@@ -79,7 +79,7 @@ namespace Halley {
 	template <>
 	struct EnumNames<ConfigNodeType> {
 		constexpr std::array<const char*, 18> operator()() const {
-			return{{
+			return std::to_array({
 				"undefined",
 				"string",
 				"sequence",
@@ -98,7 +98,7 @@ namespace Halley {
 				"entityId",
 				"bool",
 				"mapRef"
-			}};
+			});
 		}
 	};
 

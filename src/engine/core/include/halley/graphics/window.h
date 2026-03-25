@@ -29,13 +29,13 @@ namespace Halley
 	template <>
 	struct EnumNames<WindowType> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return {{
+			return std::to_array({
 				"none",
 				"fullscreen",
 				"window",
 				"resizeableWindow",
 				"borderlessWindow",
-			}};
+			});
 		}
 	};
 

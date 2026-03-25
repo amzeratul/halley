@@ -19,10 +19,10 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioExpressionTermType> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 				"switch",
                 "variable"
-			}};
+			});
 		}
 	};
 
@@ -34,10 +34,10 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioExpressionTermComp> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 				"equals",
                 "notEquals"
-			}};
+			});
 		}
 	};
 
@@ -76,12 +76,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioExpressionOperation> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
 				"multiply",
                 "add",
                 "min",
                 "max"
-			}};
+			});
 		}
 	};
 

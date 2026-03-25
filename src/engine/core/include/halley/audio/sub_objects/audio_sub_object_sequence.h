@@ -13,12 +13,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioSequenceType> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
 				"sequential",
 				"shuffle",
 				"shuffleOnce",
 				"random"
-			}};
+			});
 		}
 	};
 

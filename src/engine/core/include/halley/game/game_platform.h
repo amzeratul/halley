@@ -33,7 +33,7 @@ namespace Halley {
 	template <>
 	struct EnumNames<GamePlatform> {
 		constexpr std::array<const char*, 20> operator()() const {
-			return {{
+			return std::to_array({
 				"unknown",
 				"windows",
 				"macos",
@@ -54,7 +54,7 @@ namespace Halley {
                 "futurePlatform3",
                 "futurePlatform4",
                 "futurePlatform5"
-			}};
+			});
 		}
 	};
 

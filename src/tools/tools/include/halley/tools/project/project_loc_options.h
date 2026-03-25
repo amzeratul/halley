@@ -18,13 +18,13 @@ namespace Halley {
 	template <>
 	struct EnumNames<LocPriority> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return{{
+			return std::to_array({
 				"lowest",
 				"low",
 				"normal",
 				"high",
 				"highest"
-			}};
+			});
 		}
 	};
 

@@ -17,12 +17,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<ProjectCommentPriority> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
                 "note",
 				"low",
                 "medium",
                 "high"
-			}};
+			});
 		}
 	};
 
@@ -38,14 +38,14 @@ namespace Halley {
 	template <>
 	struct EnumNames<ProjectCommentCategory> {
 		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+			return std::to_array({
 				"misc",
                 "art",
                 "implementation",
                 "music",
                 "sound",
                 "writing"
-			}};
+			});
 		}
 	};
 

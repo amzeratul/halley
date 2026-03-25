@@ -15,12 +15,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioAttenuationCurve> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
 				"none",
 				"linear",
 				"invDistance",
 				"exponential"
-			}};
+			});
 		}
 	};
 	

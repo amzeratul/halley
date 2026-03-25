@@ -22,8 +22,8 @@ namespace Halley
 
 	template <>
 	struct EnumNames<BlendMode> {
-		constexpr std::array<const char*, 13> operator()() const {
-			return{{
+		constexpr std::array<const char*, 9> operator()() const {
+			return std::to_array({
 				"Undefined",
 				"Opaque",
 				"Alpha",
@@ -33,7 +33,7 @@ namespace Halley
 				"Invert",
 				"Max",
 				"Min",
-			}};
+			});
 		}
 	};
 

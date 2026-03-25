@@ -48,10 +48,10 @@ namespace Halley
 	template <>
 	struct EnumNames<ShaderParameterSemanticType> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 				"number",
 				"colour"
-			}};
+			});
 		}
 	};
 
@@ -79,7 +79,7 @@ namespace Halley
 	template <>
 	struct EnumNames<DepthStencilComparisonFunction> {
 		constexpr std::array<const char*, 8> operator()() const {
-			return{{
+			return std::to_array({
 				"Never",
 				"Less",
 				"Equal",
@@ -88,7 +88,7 @@ namespace Halley
 				"NotEqual",
 				"GreaterEqual",
 				"Always"
-			}};
+			});
 		}
 	};
 
@@ -107,7 +107,7 @@ namespace Halley
 	template <>
 	struct EnumNames<StencilWriteOperation> {
 		constexpr std::array<const char*, 8> operator()() const {
-			return{{
+			return std::to_array({
 				"Keep",
 				"Zero",
 				"Replace",
@@ -116,7 +116,7 @@ namespace Halley
 				"Invert",
 				"IncrementWrap",
 				"DecrementWrap"
-			}};
+			});
 		}
 	};
 
@@ -130,11 +130,11 @@ namespace Halley
 	template <>
 	struct EnumNames<CullingMode> {
 		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+			return std::to_array({
 				"None",
 				"Front",
 				"Back"
-			}};
+			});
 		}
 	};
 

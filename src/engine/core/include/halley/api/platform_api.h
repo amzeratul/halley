@@ -110,11 +110,11 @@ namespace Halley
 	template <>
 	struct EnumNames<MultiplayerPrivacy> {
 		constexpr std::array<const char*, 3> operator()() const {
-			return { {
+			return std::to_array({
 					"private",
 					"friends_only",
 					"public"
-				} };
+				});
 		}
 	};
 

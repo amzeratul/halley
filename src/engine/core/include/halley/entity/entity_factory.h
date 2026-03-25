@@ -25,11 +25,11 @@ namespace Halley {
 	template <>
 	struct EnumNames<EntityLoadContextType> {
 		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+			return std::to_array({
 				"unknown",
 				"saveData",
 				"network"
-			}};
+			});
 		}
 	};
 

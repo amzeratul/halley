@@ -18,13 +18,13 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioFadeCurve> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return{{
+			return std::to_array({
 				"none",
 				"linear",
 				"sinusoidal",
 				"sqrt",
 				"sine"
-			}};
+			});
 		}
 	};
 

@@ -26,7 +26,7 @@ namespace Halley {
 	template <>
 	struct EnumNames<SessionState> {
 		constexpr std::array<const char*, 12> operator()() const {
-			return{ {
+			return std::to_array({
 				"Idle",
 				"WaitingForService",
 				"WaitingForPlatformLobbyCallback",
@@ -39,7 +39,7 @@ namespace Halley {
 				"WaitingToStart",
 				"PlayingGame",
 				"Disconnected"
-			} };
+			});
 		}
 	};
 

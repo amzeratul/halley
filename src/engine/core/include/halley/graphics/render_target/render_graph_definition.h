@@ -21,14 +21,14 @@ namespace Halley {
 	template <>
 	struct EnumNames<RenderGraphMethod> {
 		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+			return std::to_array({
 				"none",
 				"output",
 				"imageOutput",
 				"paint",
 				"overlay",
 				"renderToTexture"
-			}};
+			});
 		}
 	};
 	

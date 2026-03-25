@@ -22,7 +22,7 @@ namespace Halley {
 	template <>
 	struct EnumNames<EditorTabs> {
 		constexpr std::array<const char*, 8> operator()() const {
-			return{{
+			return std::to_array({
 				"assets",
 				"ecs",
 				"localisation",
@@ -31,7 +31,7 @@ namespace Halley {
 				"settings",
 				"terminal",
 				"plot"
-			}};
+			});
 		}
 	};
 

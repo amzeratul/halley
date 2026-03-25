@@ -20,13 +20,13 @@ namespace Halley {
 	template <>
 	struct EnumNames<AudioSubObjectType> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return{{
+			return std::to_array({
 				"none",
 				"clips",
 				"layers",
 				"switch",
 				"sequence"
-			}};
+			});
 		}
 	};
 

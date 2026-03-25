@@ -13,11 +13,11 @@ namespace Halley {
 	template <>
 	struct EnumNames<NetworkSessionType> {
 		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+			return std::to_array({
 				"undefined",
 				"host",
 				"client"
-			}};
+			});
 		}
 	};
 
@@ -30,11 +30,11 @@ namespace Halley {
 	template <>
 	struct EnumNames<NetworkSessionMessageType> {
 		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+			return std::to_array({
 				"control",
 				"toAllPeers",
 				"toPeer"
-			}};
+			});
 		}
 	};
 

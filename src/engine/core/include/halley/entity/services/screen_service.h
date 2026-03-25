@@ -28,10 +28,10 @@ namespace Halley {
 	template <>
 	struct EnumNames<ScreenGrabMode> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{ {
+			return std::to_array({
 				"composedWithUI",
 				"composedNoUI"
-			} };
+			});
 		}
 	};
 

@@ -10,10 +10,10 @@ namespace Halley {
 	template <>
 	struct EnumNames<TranslateGizmoMode> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 					"pivot",
 					"centre"
-				}};
+				});
 		}
 	};
 	

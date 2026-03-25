@@ -17,13 +17,13 @@ namespace Halley {
 	template <>
 	struct EnumNames<PolygonGizmoMode> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return{{
+			return std::to_array({
 				"move",
 				"append",
 				"insert",
 				"delete",
 				"appendBefore"
-			}};
+			});
 		}
 	};
 

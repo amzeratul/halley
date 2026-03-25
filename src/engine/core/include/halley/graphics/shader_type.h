@@ -18,12 +18,12 @@ namespace Halley
 	template <>
 	struct EnumNames<ShaderType> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
 				"vertex",
 				"pixel",
 				"geometry",
 				"combined"
-			}};
+			});
 		}
 	};
 }

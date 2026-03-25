@@ -16,14 +16,14 @@ namespace Halley {
 	template <>
 	struct EnumNames<MathOp> {
 		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+			return std::to_array({
 				"+",
 				"-",
 				"*",
 				"/",
 				"max",
 				"min"
-			}};
+			});
 		}
 	};
 
@@ -39,14 +39,14 @@ namespace Halley {
 	template <>
 	struct EnumNames<MathRelOp> {
 		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+			return std::to_array({
 				"==",
 				"!=",
 				"<",
 				"<=",
 				">",
 				">="
-			}};
+			});
 		}
 	};
 

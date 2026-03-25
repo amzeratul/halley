@@ -12,10 +12,10 @@ namespace Halley {
 	template <>
 	struct EnumNames<LocTranslatedStatus> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 				"untranslated",
 				"translated"
-			}};
+			});
 		}
 	};
 
@@ -27,10 +27,10 @@ namespace Halley {
 	template <>
 	struct EnumNames<LocOutdatedStatus> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 				"upToDate",
 				"outOfDate"
-			}};
+			});
 		}
 	};
 

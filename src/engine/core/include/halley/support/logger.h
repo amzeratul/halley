@@ -22,12 +22,12 @@ namespace Halley
 	template <>
 	struct EnumNames<LoggerLevel> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return { {
+			return std::to_array({
 				"dev",
 				"info",
 				"warning",
 				"error"
-			} };
+			});
 		}
 	};
 

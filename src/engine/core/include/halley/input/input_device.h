@@ -61,12 +61,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<DefaultInputButtons> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
 				"primary",
 				"secondary",
 				"accept",
 				"cancel"
-			}};
+			});
 		}
 	};
 
@@ -81,13 +81,13 @@ namespace Halley {
 	template <>
 	struct EnumNames<InputPriority> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return{{
+			return std::to_array({
                 "minimum",
 				"low",
                 "normal",
 				"high",
                 "maximum"
-			}};
+			});
 		}
 	};
 

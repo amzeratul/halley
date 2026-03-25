@@ -48,7 +48,7 @@ namespace Halley
 	template <>
 	struct EnumNames<ImportAssetType> {
 		constexpr std::array<const char*, 26> operator()() const {
-			return{{
+			return std::to_array({
 				"undefined",
 				"skip",
 				"codegen",
@@ -75,7 +75,7 @@ namespace Halley
 				"prefab",
 				"scene",
 				"uiDefinition"
-			}};
+			});
 		}
 	};
 
@@ -113,7 +113,7 @@ namespace Halley
 	template <>
 	struct EnumNames<AssetType> {
 		constexpr std::array<const char*, 24> operator()() const {
-			return{{
+			return std::to_array({
 				"binaryFile",
 				"textFile",
 				"configFile",
@@ -138,7 +138,7 @@ namespace Halley
 				"prefab",
 				"scene",
 				"uiDefinition"
-			}};
+			});
 		}
 	};
 
@@ -270,14 +270,14 @@ namespace Halley
 	template <>
 	struct EnumNames<ResourceDesiredLoadState> {
 		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+			return std::to_array({
 				"undefined",
 				"load",
 				"preload",
 				"preloadLowPriority",
 				"stale",
 				"unload"
-			}};
+			});
 		}
 	};
 

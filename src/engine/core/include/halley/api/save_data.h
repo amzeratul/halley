@@ -18,12 +18,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<SaveDataType> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+			return std::to_array({
 				"save",
 				"save_local",
 				"downloads",
 				"cache"
-			}};
+			});
 		}
 	};
 

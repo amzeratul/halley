@@ -17,11 +17,11 @@ namespace Halley
 	template <>
 	struct EnumNames<ReimportType> {
 		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+			return std::to_array({
 				"ImportAll",
 				"ReimportAll",
 				"Codegen"
-			}};
+			});
 		}
 	};
 

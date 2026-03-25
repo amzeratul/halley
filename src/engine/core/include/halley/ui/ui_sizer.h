@@ -18,12 +18,12 @@ namespace Halley {
 	template <>
 	struct EnumNames<UISizerType> {
 		constexpr std::array<const char*, 4> operator()() const {
-			return {{
+			return std::to_array({
 				"horizontal",
 				"vertical",
 				"grid",
 				"free"
-			}};
+			});
 		}
 	};
 

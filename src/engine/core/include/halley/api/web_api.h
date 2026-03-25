@@ -66,13 +66,13 @@ namespace Halley
 	template <>
 	struct EnumNames<HTTPMethod> {
 		constexpr std::array<const char*, 5> operator()() const {
-			return{{
+			return std::to_array({
 				"GET",
 				"POST",
 				"PUT",
 				"DELETE",
 				"PATCH"
-			}};
+			});
 		}
 	};
 

@@ -35,7 +35,7 @@ namespace Halley
 	template <>
 	struct EnumNames<AudioEventActionType> {
 		constexpr std::array<const char*, 12> operator()() const {
-			return{{
+			return std::to_array({
 				"play",
 				"stop",
 				"pause",
@@ -48,7 +48,7 @@ namespace Halley
 				"setSwitch",
 				"copySwitch",
 				"setVariable"
-			}};
+			});
 		}
 	};
 
@@ -60,10 +60,10 @@ namespace Halley
 	template <>
 	struct EnumNames<AudioEventScope> {
 		constexpr std::array<const char*, 2> operator()() const {
-			return{{
+			return std::to_array({
 				"global",
 				"object"
-			}};
+			});
 		}
 	};
 
