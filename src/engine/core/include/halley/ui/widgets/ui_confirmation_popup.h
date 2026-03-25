@@ -33,13 +33,13 @@ namespace Halley
 
 	template <>
 	struct EnumNames<UIConfirmationPopup::ButtonType> {
-		constexpr std::array<const char*, 4> operator()() const {
-			return{{
+		constexpr auto operator()() const {
+			return std::to_array({
 				"yes",
 				"no",
 				"ok",
 				"cancel"
-			}};
+			});
 		}
 	};
 }

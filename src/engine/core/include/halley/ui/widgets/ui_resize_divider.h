@@ -12,7 +12,7 @@ namespace Halley {
     
 	template <>
 	struct EnumNames<UIResizeDividerType> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"horizontalLeft",
 				"horizontalRight",

@@ -78,7 +78,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 18> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"undefined",
 				"string",

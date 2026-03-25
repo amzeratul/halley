@@ -55,7 +55,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProfilerEventType> {
-		constexpr std::array<const char*, 30> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 			    "CorePumpEvents",
 				"CoreDevConClient",

@@ -16,7 +16,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProjectCommentPriority> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
                 "note",
 				"low",
@@ -37,7 +37,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProjectCommentCategory> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"misc",
                 "art",

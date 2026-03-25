@@ -20,7 +20,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<RenderGraphMethod> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"none",
 				"output",

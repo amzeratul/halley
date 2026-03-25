@@ -14,7 +14,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<AudioAttenuationCurve> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"none",
 				"linear",

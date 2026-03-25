@@ -156,15 +156,15 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<Image::Format> {
-		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+		constexpr auto operator()() const {
+			return std::to_array({
 				"undefined",
 				"indexed",
 				"rgb",
 				"rgba",
 				"rgba_premultiplied",
 				"single_channel"
-			}};
+			});
 		}
 	};
 }

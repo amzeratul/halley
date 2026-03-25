@@ -60,8 +60,8 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProjectDLL::Status> {
-		constexpr std::array<const char*, 7> operator()() const {
-			return{{
+		constexpr auto operator()() const {
+			return std::to_array({
 				"Unloaded",
 				"Loaded",
 				"DLLNotFound",
@@ -69,7 +69,7 @@ namespace Halley {
 				"DLLVersionTooLow",
 				"DLLVersionTooHigh",
 				"DLLCrash"
-			}};
+			});
 		}
 	};
 }

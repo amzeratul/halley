@@ -13,7 +13,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<AudioOutputType> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"headphones",
 				"stereoSpeakers",

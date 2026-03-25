@@ -25,7 +25,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<TweenCurve> {
-		constexpr std::array<const char*, 16> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"linear",
 				"sine",

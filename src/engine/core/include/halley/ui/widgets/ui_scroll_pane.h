@@ -10,7 +10,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<UIScrollDirection> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"horizontal",
 				"vertical"

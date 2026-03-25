@@ -662,7 +662,7 @@ void World::step(TimeLine timeline, Time elapsed)
 	HALLEY_DEBUG_TRACE();
 	spawnPending();
 
-	initSystems(std::array<TimeLine, 4>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render });
+	initSystems(std::to_array({ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render }));
 	updateSystems(timeline, elapsed);
 	processSystemMessages(timeline);
 	HALLEY_DEBUG_TRACE();
@@ -672,7 +672,7 @@ void World::render(RenderContext& rc)
 {
 	//ProfilerEvent event(ProfilerEventType::WorldSystemRender);
 
-	initSystems(std::array<TimeLine, 4>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render });
+	initSystems(std::to_array({ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render }));
 	renderSystems(rc);
 	rc.flush();
 }

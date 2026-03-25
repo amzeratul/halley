@@ -56,7 +56,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AudioSampleFormat> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"undefined",
 				"int16",

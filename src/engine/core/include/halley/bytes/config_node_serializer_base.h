@@ -39,15 +39,15 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<EntitySerialization::Type> {
-		constexpr std::array<const char*, 6> operator()() const {
-			return{{
+		constexpr auto operator()() const {
+			return std::to_array({
 				"Undefined",
 				"Prefab",
 				"SaveData",
 				"Dynamic",
 				"Network",
 				"DevCon"
-			}};
+			});
 		}
 	};
 

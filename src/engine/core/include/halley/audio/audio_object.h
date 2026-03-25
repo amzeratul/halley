@@ -19,7 +19,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<AudioObjectInstanceLimitType> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"dontPlay",
 				"stopOldest",

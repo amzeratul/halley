@@ -22,7 +22,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<TextureFormat> {
-		constexpr std::array<const char*, 10> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"indexed",
 				"rgb",
@@ -54,7 +54,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<TextureAddressMode> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"repeat",
 				"clamp",

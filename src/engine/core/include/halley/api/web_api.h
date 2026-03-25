@@ -65,7 +65,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<HTTPMethod> {
-		constexpr std::array<const char*, 5> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"GET",
 				"POST",

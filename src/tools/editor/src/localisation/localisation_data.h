@@ -49,7 +49,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<LocReadyStatus> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"ready",
 				"notReady"

@@ -21,7 +21,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<LoggerLevel> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"dev",
 				"info",

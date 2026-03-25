@@ -21,7 +21,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ParticleSpawnAreaShape> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"rectangle",
 				"ellipse"

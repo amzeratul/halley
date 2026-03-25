@@ -21,7 +21,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<SystemMessageDestination> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"local",
 				"host",

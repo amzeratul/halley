@@ -47,7 +47,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 26> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"undefined",
 				"skip",
@@ -112,7 +112,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 24> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"binaryFile",
 				"textFile",
@@ -269,7 +269,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<ResourceDesiredLoadState> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"undefined",
 				"load",

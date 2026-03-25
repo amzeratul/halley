@@ -21,7 +21,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<EditorTabs> {
-		constexpr std::array<const char*, 8> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"assets",
 				"ecs",

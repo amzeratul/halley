@@ -9,7 +9,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<TranslateGizmoMode> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 					"pivot",
 					"centre"

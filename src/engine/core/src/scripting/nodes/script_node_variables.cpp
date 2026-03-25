@@ -565,7 +565,7 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 	const auto a = aOrig.getType() == ConfigNodeType::Undefined ? getTypeZero(bOrig) : ConfigNode(aOrig);
 	const auto b = bOrig.getType() == ConfigNodeType::Undefined ? getTypeZero(aOrig) : ConfigNode(bOrig);
-	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 2>{ a.getType(), b.getType() }, true, op);
+	const auto type = ConfigNode::getPromotedType(std::to_array({ a.getType(), b.getType() }), true, op);
 
 	if (type == ConfigNodeType::String) {
 		if (op == MathOp::Add) {
@@ -874,7 +874,7 @@ IScriptNodeType::Result ScriptAdvanceTo::doUpdate(ScriptEnvironment& environment
 	const auto amount = readDataPin(environment, node, 7);
 	const auto var = readDataPin(environment, node, 8);
 
-	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 3>{ var.getType(), target.getType(), amount.getType() }, true, MathOp::Add);
+	const auto type = ConfigNode::getPromotedType(std::to_array({ var.getType(), target.getType(), amount.getType() }), true, MathOp::Add);
 	bool modified = false;
 	bool reached = false;
 	

@@ -15,7 +15,7 @@ namespace Halley {
 	
 	template <>
 	struct EnumNames<MathOp> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"+",
 				"-",
@@ -38,7 +38,7 @@ namespace Halley {
 	
 	template <>
 	struct EnumNames<MathRelOp> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"==",
 				"!=",

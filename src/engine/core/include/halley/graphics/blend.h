@@ -22,7 +22,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<BlendMode> {
-		constexpr std::array<const char*, 9> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"Undefined",
 				"Opaque",

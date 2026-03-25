@@ -47,23 +47,23 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<NavigationQuery::PostProcessingType> {
-		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+		constexpr auto operator()() const {
+			return std::to_array({
 				"none",
 				"simple",
 				"aggressive"
-			}};
+			});
 		}
 	};
 
 	template <>
 	struct EnumNames<NavigationQuery::QuantizationType> {
-		constexpr std::array<const char*, 3> operator()() const {
-			return{{
+		constexpr auto operator()() const {
+			return std::to_array({
 				"none",
 				"quantize8Way",
 				"quantize8WayIsometric"
-			}};
+			});
 		}
 	};
 }

@@ -32,7 +32,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<GamePlatform> {
-		constexpr std::array<const char*, 20> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"unknown",
 				"windows",

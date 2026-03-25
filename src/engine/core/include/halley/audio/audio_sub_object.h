@@ -19,7 +19,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<AudioSubObjectType> {
-		constexpr std::array<const char*, 5> operator()() const {
+		constexpr auto operator()() const {
 			return std::to_array({
 				"none",
 				"clips",
