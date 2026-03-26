@@ -193,7 +193,9 @@ private:
 			for (const auto& e: networkFamily) {
 				// If this peer took entity authority, return it to host.
 				if (e.network.authorityId && predicate(e.network.authorityId.value())) {
-					doChangeAuthority(&e, {});
+					if (doChangeAuthority(&e, {})) {
+						Logger::logDev("Stale lock released, peer is gone");
+					}
 				}
 				// Erase any stale locks.
 				std_ex::erase_if_value(e.network.locks, predicate);
@@ -217,7 +219,7 @@ private:
 			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
 			{
                 if (value && withAuthority) {
-                    changeAuthority(targetId, getMyPeerId());
+                    value = changeAuthority(targetId, getMyPeerId());
                 }
 				promise.setValue(value);
 			});
@@ -239,9 +241,12 @@ private:
 			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=] (bool value) mutable
             {
 				if (withAuthority) {
-					changeAuthority(targetId, {});
 					if (!value) {
 						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
+					}
+					value = changeAuthority(targetId, {});
+					if (!value) {
+						Logger::logWarning("client failed to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
 					}
 				}
             });
@@ -269,10 +274,13 @@ private:
 				// No existing lock
 				if (lock) {
 					// New lock
-					locks.emplace_back(targetId, peerId);
                     if (withAuthority) {
-                        doChangeAuthority(e, peerId);
+                    	// Try changing authority first. If this fails, don't bother creating a lock.
+                        if (!doChangeAuthority(e, peerId)) {
+	                        return false;
+                        }
                     }
+					locks.emplace_back(targetId, peerId);
 					return true;
 				} else {
 					// Tries to unlock non-existing lock
@@ -282,10 +290,13 @@ private:
 				// Lock exists, locked by this peer
 				if (!lock) {
 					// Release lock
-					locks.erase(iter);
                     if (withAuthority) {
-                        doChangeAuthority(e, {});
+                    	// Release authority first. If this fails, keep the lock.
+                        if (!doChangeAuthority(e, {})) {
+	                        return false;
+                        }
                     }
+					locks.erase(iter);
 					if (destroyOnUnlock) {
 						//Logger::logDev("Destroy entity " + toString(targetId.value & 0xffffffff) + " on unlock");
 						getWorld().destroyEntity(targetId);
@@ -357,22 +368,23 @@ private:
 		return {};
 	}
 
-    void changeAuthority(EntityId targetId, std::optional<NetworkSession::PeerId> authorityId)
+    [[nodiscard]] bool changeAuthority(EntityId targetId, std::optional<NetworkSession::PeerId> authorityId)
     {
         if (!targetId.isValid()) {
             Logger::logWarning("Trying to change authority of invalid entity.");
-            return;
+            return false;
         }
 
         const auto* e = getRootEntity(targetId);
-        if (e) {
-            doChangeAuthority(e, authorityId);
-        } else {
+        if (!e) {
             Logger::logWarning("Trying to change authority of entity " + toString(targetId.value & 0xffffffff) + " which is unknown, or not a network entity");
+        	return false;
         }
+
+		return doChangeAuthority(e, authorityId);
     }
 
-    void doChangeAuthority(const NetworkFamily* networkFamily, std::optional<NetworkSession::PeerId> authorityId)
+    [[nodiscard]] bool doChangeAuthority(const NetworkFamily* networkFamily, std::optional<NetworkSession::PeerId> authorityId) const
     {
 		if (getSessionService().isMultiplayer()) {
 			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
@@ -381,13 +393,19 @@ private:
 		            Logger::logWarning("Failed to assign authority of entity " +
 		            	toString(networkFamily->entityId.value & 0xffffffff) + " to " +
 		            	toString(static_cast<int>(authorityId.value())));
-
-					authorityId = {};
+				} else {
+					Logger::logWarning("Failed to release authority of entity " +
+						toString(networkFamily->entityId.value & 0xffffffff) + " to " +
+						toString(static_cast<int>(networkFamily->network.ownerId.value_or(0))));
 				}
+
+				return false;
 			}
 		}
 
 		networkFamily->network.authorityId = authorityId;
+
+		return true;
     }
 };
 
