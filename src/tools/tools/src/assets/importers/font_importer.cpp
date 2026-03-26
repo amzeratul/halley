@@ -118,7 +118,7 @@ void FontImporter::getCharactersForScript(std::set<char32_t>& charsOutput, const
 	if (script == "latin") {
 		addRange(charsOutput, 0x0000, 0x007F); // Basic Latin
 		addRange(charsOutput, 0x0080, 0x00FF); // Latin-1 Supplement
-		addRange(charsOutput, 0x2010, 0x205E); // Punctuation https://en.wikipedia.org/wiki/General_Punctuation
+		addRange(charsOutput, 0x2000, 0x205E); // Punctuation https://en.wikipedia.org/wiki/General_Punctuation
 	}
 	if (script == "latin-extended-a") {
 		addRange(charsOutput, 0x0100, 0x017F); // Latin Extended A
