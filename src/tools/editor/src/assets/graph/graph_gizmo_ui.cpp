@@ -43,6 +43,7 @@ void GraphGizmoUI::update(Time time, bool moved)
 	inputState.spaceHeld = keyboard->isButtonDown(KeyCode::Space);
 
 	gizmo->setBasePosition(getPosition());
+	gizmo->setBounds(graphEditor.getBounds());
 	if (time > 0.00001) {
 		inputState.rawMousePos = inputState.mousePos;
 		gizmo->update(time, inputState);

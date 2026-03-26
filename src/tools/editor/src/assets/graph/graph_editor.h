@@ -16,6 +16,7 @@ namespace Halley {
 		virtual void onModified() = 0;
 		virtual void undo() = 0;
 		virtual void redo() = 0;
+		virtual Rect4f getBounds() = 0;
 	};
 
 	class GraphEditor: public UIWidget, public IDrillDownAssetWindow, public IGraphEditor {
@@ -33,6 +34,7 @@ namespace Halley {
 		void setModified(bool modified) override;
 		bool isModified() override;
 		void drillDownSave() override;
+		Rect4f getBounds() override;
 
 		void onModified() override;
 		void undo() override;

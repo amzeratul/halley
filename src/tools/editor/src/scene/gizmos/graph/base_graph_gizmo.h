@@ -36,6 +36,7 @@ namespace Halley {
 		void setZoom(float zoom);
 		float getZoom() const;
 		void setBasePosition(Vector2f pos);
+		void setBounds(Rect4f bounds);
 		void setAutoConnectPins(bool autoConnect);
 
 		void onModified();
@@ -126,6 +127,7 @@ namespace Halley {
 		bool autoConnectPin = false;
 
 		Vector2f basePos;
+		Rect4f bounds;
 		float zoom = 1.0f;
 		float baseZoom = 1.0f;
 		mutable TextRenderer tooltipLabel;
@@ -145,7 +147,7 @@ namespace Halley {
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
 		void drawToolTip(Painter& painter, const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
-		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
+		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Rect4f elemArea) const;
 		void drawWheelGuides(Painter& painter) const;
 
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;

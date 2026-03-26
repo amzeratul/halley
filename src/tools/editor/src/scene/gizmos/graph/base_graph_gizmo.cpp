@@ -170,6 +170,11 @@ void BaseGraphGizmo::setBasePosition(Vector2f pos)
 	basePos = pos;
 }
 
+void BaseGraphGizmo::setBounds(Rect4f bounds)
+{
+	this->bounds = bounds;
+}
+
 void BaseGraphGizmo::setAutoConnectPins(bool autoConnect)
 {
 	autoConnectPin = autoConnect;
@@ -751,20 +756,24 @@ void BaseGraphGizmo::drawToolTip(Painter& painter, const BaseGraphNode& node, co
 {
 	auto [text, colours] = getNodeDescription(node, nodeInfo);
 	if (!text.isEmpty()) {
-		const auto elemPos = nodeInfo.element.type == GraphElementType(BaseGraphNodeElementType::Node) ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
-		drawToolTip(painter, text, colours, elemPos);
+		const auto elemArea = nodeInfo.element.type == static_cast<GraphElementType>(BaseGraphNodeElementType::Node)
+			? nodeInfo.nodeArea
+			: nodeInfo.pinPos + Rect4f(-3, -3, 6, 6);
+		drawToolTip(painter, text, colours, elemArea);
 	}
 }
 
-void BaseGraphGizmo::drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f elemPos) const
+void BaseGraphGizmo::drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Rect4f elemArea) const
 {
+	const auto elemPos = elemArea.getBottomCenter();
+
 	const float align = 0.5f;
 	const float curZoom = getZoom();
 	const auto pos = elemPos + Vector2f(0, 10) / curZoom;
 
 	auto cols = colours;
 	tooltipLabel
-		.setText(tooltipLabel.split(text, 250.0f / curZoom, cols))
+		.setText(tooltipLabel.split(text, 350.0f / curZoom, cols))
 		.setColourOverride(cols)
 		.setPosition(pos)
 		.setAlignment(align)
@@ -772,7 +781,23 @@ void BaseGraphGizmo::drawToolTip(Painter& painter, const String& text, const Vec
 		.setOutline(4.0f / curZoom);
 
 	const auto extents = tooltipLabel.getExtents();
-	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-align, 0), pos + extents * Vector2f(1.0f - align, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
+	Rect4f tooltipArea = pos + Rect4f(extents * Vector2f(-align, 0), extents * Vector2f(1.0f - align, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
+
+	// Make sure it fits in the screen
+	if (!bounds.contains(tooltipArea)) {
+		Vector2f delta;
+		if (tooltipArea.getLeft() < bounds.getLeft()) {
+			delta.x += bounds.getLeft() - tooltipArea.getLeft();
+		} else if (tooltipArea.getRight() > bounds.getRight()) {
+			delta.x += bounds.getRight() - tooltipArea.getRight();
+		} else if (tooltipArea.getBottom() > bounds.getBottom()) {
+			delta.y += bounds.getBottom() - tooltipArea.getBottom();
+		}
+
+		tooltipLabel.setPosition(pos + delta);
+		tooltipArea += delta;
+	}
+
 	const auto poly = Polygon({ tooltipArea.getTopLeft(), tooltipArea.getTopRight(), tooltipArea.getBottomRight(), tooltipArea.getBottomLeft() });
 	painter.drawPolygon(poly, Colour4f(0, 0, 0, 0.6f));
 

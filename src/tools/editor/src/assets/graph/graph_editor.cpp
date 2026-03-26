@@ -186,5 +186,10 @@ void GraphEditor::drillDownSave()
 	setModified(false);
 }
 
+Rect4f GraphEditor::getBounds()
+{
+	return infiniCanvas->getRect();
+}
+
 void GraphEditor::onWasModified()
 {}
