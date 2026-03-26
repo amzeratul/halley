@@ -34,7 +34,7 @@ namespace Halley {
 	{
 		const char* filename = nullptr;
 		int line = 0;
-		std::array<char, 256> arg = {};
+		std::array<char, 244> arg = {};
 	};
 
 	class Debug {
@@ -70,7 +70,13 @@ namespace Halley {
 		static Mutex mutex;
 	};
 
+#if defined(DEV_BUILD) || defined(_DEBUG)
 	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)
 	#define HALLEY_DEBUG_TRACE_COMMENT(str) Halley::Debug::trace(__FILE__, __LINE__, (str))
 	#define HALLEY_DEBUG_TRACE_THIS() Halley::Debug::trace(__FILE__, __LINE__, typeid(*this).name())
+#else
+	#define HALLEY_DEBUG_TRACE() (static_cast<void>(0))
+	#define HALLEY_DEBUG_TRACE_COMMENT(str) (static_cast<void>(0))
+	#define HALLEY_DEBUG_TRACE_THIS() (static_cast<void>(0))
+#endif
 }
