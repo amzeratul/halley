@@ -787,16 +787,17 @@ String ScriptHasComponent::getShortDescription(const ScriptGraphNode& node, cons
 
 ConfigNode ScriptHasComponent::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto components = node.getSettings()["components"].asVector<String>({});
-	const auto entity = environment.getWorld().getEntity(readEntityId(environment, node, 0));
+	const auto entityRef = environment.getWorld().tryGetEntity(readEntityId(environment, node, 0));
 
-	Vector<ComponentReflector*> reflectors;
-	for (const auto& component: components) {
-		reflectors.push_back(&environment.getWorld().getReflection().getComponentReflector(component));
+	if (!entityRef.isValid()) {
+		return ConfigNode(false);
 	}
 
-	for (const auto& r:reflectors) {
-		if (r->tryGetComponent(entity, false) == nullptr) {
+	const auto components = node.getSettings()["components"].asVector<String>({});
+
+	for (const auto& component: components) {
+		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(component);
+		if (reflector.tryGetComponent(entityRef, false) == nullptr) {
 			return ConfigNode(false);
 		}
 	}
