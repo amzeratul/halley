@@ -37,6 +37,9 @@ const UnicodeData::LineBreakRules& UnicodeData::getLineBreakRules(LineBreakClass
 	if (characterClass == LineBreakClass::InfixNumericSeparator && context == Context::Text) {
 		characterClass = LineBreakClass::ClosePunctuation;
 	}
+	if (characterClass == LineBreakClass::SymbolsAllowingBreakAfter && context == Context::Numeric) {
+		characterClass = LineBreakClass::Numeric;
+	}
 	return lineBreakRules[static_cast<int>(characterClass)];
 }
 
@@ -65,58 +68,69 @@ void UnicodeData::setClass(char32_t c, LineBreakClass breakClass)
 
 void UnicodeData::loadLineBreakRules()
 {
-	lineBreakClassesAscii.fill(LineBreakClass::Alphabetic);
+	using enum LineBreakClass;
+	using enum LineBreakType;
+
+	lineBreakClassesAscii.fill(Alphabetic);
 	for (char32_t c = '0'; c <= '9'; ++c) {
-		setClass(c, LineBreakClass::Numeric);
+		setClass(c, Numeric);
 	}
 
 	for (char32_t c: { U'\r' }) {
-		setClass(c, LineBreakClass::CarriageReturn);
+		setClass(c, CarriageReturn);
 	}
 	for (char32_t c: { U'\n' }) {
-		setClass(c, LineBreakClass::LineFeed);
+		setClass(c, LineFeed);
 	}
 	for (char32_t c: { U' ', U'\t', U'　' }) {
-		setClass(c, LineBreakClass::Space);
+		setClass(c, Space);
 	}
 	for (char32_t c: { U',', U'.', U';', U':' }) {
-		setClass(c, LineBreakClass::InfixNumericSeparator);
+		setClass(c, InfixNumericSeparator);
 	}
 	for (char32_t c: { U'-', U'!', U'?', U')', U']', U'}', U'、', U'。', U'…', U'‥', U'）', U'｝', U'］', U'】', U'」', U'』', U'⟩', U'〜', U'！', U'？' }) {
-		setClass(c, LineBreakClass::ClosePunctuation);
+		setClass(c, ClosePunctuation);
 	}
 	for (char32_t c: { U'(', U'[', U'{', U'（', U'｛', U'［', U'【', U'「', U'『', U'⟨' }) {
-		setClass(c, LineBreakClass::OpenPunctuation);
+		setClass(c, OpenPunctuation);
 	}
 	for (char32_t c: { U'%' }) {
-		setClass(c, LineBreakClass::PostfixNumeric);
+		setClass(c, PostfixNumeric);
 	}
-	for (char32_t c: { U'$', U'£', U'€', U'¥' }) {
-		setClass(c, LineBreakClass::PrefixNumeric);
+	for (char32_t c: { U'$', U'£', U'€', U'¥', U'\\' }) {
+		setClass(c, PrefixNumeric);
 	}
 	for (char32_t c: { U'ぁ', U'ぃ', U'ぅ', U'ぇ', U'ぉ', U'っ', U'ゃ', U'ゅ', U'ょ', U'ゎ', U'ゕ',
 		               U'ァ', U'ィ', U'ゥ', U'ェ', U'ォ', U'ッ', U'ャ', U'ュ', U'ョ', U'ヮ', U'ヵ', U'ー'}) {
-		setClass(c, LineBreakClass::ConditionalJaStarter);
+		setClass(c, ConditionalJaStarter);
 	}
 	for (char32_t c: { U'々', U'〜', U'・'}) {
-		setClass(c, LineBreakClass::NonStarter);
+		setClass(c, NonStarter);
+	}
+	for (char32_t c: { U'/'}) {
+		setClass(c, SymbolsAllowingBreakAfter);
 	}
 
-	lineBreakRules[static_cast<int>(LineBreakClass::Break)]                 = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Force,       true,  false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::CarriageReturn)]        = LineBreakRules{ LineBreakType::Neutral,     LineBreakType::Neutral,     true,  false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::LineFeed)]              = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Force,       true,  false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::Space)]                 = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Opportunity, true,  true,  Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::Alphabetic)]            = LineBreakRules{ LineBreakType::Neutral,     LineBreakType::Neutral,     false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::InfixNumericSeparator)] = LineBreakRules{ LineBreakType::Neutral,     LineBreakType::Neutral,     false, false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::ClosePunctuation)]      = LineBreakRules{ LineBreakType::Prohibit,    LineBreakType::Opportunity, false, false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::OpenPunctuation)]       = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Prohibit,    false, false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::Ideographic)]           = LineBreakRules{ LineBreakType::OpportunityLowPriority, LineBreakType::OpportunityLowPriority, false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::ConditionalJaStarter)]  = LineBreakRules{ LineBreakType::ProhibitUnlessAfterSpace,    LineBreakType::OpportunityLowPriority, false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::NonStarter)]            = LineBreakRules{ LineBreakType::ProhibitUnlessAfterSpace,    LineBreakType::OpportunityLowPriority, false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::EmojiBase)]             = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Opportunity, false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::Numeric)]               = LineBreakRules{ LineBreakType::Neutral,     LineBreakType::Neutral,     false, false, Context::Numeric };
-	lineBreakRules[static_cast<int>(LineBreakClass::PostfixNumeric)]        = LineBreakRules{ LineBreakType::Prohibit,    LineBreakType::Opportunity, false, false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::PrefixNumeric)]         = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Prohibit,    false, false, Context::Undefined };
+	auto r = [&] (LineBreakClass c) -> LineBreakRules& {
+		return lineBreakRules.at(static_cast<int>(c));
+	};
+
+	r(Break)                     = LineBreakRules{ Opportunity, Force,       true,  false, Context::Undefined };
+	r(CarriageReturn)            = LineBreakRules{ Neutral,     Neutral,     true,  false, Context::Undefined };
+	r(LineFeed)                  = LineBreakRules{ Opportunity, Force,       true,  false, Context::Undefined };
+	r(Space)                     = LineBreakRules{ Opportunity, Opportunity, true,  true,  Context::Undefined };
+	r(Alphabetic)                = LineBreakRules{ Neutral,     Neutral,     false, false, Context::Text };
+	r(InfixNumericSeparator)     = LineBreakRules{ Neutral,     Neutral,     false, false, Context::Undefined };
+	r(ClosePunctuation)          = LineBreakRules{ Prohibit,    Opportunity, false, false, Context::Undefined };
+	r(OpenPunctuation)           = LineBreakRules{ Opportunity, Prohibit,    false, false, Context::Undefined };
+	r(Ideographic)               = LineBreakRules{ OpportunityLowPriority,   OpportunityLowPriority, false, false, Context::Text };
+	r(ConditionalJaStarter)      = LineBreakRules{ ProhibitUnlessAfterSpace, OpportunityLowPriority, false, false, Context::Text };
+	r(NonStarter)                = LineBreakRules{ ProhibitUnlessAfterSpace, OpportunityLowPriority, false, false, Context::Text };
+	r(EmojiBase)                 = LineBreakRules{ Opportunity, Opportunity, false, false, Context::Text };
+	r(Numeric)                   = LineBreakRules{ Neutral,     Neutral,     false, false, Context::Numeric };
+	r(PostfixNumeric)            = LineBreakRules{ Prohibit,    Opportunity, false, false, Context::Undefined };
+	r(PrefixNumeric)             = LineBreakRules{ Opportunity, Prohibit,    false, false, Context::Undefined };
+	r(SymbolsAllowingBreakAfter) = LineBreakRules{ Neutral,     Opportunity, false, false, Context::Undefined };
 }
 
 bool UnicodeData::isEastAsianIdeographicCharacter(char32_t c)

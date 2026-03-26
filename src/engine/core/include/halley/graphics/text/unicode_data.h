@@ -47,6 +47,7 @@ namespace Halley {
             Numeric,
             PostfixNumeric,
             PrefixNumeric,
+            SymbolsAllowingBreakAfter
         };
 
         UnicodeData();
@@ -60,7 +61,7 @@ namespace Halley {
         static bool isEastAsianIdeographicCharacter(char32_t c);
 
     private:
-        std::array<LineBreakRules, 16> lineBreakRules;
+        std::array<LineBreakRules, 17> lineBreakRules;
         HashMap<char32_t, LineBreakClass> lineBreakClasses;
         std::array<LineBreakClass, 256> lineBreakClassesAscii;
 
