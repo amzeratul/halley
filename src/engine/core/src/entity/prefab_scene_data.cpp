@@ -121,7 +121,7 @@ void PrefabSceneData::fillEntityTree(const EntityData& node, EntityTree& tree) c
 
 std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId, const String& newParentId, size_t childIndex)
 {
-	HalleyAssertDev(childIndex >= 0);
+	HalleyAssertDev(childIndex < 1024 * 1024);
 	HalleyAssertDev(!entityId.isEmpty());
 	
 	const auto data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, entityId);
@@ -131,7 +131,10 @@ std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId
 	if (!data.entity) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
 	}
-	const String oldParentId = oldParent ? (*oldParent).getInstanceUUID().toString() : "";
+	if (!oldParent) {
+		return {};
+	}
+	const String oldParentId = oldParent ? oldParent->getInstanceUUID().toString() : "";
 
 	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
 	if (newParentId == oldParentId) {
@@ -167,7 +170,7 @@ std::pair<String, size_t> PrefabSceneData::getEntityParenting(const String& enti
 	const auto oldChildIndex = data.childIdx;
 
 	if (!data.entity) {
-		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
+		throw Exception("Entity not found: \"" + entityId + "\"", HalleyExceptions::Tools);
 	}
 	const String oldParentId = oldParent ? (*oldParent).getInstanceUUID().toString() : "";
 	return { oldParentId, oldChildIndex };
@@ -203,7 +206,7 @@ EntityData& PrefabSceneData::findEntity(const String& id)
 {
 	auto* data = prefab.findEntityData(id.isEmpty() ? UUID() : UUID(id));
 	if (!data) {
-		throw Exception("Couldn't find entity with id " + id, HalleyExceptions::Entity);
+		throw Exception("Couldn't find entity with id \"" + id + "\"", HalleyExceptions::Entity);
 	}
 	return *data;
 }
