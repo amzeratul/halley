@@ -219,6 +219,22 @@ static String printRootSignature(const D3D12_ROOT_SIGNATURE_DESC1* rootDesc)
                 break;
             }
 
+            case D3D12_ROOT_PARAMETER_TYPE_SRV: {
+                out += "\"  SRV(t" + toString(param->Descriptor.ShaderRegister) + ",\" \\\n";
+
+                if (param->Descriptor.RegisterSpace != 0) {
+                    out += "\"    space=" + toString(param->Descriptor.RegisterSpace) + ",\" \\\n";
+                }
+                if (param->ShaderVisibility != D3D12_SHADER_VISIBILITY_ALL) {
+                	out += "\"    visibility=" + toShaderVisibilityName(param->ShaderVisibility) + ",\" \\\n";
+                }
+
+		        out = out.substr(0, out.length() - 5);
+                out += "),\" \\\n";
+
+                break;
+            }
+
             case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE: {
                 out += "\"  DescriptorTable(\" \\\n";
 
@@ -393,6 +409,22 @@ static String buildRootSignature(const MaterialDefinition& material)
         sam.DescriptorTable.pDescriptorRanges = &samRange;
 
         parameters.emplace_back(sam);
+    }
+
+    // Add structured buffers as inline SRV root descriptors.
+    // They use t registers starting after the texture range.
+    uint32_t srvReg = (uint32_t) material.getTextures().size();
+    for (auto& buf : material.getStructuredBuffers()) {
+        D3D12_ROOT_PARAMETER1 srv = {};
+        srv.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+        srv.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+        srv.Descriptor.ShaderRegister = srvReg;
+        srv.Descriptor.RegisterSpace = 0;
+        srv.Descriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAG_NONE;
+
+        parameters.emplace_back(srv);
+        srvReg++;
     }
 
     D3D12_VERSIONED_ROOT_SIGNATURE_DESC versionedDesc = {};

@@ -4,6 +4,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "dx11_shader.h"
 #include "dx11_material_constant_buffer.h"
+#include "dx11_structured_buffer.h"
 #include "dx11_blend.h"
 #include "dx11_texture.h"
 #include "dx11_rasterizer.h"
@@ -110,6 +111,32 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		++textureUnit;
 	}
 	unbindTextureUnitsBoundToRenderTargets(textureUnit);
+
+	// Structured buffers
+	auto& devCon = dx11Video.getDeviceContext();
+	int bufferIndex = 0;
+	const int numTextures = static_cast<int>(material.getNumTextureUnits());
+	for (auto& bufDef: material.getDefinition().getStructuredBuffers()) {
+		const auto& buf = material.getStructuredBuffer(bufferIndex);
+		if (buf) {
+			auto* dx11Buf = static_cast<const DX11StructuredBuffer*>(buf.get());
+			auto* srv = dx11Buf->getSRV();
+			int vsAddr = bufDef.getAddress(passN, ShaderType::Vertex);
+			int psAddr = bufDef.getAddress(passN, ShaderType::Pixel);
+			// Fallback: SRV slots after textures, since DX11 has no shader reflection
+			if (vsAddr == -1) {
+				vsAddr = numTextures + bufferIndex;
+			}
+			if (psAddr == -1) {
+				psAddr = numTextures + bufferIndex;
+			}
+			if (srv) {
+				devCon.VSSetShaderResources(vsAddr, 1, &srv);
+				devCon.PSSetShaderResources(psAddr, 1, &srv);
+			}
+		}
+		++bufferIndex;
+	}
 }
 
 void DX11Painter::setMaterialData(const Material& material)

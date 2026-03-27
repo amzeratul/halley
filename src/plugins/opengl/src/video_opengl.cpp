@@ -10,6 +10,7 @@
 #include <halley/graphics/window.h>
 #include "halley/text/string_converter.h"
 #include "constant_buffer_opengl.h"
+#include "structured_buffer_opengl.h"
 #include "halley/game/game_platform.h"
 #include "halley/graphics/material/uniform_type.h"
 using namespace Halley;
@@ -260,6 +261,11 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 {
 	return std::make_unique<ConstantBufferOpenGL>();
+}
+
+std::unique_ptr<MaterialStructuredBuffer> VideoOpenGL::createStructuredBuffer()
+{
+	return std::make_unique<StructuredBufferOpenGL>();
 }
 
 String VideoOpenGL::getShaderLanguage()

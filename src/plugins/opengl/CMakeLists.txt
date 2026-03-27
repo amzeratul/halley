@@ -11,6 +11,7 @@ set(SOURCES
         "src/painter_opengl.cpp"
         "src/render_target_opengl.cpp"
         "src/shader_opengl.cpp"
+        "src/structured_buffer_opengl.cpp"
         "src/texture_opengl.cpp"
         "src/video_opengl.cpp"
         )
@@ -25,6 +26,7 @@ set(HEADERS
         "src/prec.h"
         "src/render_target_opengl.h"
         "src/shader_opengl.h"
+        "src/structured_buffer_opengl.h"
         "src/texture_opengl.h"
         "src/video_opengl.h"
         )

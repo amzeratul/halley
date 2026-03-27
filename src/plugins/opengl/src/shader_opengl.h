@@ -18,6 +18,7 @@ namespace Halley
 
 		int getUniformLocation(const String& name, ShaderType stage) override;
 		int getBlockLocation(const String& name, ShaderType stage) override;
+		int getBufferLocation(const String& name, ShaderType stage) override;
 		int getAttributeLocation(const String& name);
 
 	private:
@@ -31,6 +32,7 @@ namespace Halley
 		HashMap<String, unsigned int> attributeLocations;
 		HashMap<String, unsigned int> uniformLocations;
 		HashMap<String, unsigned int> blockLocations;
+		HashMap<String, int> bufferLocations;
 
 		String name;
 

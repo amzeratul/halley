@@ -191,6 +191,40 @@ void MaterialTexture::deserialize(Deserializer& s)
 	s >> samplerType;
 }
 
+MaterialStructuredBufferDefinition::MaterialStructuredBufferDefinition()
+{}
+
+MaterialStructuredBufferDefinition::MaterialStructuredBufferDefinition(String name)
+	: name(std::move(name))
+{}
+
+void MaterialStructuredBufferDefinition::loadAddresses(const MaterialDefinition& definition)
+{
+	const auto& passes = definition.getPasses();
+	addresses.resize(passes.size() * shaderStageCount);
+	for (size_t i = 0; i < passes.size(); i++) {
+		auto& shader = passes[i].getShader();
+		for (int j = 0; j < shaderStageCount; ++j) {
+			addresses[i * shaderStageCount + j] = shader.getBufferLocation(name, ShaderType(j));
+		}
+	}
+}
+
+int MaterialStructuredBufferDefinition::getAddress(int pass, ShaderType stage) const
+{
+	return addresses[pass * shaderStageCount + int(stage)];
+}
+
+void MaterialStructuredBufferDefinition::serialize(Serializer& s) const
+{
+	s << name;
+}
+
+void MaterialStructuredBufferDefinition::deserialize(Deserializer& s)
+{
+	s >> name;
+}
+
 MaterialDefinition::MaterialDefinition()
 {
 	HalleyAssertDev(!Debug::isRunningFromDLL());
@@ -242,6 +276,11 @@ void MaterialDefinition::initialize(VideoAPI& video)
 	// Load textures
 	for (auto& tex: textures) {
 		tex.loadAddresses(*this);
+	}
+
+	// Load structured buffers
+	for (auto& buf: structuredBuffers) {
+		buf.loadAddresses(*this);
 	}
 
 	// Load uniform blocks
@@ -299,6 +338,9 @@ void MaterialDefinition::load(const ConfigNode& root)
 	}
 	if (root.hasKey("textures")) {
 		loadTextures(root["textures"]);
+	}
+	if (root.hasKey("structuredBuffers")) {
+		loadStructuredBuffers(root["structuredBuffers"]);
 	}
 }
 
@@ -378,6 +420,16 @@ void MaterialDefinition::setTextures(Vector<MaterialTexture> textures)
 	this->textures = std::move(textures);
 }
 
+void MaterialDefinition::setStructuredBuffers(Vector<MaterialStructuredBufferDefinition> structuredBuffers)
+{
+	this->structuredBuffers = std::move(structuredBuffers);
+}
+
+bool MaterialDefinition::hasStructuredBuffer(const String& name) const
+{
+	return std_ex::contains_if(structuredBuffers, [&] (const auto& b) { return b.name == name; });
+}
+
 Vector<String> MaterialDefinition::getTextureNames() const
 {
 	Vector<String> result;
@@ -429,6 +481,7 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << vertexPosOffset;
 	s << defaultMask;
 	s << tags;
+	s << structuredBuffers;
 }
 
 void MaterialDefinition::deserialize(Deserializer& s)
@@ -442,6 +495,7 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> vertexPosOffset;
 	s >> defaultMask;
 	s >> tags;
+	s >> structuredBuffers;
 }
 
 bool MaterialDefinition::isColumnMajor() const
@@ -534,6 +588,19 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 		}
 
 		textures.push_back(tex);
+	}
+}
+
+void MaterialDefinition::loadStructuredBuffers(const ConfigNode& node)
+{
+	for (const auto& entry: node.asSequence()) {
+		if (entry.hasKey("name")) {
+			structuredBuffers.push_back(MaterialStructuredBufferDefinition(entry["name"].asString()));
+		} else {
+			for (auto& it: entry.asMap()) {
+				structuredBuffers.push_back(MaterialStructuredBufferDefinition(it.first));
+			}
+		}
 	}
 }
 

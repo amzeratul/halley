@@ -3,6 +3,7 @@
 #include "halley/support/assert.h"
 #include "shader_opengl.h"
 #include "constant_buffer_opengl.h"
+#include "structured_buffer_opengl.h"
 #include "render_target_opengl.h"
 #include "halley/graphics/material/material_parameter.h"
 #include "texture_opengl.h"
@@ -161,6 +162,20 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 			texture->bind(textureUnit);
 		}
 		++textureUnit;
+	}
+
+	// Bind structured buffers
+	int bufferIndex = 0;
+	for (auto& bufDef: material.getDefinition().getStructuredBuffers()) {
+		const auto& buf = material.getStructuredBuffer(bufferIndex);
+		if (buf) {
+			int location = bufDef.getAddress(passNumber, ShaderType::Combined);
+			if (location == -1) {
+				location = bufferIndex;
+			}
+			static_cast<StructuredBufferOpenGL*>(const_cast<MaterialStructuredBuffer*>(buf.get()))->bind(location);
+		}
+		++bufferIndex;
 	}
 }
 

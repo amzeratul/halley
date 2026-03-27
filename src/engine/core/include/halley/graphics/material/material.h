@@ -16,6 +16,7 @@ namespace Halley
 	enum class ShaderType;
 	class MaterialDataBlock;
 	class Material;
+	class MaterialStructuredBuffer;
 	enum class ShaderParameterType : uint8_t;
 	class Painter;
 	class MaterialDefinition;
@@ -107,6 +108,13 @@ namespace Halley
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
 
+		const std::shared_ptr<const MaterialStructuredBuffer>& getStructuredBuffer(int index) const;
+		const std::shared_ptr<const MaterialStructuredBuffer>& getStructuredBuffer(std::string_view name) const;
+		gsl::span<const std::shared_ptr<const MaterialStructuredBuffer>> getStructuredBuffers() const;
+		size_t getNumStructuredBuffers() const;
+		Material& setStructuredBuffer(size_t index, std::shared_ptr<const MaterialStructuredBuffer> buffer);
+		Material& setStructuredBuffer(std::string_view name, std::shared_ptr<const MaterialStructuredBuffer> buffer);
+
 		gsl::span<const MaterialDataBlock> getDataBlocks() const;
 		gsl::span<MaterialDataBlock> getDataBlocks();
 
@@ -157,6 +165,7 @@ namespace Halley
 		
 		Vector<MaterialDataBlock, std::allocator<MaterialDataBlock>, 2 * sizeof(MaterialDataBlock)> dataBlocks;
 		Vector<std::shared_ptr<const Texture>, std::allocator<std::shared_ptr<const Texture>>, 4 * sizeof(std::shared_ptr<const Texture>)> textures;
+		Vector<std::shared_ptr<const MaterialStructuredBuffer>> structuredBuffers;
 
 		void doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
@@ -199,6 +208,9 @@ namespace Halley
 			}
 			return *this;
 		}
+
+		MaterialUpdater& setStructuredBuffer(size_t index, std::shared_ptr<const MaterialStructuredBuffer> buffer);
+		MaterialUpdater& setStructuredBuffer(std::string_view name, std::shared_ptr<const MaterialStructuredBuffer> buffer);
 
 		MaterialUpdater& setPassEnabled(int pass, bool enabled);
 		MaterialUpdater& setStencilReferenceOverride(std::optional<uint8_t> reference);

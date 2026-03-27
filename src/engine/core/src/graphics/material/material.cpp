@@ -99,6 +99,7 @@ Material::Material(const Material& other)
 	, passEnabled(other.passEnabled)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
+	, structuredBuffers(other.structuredBuffers)
 {
 }
 
@@ -109,6 +110,7 @@ Material::Material(Material&& other) noexcept
 	, passEnabled(other.passEnabled)
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
+	, structuredBuffers(std::move(other.structuredBuffers))
 {
 	other.fullHashValue = 0;
 	other.partialHashValue = 0;
@@ -123,6 +125,7 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 
 Material::~Material()
 {
+	structuredBuffers.clear();
 	textures.clear();
 	dataBlocks.clear();
 	materialDefinition = {};
@@ -172,6 +175,9 @@ void Material::initUniforms(bool forceLocalBlocks)
 	for (size_t i = 0; i < nTextures; ++i) {
 		textures[i] = textureDefs[i].defaultTexture;
 	}
+
+	// Load structured buffers
+	structuredBuffers.resize(materialDefinition->getStructuredBuffers().size());
 }
 
 void Material::bind(int passNumber, Painter& painter) const
@@ -248,6 +254,10 @@ bool Material::isCompatibleWith(const Material& other) const
 	}
 
 	if (textures != other.textures) {
+		return false;
+	}
+
+	if (structuredBuffers != other.structuredBuffers) {
 		return false;
 	}
 
@@ -336,6 +346,10 @@ void Material::computeHashes() const
 		hasher.feed(texture.get());
 	}
 
+	for (const auto& buffer: structuredBuffers) {
+		hasher.feed(buffer.get());
+	}
+
 	fullHashValue = hasher.digest();
 }
 
@@ -367,6 +381,53 @@ const std::shared_ptr<const Texture>& Material::getTexture(std::string_view name
 std::shared_ptr<const Texture> Material::getRawTexture(int textureUnit) const
 {
 	return textureUnit >= 0 && textureUnit < static_cast<int>(textures.size()) ? textures[textureUnit] : std::shared_ptr<const Texture>();
+}
+
+const std::shared_ptr<const MaterialStructuredBuffer>& Material::getStructuredBuffer(int index) const
+{
+	return structuredBuffers[index];
+}
+
+const std::shared_ptr<const MaterialStructuredBuffer>& Material::getStructuredBuffer(std::string_view name) const
+{
+	static std::shared_ptr<const MaterialStructuredBuffer> null;
+	const auto& defs = materialDefinition->getStructuredBuffers();
+	for (size_t i = 0; i < defs.size(); ++i) {
+		if (defs[i].name == name) {
+			return structuredBuffers[i];
+		}
+	}
+	return null;
+}
+
+gsl::span<const std::shared_ptr<const MaterialStructuredBuffer>> Material::getStructuredBuffers() const
+{
+	return structuredBuffers;
+}
+
+size_t Material::getNumStructuredBuffers() const
+{
+	return structuredBuffers.size();
+}
+
+Material& Material::setStructuredBuffer(size_t index, std::shared_ptr<const MaterialStructuredBuffer> buffer)
+{
+	if (index < structuredBuffers.size() && structuredBuffers[index] != buffer) {
+		structuredBuffers[index] = std::move(buffer);
+		needToUpdateHash = true;
+	}
+	return *this;
+}
+
+Material& Material::setStructuredBuffer(std::string_view name, std::shared_ptr<const MaterialStructuredBuffer> buffer)
+{
+	const auto& defs = materialDefinition->getStructuredBuffers();
+	for (size_t i = 0; i < defs.size(); ++i) {
+		if (defs[i].name == name) {
+			return setStructuredBuffer(i, std::move(buffer));
+		}
+	}
+	throw Exception("Structured buffer \"" + String(name) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
 gsl::span<const MaterialDataBlock> Material::getDataBlocks() const
@@ -693,6 +754,23 @@ MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const SpriteResource& 
 {
 	if (material || getOriginalMaterial().getTexture(static_cast<int>(textureUnit)) != sprite.getSpriteSheet()->getTexture()) {
 		getWriteMaterial().set(textureUnit, sprite);
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(size_t index, std::shared_ptr<const MaterialStructuredBuffer> buffer)
+{
+	if (material || getOriginalMaterial().getStructuredBuffer(static_cast<int>(index)) != buffer) {
+		getWriteMaterial().setStructuredBuffer(index, std::move(buffer));
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(std::string_view name, std::shared_ptr<const MaterialStructuredBuffer> buffer)
+{
+	const auto& cur = getOriginalMaterial().getStructuredBuffer(name);
+	if (material || cur != buffer) {
+		getWriteMaterial().setStructuredBuffer(name, std::move(buffer));
 	}
 	return *this;
 }

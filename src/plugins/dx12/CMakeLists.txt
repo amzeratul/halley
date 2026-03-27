@@ -10,6 +10,7 @@ set(SOURCES
         "src/dx12_render_target.cpp"
         "src/dx12_resource.cpp"
         "src/dx12_shader.cpp"
+        "src/dx12_structured_buffer.cpp"
         "src/dx12_video.cpp"
 )
 
@@ -20,6 +21,7 @@ set(HEADERS
         "src/dx12_render_target.h"
         "src/dx12_resource.h"
         "src/dx12_shader.h"
+        "src/dx12_structured_buffer.h"
         "src/dx12_video.h"
         "src/halley_dx12.h"
 )

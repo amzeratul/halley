@@ -3,6 +3,7 @@
 #include "dx12_pipeline.h"
 #include "dx12_render_target.h"
 #include "dx12_resource.h"
+#include "dx12_structured_buffer.h"
 #include "dx12_video.h"
 #include "halley/graphics/material/material_definition.h"
 
@@ -172,6 +173,29 @@ void DX12Painter::setMaterialPass(const Material& material, int passN)
     if (material.getNumTextureUnits() > 0) {
         auto& textureView = getTextureView(material);
         textureView.bind(material);
+    }
+
+    // Structured buffers — root parameter index follows CBVs + texture/sampler descriptor tables
+    {
+        const auto& matDef = material.getDefinition();
+        const auto& structuredBuffers = matDef.getStructuredBuffers();
+        if (!structuredBuffers.empty()) {
+            const int baseRootParam = static_cast<int>(matDef.getUniformBlocks().size())
+                + (matDef.getTextures().empty() ? 0 : 2);
+
+            int bufferIndex = 0;
+            for (auto& bufDef : structuredBuffers) {
+                const auto& buf = material.getStructuredBuffer(bufferIndex);
+                if (buf) {
+                    auto* dx12Buf = static_cast<const DX12StructuredBuffer*>(buf.get());
+                    auto addr = dx12Buf->getGPUVirtualAddress();
+                    if (addr) {
+                        cmdList->SetGraphicsRootShaderResourceView(baseRootParam + bufferIndex, addr);
+                    }
+                }
+                ++bufferIndex;
+            }
+        }
     }
 
     auto clip = clipping.value_or(curViewport);

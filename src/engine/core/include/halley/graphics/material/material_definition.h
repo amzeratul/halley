@@ -224,6 +224,24 @@ namespace Halley
 		void deserialize(Deserializer& s);
 	};
 
+	class MaterialStructuredBufferDefinition
+	{
+	public:
+		String name;
+		Vector<int> addresses;
+
+		MaterialStructuredBufferDefinition();
+		MaterialStructuredBufferDefinition(String name);
+
+		void loadAddresses(const MaterialDefinition& def);
+		int getAddress(int pass, ShaderType stage) const;
+
+		const String& getName() const { return name; }
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
 	class MaterialDefinition : public AsyncResource, public std::enable_shared_from_this<MaterialDefinition>
 	{
 		friend class Material;
@@ -264,6 +282,10 @@ namespace Halley
 		const Vector<MaterialTexture>& getTextures() const { return textures; }
 		Vector<String> getTextureNames() const;
 
+		void setStructuredBuffers(Vector<MaterialStructuredBufferDefinition> structuredBuffers);
+		const Vector<MaterialStructuredBufferDefinition>& getStructuredBuffers() const { return structuredBuffers; }
+		bool hasStructuredBuffer(const String& name) const;
+
 		bool hasTexture(const String& name) const;
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 
@@ -287,6 +309,7 @@ namespace Halley
 		String name;
 		Vector<MaterialPass> passes;
 		Vector<MaterialTexture> textures;
+		Vector<MaterialStructuredBufferDefinition> structuredBuffers;
 		Vector<MaterialUniformBlock> uniformBlocks;
 		Vector<MaterialAttribute> attributes;
 		int vertexSize = 0;
@@ -301,6 +324,7 @@ namespace Halley
 		void updateUniformBlocks();
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
+		void loadStructuredBuffers(const ConfigNode& node);
 		void loadAttributes(const ConfigNode& node);
 		void assignAttributeOffsets();
 		ShaderParameterType parseParameterType(const String& rawType) const;

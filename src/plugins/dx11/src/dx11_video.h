@@ -31,6 +31,7 @@ namespace Halley {
 		std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() override;
 		std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() override;
 		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
+		std::unique_ptr<MaterialStructuredBuffer> createStructuredBuffer() override;
 		
 		void init() override;
 		void deInit() override;

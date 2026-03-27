@@ -18,6 +18,16 @@ namespace Halley
 	class MaterialConstantBuffer;
 	class Material;
 
+	class MaterialStructuredBuffer
+	{
+	public:
+		virtual ~MaterialStructuredBuffer() {}
+
+		virtual void update(gsl::span<const std::byte> data, size_t elementStride) = 0;
+		virtual size_t getSize() const = 0;
+		virtual size_t getStride() const = 0;
+	};
+
 	class VideoAPI
 	{
 	public:
@@ -40,6 +50,7 @@ namespace Halley
 		virtual std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() = 0;
 		virtual std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() = 0;
 		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() = 0;
+		virtual std::unique_ptr<MaterialStructuredBuffer> createStructuredBuffer() = 0;
 
 		virtual String getShaderLanguage() = 0;
 		virtual bool isColumnMajor() const { return false; }

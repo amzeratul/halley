@@ -1,4 +1,5 @@
 #include "metal_material_constant_buffer.h"
+#include "metal_structured_buffer.h"
 #include "metal_painter.h"
 #include "metal_render_target.h"
 #include "metal_texture.h"
@@ -100,6 +101,11 @@ std::unique_ptr<ScreenRenderTarget> MetalVideo::createScreenRenderTarget()
 std::unique_ptr<MaterialConstantBuffer> MetalVideo::createConstantBuffer()
 {
 	return std::make_unique<MetalMaterialConstantBuffer>(*this);
+}
+
+std::unique_ptr<MaterialStructuredBuffer> MetalVideo::createStructuredBuffer()
+{
+	return std::make_unique<MetalStructuredBuffer>(*this);
 }
 
 String MetalVideo::getShaderLanguage()
