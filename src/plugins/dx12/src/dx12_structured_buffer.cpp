@@ -10,6 +10,10 @@ DX12StructuredBuffer::DX12StructuredBuffer(DX12Video& video)
 void DX12StructuredBuffer::update(gsl::span<const std::byte> data, size_t elementStride)
 {
 	const size_t size = data.size_bytes();
+	if (size == 0) {
+		return;
+	}
+
 	buffer.resize(size);
 
 	auto dest = buffer.map();

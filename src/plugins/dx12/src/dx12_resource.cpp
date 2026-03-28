@@ -141,12 +141,11 @@ bool DX12Buffer::canFit(size_t size) const
 
 void DX12Buffer::resize(size_t requestedSize)
 {
-    if (curSize != 0) {
-        if (requestedSize > curSize) {
-            // TODO: this maybe shouldn't be allowed for certain buffer types
-            clear();
-        }
+    if (requestedSize <= curSize && curSize != 0) {
+        return;
     }
+
+    clear();
 
     D3D12_HEAP_TYPE heapType;
     D3D12_RESOURCE_STATES initialState = initialDestResourceState;
