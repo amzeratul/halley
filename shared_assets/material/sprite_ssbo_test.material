@@ -1,0 +1,14 @@
+---
+name: Halley/SpriteSSBOTest
+base: sprite_base.material
+textures:
+  - image: sampler2D
+structuredBuffers:
+  - name: SpriteData
+passes:
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: sprite_ssbo_test.pixel.hlsl
+...
