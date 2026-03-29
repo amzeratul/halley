@@ -15,9 +15,9 @@ TextureRenderTargetOpenGL::~TextureRenderTargetOpenGL()
 
 void TextureRenderTargetOpenGL::onBind(Painter&)
 {
-	init();
+	update();
 	HalleyAssertDev(fbo != 0);
-	
+
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glCheckError();
 
@@ -29,15 +29,22 @@ void TextureRenderTargetOpenGL::onBind(Painter&)
 void TextureRenderTargetOpenGL::onUnbind(Painter&)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glFlush();
 }
 
-void TextureRenderTargetOpenGL::init()
+void TextureRenderTargetOpenGL::update()
 {
 	if (fbo == 0) {
-		HALLEY_DEBUG_TRACE();
-
 		glGenFramebuffers(1, &fbo);
 		glCheckError();
+		dirty = true;
+	}
+
+	if (dirty) {
+		dirty = false;
+
+		HALLEY_DEBUG_TRACE();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glCheckError();
 

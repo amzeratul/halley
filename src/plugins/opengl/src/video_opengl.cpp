@@ -238,22 +238,8 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 {
 #ifdef WITH_OPENGL
 	if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW) {
-		std::stringstream ss;
-#if HAS_EASTL
-		ss << "[" << glEnumMap.at(source).second << "] [" << glEnumMap.at(type).second << "] [" << glEnumMap.at(severity).second << "] " << id << ": " << message;
-#else
-		ss << "[" << glEnumMap.at(source) << "] [" << glEnumMap.at(type) << "] [" << glEnumMap.at(severity) << "] " << id << ": " << message;
-#endif
-		std::string str = ss.str();
-
-#ifdef _DEBUG
-		std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
-#else
-		UniqueLock lock(messagesMutex);
-		messagesPending.push_back([str] () {
-			std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
-		});
-#endif
+		Logger::logError(String("[") + glEnumMap.at(source) + "] [" + glEnumMap.at(type) + "] [" + glEnumMap.at(severity) + "] " + id + ": " + message);
+		//Logger::logError(Debug::getCallStack());
 	}
 #endif
 }

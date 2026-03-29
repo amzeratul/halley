@@ -65,18 +65,23 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 
 	auto renderTarget = dynamic_cast<const IRenderTargetOpenGL*>(tryGetActiveRenderTarget());
 
-	const auto col = colour.value_or(Colour());
-
 	if (!renderTarget || renderTarget->isScreenRenderTarget()) {
-		glClearColor(col.r, col.g, col.b, col.a);
+		if (colour) {
+			glClearColor(colour->r, colour->g, colour->b, colour->a);
+		}
 
 		glDepthMask(GL_TRUE);
+		if (depth) {
 #ifdef WITH_OPENGL
-		glClearDepth(depth.value_or(1.0f));
+			glClearDepth(*depth);
 #else
-		glClearDepthf(depth.value_or(1.0f));
+			glClearDepthf(*depth);
 #endif
-		glClearStencil(stencil.value_or(0));
+		}
+
+		if (stencil) {
+			glClearStencil(*stencil);
+		}
 
 		GLbitfield mask = 0;
 		if (colour) {
@@ -92,8 +97,10 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 		glClear(mask);
 		glCheckError();
 	} else {
-		glClearBufferfv(GL_COLOR, 0, &col.r);
-		glCheckError();
+		if (colour) {
+			glClearBufferfv(GL_COLOR, 0, &colour->r);
+			glCheckError();
+		}
 
 		if (depth) {
 			glDepthMask(GL_TRUE);
@@ -135,11 +142,10 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 		for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
 			const auto& dataBlock = material.getDataBlocks()[i];
 			const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
-			int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
-			if (address == -1) {
-				address = dataBlock.getBindPoint();
+			const int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
+			if (address != -1) {
+				shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 			}
-			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 		}
 	}
 
@@ -151,11 +157,8 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 		if (!texture) {
 			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);					
 		} else {
-			int location = tex.getAddress(passNumber, ShaderType::Combined);
-			if (location == -1) {
-				location = textureUnit;
-			}
-			if (!supportsShaderTextureBinding) {
+			const int location = tex.getAddress(passNumber, ShaderType::Combined);
+			if (!supportsShaderTextureBinding && location != -1) {
 				glUniform1i(location, textureUnit);
 				glCheckError();
 			}

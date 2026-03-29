@@ -15,8 +15,6 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
 	: Texture(size)
 	, parent(parent)
 {
-	glGenTextures(1, &textureId);
-	HalleyAssertDev(textureId != 0);
 }
 
 TextureOpenGL::~TextureOpenGL()
@@ -44,6 +42,10 @@ TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
 
 void TextureOpenGL::doLoad(TextureDescriptor& d)
 {
+	if (textureId == 0) {
+		glGenTextures(1, &textureId);
+	}
+
 	GLUtils glUtils;
     glUtils.setTextureUnit(0);
 	glUtils.bindTexture(textureId);
@@ -83,6 +85,7 @@ void TextureOpenGL::generateMipMaps()
 
 unsigned TextureOpenGL::getNativeId() const
 {
+	HalleyAssertDev(textureId != 0);
 	return textureId;
 }
 
@@ -126,6 +129,7 @@ void TextureOpenGL::bind(int textureUnit) const
 	waitForOpenGLLoad();
 	GLUtils glUtils;
 	glUtils.setTextureUnit(textureUnit);
+	HalleyAssertDev(textureId != 0);
 	glUtils.bindTexture(textureId);
 }
 
@@ -163,7 +167,7 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	if (format != TextureFormat::Depth) {
 		const int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format) == 4 ? 4 : 1);
-		glPixelStorei(GL_PACK_ROW_LENGTH, stride);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
 		glCheckError();
 	}
 
@@ -185,8 +189,8 @@ void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFo
 {
 	int stride = pixelData.getStrideOr(size.x);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format));
-	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format) == 4 ? 4 : 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLPixelFormat(format), GL_UNSIGNED_BYTE, pixelData.getBytes());
 	glCheckError();
 

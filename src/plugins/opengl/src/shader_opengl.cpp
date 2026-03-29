@@ -260,6 +260,10 @@ int ShaderOpenGL::getBlockLocation(const String& name, ShaderType stage)
 		result = glGetUniformBlockIndex(id, nameAlt.c_str());
 	}
 
+	if (result == GL_INVALID_INDEX) {
+		Logger::logError("Could not find uniform block \"" + name + "\" on shader " + this->name);
+	}
+
 	const int value = result == GL_INVALID_INDEX ? -1 : static_cast<int>(result);
 	blockLocations[name] = value;
 	return value;
