@@ -115,7 +115,8 @@ namespace Halley
 				return iter;
 			}
 
-			auto next = ++iter;
+			auto next = iter;
+			++next;
 			if (next == end) {
 				return iter;
 			}
@@ -159,7 +160,8 @@ namespace Halley
 				return iter;
 			}
 
-			auto next = ++iter;
+			auto next = iter;
+			++next;
 			if (next == end) {
 				return iter;
 			}
