@@ -106,14 +106,13 @@ ConfigNode LocStringUploadChunkData::toConfigNode() const
 				keysToKeep.push_back(ConfigNode(entry.key));
 			} else {
 				hasSend = true;
-				if (entry.type != LocStringUploadEntryType::Removed) {
+				if (entry.type == LocStringUploadEntryType::Added || entry.type == LocStringUploadEntryType::Modified) {
 					keys.push_back(ConfigNode(entry.key));
 					values.push_back(ConfigNode(entry.value));
+				} else if (entry.type == LocStringUploadEntryType::Renamed) {
+					keysToKeep.push_back(ConfigNode(entry.key));
+					keyRenames.push_back(ConfigNode(std::pair(*entry.oldKey, entry.key)));
 				}
-			}
-
-			if (entry.oldKey) {
-				keyRenames.push_back(ConfigNode(std::pair(*entry.oldKey, entry.key)));
 			}
 		} else if (entry.remoteValue) {
 			keysToKeep.push_back(ConfigNode(entry.key));
