@@ -35,6 +35,10 @@ namespace Halley {
 
         const Vector<int>& getActiveRows() const;
 
+        LocalisedString getToolTip() const override;
+        bool hasDynamicToolTip() const override;
+        Vector2f getToolTipPosition(Vector2f mousePos) const override;
+
     protected:
         void onMouseOver(Vector2f mousePos) override;
         void onMouseLeft(Vector2f mousePos) override;
@@ -52,6 +56,7 @@ namespace Halley {
 
         virtual std::pair<Vector<float>, Vector<String>> getColumns() const;
         virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const;
+        virtual LocalisedString getCellToolTip(int row, int col, const String& columnName) const;
 
         virtual void onRightClick(std::optional<int> line);
         virtual void copySelection();

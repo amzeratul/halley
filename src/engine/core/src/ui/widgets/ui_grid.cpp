@@ -544,6 +544,11 @@ void UIGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& co
 {
 }
 
+LocalisedString UIGrid::getCellToolTip(int row, int col, const String& columnName) const
+{
+	return {};
+}
+
 void UIGrid::onRightClick(std::optional<int> line)
 {
 }
@@ -594,4 +599,27 @@ std::optional<int> UIGrid::getRowForLine(int line) const
 const String& UIGrid::getKeyAt(int idx) const
 {
 	return String::emptyString();
+}
+
+LocalisedString UIGrid::getToolTip() const
+{
+	if (columnUnderMouse && lineUnderMouse) {
+		return getCellToolTip(*lineUnderMouse, *columnUnderMouse, columnNames[*columnUnderMouse]);
+	}
+	return {};
+}
+
+bool UIGrid::hasDynamicToolTip() const
+{
+	return true;
+}
+
+Vector2f UIGrid::getToolTipPosition(Vector2f mousePos) const
+{
+	if (columnUnderMouse && lineUnderMouse) {
+		if (const auto row = getRowForLine(*lineUnderMouse)) {
+			return getCellBasePos(*row, *columnUnderMouse) + Vector2f(0, getLineHeight());
+		}
+	}
+	return mousePos;
 }

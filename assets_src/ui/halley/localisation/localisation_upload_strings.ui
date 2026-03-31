@@ -1,0 +1,114 @@
+uuid: 373af10e-5e71-4100-994c-09d99dddeac0
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 6d3e52a8-b985-4e9a-af1a-2fed5f151e92
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_title_capsule.png
+      innerBorder: [7, 2, 7, 7]
+      size: [400, 0]
+    children:
+      - uuid: 9399e556-1281-48b5-99fe-90a2f405f2a0
+        border: [0, 0, 0, 3]
+        widget:
+          class: label
+          text: Upload strings
+        fill: [centreHorizontal, fillVertical]
+      - uuid: 26075b1b-4937-480f-baac-9af69e9ed1e7
+        proportion: 1
+        sizer:
+          columnProportions: []
+          gap: 4
+          type: vertical
+        children:
+          - uuid: ed41a0b5-f8b1-431a-9f13-15c3d37e3175
+            proportion: 1
+            sizer:
+              columnProportions: []
+            widget:
+              class: scrollBarPane
+              clipSize: [0, 0]
+              size: [0, 200]
+            children:
+              - uuid: e34b4032-d360-48f6-a98f-f6c0981b213a
+                proportion: 1
+                border: [0, 0, 4, 0]
+                sizer:
+                  columnProportions: []
+                  columns: 1
+                  gap: 1
+                  type: vertical
+                widget:
+                  class: widget
+                  id: gridContainer
+                  size: [300, 0]
+                children: []
+                fill: [fillHorizontal, top]
+            fill: [fillHorizontal, fillVertical]
+          - uuid: 62451afc-b01e-401b-a3ea-9fe52c3e01f4
+            widget:
+              class: label
+              id: summary
+              text: Summary
+            fill: [centreHorizontal, fillVertical]
+      - uuid: b52a6d48-2124-48c4-8ace-fa465f57ce77
+        sizer:
+          columnProportions: []
+          gap: 8
+          type: horizontal
+        widget:
+          class: widget
+          id: ""
+        children:
+          - uuid: 2a2d9682-9f2b-4521-af9e-8e349f2600f3
+            proportion: 1
+            sizer:
+              columnProportions: []
+            widget:
+              class: image
+              colour: "#2e2e2e"
+              image: $ui_list_item
+            children:
+              - uuid: 073cf3c1-06e5-498e-8a66-2515eeba6971
+                proportion: 1
+                border: [5, 0, 5, 0]
+                widget:
+                  class: label
+                  colour: "#9d9d9d"
+                  id: status
+                  text: Idle
+                fill: [centreHorizontal, centreVertical]
+          - uuid: 0956e2c6-96eb-4803-bbe6-a2bc7569e4e4
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              icon: ui/upload.png
+              id: upload
+              size: [120, 0]
+              text: Upload!
+            fill: [right, fillVertical]
+          - uuid: 2205fe64-43ed-4970-a8d3-2739ef41bcc8
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: cancel
+              size: [120, 0]
+              text: Cancel
+            fill: [right, fillVertical]
+        fill: [fillHorizontal, fillVertical]
+    fill: [fillHorizontal, fillVertical]

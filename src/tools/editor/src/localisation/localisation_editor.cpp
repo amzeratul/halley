@@ -4,6 +4,7 @@
 #include "localisation_export_window.h"
 #include "localisation_language_editor.h"
 #include "localisation_manage_users.h"
+#include "localisation_upload_strings_window.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
@@ -787,15 +788,8 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings && remoteStrings) {
-		curMessage = "Uploading original strings...";
-		client->putOriginalStrings(*localStrings->originalLanguage, *remoteStrings->originalLanguage).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
-		{
-			if (result) {
-				curMessage = {};
-			} else {
-				curMessage = "Error uploading original strings.";
-			}
-		});
+		auto uploadData = LocStringUploadData(*localStrings->originalLanguage, *remoteStrings->originalLanguage);
+		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, *client, std::move(uploadData)));
 	}
 }
 

@@ -103,6 +103,10 @@ src/localisation/localisation_remote_client_updater.cpp
 src/localisation/localisation_remote_client_updater.h
 src/localisation/localisation_set_filters_window.cpp
 src/localisation/localisation_set_filters_window.h
+src/localisation/localisation_string_upload_data.cpp
+src/localisation/localisation_string_upload_data.h
+src/localisation/localisation_upload_strings_window.cpp
+src/localisation/localisation_upload_strings_window.h
 src/preferences.cpp
 src/preferences.h
 src/project/check_update_task.cpp

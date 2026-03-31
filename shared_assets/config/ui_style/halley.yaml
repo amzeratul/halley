@@ -378,7 +378,7 @@ uiStyle:
     background: { img: $ui_tooltip, colour: $ui_listHover }
     innerBorder: [ 5, 5, 5, 5 ]
     delay: 0.3
-    maxWidth: 200
+    maxWidth: 300
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
 
   slider:
