@@ -221,7 +221,7 @@ void LocUploadStringsWindow::upload()
 		return;
 	}
 
-	const auto buttons = Vector{ { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::Cancel }};
+	const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::Cancel }};
 	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload Strings?", "Are you sure you want to upload these " + toString(count) + " strings?", buttons, [=](UIConfirmationPopup::ButtonType result)
 	{
 		if (result == UIConfirmationPopup::ButtonType::Yes) {
