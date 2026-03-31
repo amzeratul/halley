@@ -14,12 +14,16 @@ LocStringUploadChunkData::LocStringUploadChunkData(const LocOriginalDataChunk& c
 
 	HashMap<String, const LocalisationDataEntry*> myEntries;
 	HashMap<String, const LocalisationDataEntry*> remoteEntries;
+	HashMap<String, Vector<const LocalisationDataEntry*>> remoteValues;
+	HashSet<String> remotesModifiedOrDeleted;
+	HashSet<String> renamedKeys;
 
 	if (remote) {
 		const auto n = remote->getNumEntries();
 		for (size_t i = 0; i < n; ++i) {
 			const auto& e = remote->getEntry(i);
 			remoteEntries[e.getKey()] = &e;
+			remoteValues[e.getValue()] += &e;
 		}
 	}
 
@@ -38,23 +42,49 @@ LocStringUploadChunkData::LocStringUploadChunkData(const LocOriginalDataChunk& c
 			} else {
 				type = LocStringUploadEntryType::Added;
 			}
+
+			if (type == LocStringUploadEntryType::Modified) {
+				remotesModifiedOrDeleted.insert(e.getKey());
+			}
 		}
 		
-		// TODO: detect key renames
-		std::optional<String> oldKey;
-		if (oldKey) {
-			type = LocStringUploadEntryType::Renamed;
-		}
-
-		entries += Entry{ e.getKey(), e.getValue(), std::move(remoteValue), std::move(oldKey), type, true };
+		entries += Entry{ e.getKey(), e.getValue(), std::move(remoteValue), std::nullopt, type, true };
 	}
 	
-	// Check which strings have been removed
 	if (remote) {
 		const auto n = remote->getNumEntries();
+
+		// Removed strings happens in two passes due to renames
+		// Check which strings have been removed, but don't create entries
 		for (size_t i = 0; i < n; ++i) {
 			const auto& e = remote->getEntry(i);
 			if (!myEntries.contains(e.getKey())) {
+				remotesModifiedOrDeleted.insert(e.getKey());
+			}
+		}
+
+		// Process renames
+		for (auto& entry: entries) {
+			if (entry.type == LocStringUploadEntryType::Added || entry.type == LocStringUploadEntryType::Modified) {
+				const auto iter = remoteValues.find(entry.value);
+				if (iter != remoteValues.end()) {
+					for (auto* remoteEntry: iter->second) {
+						if (remotesModifiedOrDeleted.contains(remoteEntry->getKey())) {
+							entry.type = LocStringUploadEntryType::Renamed;
+							entry.oldKey = remoteEntry->getKey();
+							entry.remoteValue = remoteEntry->getValue();
+							renamedKeys.insert(remoteEntry->getKey());
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// Second phase, actually generate the deletes
+		for (size_t i = 0; i < n; ++i) {
+			const auto& e = remote->getEntry(i);
+			if (!myEntries.contains(e.getKey()) && !renamedKeys.contains(e.getKey())) {
 				entries += Entry { e.getKey(), "", e.getValue(), std::nullopt, LocStringUploadEntryType::Removed, true };
 			}
 		}

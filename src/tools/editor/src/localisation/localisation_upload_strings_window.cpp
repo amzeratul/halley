@@ -48,7 +48,7 @@ void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector
 	strs.resize(len);
 	strs[1] = Path(getChunk(idx).chunkId).getFilenameStr();
 	strs[2] = getTypeDesc(e.type);
-	strs[3] = e.key;
+	strs[3] = (e.oldKey ? "*" : "") + e.key;
 	strs[4] = e.remoteValue.value_or("");
 	strs[5] = e.value;
 
@@ -66,7 +66,7 @@ LocalisedString LocUploadStringsGrid::getCellToolTip(int row, int col, const Str
 	} else {
 		const auto& e = getEntry(row);
 		if (columnName == "Key") {
-			return LocalisedString::fromUserString(e.key);
+			return LocalisedString::fromUserString((e.oldKey ? *e.oldKey + "\n->\n" : "") + e.key);
 		} else if (columnName == "Previous Value") {
 			return LocalisedString::fromUserString(e.remoteValue.value_or(""));
 		} else if (columnName == "New Value") {
