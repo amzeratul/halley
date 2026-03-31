@@ -34,8 +34,8 @@ std::pair<Vector<float>, Vector<String>> LocUploadStringsGrid::getColumns() cons
 	const float fixedWidth = 20 + 120 + 40;
 	const float remainingWidth = width - fixedWidth;
 
-	Vector<float> sizes = { 20.0f, 120.0f, 40.0f, remainingWidth * 0.3f, remainingWidth * 0.7f };
-	Vector<String> names { "Send", "Group", "Status", "Key", "Value" };
+	Vector<float> sizes = { 20.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.4f, remainingWidth * 0.4f };
+	Vector<String> names { "Send", "Group", "Status", "Key", "Previous Value", "New Value" };
 	return { sizes, names };
 }
 
@@ -43,18 +43,19 @@ void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector
 {
 	const auto& e = getEntry(idx);
 
-	int len = 5;
+	int len = 6;
 
 	strs.resize(len);
 	strs[1] = Path(getChunk(idx).chunkId).getFilenameStr();
 	strs[2] = getTypeDesc(e.type);
 	strs[3] = e.key;
-	strs[4] = e.value;
+	strs[4] = e.remoteValue.value_or("");
+	strs[5] = e.value;
 
 	colours.resize(len, textCol);
 
 	sprites.resize(len, {});
-	sprites[0] = tickSprite;
+	sprites[0] = e.send ? tickSprite : Sprite();
 }
 
 LocalisedString LocUploadStringsGrid::getCellToolTip(int row, int col, const String& columnName) const
@@ -66,7 +67,9 @@ LocalisedString LocUploadStringsGrid::getCellToolTip(int row, int col, const Str
 		const auto& e = getEntry(row);
 		if (columnName == "Key") {
 			return LocalisedString::fromUserString(e.key);
-		} else if (columnName == "Value") {
+		} else if (columnName == "Previous Value") {
+			return LocalisedString::fromUserString(e.remoteValue.value_or(""));
+		} else if (columnName == "New Value") {
 			return LocalisedString::fromUserString(e.value);
 		}
 	}
@@ -93,7 +96,6 @@ void LocUploadStringsGrid::generateMapping()
 			}
 		}
 	}
-	Logger::logInfo("Got " + toString(mapping.size()) + " lines in mapping");
 }
 
 const LocStringUploadChunkData& LocUploadStringsGrid::getChunk(int idx) const
@@ -102,7 +104,7 @@ const LocStringUploadChunkData& LocUploadStringsGrid::getChunk(int idx) const
 	return uploadData.getChunks()[i.first];	
 }
 
-const LocStringUploadChunkData::Entry& LocUploadStringsGrid::getEntry(int idx) const
+LocStringUploadChunkData::Entry& LocUploadStringsGrid::getEntry(int idx) const
 {
 	const auto i = mapping[idx];
 	return uploadData.getChunks()[i.first].entries[i.second];
@@ -130,11 +132,13 @@ std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 	const auto& e = getEntry(row);
 	switch (e.type) {
 	case LocStringUploadEntryType::Added:
-		return Colour4f(0.2f, 1.0f, 0.2f, 0.2f);
+		return Colour4f(0.2f, 1.0f, 0.2f, 0.1f);
 	case LocStringUploadEntryType::Renamed:
-		return Colour4f(0.2f, 0.2f, 1.0f, 0.2f);
+		return Colour4f(0.2f, 0.2f, 1.0f, 0.1f);
 	case LocStringUploadEntryType::Removed:
-		return Colour4f(1.0f, 0.2f, 0.2f, 0.2f);
+		return Colour4f(1.0f, 0.2f, 0.2f, 0.1f);
+	case LocStringUploadEntryType::Modified:
+		return Colour4f(1.0f, 1.0f, 0.2f, 0.1f);
 	}
 	return {};
 }
@@ -154,6 +158,13 @@ void LocUploadStringsWindow::onMakeUI()
 	setStatus("Idle", Status::Idle);
 
 	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData);
+	grid->setFilter([=] (int row) -> bool {
+		if (onlyShowSend) {
+			return grid->getEntry(row).send;
+		} else {
+			return true;
+		}
+	});
 	getWidget("gridContainer")->add(grid, 1);
 
 	setHandle(UIEventType::ButtonClicked, "upload", [this] (const UIEvent& event) {
@@ -162,6 +173,19 @@ void LocUploadStringsWindow::onMakeUI()
 	
 	setHandle(UIEventType::ButtonClicked, "cancel", [this] (const UIEvent& event) {
 		destroy();
+	});
+	
+	setHandle(UIEventType::ButtonClicked, "markSend", [this] (const UIEvent& event) {
+		markSend(true);
+	});
+	
+	setHandle(UIEventType::ButtonClicked, "unmarkSend", [this] (const UIEvent& event) {
+		markSend(false);
+	});
+
+	bindData("onlyShowSend", onlyShowSend, [=] (bool value) {
+		onlyShowSend = value;
+		grid->refreshFilter();
 	});
 
 	updateSummary();
@@ -179,9 +203,33 @@ void LocUploadStringsWindow::update(Time t, bool moved)
 
 void LocUploadStringsWindow::upload()
 {
+	int count = 0;
+	for (const auto& c: uploadData.getChunks()) {
+		for (const auto& e: c.entries) {
+			if (e.send && e.type != LocStringUploadEntryType::Noop) {
+				++count;
+			}
+		}
+	}
+
+	if (count == 0) {
+		return;
+	}
+
+	const auto buttons = Vector{ { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::Cancel }};
+	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload Strings?", "Are you sure you want to upload these " + toString(count) + " strings?", buttons, [=](UIConfirmationPopup::ButtonType result)
+	{
+		if (result == UIConfirmationPopup::ButtonType::Yes) {
+			doUpload();
+		}
+	}));
+}
+
+void LocUploadStringsWindow::doUpload()
+{
 	setStatus("Uploading", Status::Uploading);
 
-	client.putOriginalStrings(uploadData).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
+	client.putOriginalStrings(uploadData, true).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
 	{
 		if (result) {
 			setStatus("Upload complete", Status::Success);
@@ -209,7 +257,9 @@ void LocUploadStringsWindow::updateSummary()
 	HashMap<LocStringUploadEntryType, int> counts;
 	for (const auto& c: uploadData.getChunks()) {
 		for (const auto& e: c.entries) {
-			++counts[e.type];
+			if (e.send) {
+				++counts[e.type];
+			}
 		}
 	}
 
@@ -220,4 +270,13 @@ void LocUploadStringsWindow::updateSummary()
 		+ counts[Removed] + " removed, "
 		+ counts[Renamed] + " renamed"
 	));
+}
+
+void LocUploadStringsWindow::markSend(bool toSend)
+{
+	for (auto line: grid->getSelectedLines()) {
+		grid->getEntry(line).send = toSend;
+	}
+	updateSummary();
+	grid->refreshFilter();
 }

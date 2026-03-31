@@ -18,6 +18,9 @@ namespace Halley {
         void onRightClick(std::optional<int> line) override;
         void copySelection() override;
 
+        const LocStringUploadChunkData& getChunk(int idx) const;
+        LocStringUploadChunkData::Entry& getEntry(int idx) const;
+
     private:
         LocStringUploadData& uploadData;
 
@@ -26,8 +29,6 @@ namespace Halley {
         Sprite tickSprite;
         
     	void generateMapping();
-        const LocStringUploadChunkData& getChunk(int idx) const;
-        const LocStringUploadChunkData::Entry& getEntry(int idx) const;
         String getTypeDesc(LocStringUploadEntryType type) const;
         std::optional<Colour4f> getRowColour(int row) const;
     };
@@ -47,6 +48,8 @@ namespace Halley {
 
         std::shared_ptr<LocUploadStringsGrid> grid;
 
+        bool onlyShowSend = false;
+
 		AliveFlag aliveFlag;
 
         enum class Status {
@@ -57,7 +60,9 @@ namespace Halley {
         };
 
         void upload();
+        void doUpload();
         void setStatus(const String& message, Status status);
         void updateSummary();
+        void markSend(bool toSend);
     };
 }

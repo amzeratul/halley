@@ -29,14 +29,17 @@ namespace Halley {
 		struct Entry {
 			String key;
 			String value;
+			std::optional<String> remoteValue;
 			std::optional<String> oldKey;
 			LocStringUploadEntryType type;
+			bool send = true;
 		};
 
 		String chunkId;
 		Vector<Entry> entries;
+		bool isDelete = false;
 
-		LocStringUploadChunkData(String chunkId = "");
+		LocStringUploadChunkData(String chunkId = "", bool isDelete = false);
 		LocStringUploadChunkData(const LocOriginalDataChunk& chunk, const LocOriginalDataChunk* remote = nullptr);
 
 		ConfigNode toConfigNode() const;
@@ -51,6 +54,7 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 		const Vector<LocStringUploadChunkData>& getChunks() const;
+		Vector<LocStringUploadChunkData>& getChunks();
 
 	private:
 		Vector<LocStringUploadChunkData> chunks;
