@@ -234,7 +234,7 @@ void LocUploadStringsWindow::doUpload()
 {
 	setStatus("Uploading", Status::Uploading);
 
-	client.putOriginalStrings(uploadData, true).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
+	client.putOriginalStrings(uploadData).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
 	{
 		if (result) {
 			setStatus("Upload complete", Status::Success);
