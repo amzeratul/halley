@@ -24,6 +24,7 @@ namespace Halley {
         const String& getActiveSelectedKey() const;
 
     	void setSelectedLine(int line);
+    	void setSelectedLines(HashSet<int> lines);
         void moveSelection(int delta);
         void selectAll();
         const HashSet<int>& getSelectedLines() const;

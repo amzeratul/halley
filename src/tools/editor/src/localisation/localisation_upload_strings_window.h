@@ -45,12 +45,11 @@ namespace Halley {
         UIFactory& factory;
         LocalisationClient& client;
         LocStringUploadData uploadData;
+		AliveFlag aliveFlag;
 
         std::shared_ptr<LocUploadStringsGrid> grid;
 
         bool onlyShowSend = false;
-
-		AliveFlag aliveFlag;
 
         enum class Status {
 	        Idle,
@@ -59,10 +58,18 @@ namespace Halley {
             Error
         };
 
+        int sendCount = 0;
+		Status curStatus = Status::Idle;
+
         void upload();
         void doUpload();
         void setStatus(const String& message, Status status);
         void updateSummary();
+        void updateButtons();
         void markSend(bool toSend);
+        void markAllSend(bool toSend);
+        void markSend(const HashSet<int>& lines, bool toSend);
+        void selectGroup();
+        void selectGroup(const String& id);
     };
 }

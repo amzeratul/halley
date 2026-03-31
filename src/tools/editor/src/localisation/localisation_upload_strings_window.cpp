@@ -158,6 +158,7 @@ void LocUploadStringsWindow::onMakeUI()
 	setStatus("Idle", Status::Idle);
 
 	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData);
+	markAllSend(false);
 	grid->setFilter([=] (int row) -> bool {
 		if (onlyShowSend) {
 			return grid->getEntry(row).send;
@@ -181,6 +182,10 @@ void LocUploadStringsWindow::onMakeUI()
 	
 	setHandle(UIEventType::ButtonClicked, "unmarkSend", [this] (const UIEvent& event) {
 		markSend(false);
+	});
+	
+	setHandle(UIEventType::ButtonClicked, "selectGroup", [this] (const UIEvent& event) {
+		selectGroup();
 	});
 
 	bindData("onlyShowSend", onlyShowSend, [=] (bool value) {
@@ -241,9 +246,8 @@ void LocUploadStringsWindow::doUpload()
 
 void LocUploadStringsWindow::setStatus(const String& message, Status status)
 {
-	bool enabled = status != Status::Uploading;
-	getWidget("upload")->setEnabled(enabled);
-	getWidget("cancel")->setEnabled(enabled);
+	curStatus = status;
+	updateButtons();
 	
 	auto statusLabel = getWidgetAs<UILabel>("status");
 	statusLabel->setText(LocalisedString::fromUserString("Status: " + message));
@@ -254,29 +258,76 @@ void LocUploadStringsWindow::updateSummary()
 {
 	auto label = getWidgetAs<UILabel>("summary");
 
+	sendCount = 0;
 	HashMap<LocStringUploadEntryType, int> counts;
 	for (const auto& c: uploadData.getChunks()) {
 		for (const auto& e: c.entries) {
-			if (e.send) {
+			if (e.send && e.type != LocStringUploadEntryType::Noop) {
 				++counts[e.type];
+				++sendCount;
 			}
 		}
 	}
 
 	using enum LocStringUploadEntryType;
 	label->setText(LocalisedString::fromUserString(String("Summary: ") 
+		+ sendCount + " lines to send ("
 		+ counts[Added] + " added, "
 		+ counts[Modified] + " modified, "
 		+ counts[Removed] + " removed, "
-		+ counts[Renamed] + " renamed"
+		+ counts[Renamed] + " renamed)"
 	));
+
+	updateButtons();
+}
+
+void LocUploadStringsWindow::updateButtons()
+{
+	bool enabled = curStatus != Status::Uploading;
+	getWidget("upload")->setEnabled(enabled && sendCount > 0);
+	getWidget("cancel")->setEnabled(enabled);
 }
 
 void LocUploadStringsWindow::markSend(bool toSend)
 {
-	for (auto line: grid->getSelectedLines()) {
+	markSend(grid->getSelectedLines(), toSend);
+}
+
+void LocUploadStringsWindow::markAllSend(bool toSend)
+{
+	HashSet<int> lines;
+	const auto n = grid->getSrcRowCount();
+	for (int i = 0; i < n; ++i) {
+		lines.insert(i);
+	}
+	markSend(lines, toSend);
+}
+
+void LocUploadStringsWindow::markSend(const HashSet<int>& lines, bool toSend)
+{
+	for (auto line: lines) {
 		grid->getEntry(line).send = toSend;
 	}
 	updateSummary();
 	grid->refreshFilter();
+}
+
+void LocUploadStringsWindow::selectGroup()
+{
+	int n = grid->getActiveSelectedLine();
+	if (n >= 0) {
+		selectGroup(grid->getChunk(n).chunkId);
+	}
+}
+
+void LocUploadStringsWindow::selectGroup(const String& id)
+{
+	HashSet<int> sel;
+	const auto n = grid->getSrcRowCount();
+	for (int i = 0; i < n; ++i) {
+		if (grid->getChunk(i).chunkId == id) {
+			sel.insert(i);
+		}
+	}
+	grid->setSelectedLines(sel);
 }

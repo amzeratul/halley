@@ -63,13 +63,6 @@ children:
             widget:
               class: widget
             children:
-              - uuid: 180e643f-b213-4ebf-bef2-7f42701e27f2
-                proportion: 1
-                widget:
-                  active: false
-                  class: button
-                  id: selectGroup
-                  text: Select Group
               - uuid: 005d1a6c-cdc2-4440-8b6c-a43311511096
                 border: [0, 0, 10, 0]
                 widget:
@@ -77,6 +70,13 @@ children:
                   id: onlyShowSend
                   label: Only show marked
                 fill: [fillHorizontal, centreVertical]
+              - uuid: 180e643f-b213-4ebf-bef2-7f42701e27f2
+                proportion: 1
+                widget:
+                  active: true
+                  class: button
+                  id: selectGroup
+                  text: Select Group
               - uuid: bd6b1a2d-0105-4544-9530-58b903879ed5
                 proportion: 1
                 widget:

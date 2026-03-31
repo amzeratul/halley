@@ -241,6 +241,14 @@ void UIGrid::setSelectedLine(int line)
 	onClickLine(line, KeyMods::None);
 }
 
+void UIGrid::setSelectedLines(HashSet<int> lines)
+{
+	if (lines != selectedLines) {
+		selectedLines = std::move(lines);
+		notifySelectionChanged();
+	}
+}
+
 void UIGrid::moveSelection(int delta)
 {
 	const auto iter = lineIndex.find(getActiveSelectedLine());
