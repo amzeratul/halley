@@ -12,17 +12,13 @@ UIFadeBehaviour::UIFadeBehaviour(Time delay, Time length, InterpolationCurve cur
 
 void UIFadeBehaviour::init()
 {
-	getWidget()->setDynamicValue("alpha", ConfigNode(0.0f));
+	restart();
 }
 
 void UIFadeBehaviour::update(Time time)
 {
 	curTime += time;
-	if (curTime > delay) {
-		const auto alpha = static_cast<float>(clamp((curTime - delay) / std::max(length, 0.01), 0.0, 1.0));
-		const auto t = curve.evaluate(isReversed() ? 1.0f - alpha : alpha);
-		getWidget()->setDynamicValue("alpha", ConfigNode(t));
-	}
+	applyFade();
 }
 
 bool UIFadeBehaviour::isAlive() const
@@ -33,4 +29,14 @@ bool UIFadeBehaviour::isAlive() const
 void UIFadeBehaviour::restart()
 {
 	curTime = 0;
+	applyFade();
+}
+
+void UIFadeBehaviour::applyFade()
+{
+	if (auto w = getWidget()) {
+		const auto alpha = static_cast<float>(clamp((curTime - delay) / std::max(length, 0.01), 0.0, 1.0));
+		const auto t = curve.evaluate(isReversed() ? 1.0f - alpha : alpha);
+		w->setDynamicValue("alpha", ConfigNode(t));
+	}
 }
