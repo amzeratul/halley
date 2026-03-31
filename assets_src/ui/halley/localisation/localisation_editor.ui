@@ -99,7 +99,7 @@ children:
                   icon: ui/upload.png
                   id: upload
                   size: [200, 0]
-                  text: Upload Original
+                  text: Upload Original...
                 fill: [centreHorizontal, centreVertical]
               - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
                 widget:
