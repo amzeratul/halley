@@ -29,18 +29,17 @@ namespace Halley {
         {
             explicit Page() {};
 
-            union
-            {
-                UUID uuid;
-                uint16_t componentId = 0;
-            };
-
             uint64_t hash = 0; // XXH64 over data in scratchpad
 
             uint32_t from = 0; // points to start of data in scratchpad
             uint32_t to = 0; // points to end of data in scratchpad
 
+            UUID uuid;
+            uint16_t componentId = 0;
+
             Type type = Type::Unknown;
+
+            bool remote = false;
 
             // Volatile, intermediate, per-frame data; not serialized!
 
@@ -49,7 +48,7 @@ namespace Halley {
 
         explicit EntityNetworkChanges() = default;
 
-        void pushEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent, Bytes& buffer);
+        void pushEntity(Serializer& serializer, const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, Bytes& buffer);
 
         void beginComponent(Serializer& serializer, uint16_t componentId);
         void endComponent(Serializer& serializer, Bytes& buffer);
@@ -165,7 +164,7 @@ namespace Halley {
 
         void doSerializeEntityUpdate(
             const SerializationContext& context, Serializer& serializer,
-            const EntityRef& entity, const std::optional<EntityRef>& parent);
+            const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent);
 
         EntityNetworkChanges::Type doDeserializeEntityUpdate(
             const SerializationContext& context, Deserializer& deserializer,
@@ -175,6 +174,8 @@ namespace Halley {
         static std::optional<std::pair<EntityRef, EntityRef>> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         const EntityNetworkSession* session;
+        NetworkSession::PeerId myPeerId;
+
         EntityRef& rootEntity;
         EntityNetworkChanges journal;
 

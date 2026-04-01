@@ -48,7 +48,8 @@ thread_local Bytes EntityNetworkSerialize::scratchpad;
 
 void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
 {
-    curPage.hash = 0;
+    memset(&curPage, 0, sizeof(curPage));
+
     curPage.from = static_cast<uint32_t>(serializer.getPosition());
     curPage.to = curPage.from;
 
@@ -79,11 +80,12 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
     }
 }
 
-void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent, Bytes& buffer)
+void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, Bytes& buffer)
 {
     // Entity "header"
     beginPage(serializer, Type::Entity);
     curPage.uuid = entity.getInstanceUUID();
+    curPage.remote = remote;
 
     serializer << entity.getInstanceUUID();
 
@@ -98,7 +100,6 @@ void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& e
 
     // Identity
     beginPage(serializer, Type::EntityIdentity);
-    curPage.uuid = entity.getInstanceUUID();
 
     UUID parentInstanceUUID = {};
     if (parent.has_value()) {
@@ -138,15 +139,20 @@ bool EntityNetworkChanges::isFull() const
 
 void EntityNetworkChanges::serialize(Serializer& s) const
 {
-    s << (uint16_t) pp;
+    s << static_cast<uint16_t>(pp);
 
     for (int p = 0; p < pp; p++) {
         auto& page = pages[p];
-        s << page.uuid;
         s << page.hash;
         s << page.from;
         s << page.to;
         s << page.type;
+        if (page.type == Type::Entity) {
+            s << page.uuid;
+            s << page.remote;
+        } else if (page.type == Type::Component) {
+            s << page.componentId;
+        }
     }
 }
 
@@ -156,15 +162,22 @@ void EntityNetworkChanges::deserialize(Deserializer& s)
     s >> count;
     pp = count;
 
+    memset(&pages[0], 0, pp * sizeof(Page));
+
     contentHasher.reset();
 
     for (int p = 0; p < pp; p++) {
         auto& page = pages[p];
-        s >> page.uuid;
         s >> page.hash;
         s >> page.from;
         s >> page.to;
         s >> page.type;
+        if (page.type == Type::Entity) {
+            s >> page.uuid;
+            s >> page.remote;
+        } else if (page.type == Type::Component) {
+            s >> page.componentId;
+        }
 
         contentHasher.feed(page.hash);
     }
@@ -353,6 +366,8 @@ EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* sessi
     , rootEntity(entity)
     , hasComponentsAddedOrRemoved(false)
 {
+    myPeerId = session->getSession().getMyPeerId().value_or(0);
+
     // Thread-local buffer to serialize/encode changes into.
     // The maximum size depends on some limits: MTU, maximum UDP packet split size in AckUnreliableConnection,
     // and maximum network message split size in EntityNetworkSession.
@@ -379,7 +394,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const SerializerOptions& opti
     Serializer serializer(scratchpad.byte_span(), opt);
     const SerializationContext context(rootEntity);
 
-    doSerializeEntityUpdate(context, serializer, rootEntity, {});
+    doSerializeEntityUpdate(context, serializer, rootEntity, false, {});
 
     journal.digest();
 
@@ -388,7 +403,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const SerializerOptions& opti
 
 void EntityNetworkSerialize::doSerializeEntityUpdate(
     const SerializationContext& context, Serializer& serializer,
-    const EntityRef& entity, const std::optional<EntityRef>& parent)
+    const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent)
 {
 #if INJECT_RUNTIME_CHECKS
     if (!entity.isSerializable()) {
@@ -411,22 +426,34 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
     byteSerializationContext.entitySerializationContext = &serializationContext;
 
+    // For any child entities that have a NetworkComponent, check if someone else grabbed
+    // authority. If so, do not serialize any component data for this child (and all its
+    // sub-children).
+    if (parent && !remote) {
+        const auto networkComponent = entity.tryGetComponent<NetworkComponent>();
+        if (networkComponent && networkComponent->authorityId.has_value()) {
+            remote = networkComponent->authorityId != myPeerId;
+        }
+    }
+
     // Entity
-    journal.pushEntity(serializer, entity, parent, scratchpad);
+    journal.pushEntity(serializer, entity, remote, parent, scratchpad);
 
     // Components
-    auto& reflection = serializer.getOptions().world->getReflection();
+    if (!remote) {
+        auto& reflection = serializer.getOptions().world->getReflection();
 
-    for (auto [componentId, component] : entity) {
-        if (componentsIgnored.contains(componentId)) {
-            continue;
+        for (auto [componentId, component] : entity) {
+            if (componentsIgnored.contains(componentId)) {
+                continue;
+            }
+
+            const auto& reflector = reflection.getComponentReflector(componentId);
+
+            journal.beginComponent(serializer, static_cast<uint16_t>(componentId));
+            reflector.serializeNetwork(byteSerializationContext, serializer, *component);
+            journal.endComponent(serializer, scratchpad);
         }
-
-        const auto& reflector = reflection.getComponentReflector(componentId);
-
-        journal.beginComponent(serializer, static_cast<uint16_t>(componentId));
-        reflector.serializeNetwork(byteSerializationContext, serializer, *component);
-        journal.endComponent(serializer, scratchpad);
     }
 
     // Children
@@ -434,7 +461,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
         if (!session->isEntitySerializableAsChild(child)) {
             continue;
         }
-        doSerializeEntityUpdate(context, serializer, child, entity);
+        doSerializeEntityUpdate(context, serializer, child, remote, entity);
     }
 }
 
@@ -674,7 +701,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
         // Fast check. We don't want to do the rather expensive work below if
         // nothing has changed since the last visit.
 
-        modified = !(journal == previousJournal);
+        modified = journal != previousJournal;
 
         if (modified) {
             // Something has changed. We need to do a more detailed inspection
@@ -724,23 +751,26 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         auto& prevEntityPage = previousJournal.findEntityByUUID(page.uuid, prevPageIdx);
 
                         // Compare hashes for the entity page.
-                        page.modified = page.hash != prevEntityPage.hash;
+                        page.modified = !page.remote && page.hash != prevEntityPage.hash;
 
                         // Compare identity pages.
                         {
                             auto identityPage = journal.getEntityIdentity(pageIdx);
                             auto prevIdentityPage = previousJournal.getEntityIdentity(prevPageIdx);
 
-                            identityPage->modified = identityPage->hash != prevIdentityPage->hash;
+                            identityPage->modified = !page.remote && identityPage->hash != prevIdentityPage->hash;
 
                             page.modified |= identityPage->modified;
                         }
 
                         // Enumerate components for this entity.
-                        {
+                        // Can be skipped for "remote" pages.
+                        if (!page.remote) {
                             int componentPageIdx = pageIdx + 2;
 
                             while (auto componentPage = journal.findNextComponent(componentPageIdx)) {
+                                HalleyAssertDebug(!page.remote);
+
                                 // Search for the same component, by ID, in the previous journal.
                                 EntityNetworkChanges::Page* prevComponentPage = nullptr;
                                 int prevComponentPageIdx = prevPageIdx + 2;
@@ -768,7 +798,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         // If no components have been added, compare the components again,
                         // but "reversed" - check for components that have been removed.
 
-                        if (!hasComponentsAddedOrRemoved) {
+                        if (!page.remote && !hasComponentsAddedOrRemoved) {
                             int prevComponentPageIdx = prevPageIdx + 2;
 
                             while (auto prevComponentPage = previousJournal.findNextComponent(prevComponentPageIdx)) {
@@ -787,6 +817,9 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                                 }
                             }
                         }
+
+                        // Sanity check: remote pages *must not* be marked as modified!
+                        HalleyAssertDebug(!(page.modified && page.remote));
                     }
             );
         }
