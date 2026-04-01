@@ -364,15 +364,34 @@ children:
                         fill: [right, centreVertical]
                     fill: [fillHorizontal, fillVertical]
                 fill: [left, fillVertical]
-              - uuid: 05e11bcb-8c98-4bc3-b224-4e77b5c450dc
+              - uuid: a90e6f1c-ced3-4727-b4e7-dd0325d4a6f3
                 proportion: 1
-                border: [0, 0, 0, 0]
+                sizer:
+                  columnProportions: []
+                  gap: 5
                 widget:
-                  class: button
-                  enabled: true
-                  id: editOriginal
-                  size: [200, 0]
-                  text: Edit Original...
+                  class: widget
+                children:
+                  - uuid: 05e11bcb-8c98-4bc3-b224-4e77b5c450dc
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: button
+                      enabled: true
+                      id: editOriginal
+                      size: [200, 0]
+                      text: Edit Original...
+                    fill: [centreHorizontal, centreVertical]
+                  - uuid: 65d308b1-aecf-4a44-ade4-7229af3bd398
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: button
+                      enabled: true
+                      id: validateTags
+                      size: [200, 0]
+                      text: Validate Tags
+                    fill: [centreHorizontal, centreVertical]
                 fill: [centreHorizontal, bottom]
           - uuid: 051fb284-5637-4378-a99e-673fbf445a9c
             proportion: 1
