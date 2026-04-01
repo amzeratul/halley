@@ -19,7 +19,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType { ET::ReadDataPin, PD::Input }, PinType { ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType { ET::ReadDataPin, PD::Input }, PinType { ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -94,12 +94,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIInWorld::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::to_array({
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
-	};
+	});
 	return data;
 }
 

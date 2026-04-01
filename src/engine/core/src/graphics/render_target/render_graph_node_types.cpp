@@ -77,13 +77,13 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::PaintNodeType::ge
 {
 	using ET = RenderGraphElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 5>{
+	const static auto data = std::to_array({
 		PinType{ ET::ColourBuffer, PD::Input },
 		PinType{ ET::DepthStencilBuffer, PD::Input },
 		PinType{ ET::Dependency, PD::Input },
 		PinType{ ET::ColourBuffer, PD::Output },
 		PinType{ ET::DepthStencilBuffer, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -157,7 +157,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::
 {
 	using ET = RenderGraphElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 12>{
+	const static auto data = std::to_array({
 		PinType{ ET::ColourBuffer, PD::Input },
 		PinType{ ET::DepthStencilBuffer, PD::Input },
 		PinType{ ET::ColourBuffer, PD::Output },
@@ -170,7 +170,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::
 		PinType{ ET::Texture, PD::Input },
 		PinType{ ET::Texture, PD::Input },
 		PinType{ ET::Texture, PD::Input }
-	};
+	});
 
 	size_t numTexs = 0;
 	const auto& renderNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
@@ -247,10 +247,10 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNo
 {
 	using ET = RenderGraphElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{
+	const static auto data = std::to_array({
 		PinType{ ET::ColourBuffer, PD::Input },
 		PinType{ ET::Dependency, PD::Output, false, false, true }
-	};
+	});
 	return data;
 }
 
@@ -266,10 +266,10 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OutputNodeType::g
 {
 	using ET = RenderGraphElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{
+	const static auto data = std::to_array({
 		PinType{ ET::ColourBuffer, PD::Input },
 		PinType{ ET::DepthStencilBuffer, PD::Input }
-	};
+	});
 	return data;
 }
 
@@ -284,9 +284,9 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::ImageOutputNodeTy
 {
 	using ET = RenderGraphElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{
+	const static auto data = std::to_array({
 		PinType{ ET::ColourBuffer, PD::Input }
-	};
+	});
 	return data;
 }
 

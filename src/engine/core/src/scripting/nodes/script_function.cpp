@@ -219,7 +219,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 		// Simple, common case
 		using ET = ScriptNodeElementType;
 		using PD = GraphNodePinDirection;
-		const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input } };
+		const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input } });
 		return gsl::span<const PinType>(data).subspan(0, nInput);
 	} else {
 		static thread_local Vector<PinType> pins;

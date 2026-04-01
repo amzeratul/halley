@@ -24,7 +24,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 10>{
+	const static auto data = std::to_array({
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
@@ -35,7 +35,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
-	};
+	});
 
 	const auto nPins = 5 + node.getSettings()["variables"].asVector<String>({}).size();
 	return gsl::span<const PinType>(data).subspan(0, nPins);
