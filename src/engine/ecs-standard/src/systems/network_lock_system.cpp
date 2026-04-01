@@ -67,7 +67,7 @@ public:
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId) const override
 	{
-		if (const NetworkFamily* e = getRootEntity(targetId)) {
+		if (const NetworkFamily* e = networkFamily.tryFind(targetId)) {
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
 			if (iter != e->network.locks.end()) {
 				return iter->second == getMyPeerId() ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
@@ -81,10 +81,10 @@ public:
 
 	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const override
 	{
-		if (const NetworkFamily* e = getRootEntity(targetId)) {
+		if (const NetworkFamily* e = networkFamily.tryFind(targetId)) {
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
 			if (iter != e->network.locks.end()) {
-				if (const NetworkFamily* playerEntity = getRootEntity(playerId)) {
+				if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
 					const auto playerPeer = playerEntity->network.ownerId.value_or(0);
 					return iter->second == playerPeer;
 				}
@@ -260,7 +260,7 @@ private:
 			return false;
 		}
 
-		const auto* e = getRootEntity(targetId);
+		const auto* e = networkFamily.tryFind(targetId);
 		if (e) {
 			if (e->network.ownerId.value_or(0) != getMyPeerId()) {
 				Logger::logError("Peer attempted to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
@@ -345,29 +345,6 @@ private:
 		return getSessionService().isMultiplayer() && std_ex::contains(getSessionService().getMultiplayerSession().getNetworkSession()->getRemotePeers(), peerId);
 	}
 
-	const NetworkFamily* getRootEntity(EntityId targetId) const
-	{
-		const auto root = findNetworkRoot(getWorld().tryGetEntity(targetId));
-		if (!root.isValid()) {
-			return nullptr;
-		}
-		return networkFamily.tryFind(root.getEntityId());
-	}
-
-	EntityRef findNetworkRoot(EntityRef e) const
-	{
-		if (!e.isValid()) {
-			return {};
-		}
-		if (e.hasComponent<NetworkComponent>()) {
-			return e;
-		}
-		if (e.hasParent()) {
-			return findNetworkRoot(e.getParent());
-		}
-		return {};
-	}
-
     [[nodiscard]] bool changeAuthority(EntityId targetId, std::optional<NetworkSession::PeerId> authorityId)
     {
         if (!targetId.isValid()) {
@@ -375,7 +352,7 @@ private:
             return false;
         }
 
-        const auto* e = getRootEntity(targetId);
+        const auto* e = networkFamily.tryFind(targetId);
         if (!e) {
             Logger::logWarning("Trying to change authority of entity " + toString(targetId.value & 0xffffffff) + " which is unknown, or not a network entity");
         	return false;
