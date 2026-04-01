@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -17,11 +17,11 @@ public:
 
 	std::optional<uint8_t> ownerId{};
 	std::optional<uint8_t> authorityId{};
+	std::optional<uint8_t> creatorId{};
+	bool sendUpdates{ false };
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
-	bool sendUpdates{ false };
-	std::optional<uint8_t> creatorId{};
 
 	NetworkComponent() {
 	}
@@ -29,43 +29,36 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::serialize(sendUpdates, bool{ false }, _context, _node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		
 		return _node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::deserialize(sendUpdates, bool{ false }, _context, _node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
-		if ((_mask & makeMask(Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("sendUpdates");
+		
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
-		using namespace Halley::EntitySerialization;
-		if (_fieldName == "sendUpdates") {
-			return Halley::ConfigNodeHelper<decltype(sendUpdates)>::serialize(sendUpdates, _context);
-		}
+		
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
 	void deserializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName, const Halley::ConfigNode& _node) {
-		using namespace Halley::EntitySerialization;
-		if (_fieldName == "sendUpdates") {
-			Halley::ConfigNodeHelper<decltype(sendUpdates)>::deserialize(sendUpdates, _context, _node);
-			return;
-		}
+		
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
 	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(sendUpdates)>::serialize(sendUpdates, _context, _serializer, componentIndex, "sendUpdates");
+		
 	}
 
 	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(sendUpdates)>::deserialize(sendUpdates, _context, _deserializer, componentIndex, "sendUpdates");
+		
 	}
 
 

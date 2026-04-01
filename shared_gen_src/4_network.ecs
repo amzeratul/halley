@@ -12,6 +12,15 @@ component:
       type: 'std::optional<uint8_t>'
       canSave: false
       canEdit: false
+  - creatorId:
+      type: 'std::optional<uint8_t>'
+      canSave: false
+      canEdit: false
+  - sendUpdates:
+      type: bool
+      canSave: false
+      canEdit: false
+      defaultValue: false
   - dataInterpolatorSet:
       type: 'Halley::DataInterpolatorSet'
       canSave: false
@@ -22,14 +31,6 @@ component:
       canEdit: false
   - locks:
       type: 'Halley::Vector<std::pair<Halley::EntityId, uint8_t>>'
-      canSave: false
-      canEdit: false
-  - sendUpdates:
-      type: bool
-      canEdit: false
-      defaultValue: false
-  - creatorId:
-      type: 'std::optional<uint8_t>'
       canSave: false
       canEdit: false
 
