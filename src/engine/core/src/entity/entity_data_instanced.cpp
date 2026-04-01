@@ -1,7 +1,7 @@
 #include "halley/entity/entity_data_instanced.h"
 using namespace Halley;
 
-EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData)
+EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData, bool allowAddComponensNotInPrefab)
 	: prefabData(&prefabData)
 {
 	instanceUUID = instanceData.getInstanceUUID();
@@ -17,7 +17,11 @@ EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEn
 	const auto& nComponents = instanceData.getNumComponents();
 	for (size_t i = 0; i < nComponents; ++i) {
 		const auto& component = instanceData.getComponent(i);
-		componentOverrides[component.first] = component;
+		if (prefabData.tryGetComponent(component.first)) {
+			componentOverrides[component.first] = component;
+		} else if (allowAddComponensNotInPrefab) {
+			componentsAdded.emplace_back(component);
+		}
 	}
 }
 
@@ -92,30 +96,36 @@ const IEntityConcreteData& EntityDataInstanced::getChild(size_t idx) const
 
 size_t EntityDataInstanced::getNumComponents() const
 {
-	return prefabData->getNumComponents();
+	return prefabData->getNumComponents() + componentsAdded.size();
 }
 
 const std::pair<String, ConfigNode>& EntityDataInstanced::getComponent(size_t idx) const
 {
-	const auto& original = prefabData->getComponent(idx);
-	const auto iter = componentOverrides.find(original.first);
+	const size_t numComponentsInPrefab = prefabData->getNumComponents();
 
-	if (iter != componentOverrides.end()) {
-		const auto& fromData = original.second;
-		const auto& toData = iter->second.second;
-		if (toData.asMap().empty()) {
-			return original;
+	if (idx < numComponentsInPrefab) {
+		const auto& original = prefabData->getComponent(idx);
+		const auto iter = componentOverrides.find(original.first);
+
+		if (iter != componentOverrides.end()) {
+			const auto& fromData = original.second;
+			const auto& toData = iter->second.second;
+			if (toData.asMap().empty()) {
+				return original;
+			}
+
+			if (toData.getType() == ConfigNodeType::DeltaMap && !fromData.asMap().empty()) {
+				thread_local std::pair<String, ConfigNode> temp;
+
+				temp = original;
+				temp.second.applyDelta(toData);
+				return temp;
+			} else {
+				return iter->second;
+			}
 		}
-
-		if (toData.getType() == ConfigNodeType::DeltaMap && !fromData.asMap().empty()) {
-			thread_local std::pair<String, ConfigNode> temp;
-
-			temp = original;
-			temp.second.applyDelta(toData);
-			return temp;
-		} else {
-			return iter->second;
-		}
+		return original;
+	} else {
+		return componentsAdded.at(idx - numComponentsInPrefab);
 	}
-	return original;
 }

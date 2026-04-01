@@ -353,7 +353,8 @@ void EntityFactoryContext::setEntityData(const IEntityData& iData)
 			}
 			entityData = &iData;
 		} else {
-			instancedEntityData = EntityDataInstanced(prefab->getEntityData(), dynamic_cast<const IEntityConcreteData&>(iData));
+			instancedEntityData = EntityDataInstanced(prefab->getEntityData(), dynamic_cast<const IEntityConcreteData&>(iData),
+				entitySerializationContext.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network)));
 			entityData = &instancedEntityData;
 		}
 	} else {

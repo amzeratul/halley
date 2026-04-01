@@ -5,7 +5,7 @@ namespace Halley {
 	class EntityDataInstanced final : public IEntityConcreteData {
 	public:
 		EntityDataInstanced() = default;
-		EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData);
+		EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData, bool allowAddComponensNotInPrefab);
 		EntityDataInstanced(const EntityData& prefabData, const UUID& rootInstanceUUID);
 
 		Type getType() const override;
@@ -32,5 +32,6 @@ namespace Halley {
 
 		Vector<EntityDataInstanced> children;
 		HashMap<String, std::pair<String, ConfigNode>> componentOverrides;
+		Vector<std::pair<String, ConfigNode>> componentsAdded;
 	};
 }
