@@ -199,11 +199,11 @@ void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationD
 	onDataUpdated();
 }
 
-LocalisedString LocalisationGrid::getCellToolTip(int row, int col, const String& colName) const
+String LocalisationGrid::getCellToolTip(int row, int col, const String& colName) const
 {
 	const auto& entry = origData->getEntry(row);
 	if (colName == "Group") {
-		return LocalisedString::fromUserString(origData->getGroupNameEntry(row));
+		return origData->getGroupNameEntry(row);
 	} else if (colName == "Key") {
 		String tooltip = entry.getKey() + "\nv" + toString(entry.getVersion());
 
@@ -216,21 +216,21 @@ LocalisedString LocalisationGrid::getCellToolTip(int row, int col, const String&
 		}
 
 		Logger::logInfo(tooltip);
-		return LocalisedString::fromUserString(tooltip);
+		return tooltip;
 	} else if (colName == "Original") {
-		return LocalisedString::fromUserString(entry.getValue());
+		return entry.getValue();
 	} else if (colName == "Translated") {
 		if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
-			return LocalisedString::fromUserString(translatedEntry->getValue());
+			return translatedEntry->getValue();
 		}
 	} else if (colName == "Rdy") {
-		return LocalisedString::fromUserString(isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate");
+		return isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate";
 	} else if (colName == "Pri") {
-		return LocalisedString::fromUserString("Priority: " + toString(entry.getPriority()));
+		return "Priority: " + toString(entry.getPriority());
 	} else if (colName == "Cmt") {
-		return LocalisedString::fromUserString(entry.getComment());
+		return entry.getComment();
 	} else if (colName == "Ctx") {
-		return LocalisedString::fromUserString(entry.getContext());
+		return entry.getContext();
 	}
 	return {};
 }

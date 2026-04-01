@@ -552,7 +552,7 @@ void UIGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& co
 {
 }
 
-LocalisedString UIGrid::getCellToolTip(int row, int col, const String& columnName) const
+String UIGrid::getCellToolTip(int row, int col, const String& columnName) const
 {
 	return {};
 }
@@ -612,7 +612,7 @@ const String& UIGrid::getKeyAt(int idx) const
 LocalisedString UIGrid::getToolTip() const
 {
 	if (columnUnderMouse && lineUnderMouse) {
-		return getCellToolTip(*lineUnderMouse, *columnUnderMouse, columnNames[*columnUnderMouse]);
+		return LocalisedString::fromUserString(getCellToolTip(*lineUnderMouse, *columnUnderMouse, columnNames[*columnUnderMouse]));
 	}
 	return {};
 }

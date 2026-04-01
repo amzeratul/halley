@@ -789,7 +789,20 @@ void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings && remoteStrings) {
 		auto uploadData = LocStringUploadData(*localStrings->originalLanguage, *remoteStrings->originalLanguage);
-		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, *client, std::move(uploadData)));
+
+		// Find all languages that have localised each string
+		HashMap<String, Vector<String>> localisedIn;
+		for (const auto& chunk: uploadData.getChunks()) {
+			for (const auto& entry: chunk.entries) {
+				for (const auto& [lang, data]: remoteStrings->localised) {
+					if (data.entries.contains(entry.key)) {
+						localisedIn[entry.key] += lang;
+					}
+				}
+			}
+		}
+
+		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, *client, std::move(uploadData), std::move(localisedIn)));
 	}
 }
 
