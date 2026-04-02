@@ -483,6 +483,11 @@ private:
 
 	void addConsoleCommands()
 	{
+		auto getScripts = UIDebugConsoleSyntax::Callback([=] () -> Vector<String>
+		{
+			return getResources().enumerate<ScriptGraph>();
+		});
+
 		getDevService().getConsoleCommands().addCommand("scriptRun", [=] (Vector<String> args) -> String
 		{
 			if (!args.empty() && args.size() <= 2) {
@@ -494,7 +499,7 @@ private:
 				return "Attached script to " + toString(n) + " entities.";
 			}
 			return "Usage: scriptRun <scriptName> [tag=player]";
-		});
+		}, { { { "scriptId", getScripts } } });
 
 		getDevService().getConsoleCommands().addCommand("eval", [=] (Vector<String> args) -> String
 		{
