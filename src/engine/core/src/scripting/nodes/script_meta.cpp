@@ -38,7 +38,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptDebugDisplay::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input } });
 	return data;
 }
 
@@ -70,7 +70,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptLog::getPinConfiguration(const Ba
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } });
 	return data;
 }
 

@@ -19,7 +19,7 @@ namespace Halley {
         void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const override;
         void onRightClick(std::optional<int> line) override;
         void copySelection() override;
-        LocalisedString getCellToolTip(int row, int col, const String& columnName) const override;
+        String getCellToolTip(int row, int col, const String& columnName) const override;
 
     private:
         UIFactory& factory;

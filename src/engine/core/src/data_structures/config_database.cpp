@@ -81,10 +81,82 @@ void ConfigDatabase::generateMemoryReport()
 	}
 }
 
+namespace {
+	const ConfigNode& processExtends(const String& type, const ConfigNode& nodes, ConfigNode& result)
+	{
+		if (nodes.getType() != ConfigNodeType::Sequence) {
+			return nodes;
+		}
+
+		Vector<size_t> pendingLoad;
+		HashSet<String> dependencies;
+		{
+			const auto& vs = nodes.asSequence();
+
+			// Collect dependency info
+			for (size_t i = 0; i < vs.size(); ++i) {
+				const auto& v = vs[i];
+				if (v.hasKey("$extends")) {
+					pendingLoad += i;
+					dependencies.insert(v["$extends"].asString());
+				}
+			}
+
+			if (dependencies.empty()) {
+				return nodes;
+			}
+		}
+
+		result = ConfigNode(nodes);
+		auto& vs = result.asSequence();
+
+		// Create map and populate with root configs
+		HashMap<String, size_t> idMap;
+		HashSet<String> loadedIds;
+		for (size_t i = 0; i < vs.size(); ++i) {
+			const auto& id = vs[i]["id"].asString();
+			if (dependencies.contains(id)) {
+				idMap[id] = i;
+				if (!vs[i].hasKey("$extends")) {
+					loadedIds.insert(id);
+				}
+			}
+		}
+
+		// Keep trying to load pending
+		while (!pendingLoad.empty()) {
+			Vector<size_t> stillPending;
+			for (auto& i: pendingLoad) {
+				auto& v = vs[i];
+				const auto& extends = v["$extends"].asString();
+				if (loadedIds.contains(extends)) {
+					loadedIds.insert(v["id"].asString());
+					auto v2 = ConfigNode(vs[idMap.at(extends)]);
+					for (auto& [key, value]: v.asMap()) {
+						if (key != "$extends") {
+							v2[key] = std::move(value);
+						}
+					}
+					v = std::move(v2);
+				} else {
+					stillPending += i;
+				}
+			}
+			if (pendingLoad == stillPending) {
+				Logger::logError("Unable to process " + type + " config dependencies; is there a circular reference? First affected id: \"" + vs[stillPending[0]]["id"].asString("") + "\"");
+				return nodes;
+			}
+			pendingLoad = std::move(stillPending);
+		}
+
+		return result;
+	}
+}
+
 void ConfigDatabase::loadConfig(const ConfigNode& node, bool enforceUnique)
 {
 	if (node.getType() == ConfigNodeType::Map) {
-		for (const auto& [k, v]: node.asMap()) {
+		for (const auto& [k, vs]: node.asMap()) {
 			if (onlyLoad && !std_ex::contains(*onlyLoad, k)) {
 				continue;
 			}
@@ -92,7 +164,8 @@ void ConfigDatabase::loadConfig(const ConfigNode& node, bool enforceUnique)
 			for (auto& db: dbs) {
 				if (db && db->getKey() == k) {
 					try {
-						db->loadConfigs(v, enforceUnique);
+						ConfigNode temp;
+						db->loadConfigs(processExtends(k, vs, temp), enforceUnique);
 					} catch (const std::exception& e) {
 						Logger::logException(e);
 					}

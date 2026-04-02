@@ -5,11 +5,14 @@
 
 using namespace Halley;
 
-LocUploadStringsGrid::LocUploadStringsGrid(UIFactory& factory, LocStringUploadData& data)
+LocUploadStringsGrid::LocUploadStringsGrid(UIFactory& factory, LocStringUploadData& data, HashMap<String, Vector<String>>& keysLocalisedIn)
 	: UIGrid("grid", factory)
 	, uploadData(data)
+	, keysLocalisedIn(keysLocalisedIn)
 {
 	tickSprite = Sprite().setImage(factory.getResources(), "ui/check.png");
+	locSprite = Sprite().setImage(factory.getResources(), "ui/localised.png");
+
 	setLineColourFilter([=] (int row) {
 		return getRowColour(row);
 	});
@@ -31,11 +34,11 @@ size_t LocUploadStringsGrid::getSrcRowCount() const
 std::pair<Vector<float>, Vector<String>> LocUploadStringsGrid::getColumns() const
 {
 	const float width = getSize().x - 1;
-	const float fixedWidth = 20 + 120 + 40;
+	const float fixedWidth = 25 + 25 + 120 + 40;
 	const float remainingWidth = width - fixedWidth;
 
-	Vector<float> sizes = { 20.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.4f, remainingWidth * 0.4f };
-	Vector<String> names { "Send", "Group", "Status", "Key", "Previous Value", "New Value" };
+	Vector<float> sizes = { 25.0f, 25.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.4f, remainingWidth * 0.4f };
+	Vector<String> names { "Send", "Loc", "Group", "Status", "Key", "Previous Value", "New Value" };
 	return { sizes, names };
 }
 
@@ -43,34 +46,45 @@ void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector
 {
 	const auto& e = getEntry(idx);
 
-	int len = 6;
+	int len = 7;
 
 	strs.resize(len);
-	strs[1] = Path(getChunk(idx).chunkId).getFilenameStr();
-	strs[2] = getTypeDesc(e.type);
-	strs[3] = (e.oldKey ? "*" : "") + e.key;
-	strs[4] = e.remoteValue.value_or("");
-	strs[5] = e.value;
+	strs[2] = Path(getChunk(idx).chunkId).getFilenameStr();
+	strs[3] = getTypeDesc(e.type);
+	strs[4] = (e.oldKey ? "*" : "") + e.key;
+	strs[5] = e.remoteValue.value_or("");
+	strs[6] = e.value;
 
 	colours.resize(len, textCol);
 
 	sprites.resize(len, {});
 	sprites[0] = e.send ? tickSprite : Sprite();
+	sprites[1] = keysLocalisedIn.contains(e.oldKey.value_or(e.key)) ? locSprite : Sprite();
 }
 
-LocalisedString LocUploadStringsGrid::getCellToolTip(int row, int col, const String& columnName) const
+String LocUploadStringsGrid::getCellToolTip(int row, int col, const String& columnName) const
 {
 	if (columnName == "Group") {
 		const auto& c = getChunk(row);
-		return LocalisedString::fromUserString(c.chunkId);
+		return c.chunkId;
 	} else {
 		const auto& e = getEntry(row);
-		if (columnName == "Key") {
-			return LocalisedString::fromUserString((e.oldKey ? *e.oldKey + "\n->\n" : "") + e.key);
+		if (columnName == "Send") {
+			return e.send ? "Sending" : "Not sending";
+		} else if (columnName == "Loc") {
+			if (const auto iter = keysLocalisedIn.find(e.key); iter != keysLocalisedIn.end()) {
+				return "Localised in: " + String::concatList(iter->second, ", ");
+			} else {
+				return "Not localised";
+			}
+		} else if (columnName == "Status") {
+			return "Status: " + toString(e.type);
+		} else if (columnName == "Key") {
+			return (e.oldKey ? *e.oldKey + "\n->\n" : "") + e.key;
 		} else if (columnName == "Previous Value") {
-			return LocalisedString::fromUserString(e.remoteValue.value_or(""));
+			return e.remoteValue.value_or("");
 		} else if (columnName == "New Value") {
-			return LocalisedString::fromUserString(e.value);
+			return e.value;
 		}
 	}
 	return {};
@@ -143,11 +157,12 @@ std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 	return {};
 }
 
-LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, LocalisationClient& client, LocStringUploadData uploadData)
+LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, LocalisationClient& client, LocStringUploadData uploadData, HashMap<String, Vector<String>> keysLocalisedIn)
 	: UIWidget("upload_strings", {}, UISizer())
 	, factory(factory)
 	, client(client)
 	, uploadData(std::move(uploadData))
+	, keysLocalisedIn(std::move(keysLocalisedIn))
 {
 	setAnchor(UIAnchor());
 	factory.loadUI(*this, "halley/localisation/localisation_upload_strings");
@@ -157,7 +172,7 @@ void LocUploadStringsWindow::onMakeUI()
 {
 	setStatus("Idle", Status::Idle);
 
-	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData);
+	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData, keysLocalisedIn);
 	markAllSend(false);
 	grid->setFilter([=] (int row) -> bool {
 		if (onlyShowSend) {

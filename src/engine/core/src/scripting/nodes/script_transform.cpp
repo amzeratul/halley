@@ -13,7 +13,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetPosition::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } });
 	return data;
 }
 
@@ -45,12 +45,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetHeight::getPinConfiguration(co
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::to_array({
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }
-	};
+	});
 	return data;
 }
 
@@ -80,10 +80,10 @@ gsl::span<const IGraphNodeType::PinType> ScriptGetHeight::getPinConfiguration(co
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{
+	const static auto data = std::to_array({
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -112,7 +112,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } });
 	return data;
 }
 
@@ -142,7 +142,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 7>{
+	const static auto data = std::to_array({
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Input },
@@ -150,7 +150,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -233,7 +233,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetRotation::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -280,12 +280,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetRotation::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::to_array({
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }
-	};
+	});
 	return data;
 }
 
@@ -324,12 +324,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::to_array({
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }
-	};
+	});
 	return data;
 }
 
