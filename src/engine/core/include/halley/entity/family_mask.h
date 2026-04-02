@@ -9,8 +9,10 @@ class MaskStorage;
 namespace Halley {
 	class HalleyStatics;
 
+	constexpr static int maxComponents = 256; // Increasing this number has performance consequences
+
 	namespace FamilyMask {
-		using RealType = std::bitset<256>;
+		using RealType = std::bitset<maxComponents>;
 
 
 		class Handle

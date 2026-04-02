@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -14,6 +14,7 @@ class ParticlesComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 7 };
 	static const constexpr char* componentName{ "Particles" };
+	static constexpr bool alwaysEnabled{ false };
 
 	Halley::Particles particles{};
 	Halley::Vector<Halley::Sprite> sprites{};

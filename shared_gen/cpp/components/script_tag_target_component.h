@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -14,6 +14,7 @@ class ScriptTagTargetComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 15 };
 	static const constexpr char* componentName{ "ScriptTagTarget" };
+	static constexpr bool alwaysEnabled{ false };
 
 	Halley::Vector<Halley::String> tags{};
 

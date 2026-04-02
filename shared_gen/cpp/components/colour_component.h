@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -14,6 +14,7 @@ class ColourComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 3 };
 	static const constexpr char* componentName{ "Colour" };
+	static constexpr bool alwaysEnabled{ false };
 
 	Halley::Colour4f colour{ "#FFFFFF" };
 	float intensity{ 1 };

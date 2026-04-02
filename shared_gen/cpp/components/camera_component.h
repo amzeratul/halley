@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -14,6 +14,7 @@ class CameraComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 6 };
 	static const constexpr char* componentName{ "Camera" };
+	static constexpr bool alwaysEnabled{ false };
 
 	float zoom{ 1 };
 	Halley::String id{};

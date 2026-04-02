@@ -44,6 +44,8 @@ namespace Halley {
 
         virtual void serializeNetwork(const ByteSerializationContext& context, Serializer& serializer, const Component& component) const = 0;
         virtual void deserializeNetwork(const ByteSerializationContext& context, Deserializer& deserializer, Component& component) const = 0;
+
+		virtual bool isAlwaysEnabled() const = 0;
 	};
 
 	class MessageReflector {

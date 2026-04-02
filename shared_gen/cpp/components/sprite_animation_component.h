@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -14,6 +14,7 @@ class SpriteAnimationComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 5 };
 	static const constexpr char* componentName{ "SpriteAnimation" };
+	static constexpr bool alwaysEnabled{ false };
 
 	Halley::AnimationPlayer player{};
 	bool updateSprite{ true };

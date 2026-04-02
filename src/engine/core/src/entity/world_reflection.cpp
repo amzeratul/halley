@@ -102,3 +102,16 @@ SystemMessageReflector& WorldReflection::getSystemMessageReflector(int id) const
 {
 	return *systemMessageReflectors.at(id);
 }
+
+Vector<int> WorldReflection::getAlwaysEnabledComponents() const
+{
+	Vector<int> result;
+
+	for (const auto& comp: componentReflectors) {
+		if (comp->isAlwaysEnabled()) {
+			result += comp->getIndex();
+		}
+	}
+
+	return result;
+}

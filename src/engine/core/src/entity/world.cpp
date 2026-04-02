@@ -31,6 +31,7 @@ World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldRe
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<TypedPool<Entity>>())
+	, alwaysEnabledComponents(this->reflection->getAlwaysEnabledComponents()) // Watch out for initialisation order!
 	, updateMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
 	, renderMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
 	, uuid(UUID::generate())
@@ -46,6 +47,7 @@ World::World(World& world, StagingWorldTag tag)
 	, maskStorage({})
 	, componentDeleterTable(world.componentDeleterTable)
 	, entityPool(world.entityPool)
+	, alwaysEnabledComponents(world.alwaysEnabledComponents)
 	, transform2DAnisotropy(world.transform2DAnisotropy)
 	, updateMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
 	, renderMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
@@ -739,7 +741,7 @@ void World::updateEntities()
 			} else {
 				// It's alive, so check old and new system inclusions
 				FamilyMaskType oldMask = entity.getMask();
-				entity.refresh(maskStorage.get(), *componentDeleterTable);
+				entity.refresh(maskStorage.get(), *componentDeleterTable, alwaysEnabledComponents);
 				FamilyMaskType newMask = entity.getMask();
 
 				// Did it change?

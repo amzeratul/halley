@@ -2,6 +2,8 @@
 
 #include <halley/data_structures/vector.h>
 
+#include "family_mask.h"
+
 namespace Halley {
 	class TypeDeleterBase
 	{
@@ -17,7 +19,7 @@ namespace Halley {
 	public:
 		ComponentDeleterTable()
 		{
-			map.resize(256, nullptr);
+			map.resize(maxComponents, nullptr);
 		}
 
 		~ComponentDeleterTable()

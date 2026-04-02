@@ -23,6 +23,8 @@ namespace Halley {
 		MessageReflector& getMessageReflector(int id) const;
 		SystemMessageReflector& getSystemMessageReflector(int id) const;
 
+		Vector<int> getAlwaysEnabledComponents() const;
+
 	private:
 		Vector<SystemReflector> systemReflectors;
 		Vector<std::unique_ptr<ComponentReflector>> componentReflectors;

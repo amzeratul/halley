@@ -14,6 +14,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 {
 	name = node["name"].as<std::string>();
 	category = node["category"].as<std::string>("general");
+	alwaysEnabled = node["alwaysEnabled"].as<bool>(false);
 
 	for (auto memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {

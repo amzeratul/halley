@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -15,6 +15,7 @@ class Transform2DComponentBase : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 0 };
 	static const constexpr char* componentName{ "Transform2D" };
+	static constexpr bool alwaysEnabled{ false };
 
 	Transform2DComponentBase() {
 	}
