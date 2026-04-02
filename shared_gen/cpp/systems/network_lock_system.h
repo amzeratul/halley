@@ -30,7 +30,7 @@ public:
 		}
 	};
 
-	virtual bool onMessageReceived(NetworkEntityLockSystemMessage msg) = 0;
+	virtual Halley::ConfigNode onMessageReceived(NetworkEntityLockSystemMessage msg) = 0;
 
 	NetworkLockSystemBase()
 		: System({&networkFamily}, {})
@@ -44,7 +44,7 @@ protected:
 	Halley::TempMemoryPool& getTempMemoryPool() const {
 		return doGetWorld().getUpdateMemoryPool();
 	}
-	void sendMessage(NetworkEntityLockSystemMessage msg, std::function<void(bool)> callback = {}) {
+	void sendMessage(NetworkEntityLockSystemMessage msg, std::function<void(Halley::ConfigNode)> callback = {}) {
 		Halley::String targetSystem = "";
 		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
 		if (n != 1) {
@@ -52,7 +52,7 @@ protected:
 		}
 	}
 
-	void sendMessage(const Halley::String& targetSystem, NetworkEntityLockSystemMessage msg, std::function<void(bool)> callback = {}) {
+	void sendMessage(const Halley::String& targetSystem, NetworkEntityLockSystemMessage msg, std::function<void(Halley::ConfigNode)> callback = {}) {
 		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
 		if (n != 1) {
 		    throw Halley::Exception("Sending non-multicast NetworkEntityLockSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);

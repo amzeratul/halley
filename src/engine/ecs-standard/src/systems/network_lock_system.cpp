@@ -162,9 +162,17 @@ public:
 		}		
 	}
 
-	bool onMessageReceived(NetworkEntityLockSystemMessage msg) override
+	ConfigNode onMessageReceived(NetworkEntityLockSystemMessage msg) override
 	{
-		return doEntityLock(msg.target, msg.peerId, msg.lock, msg.withAuthority, msg.destroyOnUnlock);
+		const auto [success, networkId] = doEntityLock(msg.target, msg.peerId, msg.lock, msg.withAuthority, msg.destroyOnUnlock);
+
+		ConfigNode::MapType result;
+		result["success"] = success;
+		if (networkId.has_value()) {
+			result["id"] = networkId.value();
+		}
+
+		return result;
 	}
 
 private:
@@ -193,7 +201,8 @@ private:
 			for (const auto& e: networkFamily) {
 				// If this peer took entity authority, return it to host.
 				if (e.network.authorityId && predicate(e.network.authorityId.value())) {
-					if (doChangeAuthority(&e, {})) {
+					auto [success, _] = doChangeAuthority(&e, {}, {});
+					if (success) {
 						Logger::logDev("Stale lock released, peer is gone");
 					}
 				}
@@ -206,22 +215,28 @@ private:
 	Future<bool> doLockAcquireForMe(EntityId targetId, bool withAuthority)
 	{
 		if (isHost()) {
-			return Future<bool>::makeImmediate(doEntityLock(targetId, getMyPeerId(), true, withAuthority, false));
+			auto [success, networkId] = doEntityLock(targetId, getMyPeerId(), true, withAuthority, false);
+			HalleyAssertDebug(!networkId.has_value());
+			return Future<bool>::makeImmediate(success);
 		} else {
-			/*auto target = getWorld().tryGetEntity(targetId);
-			if (target.isValid()) {
-				Logger::logDev("- acquire lock for me, id=" + toString(targetId.value & 0xffffffff) + ", " + target.getName());
-			} else {
-				Logger::logDev("- acquire lock for me, but no entity found, id=" + toString(targetId.value & 0xffffffff));
-			}*/
 			Promise<bool> promise;
 			auto future = promise.getFuture();
-			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, promise = std::move(promise)] (ConfigNode result) mutable
 			{
-                if (value && withAuthority) {
-                    value = changeAuthority(targetId, getMyPeerId());
+				bool success = result["success"].asBool(false);
+
+				std::optional<EntityNetworkId> assignNetworkId;
+				if (result.hasKey("id")) {
+					assignNetworkId = result["id"].asInt();
+				}
+
+                if (success && withAuthority) {
+                    auto [ok, networkId] = changeAuthority(targetId, getMyPeerId(), assignNetworkId);
+                	HalleyAssertDebug(!networkId.has_value());
+                	success = ok;
                 }
-				promise.setValue(value);
+
+				promise.setValue(success);
 			});
 			return future;
 		}
@@ -232,20 +247,16 @@ private:
 		if (isHost()) {
 			doEntityLock(targetId, getMyPeerId(), false, withAuthority, destroyOnUnlock);
 		} else {
-			/*auto target = getWorld().tryGetEntity(targetId);
-			if (target.isValid()) {
-				Logger::logDev("- release lock for me, id=" + toString(targetId.value & 0xffffffff) + ", " + target.getName());
-			} else {
-				Logger::logDev("- release lock for me, but target entity not found, id=" + toString(targetId.value & 0xffffffff));
-			}*/
-			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=] (bool value) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=] (ConfigNode result) mutable
             {
+				bool success = result["success"].asBool(false);
+
 				if (withAuthority) {
-					if (!value) {
+					if (!success) {
 						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
 					}
-					value = changeAuthority(targetId, {});
-					if (!value) {
+					auto [ok, _] = changeAuthority(targetId, {}, {});
+					if (!ok) {
 						Logger::logWarning("client failed to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
 					}
 				}
@@ -253,18 +264,20 @@ private:
 		}
 	}
 
-	bool doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority, bool destroyOnUnlock)
+	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority, bool destroyOnUnlock)
 	{
+		std::pair<bool, std::optional<EntityNetworkId>> result = {false, {}};
+
 		if (!targetId.isValid()) {
 			Logger::logDev("Peer attempted to lock invalid entity.");
-			return false;
+			return result;
 		}
 
 		const auto* e = networkFamily.tryFind(targetId);
 		if (e) {
 			if (e->network.ownerId.value_or(0) != getMyPeerId()) {
 				Logger::logError("Peer attempted to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
-				return false;
+				return result;
 			}
 
 			auto& locks = e->network.locks;
@@ -276,15 +289,16 @@ private:
 					// New lock
                     if (withAuthority) {
                     	// Try changing authority first. If this fails, don't bother creating a lock.
-                        if (!doChangeAuthority(e, peerId)) {
-	                        return false;
+                    	result = doChangeAuthority(e, peerId, {});
+                        if (!result.first) {
+	                        return result;
                         }
                     }
 					locks.emplace_back(targetId, peerId);
-					return true;
+					return result;
 				} else {
 					// Tries to unlock non-existing lock
-					return false;
+					return result;
 				}
 			} else if (iter->second == peerId) {
 				// Lock exists, locked by this peer
@@ -292,31 +306,31 @@ private:
 					// Release lock
                     if (withAuthority) {
                     	// Release authority first. If this fails, keep the lock.
-                        if (!doChangeAuthority(e, {})) {
-	                        return false;
+                    	result = doChangeAuthority(e, {}, {});
+                        if (!result.first) {
+	                        return result;
                         }
                     }
 					locks.erase(iter);
 					if (destroyOnUnlock) {
-						//Logger::logDev("Destroy entity " + toString(targetId.value & 0xffffffff) + " on unlock");
 						getWorld().destroyEntity(targetId);
 					}
-					return true;
+					return result;
 				} else {
 					// Wants to lock again
-					return true;
+					result.first = true;
+					return result;
 				}
 			} else {
 				// Lock exists, locked by someone else
-				return false;
+				return result;
 			}
 		} else {
 			// Entity not found
-			const auto entity = getWorld().tryGetEntity(targetId);
-			if (entity.isValid()) {
-				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity or descendant of one.");
+			if (const auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
+				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity");
 			}
-			return false;
+			return result;
 		}
 	}
 
@@ -345,27 +359,35 @@ private:
 		return getSessionService().isMultiplayer() && std_ex::contains(getSessionService().getMultiplayerSession().getNetworkSession()->getRemotePeers(), peerId);
 	}
 
-    [[nodiscard]] bool changeAuthority(EntityId targetId, std::optional<NetworkSession::PeerId> authorityId)
+    [[nodiscard]] std::pair<bool, std::optional<EntityNetworkId>> changeAuthority(EntityId targetId,
+    	const std::optional<NetworkSession::PeerId>& authorityId, const std::optional<EntityNetworkId>& assignNetworkId)
     {
         if (!targetId.isValid()) {
             Logger::logWarning("Trying to change authority of invalid entity.");
-            return false;
+            return {false, {}};
         }
 
         const auto* e = networkFamily.tryFind(targetId);
         if (!e) {
             Logger::logWarning("Trying to change authority of entity " + toString(targetId.value & 0xffffffff) + " which is unknown, or not a network entity");
-        	return false;
+            return {false, {}};
         }
 
-		return doChangeAuthority(e, authorityId);
+		return doChangeAuthority(e, authorityId, assignNetworkId);
     }
 
-    [[nodiscard]] bool doChangeAuthority(const NetworkFamily* networkFamily, std::optional<NetworkSession::PeerId> authorityId) const
+    [[nodiscard]] std::pair<bool, std::optional<EntityNetworkId>> doChangeAuthority(const NetworkFamily* networkFamily,
+    	const std::optional<NetworkSession::PeerId>& authorityId, const std::optional<EntityNetworkId>& assignNetworkId) const
     {
+		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
+
 		if (getSessionService().isMultiplayer()) {
 			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
-			if (!entityNetworkSession->prepareChangeEntityAuthority(networkFamily->entityId, networkFamily->network, authorityId)) {
+
+			result = entityNetworkSession->prepareChangeEntityAuthority(
+				networkFamily->entityId, networkFamily->network, authorityId, assignNetworkId);
+
+			if (!result.first) {
 				if (authorityId.has_value()) {
 		            Logger::logWarning("Failed to assign authority of entity " +
 		            	toString(networkFamily->entityId.value & 0xffffffff) + " to " +
@@ -376,13 +398,13 @@ private:
 						toString(static_cast<int>(networkFamily->network.ownerId.value_or(0))));
 				}
 
-				return false;
+				return result;
 			}
 		}
 
 		networkFamily->network.authorityId = authorityId;
 
-		return true;
+		return result;
     }
 };
 

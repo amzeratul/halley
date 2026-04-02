@@ -55,7 +55,7 @@ systemMessage:
     - peerId: uint8_t
   destination: host
   serializable: true
-  returnType: bool
+  returnType: 'Halley::ConfigNode'
 
 ---
 

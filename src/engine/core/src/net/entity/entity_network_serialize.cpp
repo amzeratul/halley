@@ -458,7 +458,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
 
     // Children
     for (const auto& child : entity.getChildren()) {
-        if (!session->isEntitySerializableAsChild(child)) {
+        if (!child.isSerializable()) {
             continue;
         }
         doSerializeEntityUpdate(context, serializer, child, remote, entity);

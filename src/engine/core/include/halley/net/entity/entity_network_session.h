@@ -46,7 +46,6 @@ namespace Halley {
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet) = 0;
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity) = 0;
 			virtual bool allowComponentAddedForFastUpdate(uint16_t componentId) const { return false; }
-			virtual bool isEntitySerializableAsChild(EntityRef entity, const World& world) const { return entity.isSerializable(); }
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) = 0;
 			virtual ConfigNode getLobbyInfo() = 0;
 			virtual bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
@@ -107,9 +106,10 @@ namespace Halley {
 		void findEntity(EntityNetworkId networkId, bool inbound, std::function<void(EntityId, NetworkSession::PeerId)> callback) const;
 		void logUpdates();
 
-		bool prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId);
+		std::pair<bool, std::optional<EntityNetworkId>> prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent,
+			const std::optional<NetworkSession::PeerId>& authorityId, const std::optional<EntityNetworkId>& assignNetworkId);
+
 		bool allowComponentAddedForFastUpdate(uint16_t componentId) const;
-		bool isEntitySerializableAsChild(EntityRef entity) const;
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;

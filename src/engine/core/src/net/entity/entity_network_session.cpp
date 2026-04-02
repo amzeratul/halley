@@ -849,7 +849,8 @@ void EntityNetworkSession::logUpdates()
 	}
 }
 
-bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId)
+std::pair<bool, std::optional<EntityNetworkId>> EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent,
+	const std::optional<NetworkSession::PeerId>& authorityId, const std::optional<EntityNetworkId>& assignNetworkId)
 {
 	const auto myPeerId = session->getMyPeerId().value(); // non-optional
 	const auto ownerId = networkComponent.ownerId; // can be none
@@ -858,17 +859,21 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 	// authority to what peer, and notifies the right EntityNetworkRemotePeer instance about it.
 	//
 	// This whole block could be shortened down a lot, but this wouldn't be very readable.
-	bool success = true;
+	std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
 
 	if (authorityId.has_value()) {
 		// Authority is taken by someone.
-		HalleyAssertDev(!networkComponent.authorityId.has_value());
+		if (networkComponent.authorityId.has_value()) {
+			Logger::logWarning("Already have authority stored as " +
+				toString(static_cast<int>(networkComponent.authorityId.value())) + ", want to set to " +
+				toString(static_cast<int>(authorityId.value())));
+		}
 
 		if (ownerId == myPeerId) {
 			// Local peer is giving away authority.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == authorityId) {
-					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					result = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId, assignNetworkId);
 					break;
 				}
 			}
@@ -877,7 +882,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is taking authority.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == ownerId) {
-					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					result = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId, assignNetworkId);
 					break;
 				}
 			}
@@ -891,7 +896,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is losing authority. Revoke the outbound entity.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == ownerId) {
-					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					result = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId, assignNetworkId);
 					break;
 				}
 			}
@@ -900,7 +905,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Authority returned to local peer. Revoke the inbound entity.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == networkComponent.authorityId) {
-					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					result = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId, assignNetworkId);
 					break;
 				}
 			}
@@ -910,7 +915,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 		}
 	}
 
-	return success;
+	return result;
 }
 
 bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId) const
@@ -919,14 +924,6 @@ bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId
 		return listener->allowComponentAddedForFastUpdate(componentId);
 	}
 	return false;
-}
-
-bool EntityNetworkSession::isEntitySerializableAsChild(EntityRef entity) const
-{
-	if (listener) {
-		return listener->isEntitySerializableAsChild(entity, getWorld());
-	}
-	return entity.isSerializable();
 }
 
 void EntitySessionSharedData::serialize(Serializer& s) const

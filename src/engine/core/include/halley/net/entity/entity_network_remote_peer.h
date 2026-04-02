@@ -53,14 +53,15 @@ namespace Halley {
 
     	void logUpdates();
 
-    	[[nodiscard]] bool prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
-			NetworkSession::PeerId ownerId, std::optional<NetworkSession::PeerId> authorityId);
+    	[[nodiscard]] std::pair<bool, std::optional<EntityNetworkId>> prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId, NetworkSession::PeerId ownerId,
+    		const std::optional<NetworkSession::PeerId>& authorityId, const std::optional<EntityNetworkId>& assignNetworkId);
 
     private:
         class OutboundEntity {
         public:
             bool alive = true;
         	bool hasAuthorityOnly = false;
+        	bool forChildEntityTemporaryOnly = false;
         	bool forceNextFastUpdate = false;
             EntityNetworkId networkId = 0;
             Time timeSinceSend = 0;
@@ -130,8 +131,6 @@ namespace Halley {
 
         bool isRemoteReady() const;
         void onFirstDataBatchSent();
-
-        void stripNestedNetworkComponents(EntityRef entity, int depth = 0);
 
     	void updateRemoteEntityPosition(InboundEntity& inboundEntity, const Vector2f& position, int32_t timestamp);
     	void interpolateRemoteEntityPosition(InboundEntity& inboundEntity, int32_t now, int32_t latency);

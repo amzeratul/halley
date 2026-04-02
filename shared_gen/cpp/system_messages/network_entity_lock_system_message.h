@@ -10,7 +10,7 @@ public:
 	static constexpr int messageIndex{ 6 };
 	static const constexpr char* messageName{ "NetworkEntityLock" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Host };
-	using ReturnType = bool;
+	using ReturnType = Halley::ConfigNode;
 
 	Halley::EntityId target{};
 	bool lock{};
