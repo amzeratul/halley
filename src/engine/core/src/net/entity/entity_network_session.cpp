@@ -50,7 +50,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	deltaOptions.shallow = false;
 	deltaOptions.deltaComponents = true;
 	deltaOptions.allowNonSerializable = false;
-	deltaOptions.omitEmptyComponents = true;
+	deltaOptions.omitEmptyComponents = false;
 	deltaOptions.ignoreComponents = std::move(ignoreComponents);
 
 	setupDictionary();
