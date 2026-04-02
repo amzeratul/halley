@@ -27,14 +27,16 @@ public:
 			const auto myPeerId = maybePeerId.value();
 			const bool isHost = mpSession.isHost();
 
-			// Enable updates for all network components
+			// First, enable updates for *all* network components.
 			for (const auto& e: networkFamily) {
 				e.network.sendUpdates = true;
 			}
 
-			// Disable updates for nested entities
+			// Now disable updates for nested entities.
 			for (const auto& e: networkFamily) {
-				disableSendUpdateForChildren(getWorld().getEntity(e.entityId), getWorld(), mpSession);
+				if (e.network.sendUpdates) { // Could be processed already, as child of another entity.
+					disableSendUpdateForChildren(getWorld().getEntity(e.entityId), getWorld(), myPeerId);
+				}
 			}
 
 			entities.clear();
@@ -85,20 +87,30 @@ private:
 	Vector<EntityNetworkUpdateInfo> entities;
 	ListenerSetToken sessionChangeToken;
 
-	static void disableSendUpdateForChildren(const EntityRef& entity, const World& world, const SessionMultiplayer& session)
+	static void disableSendUpdateForChildren(const EntityRef& entity, const World& world, NetworkSession::PeerId myPeerId)
 	{
 		for (auto c: entity.getChildren()) {
-			if (!session.isEntitySerializableAsChild(c, world)) {
-				// Don't stop updating, as we don't serialize this with its parent.
+			if (!c.isSerializable()) {
 				continue;
 			}
 
+			// By default, child entities are updated as part of their parent, even if they have
+			// their own NetworkComponent. But another peer may lock & grab authority, then wants
+			// to update them separately.
 			if (auto* network = c.tryGetComponent<NetworkComponent>()) {
-				// Disable updates by default, but keep updating if someone grabbed authority.
-				network->sendUpdates = network->authorityId.has_value();
+				if (!network->sendUpdates) {
+					continue;
+				}
+
+				if (network->authorityId.has_value()) {
+					// Only the authority may want to keep updating.
+					network->sendUpdates = network->authorityId == myPeerId;
+				} else {
+					network->sendUpdates = false;
+				}
 			}
 
-			disableSendUpdateForChildren(c, world, session);
+			disableSendUpdateForChildren(c, world, myPeerId);
 		}
 	}
 
