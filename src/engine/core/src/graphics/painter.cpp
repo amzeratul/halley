@@ -55,7 +55,7 @@ void Painter::startRender()
 	nDrawCalls = nTriangles = nVertices = 0;
 	frameStart = frameEnd = 0;
 
-	refreshConstantBufferCache();
+	refreshBufferCaches();
 	resetPending();
 	doStartRender();
 }
@@ -544,6 +544,11 @@ void Painter::stopRecording()
 	}
 }
 
+void Painter::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass)
+{
+	throw Exception("Unimplemented: Painter::BindStructuredBuffer()", HalleyExceptions::Graphics);
+}
+
 bool Painter::startPerformanceMeasurement()
 {
 	return false;
@@ -717,12 +722,43 @@ MaterialConstantBuffer& Painter::getConstantBuffer(const MaterialDataBlock& data
 	}
 }
 
-void Painter::refreshConstantBufferCache()
+MaterialStructuredBuffer& Painter::getStructuredBuffer(const MaterialStructuredBufferData& data, const MaterialStructuredBufferDefinition& def)
+{
+	const uint64_t hash = data.getHash();
+	const auto iter = structuredBuffers.find(hash);
+	if (iter == structuredBuffers.end()) {
+		auto buffer = std::shared_ptr<MaterialStructuredBuffer>(video.createStructuredBuffer());
+		buffer->update(data.getData(), def.getStride());
+		structuredBuffers[hash] = StructuredBufferEntry{ buffer, 0 };
+		return *buffer;
+	} else {
+        iter->second.age = 0;
+		return *iter->second.buffer;
+	}
+}
+
+MaterialStructuredBuffer& Painter::getStructuredBuffer(const String& semantic)
+{
+	const auto iter = semanticStructuredBuffers.find(semantic);
+	if (iter != semanticStructuredBuffers.end()) {
+		return *iter->second;
+	}
+
+	auto buf = std::shared_ptr(video.createStructuredBuffer());
+	semanticStructuredBuffers[semantic] = buf;
+	return *buf;
+}
+
+void Painter::refreshBufferCaches()
 {
 	for (auto& [k, v]: constantBuffers) {
 		++v.age;
 	}
+	for (auto& [k, v]: structuredBuffers) {
+		++v.age;
+	}
 	std_ex::erase_if_value(constantBuffers, [] (const ConstantBufferEntry& e) { return e.age >= 10; });
+	std_ex::erase_if_value(structuredBuffers, [] (const StructuredBufferEntry& e) { return e.age >= 10; });
 }
 
 void Painter::startDrawCall(const std::shared_ptr<const Material>& material)
@@ -781,14 +817,18 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 	// Load vertices
 	setVertices(material.getDefinition(), numVertices, vertexData.data(), indices.size(), indices.data(), allIndicesAreQuads);
 	
-	// Load material uniforms
+	// Load material uniforms and buffers
 	setMaterialData(material);
 
 	// Go through each pass
 	for (int i = 0; i < material.getDefinition().getNumPasses(); i++) {
 		if (material.isPassEnabled(i)) {
 			// Bind pass
-			material.bind(i, *this);
+			if (material.bind(i)) {
+				setMaterialPass(material, i);
+				setStructuredBuffers(material, i);
+			}
+
 			if (recordingSnapshot) {
 				recordTimestamp(TimestampType::CommandSetupDone, commandIdx);
 			}
@@ -809,6 +849,22 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 
 	if (recordingSnapshot) {
 		recordTimestamp(TimestampType::CommandEnd, commandIdx);
+	}
+}
+
+void Painter::setStructuredBuffers(const Material& material, int passN)
+{
+	const auto& bufDefs = material.getDefinition().getStructuredBuffers();
+	for (size_t i = 0; i < bufDefs.size(); ++i) {
+		const auto& bufDef = bufDefs[i];
+		if (auto matStructuredBuf = material.tryGetStructuredBuffer(static_cast<int>(i))) {
+			bindStructuredBuffer(i, bufDef, getStructuredBuffer(*matStructuredBuf, bufDef), passN);
+		} else if (!bufDef.getAutoBindSemantic().isEmpty()) {
+			bindStructuredBuffer(i, bufDef, getStructuredBuffer(bufDef.getAutoBindSemantic()), passN);
+		} else {
+			Logger::logError("Binding empty structured buffer for material " + material.getDefinition().getAssetId());
+			bindStructuredBuffer(i, bufDef, getStructuredBuffer({}, bufDef), passN);
+		}
 	}
 }
 

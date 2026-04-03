@@ -13,10 +13,6 @@ StructuredBufferOpenGL::StructuredBufferOpenGL()
 	buffer.init(GL_SHADER_STORAGE_BUFFER);
 }
 
-StructuredBufferOpenGL::~StructuredBufferOpenGL()
-{
-}
-
 void StructuredBufferOpenGL::update(gsl::span<const std::byte> data, size_t elementStride)
 {
 	buffer.setData(data);

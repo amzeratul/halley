@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/api/video_api.h"
+#include "halley/graphics/material/material.h"
 #include "gl_buffer.h"
 
 namespace Halley
@@ -8,7 +8,6 @@ namespace Halley
 	{
 	public:
 		StructuredBufferOpenGL();
-		~StructuredBufferOpenGL();
 
 		void update(gsl::span<const std::byte> data, size_t elementStride) override;
 		size_t getSize() const override { return dataSize; }

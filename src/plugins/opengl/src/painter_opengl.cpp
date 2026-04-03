@@ -166,20 +166,6 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 		}
 		++textureUnit;
 	}
-
-	// Bind structured buffers
-	int bufferIndex = 0;
-	for (auto& bufDef: material.getDefinition().getStructuredBuffers()) {
-		const auto& buf = material.getStructuredBuffer(bufferIndex);
-		if (buf) {
-			int location = bufDef.getAddress(passNumber, ShaderType::Combined);
-			if (location == -1) {
-				location = bufferIndex;
-			}
-			static_cast<StructuredBufferOpenGL*>(const_cast<MaterialStructuredBuffer*>(buf.get()))->bind(location);
-		}
-		++bufferIndex;
-	}
 }
 
 void PainterOpenGL::setMaterialData(const Material& material)
@@ -189,6 +175,15 @@ void PainterOpenGL::setMaterialData(const Material& material)
 			static_cast<ConstantBufferOpenGL&>(getConstantBuffer(dataBlock)).bind(dataBlock.getBindPoint());
 		}
 	}
+}
+
+void PainterOpenGL::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass)
+{
+	int location = bufDef.getAddress(pass, ShaderType::Combined);
+	if (location == -1) {
+		location = static_cast<int>(index);
+	}
+	static_cast<StructuredBufferOpenGL&>(buffer).bind(location);
 }
 
 void PainterOpenGL::setClip(Rect4i clip, bool enable)

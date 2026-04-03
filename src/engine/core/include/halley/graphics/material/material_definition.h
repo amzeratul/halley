@@ -227,19 +227,25 @@ namespace Halley
 	class MaterialStructuredBufferDefinition
 	{
 	public:
-		String name;
-		Vector<int> addresses;
-
 		MaterialStructuredBufferDefinition();
-		MaterialStructuredBufferDefinition(String name);
+		MaterialStructuredBufferDefinition(String name, size_t stride, String autoBindSemantic);
 
-		void loadAddresses(const MaterialDefinition& def);
+		void loadAddresses(const MaterialDefinition& def, int index);
 		int getAddress(int pass, ShaderType stage) const;
 
 		const String& getName() const { return name; }
+		const size_t getStride() const { return stride; }
+		const String& getAutoBindSemantic() const { return autoBindSemantic; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+	private:
+		String name;
+		size_t stride;
+		String autoBindSemantic;
+
+		Vector<int> addresses;
 	};
 
 	class MaterialDefinition : public AsyncResource, public std::enable_shared_from_this<MaterialDefinition>
@@ -284,7 +290,6 @@ namespace Halley
 
 		void setStructuredBuffers(Vector<MaterialStructuredBufferDefinition> structuredBuffers);
 		const Vector<MaterialStructuredBufferDefinition>& getStructuredBuffers() const { return structuredBuffers; }
-		bool hasStructuredBuffer(const String& name) const;
 
 		bool hasTexture(const String& name) const;
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;

@@ -6,6 +6,7 @@
 
 namespace Halley
 {
+	class MaterialStructuredBuffer;
 	class ShaderDefinition;
 	class WindowDefinition;
 	class Painter;
@@ -17,16 +18,6 @@ namespace Halley
 	class Window;
 	class MaterialConstantBuffer;
 	class Material;
-
-	class MaterialStructuredBuffer
-	{
-	public:
-		virtual ~MaterialStructuredBuffer() {}
-
-		virtual void update(gsl::span<const std::byte> data, size_t elementStride) = 0;
-		virtual size_t getSize() const = 0;
-		virtual size_t getStride() const = 0;
-	};
 
 	class VideoAPI
 	{

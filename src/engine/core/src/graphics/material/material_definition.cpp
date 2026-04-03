@@ -194,18 +194,24 @@ void MaterialTexture::deserialize(Deserializer& s)
 MaterialStructuredBufferDefinition::MaterialStructuredBufferDefinition()
 {}
 
-MaterialStructuredBufferDefinition::MaterialStructuredBufferDefinition(String name)
+MaterialStructuredBufferDefinition::MaterialStructuredBufferDefinition(String name, size_t stride, String autoBindSemantic)
 	: name(std::move(name))
+	, stride(stride)
+	, autoBindSemantic(std::move(autoBindSemantic))
 {}
 
-void MaterialStructuredBufferDefinition::loadAddresses(const MaterialDefinition& definition)
+void MaterialStructuredBufferDefinition::loadAddresses(const MaterialDefinition& definition, int index)
 {
 	const auto& passes = definition.getPasses();
 	addresses.resize(passes.size() * shaderStageCount);
 	for (size_t i = 0; i < passes.size(); i++) {
 		auto& shader = passes[i].getShader();
 		for (int j = 0; j < shaderStageCount; ++j) {
-			addresses[i * shaderStageCount + j] = shader.getBufferLocation(name, ShaderType(j));
+			int addr = shader.getBufferLocation(name, ShaderType(j));
+			if (addr == -1) {
+				addr = static_cast<int>(definition.getTextures().size()) + index;
+			}
+			addresses[i * shaderStageCount + j] = addr;
 		}
 	}
 }
@@ -218,11 +224,13 @@ int MaterialStructuredBufferDefinition::getAddress(int pass, ShaderType stage) c
 void MaterialStructuredBufferDefinition::serialize(Serializer& s) const
 {
 	s << name;
+	s << stride;
 }
 
 void MaterialStructuredBufferDefinition::deserialize(Deserializer& s)
 {
 	s >> name;
+	s >> stride;
 }
 
 MaterialDefinition::MaterialDefinition()
@@ -279,8 +287,8 @@ void MaterialDefinition::initialize(VideoAPI& video)
 	}
 
 	// Load structured buffers
-	for (auto& buf: structuredBuffers) {
-		buf.loadAddresses(*this);
+	for (size_t i = 0; i < structuredBuffers.size(); ++i) {
+		structuredBuffers[i].loadAddresses(*this, static_cast<int>(i));
 	}
 
 	// Load uniform blocks
@@ -423,11 +431,6 @@ void MaterialDefinition::setTextures(Vector<MaterialTexture> textures)
 void MaterialDefinition::setStructuredBuffers(Vector<MaterialStructuredBufferDefinition> structuredBuffers)
 {
 	this->structuredBuffers = std::move(structuredBuffers);
-}
-
-bool MaterialDefinition::hasStructuredBuffer(const String& name) const
-{
-	return std_ex::contains_if(structuredBuffers, [&] (const auto& b) { return b.name == name; });
 }
 
 Vector<String> MaterialDefinition::getTextureNames() const
@@ -594,13 +597,7 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 void MaterialDefinition::loadStructuredBuffers(const ConfigNode& node)
 {
 	for (const auto& entry: node.asSequence()) {
-		if (entry.hasKey("name")) {
-			structuredBuffers.push_back(MaterialStructuredBufferDefinition(entry["name"].asString()));
-		} else {
-			for (auto& it: entry.asMap()) {
-				structuredBuffers.push_back(MaterialStructuredBufferDefinition(it.first));
-			}
-		}
+		structuredBuffers.push_back(MaterialStructuredBufferDefinition(entry["name"].asString(), entry["stride"].asInt(), entry["autoBindSemantic"].asString("")));
 	}
 }
 

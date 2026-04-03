@@ -44,6 +44,7 @@ namespace Halley {
 
         void setMaterialPass(const Material& material, int pass) override;
         void setMaterialData(const Material& material) override;
+        void bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass) override;
 
         void setViewPort(Rect4i rect) override;
         void setClip(Rect4i clip, bool enable) override;

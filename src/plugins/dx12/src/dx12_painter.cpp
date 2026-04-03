@@ -175,29 +175,6 @@ void DX12Painter::setMaterialPass(const Material& material, int passN)
         textureView.bind(material);
     }
 
-    // Structured buffers — root parameter index follows CBVs + texture/sampler descriptor tables
-    {
-        const auto& matDef = material.getDefinition();
-        const auto& structuredBuffers = matDef.getStructuredBuffers();
-        if (!structuredBuffers.empty()) {
-            const int baseRootParam = static_cast<int>(matDef.getUniformBlocks().size())
-                + (matDef.getTextures().empty() ? 0 : 2);
-
-            int bufferIndex = 0;
-            for (auto& bufDef : structuredBuffers) {
-                const auto& buf = material.getStructuredBuffer(bufferIndex);
-                if (buf) {
-                    auto* dx12Buf = static_cast<const DX12StructuredBuffer*>(buf.get());
-                    auto addr = dx12Buf->getGPUVirtualAddress();
-                    if (addr) {
-                        cmdList->SetGraphicsRootShaderResourceView(baseRootParam + bufferIndex, addr);
-                    }
-                }
-                ++bufferIndex;
-            }
-        }
-    }
-
     auto clip = clipping.value_or(curViewport);
 
     D3D12_RECT scissor = {
@@ -246,6 +223,16 @@ void DX12Painter::setMaterialData(const Material& material)
             }
             constantBufferCache[block.getBindPoint()] = range;
         }
+    }
+}
+
+void DX12Painter::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass)
+{
+	auto cmdList = dx12Video.getCmdList();
+    auto& dx12Buf = static_cast<const DX12StructuredBuffer&>(buffer);
+    auto addr = dx12Buf.getGPUVirtualAddress();
+    if (addr) {
+        cmdList->SetGraphicsRootShaderResourceView(static_cast<int>(index), addr);
     }
 }
 

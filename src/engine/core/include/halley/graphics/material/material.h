@@ -7,8 +7,6 @@
 #include <gsl/gsl>
 #include <bitset>
 
-#include "material.h"
-
 namespace Halley
 {
 	class SpriteResource;
@@ -29,6 +27,16 @@ namespace Halley
 		virtual ~MaterialConstantBuffer() {}
 
 		virtual void update(gsl::span<const std::byte> data) = 0;
+	};
+	
+	class MaterialStructuredBuffer
+	{
+	public:
+		virtual ~MaterialStructuredBuffer() {}
+
+		virtual void update(gsl::span<const std::byte> data, size_t elementStride) = 0;
+		virtual size_t getSize() const = 0;
+		virtual size_t getStride() const = 0;
 	};
 
 	enum class MaterialDataBlockType : uint8_t
@@ -70,6 +78,26 @@ namespace Halley
 		bool setUniform(size_t offset, ShaderParameterType type, const void* data);
 		bool isEqualTo(size_t offset, ShaderParameterType type, const void* data) const;
 	};
+
+	class MaterialStructuredBufferData {
+		friend class Material;
+
+	public:
+		MaterialStructuredBufferData() = default;
+		MaterialStructuredBufferData(Bytes data);
+		MaterialStructuredBufferData(gsl::span<const std::byte> data);
+
+		void setData(Bytes data);
+		void setData(gsl::span<const std::byte> data);
+
+		gsl::span<const std::byte> getData() const;
+		uint64_t getHash() const;
+
+	private:
+		Bytes data;
+		mutable bool needToUpdateHash = true;
+		mutable uint64_t hash = 0;
+	};
 	
 	class Material
 	{
@@ -82,7 +110,7 @@ namespace Halley
 		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
 		~Material();
 
-		void bind(int pass, Painter& painter) const;
+		bool bind(int pass) const;
 		static void resetBindCache();
 
 		bool operator==(const Material& material) const;
@@ -108,15 +136,15 @@ namespace Halley
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
 
-		const std::shared_ptr<const MaterialStructuredBuffer>& getStructuredBuffer(int index) const;
-		const std::shared_ptr<const MaterialStructuredBuffer>& getStructuredBuffer(std::string_view name) const;
-		gsl::span<const std::shared_ptr<const MaterialStructuredBuffer>> getStructuredBuffers() const;
-		size_t getNumStructuredBuffers() const;
-		Material& setStructuredBuffer(size_t index, std::shared_ptr<const MaterialStructuredBuffer> buffer);
-		Material& setStructuredBuffer(std::string_view name, std::shared_ptr<const MaterialStructuredBuffer> buffer);
-
 		gsl::span<const MaterialDataBlock> getDataBlocks() const;
 		gsl::span<MaterialDataBlock> getDataBlocks();
+
+		std::optional<int> getStructuredBufferIndex(std::string_view name) const;
+		void setStructuredBuffer(int i, std::shared_ptr<MaterialStructuredBufferData> data);
+		void setStructuredBuffer(int i, Bytes data);
+		void setStructuredBuffer(int i, gsl::span<const std::byte> data);
+		const MaterialStructuredBufferData* tryGetStructuredBuffer(int i) const;
+		gsl::span<const std::byte> getStructuredBufferData(int i) const;
 
 		void setPassEnabled(int pass, bool enabled);
 		bool isPassEnabled(int pass) const;
@@ -165,7 +193,7 @@ namespace Halley
 		
 		Vector<MaterialDataBlock, std::allocator<MaterialDataBlock>, 2 * sizeof(MaterialDataBlock)> dataBlocks;
 		Vector<std::shared_ptr<const Texture>, std::allocator<std::shared_ptr<const Texture>>, 4 * sizeof(std::shared_ptr<const Texture>)> textures;
-		Vector<std::shared_ptr<const MaterialStructuredBuffer>> structuredBuffers;
+		HashMap<int, std::shared_ptr<MaterialStructuredBufferData>> localStructuredBuffers;
 
 		void doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
@@ -209,8 +237,12 @@ namespace Halley
 			return *this;
 		}
 
-		MaterialUpdater& setStructuredBuffer(size_t index, std::shared_ptr<const MaterialStructuredBuffer> buffer);
-		MaterialUpdater& setStructuredBuffer(std::string_view name, std::shared_ptr<const MaterialStructuredBuffer> buffer);
+		MaterialUpdater& setStructuredBuffer(size_t index, Bytes data);
+		MaterialUpdater& setStructuredBuffer(std::string_view name, Bytes data);
+		MaterialUpdater& setStructuredBuffer(size_t index, gsl::span<const std::byte> data);
+		MaterialUpdater& setStructuredBuffer(std::string_view name, gsl::span<const std::byte> data);
+		MaterialUpdater& setStructuredBuffer(size_t index, std::shared_ptr<MaterialStructuredBufferData> data);
+		MaterialUpdater& setStructuredBuffer(std::string_view name, std::shared_ptr<MaterialStructuredBufferData> data);
 
 		MaterialUpdater& setPassEnabled(int pass, bool enabled);
 		MaterialUpdater& setStencilReferenceOverride(std::optional<uint8_t> reference);

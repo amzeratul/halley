@@ -1,6 +1,6 @@
 #pragma once
-#include "halley/api/video_api.h"
 #include "dx11_buffer.h"
+#include "halley/graphics/material/material.h"
 
 namespace Halley
 {
