@@ -30,6 +30,7 @@ namespace Halley {
         std::optional<Rect4i> clipping;
 
         uint64_t resourceVersionIndex = 0;
+        int ssboRootParamBase = 0;
 
         void resetState() override;
 

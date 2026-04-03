@@ -11,6 +11,7 @@ namespace Halley {
 		explicit MetalPainter(MetalVideo& video, Resources& resources);
 		void doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) override;
 		void setMaterialPass(const Material& material, int pass) override;
+		void bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass) override;
 		void doStartRender() override;
 		void doEndRender() override;
 		void setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly) override;

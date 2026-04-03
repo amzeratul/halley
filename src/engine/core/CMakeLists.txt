@@ -89,6 +89,7 @@ set(SOURCES
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
+        "src/stage/render_test_stage.cpp"
         "src/stage/stage.cpp"
 
         "src/version/version.cpp"
@@ -544,6 +545,7 @@ set(HEADERS
         "src/resources/resource_filesystem.h"
         "src/resources/resource_pack.h"
 
+        "include/halley/stage/render_test_stage.h"
         "include/halley/stage/stage.h"
         "include/halley/stage/stage_id.h"
 

@@ -74,6 +74,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "halley/resources/resource_reference.h"
 #include "halley/resources/resource_unloader.h"
 
+#include "halley/stage/render_test_stage.h"
 #include "halley/stage/stage.h"
 
 #include "halley/devcon/devcon_client.h"

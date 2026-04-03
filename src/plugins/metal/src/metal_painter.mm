@@ -52,23 +52,20 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 		auto texture = std::static_pointer_cast<const MetalTexture>(tex);
 		texture->bind(encoder, texIndex++);
 	}
+}
+		
+void MetalPainter::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass)
+{
+	// TODO: this code is untested
 
-	// Bind structured buffers
-	int bufferIndex = 0;
-	for (auto& bufDef : material.getDefinition().getStructuredBuffers()) {
-		const auto& buf = material.getStructuredBuffer(bufferIndex);
-		if (buf) {
-			auto* metalBuf = static_cast<MetalStructuredBuffer*>(const_cast<MaterialStructuredBuffer*>(buf.get()));
-			const int vsAddr = bufDef.getAddress(passNumber, ShaderType::Vertex);
-			const int psAddr = bufDef.getAddress(passNumber, ShaderType::Pixel);
-			if (vsAddr != -1) {
-				metalBuf->bindVertex(encoder, vsAddr);
-			}
-			if (psAddr != -1) {
-				metalBuf->bindFragment(encoder, psAddr);
-			}
-		}
-		++bufferIndex;
+	auto& metalBuf = static_cast<MetalStructuredBuffer&>(buffer);
+	const int vsAddr = bufDef.getAddress(passNumber, ShaderType::Vertex);
+	const int psAddr = bufDef.getAddress(passNumber, ShaderType::Pixel);
+	if (vsAddr != -1) {
+		metalBuf.bindVertex(encoder, vsAddr);
+	}
+	if (psAddr != -1) {
+		metalBuf.bindFragment(encoder, psAddr);
 	}
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/api/video_api.h"
+#include "halley/graphics/material/material.h"
 #include "metal_buffer.h"
 
 namespace Halley

@@ -113,7 +113,7 @@ void MaterialStructuredBufferData::setData(Bytes data)
 void MaterialStructuredBufferData::setData(gsl::span<const std::byte> data)
 {
 	this->data.resize(data.size());
-	memcpy_s(this->data.data(), this->data.size(), data.data(), data.size());
+	memcpy(this->data.data(), data.data(), data.size());
 	needToUpdateHash = true;
 }
 
