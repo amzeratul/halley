@@ -207,6 +207,9 @@ void DX12Painter::setMaterialPass(const Material& material, int passN)
     }
 
     dx12Video.getCmdList()->RSSetScissorRects(1, &scissor);
+
+    const int numUniformBlocks = static_cast<int>(material.getDefinition().getUniformBlocks().size());
+    ssboRootParamBase = numUniformBlocks + (material.getNumTextureUnits() > 0 ? 2 : 0);
 }
 
 void DX12Painter::setMaterialData(const Material& material)
@@ -232,7 +235,7 @@ void DX12Painter::bindStructuredBuffer(size_t index, const MaterialStructuredBuf
     auto& dx12Buf = static_cast<const DX12StructuredBuffer&>(buffer);
     auto addr = dx12Buf.getGPUVirtualAddress();
     if (addr) {
-        cmdList->SetGraphicsRootShaderResourceView(static_cast<int>(index), addr);
+        cmdList->SetGraphicsRootShaderResourceView(ssboRootParamBase + static_cast<int>(index), addr);
     }
 }
 
