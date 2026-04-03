@@ -154,5 +154,7 @@ namespace Halley {
         std::pair<float, String> convertCurrency(std::pair<float, String> cost, const String& dstCurrency) const;
         std::optional<float> convertCurrency(float cost, const String& srcCurrency, const String& dstCurrency) const;
         void setupCurrencyConversion();
+
+        void validateTags();
     };
 }

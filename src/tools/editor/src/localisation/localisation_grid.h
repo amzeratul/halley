@@ -10,9 +10,6 @@ namespace Halley {
 
     	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData, bool showProperties, I18NLanguage language);
 
-        LocalisedString getToolTip() const override;
-        bool hasDynamicToolTip() const override;
-        Vector2f getToolTipPosition(Vector2f mousePos) const override;
         const String& getKeyAt(int idx) const override;
 
     	size_t getSrcRowCount() const override;
@@ -22,6 +19,7 @@ namespace Halley {
         void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const override;
         void onRightClick(std::optional<int> line) override;
         void copySelection() override;
+        String getCellToolTip(int row, int col, const String& columnName) const override;
 
     private:
         UIFactory& factory;

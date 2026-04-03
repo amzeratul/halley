@@ -122,57 +122,22 @@ void LocalisationClient::signOut()
 	password = {};
 }
 
-Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData, const LocOriginalData& curRemoteData)
+Future<bool> LocalisationClient::putOriginalStrings(const LocStringUploadData& data, bool drySend)
 {
-	const auto url = "/strings-chunk/" + Encode::encodeURL(project);
-
-	int nChunksUpdated = 0;
-	HashSet<String> existingChunks;
-
-	ConfigNode payload;
-	auto& chunks = payload["chunks"];
-	for (const auto& chunk: origData.getChunks()) {
-		existingChunks.insert(chunk.name);
-
-		if (auto* remote = curRemoteData.tryGetChunk(chunk.name)) {
-			// Exists in remote, skip if it's the same
-			if (!chunk.hasKeyValueChanges(*remote)) {
-				continue;
-			}
-		} else {
-			// Doesn't exist in remote, skip if empty
-			if (chunk.getNumEntries() == 0) {
-				continue;
-			}
-		}
-
-		Logger::logInfo("Updating chunk: " + chunk.name);
-		chunks.push_back(getChunkConfig(chunk));
-		++nChunksUpdated;
-	}
-
-	for (const auto& chunk: curRemoteData.getChunks()) {
-		if (!existingChunks.contains(chunk.name)) {
-			Logger::logInfo("Erasing chunk: " + chunk.name);
-			chunks.push_back(getChunkConfig(LocOriginalDataChunk(chunk.name, chunk.category, {})));
-			++nChunksUpdated;
-		}
-	}
-
-	if (nChunksUpdated > 0) {
-		Logger::logInfo("Sending " + toString(nChunksUpdated) + " chunks to update...");
-		return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
-	} else {
+	if (data.getChunks().empty()) {
 		Logger::logInfo("No changes detected.");
 		return Future<bool>::makeImmediate(true);
 	}
-}
 
-Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData)
-{
-	const auto url = "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
+	const auto url = "/strings-chunk/" + Encode::encodeURL(project);
+	Logger::logInfo("Sending " + toString(data.getChunks().size()) + " chunks to update...");
 
-	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, getChunkConfig(origData));
+	if (drySend) {
+		Logger::logDev("Dry sending:\n" + YAMLConvert::generateYAML(data.toConfigNode()));
+		return Future<bool>::makeImmediate(false);
+	} else {
+		return sendWithAuthorizationSimple(HTTPMethod::PUT, url, data.toConfigNode());
+	}
 }
 
 Future<bool> LocalisationClient::putStringProperties(const Vector<LocStringProperties>& data)
@@ -335,26 +300,6 @@ bool LocalisationClient::isAdmin() const
 const String& LocalisationClient::getProject() const
 {
 	return project;
-}
-
-ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const
-{
-	ConfigNode keys;
-	ConfigNode values;
-
-	const auto n = data.getNumEntries();
-	for (int i = 0; i < n; ++i) {
-		const auto& entry = data.getEntry(i);
-		keys.push_back(ConfigNode(entry.getKey()));
-		values.push_back(ConfigNode(entry.getValue()));
-	}
-
-	ConfigNode result;
-	result["chunkId"] = data.name;
-	result["keys"] = std::move(keys);
-	result["values"] = std::move(values);
-
-	return result;
 }
 
 ConfigNode LocalisationClient::getTranslationConfig(const LocTranslationData& data) const

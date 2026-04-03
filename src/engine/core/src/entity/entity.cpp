@@ -3,6 +3,7 @@
 #include "halley/entity/world.h"
 #include "halley/net/interpolators/data_interpolator.h"
 #include "halley/net/interpolators/byte_data_interpolator.h"
+#include "halley/utils/algorithm.h"
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #define DONT_INCLUDE_HALLEY_HPP
@@ -250,7 +251,7 @@ FamilyMaskType Entity::getMask() const
 	return mask;
 }
 
-void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table)
+void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::span<const int> alwaysEnabledComponents)
 {
 	if (dirty) {
 		dirty = false;
@@ -266,8 +267,9 @@ void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table)
 			mask = {};
 		} else {
 			auto m = FamilyMask::RealType();
-			if (enabled && parentEnabled) {
-				for (auto i : components) {
+			bool componentsEnabled = enabled && parentEnabled;
+			for (auto i : components) {
+				if (componentsEnabled || std_ex::contains(alwaysEnabledComponents, i.first)) {
 					FamilyMask::setBit(m, i.first);
 				}
 			}

@@ -4,6 +4,7 @@
 #include "localisation_export_window.h"
 #include "localisation_language_editor.h"
 #include "localisation_manage_users.h"
+#include "localisation_upload_strings_window.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
@@ -96,6 +97,11 @@ void LocalisationEditor::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
 	{
 		openOriginalLanguage(true);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "validateTags", [this] (const UIEvent& event)
+	{
+		validateTags();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "signIn", [this] (const UIEvent& event)
@@ -787,15 +793,21 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings && remoteStrings) {
-		curMessage = "Uploading original strings...";
-		client->putOriginalStrings(*localStrings->originalLanguage, *remoteStrings->originalLanguage).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
-		{
-			if (result) {
-				curMessage = {};
-			} else {
-				curMessage = "Error uploading original strings.";
+		auto uploadData = LocStringUploadData(*localStrings->originalLanguage, *remoteStrings->originalLanguage);
+
+		// Find all languages that have localised each string
+		HashMap<String, Vector<String>> localisedIn;
+		for (const auto& chunk: uploadData.getChunks()) {
+			for (const auto& entry: chunk.entries) {
+				for (const auto& [lang, data]: remoteStrings->localised) {
+					if (data.entries.contains(entry.key)) {
+						localisedIn[entry.key] += lang;
+					}
+				}
 			}
-		});
+		}
+
+		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, *client, std::move(uploadData), std::move(localisedIn)));
 	}
 }
 
@@ -1084,6 +1096,96 @@ void LocalisationEditor::uploadProjectProperties(HalleyVersion version)
 			Logger::logError("Unable to update project info");
 		}
 	});
+}
+
+void LocalisationEditor::validateTags()
+{
+	if (remoteStrings) {
+		struct Mismatch {
+			String language;
+			String key;
+			String orig;
+			String translation;
+			Vector<String> tagsOrig;
+			Vector<String> tagsTranslation;
+		};
+		Vector<Mismatch> mismatches;
+
+		auto isOptionalTag = [&](std::string_view tag)
+		{
+			return tag.starts_with("g:"); // This should probably not live here
+		};
+
+		auto getTags = [&] (const String& str) -> Vector<String> {
+			Vector<String> tags;
+			
+			auto strRemaining = std::string_view(str);
+			while (!strRemaining.empty()) {
+				const auto bracketStart = strRemaining.find('{');
+				if (bracketStart == std::string::npos) {
+					break;
+				}
+				const auto bracketEnd = strRemaining.find('}', bracketStart);
+				if (bracketEnd == std::string::npos) {
+					break;
+				}
+				auto tag = strRemaining.substr(bracketStart + 1, bracketEnd - bracketStart - 1);
+				if (!isOptionalTag(tag) && !tags.contains(tag)) {
+					tags += tag;
+				}
+				strRemaining = strRemaining.substr(bracketEnd + 1);
+			}
+
+			return tags;
+		};
+
+		for (const auto& [lang, locData]: remoteStrings->localised) {
+			for (const auto& chunk: remoteStrings->originalLanguage->getChunks()) {
+				for (const auto& entry: chunk.entries) {
+					if (const auto iter = locData.entries.find(entry.getKey()); iter != locData.entries.end()) {
+						auto tags0 = getTags(entry.getValue());
+						auto tags1 = getTags(iter->second.getValue());
+						std::sort(tags0.begin(), tags0.end());
+						std::sort(tags1.begin(), tags1.end());
+						if (tags0 != tags1) {
+							mismatches += Mismatch{ lang, entry.getKey(), entry.getValue(), iter->second.getValue(), std::move(tags0), std::move(tags1) };
+						}
+					}
+				}
+			}
+		}
+
+		if (mismatches.empty()) {
+			const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok }};
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "All tags OK", "No tag mismatches found.", buttons, [=](UIConfirmationPopup::ButtonType result) {}));
+		} else {
+			const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok }};
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Tag mismatches found", "Tag mismatches found. Choose destination path to save CSV..", buttons,
+				[this, mismatches = std::move(mismatches)](UIConfirmationPopup::ButtonType result) mutable
+			{
+				auto basePath = project.getRootPath();
+				FileChooserParameters fileChooserParams;
+				fileChooserParams.defaultPath = basePath;
+				fileChooserParams.fileName = "tag_mismatches.csv";
+				fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "Comma-Separated Values", {"csv"}, true });
+				fileChooserParams.save = true;
+					
+				OS::get().openFileChooser(fileChooserParams).then(Executors::getMainUpdateThread(),
+					[mismatches = std::move(mismatches)](std::optional<Path> path) 
+				{
+					if (path) {
+						CSVFile file;
+						file.setColumns({ "language", "key", "originalTags", "translationTags", "original", "translation" });
+						for (const auto& tag: mismatches) {
+							file.addRow(std::to_array<String>({ tag.language, tag.key, String::concatList(tag.tagsOrig, "/"), String::concatList(tag.tagsTranslation, "/"), tag.orig, tag.translation }));
+						}
+						Path::writeFile(*path, file.save());
+					}
+				});
+			}));
+
+		}
+	}
 }
 
 bool LocalisationEditor::CategoryInfo::operator<(const CategoryInfo& other) const

@@ -241,6 +241,14 @@ void UIGrid::setSelectedLine(int line)
 	onClickLine(line, KeyMods::None);
 }
 
+void UIGrid::setSelectedLines(HashSet<int> lines)
+{
+	if (lines != selectedLines) {
+		selectedLines = std::move(lines);
+		notifySelectionChanged();
+	}
+}
+
 void UIGrid::moveSelection(int delta)
 {
 	const auto iter = lineIndex.find(getActiveSelectedLine());
@@ -544,6 +552,11 @@ void UIGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& co
 {
 }
 
+String UIGrid::getCellToolTip(int row, int col, const String& columnName) const
+{
+	return {};
+}
+
 void UIGrid::onRightClick(std::optional<int> line)
 {
 }
@@ -594,4 +607,27 @@ std::optional<int> UIGrid::getRowForLine(int line) const
 const String& UIGrid::getKeyAt(int idx) const
 {
 	return String::emptyString();
+}
+
+LocalisedString UIGrid::getToolTip() const
+{
+	if (columnUnderMouse && lineUnderMouse) {
+		return LocalisedString::fromUserString(getCellToolTip(*lineUnderMouse, *columnUnderMouse, columnNames[*columnUnderMouse]));
+	}
+	return {};
+}
+
+bool UIGrid::hasDynamicToolTip() const
+{
+	return true;
+}
+
+Vector2f UIGrid::getToolTipPosition(Vector2f mousePos) const
+{
+	if (columnUnderMouse && lineUnderMouse) {
+		if (const auto row = getRowForLine(*lineUnderMouse)) {
+			return getCellBasePos(*row, *columnUnderMouse) + Vector2f(0, getLineHeight());
+		}
+	}
+	return mousePos;
 }

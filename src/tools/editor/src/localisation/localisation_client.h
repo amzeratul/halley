@@ -1,5 +1,6 @@
 #pragma once
 #include "localisation_data.h"
+#include "localisation_string_upload_data.h"
 
 namespace Halley {
 	class LocOriginalData;
@@ -44,8 +45,7 @@ namespace Halley {
 		Future<LoginResult> signIn(const String& username, const String& password);
 		void signOut();
 
-		Future<bool> putOriginalStrings(const LocOriginalData& origData, const LocOriginalData& curRemoteData);
-		Future<bool> putOriginalStrings(const LocOriginalDataChunk& origData);
+		Future<bool> putOriginalStrings(const LocStringUploadData& data, bool drySend = false);
 		Future<bool> putStringProperties(const Vector<LocStringProperties>& data);
 		Future<std::optional<LocStringSet>> getStrings(std::optional<String> chunkId = std::nullopt, int minVersion = 0);
 		Future<int> getStringsVersion();
@@ -92,7 +92,6 @@ namespace Halley {
 		};
 		std::list<PendingRequest> pendingRequests;
 
-		ConfigNode getChunkConfig(const LocOriginalDataChunk& data) const;
 		ConfigNode getTranslationConfig(const LocTranslationData& data) const;
 
 		static LocStringSet toLocStringSet(I18NLanguage origLanguage, const ConfigNode& data);

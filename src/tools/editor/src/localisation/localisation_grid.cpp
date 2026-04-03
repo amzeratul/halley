@@ -199,56 +199,38 @@ void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationD
 	onDataUpdated();
 }
 
-LocalisedString LocalisationGrid::getToolTip() const
+String LocalisationGrid::getCellToolTip(int row, int col, const String& colName) const
 {
-	if (columnUnderMouse && lineUnderMouse) {
-		const auto& entry = origData->getEntry(*lineUnderMouse);
-		const auto colName = columnNames[*columnUnderMouse];
-		if (colName == "Group") {
-			return LocalisedString::fromUserString(origData->getGroupNameEntry(*lineUnderMouse));
-		} else if (colName == "Key") {
-			String tooltip = entry.getKey() + "\nv" + toString(entry.getVersion());
+	const auto& entry = origData->getEntry(row);
+	if (colName == "Group") {
+		return origData->getGroupNameEntry(row);
+	} else if (colName == "Key") {
+		String tooltip = entry.getKey() + "\nv" + toString(entry.getVersion());
 
-			if (translatedData) {
-				if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
-					if (translatedEntry->origVersion != entry.getVersion()) {
-						tooltip += " (translation at v" + toString(translatedEntry->origVersion) + ")";
-					}
+		if (translatedData) {
+			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
+				if (translatedEntry->origVersion != entry.getVersion()) {
+					tooltip += " (translation at v" + toString(translatedEntry->origVersion) + ")";
 				}
 			}
-
-			Logger::logInfo(tooltip);
-			return LocalisedString::fromUserString(tooltip);
-		} else if (colName == "Original") {
-			return LocalisedString::fromUserString(entry.getValue());
-		} else if (colName == "Translated") {
-			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
-				return LocalisedString::fromUserString(translatedEntry->getValue());
-			}
-		} else if (colName == "Rdy") {
-			return LocalisedString::fromUserString(isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate");
-		} else if (colName == "Pri") {
-			return LocalisedString::fromUserString("Priority: " + toString(entry.getPriority()));
-		} else if (colName == "Cmt") {
-			return LocalisedString::fromUserString(entry.getComment());
-		} else if (colName == "Ctx") {
-			return LocalisedString::fromUserString(entry.getContext());
 		}
+
+		Logger::logInfo(tooltip);
+		return tooltip;
+	} else if (colName == "Original") {
+		return entry.getValue();
+	} else if (colName == "Translated") {
+		if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
+			return translatedEntry->getValue();
+		}
+	} else if (colName == "Rdy") {
+		return isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate";
+	} else if (colName == "Pri") {
+		return "Priority: " + toString(entry.getPriority());
+	} else if (colName == "Cmt") {
+		return entry.getComment();
+	} else if (colName == "Ctx") {
+		return entry.getContext();
 	}
 	return {};
-}
-
-bool LocalisationGrid::hasDynamicToolTip() const
-{
-	return true;
-}
-
-Vector2f LocalisationGrid::getToolTipPosition(Vector2f mousePos) const
-{
-	if (columnUnderMouse && lineUnderMouse) {
-		if (const auto row = getRowForLine(*lineUnderMouse)) {
-			return getCellBasePos(*row, *columnUnderMouse) + Vector2f(0, getLineHeight());
-		}
-	}
-	return mousePos;
 }

@@ -112,12 +112,15 @@ Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired
 			// Snap frame time if average has been within 1ms
 			elapsed = *desired;
 		}
-	} else if (std::abs(avgFrameLen - 1.0 / 60.0) <= 0.001) {
-		elapsed = 1.0 / 60.0;
-	} else if (std::abs(avgFrameLen - 1.0 / 120.0) <= 0.001) {
-		elapsed = 1.0 / 120.0;
-	} else if (std::abs(avgFrameLen - 1.0 / 144.0) <= 0.001) {
-		elapsed = 1.0 / 144.0;
+	} else {
+		const auto avgFps = 1.0f / avgFrameLen;
+		const auto knownFPS = std::to_array({ 30.0f, 40.0f, 60.0f, 75.0f, 100.0f, 120.0f, 144.0f, 165.0f, 180.0f, 240.0f, 300.0f, 360.0f, 500.0f });
+		for (const auto fps: knownFPS) {
+			if (std::abs(avgFps - fps) <= 2) {
+				elapsed = 1.0 / fps;
+				break;
+			}
+		}
 	}
 
 	//Logger::logDev(toString(elapsed));

@@ -131,9 +131,6 @@ std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId
 	if (!data.entity) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
 	}
-	if (!oldParent) {
-		return {};
-	}
 	const String oldParentId = oldParent ? oldParent->getInstanceUUID().toString() : "";
 
 	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES

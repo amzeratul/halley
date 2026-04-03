@@ -22,5 +22,7 @@ namespace Halley {
 		InterpolationCurve curve;
 
 		Time curTime = 0;
+
+		void applyFade();
 	};
 }

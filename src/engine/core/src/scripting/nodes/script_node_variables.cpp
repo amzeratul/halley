@@ -23,11 +23,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(co
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{
+	const static auto data = std::to_array({
 		PinType{ ET::WriteDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -106,12 +106,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptEntityVariable::getPinConfigurati
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::to_array({
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::WriteDataPin, PD::Input },
 		PinType{ ET::TargetPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -186,7 +186,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -277,9 +277,9 @@ gsl::span<const IGraphNodeType::PinType> ScriptVariableTable::getPinConfiguratio
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{
+	const static auto data = std::to_array({
 		PinType{ ET::ReadDataPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -326,11 +326,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptECSVariable::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{
+	const static auto data = std::to_array({
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::WriteDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -430,7 +430,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptColourLiteral::getPinConfigurati
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -470,7 +470,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -528,7 +528,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptArithmetic::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -610,7 +610,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -660,7 +660,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptConditionalOperator::getPinConfig
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -700,11 +700,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const 
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::to_array({
 	    PinType{ ET::ReadDataPin, PD::Input },
 	    PinType{ ET::ReadDataPin, PD::Output },
 	    PinType{ ET::ReadDataPin, PD::Input },
-	    PinType{ ET::ReadDataPin, PD::Input } };
+	    PinType{ ET::ReadDataPin, PD::Input } });
 	return data;
 }
 
@@ -809,7 +809,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 9>{
+	const static auto data = std::to_array({
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::FlowPin, PD::Output },
@@ -819,7 +819,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::WriteDataPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -917,7 +917,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } });
 	return data;
 }
 
@@ -988,7 +988,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptHoldVariable::getPinConfiguratio
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } });
 	return data;
 }
 
@@ -1065,7 +1065,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -1096,7 +1096,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptDataToEntityId::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output } });
 	return data;
 }
 
@@ -1133,7 +1133,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptToVector::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -1177,7 +1177,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptFromVector::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -1227,7 +1227,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoMap::getPinConfigu
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -1297,11 +1297,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{
+	const static auto data = std::to_array({
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output }
-	};
+	});
 	return data;
 }
 
@@ -1506,7 +1506,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinCo
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -1572,7 +1572,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptHasSequenceValue::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } });
 	return data;
 }
 
@@ -1632,10 +1632,10 @@ gsl::span<const IGraphNodeType::PinType> ScriptSizeOf::getPinConfiguration(const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{
+	const static auto data = std::to_array({
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output },
-	};
+	});
 	return data;
 }
 
@@ -1699,10 +1699,10 @@ gsl::span<const IGraphNodeType::PinType> ScriptRandomElement::getPinConfiguratio
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{
+	const static auto data = std::to_array({
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output },
-	};
+	});
 	return data;
 }
 
@@ -1741,7 +1741,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptRandomOf::getPinConfiguration(con
 
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 9>{
+	const static auto data = std::to_array({
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
@@ -1751,7 +1751,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptRandomOf::getPinConfiguration(con
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
-	};
+	});
 	return gsl::span(data).subspan(0, 1 + nInputs);
 }
 
@@ -1789,9 +1789,9 @@ gsl::span<const IGraphNodeType::PinType> ScriptRandomNumber::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{
+	const static auto data = std::to_array({
 		PinType{ ET::ReadDataPin, PD::Output },
-	};
+	});
 	return data;
 }
 
