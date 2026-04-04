@@ -229,10 +229,10 @@ void UITextInput::draw(UIPainter& painter) const
 	}
 }
 
-void UITextInput::updateCaret()
+void UITextInput::updateCaret(bool force)
 {
 	int pos = clamp(text.getSelection().getCaret(), 0, int(text.getText().size()));
-	if (pos != caretPos) {
+	if (pos != caretPos || force) {
 		caretTime = 0;
 		caretShowing = true;
 		caretPos = pos;
@@ -250,10 +250,7 @@ void UITextInput::onMaybeTextModified()
 
 void UITextInput::onTextModified()
 {
-	if (getValidator()) {
-		text.setText(getValidator()->onTextChanged(text.getText()));
-	}
-	updateCaret();
+	validateText();
 
 	const auto str = String(text.getText());
 	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
@@ -267,31 +264,19 @@ void UITextInput::onTextModified()
 
 void UITextInput::validateText()
 {
-	// TODO
-	/*
-	size_t removePos;
-	while ((removePos = text.find('\r')) != StringUTF32::npos) {
-		text = text.erase(removePos);
-	}
-
-	for (auto& c: text) {
-		if (c == '\n' && !isMultiLine) {
-			c = ' ';
+	bool forceCaretRefresh = false;
+	if (getValidator()) {
+		if (auto newText = getValidator()->onTextChanged(text.getText())) {
+			text.setText(std::move(*newText));
+			forceCaretRefresh = true;
 		}
 	}
-
-	if (getValidator()) {
-		text = getValidator()->onTextChanged(text);
-	}
-	*/
+	updateCaret(forceCaretRefresh);
 }
 
 void UITextInput::onValidatorSet()
 {
-	if (getValidator()) {
-		text.setText(getValidator()->onTextChanged(text.getText()));
-	}
-	updateCaret();
+	validateText();
 }
 
 void UITextInput::submit()
@@ -347,15 +332,22 @@ void UITextInput::update(Time t, bool moved)
 
 	// Update text
 	const auto textBounds = getTextBounds();
+	bool textModified = false;
 	if (multiLine) {
 		const auto extents = label.getExtents(textToDisplay);
 		if (extents.x > textBounds.getWidth()) {
-			label.setText(label.split(textToDisplay, textBounds.getWidth() - 1));
+			label.setText(label.split(textToDisplay, textBounds.getWidth() - 1), textModified);
 		} else {
-			label.setText(textToDisplay);
+			label.setText(textToDisplay, textModified);
 		}
 	} else {
-		label.setText(textToDisplay);
+		label.setText(textToDisplay, textModified);
+	}
+	needsCaretRefresh |= textModified;
+
+	// Lose focus if disabled
+	if (isFocused() && !isEnabled()) {
+		getRoot()->setFocus({});
 	}
 
 	// Caret
@@ -368,7 +360,8 @@ void UITextInput::update(Time t, bool moved)
 
 		if (t > 0.000001f) {
 			// Update can be called more than once. Only one of them will have non-zero time.
-			updateCaret();
+			updateCaret(needsCaretRefresh);
+			needsCaretRefresh = false;
 			onMaybeTextModified();
 		}
 	} else {
@@ -405,7 +398,7 @@ void UITextInput::update(Time t, bool moved)
 	ghostLabel.setPosition(showAppend ? textPos + Vector2f(label.getExtents().x, 0) : textPos);
 
 	// Position the caret
-	caret.setPos(textPos + caretPhysicalPos);
+	caret.setPos(textPos + caretPhysicalPos).scaleTo(Vector2f(caret.getSize().x, label.getLineHeight(false)));
 
 	// Position the icon
 	if (icon.hasMaterial()) {
@@ -548,7 +541,7 @@ void UITextInput::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 			text.setSelection(TextInputData::Selection(text.getTextBoundary(-1), text.getTextBoundary(1)));
 		}
 
-		updateCaret();
+		updateCaret(false);
 	}
 }
 

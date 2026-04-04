@@ -71,7 +71,9 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		setJoystickType(joystickType);
 	
 		if (validator) {
-			setEnabled(getValidator()->isEnabled());
+			if (const auto newValue = getValidator()->isEnabled(); newValue.has_value()) {
+				setEnabled(*newValue);
+			}
 		}
 
 		checkActive();

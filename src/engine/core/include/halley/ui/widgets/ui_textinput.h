@@ -98,7 +98,7 @@ namespace Halley {
 		virtual void onTextModified();
 
 	private:
-		void updateCaret();
+		void updateCaret(bool force);
 		Rect4f getTextBounds() const;
 
 		void onMaybeTextModified();
@@ -155,6 +155,7 @@ namespace Halley {
 		float caretTime = 0;
 		int caretPos = 0;
 		bool caretShowing = false;
+		bool needsCaretRefresh = false;
 		bool mouseHeld = false;
 
 		bool multiLine = false;
