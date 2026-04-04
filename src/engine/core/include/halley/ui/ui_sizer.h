@@ -12,7 +12,8 @@ namespace Halley {
 		Horizontal,
 		Vertical,
 		Grid,
-		Free
+		Free,
+		Flow
 	};
 
 	template <>
@@ -22,7 +23,8 @@ namespace Halley {
 				"horizontal",
 				"vertical",
 				"grid",
-				"free"
+				"free",
+				"flow"
 			});
 		}
 	};
@@ -114,6 +116,7 @@ namespace Halley {
 		UISizer& operator=(const UISizer& other) = delete;
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
+		Vector2f getLayoutMinimumSize(bool force, Vector2f sizeHint) const;
 		void setRect(Rect4f rect, IUIElementListener* listener) override;
 
 		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, size_t insertPos = std::numeric_limits<size_t>::max()) override;
@@ -169,12 +172,12 @@ namespace Halley {
 		void reparentEntry(UISizerEntry& entry);
 		void unparentEntry(UISizerEntry& entry);
 
-		Vector2f computeMinimumSize(bool includeProportional) const;
+		Vector2f computeMinimumSize(bool includeProportional, Vector2f sizeHint) const;
 
 		Vector2f computeMinimumSizeBox(bool includeProportional) const;
 		void setRectBox(Rect4f rect, IUIElementListener* listener);
 
-		Vector2f computeMinimumSizeBoxFree() const;
+		Vector2f computeMinimumSizeFree() const;
 		void setRectFree(Rect4f origRect, IUIElementListener* listener);
 
 		void computeGridSizes(Vector<float>& cols, Vector<float>& rows) const;
@@ -182,6 +185,9 @@ namespace Halley {
 		void setRectGrid(Rect4f rect, IUIElementListener* listener);
 		float getColumnProportion(int column) const;
 		float getRowProportion(int row) const;
+
+		Vector2f computeMinimumSizeFlow(Vector2f sizeHint) const;
+		void setRectFlow(Rect4f origRect, IUIElementListener* listener);
 
 		void sortChildrenBySizerOrder();
 	};
