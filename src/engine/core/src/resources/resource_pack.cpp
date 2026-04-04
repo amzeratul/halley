@@ -42,7 +42,7 @@ void PackResourceLocator::purgeAll(SystemAPI& sys)
 
 bool PackResourceLocator::purgeIfAffected(SystemAPI& system, gsl::span<const String> assetIds, gsl::span<const String> packIds)
 {
-	const auto packId = path.getFilename().replaceExtension("").string();
+	const auto packId = path.getFilename().replaceExtension("").toString();
 	if (std_ex::contains(packIds, packId)) {
 		Logger::logDev("Purging pack " + packId);
 		assetPack.reset();

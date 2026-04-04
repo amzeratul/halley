@@ -42,6 +42,12 @@
 
 using namespace Halley;
 
+namespace {
+	std::string_view toStringView(std::u8string_view str)
+	{
+		return std::string_view(reinterpret_cast<const char*>(str.data()), str.length());
+	}
+}
 
 String::String()
 {
@@ -60,15 +66,18 @@ String::String(const char* utf8, size_t bytes)
 	}
 }
 
-#if __cplusplus >= 202002L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
 String::String(const char8_t* utf8)
-	: str(reinterpret_cast<const char*>(utf8))
+	: str(toStringView(utf8))
 {
 }
-#endif
 
 String::String(std::string_view strView)
 	: str(strView)
+{
+}
+
+String::String(std::u8string_view strView)
+	: str(toStringView(strView))
 {
 }
 
@@ -276,7 +285,12 @@ bool String::contains(Character chr) const
 	return str.find(chr) != npos;
 }
 
-bool String::contains(const std::string_view& string, bool caseSensitive, bool paramIsPreLowercased) const
+bool String::contains(std::string_view string, bool caseSensitive, bool paramIsPreLowercased) const
+{
+	return find(string, caseSensitive, paramIsPreLowercased) != npos;
+}
+
+bool String::contains(std::u8string_view string, bool caseSensitive, bool paramIsPreLowercased) const
 {
 	return find(string, caseSensitive, paramIsPreLowercased) != npos;
 }
@@ -297,7 +311,7 @@ String String::mid(size_t start,size_t count) const
 	return String(str.substr(start,count));
 }
 
-bool String::startsWith(const std::string_view& string, bool caseSensitive) const
+bool String::startsWith(std::string_view string, bool caseSensitive) const
 {
 	if (caseSensitive) {
 		const size_t strSize = string.size();
@@ -311,6 +325,11 @@ bool String::startsWith(const std::string_view& string, bool caseSensitive) cons
 	}
 }
 
+bool String::startsWith(std::u8string_view string, bool caseSensitive) const
+{
+	return startsWith(toStringView(string), caseSensitive);
+}
+
 bool String::startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive) const
 {
 	for (const auto& str: strings) {
@@ -322,7 +341,7 @@ bool String::startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive
 }
 
 
-bool String::endsWith(const std::string_view& string, bool caseSensitive) const
+bool String::endsWith(std::string_view string, bool caseSensitive) const
 {
 	if (caseSensitive) {
 		const size_t strSize = string.size();
@@ -334,6 +353,11 @@ bool String::endsWith(const std::string_view& string, bool caseSensitive) const
 	} else {
 		return asciiLower().endsWith(String(string).asciiLower(), true);
 	}
+}
+
+bool String::endsWith(std::u8string_view string, bool caseSensitive) const
+{
+	return endsWith(toStringView(string), caseSensitive);
 }
 
 
@@ -589,6 +613,46 @@ String& String::operator += (const Character &p)
 {
 	str.append(1,p);
 	return *this;
+}
+
+bool String::operator==(const char* rhp) const
+{
+	return str == rhp;
+}
+
+bool String::operator==(const char8_t* rhp) const
+{
+	return str == rhp;
+}
+
+bool String::operator==(std::string_view rhp) const
+{
+	return str == rhp;
+}
+
+bool String::operator==(std::u8string_view rhp) const
+{
+	return str == toStringView(rhp);
+}
+
+bool String::operator!=(const char* rhp) const
+{
+	return str != rhp;
+}
+
+bool String::operator!=(const char8_t* rhp) const
+{
+	return str != rhp;
+}
+
+bool String::operator!=(std::string_view rhp) const
+{
+	return str != rhp;
+}
+
+bool String::operator!=(std::u8string_view rhp) const
+{
+	return str != toStringView(rhp);
 }
 
 void operator <<(double &p1, String &p2)
@@ -1089,7 +1153,7 @@ uint64_t String::toUInteger64() const
 	}
 }
 
-String String::replaceAll(const std::string_view& before, const std::string_view& after) const
+String String::replaceAll(std::string_view before, std::string_view after) const
 {
 	const size_t pos = find(before);
 	if (pos == std::string::npos) {
@@ -1100,7 +1164,12 @@ String String::replaceAll(const std::string_view& before, const std::string_view
 	}
 }
 
-String String::replaceOne(const std::string_view& before, const std::string_view& after) const
+String String::replaceAll(std::u8string_view before, std::u8string_view after) const
+{
+	return replaceAll(toStringView(before), toStringView(after));
+}
+
+String String::replaceOne(std::string_view before, std::string_view after) const
 {
 	const size_t pos = find(before);
 	if (pos == std::string::npos) {
@@ -1109,6 +1178,11 @@ String String::replaceOne(const std::string_view& before, const std::string_view
 		const size_t len = before.length();
 		return substr(0, pos) + after + substr(pos + len);
 	}
+}
+
+String String::replaceOne(std::u8string_view before, std::u8string_view after) const
+{
+	return replaceOne(toStringView(before), toStringView(after));
 }
 
 void String::shrink()
@@ -1134,6 +1208,11 @@ size_t String::find(std::string_view s, bool caseSensitive, bool paramIsPreLower
 	}
 }
 
+size_t String::find(std::u8string_view s, bool caseSensitive, bool paramIsPreLowercased) const
+{
+	return find(toStringView(s), caseSensitive, paramIsPreLowercased);
+}
+
 std::ostream& Halley::operator<< (std::ostream& os, const String& rhp)
 {
 	os << rhp.cppStr();
@@ -1148,35 +1227,51 @@ std::istream& Halley::operator>> (std::istream& is, String& rhp)
 	return is;
 }
 
-bool Halley::operator<(const String& lhp, const String& rhp)
+std::strong_ordering Halley::operator<=>(std::string_view lhp, const String& rhp)
 {
-	return std::string_view(lhp) < std::string_view(rhp);
+	return lhp <=> std::string_view(rhp);
 }
 
-bool Halley::operator<(const String& lhp, const std::string_view& rhp)
+std::strong_ordering Halley::operator<=>(std::u8string_view lhp, const String& rhp)
 {
-	return std::string_view(lhp) < rhp;
+	return toStringView(lhp) <=> std::string_view(rhp);
 }
 
-bool Halley::operator<(const std::string_view& lhp, const String& rhp)
+std::strong_ordering Halley::operator<=>(const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp)
 {
-	return lhp < std::string_view(rhp);
+	return lhp <=> std::basic_string_view<char32_t>(rhp);
 }
 
-bool Halley::operator<(const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp)
+bool Halley::operator== (std::string_view lhp, const String& rhp) 
 {
-	return lhp < std::basic_string_view<char32_t>(rhp);
+	return lhp == std::string_view(rhp);
 }
 
-bool Halley::operator<(const StringUTF32& lhp, const std::basic_string_view<char32_t>& rhp)
+bool Halley::operator== (std::u8string_view lhp, const String& rhp) 
 {
-	return std::basic_string_view<char32_t>(lhp) < rhp;
+	return lhp == std::u8string_view(rhp);
 }
 
 bool Halley::operator==(const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp)
 {
-	return lhp == std::basic_string_view<char32_t>(rhp);
+	return lhp == std::u32string_view(rhp);
 }
+
+bool Halley::operator!= (std::string_view lhp, const String& rhp) 
+{
+	return lhp != std::string_view(rhp);
+}
+
+bool Halley::operator!= (std::u8string_view lhp, const String& rhp) 
+{
+	return lhp != std::u8string_view(rhp);
+}
+
+bool Halley::operator!=(const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp)
+{
+	return lhp != std::u32string_view(rhp);
+}
+
 
 size_t String::getSizeBytes() const
 {
@@ -1244,29 +1339,29 @@ String Halley::operator+(const String& lhp, const char* rhp)
 	return String(lhp.cppStr() + std::string(rhp));
 }
 
-bool String::operator==(const std::string_view& rhp) const
+std::strong_ordering String::operator<=>(const String& rhp) const
 {
-	return str == rhp;
+	return str <=> rhp.str;
 }
 
-bool String::operator!= (const std::string_view& rhp) const
+std::strong_ordering String::operator<=>(const char* rhp) const
 {
-	return str != rhp;
+	return str <=> rhp;
 }
 
-bool String::operator> (const std::string_view& rhp) const
+std::strong_ordering String::operator<=>(const char8_t* rhp) const
 {
-	return str > rhp;
+	return str <=> rhp;
 }
 
-bool String::operator<= (const std::string_view& rhp) const
+std::strong_ordering String::operator<=>(std::string_view rhp) const
 {
-	return str <= rhp;
+	return str <=> rhp;
 }
 
-bool String::operator>= (const std::string_view& rhp) const
+std::strong_ordering String::operator<=>(std::u8string_view rhp) const
 {
-	return str >= rhp;
+	return *this <=> toStringView(rhp);
 }
 
 String::operator std::string() const
