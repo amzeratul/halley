@@ -168,6 +168,7 @@ protected:
     CHAR    moduleName[STACKWALK_MAX_NAMELEN];
     DWORD64 baseOfImage;
     CHAR    loadedImageName[STACKWALK_MAX_NAMELEN];
+    DWORD64 stackPointer;
   } CallstackEntry;
 
   typedef enum CallstackEntryType

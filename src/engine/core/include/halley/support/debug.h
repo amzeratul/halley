@@ -30,11 +30,17 @@
 #include "halley/concurrency/mutex.h"
 
 namespace Halley {
-	struct DebugTraceEntry
-	{
-		const char* filename = nullptr;
-		int line = 0;
-		std::array<char, 244> arg = {};
+	class StackDebugTrace {
+	public:
+		StackDebugTrace(std::string_view name, std::string_view value);
+		~StackDebugTrace();
+
+		std::string_view getName() const;
+		std::string_view getValue() const;
+
+	private:
+		std::string_view name;
+		std::string_view value;
 	};
 
 	class Debug {
@@ -50,8 +56,9 @@ namespace Halley {
 
 		static void setErrorHandling(const String& dumpFilePath, std::function<void(std::string_view)> errorHandler);
 		static String getCallStack(int skip = 3); // Thread safe
-		static void getCallStack(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
-		static void printCallStackTo(std::ostream& out, int skip);
+		static [[nodiscard]] std::string_view getCallStackUnsafe(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
+		static [[nodiscard]] std::string_view getCallStackUnsafe(int skip = 3); // Not thread safe, use in unsafe environments
+		static void printCallStackToUnsafe(std::ostream& out, int skip); // Not thread safe, use in unsafe environments
 
 		static void trace(const char* filename, int line, std::string_view arg = {});
 		static String getLastTraces();
@@ -62,12 +69,25 @@ namespace Halley {
 
 		static bool isRunningFromDLL();
 
+		static void registerDebugTrace(const StackDebugTrace& trace);
+		static void unregisterDebugTrace(const StackDebugTrace& trace);
+
 	private:
-		Debug();
+		struct DebugTraceEntry
+		{
+			const char* filename = nullptr;
+			int line = 0;
+			std::array<char, 244> arg = {};
+		};
+
 		static bool debugging;
 		static std::array<DebugTraceEntry, 32> lastTraces;
 		static std::atomic<int> tracePos;
 		static Mutex mutex;
+
+		static thread_local Vector<const StackDebugTrace*> stackDebugTraces;
+
+		Debug();
 	};
 
 #if defined(DEV_BUILD) || defined(_DEBUG)
