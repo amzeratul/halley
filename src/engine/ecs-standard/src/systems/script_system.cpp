@@ -334,10 +334,13 @@ private:
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& e: scriptables) {
 			const auto entityId = e.entityId;
-			if (!getWorld().tryGetEntity(entityId).isValid()) {
+			auto entity = getWorld().tryGetEntity(entityId);
+			if (!entity.isValid()) {
 				// Entity no longer valid, can't access ScriptableComponent
 				continue;
 			}
+			const auto trace = StackDebugTrace("entityName", entity.getName());
+
 			auto& scriptable = *e.scriptable;
 			bool hasTransform = e.hasTransform;
 

@@ -5,6 +5,7 @@
 #include "halley/audio/vorbis_dec.h"
 #include "halley/resources/metadata.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/support/debug.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
@@ -90,6 +91,8 @@ std::unique_ptr<IAudioClipStreamHandle> AudioClip::makeStreamHandle() const
 
 void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const
 {
+	const auto trace = StackDebugTrace("audioClip", getAssetId());
+
 	markActivelyInUse();
 
 	if (!streaming) {
@@ -127,6 +130,8 @@ void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandl
 
 size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
+	const auto trace = StackDebugTrace("audioClip", getAssetId());
+
 	HalleyAssertDev(pos + len <= sampleLength);
 
 	if (streaming) {

@@ -29,6 +29,8 @@ Texture::Texture(Vector2i size)
 
 void Texture::load(TextureDescriptor desc)
 {
+	const auto trace = StackDebugTrace("texture", getAssetId());
+
 	startLoading();
 	descriptor = std::move(desc);
 	size = descriptor.size;

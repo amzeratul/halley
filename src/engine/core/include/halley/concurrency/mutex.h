@@ -102,22 +102,22 @@ namespace Halley {
 	public:
 		UniqueLock() = default;
 
-		UniqueLock(M& mutex)
+		[[nodiscard]] UniqueLock(M& mutex)
 			: Detail::LockBase<std::unique_lock<typename M::MutexType>, M>(mutex)
 		{
 		}
 
-		UniqueLock(M& mutex, std::defer_lock_t t)
+		[[nodiscard]] UniqueLock(M& mutex, std::defer_lock_t t)
 			: Detail::LockBase<std::unique_lock<typename M::MutexType>, M>(mutex, t)
 		{
 		}
 
-		UniqueLock(M& mutex, std::try_to_lock_t t)
+		[[nodiscard]] UniqueLock(M& mutex, std::try_to_lock_t t)
 			: Detail::LockBase<std::unique_lock<typename M::MutexType>, M>(mutex, t)
 		{
 		}
 
-		UniqueLock(M& mutex, std::adopt_lock_t t)
+		[[nodiscard]] UniqueLock(M& mutex, std::adopt_lock_t t)
 			: Detail::LockBase<std::unique_lock<typename M::MutexType>, M>(mutex, t)
 		{
 		}
@@ -126,22 +126,22 @@ namespace Halley {
 	template <typename M>
 	class SharedLock : public Detail::LockBase<std::shared_lock<typename M::MutexType>, M> {
 	public:
-		SharedLock(M& mutex)
+		[[nodiscard]] SharedLock(M& mutex)
 			: Detail::LockBase<std::shared_lock<typename M::MutexType>, M>(mutex)
 		{
 		}
 
-		SharedLock(M& mutex, std::defer_lock_t t)
+		[[nodiscard]] SharedLock(M& mutex, std::defer_lock_t t)
 			: Detail::LockBase<std::shared_lock<typename M::MutexType>, M>(mutex, t)
 		{
 		}
 
-		SharedLock(M& mutex, std::try_to_lock_t t)
+		[[nodiscard]] SharedLock(M& mutex, std::try_to_lock_t t)
 			: Detail::LockBase<std::shared_lock<typename M::MutexType>, M>(mutex, t)
 		{
 		}
 
-		SharedLock(M& mutex, std::adopt_lock_t t)
+		[[nodiscard]] SharedLock(M& mutex, std::adopt_lock_t t)
 			: Detail::LockBase<std::shared_lock<typename M::MutexType>, M>(mutex, t)
 		{
 		}

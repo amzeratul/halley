@@ -49,6 +49,7 @@ void ConfigDatabase::loadConfigs(Resources& resources, const std::function<bool(
 void ConfigDatabase::loadFile(Resources& resources, const String& configName)
 {
 	auto configFile = resources.get<ConfigFile>(configName);
+	const auto trace = StackDebugTrace("configName", configName);
 
 	loadConfig(configFile->getRoot(), true);
 

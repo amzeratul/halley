@@ -27,13 +27,18 @@ UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Ve
 
 UIWidget::~UIWidget()
 {
-	HALLEY_DEBUG_TRACE_COMMENT(getDebugId());
+	const auto traceId = StackDebugTrace("widgetId", getId());
+#ifdef DEV_BUILD
+	const auto traceType = StackDebugTrace("widgetType", debugId);
+#endif
 
 	alive = false;
 	if (dataBind) {
 		dataBind->setWidget(nullptr);
 		dataBind.reset();
 	}
+
+	UIWidget::clear();
 }
 
 void UIWidget::doDraw(UIPainter& painter) const
@@ -41,7 +46,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	if (!isActive()) {
 		return;
 	}
-	
+
 	auto clip = painter.getClip();
 	if (clip && !ignoreClip()) {
 		if (!clip->overlaps(getRect())) {
@@ -49,7 +54,13 @@ void UIWidget::doDraw(UIPainter& painter) const
 		}
 	}
 
-	draw(painter);
+	{
+		const auto traceId = StackDebugTrace("widgetId", getId());
+#ifdef DEV_BUILD
+		const auto traceType = StackDebugTrace("widgetType", debugId);
+#endif
+		draw(painter);
+	}
 
 	if (childLayerAdjustment == 0) {
 		drawChildren(painter);
@@ -66,6 +77,11 @@ void UIWidget::doDraw(UIPainter& painter) const
 
 void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>& dst)
 {
+	const auto traceId = StackDebugTrace("widgetId", getId());
+#ifdef DEV_BUILD
+	const auto traceType = StackDebugTrace("widgetType", debugId);
+#endif
+
 	if (updateType == UIWidgetUpdateType::Full || updateType == UIWidgetUpdateType::First) {
 		setInputType(inputType);
 		setJoystickType(joystickType);
