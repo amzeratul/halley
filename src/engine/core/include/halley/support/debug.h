@@ -30,22 +30,13 @@
 #include "halley/concurrency/mutex.h"
 
 namespace Halley {
-	class StackDebugTrace {
-	public:
-		StackDebugTrace(std::string_view name, std::string_view value);
-		~StackDebugTrace();
-
-		std::string_view getName() const;
-		std::string_view getValue() const;
-
-	private:
-		std::string_view name;
-		std::string_view value;
-	};
+	class StackDebugTrace;
 
 	class Debug {
+		friend class StackDebugTrace;
+
 	public:
-		static constexpr bool isDebug()
+		[[nodiscard]] static constexpr bool isDebug()
 		{
 		#ifdef _DEBUG
 			return true;
@@ -55,22 +46,19 @@ namespace Halley {
 		}
 
 		static void setErrorHandling(const String& dumpFilePath, std::function<void(std::string_view)> errorHandler);
-		static String getCallStack(int skip = 3); // Thread safe
-		static [[nodiscard]] std::string_view getCallStackUnsafe(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
-		static [[nodiscard]] std::string_view getCallStackUnsafe(int skip = 3); // Not thread safe, use in unsafe environments
+		[[nodiscard]] static String getCallStack(int skip = 3); // Thread safe
+		[[nodiscard]] static std::string_view getCallStackUnsafe(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
+		[[nodiscard]] static std::string_view getCallStackUnsafe(int skip = 3); // Not thread safe, use in unsafe environments
 		static void printCallStackToUnsafe(std::ostream& out, int skip); // Not thread safe, use in unsafe environments
 
 		static void trace(const char* filename, int line, std::string_view arg = {});
-		static String getLastTraces();
+		[[nodiscard]] static String getLastTraces();
 		static void printLastTraces();
 
 		static void abort();
 		static void abort(std::string_view message);
 
 		static bool isRunningFromDLL();
-
-		static void registerDebugTrace(const StackDebugTrace& trace);
-		static void unregisterDebugTrace(const StackDebugTrace& trace);
 
 	private:
 		struct DebugTraceEntry
@@ -88,6 +76,77 @@ namespace Halley {
 		static thread_local Vector<const StackDebugTrace*> stackDebugTraces;
 
 		Debug();
+
+		static void registerDebugTrace(const StackDebugTrace& trace);
+		static void unregisterDebugTrace(const StackDebugTrace& trace);
+	};
+
+	class StackDebugTrace {
+	public:
+		[[nodiscard]] StackDebugTrace(std::string_view name, std::string_view value)
+			: name(name)
+			, strValue(value)
+			, type(Type::StringView)
+		{
+			doRegister();
+		}
+
+		[[nodiscard]] StackDebugTrace(std::string_view name, int64_t value)
+			: name(name)
+			, type(Type::Int64)
+		{
+			this->value.int64Value = value;
+			doRegister();
+		}
+
+		[[nodiscard]] StackDebugTrace(std::string_view name, double value)
+			: name(name)
+			, type(Type::Double)
+		{
+			this->value.doubleValue = value;
+			doRegister();
+		}
+
+#if defined(DEV_BUILD) || defined(_DEBUG)
+		~StackDebugTrace()
+		{
+			Debug::unregisterDebugTrace(*this);
+		}
+#endif
+
+		StackDebugTrace(const StackDebugTrace& other) = delete;
+		StackDebugTrace(StackDebugTrace&& other) = delete;
+		StackDebugTrace& operator=(const StackDebugTrace& other) = delete;
+		StackDebugTrace& operator=(StackDebugTrace&& other) = delete;
+
+		[[nodiscard]] std::string_view getName() const { return name; }
+		[[nodiscard]] bool isString() const { return type == Type::StringView; }
+		[[nodiscard]] std::string_view getValue(gsl::span<char> buffer) const;
+
+		void* operator new(size_t) = delete;
+		void* operator new(size_t, void*) = delete;
+
+	private:
+		enum class Type : uint8_t {
+			StringView,
+			Int64,
+			Double
+		};
+
+		std::string_view name;
+		std::string_view strValue;
+		union {
+			int64_t int64Value;
+			double doubleValue;
+		} value;
+		const Type type;
+
+		void doRegister() const
+		{
+#if defined(DEV_BUILD) || defined(_DEBUG)
+			Debug::registerDebugTrace(*this);
+#endif
+		}
 	};
 
 #if defined(DEV_BUILD) || defined(_DEBUG)

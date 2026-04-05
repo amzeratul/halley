@@ -68,8 +68,10 @@ namespace Halley {
 				return;
 			}
 
-			cat(" ");
-			cat(curPos - startFrom);
+			const auto index = curPos - startFrom;
+
+			cat(index < 10 ? "  " : " ");
+			cat(index);
 			cat(": ");
 			cat(entry.name);
 			if (entry.lineFileName[0] != 0) {
@@ -125,13 +127,14 @@ namespace Halley {
 
 		void printTraces(size_t stackPtr)
 		{
+			char buffer[32];
 			while (lastTrace > 0 && reinterpret_cast<size_t>(traces[lastTrace - 1]) < stackPtr) {
 				const auto* trace = traces[--lastTrace];
-				cat("    * ");
+				cat("    + ");
 				cat(trace->getName());
-				cat(": ");
-				cat(trace->getValue());
-				cat("\n");
+				cat(trace->isString() ? ": \"" : ": ");
+				cat(trace->getValue(buffer));
+				cat(trace->isString() ? "\"\n" : "\n");
 			}
 		}
 	};
@@ -396,28 +399,6 @@ bool Debug::isRunningFromDLL()
 
 #endif
 
-StackDebugTrace::StackDebugTrace(std::string_view name, std::string_view value)
-	: name(name)
-	, value(value)
-{
-	Debug::registerDebugTrace(*this);
-}
-
-StackDebugTrace::~StackDebugTrace()
-{
-	Debug::unregisterDebugTrace(*this);
-}
-
-std::string_view StackDebugTrace::getName() const
-{
-	return name;
-}
-
-std::string_view StackDebugTrace::getValue() const
-{
-	return value;
-}
-
 void Debug::registerDebugTrace(const StackDebugTrace& trace)
 {
 	stackDebugTraces += &trace;
@@ -522,6 +503,22 @@ void Debug::printLastTraces()
 		}
 		std::cout << std::endl;
 	}
+}
+
+std::string_view StackDebugTrace::getValue(gsl::span<char> buffer) const
+{
+	buffer[0] = 0;
+	switch (type) {
+	case Type::StringView:
+		return strValue;
+	case Type::Int64:
+		(void) snprintf(buffer.data(), buffer.size(), "%lli", value.int64Value);
+		return std::string_view(buffer.data(), strlen(buffer.data()));
+	case Type::Double:
+		(void) snprintf(buffer.data(), buffer.size(), "%f", value.doubleValue);
+		return std::string_view(buffer.data(), strlen(buffer.data()));
+	}
+	return {};
 }
 
 std::array<Debug::DebugTraceEntry, 32> Debug::lastTraces;
