@@ -547,6 +547,7 @@ std::pair<size_t, Time> Core::getFixedUpdateCount(Time time)
 
 void Core::fixedUpdate(Time time, bool multithreaded)
 {
+	const auto trace = StackDebugTrace("time", time);
 	fixedUpdateTime = std::max(fixedUpdateTime - time, 0.0);
 	
 	if (!multithreaded && game->shouldProcessEventsOnFixedUpdate()) {
@@ -562,7 +563,8 @@ void Core::fixedUpdate(Time time, bool multithreaded)
 }
 
 void Core::variableUpdate(Time time)
-{		
+{
+	const auto trace = StackDebugTrace("time", time);
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
 		try {

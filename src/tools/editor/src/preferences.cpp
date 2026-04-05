@@ -98,8 +98,8 @@ void Preferences::loadFromFile(SystemAPI& system)
 
 void Preferences::addRecent(Path path)
 {
-	auto name = path.string();
-	recents.erase(std::remove(recents.begin(), recents.end(), name), recents.end());
+	auto name = path.toString();
+	std_ex::erase(recents, name);
 	recents.insert(recents.begin(), name);
 	dirty = true;
 }

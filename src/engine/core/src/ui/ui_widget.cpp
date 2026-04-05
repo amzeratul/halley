@@ -27,13 +27,18 @@ UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Ve
 
 UIWidget::~UIWidget()
 {
-	HALLEY_DEBUG_TRACE_COMMENT(getDebugId());
+	const auto traceId = StackDebugTrace("widgetId", getId());
+#ifdef DEV_BUILD
+	const auto traceType = StackDebugTrace("widgetType", debugId);
+#endif
 
 	alive = false;
 	if (dataBind) {
 		dataBind->setWidget(nullptr);
 		dataBind.reset();
 	}
+
+	UIWidget::clear();
 }
 
 void UIWidget::doDraw(UIPainter& painter) const
@@ -41,7 +46,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	if (!isActive()) {
 		return;
 	}
-	
+
 	auto clip = painter.getClip();
 	if (clip && !ignoreClip()) {
 		if (!clip->overlaps(getRect())) {
@@ -49,7 +54,13 @@ void UIWidget::doDraw(UIPainter& painter) const
 		}
 	}
 
-	draw(painter);
+	{
+		const auto traceId = StackDebugTrace("widgetId", getId());
+#ifdef DEV_BUILD
+		const auto traceType = StackDebugTrace("widgetType", debugId);
+#endif
+		draw(painter);
+	}
 
 	if (childLayerAdjustment == 0) {
 		drawChildren(painter);
@@ -66,12 +77,19 @@ void UIWidget::doDraw(UIPainter& painter) const
 
 void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>& dst)
 {
+	const auto traceId = StackDebugTrace("widgetId", getId());
+#ifdef DEV_BUILD
+	const auto traceType = StackDebugTrace("widgetType", debugId);
+#endif
+
 	if (updateType == UIWidgetUpdateType::Full || updateType == UIWidgetUpdateType::First) {
 		setInputType(inputType);
 		setJoystickType(joystickType);
 	
 		if (validator) {
-			setEnabled(getValidator()->isEnabled());
+			if (const auto newValue = getValidator()->isEnabled(); newValue.has_value()) {
+				setEnabled(*newValue);
+			}
 		}
 
 		checkActive();
@@ -162,15 +180,15 @@ Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 	if (!isActive() && !force) {
 		return {};
 	}
-	Vector2f minSize = getMinimumSize();
+	const Vector2f minSize = getMinimumSize();
 
 	if (sizer) {
 		if (layoutNeeded > 0) {
 			--layoutNeeded;
-			auto border = getInnerBorder();
-			layoutSize = sizer->getLayoutMinimumSize(false);
+			const auto border = getInnerBorder();
+			layoutSize = sizer->getLayoutMinimumSize(false, Vector2f::max(getMinimumSize(), getSize()) - border.xy() - border.zw());
 			if (layoutSize.x > 0.1f || layoutSize.y > 0.1f) {
-				layoutSize += Vector2f(border.x + border.z, border.y + border.w);
+				layoutSize += border.xy() + border.zw();
 			}
 		}
 		return Vector2f::max(minSize, layoutSize);
@@ -188,7 +206,7 @@ void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
 		if (listener) {
 			onPreNotifySetRect(*listener);
 		}
-		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + size - Vector2f(border.z, border.w)), listener);
+		sizer->setRect(Rect4f(p0 + border.xy(), p0 + size - border.zw()), listener);
 	} else {
 		for (auto& c: getChildren()) {
 			c->layout();

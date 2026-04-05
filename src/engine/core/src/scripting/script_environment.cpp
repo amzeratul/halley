@@ -54,6 +54,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
 
+	const auto trace = StackDebugTrace("scriptId", currentGraph->getAssetId());
+
 	try {
 		auto& threads = graphState.getThreads();
 
@@ -131,7 +133,8 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
 		currentInputPin = thread.getCurInputPin();
-		HALLEY_DEBUG_TRACE_COMMENT(node.getType());
+
+		const auto trace = StackDebugTrace("nodeType", node.getType());
 
 		// Dead watcher
 		if (nodeState.threadCount == nodeState.watcherCount && thread.isWatcher()) {

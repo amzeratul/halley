@@ -76,6 +76,9 @@ namespace Halley
 		TextRenderer& setText(const String& text);
 		TextRenderer& setText(const StringUTF32& text);
 		TextRenderer& setText(const LocalisedString& text);
+		TextRenderer& setText(const String& text, bool& modifiedOut);
+		TextRenderer& setText(const StringUTF32& text, bool& modifiedOut);
+		TextRenderer& setText(const LocalisedString& text, bool& modifiedOut);
 		TextRenderer& setSize(float size);
 		TextRenderer& setFontSize(float size);
 		TextRenderer& setColour(Colour colour);

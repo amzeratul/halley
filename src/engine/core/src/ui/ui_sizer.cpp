@@ -165,18 +165,25 @@ UISizer& UISizer::operator=(UISizer&& other) noexcept
 
 Vector2f UISizer::getLayoutMinimumSize(bool force) const
 {
-	return computeMinimumSize(true);
+	return computeMinimumSize(true, {});
 }
 
-Vector2f UISizer::computeMinimumSize(bool includeProportional) const
+Vector2f UISizer::getLayoutMinimumSize(bool force, Vector2f sizeHint) const
+{
+	return computeMinimumSize(true, sizeHint);
+}
+
+Vector2f UISizer::computeMinimumSize(bool includeProportional, Vector2f sizeHint) const
 {
 	updateEnabled();
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
 		return computeMinimumSizeBox(includeProportional);
 	} else if (type == UISizerType::Free) {
-		return computeMinimumSizeBoxFree();
+		return computeMinimumSizeFree();
 	} else if (type == UISizerType::Grid) {
 		return computeMinimumSizeGrid();
+	} else if (type == UISizerType::Flow) {
+		return computeMinimumSizeFlow(sizeHint);
 	} else {
 		return {};
 	}
@@ -190,6 +197,8 @@ void UISizer::setRect(Rect4f rect, IUIElementListener* listener)
 		setRectFree(rect, listener);
 	} else if (type == UISizerType::Grid) {
 		setRectGrid(rect, listener);
+	} else if (type == UISizerType::Flow) {
+		setRectFlow(rect, listener);
 	}
 }
 
@@ -489,7 +498,7 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 	}
 }
 
-Vector2f UISizer::computeMinimumSizeBoxFree() const
+Vector2f UISizer::computeMinimumSizeFree() const
 {
 	return Vector2f(); // Free sizer doesn't have a minimum size
 
@@ -702,6 +711,63 @@ float UISizer::getRowProportion(int row) const
 		return rowProportions[row];
 	}
 	return 0.0f;
+}
+
+Vector2f UISizer::computeMinimumSizeFlow(Vector2f sizeHint) const
+{
+	Vector2f curPos;
+	Vector2f maxBounds;
+	int itemsThisRow = 0;
+
+	for (auto& e : entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		const auto minSize = e.getMinimumSize();
+		const auto border = e.getBorder();
+		const auto fullSize = minSize + border.xy() + border.zw();
+
+		if (itemsThisRow > 0 && curPos.x + fullSize.x >= sizeHint.x) {
+			// Doesn't fit this row, move to next (first item will always have to fit)
+			curPos = Vector2f(0, maxBounds.y + gap);
+			itemsThisRow = 0;
+		}
+
+		++itemsThisRow;
+		maxBounds = Vector2f::max(maxBounds, curPos + fullSize);
+		curPos.x += fullSize.x + gap;
+	}
+	return maxBounds;
+}
+
+void UISizer::setRectFlow(Rect4f origRect, IUIElementListener* listener)
+{
+	Vector2f curPos = origRect.getTopLeft();
+	float nextRowY = origRect.getTop();
+	int itemsThisRow = 0;
+
+	for (auto& e : entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		const auto minSize = e.getMinimumSize();
+		const auto border = e.getBorder();
+		const auto fullSize = minSize + border.xy() + border.zw();
+
+		if (itemsThisRow > 0 && curPos.x + fullSize.x >= origRect.getRight()) {
+			// Doesn't fit this row, move to next (first item will always have to fit)
+			curPos = Vector2f(origRect.getLeft(), nextRowY);
+			itemsThisRow = 0;
+		}
+
+		e.placeInside(curPos + border.xy() + Rect4f(Vector2f(), minSize), origRect, minSize, listener, *this);
+
+		++itemsThisRow;
+		nextRowY = std::max(nextRowY, curPos.y + fullSize.y + gap);
+		curPos.x += fullSize.x + gap;
+	}
 }
 
 void UISizer::sortChildrenBySizerOrder()

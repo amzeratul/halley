@@ -33,6 +33,8 @@ World& EntityFactory::getWorld()
 
 EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, WorldPartitionId worldPartition, String variant)
 {
+	const auto trace = StackDebugTrace("prefabAssetId", prefab->getAssetId());
+
 	EntityScene curScene(allowReload, worldPartition, variant);
 	try {
 		Vector<EntityRef> entities;
@@ -370,6 +372,8 @@ void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
 
 EntityRef EntityFactory::createEntity(const String& prefabName, EntityRef parent, EntityScene* scene)
 {
+	const auto trace = StackDebugTrace("prefabName", prefabName);
+
 	EntityData data(UUID::generate());
 	data.setPrefab(prefabName);
 	const int mask = makeMask(EntitySerialization::Type::Prefab);
@@ -386,6 +390,7 @@ EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRe
 
 void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
 {
+	const auto trace = StackDebugTrace("entityName", entity.getName());
 	HalleyAssertDev(entity.isValid());
 	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, fallbackVariant);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);

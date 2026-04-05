@@ -45,10 +45,9 @@ namespace Halley {
 		String();
 		String(const char* utf8);
 		String(const char* utf8, size_t bytes);
-#if __cplusplus >= 202002L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
 		String(const char8_t* utf8);
-#endif
 		String(std::string_view strView);
+		String(std::u8string_view strView);
 		String(const std::basic_string<Character>& str);
 		String(std::basic_string<Character>&& str);
 		String(const String& str) noexcept;
@@ -84,20 +83,26 @@ namespace Halley {
 		String& trimBoth();
 
 		[[nodiscard]] bool contains(Character chr) const;
-		[[nodiscard]] bool contains(const std::string_view& string, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] bool contains(std::string_view string, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] bool contains(std::u8string_view string, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 		[[nodiscard]] size_t find(std::string_view str, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] size_t find(std::u8string_view str, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 
-		[[nodiscard]] String replaceAll(const std::string_view& before, const std::string_view& after) const;
-		[[nodiscard]] String replaceOne(const std::string_view& before, const std::string_view& after) const;
+		[[nodiscard]] String replaceAll(std::string_view before, std::string_view after) const;
+		[[nodiscard]] String replaceAll(std::u8string_view before, std::u8string_view after) const;
+		[[nodiscard]] String replaceOne(std::string_view before, std::string_view after) const;
+		[[nodiscard]] String replaceOne(std::u8string_view before, std::u8string_view after) const;
 		void shrink();
 
 		[[nodiscard]] String left(size_t n) const;
 		[[nodiscard]] String right(size_t n) const;
 		[[nodiscard]] String mid(size_t start, size_t count = npos) const;
 
-		[[nodiscard]] bool startsWith(const std::string_view& string, bool caseSensitive = true) const;
+		[[nodiscard]] bool startsWith(std::string_view string, bool caseSensitive = true) const;
+		[[nodiscard]] bool startsWith(std::u8string_view string, bool caseSensitive = true) const;
 		[[nodiscard]] bool startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive = true) const;
-		[[nodiscard]] bool endsWith(const std::string_view& string, bool caseSensitive = true) const;
+		[[nodiscard]] bool endsWith(std::string_view string, bool caseSensitive = true) const;
+		[[nodiscard]] bool endsWith(std::u8string_view string, bool caseSensitive = true) const;
 
 		void writeText(const Character* src, size_t len, size_t &pos);
 		void writeChar(const Character &src, size_t &pos);
@@ -196,13 +201,24 @@ namespace Halley {
 		String& operator += (const int &p);
 		String& operator += (const Character &p);
 
-		bool operator== (const std::string_view& rhp) const;
-		bool operator!= (const std::string_view& rhp) const;
-		bool operator> (const std::string_view& rhp) const;
-		bool operator<= (const std::string_view& rhp) const;
-		bool operator>= (const std::string_view& rhp) const;
+		bool operator== (const String& rhp) const = default;
+		bool operator== (const char* rhp) const;
+		bool operator== (const char8_t* rhp) const;
+		bool operator== (std::string_view rhp) const;
+		bool operator== (std::u8string_view rhp) const;
+		bool operator!= (const String& rhp) const = default;
+		bool operator!= (const char* rhp) const;
+		bool operator!= (const char8_t* rhp) const;
+		bool operator!= (std::string_view rhp) const;
+		bool operator!= (std::u8string_view rhp) const;
+		std::strong_ordering operator<=> (const String& rhp) const;
+		std::strong_ordering operator<=> (const char* rhp) const;
+		std::strong_ordering operator<=> (const char8_t* rhp) const;
+		std::strong_ordering operator<=> (std::string_view rhp) const;
+		std::strong_ordering operator<=> (std::u8string_view rhp) const;
 
 		operator std::string_view() const noexcept { return str; }
+		explicit operator std::u8string_view() const noexcept { return std::u8string_view(reinterpret_cast<const char8_t*>(str.c_str()), str.length()); }
 		const String& toString() const { return *this; }
 
 		[[nodiscard]] size_t getSizeBytes() const;
@@ -230,13 +246,15 @@ namespace Halley {
 	std::ostream& operator<< (std::ostream& os, const String& rhp);
 	std::istream& operator>> (std::istream& is, String& rhp);
 
-	bool operator< (const String& lhp, const String& rhp);
-	bool operator< (const String& lhp, const std::string_view& rhp);
-	bool operator< (const std::string_view& lhp, const String& rhp);
-
-	bool operator< (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
-	bool operator< (const StringUTF32& lhp, const std::basic_string_view<char32_t>& rhp);
+	std::strong_ordering operator<=> (std::string_view lhp, const String& rhp);
+	std::strong_ordering operator<=> (std::u8string_view lhp, const String& rhp);
+	std::strong_ordering operator<=> (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
+	bool operator== (std::string_view lhp, const String& rhp);
+	bool operator== (std::u8string_view lhp, const String& rhp);
 	bool operator== (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
+	bool operator!= (std::string_view lhp, const String& rhp);
+	bool operator!= (std::u8string_view lhp, const String& rhp);
+	bool operator!= (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
 
 	using StringArray = Vector<String>;
 }
