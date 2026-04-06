@@ -302,8 +302,6 @@ bool VideoOpenGL::isLoaderThread() const
 
 void VideoOpenGL::startRender()
 {
-	HALLEY_DEBUG_TRACE();
-
 	context->bind();
 
 	// TODO
@@ -318,10 +316,7 @@ void VideoOpenGL::startRender()
 
 void VideoOpenGL::finishRender()
 {
-	HALLEY_DEBUG_TRACE();
 	flip();
-	HALLEY_DEBUG_TRACE();
-
 	glCheckError();
 }
 

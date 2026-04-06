@@ -275,8 +275,6 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 
 void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition)
 {
-	HALLEY_DEBUG_TRACE();
-
 	// First, make sure other doesn't have any pending entities that actually need deletion
 	other.spawnPending();
 
@@ -317,7 +315,6 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 
 	// Update me
 	spawnPending();
-	HALLEY_DEBUG_TRACE();
 }
 
 bool World::tryDestroyEntity(EntityId id)
@@ -661,13 +658,11 @@ void World::step(TimeLine timeline, Time elapsed)
 {
 	//ProfilerEvent event(timeline == TimeLine::FixedUpdate ? ProfilerEventType::WorldFixedUpdate : ProfilerEventType::WorldVariableUpdate);
 
-	HALLEY_DEBUG_TRACE();
 	spawnPending();
 
 	initSystems(std::to_array({ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render }));
 	updateSystems(timeline, elapsed);
 	processSystemMessages(timeline);
-	HALLEY_DEBUG_TRACE();
 }
 
 void World::render(RenderContext& rc)
@@ -688,14 +683,12 @@ void World::allocateEntity(Entity* entity) {
 void World::spawnPending()
 {
 	if (!entitiesPendingCreation.empty()) {
-		HALLEY_DEBUG_TRACE();
 		for (auto& e : entitiesPendingCreation) {
 			e->onReady();
 		}
 		std::move(entitiesPendingCreation.begin(), entitiesPendingCreation.end(), std::insert_iterator<decltype(entities)>(entities, entities.end()));
 		entitiesPendingCreation.clear();
 		entityDirty = true;
-		HALLEY_DEBUG_TRACE();
 	}
 
 	updateEntities();
@@ -711,7 +704,6 @@ void World::updateEntities()
 
 	entityDirty = false;
 
-	HALLEY_DEBUG_TRACE();
 	size_t nEntities = entities.size();
 
 	Vector<size_t> entitiesRemoved;
@@ -765,7 +757,6 @@ void World::updateEntities()
 
 	entityReloaded = false;
 
-	HALLEY_DEBUG_TRACE();
 	// Go through every family adding/removing entities as needed
 	if (maskStorage) {
 		for (auto& todo: pending) {
@@ -800,13 +791,11 @@ void World::updateEntities()
 		}
 	}
 
-	HALLEY_DEBUG_TRACE();
 	// Update families
 	for (auto& iter : families) {
 		iter->updateEntities();
 	}
 	
-	HALLEY_DEBUG_TRACE();
 	// Actually remove dead entities
 	if (!entitiesRemoved.empty()) {
 		size_t livingEntityCount = entities.size();
@@ -824,13 +813,10 @@ void World::updateEntities()
 		}
 		entities.resize(livingEntityCount);
 	}
-
-	HALLEY_DEBUG_TRACE();
 }
 
 void World::initSystems(gsl::span<const TimeLine> timelines)
 {
-	HALLEY_DEBUG_TRACE();
 	for (auto& tl: timelines) {
 		for (auto& system : systems[int(tl)]) {
 			// If the system is initialised, also check for any entities that need spawning
@@ -840,30 +826,25 @@ void World::initSystems(gsl::span<const TimeLine> timelines)
 			}
 		}
 	}
-	HALLEY_DEBUG_TRACE();
 }
 
 void World::updateSystems(TimeLine timeline, Time elapsed)
 {
-	HALLEY_DEBUG_TRACE();
 	for (auto& system : getSystems(timeline)) {
 		updateMemoryPool->reset();
 		system->doUpdate(elapsed);
 		spawnPending();
 		updateMemoryPool->reset();
 	}
-	HALLEY_DEBUG_TRACE();
 }
 
 void World::renderSystems(RenderContext& rc) const
 {
-	HALLEY_DEBUG_TRACE();
 	for (auto& system : getSystems(TimeLine::Render)) {
 		renderMemoryPool->reset();
 		system->doRender(rc);
 		renderMemoryPool->reset();
 	}
-	HALLEY_DEBUG_TRACE();
 }
 
 Family& World::addFamily(std::unique_ptr<Family> family) noexcept
@@ -912,7 +893,6 @@ const Vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 
 void World::processSystemMessages(TimeLine timeline)
 {
-	HALLEY_DEBUG_TRACE();
 	auto& pool = timeline == TimeLine::Render ? renderMemoryPool : updateMemoryPool;
 
 	bool keepRunning = true;
@@ -938,7 +918,6 @@ void World::processSystemMessages(TimeLine timeline)
 		pool->reset();
 	}
 	pendingSystemMessages[static_cast<int>(timeline)].clear();
-	HALLEY_DEBUG_TRACE();
 }
 
 bool World::isEntityNetworkOwner(EntityId entityId) const

@@ -452,61 +452,6 @@ void Debug::printCallStackToUnsafe(std::ostream& out, int skip)
 #endif
 }
 
-void Debug::trace(const char* filename, int line, std::string_view arg)
-{
-	auto& trace = lastTraces[tracePos.fetch_add(1) % lastTraces.size()];
-	trace.filename = filename;
-	trace.line = line;
-
-	//Logger::logDev(String(filename) + ":" + line + " - " + (arg.empty() ? String() : String(arg)));
-
-	if (!arg.empty()) {
-		size_t len = std::min(trace.arg.size() - 1, arg.length());
-		memcpy(trace.arg.data(), arg.data(), len);
-		trace.arg[len] = 0;
-	} else {
-		trace.arg[0] = 0;
-	}
-}
-
-String Debug::getLastTraces()
-{
-	std::stringstream result;
-	const size_t n = lastTraces.size();
-	const int startPos = tracePos;
-	for (size_t i = 0; i < n; ++i) {
-		auto& trace = lastTraces[(i + startPos) % n];
-		result << " - " + String(trace.filename) + ":" + toString(trace.line);
-		if (trace.arg[0] != 0) {
-			result << String(" [") + trace.arg.data() + "]";
-		}
-		if (i == n - 1) {
-			result << " [latest]";
-		}
-		result << "\n";
-	}
-	return result.str();
-}
-
-void Debug::printLastTraces()
-{
-	const size_t n = lastTraces.size();
-	for (size_t i = 0; i < n; ++i) {
-		auto& trace = lastTraces[(i + tracePos) % n];
-		if (!trace.filename) {
-			break;
-		}
-		std::cout << " - " << trace.filename << ":" << toString(trace.line);
-		if (trace.arg[0] != 0) {
-			std::cout << " [" << trace.arg.data() << "]";
-		}
-		if (i == n - 1) {
-			std::cout << " [latest]";
-		}
-		std::cout << std::endl;
-	}
-}
-
 std::string_view StackDebugTrace::getValue(gsl::span<char> buffer) const
 {
 	buffer[0] = 0;
@@ -523,7 +468,5 @@ std::string_view StackDebugTrace::getValue(gsl::span<char> buffer) const
 	return {};
 }
 
-std::array<Debug::DebugTraceEntry, 32> Debug::lastTraces;
-std::atomic<int> Debug::tracePos = 0;
 Mutex Debug::mutex;
 thread_local Vector<const StackDebugTrace*> Debug::stackDebugTraces;

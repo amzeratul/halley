@@ -43,8 +43,6 @@ void TextureRenderTargetOpenGL::update()
 	if (dirty) {
 		dirty = false;
 
-		HALLEY_DEBUG_TRACE();
-
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glCheckError();
 
@@ -67,8 +65,6 @@ void TextureRenderTargetOpenGL::update()
 			msgs[GL_FRAMEBUFFER_UNSUPPORTED] = "GL_FRAMEBUFFER_UNSUPPORTED";
 			throw Exception("Unable to set up framebuffer: error " + msgs[status], HalleyExceptions::VideoPlugin);
 		}
-
-		HALLEY_DEBUG_TRACE();
 	}
 }
 

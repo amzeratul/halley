@@ -113,7 +113,6 @@ HalleyStatics& Core::getStatics()
 
 void Core::onSuspended()
 {
-	HALLEY_DEBUG_TRACE();
 	if (api->videoInternal) {
 		api->videoInternal->onSuspend();
 	}
@@ -134,12 +133,10 @@ void Core::onSuspended()
 
 	std::cout.flush();
 	out.reset();
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::onReloaded()
 {
-	HALLEY_DEBUG_TRACE();
 	if (game->shouldCreateSeparateConsole()) {
 		setOutRedirect(true);
 	}
@@ -163,7 +160,6 @@ void Core::onReloaded()
 	if (api->videoInternal) {
 		api->videoInternal->onResume();
 	}
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::onTerminatedInError(std::string_view error)
@@ -176,8 +172,6 @@ void Core::onTerminatedInError(std::string_view error)
 
 	OS::get().displayError((game ? game->getName() : String("Halley")) + " has aborted with an unhandled exception: \n\n" + error);
 
-	std::cout << ConsoleColour(Console::RED) << "Last traces:\n" << ConsoleColour(Console::DARK_RED);
-	Debug::printLastTraces();
 	std::cout << "\nEnd of traces." << ConsoleColour() << std::endl;
 	hasError = true;
 }
@@ -689,9 +683,7 @@ void Core::showComputerInfo() const
 
 void Core::setStage(StageID stage)
 {
-	HALLEY_DEBUG_TRACE();
 	setStage(game->makeStage(stage));
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::setStage(std::unique_ptr<Stage> next)
@@ -753,9 +745,7 @@ bool Core::transitionStage()
 
         // Get rid of current stage
 		if (currentStage) {
-			HALLEY_DEBUG_TRACE();
 			currentStage.reset();
-			HALLEY_DEBUG_TRACE();
 		}
 
 		// Update stage
@@ -766,9 +756,7 @@ bool Core::transitionStage()
 
 		// Prepare next stage
 		if (currentStage) {
-			HALLEY_DEBUG_TRACE();
 			initStage(*currentStage);
-			HALLEY_DEBUG_TRACE();
 		} else {
 			quit(0);
 		}

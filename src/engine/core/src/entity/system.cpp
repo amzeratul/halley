@@ -50,9 +50,8 @@ size_t System::getEntityCount() const
 bool System::tryInit()
 {
 	if (!initialised) {
-		HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
+		const auto trace = StackDebugTrace("name", name);
 		initBase();
-		HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 		initialised = true;
 		return true;
 	}
@@ -211,7 +210,7 @@ void System::sendSystemMessageConfig(const String& targetSystem, const String& m
 }
 
 void System::doUpdate(Time time) {
-	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
+	const auto trace = StackDebugTrace("name", name);
 	ProfilerEvent event(ProfilerEventType::WorldSystemUpdate, name, reinterpret_cast<uint64_t>(this));
 
 	if (!messageTypesReceived.empty()) {
@@ -224,7 +223,6 @@ void System::doUpdate(Time time) {
 	
 	updateBase(time);
 	dispatchMessages();
-	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }
 
 void System::doRender(RenderContext& rc) {
@@ -234,6 +232,4 @@ void System::doRender(RenderContext& rc) {
 	
 	ProfilerEvent event(ProfilerEventType::WorldSystemRender, name, reinterpret_cast<uint64_t>(this));
 	renderBase(rc);
-
-	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }

@@ -51,26 +51,13 @@ namespace Halley {
 		[[nodiscard]] static std::string_view getCallStackUnsafe(int skip = 3); // Not thread safe, use in unsafe environments
 		static void printCallStackToUnsafe(std::ostream& out, int skip); // Not thread safe, use in unsafe environments
 
-		static void trace(const char* filename, int line, std::string_view arg = {});
-		[[nodiscard]] static String getLastTraces();
-		static void printLastTraces();
-
 		static void abort();
 		static void abort(std::string_view message);
 
 		static bool isRunningFromDLL();
 
 	private:
-		struct DebugTraceEntry
-		{
-			const char* filename = nullptr;
-			int line = 0;
-			std::array<char, 244> arg = {};
-		};
-
 		static bool debugging;
-		static std::array<DebugTraceEntry, 32> lastTraces;
-		static std::atomic<int> tracePos;
 		static Mutex mutex;
 
 		static thread_local Vector<const StackDebugTrace*> stackDebugTraces;
@@ -148,14 +135,4 @@ namespace Halley {
 #endif
 		}
 	};
-
-#if defined(DEV_BUILD) || defined(_DEBUG)
-	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)
-	#define HALLEY_DEBUG_TRACE_COMMENT(str) Halley::Debug::trace(__FILE__, __LINE__, (str))
-	#define HALLEY_DEBUG_TRACE_THIS() Halley::Debug::trace(__FILE__, __LINE__, typeid(*this).name())
-#else
-	#define HALLEY_DEBUG_TRACE() (static_cast<void>(0))
-	#define HALLEY_DEBUG_TRACE_COMMENT(str) (static_cast<void>(0))
-	#define HALLEY_DEBUG_TRACE_THIS() (static_cast<void>(0))
-#endif
 }
