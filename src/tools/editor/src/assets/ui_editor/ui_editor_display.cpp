@@ -140,7 +140,10 @@ void UIEditorDisplay::clearDisplay()
 void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 {
 	clearDisplay();
-	editor->getGameFactory().loadUI(*displayRoot, uiDefinition, this);
+	auto& factory = editor->getGameFactory();
+	factory.pushConditions({ "uiEditor" });
+	factory.loadUI(*displayRoot, uiDefinition, this);
+	factory.popConditions();
 	updateCurWidget();
 }
 

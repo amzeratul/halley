@@ -87,6 +87,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
 		std::shared_ptr<UIWidget> makeUIWithHotReload(const String& configName, IUIReloadObserver* observer = nullptr);
 		std::shared_ptr<UIWidget> makeUI(const String& configName, Vector<String> conditions);
+		std::shared_ptr<UIWidget> makeUI(const UIDefinition& definition, Vector<String> conditions);
 		std::shared_ptr<UIWidget> makeUI(const UIDefinition& definition);
 
 		void loadUI(UIWidget& target, const String& configName, IUIReloadObserver* observer = nullptr);
@@ -201,6 +202,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeCustomPaint(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeResizeDivider(const ConfigNode& node);
         std::shared_ptr<UIWidget> makeScene3d(const ConfigNode& node);
+        std::shared_ptr<UIWidget> makePlaceholder(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
 
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
@@ -234,6 +236,7 @@ namespace Halley
 		UIFactoryWidgetProperties getCustomPaintProperties() const;
 		UIFactoryWidgetProperties getResizeDividerProperties() const;
         UIFactoryWidgetProperties getScene3dProperties() const;
+        UIFactoryWidgetProperties getPlaceholderProperties() const;
 
 		std::shared_ptr<UIBehaviour> makeSlideBehaviour(const ConfigNode& node);
 		std::shared_ptr<UIBehaviour> makeFadeBehaviour(const ConfigNode& node);

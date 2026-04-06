@@ -64,16 +64,16 @@ namespace Halley {
 				curPos = 0;
 			}
 
-			if (++curPos < startFrom) {
+			auto entryName = std::string_view(entry.name);
+			if (++curPos < startFrom || (displayIndex == 0 && (entryName.starts_with("Halley::Exception") || entryName.starts_with("Halley::Debug")))) {
 				return;
 			}
 
-			const auto index = curPos - startFrom;
-
+			const auto index = displayIndex++;
 			cat(index < 10 ? "  " : " ");
 			cat(index);
 			cat(": ");
-			cat(entry.name);
+			cat(entryName);
 			if (entry.lineFileName[0] != 0) {
 				const char* lastSlash = strrchr(entry.lineFileName, '\\');
 				if (lastSlash) {
@@ -102,7 +102,7 @@ namespace Halley {
 
 		int startFrom = 0;
 		int curPos = 0;
-		int offset = 0;
+		int displayIndex = 0;
 
 		void cat(std::string_view str)
 		{
@@ -418,7 +418,7 @@ String Debug::getCallStack(int skip)
 	// NB: StackWalker isn't thread-safe - uses mutex if multiple sources are trying to retrieve
 	// callstacks at the same time, for example in the Editor when hitting asset build errors.
 	UniqueLock lock(mutex);
-	return String(getCallStackUnsafe(skip + 1));
+	return String(getCallStackUnsafe(skip));
 #else
 	return {};
 #endif
@@ -428,7 +428,7 @@ std::string_view Debug::getCallStackUnsafe(int skip)
 {
 #if defined(HAS_STACKWALKER)
 	char buffer[64 * 1024]; // As Bill Gates once famously said...
-	return getCallStackUnsafe(buffer, skip + 1);
+	return getCallStackUnsafe(buffer, skip);
 #else
 	return {};
 #endif
@@ -448,7 +448,7 @@ std::string_view Debug::getCallStackUnsafe(gsl::span<char> dst, int skip)
 void Debug::printCallStackToUnsafe(std::ostream& out, int skip)
 {
 #if defined(HAS_STACKWALKER)
-	out << getCallStackUnsafe(skip + 1);
+	out << getCallStackUnsafe(skip);
 #endif
 }
 
