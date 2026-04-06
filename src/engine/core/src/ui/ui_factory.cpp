@@ -1937,7 +1937,7 @@ std::shared_ptr<UIWidget> UIFactory::makePlaceholder(const ConfigNode& entryNode
 	if (hasCondition("uiEditor")) {
 		const auto& node = entryNode["widget"];
 		if (const auto uiDef = node["ui"].asString(""); !uiDef.isEmpty()) {
-			if (auto widget = makeUI(uiDef)) {
+			if (auto widget = makeUI(uiDef, conditions)) {
 				auto children = makeSizer(entryNode);
 				const auto childContainerId = node["childContainerId"].asString("");
 				if (!childContainerId.isEmpty()) {

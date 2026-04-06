@@ -236,7 +236,9 @@ UUID UIEditorDisplay::getUUIDOfWidgetClicked(const UIWidget& widget) const
 	// NB: this algorithm is garbage
 	for (const auto& [k, v]: elements) {
 		if (v.get() == &widget) {
-			return k;
+			if (editor->hasWidget(k.toString())) {
+				return k;
+			}
 		}
 	}
 

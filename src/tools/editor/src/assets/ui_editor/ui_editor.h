@@ -41,6 +41,7 @@ namespace Halley {
         void deleteWidgets(const Vector<String>& ids);
 
 		void selectWidget(const String& id);
+		bool hasWidget(const String& id) const;
 		bool isEditingHalleyUI() const;
 
 	protected:
