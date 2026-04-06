@@ -794,6 +794,12 @@ void UIWidget::setParent(UIParent* p)
 {
 	HalleyAssertDev((parent == nullptr) ^ (p == nullptr));
 
+#ifdef DEV_BUILD
+	if (!debugId) {
+		debugId = typeid(*this).name();
+	}
+#endif
+
 	if (p) {
 		if (!root) {
 			auto* parentRoot = p->getRoot();
@@ -825,10 +831,6 @@ void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 	if (this->root != &root) {
 		lastInputType = root.getLastInputType();
 		this->root = &root;
-
-#ifdef DEV_BUILD
-		debugId = typeid(*this).name();
-#endif
 
 		onAddedToRoot(root);
 
