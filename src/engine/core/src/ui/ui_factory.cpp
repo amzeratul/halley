@@ -1713,6 +1713,17 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 
 void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const String& inputConfigName)
 {
+	list.setDragEnabled(node["canDrag"].asBool(false));
+	list.setDragOutsideEnabled(node["canDragOutside"].asBool(false));
+	list.setReorderWhenDragging(node["reorderWhenDragging"].asBool(true));
+	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
+	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
+	list.setMultiSelect(node["multiSelect"].asBool(false));
+	list.setAcceptKeyboardInput(node["acceptKeyboardInput"].asBool(true));
+	list.setFocusable(node["focusable"].asBool(true));
+	list.setRequiresSelection(node["requiresSelection"].asBool(true));
+	list.setShowSelection(node["showSelection"].asBool(true));
+
 	applyInputButtons(list, node["inputButtons"].asString(inputConfigName));
 
 	const auto options = parseOptions(node["options"]);
@@ -1753,17 +1764,6 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 
 		list.setItemActive(o.id, o.active);
 	}
-
-	list.setDragEnabled(node["canDrag"].asBool(false));
-	list.setDragOutsideEnabled(node["canDragOutside"].asBool(false));
-	list.setReorderWhenDragging(node["reorderWhenDragging"].asBool(true));
-	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
-	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
-	list.setMultiSelect(node["multiSelect"].asBool(false));
-	list.setAcceptKeyboardInput(node["acceptKeyboardInput"].asBool(true));
-	list.setFocusable(node["focusable"].asBool(true));
-	list.setRequiresSelection(node["requiresSelection"].asBool(true));
-	list.setShowSelection(node["showSelection"].asBool(true));
 }
 
 UIFactoryWidgetProperties UIFactory::getBaseListProperties(bool includeOptions) const
