@@ -29,7 +29,7 @@ UIWidget::~UIWidget()
 {
 	const auto traceId = StackDebugTrace("widgetId", getId());
 #ifdef DEV_BUILD
-	const auto traceType = StackDebugTrace("widgetType", debugId);
+	const auto traceType = StackDebugTrace("widgetType", debugId ? std::string_view(debugId) : std::string_view());
 #endif
 
 	alive = false;

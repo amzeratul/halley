@@ -106,9 +106,11 @@ namespace Halley {
 
 		void cat(std::string_view str)
 		{
-			const size_t toWrite = std::min(str.length(), dst.size() - curWritePos);
-			memcpy(dst.data() + curWritePos, str.data(), toWrite);
-			curWritePos += toWrite;
+			if (!str.empty()) {
+				const size_t toWrite = std::min(str.length(), dst.size() - curWritePos);
+				memcpy(dst.data() + curWritePos, str.data(), toWrite);
+				curWritePos += toWrite;
+			}
 		}
 
 		void cat(int value)
