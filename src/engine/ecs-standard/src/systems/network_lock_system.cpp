@@ -67,7 +67,7 @@ public:
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId) const override
 	{
-		if (const NetworkFamily* e = networkFamily.tryFind(targetId)) {
+		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
 			if (iter != e->network.locks.end()) {
 				return iter->second == getMyPeerId() ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
@@ -81,7 +81,7 @@ public:
 
 	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const override
 	{
-		if (const NetworkFamily* e = networkFamily.tryFind(targetId)) {
+		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
 			if (iter != e->network.locks.end()) {
 				if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
@@ -266,18 +266,18 @@ private:
 
 	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority, bool destroyOnUnlock)
 	{
-		std::pair<bool, std::optional<EntityNetworkId>> result = {false, {}};
+		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
 
 		if (!targetId.isValid()) {
 			Logger::logDev("Peer attempted to lock invalid entity.");
-			return result;
+			return {false, {}};
 		}
 
-		const auto* e = networkFamily.tryFind(targetId);
+		const auto* e = tryFindNetworkRoot(targetId);
 		if (e) {
 			if (e->network.ownerId.value_or(0) != getMyPeerId()) {
 				Logger::logError("Peer attempted to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
-				return result;
+				return {false, {}};
 			}
 
 			auto& locks = e->network.locks;
@@ -298,7 +298,7 @@ private:
 					return result;
 				} else {
 					// Tries to unlock non-existing lock
-					return result;
+					return {false, {}};
 				}
 			} else if (iter->second == peerId) {
 				// Lock exists, locked by this peer
@@ -323,14 +323,14 @@ private:
 				}
 			} else {
 				// Lock exists, locked by someone else
-				return result;
+				return {false, {}};
 			}
 		} else {
 			// Entity not found
 			if (const auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
 				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity");
 			}
-			return result;
+			return {false, {}};
 		}
 	}
 
@@ -367,7 +367,7 @@ private:
             return {false, {}};
         }
 
-        const auto* e = networkFamily.tryFind(targetId);
+        const auto* e = tryFindNetworkRoot(targetId);
         if (!e) {
             Logger::logWarning("Trying to change authority of entity " + toString(targetId.value & 0xffffffff) + " which is unknown, or not a network entity");
             return {false, {}};
@@ -406,6 +406,33 @@ private:
 
 		return result;
     }
+
+	[[nodiscard]] const NetworkFamily* tryFindNetworkRoot(EntityId entityId) const
+	{
+		if (const auto* e = networkFamily.tryFind(entityId)) {
+			return e;
+		}
+
+		const auto entityRef = tryFindNetworkRoot(getWorld().tryGetEntity(entityId));
+		return entityRef.isValid() ? networkFamily.tryFind(entityRef.getEntityId()) : nullptr;
+	}
+
+	[[nodiscard]] static ConstEntityRef tryFindNetworkRoot(ConstEntityRef entityRef)
+	{
+		if (!entityRef.isValid()) {
+			return {};
+		}
+
+		if (entityRef.hasComponent<NetworkComponent>()) {
+			return entityRef;
+		}
+
+		if (entityRef.hasParent()) {
+			return tryFindNetworkRoot(entityRef.getParent());
+		}
+
+		return {};
+	}
 };
 
 REGISTER_SYSTEM(NetworkLockSystem)
