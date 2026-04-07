@@ -116,7 +116,12 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int 
 	}
 
 	if (!world->isEntityNetworkAuthority(e)) {
-		world->sendNetworkMessage(entityId, id, std::move(msg));
+		if (world->isNetworkConnected()) {
+			world->sendNetworkMessage(entityId, id, std::move(msg));
+		} else {
+			// Seen this happen if message overlaps with disconnect of host (or peer that has authority).
+			Logger::logWarning("Failed to send message to remote entity, no connection", true);
+		}
 	} else {
 		outbox.emplace_back(std::make_pair(MessageEntry(std::move(msg), id, systemId), entityId));
 	}
