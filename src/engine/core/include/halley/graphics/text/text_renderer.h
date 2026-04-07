@@ -66,7 +66,7 @@ namespace Halley
 	class TextRenderer
 	{
 	public:
-		using SpriteFilter = std::function<void(gsl::span<Sprite>)>;
+		using SpriteFilter = std::function<void(gsl::span<Sprite>, const TextRenderer&)>;
 
 		TextRenderer();
 		explicit TextRenderer(std::shared_ptr<const Font> font, const String& text = "", float size = 20, Colour colour = Colour(1, 1, 1, 1), float outline = 0, Colour outlineColour = Colour(0, 0, 0, 1));

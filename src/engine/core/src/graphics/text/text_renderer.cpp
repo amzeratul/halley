@@ -504,7 +504,7 @@ void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 	if (spriteFilter) {
 		// We don't know what the user will do with glyphs, so mark them as dirty
-		spriteFilter(gsl::span<Sprite>(spritesCache.data(), spritesCache.size()));
+		spriteFilter(gsl::span<Sprite>(spritesCache.data(), spritesCache.size()), *this);
 		markSpritesDirty();
 		positionDirty = true;
 	}
