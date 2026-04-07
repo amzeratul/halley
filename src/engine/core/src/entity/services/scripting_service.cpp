@@ -62,6 +62,8 @@ ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression,
 		return ConfigNode();
 	}
 
+	const auto trace = StackDebugTrace("expression", expression.getExpression());
+
 	if (useResultCache) {
 		if (auto iter = resultCache.find(expression.getExpression()); iter != resultCache.end()) {
 			return ConfigNode(iter->second);

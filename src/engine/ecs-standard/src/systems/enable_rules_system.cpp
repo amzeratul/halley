@@ -27,6 +27,7 @@ public:
 	{
 		const auto& enableRules = e.getEnableRules();
 		if (!enableRules.isEmpty()) {
+			const auto trace = StackDebugTrace("entityName", e.getName());
 			e.setEnabled(getEnableRulesService().evaluateEnableRules(enableRules));
 		}
 	}
