@@ -97,7 +97,7 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optio
 	}
 }
 
-void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
+void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter, bool waitForLoad) // static
 {
 	if (sprites.empty()) {
 		return;
@@ -105,6 +105,11 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 
 	auto& material = sprites[0].material;
 	HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+	
+	if (!waitForLoad && !material->areAllTexturesLoaded()) {
+		material->markInActiveUse();
+		return;
+	}
 
 	size_t spriteSize = sizeof(SpriteVertexAttrib) + 16;
 	char buffer[4096];
@@ -127,7 +132,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	painter.drawSprites(material, sprites.size(), vertexData);
 }
 
-void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter)
+void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter, bool waitForLoad)
 {
 	if (n == 0) {
 		return;
@@ -138,12 +143,12 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 	for (size_t i = 0; i < n; ++i) {
 		auto* material = sprites[i].material.get();
 		if (material != lastMaterial) {
-			draw(gsl::span<const Sprite>(sprites + start, i - start), painter);
+			draw(gsl::span<const Sprite>(sprites + start, i - start), painter, waitForLoad);
 			start = i;
 			lastMaterial = material;
 		}
 	}
-	draw(gsl::span<const Sprite>(sprites + start, n - start), painter);
+	draw(gsl::span<const Sprite>(sprites + start, n - start), painter, waitForLoad);
 }
 
 Rect4f Sprite::getLocalAABB() const

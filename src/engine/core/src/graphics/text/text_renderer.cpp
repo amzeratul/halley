@@ -515,7 +515,7 @@ void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) 
 		painter.setRelativeClip(finalClip.value());
 	}
 	
-	Sprite::drawMixedMaterials(spritesCache.data(), spritesCache.size(), painter);
+	Sprite::drawMixedMaterials(spritesCache.data(), spritesCache.size(), painter, false);
 
 	if (finalClip) {
 		painter.setClip();
