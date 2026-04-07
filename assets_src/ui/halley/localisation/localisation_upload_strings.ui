@@ -134,8 +134,20 @@ children:
               class: button
               icon: ui/upload.png
               id: upload
-              size: [120, 0]
+              size: [140, 0]
               text: Upload!
+            fill: [right, fillVertical]
+          - uuid: 5928c17c-97bd-4347-b6d9-809fc01e059b
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              enabled: true
+              icon: entity_icons/save.png
+              id: saveReport
+              size: [140, 0]
+              text: Save report...
             fill: [right, fillVertical]
           - uuid: 2205fe64-43ed-4970-a8d3-2739ef41bcc8
             proportion: 0

@@ -74,5 +74,8 @@ namespace Halley {
         void markSend(const HashSet<int>& lines, bool toSend);
         void selectGroup();
         void selectGroup(const String& id);
+
+        void saveReport();
+        String generateReport() const;
     };
 }

@@ -202,6 +202,10 @@ void LocUploadStringsWindow::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "selectGroup", [this] (const UIEvent& event) {
 		selectGroup();
 	});
+	
+	setHandle(UIEventType::ButtonClicked, "saveReport", [this] (const UIEvent& event) {
+		saveReport();
+	});
 
 	bindData("onlyShowSend", onlyShowSend, [=] (bool value) {
 		onlyShowSend = value;
@@ -263,6 +267,11 @@ void LocUploadStringsWindow::setStatus(const String& message, Status status)
 {
 	curStatus = status;
 	updateButtons();
+
+	if (status == Status::Success) {
+		getWidgetAs<UIButton>("cancel")->setLabel(LocalisedString::fromHardcodedString("Close"));
+		saveReport();
+	}
 	
 	auto statusLabel = getWidgetAs<UILabel>("status");
 	statusLabel->setText(LocalisedString::fromUserString("Status: " + message));
@@ -298,9 +307,10 @@ void LocUploadStringsWindow::updateSummary()
 
 void LocUploadStringsWindow::updateButtons()
 {
-	bool enabled = curStatus != Status::Uploading;
-	getWidget("upload")->setEnabled(enabled && sendCount > 0);
-	getWidget("cancel")->setEnabled(enabled);
+	getWidget("upload")->setEnabled(sendCount > 0 && curStatus != Status::Uploading && curStatus != Status::Success);
+	getWidget("cancel")->setEnabled(curStatus != Status::Uploading);
+	getWidget("markSend")->setEnabled(curStatus != Status::Success);
+	getWidget("unmarkSend")->setEnabled(curStatus != Status::Success);
 }
 
 void LocUploadStringsWindow::markSend(bool toSend)
@@ -345,4 +355,50 @@ void LocUploadStringsWindow::selectGroup(const String& id)
 		}
 	}
 	grid->setSelectedLines(sel);
+}
+
+void LocUploadStringsWindow::saveReport()
+{
+	FileChooserParameters fileChooserParams;
+	fileChooserParams.fileName = "exported_strings.csv";
+	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "Comma-Separated Values", {"csv"}, true });
+	fileChooserParams.save = true;
+
+	OS::get().openFileChooser(fileChooserParams).then(Executors::getMainUpdateThread(), [this](std::optional<Path> path) {
+		if (path) {
+			Path::writeFile(*path, generateReport());
+		}
+	});
+}
+
+String LocUploadStringsWindow::generateReport() const
+{
+	CSVFile csv;
+	csv.setColumns({{ "group", "status", "oldKey", "key", "oldValue", "newValue", "translatedIn" }});
+
+	const auto groupIdx = csv.getColumnIndex("group");
+	const auto statusIdx = csv.getColumnIndex("status");
+	const auto oldKeyIdx = csv.getColumnIndex("oldKey");
+	const auto keyIdx = csv.getColumnIndex("key");
+	const auto oldValueIdx = csv.getColumnIndex("oldValue");
+	const auto newValueIdx = csv.getColumnIndex("newValue");
+	const auto translatedInIdx = csv.getColumnIndex("translatedIn");
+
+	for (const auto& chunk: uploadData.getChunks()) {
+		for (const auto& entry: chunk.entries) {
+			if (entry.send && entry.type != LocStringUploadEntryType::Noop) {
+				const auto rowIdx = csv.addRow();
+				
+				csv.setCell(rowIdx, groupIdx, chunk.chunkId);
+				csv.setCell(rowIdx, statusIdx, toString(entry.type));
+				csv.setCell(rowIdx, oldKeyIdx, entry.oldKey.value_or(""));
+				csv.setCell(rowIdx, keyIdx, entry.key);
+				csv.setCell(rowIdx, oldValueIdx, entry.remoteValue.value_or(""));
+				csv.setCell(rowIdx, newValueIdx, entry.value);
+				csv.setCell(rowIdx, translatedInIdx, String::concatList(keysLocalisedIn.value_or(entry.key, {}).const_span(), " "));
+			}
+		}
+	}
+
+	return csv.save();
 }
