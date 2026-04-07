@@ -132,9 +132,18 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 
 	// Destroy dead entities
 	for (auto& e: outboundEntities) {
-		if (!e.second.alive) {
-			sendDestroyEntity(e.second, e.first);
+		if (e.second.alive) {
+			continue;
 		}
+
+		if (e.second.forChildEntityTemporaryOnly) {
+			// Keep temporary outbound entities alive for child entities with changed authority.
+			// They are removed if authority is given back, see prepareChangeEntityAuthority().
+			e.second.alive = true;
+			continue;
+		}
+
+		sendDestroyEntity(e.second, e.first);
 	}
 
 	// Update existing entities
@@ -333,7 +342,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
     			// ... but set flag to force an update next tick, so we don't miss any changes.
     			remote.forceNextFastUpdate = true;
-    			Logger::logDev("populating outbound entity journal, authority-only");
+    			//Logger::logDev("populating outbound entity journal, authority-only, for " + entity.getName());
     		} else {
     			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
     			modifiedInStructure = fastSerialize.hasEntityChanges(wantToLog);
@@ -442,7 +451,7 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId
 		// This "usually" happens, on the host, if an entity got destroyed before we got back authority.
 		// In scripts, network locks (with authority) are only released on exit, but script nodes or
 		// messages that trigger entity destruction in code can happen before that.
-		Logger::logWarning("Attempt to destroy outbound entity we don't have authority for right now");
+		Logger::logWarning("Attempt to destroy outbound entity for " + toString(entityId.value & 0xffffffff) + ", but do not have authority");
 		return;
 	}
 
@@ -541,7 +550,8 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 				Logger::logWarning("No entity found " + toString(remote.worldId.value & 0xffffffff) + " for inbound message with authority-only, dropping message");
 			}
 		} else {
-			Logger::logWarning("No temporary inbound entity with network id " + toString(static_cast<int>(msg.entityId)) + " found", true);
+			// NB: it's possible to receive updates after authority/lock has been released already
+			Logger::logDev("No temporary inbound entity with network id " + toString(static_cast<int>(msg.entityId)) + " found", true);
 		}
 		return;
 	}
@@ -614,7 +624,6 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 
 	const auto mask = EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network);
 	auto [entity, parentUUID] = parentSession->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), mask, debugInfo);
-	stripNestedNetworkComponents(entity);
 
 	// EntityFactory::loadEntityDelta() returns an empty parentUUID if it applies the delta to
 	// an existing entity, but we still want/need to update parenting here.
@@ -688,8 +697,6 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
 
         try {
             auto result = serialize.deserializeEntityUpdate(msg.bytes, parentSession->getByteSerializationOptions());
-			// TODO: is this still required?
-        	stripNestedNetworkComponents(entity);
         	if (result.position) {
         		updateRemoteEntityPosition(inboundEntity, result.position.value(), timestamp);
         	}
@@ -713,7 +720,6 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
             parentSession->getFactory().updateEntity(entity, delta,
                                               EntitySerialization::makeMask(EntitySerialization::Type::Network),
                                               nullptr, &retriever);
-            stripNestedNetworkComponents(entity);
         } catch (const std::exception &e) {
             Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
             Logger::logException(e);
@@ -826,26 +832,6 @@ void EntityNetworkRemotePeer::onFirstDataBatchSent()
 	}
 }
 
-void EntityNetworkRemotePeer::stripNestedNetworkComponents(EntityRef entity, int depth)
-{
-	if (depth > 0) {
-		if (parentSession->isEntitySerializableAsChild(entity)) {
-			const auto* networkComponent = entity.tryGetComponent<NetworkComponent>(true);
-			if (networkComponent != nullptr) {
-				if (networkComponent->authorityId.has_value()) {
-					Logger::logWarning("Would strip network component of " + entity.getName() + ", but someone got authority");
-				} else {
-					entity.removeComponent<NetworkComponent>();
-				}
-			}
-		}
-	}
-
-	for (auto c: entity.getChildren()) {
-		stripNestedNetworkComponents(c, depth + 1);
-	}
-}
-
 EntityId EntityNetworkRemotePeer::findInboundEntity(EntityNetworkId networkId) const
 {
 	if (inboundEntities.contains(networkId)) {
@@ -869,83 +855,134 @@ void EntityNetworkRemotePeer::logUpdates()
 	log = !log;
 }
 
-bool EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
-	NetworkSession::PeerId ownerId, std::optional<NetworkSession::PeerId> authorityId)
+std::pair<bool, std::optional<EntityNetworkId>> EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
+	NetworkSession::PeerId ownerId, const std::optional<NetworkSession::PeerId>& authorityId, const std::optional<EntityNetworkId>& assignNetworkId)
 {
+	std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
+
 	if (authorityId.has_value()) {
 		if (myPeerId == ownerId) {
 			// I lose authority. Create a temporary inbound entity.
-			//Logger::logDev("Lost authority of " + toString(entityId.value & 0xffffffff) + " to " + toString((int) authorityId.value()));
+			HalleyAssertDebug(!assignNetworkId.has_value());
 
-			// There should be some outbound entity available.
+			// If somebody wants to grab authority of a child entity, it's very likely that there
+			// is no outbound entity just yet. So let's create one, and return its network ID
+			// assigned up the call chain.
+			if (!outboundEntities.contains(entityId)) {
+				const auto entityRef = parentSession->getWorld().getEntity(entityId);
+				if (entityRef.isValid()) {
+					const auto networkComponent = entityRef.tryGetComponent<NetworkComponent>();
+					if (networkComponent) {
+						OutboundEntity outbound = {};
+						outbound.alive = true;
+						outbound.forChildEntityTemporaryOnly = true;
+						outbound.networkId = assignId();
+
+						//Logger::logDev("Assign temporary outbound entity for " + entityRef.getName() +
+						//	", " + toString(entityRef.getEntityId().value & 0xffffffff) + ", network ID " + toString(outbound.networkId));
+
+						outboundEntities[entityId] = std::move(outbound);
+					}
+				}
+			}
+
+			// There should (now) be some outbound entity available.
 			if (outboundEntities.contains(entityId)) {
 				const auto &oe = outboundEntities[entityId];
+
+				// Always return assigned network ID to caller.
+				result.second = oe.networkId;
 
 				InboundEntity remote;
 				remote.worldId = entityId;
 				remote.debugName = "[temp authority]";
 				remote.forChangedAuthorityOnly = true;
 
+				//Logger::logDev("Create temporary inbound entity for " +
+				//	toString(entityId.value & 0xffffffff) + ", network ID " + toString(oe.networkId));
+
 				if (!tempInboundEntities.contains(oe.networkId)) {
 					tempInboundEntities[oe.networkId] = std::move(remote);
 				} else {
-					Logger::logWarning("Entity with network id " + toString(static_cast<int>(oe.networkId)) + " already has a temporary inbound entity");
+					Logger::logWarning("Entity with network id " + toString(oe.networkId) + " already has a temporary inbound entity");
 				}
 			} else {
 				Logger::logWarning("No outbound entity " + toString(entityId.value & 0xffffffff) + " found to create temporary inbound entity from", true);
-				return false;
+				return {false, {}};
 			}
 		} else if (myPeerId == authorityId) {
 			// I'm taking authority. Create a temporary outbound entity.
-			//Logger::logDev("Took authority of " + toString(entityId.value & 0xffffffff) + " from " + toString((int) ownerId));
+			if (!assignNetworkId.has_value()) {
+				Logger::logError("Expected network ID to be passed by caller", true);
+				return {false, {}};
+			}
 
-			// Search for inbound entity.
-			const auto inboundIter = std_ex::find_if(inboundEntities, [&](const auto& kv) {
+			OutboundEntity outbound = {};
+			outbound.alive = true;
+			outbound.hasAuthorityOnly = true;
+
+			// Search for existing inbound entity.
+			auto inboundIter = std_ex::find_if(inboundEntities, [&](const auto& kv) {
 				return kv.second.worldId == entityId;
 			});
 
-			if (inboundIter != inboundEntities.end()) {
-				OutboundEntity outbound = {};
-				outbound.alive = true;
-				outbound.hasAuthorityOnly = true;
-				outbound.networkId = inboundIter->first;
-
-				if (!outboundEntities.contains(entityId)) {
-					outboundEntities[entityId] = std::move(outbound);
-				} else {
-					Logger::logWarning("Entity id " + toString(entityId.value & 0xffffffff) + " already has an outbound entity");
-				}
+			// Just like above: if this is a child entity, it's possible that there is no inbound
+			// entity. In this case, we flag it and use the network ID sent by the caller.
+			if (inboundIter == inboundEntities.end()) {
+				outbound.networkId = assignNetworkId.value();
+				outbound.forChildEntityTemporaryOnly = true;
 			} else {
-				Logger::logWarning("No inbound entity " + toString(entityId.value & 0xffffffff) + " found to create temporary outbound entity from", true);
-				return false;
+				outbound.networkId = inboundIter->first;
+				HalleyAssertDebug(outbound.networkId == assignNetworkId.value());
+			}
+
+			//Logger::logDev("Create temporary outbound entity for " +
+			//	toString(entityId.value & 0xffffffff) + ", network ID " + toString(outbound.networkId));
+
+			if (!outboundEntities.contains(entityId)) {
+				outboundEntities[entityId] = std::move(outbound);
+			} else {
+				Logger::logWarning("Entity id " + toString(entityId.value & 0xffffffff) + " already has an outbound entity");
 			}
 		}
 	} else {
-		if (myPeerId == ownerId) {
-			// I've been given back authority. Remove the temporary inbound entity.
-			//Logger::logDev("Recovered authority of " + toString(entityId.value & 0xffffffff));
-			const size_t found = std_ex::erase_if_value(tempInboundEntities, [&](const auto& value) {
-				if (value.worldId == entityId) {
-					HalleyAssertDev(value.forChangedAuthorityOnly);
-					return true;
-				}
-				return false;
-			});
-			if (found != 1) {
-				Logger::logWarning(toString(found) + " temporary inbound entities deleted, should be 1");
+		// Authority has been given back.
+
+		// This shouldn't be called with some ID to assign.
+		HalleyAssertDebug(!assignNetworkId.has_value());
+
+		// Remove the temporary inbound entity:
+		// - for the owner, this is the one created for receiving updates
+		// - for the peer releasing authority, this might be one ... TODO we don't actually need?
+		const size_t found = std_ex::erase_if_value(tempInboundEntities, [&](const auto& value) {
+			if (value.worldId == entityId) {
+				HalleyAssertDev(value.forChangedAuthorityOnly);
+				return true;
+			}
+			return false;
+		});
+		if (found > 1) {
+			Logger::logWarning(toString(found) + " temporary inbound entities deleted, should be 1");
+		}
+
+		if (outboundEntities.contains(entityId)) {
+			// Remove any temporary outbound entity:
+			// - for the owner, this might be one created for child entities
+			// - for the peer releasing authority, it's the one created to send updates with
+			const auto& oe = outboundEntities[entityId];
+			if (oe.hasAuthorityOnly || oe.forChildEntityTemporaryOnly) {
+				//auto entityRef = parentSession->getWorld().tryGetEntity(entityId);
+				//Logger::logDev("Remove temporary outbound entity for " + entityRef.getName() + ", ID " +
+				//	toString(entityId.value & 0xffffffff) + ", network ID " + toString(outboundEntities[entityId].networkId));
+
+				outboundEntities.erase(entityId);
 			}
 		} else {
-			// I'm returning authority to owner. Remove the temporary outbound entity.
-			//Logger::logDev("Gave back authority of " + toString(entityId.value & 0xffffffff) + " to " + toString((int) ownerId));
-			if (outboundEntities.contains(entityId)) {
-				outboundEntities.erase(entityId);
-			} else {
-				Logger::logWarning("No temporary outbound entity found to delete for " +  toString(entityId.value & 0xffffffff));
-			}
+			Logger::logWarning("No (temporary) outbound entity found for " + toString(entityId.value & 0xffffffff));
 		}
 	}
 
-	return true;
+	return result;
 }
 
 void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundEntity, const Vector2f& position, int32_t timestamp)
