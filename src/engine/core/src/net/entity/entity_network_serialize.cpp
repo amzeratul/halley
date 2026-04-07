@@ -617,10 +617,12 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                 }
 
                 if (expectedEndPos < deserializer.getPosition()) {
-                    Logger::logError("Network stream read error, read past end of component page");
+                    Logger::logError("Network read error, read past end of component " + toString(componentId) + ", rewind " +
+                        toString(deserializer.getPosition() - expectedEndPos) + " bytes", true);
                     deserializer.rewind(expectedEndPos);
                 } else if (expectedEndPos > deserializer.getPosition()) {
-                    Logger::logError("Network stream read error, component page not fully read");
+                    Logger::logError("Network read error, component " + toString(componentId) + " not fully read, skip " +
+                        toString(expectedEndPos - deserializer.getPosition()) + " bytes", true);
                     deserializer.skipBytes(expectedEndPos - deserializer.getPosition());
                 }
             } else {

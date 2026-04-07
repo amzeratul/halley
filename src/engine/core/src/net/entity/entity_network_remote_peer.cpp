@@ -920,6 +920,7 @@ std::pair<bool, std::optional<EntityNetworkId>> EntityNetworkRemotePeer::prepare
 			OutboundEntity outbound = {};
 			outbound.alive = true;
 			outbound.hasAuthorityOnly = true;
+			outbound.networkId = assignNetworkId.value();
 
 			// Search for existing inbound entity.
 			auto inboundIter = std_ex::find_if(inboundEntities, [&](const auto& kv) {
@@ -929,11 +930,11 @@ std::pair<bool, std::optional<EntityNetworkId>> EntityNetworkRemotePeer::prepare
 			// Just like above: if this is a child entity, it's possible that there is no inbound
 			// entity. In this case, we flag it and use the network ID sent by the caller.
 			if (inboundIter == inboundEntities.end()) {
-				outbound.networkId = assignNetworkId.value();
 				outbound.forChildEntityTemporaryOnly = true;
 			} else {
-				outbound.networkId = inboundIter->first;
-				HalleyAssertDebug(outbound.networkId == assignNetworkId.value());
+				if (inboundIter->first != assignNetworkId.value()) {
+					Logger::logError("Inbound entity exists, but assigned network ID does not match");
+				}
 			}
 
 			//Logger::logDev("Create temporary outbound entity for " +
