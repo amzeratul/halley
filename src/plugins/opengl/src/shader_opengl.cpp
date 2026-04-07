@@ -6,6 +6,34 @@
 #include "gl_utils.h"
 #include "halley_gl.h"
 
+#ifndef GL_SHADER_STORAGE_BLOCK
+#define GL_SHADER_STORAGE_BLOCK 0x92E6
+#endif
+#ifndef GL_ACTIVE_RESOURCES
+#define GL_ACTIVE_RESOURCES 0x92F5
+#endif
+
+#ifdef WITH_OPENGL
+typedef GLuint (CODEGEN_FUNCPTR *PFNGLGETPROGRAMRESOURCEINDEXPROC)(GLuint program, GLenum programInterface, const GLchar* name);
+
+static PFNGLGETPROGRAMRESOURCEINDEXPROC loadGlGetProgramResourceIndex()
+{
+	static PFNGLGETPROGRAMRESOURCEINDEXPROC ptr = nullptr;
+	static bool loaded = false;
+	if (!loaded) {
+		loaded = true;
+#if defined(_WIN32)
+		ptr = reinterpret_cast<PFNGLGETPROGRAMRESOURCEINDEXPROC>(wglGetProcAddress("glGetProgramResourceIndex"));
+#elif defined(__APPLE__)
+		// macOS tops out at GL 4.1, no SSBO support
+#else
+		ptr = reinterpret_cast<PFNGLGETPROGRAMRESOURCEINDEXPROC>(glXGetProcAddress(reinterpret_cast<const GLubyte*>("glGetProgramResourceIndex")));
+#endif
+	}
+	return ptr;
+}
+#endif
+
 using namespace Halley;
 
 static ShaderOpenGL* currentShader = nullptr;
@@ -232,9 +260,41 @@ int ShaderOpenGL::getBlockLocation(const String& name, ShaderType stage)
 		result = glGetUniformBlockIndex(id, nameAlt.c_str());
 	}
 
+	if (result == GL_INVALID_INDEX) {
+		Logger::logError("Could not find uniform block \"" + name + "\" on shader " + this->name);
+	}
+
 	const int value = result == GL_INVALID_INDEX ? -1 : static_cast<int>(result);
 	blockLocations[name] = value;
 	return value;
+}
+
+int ShaderOpenGL::getBufferLocation(const String& name, ShaderType stage)
+{
+	if (stage != ShaderType::Combined) {
+		return -1;
+	}
+
+	auto i = bufferLocations.find(name);
+	if (i != bufferLocations.end()) {
+		return i->second;
+	}
+
+	int result = -1;
+
+#ifdef WITH_OPENGL
+	// glGetProgramResourceIndex is GL 4.3+; load at runtime
+	auto fn = loadGlGetProgramResourceIndex();
+	if (fn) {
+		GLuint index = fn(id, GL_SHADER_STORAGE_BLOCK, name.c_str());
+		if (index != GL_INVALID_INDEX) {
+			result = static_cast<int>(index);
+		}
+	}
+#endif
+
+	bufferLocations[name] = result;
+	return result;
 }
 
 int ShaderOpenGL::getAttributeLocation(const String& name)

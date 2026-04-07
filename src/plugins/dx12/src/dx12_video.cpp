@@ -6,6 +6,7 @@
 #include "dx12_render_target.h"
 #include "dx12_resource.h"
 #include "dx12_shader.h"
+#include "dx12_structured_buffer.h"
 
 #if defined(_GAMING_XBOX_XBOXONE)
 #pragma comment (lib, "d3d12_x.lib")
@@ -386,6 +387,11 @@ D3D12_CPU_DESCRIPTOR_HANDLE DX12Video::getScreenDepthStencilView() const
 std::unique_ptr<MaterialConstantBuffer> DX12Video::createConstantBuffer()
 {
     return std::make_unique<DX12MaterialConstantBuffer>(*this);
+}
+
+std::unique_ptr<MaterialStructuredBuffer> DX12Video::createStructuredBuffer()
+{
+    return std::make_unique<DX12StructuredBuffer>(*this);
 }
 
 String DX12Video::getShaderLanguage()

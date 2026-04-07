@@ -11,6 +11,7 @@ set(SOURCES
         "src/metal_painter.mm"
         "src/metal_render_target.mm"
         "src/metal_shader.mm"
+        "src/metal_structured_buffer.mm"
         "src/metal_texture.mm"
         "src/metal_video.mm"
         )
@@ -22,6 +23,7 @@ set(HEADERS
         "src/metal_painter.h"
         "src/metal_render_target.h"
         "src/metal_shader.h"
+        "src/metal_structured_buffer.h"
         "src/metal_texture.h"
         "src/metal_video.h"
         )

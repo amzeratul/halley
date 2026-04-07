@@ -39,147 +39,108 @@
 #pragma warning(disable: 4996)
 #endif
 
-class OStreamStackWalker : public StackWalker {
-public:
-	OStreamStackWalker(std::ostream& os, int startFrom)
-		: os(os)
-		, startFrom(startFrom)
-	{}
+namespace Halley {
+	class NoAllocStackWalker : public StackWalker {
+	public:
+		NoAllocStackWalker(gsl::span<char> dst, int startFrom, gsl::span<const StackDebugTrace*> traces)
+			: dst(dst)
+			, traces(traces)
+			, lastTrace(traces.size())
+			, startFrom(startFrom)
+		{}
 
-	OStreamStackWalker(std::ostream& os, const char* skipUntil, int offset)
-		: os(os)
-		, skipUntil(skipUntil)
-		, offset(offset)
-	{}
-
-protected:
-	void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override
-	{
-		if (eType == firstEntry) {
-			curPos = 0;
+		std::string_view getResult() const
+		{
+			return std::string_view(dst.data(), curWritePos);
 		}
 
-		if (skipUntil && !foundSkip) {
-			if (std::strstr(entry.name, skipUntil) == nullptr) {
-				startFrom = curPos + offset + 2;
-			} else {
-				foundSkip = true;
+	protected:
+		void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override
+		{
+			// Print stack traces that happened on frames above this
+			printTraces(entry.stackPointer);
+
+			if (eType == firstEntry) {
+				curPos = 0;
+			}
+
+			auto entryName = std::string_view(entry.name);
+			if (++curPos < startFrom || (displayIndex == 0 && (entryName.starts_with("Halley::Exception") || entryName.starts_with("Halley::Debug")))) {
+				return;
+			}
+
+			const auto index = displayIndex++;
+			cat(index < 10 ? "  " : " ");
+			cat(index);
+			cat(": ");
+			cat(entryName);
+			if (entry.lineFileName[0] != 0) {
+				const char* lastSlash = strrchr(entry.lineFileName, '\\');
+				if (lastSlash) {
+					++lastSlash;
+				} else {
+					lastSlash = entry.lineFileName;
+				}
+				cat(" at ");
+				cat(lastSlash);
+				cat(":");
+				cat(static_cast<int>(entry.lineNumber));
+			} else if (entry.moduleName[0] != 0) {
+				cat(" [");
+				cat(entry.moduleName);
+				cat("]");
+			}
+			cat("\n");
+		}
+		
+	private:
+		gsl::span<char> dst;
+		size_t curWritePos = 0;
+
+		gsl::span<const StackDebugTrace*> traces;
+		size_t lastTrace = 0;
+
+		int startFrom = 0;
+		int curPos = 0;
+		int displayIndex = 0;
+
+		void cat(std::string_view str)
+		{
+			if (!str.empty()) {
+				const size_t toWrite = std::min(str.length(), dst.size() - curWritePos);
+				memcpy(dst.data() + curWritePos, str.data(), toWrite);
+				curWritePos += toWrite;
 			}
 		}
 
-		if (++curPos < startFrom) {
-			return;
+		void cat(int value)
+		{
+			char buffer[32];
+			_itoa(value, buffer, 10);
+			cat(buffer);
 		}
 
-		os << ' ' << (curPos - startFrom) << ": " << entry.name;
-		if (entry.lineFileName[0] != 0) {
-			const char* lastSlash = strrchr(entry.lineFileName, '\\');
-			if (lastSlash) {
-				++lastSlash;
-			} else {
-				lastSlash = entry.lineFileName;
-			}
-			os << " at " << lastSlash << ':' << entry.lineNumber;
-		} else if (entry.moduleName[0] != 0) {
-			os << " [" << entry.moduleName << ']';
-		}
-		os << '\n';
-	}
-	
-private:
-	std::ostream& os;
-	int startFrom = 0;
-	int curPos = 0;
-	int offset = 0;
-	const char* skipUntil = nullptr;
-	bool foundSkip = false;
-};
-
-
-class NoAllocStackWalker : public StackWalker {
-public:
-	NoAllocStackWalker(gsl::span<char> dst, int startFrom)
-		: dst(dst.data())
-		, spaceLeft(dst.size() - strlen(dst.data()))
-		, startFrom(startFrom)
-	{}
-
-	NoAllocStackWalker(gsl::span<char> dst, const char* skipUntil, int offset)
-		: dst(dst.data())
-		, spaceLeft(dst.size() - strlen(dst.data()))
-		, offset(offset)
-		, skipUntil(skipUntil)
-	{}
-
-protected:
-	void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override
-	{
-		if (eType == firstEntry) {
-			curPos = 0;
+		void cat(uint64_t value)
+		{
+			char buffer[32];
+			_i64toa(value, buffer, 16);
+			cat(buffer);
 		}
 
-		if (skipUntil && !foundSkip) {
-			if (std::strstr(entry.name, skipUntil) == nullptr) {
-				startFrom = curPos + offset + 2;
-			} else {
-				foundSkip = true;
+		void printTraces(size_t stackPtr)
+		{
+			char buffer[32];
+			while (lastTrace > 0 && reinterpret_cast<size_t>(traces[lastTrace - 1]) < stackPtr) {
+				const auto* trace = traces[--lastTrace];
+				cat("    + ");
+				cat(trace->getName());
+				cat(trace->isString() ? ": \"" : ": ");
+				cat(trace->getValue(buffer));
+				cat(trace->isString() ? "\"\n" : "\n");
 			}
 		}
-
-		if (++curPos < startFrom) {
-			return;
-		}
-
-		cat(" ");
-		cat(curPos - startFrom);
-		cat(": ");
-		cat(entry.name);
-		if (entry.lineFileName[0] != 0) {
-			const char* lastSlash = strrchr(entry.lineFileName, '\\');
-			if (lastSlash) {
-				++lastSlash;
-			} else {
-				lastSlash = entry.lineFileName;
-			}
-			cat(" at ");
-			cat(lastSlash);
-			cat(":");
-			cat(static_cast<int>(entry.lineNumber));
-		} else if (entry.moduleName[0] != 0) {
-			cat(" [");
-			cat(entry.moduleName);
-			cat("]");
-		}
-		cat("\n");
-	}
-
-	void cat(const char* str)
-	{
-		const auto len = strlen(str);
-		if (spaceLeft >= len + 1) {
-			strcpy(dst, str);
-			spaceLeft -= len;
-		} else {
-			spaceLeft = 0;
-		}
-	}
-
-	void cat(int value)
-	{
-		char buffer[32];
-		_itoa(value, buffer, 10);
-		cat(buffer);
-	}
-	
-private:
-	char* dst;
-	size_t spaceLeft = 0;
-	int startFrom = 0;
-	int curPos = 0;
-	int offset = 0;
-	const char* skipUntil = nullptr;
-	bool foundSkip = false;
-};
+	};
+}
 
 #endif
 
@@ -235,7 +196,7 @@ namespace {
 
 		std::cout << "Process aborting due to: " << name << " (" << signum << ")\n";
 		std::cout << "[start of stack trace]\n";
-		Debug::printCallStackTo(std::cout, 4);
+		Debug::printCallStackToUnsafe(std::cout, 4);
 		std::cout << "[end of stack trace]\n";
 
 		if (errorHandler) {
@@ -250,7 +211,7 @@ namespace {
 	{
 		std::cout << "std::terminate() invoked.\n";
 		std::cout << "[start of stack trace]\n";
-		Debug::printCallStackTo(std::cout, 4);
+		Debug::printCallStackToUnsafe(std::cout, 4);
 		std::cout << "[end of stack trace]\n";
 
 		errorHandler("std::terminate() invoked.");
@@ -330,7 +291,7 @@ namespace {
 
 		std::cout << "Process aborting due to: " << name << "\n";
 		std::cout << "[start of stack trace]\n";
-		Debug::printCallStackTo(std::cout, 4);
+		Debug::printCallStackToUnsafe(std::cout, 4);
 		std::cout << "[end of stack trace]\n";
 
 		if (errorHandler) {
@@ -341,6 +302,7 @@ namespace {
 	}
 #endif
 }
+
 
 void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(std::string_view)> eh)
 {
@@ -439,96 +401,72 @@ bool Debug::isRunningFromDLL()
 
 #endif
 
+void Debug::registerDebugTrace(const StackDebugTrace& trace)
+{
+	stackDebugTraces += &trace;
+}
 
+void Debug::unregisterDebugTrace(const StackDebugTrace& trace)
+{
+	HalleyAssertDebug(stackDebugTraces.back() == &trace);
+	stackDebugTraces.pop_back();
+}
 
 String Debug::getCallStack(int skip)
 {
 #if defined(HAS_STACKWALKER)
-
-	std::stringstream ss;
-
 	// NB: StackWalker isn't thread-safe - uses mutex if multiple sources are trying to retrieve
 	// callstacks at the same time, for example in the Editor when hitting asset build errors.
 	UniqueLock lock(mutex);
-	OStreamStackWalker walker(ss, skip);
-	walker.ShowCallstack();
-	return ss.str();
+	return String(getCallStackUnsafe(skip));
 #else
 	return {};
 #endif
 }
 
-void Debug::getCallStack(gsl::span<char> dst, int skip)
+std::string_view Debug::getCallStackUnsafe(int skip)
 {
 #if defined(HAS_STACKWALKER)
-	NoAllocStackWalker walker(dst, skip);
-	walker.ShowCallstack();
+	char buffer[64 * 1024]; // As Bill Gates once famously said...
+	return getCallStackUnsafe(buffer, skip);
+#else
+	return {};
 #endif
 }
 
-void Debug::printCallStackTo(std::ostream& out, int skip)
+std::string_view Debug::getCallStackUnsafe(gsl::span<char> dst, int skip)
 {
 #if defined(HAS_STACKWALKER)
-	OStreamStackWalker walker(out, skip);
+	NoAllocStackWalker walker(dst, skip, stackDebugTraces);
 	walker.ShowCallstack();
+	return walker.getResult();
+#else
+	return {};
 #endif
 }
 
-void Debug::trace(const char* filename, int line, std::string_view arg)
+void Debug::printCallStackToUnsafe(std::ostream& out, int skip)
 {
-	auto& trace = lastTraces[tracePos.fetch_add(1) % lastTraces.size()];
-	trace.filename = filename;
-	trace.line = line;
-
-	//Logger::logDev(String(filename) + ":" + line + " - " + (arg.empty() ? String() : String(arg)));
-
-	if (!arg.empty()) {
-		size_t len = std::min(trace.arg.size() - 1, arg.length());
-		memcpy(trace.arg.data(), arg.data(), len);
-		trace.arg[len] = 0;
-	} else {
-		trace.arg[0] = 0;
-	}
+#if defined(HAS_STACKWALKER)
+	out << getCallStackUnsafe(skip);
+#endif
 }
 
-String Debug::getLastTraces()
+std::string_view StackDebugTrace::getValue(gsl::span<char> buffer) const
 {
-	std::stringstream result;
-	const size_t n = lastTraces.size();
-	const int startPos = tracePos;
-	for (size_t i = 0; i < n; ++i) {
-		auto& trace = lastTraces[(i + startPos) % n];
-		result << " - " + String(trace.filename) + ":" + toString(trace.line);
-		if (trace.arg[0] != 0) {
-			result << String(" [") + trace.arg.data() + "]";
-		}
-		if (i == n - 1) {
-			result << " [latest]";
-		}
-		result << "\n";
+	buffer[0] = 0;
+	switch (type) {
+	case Type::StringView:
+		return strValue;
+	case Type::Int64:
+		(void) snprintf(buffer.data(), buffer.size(), "%lli", value.int64Value);
+		return std::string_view(buffer.data(), strlen(buffer.data()));
+	case Type::Double:
+		(void) snprintf(buffer.data(), buffer.size(), "%f", value.doubleValue);
+		return std::string_view(buffer.data(), strlen(buffer.data()));
 	}
-	return result.str();
+	return {};
 }
 
-void Debug::printLastTraces()
-{
-	const size_t n = lastTraces.size();
-	for (size_t i = 0; i < n; ++i) {
-		auto& trace = lastTraces[(i + tracePos) % n];
-		if (!trace.filename) {
-			break;
-		}
-		std::cout << " - " << trace.filename << ":" << toString(trace.line);
-		if (trace.arg[0] != 0) {
-			std::cout << " [" << trace.arg.data() << "]";
-		}
-		if (i == n - 1) {
-			std::cout << " [latest]";
-		}
-		std::cout << std::endl;
-	}
-}
-
-std::array<DebugTraceEntry, 32> Debug::lastTraces;
-std::atomic<int> Debug::tracePos = 0;
 Mutex Debug::mutex;
+thread_local Vector<const StackDebugTrace*> Debug::stackDebugTraces;

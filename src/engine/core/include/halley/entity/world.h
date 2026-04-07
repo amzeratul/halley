@@ -263,6 +263,7 @@ namespace Halley {
 		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
 		std::shared_ptr<TypedPool<Entity>> entityPool;
+		Vector<int> alwaysEnabledComponents;
 
 		std::array<std::list<SystemMessageContext>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> pendingSystemMessages;
 		

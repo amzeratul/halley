@@ -11,7 +11,7 @@ namespace Halley {
 
 	class UIReloadUIBehaviour final : public UIBehaviour {
 	public:
-		UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer, IUIReloadObserver* reloadObserver = nullptr);
+		UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer, IUIReloadObserver* reloadObserver = nullptr, Vector<String> conditions = {});
 
 		void init() override;
 		void update(Time time) override;
@@ -21,6 +21,7 @@ namespace Halley {
 		ResourceObserver observer;
 		Vector<std::pair<String, int>> uiStyleObservers;
 		IUIReloadObserver* reloadObserver = nullptr;
+		Vector<String> conditions;
 
 		bool requireStyleUpdate() const;
 		bool styleObserverNeedsUpdate(const std::pair<String, int>& observer) const;

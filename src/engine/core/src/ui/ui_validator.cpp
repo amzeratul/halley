@@ -6,14 +6,14 @@ UIValidator::~UIValidator()
 {
 }
 
-StringUTF32 UIValidator::onTextChanged(StringUTF32 changedTo)
+std::optional<StringUTF32> UIValidator::onTextChanged(StringUTF32 changedTo)
 {
-	return changedTo;
+	return std::nullopt;
 }
 
-bool UIValidator::isEnabled()
+std::optional<bool> UIValidator::isEnabled()
 {
-	return true;
+	return std::nullopt;
 }
 
 UINumericValidator::UINumericValidator(bool allowNegative, bool allowFloat)
@@ -22,7 +22,7 @@ UINumericValidator::UINumericValidator(bool allowNegative, bool allowFloat)
 {
 }
 
-StringUTF32 UINumericValidator::onTextChanged(StringUTF32 src)
+std::optional<StringUTF32> UINumericValidator::onTextChanged(StringUTF32 src)
 {
 	Vector<utf32type> result(src.length());
 	size_t j = 0;
@@ -35,11 +35,11 @@ StringUTF32 UINumericValidator::onTextChanged(StringUTF32 src)
 }
 
 UIFunctionValidator::UIFunctionValidator(std::function<bool()> f)
-	: f(f)
+	: f(std::move(f))
 {
 }
 
-bool UIFunctionValidator::isEnabled()
+std::optional<bool> UIFunctionValidator::isEnabled()
 {
 	return f();
 }
@@ -49,7 +49,7 @@ UITextFunctionValidator::UITextFunctionValidator(std::function<StringUTF32(Strin
 {
 }
 
-StringUTF32 UITextFunctionValidator::onTextChanged(StringUTF32 changedTo)
+std::optional<StringUTF32> UITextFunctionValidator::onTextChanged(StringUTF32 changedTo)
 {
 	return f(std::move(changedTo));
 }

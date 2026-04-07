@@ -3,6 +3,7 @@
 #include "halley/support/assert.h"
 #include "shader_opengl.h"
 #include "constant_buffer_opengl.h"
+#include "structured_buffer_opengl.h"
 #include "render_target_opengl.h"
 #include "halley/graphics/material/material_parameter.h"
 #include "texture_opengl.h"
@@ -64,18 +65,23 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 
 	auto renderTarget = dynamic_cast<const IRenderTargetOpenGL*>(tryGetActiveRenderTarget());
 
-	const auto col = colour.value_or(Colour());
-
 	if (!renderTarget || renderTarget->isScreenRenderTarget()) {
-		glClearColor(col.r, col.g, col.b, col.a);
+		if (colour) {
+			glClearColor(colour->r, colour->g, colour->b, colour->a);
+		}
 
 		glDepthMask(GL_TRUE);
+		if (depth) {
 #ifdef WITH_OPENGL
-		glClearDepth(depth.value_or(1.0f));
+			glClearDepth(*depth);
 #else
-		glClearDepthf(depth.value_or(1.0f));
+			glClearDepthf(*depth);
 #endif
-		glClearStencil(stencil.value_or(0));
+		}
+
+		if (stencil) {
+			glClearStencil(*stencil);
+		}
 
 		GLbitfield mask = 0;
 		if (colour) {
@@ -91,8 +97,10 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 		glClear(mask);
 		glCheckError();
 	} else {
-		glClearBufferfv(GL_COLOR, 0, &col.r);
-		glCheckError();
+		if (colour) {
+			glClearBufferfv(GL_COLOR, 0, &colour->r);
+			glCheckError();
+		}
 
 		if (depth) {
 			glDepthMask(GL_TRUE);
@@ -134,11 +142,10 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 		for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
 			const auto& dataBlock = material.getDataBlocks()[i];
 			const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
-			int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
-			if (address == -1) {
-				address = dataBlock.getBindPoint();
+			const int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
+			if (address != -1) {
+				shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 			}
-			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 		}
 	}
 
@@ -150,11 +157,8 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 		if (!texture) {
 			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);					
 		} else {
-			int location = tex.getAddress(passNumber, ShaderType::Combined);
-			if (location == -1) {
-				location = textureUnit;
-			}
-			if (!supportsShaderTextureBinding) {
+			const int location = tex.getAddress(passNumber, ShaderType::Combined);
+			if (!supportsShaderTextureBinding && location != -1) {
 				glUniform1i(location, textureUnit);
 				glCheckError();
 			}
@@ -171,6 +175,15 @@ void PainterOpenGL::setMaterialData(const Material& material)
 			static_cast<ConstantBufferOpenGL&>(getConstantBuffer(dataBlock)).bind(dataBlock.getBindPoint());
 		}
 	}
+}
+
+void PainterOpenGL::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass)
+{
+	int location = bufDef.getAddress(pass, ShaderType::Combined);
+	if (location == -1) {
+		location = static_cast<int>(index);
+	}
+	static_cast<StructuredBufferOpenGL&>(buffer).bind(location);
 }
 
 void PainterOpenGL::setClip(Rect4i clip, bool enable)

@@ -77,6 +77,7 @@ namespace Halley {
         DX12Texture& operator=(DX12Texture&& other) noexcept;
 
         void doLoad(TextureDescriptor& descriptor) override;
+        void reload(Resource&& resource) override;
         void clearTexture() override;
         void doCreateDeferred();
 

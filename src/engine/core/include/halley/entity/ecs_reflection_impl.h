@@ -106,6 +106,11 @@ namespace Halley {
 				static_cast<T&>(component).onAddedToEntity(entity);
 			}
 		}
+
+		bool isAlwaysEnabled() const override
+		{
+			return T::alwaysEnabled;
+		}
 	};
 
 	template <typename T>

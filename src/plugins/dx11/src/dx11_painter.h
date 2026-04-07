@@ -26,6 +26,7 @@ namespace Halley
 		
 		void doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) override;
 		void setMaterialPass(const Material& material, int pass) override;
+		void bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int passN) override;
 		void setMaterialData(const Material& material) override;
 
 		void doBind(const Camera& camera, RenderTarget& renderTarget) override;

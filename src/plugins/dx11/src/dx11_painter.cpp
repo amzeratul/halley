@@ -4,6 +4,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "dx11_shader.h"
 #include "dx11_material_constant_buffer.h"
+#include "dx11_structured_buffer.h"
 #include "dx11_blend.h"
 #include "dx11_texture.h"
 #include "dx11_rasterizer.h"
@@ -110,6 +111,19 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		++textureUnit;
 	}
 	unbindTextureUnitsBoundToRenderTargets(textureUnit);
+}
+
+void DX11Painter::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int passN)
+{
+	auto& devCon = dx11Video.getDeviceContext();
+	auto& dx11Buf = static_cast<const DX11StructuredBuffer&>(buffer);
+	auto* srv = dx11Buf.getSRV();
+
+	const int vsAddr = bufDef.getAddress(passN, ShaderType::Vertex);
+	const int psAddr = bufDef.getAddress(passN, ShaderType::Pixel);
+	HalleyAssertDev(vsAddr != -1 || psAddr != -1);
+	devCon.VSSetShaderResources(vsAddr, 1, &srv);
+	devCon.PSSetShaderResources(psAddr, 1, &srv);
 }
 
 void DX11Painter::setMaterialData(const Material& material)

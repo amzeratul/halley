@@ -48,31 +48,59 @@ TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 	return *this;
 }
 
-TextRenderer& TextRenderer::setText(const String& v)
+TextRenderer& TextRenderer::setText(const String& text)
+{
+	bool modified = false;
+	return setText(text, modified);
+}
+
+TextRenderer& TextRenderer::setText(const StringUTF32& text)
+{
+	bool modified = false;
+	return setText(text, modified);
+	
+}
+
+TextRenderer& TextRenderer::setText(const LocalisedString& text)
+{
+	bool modified = false;
+	return setText(text, modified);
+}
+
+TextRenderer& TextRenderer::setText(const String& v, bool& modifiedOut)
 {
 	const auto newText = v.getUTF32();
 	if (newText != text) {
 		text = newText;
 		markLayoutDirty();
+		modifiedOut = true;
+	} else {
+		modifiedOut = false;
 	}
 	return *this;
 }
 
-TextRenderer& TextRenderer::setText(const StringUTF32& v)
+TextRenderer& TextRenderer::setText(const StringUTF32& v, bool& modifiedOut)
 {
 	if (v != text) {
 		text = v;
 		markLayoutDirty();
+		modifiedOut = true;
+	} else {
+		modifiedOut = false;
 	}
 	return *this;
 }
 
-TextRenderer& TextRenderer::setText(const LocalisedString& v)
+TextRenderer& TextRenderer::setText(const LocalisedString& v, bool& modifiedOut)
 {
 	const auto newText = v.getString().getUTF32();
 	if (newText != text) {
 		text = newText;
 		markLayoutDirty();
+		modifiedOut = true;
+	} else {
+		modifiedOut = false;
 	}
 	return *this;
 }

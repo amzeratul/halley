@@ -6,6 +6,7 @@
 
 namespace Halley
 {
+	class MaterialStructuredBuffer;
 	class ShaderDefinition;
 	class WindowDefinition;
 	class Painter;
@@ -40,6 +41,7 @@ namespace Halley
 		virtual std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() = 0;
 		virtual std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() = 0;
 		virtual std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() = 0;
+		virtual std::unique_ptr<MaterialStructuredBuffer> createStructuredBuffer() = 0;
 
 		virtual String getShaderLanguage() = 0;
 		virtual bool isColumnMajor() const { return false; }

@@ -3,6 +3,7 @@
 #include "dx12_pipeline.h"
 #include "dx12_render_target.h"
 #include "dx12_resource.h"
+#include "dx12_structured_buffer.h"
 #include "dx12_video.h"
 #include "halley/graphics/material/material_definition.h"
 
@@ -206,6 +207,9 @@ void DX12Painter::setMaterialPass(const Material& material, int passN)
     }
 
     dx12Video.getCmdList()->RSSetScissorRects(1, &scissor);
+
+    const int numUniformBlocks = static_cast<int>(material.getDefinition().getUniformBlocks().size());
+    ssboRootParamBase = numUniformBlocks + (material.getNumTextureUnits() > 0 ? 2 : 0);
 }
 
 void DX12Painter::setMaterialData(const Material& material)
@@ -222,6 +226,16 @@ void DX12Painter::setMaterialData(const Material& material)
             }
             constantBufferCache[block.getBindPoint()] = range;
         }
+    }
+}
+
+void DX12Painter::bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass)
+{
+	auto cmdList = dx12Video.getCmdList();
+    auto& dx12Buf = static_cast<const DX12StructuredBuffer&>(buffer);
+    auto addr = dx12Buf.getGPUVirtualAddress();
+    if (addr) {
+        cmdList->SetGraphicsRootShaderResourceView(ssboRootParamBase + static_cast<int>(index), addr);
     }
 }
 

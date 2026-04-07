@@ -29,6 +29,6 @@ namespace Halley {
 
 	class FileNameValidator : public UIValidator {
 	public:
-		StringUTF32 onTextChanged(StringUTF32 changedTo) override;
+		std::optional<StringUTF32> onTextChanged(StringUTF32 changedTo) override;
 	};
 }

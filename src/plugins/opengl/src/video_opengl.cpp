@@ -10,6 +10,7 @@
 #include <halley/graphics/window.h>
 #include "halley/text/string_converter.h"
 #include "constant_buffer_opengl.h"
+#include "structured_buffer_opengl.h"
 #include "halley/game/game_platform.h"
 #include "halley/graphics/material/uniform_type.h"
 using namespace Halley;
@@ -237,22 +238,8 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 {
 #ifdef WITH_OPENGL
 	if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW) {
-		std::stringstream ss;
-#if HAS_EASTL
-		ss << "[" << glEnumMap.at(source).second << "] [" << glEnumMap.at(type).second << "] [" << glEnumMap.at(severity).second << "] " << id << ": " << message;
-#else
-		ss << "[" << glEnumMap.at(source) << "] [" << glEnumMap.at(type) << "] [" << glEnumMap.at(severity) << "] " << id << ": " << message;
-#endif
-		std::string str = ss.str();
-
-#ifdef _DEBUG
-		std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
-#else
-		UniqueLock lock(messagesMutex);
-		messagesPending.push_back([str] () {
-			std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
-		});
-#endif
+		Logger::logError(String("[") + glEnumMap.at(source) + "] [" + glEnumMap.at(type) + "] [" + glEnumMap.at(severity) + "] " + id + ": " + message);
+		//Logger::logError(Debug::getCallStack());
 	}
 #endif
 }
@@ -260,6 +247,11 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 {
 	return std::make_unique<ConstantBufferOpenGL>();
+}
+
+std::unique_ptr<MaterialStructuredBuffer> VideoOpenGL::createStructuredBuffer()
+{
+	return std::make_unique<StructuredBufferOpenGL>();
 }
 
 String VideoOpenGL::getShaderLanguage()
@@ -310,8 +302,6 @@ bool VideoOpenGL::isLoaderThread() const
 
 void VideoOpenGL::startRender()
 {
-	HALLEY_DEBUG_TRACE();
-
 	context->bind();
 
 	// TODO
@@ -326,10 +316,7 @@ void VideoOpenGL::startRender()
 
 void VideoOpenGL::finishRender()
 {
-	HALLEY_DEBUG_TRACE();
 	flip();
-	HALLEY_DEBUG_TRACE();
-
 	glCheckError();
 }
 

@@ -85,7 +85,7 @@ void NewAssetWindow::cancel()
 	destroy();
 }
 
-StringUTF32 FileNameValidator::onTextChanged(StringUTF32 changedTo)
+std::optional<StringUTF32> FileNameValidator::onTextChanged(StringUTF32 changedTo)
 {
 	const StringUTF32 illegalChars = U"./\\?:\"<>|*";
 

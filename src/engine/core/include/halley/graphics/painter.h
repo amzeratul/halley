@@ -15,6 +15,7 @@
 
 namespace Halley
 {
+	class MaterialStructuredBufferDefinition;
 	class RenderSnapshot;
 	class LineSegment;
 	class VideoAPI;
@@ -142,6 +143,7 @@ namespace Halley
 
 		virtual void setMaterialPass(const Material& material, int pass) = 0;
 		virtual void setMaterialData(const Material& material) = 0;
+		virtual void bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass);
 
 		virtual void setViewPort(Rect4i rect) = 0;
 		virtual void setClip(Rect4i clip, bool enable) = 0;
@@ -165,6 +167,8 @@ namespace Halley
 		const Vector<String>& getPendingDebugGroupStack() const;
 
 		MaterialConstantBuffer& getConstantBuffer(const MaterialDataBlock& dataBlock);
+		MaterialStructuredBuffer& getStructuredBuffer(const MaterialStructuredBufferData& data, const MaterialStructuredBufferDefinition& def);
+		MaterialStructuredBuffer& getStructuredBuffer(const String& semantic);
 
 		std::unique_ptr<Material> halleyGlobalMaterial;
 
@@ -174,7 +178,12 @@ namespace Halley
 			std::shared_ptr<MaterialConstantBuffer> buffer;
 			int age = 0;
 		};
-		
+		class StructuredBufferEntry {
+		public:
+			std::shared_ptr<MaterialStructuredBuffer> buffer;
+			int age = 0;
+		};
+
 		Resources& resources;
 		VideoAPI& video;
 		RenderContext* activeContext = nullptr;
@@ -211,6 +220,8 @@ namespace Halley
 		Vector<String> pendingDebugGroupStack;
 
 		HashMap<uint64_t, ConstantBufferEntry> constantBuffers;
+		HashMap<uint64_t, StructuredBufferEntry> structuredBuffers;
+		HashMap<String, std::shared_ptr<MaterialStructuredBuffer>> semanticStructuredBuffers;
 
 		RenderSnapshot* recordingSnapshot = nullptr;
 		bool recordingPerformance = false;
@@ -228,6 +239,7 @@ namespace Halley
 		void startDrawCall(const std::shared_ptr<const Material>& material);
 		void flushPending();
 		void executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
+		void setStructuredBuffers(const Material& material, int passN);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
@@ -244,6 +256,6 @@ namespace Halley
 		std::shared_ptr<const Material> getSolidLineMaterial();
 		std::shared_ptr<const Material> getSolidPolygonMaterial();
 
-		void refreshConstantBufferCache();
+		void refreshBufferCaches();
 	};
 }

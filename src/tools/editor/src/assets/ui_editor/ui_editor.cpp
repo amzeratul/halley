@@ -501,6 +501,15 @@ void UIEditor::selectWidget(const String& id)
 	}
 }
 
+bool UIEditor::hasWidget(const String& id) const
+{
+	if (widgetList) {
+		return static_cast<bool>(widgetList->getList().tryGetItem(id));
+	} else {
+		return false;
+	}
+}
+
 bool UIEditor::isEditingHalleyUI() const
 {
 	return isHalleyUI;

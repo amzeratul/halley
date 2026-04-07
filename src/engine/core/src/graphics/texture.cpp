@@ -29,6 +29,8 @@ Texture::Texture(Vector2i size)
 
 void Texture::load(TextureDescriptor desc)
 {
+	const auto trace = StackDebugTrace("texture", getAssetId());
+
 	startLoading();
 	descriptor = std::move(desc);
 	size = descriptor.size;
@@ -198,6 +200,7 @@ void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool re
 
 				const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
 				auto image = std::make_unique<Image>(imageData, format);
+				HalleyAssertDev(image->getSize() == texture->getSize());
 				alphaMask = ImageMask::fromAlpha(*image);
 				return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
 			} else {

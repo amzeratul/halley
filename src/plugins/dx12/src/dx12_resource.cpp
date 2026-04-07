@@ -141,12 +141,11 @@ bool DX12Buffer::canFit(size_t size) const
 
 void DX12Buffer::resize(size_t requestedSize)
 {
-    if (curSize != 0) {
-        if (requestedSize > curSize) {
-            // TODO: this maybe shouldn't be allowed for certain buffer types
-            clear();
-        }
+    if (requestedSize <= curSize && curSize != 0) {
+        return;
     }
+
+    clear();
 
     D3D12_HEAP_TYPE heapType;
     D3D12_RESOURCE_STATES initialState = initialDestResourceState;
@@ -257,16 +256,28 @@ DX12Texture& DX12Texture::operator=(DX12Texture&& other) noexcept
 {
     other.waitForLoad(true);
 
-    size = other.size;
-    descriptor = std::move(other.descriptor);
+    clearTexture();
+    moveFrom(other);
 
-    resource = other.resource;
+    resource = std::move(other.resource);
+    resourceDesc = other.resourceDesc;
+    state = other.state;
+    useFiltering = other.useFiltering;
+    addressMode = other.addressMode;
+    vramUsage = other.vramUsage;
 
-    other.resource.Reset();
+    other.resourceDesc = {};
+    other.state = D3D12_RESOURCE_STATE_COMMON;
+    other.vramUsage = 0;
 
     doneLoading();
 
     return *this;
+}
+
+void DX12Texture::reload(Resource&& resource)
+{
+    *this = std::move(dynamic_cast<DX12Texture&>(resource));
 }
 
 void DX12Texture::doLoad(TextureDescriptor& descriptor)
@@ -280,7 +291,10 @@ void DX12Texture::doLoad(TextureDescriptor& descriptor)
 
 void DX12Texture::clearTexture()
 {
-    video.addReleaseResource(resource);
+    if (resource) {
+        video.addReleaseResource(resource);
+        resource.Reset();
+    }
     resourceDesc = {};
     state = D3D12_RESOURCE_STATE_COMMON;
     vramUsage = 0;

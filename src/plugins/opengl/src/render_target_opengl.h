@@ -25,7 +25,7 @@ namespace Halley
 		void onUnbind(Painter&) override;
 
 	private:
-		void init();
+		void update();
 		void deInit();
 
 		GLuint fbo = 0;

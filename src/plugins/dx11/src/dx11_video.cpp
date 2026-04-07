@@ -5,6 +5,7 @@
 #include "dx11_render_target_screen.h"
 #include "dx11_render_target_texture.h"
 #include "dx11_material_constant_buffer.h"
+#include "dx11_structured_buffer.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -181,6 +182,11 @@ std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
 {
 	return std::make_unique<DX11MaterialConstantBuffer>(*this);
+}
+
+std::unique_ptr<MaterialStructuredBuffer> DX11Video::createStructuredBuffer()
+{
+	return std::make_unique<DX11StructuredBuffer>(*this);
 }
 
 std::unique_ptr<Painter> DX11Video::makePainter(Resources& resources)

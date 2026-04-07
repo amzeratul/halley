@@ -102,6 +102,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("customPaint", [=](const ConfigNode& node) { return makeCustomPaint(node); }, getCustomPaintProperties());
 	addFactory("resizeDivider", [=](const ConfigNode& node) { return makeResizeDivider(node); }, getResizeDividerProperties());
 	addFactory("scene3d", [=](const ConfigNode& node) { return makeScene3d(node); }, getScene3dProperties());
+	addFactory("placeholder", [=](const ConfigNode& node) { return makePlaceholder(node); }, getPlaceholderProperties());
 
 	addBehaviourFactory("slide", [=](const ConfigNode& node) { return makeSlideBehaviour(node); }, getSlideBehaviourProperties());
 	addBehaviourFactory("fade", [=](const ConfigNode& node) { return makeFadeBehaviour(node); }, getFadeBehaviourProperties());
@@ -222,8 +223,22 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, Vector<Str
 	}
 }
 
+std::shared_ptr<UIWidget> UIFactory::makeUI(const UIDefinition& definition, Vector<String> conditions)
+{
+	pushConditions(std::move(conditions));
+	try {
+		auto result = makeUI(definition);
+		popConditions();
+		return result;
+	} catch (...) {
+		popConditions();
+		throw;
+	}
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeUI(const UIDefinition& definition)
 {
+	const auto trace = StackDebugTrace("uiDefinition", definition.getAssetId());
 	return std::dynamic_pointer_cast<UIWidget>(makeWidget(definition.getRoot()));
 }
 
@@ -242,7 +257,7 @@ void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition, IUIRe
 	}
 
 	if (api.core->isDevMode()) {
-		target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition), observer));
+		target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition), observer, conditions));
 	}
 }
 
@@ -525,41 +540,42 @@ std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
 			throw Exception("Unknown widget class: " + widgetClass, HalleyExceptions::UI);
 		}
 		
-		auto widget = iter->second(entryNode);
-		if (widgetNode.hasKey("size")) {
-			const auto size = widgetNode["size"].asVector2f({});
-			if (size != Vector2f()) {
-				widget->setMinSize(size);
-			}
-		}
-		if (widgetNode.hasKey("enabled")) {
-			widget->setEnabled(widgetNode["enabled"].asBool(true));
-		}
-		if (widgetNode.hasKey("active")) {
-			widget->setActive(widgetNode["active"].asBool(true));
-		}
-		if (widgetNode.hasKey("childLayerAdjustment")) {
-			widget->setChildLayerAdjustment(widgetNode["childLayerAdjustment"].asInt());
-		}
-		if (widgetNode.hasKey("tooltip")) {
-			widget->setToolTip(LocalisedString::fromUserString(widgetNode["tooltip"].asString()));
-		}
-		if (widgetNode.hasKey("tooltipKey")) {
-			widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
-		}
-		if (widgetNode.hasKey("positionOffset")) {
-			widget->setPositionOffset(widgetNode["positionOffset"].asVector2f({}));
-		}
-		if (entryNode.hasKey("behaviours")) {
-			for (const auto& behaviourNode: entryNode["behaviours"].asSequence()) {
-				if (auto behaviour = makeBehaviourFromFactory(behaviourNode["class"].asString(""), behaviourNode)) {
-					behaviour->setInitial(true);
-					widget->addBehaviour(behaviour);
+		if (auto widget = iter->second(entryNode)) {
+			if (widgetNode.hasKey("size")) {
+				const auto size = widgetNode["size"].asVector2f({});
+				if (size != Vector2f()) {
+					widget->setMinSize(size);
 				}
 			}
-		}
+			if (widgetNode.hasKey("enabled")) {
+				widget->setEnabled(widgetNode["enabled"].asBool(true));
+			}
+			if (widgetNode.hasKey("active")) {
+				widget->setActive(widgetNode["active"].asBool(true));
+			}
+			if (widgetNode.hasKey("childLayerAdjustment")) {
+				widget->setChildLayerAdjustment(widgetNode["childLayerAdjustment"].asInt());
+			}
+			if (widgetNode.hasKey("tooltip")) {
+				widget->setToolTip(LocalisedString::fromUserString(widgetNode["tooltip"].asString()));
+			}
+			if (widgetNode.hasKey("tooltipKey")) {
+				widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
+			}
+			if (widgetNode.hasKey("positionOffset")) {
+				widget->setPositionOffset(widgetNode["positionOffset"].asVector2f({}));
+			}
+			if (entryNode.hasKey("behaviours")) {
+				for (const auto& behaviourNode : entryNode["behaviours"].asSequence()) {
+					if (auto behaviour = makeBehaviourFromFactory(behaviourNode["class"].asString(""), behaviourNode)) {
+						behaviour->setInitial(true);
+						widget->addBehaviour(behaviour);
+					}
+				}
+			}
 
-		element = widget;
+			element = widget;
+		}
 	} else {
 		if (auto sizer = makeSizer(entryNode)) {
 			element = std::make_shared<UISizer>(std::move(sizer.value()));
@@ -634,7 +650,9 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 
 			if (childNode.hasKey("widget") || childNode.hasKey("sizer") || childNode.hasKey("children")) {
 				const auto fill = parseSizerAlignFlags(childNode["fill"]);
-				sizer.add(makeWidget(childNode), proportion, border, fill);
+				if (auto e = makeWidget(childNode)) {
+					sizer.add(std::move(e), proportion, border, fill);
+				}
 			} else if (childNode.hasKey("spacer") || childNode.hasKey("stretchSpacer")) {
 				auto& spacerNode = childNode[childNode.hasKey("spacer") ? "spacer" : "stretchSpacer"];
 				const auto size = spacerNode["size"].asFloat(0);
@@ -1713,6 +1731,17 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 
 void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const String& inputConfigName)
 {
+	list.setDragEnabled(node["canDrag"].asBool(false));
+	list.setDragOutsideEnabled(node["canDragOutside"].asBool(false));
+	list.setReorderWhenDragging(node["reorderWhenDragging"].asBool(true));
+	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
+	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
+	list.setMultiSelect(node["multiSelect"].asBool(false));
+	list.setAcceptKeyboardInput(node["acceptKeyboardInput"].asBool(true));
+	list.setFocusable(node["focusable"].asBool(true));
+	list.setRequiresSelection(node["requiresSelection"].asBool(true));
+	list.setShowSelection(node["showSelection"].asBool(true));
+
 	applyInputButtons(list, node["inputButtons"].asString(inputConfigName));
 
 	const auto options = parseOptions(node["options"]);
@@ -1753,17 +1782,6 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 
 		list.setItemActive(o.id, o.active);
 	}
-
-	list.setDragEnabled(node["canDrag"].asBool(false));
-	list.setDragOutsideEnabled(node["canDragOutside"].asBool(false));
-	list.setReorderWhenDragging(node["reorderWhenDragging"].asBool(true));
-	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
-	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
-	list.setMultiSelect(node["multiSelect"].asBool(false));
-	list.setAcceptKeyboardInput(node["acceptKeyboardInput"].asBool(true));
-	list.setFocusable(node["focusable"].asBool(true));
-	list.setRequiresSelection(node["requiresSelection"].asBool(true));
-	list.setShowSelection(node["showSelection"].asBool(true));
 }
 
 UIFactoryWidgetProperties UIFactory::getBaseListProperties(bool includeOptions) const
@@ -1901,6 +1919,38 @@ std::shared_ptr<UIWidget> UIFactory::makeScene3d(const ConfigNode& entryNode)
 		widget->setMaterial(node["material"].asString());
 	}
 	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getPlaceholderProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.entries.emplace_back("UI", "ui", "Halley::ResourceReference<Halley::UIDefinition>", "");
+	result.entries.emplace_back("Child Container Id", "childContainerId", "Halley::String", "");
+
+	result.name = "Placeholder";
+	result.iconName = "widget_icons/widget.png";
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makePlaceholder(const ConfigNode& entryNode)
+{
+	if (hasCondition("uiEditor")) {
+		const auto& node = entryNode["widget"];
+		if (const auto uiDef = node["ui"].asString(""); !uiDef.isEmpty()) {
+			if (auto widget = makeUI(uiDef, conditions)) {
+				auto children = makeSizer(entryNode);
+				const auto childContainerId = node["childContainerId"].asString("");
+				if (!childContainerId.isEmpty()) {
+					if (auto container = widget->tryGetWidget(childContainerId)) {
+						container->setSizer(std::move(children));
+					}
+				}
+				return widget;
+			}
+		}
+	}
+
+	return makeBaseWidget(entryNode);
 }
 
 UIFactoryWidgetProperties UIFactory::getSlideBehaviourProperties() const

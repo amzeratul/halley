@@ -26,6 +26,7 @@ namespace Halley
 		Vector<String> componentDependencies;
 		Vector<String> componentDependenciesInAncestors;
 		bool generate = false;
+		bool alwaysEnabled = false;
 
 		bool operator<(const ComponentSchema& other) const;
 	};

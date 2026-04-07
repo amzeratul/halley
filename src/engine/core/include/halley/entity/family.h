@@ -139,7 +139,6 @@ namespace Halley {
 		{
 			if (dirty) {
 				// Notify additions
-				HALLEY_DEBUG_TRACE();
 				size_t prevSize = elemCount;
 				size_t curSize = entities.size();
 				updateElems();
@@ -153,7 +152,6 @@ namespace Halley {
 
 			if (!toReload.empty()) {
 				// Notify reloads
-				HALLEY_DEBUG_TRACE();
 				Vector<StorageType*> reloadedEntities;
 				for (auto& entity : entities) {
 					if (std::find(toReload.begin(), toReload.end(), entity.entityId) != toReload.end()) {
@@ -196,7 +194,6 @@ namespace Halley {
 			// Performance-critical code
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			if (!toRemove.empty()) {
-				HALLEY_DEBUG_TRACE();
 				size_t removeCount = toRemove.size();
 				HalleyAssertDebug(removeCount > 0);
 				HalleyAssertDebug(removeCount <= entities.size());

@@ -30,16 +30,13 @@
 #include "halley/concurrency/mutex.h"
 
 namespace Halley {
-	struct DebugTraceEntry
-	{
-		const char* filename = nullptr;
-		int line = 0;
-		std::array<char, 244> arg = {};
-	};
+	class StackDebugTrace;
 
 	class Debug {
+		friend class StackDebugTrace;
+
 	public:
-		static constexpr bool isDebug()
+		[[nodiscard]] static constexpr bool isDebug()
 		{
 		#ifdef _DEBUG
 			return true;
@@ -49,13 +46,10 @@ namespace Halley {
 		}
 
 		static void setErrorHandling(const String& dumpFilePath, std::function<void(std::string_view)> errorHandler);
-		static String getCallStack(int skip = 3); // Thread safe
-		static void getCallStack(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
-		static void printCallStackTo(std::ostream& out, int skip);
-
-		static void trace(const char* filename, int line, std::string_view arg = {});
-		static String getLastTraces();
-		static void printLastTraces();
+		[[nodiscard]] static String getCallStack(int skip = 3); // Thread safe
+		[[nodiscard]] static std::string_view getCallStackUnsafe(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
+		[[nodiscard]] static std::string_view getCallStackUnsafe(int skip = 3); // Not thread safe, use in unsafe environments
+		static void printCallStackToUnsafe(std::ostream& out, int skip); // Not thread safe, use in unsafe environments
 
 		static void abort();
 		static void abort(std::string_view message);
@@ -63,20 +57,82 @@ namespace Halley {
 		static bool isRunningFromDLL();
 
 	private:
-		Debug();
 		static bool debugging;
-		static std::array<DebugTraceEntry, 32> lastTraces;
-		static std::atomic<int> tracePos;
 		static Mutex mutex;
+
+		static thread_local Vector<const StackDebugTrace*> stackDebugTraces;
+
+		Debug();
+
+		static void registerDebugTrace(const StackDebugTrace& trace);
+		static void unregisterDebugTrace(const StackDebugTrace& trace);
 	};
 
+	class StackDebugTrace {
+	public:
+		[[nodiscard]] StackDebugTrace(std::string_view name, std::string_view value)
+			: name(name)
+			, strValue(value)
+			, type(Type::StringView)
+		{
+			doRegister();
+		}
+
+		[[nodiscard]] StackDebugTrace(std::string_view name, int64_t value)
+			: name(name)
+			, type(Type::Int64)
+		{
+			this->value.int64Value = value;
+			doRegister();
+		}
+
+		[[nodiscard]] StackDebugTrace(std::string_view name, double value)
+			: name(name)
+			, type(Type::Double)
+		{
+			this->value.doubleValue = value;
+			doRegister();
+		}
+
 #if defined(DEV_BUILD) || defined(_DEBUG)
-	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)
-	#define HALLEY_DEBUG_TRACE_COMMENT(str) Halley::Debug::trace(__FILE__, __LINE__, (str))
-	#define HALLEY_DEBUG_TRACE_THIS() Halley::Debug::trace(__FILE__, __LINE__, typeid(*this).name())
-#else
-	#define HALLEY_DEBUG_TRACE() (static_cast<void>(0))
-	#define HALLEY_DEBUG_TRACE_COMMENT(str) (static_cast<void>(0))
-	#define HALLEY_DEBUG_TRACE_THIS() (static_cast<void>(0))
+		~StackDebugTrace()
+		{
+			Debug::unregisterDebugTrace(*this);
+		}
 #endif
+
+		StackDebugTrace(const StackDebugTrace& other) = delete;
+		StackDebugTrace(StackDebugTrace&& other) = delete;
+		StackDebugTrace& operator=(const StackDebugTrace& other) = delete;
+		StackDebugTrace& operator=(StackDebugTrace&& other) = delete;
+
+		[[nodiscard]] std::string_view getName() const { return name; }
+		[[nodiscard]] bool isString() const { return type == Type::StringView; }
+		[[nodiscard]] std::string_view getValue(gsl::span<char> buffer) const;
+
+		void* operator new(size_t) = delete;
+		void* operator new(size_t, void*) = delete;
+
+	private:
+		enum class Type : uint8_t {
+			StringView,
+			Int64,
+			Double
+		};
+
+		std::string_view name;
+		std::string_view strValue;
+		union {
+			int64_t int64Value;
+			double doubleValue;
+		} value;
+		const Type type;
+
+		void doRegister() const
+		{
+#if defined(DEV_BUILD) || defined(_DEBUG)
+			Debug::registerDebugTrace(*this);
+#endif
+		}
+	};
 }

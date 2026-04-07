@@ -1242,6 +1242,7 @@ BOOL StackWalker::ShowCallstack(HANDLE                    hThread,
     csEntry.lineNumber = 0;
     csEntry.loadedImageName[0] = 0;
     csEntry.moduleName[0] = 0;
+    csEntry.stackPointer = s.AddrStack.Offset;
     if (s.AddrPC.Offset == s.AddrReturn.Offset)
     {
       if ((this->m_MaxRecursionCount > 0) && (curRecursionCount > m_MaxRecursionCount))

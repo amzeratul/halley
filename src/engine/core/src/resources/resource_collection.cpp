@@ -251,6 +251,8 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std
 {
 	HalleyAssertDev(!Debug::isRunningFromDLL());
 
+	const auto trace = StackDebugTrace("assetId", assetId);
+
 	std::shared_ptr<Resource> newRes;
 
 	if (resourceLoader) {

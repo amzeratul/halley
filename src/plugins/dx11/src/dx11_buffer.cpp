@@ -31,7 +31,7 @@ DX11Buffer::~DX11Buffer()
 	clear();
 }
 
-void DX11Buffer::setData(gsl::span<const std::byte> data)
+void DX11Buffer::setData(gsl::span<const std::byte> data, size_t structStride)
 {
 	HalleyAssertDev(data.size_bytes() > 0);
 
@@ -64,8 +64,8 @@ void DX11Buffer::setData(gsl::span<const std::byte> data)
 
 		video.getDevice().CreateBuffer(&bd, &resData, &buffer);
 	} else {
-		if (size_t(data.size_bytes()) > curSize) {
-			resize(size_t(data.size_bytes()));
+		if (size_t(data.size_bytes()) > curSize || structStride != curStride) {
+			resize(size_t(data.size_bytes()), structStride);
 		}
 
 		lastPos = curPos;
@@ -117,21 +117,23 @@ void DX11Buffer::reset()
 
 void DX11Buffer::clear()
 {
+	if (srv) {
+		srv->Release();
+		srv = nullptr;
+	}
 	if (buffer) {
 		buffer->Release();
 		buffer = nullptr;
 	}
 	curSize = 0;
+	curStride = 0;
 }
 
-void DX11Buffer::resize(size_t requestedSize)
+void DX11Buffer::resize(size_t requestedSize, size_t structStride)
 {
 	size_t targetSize = std::max(size_t(256), nextPowerOf2(requestedSize));
 
-	if (buffer) {
-		buffer->Release();
-		buffer = nullptr;
-	}
+	clear();
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -150,11 +152,31 @@ void DX11Buffer::resize(size_t requestedSize)
 	case Type::Vertex:
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		break;
+	case Type::Structured:
+		bd.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		bd.StructureByteStride = UINT(structStride);
+		break;
 	}
 
 	HRESULT result = video.getDevice().CreateBuffer(&bd, nullptr, &buffer);
 	if (result != S_OK) {
 		throw Exception("Unable to create DX buffer with size " + toString(targetSize), HalleyExceptions::VideoPlugin);
+	}
+
+	if (type == Type::Structured) {
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		ZeroMemory(&srvDesc, sizeof(srvDesc));
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srvDesc.Buffer.FirstElement = 0;
+		srvDesc.Buffer.NumElements = UINT(targetSize / structStride);
+
+		result = video.getDevice().CreateShaderResourceView(buffer, &srvDesc, &srv);
+		if (result != S_OK) {
+			throw Exception("Unable to create SRV for structured buffer", HalleyExceptions::VideoPlugin);
+		}
+		curStride = structStride;
 	}
 
 	curSize = targetSize;

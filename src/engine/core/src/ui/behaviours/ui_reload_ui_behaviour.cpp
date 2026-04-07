@@ -9,10 +9,11 @@
 
 using namespace Halley;
 
-UIReloadUIBehaviour::UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer, IUIReloadObserver* reloadObserver)
+UIReloadUIBehaviour::UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer, IUIReloadObserver* reloadObserver, Vector<String> conditions)
 	: factory(factory)
 	, observer(observer)
 	, reloadObserver(reloadObserver)
+	, conditions(std::move(conditions))
 {}
 
 void UIReloadUIBehaviour::init()
@@ -26,7 +27,7 @@ void UIReloadUIBehaviour::update(Time time)
 		observer.update();
 
 		try {
-			auto ui = factory.makeUI(*dynamic_cast<const UIDefinition*>(observer.getResourceBeingObserved()));
+			auto ui = factory.makeUI(*dynamic_cast<const UIDefinition*>(observer.getResourceBeingObserved()), conditions);
 
 			// The above might throw, don't clear until after we know it hasn't
 			auto& widget = *getWidget();

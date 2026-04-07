@@ -130,9 +130,9 @@ namespace Halley
 			: ResourceCollectionBase(parent, type)
 		{}
 
-		~ResourceCollection()
+		~ResourceCollection() override
 		{
-			HALLEY_DEBUG_TRACE_COMMENT(typeid(T).name());
+			clear();
 		}
 
 #ifndef VIRTUAL_RESOURCE_GET

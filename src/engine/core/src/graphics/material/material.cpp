@@ -92,6 +92,49 @@ bool MaterialDataBlock::isEqualTo(size_t offset, ShaderParameterType type, const
 	return memcmp(data.data() + offset, srcData, size) == 0;
 }
 
+
+
+MaterialStructuredBufferData::MaterialStructuredBufferData(Bytes data)
+{
+	setData(std::move(data));
+}
+
+MaterialStructuredBufferData::MaterialStructuredBufferData(gsl::span<const std::byte> data)
+{
+	setData(data);
+}
+
+void MaterialStructuredBufferData::setData(Bytes data)
+{
+	this->data = std::move(data);
+	needToUpdateHash = true;
+}
+
+void MaterialStructuredBufferData::setData(gsl::span<const std::byte> data)
+{
+	this->data.resize(data.size());
+	memcpy(this->data.data(), data.data(), data.size());
+	needToUpdateHash = true;
+}
+
+gsl::span<const std::byte> MaterialStructuredBufferData::getData() const
+{
+	return data.const_byte_span();
+}
+
+uint64_t MaterialStructuredBufferData::getHash() const
+{
+	if (needToUpdateHash) {
+		needToUpdateHash = false;
+		Hash::Hasher hasher;
+		hasher.feedBytes(data.const_byte_span());
+		hash = hasher.digest();
+	}
+	return hash;
+}
+
+
+
 Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
 	, depthStencilEnabled(other.depthStencilEnabled)
@@ -99,6 +142,7 @@ Material::Material(const Material& other)
 	, passEnabled(other.passEnabled)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
+	, localStructuredBuffers(other.localStructuredBuffers)
 {
 }
 
@@ -109,6 +153,7 @@ Material::Material(Material&& other) noexcept
 	, passEnabled(other.passEnabled)
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
+	, localStructuredBuffers(std::move(other.localStructuredBuffers))
 {
 	other.fullHashValue = 0;
 	other.partialHashValue = 0;
@@ -123,6 +168,7 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 
 Material::~Material()
 {
+	localStructuredBuffers.clear();
 	textures.clear();
 	dataBlocks.clear();
 	materialDefinition = {};
@@ -174,18 +220,18 @@ void Material::initUniforms(bool forceLocalBlocks)
 	}
 }
 
-void Material::bind(int passNumber, Painter& painter) const
+bool Material::bind(int passNumber) const
 {
 	// Avoid redundant work
 	if (currentMaterial == this && currentPass == passNumber && currentHash == getFullHash()) {
-		return;
+		return false;
 	}
 	currentMaterial = this;
 	currentPass = passNumber;
 	currentHash = getFullHash();
 
 	markInActiveUse();
-	painter.setMaterialPass(*this, passNumber);
+	return true;
 }
 
 void Material::resetBindCache()
@@ -324,6 +370,10 @@ void Material::computeHashes() const
 	for (const auto& dataBlock: dataBlocks) {
 		hasher.feedBytes(dataBlock.getData());
 	}
+	for (const auto& structuredBuffer: localStructuredBuffers) {
+		hasher.feed(structuredBuffer.first);
+		hasher.feedBytes(structuredBuffer.second->getData());
+	}
 
 	hasher.feed(stencilReferenceOverride.has_value());
 	hasher.feed(stencilReferenceOverride.value_or(0));
@@ -377,6 +427,60 @@ gsl::span<const MaterialDataBlock> Material::getDataBlocks() const
 gsl::span<MaterialDataBlock> Material::getDataBlocks()
 {
 	return dataBlocks.span();
+}
+
+std::optional<int> Material::getStructuredBufferIndex(std::string_view name) const
+{
+	const auto& buffers = materialDefinition->getStructuredBuffers();
+	for (int i = 0; i < static_cast<int>(buffers.size()); ++i) {
+		if (buffers[i].getName() == name) {
+			return i;
+		}
+	}
+	return {};
+}
+
+void Material::setStructuredBuffer(int i, std::shared_ptr<MaterialStructuredBufferData> data)
+{
+	localStructuredBuffers[i] = std::move(data);
+}
+
+void Material::setStructuredBuffer(int i, Bytes data)
+{
+	const auto iter = localStructuredBuffers.find(i);
+	if (iter != localStructuredBuffers.end()) {
+		iter->second->setData(std::move(data));
+	} else {
+		localStructuredBuffers[i] = std::make_shared<MaterialStructuredBufferData>(std::move(data));
+	}
+}
+
+void Material::setStructuredBuffer(int i, gsl::span<const std::byte> data)
+{
+	const auto iter = localStructuredBuffers.find(i);
+	if (iter != localStructuredBuffers.end()) {
+		iter->second->setData(data);
+	} else {
+		localStructuredBuffers[i] = std::make_shared<MaterialStructuredBufferData>(data);
+	}
+}
+
+const MaterialStructuredBufferData* Material::tryGetStructuredBuffer(int i) const
+{
+	const auto iter = localStructuredBuffers.find(i);
+	if (iter != localStructuredBuffers.end()) {
+		return iter->second.get();
+	} else {
+		return nullptr;
+	}
+}
+
+gsl::span<const std::byte> Material::getStructuredBufferData(int i) const
+{
+	if (const auto* buffer = tryGetStructuredBuffer(i)) {
+		return buffer->getData();
+	}
+	return {};
 }
 
 void Material::setPassEnabled(int pass, bool enabled)
@@ -693,6 +797,63 @@ MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const SpriteResource& 
 {
 	if (material || getOriginalMaterial().getTexture(static_cast<int>(textureUnit)) != sprite.getSpriteSheet()->getTexture()) {
 		getWriteMaterial().set(textureUnit, sprite);
+	}
+	return *this;
+}
+
+namespace {
+	bool rangeEqual(gsl::span<const std::byte> a, gsl::span<const std::byte> b)
+	{
+		return std::equal(a.begin(), a.end(), b.begin(), b.end());
+	}
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(size_t index, Bytes data)
+{
+	if (material || !rangeEqual(data.const_byte_span(), getOriginalMaterial().getStructuredBufferData(static_cast<int>(index)))) {
+		getWriteMaterial().setStructuredBuffer(static_cast<int>(index), std::move(data));
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(std::string_view name, Bytes data)
+{
+	if (auto idx = getOriginalMaterial().getStructuredBufferIndex(name)) {
+		setStructuredBuffer(*idx, std::move(data));
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(size_t index, gsl::span<const std::byte> data)
+{
+	if (material || !rangeEqual(data, getOriginalMaterial().getStructuredBufferData(static_cast<int>(index)))) {
+		getWriteMaterial().setStructuredBuffer(static_cast<int>(index), data);
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(std::string_view name, gsl::span<const std::byte> data)
+{
+	if (auto idx = getOriginalMaterial().getStructuredBufferIndex(name)) {
+		setStructuredBuffer(*idx, data);
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(size_t index, std::shared_ptr<MaterialStructuredBufferData> buffer)
+{
+	if (material || getOriginalMaterial().tryGetStructuredBuffer(static_cast<int>(index)) != buffer.get()) {
+		getWriteMaterial().setStructuredBuffer(static_cast<int>(index), std::move(buffer));
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStructuredBuffer(std::string_view name, std::shared_ptr<MaterialStructuredBufferData> buffer)
+{
+	if (auto idx = getOriginalMaterial().getStructuredBufferIndex(name)) {
+		if (material || getOriginalMaterial().tryGetStructuredBuffer(*idx) != buffer.get()) {
+			getWriteMaterial().setStructuredBuffer(*idx, std::move(buffer));
+		}
 	}
 	return *this;
 }

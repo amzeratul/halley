@@ -30,6 +30,7 @@ namespace Halley {
         std::optional<Rect4i> clipping;
 
         uint64_t resourceVersionIndex = 0;
+        int ssboRootParamBase = 0;
 
         void resetState() override;
 
@@ -44,6 +45,7 @@ namespace Halley {
 
         void setMaterialPass(const Material& material, int pass) override;
         void setMaterialData(const Material& material) override;
+        void bindStructuredBuffer(size_t index, const MaterialStructuredBufferDefinition& bufDef, MaterialStructuredBuffer& buffer, int pass) override;
 
         void setViewPort(Rect4i rect) override;
         void setClip(Rect4i clip, bool enable) override;

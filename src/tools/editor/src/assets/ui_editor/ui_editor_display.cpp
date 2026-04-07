@@ -140,7 +140,10 @@ void UIEditorDisplay::clearDisplay()
 void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 {
 	clearDisplay();
-	editor->getGameFactory().loadUI(*displayRoot, uiDefinition, this);
+	auto& factory = editor->getGameFactory();
+	factory.pushConditions({ "uiEditor" });
+	factory.loadUI(*displayRoot, uiDefinition, this);
+	factory.popConditions();
 	updateCurWidget();
 }
 
@@ -233,7 +236,9 @@ UUID UIEditorDisplay::getUUIDOfWidgetClicked(const UIWidget& widget) const
 	// NB: this algorithm is garbage
 	for (const auto& [k, v]: elements) {
 		if (v.get() == &widget) {
-			return k;
+			if (editor->hasWidget(k.toString())) {
+				return k;
+			}
 		}
 	}
 

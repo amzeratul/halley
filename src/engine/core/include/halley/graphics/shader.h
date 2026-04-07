@@ -36,5 +36,6 @@ namespace Halley
 		virtual ~Shader() {}
 		virtual int getUniformLocation(const String& name, ShaderType stage) = 0;
 		virtual int getBlockLocation(const String& name, ShaderType stage) = 0;
+		virtual int getBufferLocation(const String& name, ShaderType stage) { return getUniformLocation(name, stage); }
 	};
 }
