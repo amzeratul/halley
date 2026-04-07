@@ -103,11 +103,12 @@ void ImportAssetsTask::run()
 			}
 
 			if (packAfter) {
-				/*
-				for (const auto& asset: outputAssets) {
-					Logger::logInfo("Packing " + asset);
+				const auto names = Vector<String>(outputAssets.begin(), outputAssets.end());
+				if (names.size() > 10) {
+					Logger::logInfo("Packing assets: [ " + String::concatList(names.const_span().subspan(0, 10), ", ") + ", ... ]");
+				} else {
+					Logger::logInfo("Packing assets: [ " + String::concatList(names, ", ") + " ]");
 				}
-				*/
 				addContinuation(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets)));
 			}
 		}
