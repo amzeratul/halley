@@ -478,7 +478,7 @@ namespace {
 
 			// Check for \r\n chain
 			if (idx + 1 < vs.size()) {
-				if (vs[idx] == cr && vs[idx + 1] == lf) {
+				if ((vs[idx] == cr && vs[idx + 1] == lf) || (vs[idx] == lf && vs[idx + 1] == cr)) {
 					idx += 2;
 					return lf;
 				}
