@@ -415,8 +415,16 @@ const Vector<EntityId>& SceneEditor::getCameraIds() const
 
 void SceneEditor::dragCamera(Vector2f amount)
 {
-	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
+	if (amount.length() > 1000000) {
+		Logger::logError("SceneEditor::dragCamera(" + toString(amount) + ") - amount is too high");
+	}
+	
+	const auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
+
+	if (zoom < 0.001f) {
+		Logger::logError("SceneEditor::dragCamera() - Zoom is too low for inertial drag: " + toString(zoom));
+	}
 
 	inertialDrag.appendDelta(amount / zoom);
 }
