@@ -163,6 +163,7 @@ LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, LocalisationC
 	, client(client)
 	, uploadData(std::move(uploadData))
 	, keysLocalisedIn(std::move(keysLocalisedIn))
+	, testMode(false)
 {
 	setAnchor(UIAnchor());
 	factory.loadUI(*this, "halley/localisation/localisation_upload_strings");
@@ -171,6 +172,10 @@ LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, LocalisationC
 void LocUploadStringsWindow::onMakeUI()
 {
 	setStatus("Idle", Status::Idle);
+
+	if (testMode) {
+		getWidgetAs<UIButton>("upload")->setLabel(LocalisedString::fromHardcodedString("Test Upload"));
+	}
 
 	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData, keysLocalisedIn);
 	markAllSend(false);
@@ -253,7 +258,7 @@ void LocUploadStringsWindow::doUpload()
 {
 	setStatus("Uploading", Status::Uploading);
 
-	client.putOriginalStrings(uploadData).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
+	client.putOriginalStrings(uploadData, testMode).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
 	{
 		if (result) {
 			setStatus("Upload complete", Status::Success);

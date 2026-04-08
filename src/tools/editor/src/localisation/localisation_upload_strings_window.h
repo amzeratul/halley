@@ -63,6 +63,7 @@ namespace Halley {
 
         int sendCount = 0;
 		Status curStatus = Status::Idle;
+        bool testMode = false;
 
         void upload();
         void doUpload();

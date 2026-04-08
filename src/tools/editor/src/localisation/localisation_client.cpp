@@ -134,7 +134,7 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocStringUploadData& d
 
 	if (drySend) {
 		Logger::logDev("Dry sending:\n" + YAMLConvert::generateYAML(data.toConfigNode()));
-		return Future<bool>::makeImmediate(false);
+		return Future<bool>::makeImmediate(true);
 	} else {
 		return sendWithAuthorizationSimple(HTTPMethod::PUT, url, data.toConfigNode());
 	}
