@@ -529,15 +529,23 @@ public:
 			}
 			prevMaterialParameters->clear();
 			
+			Vector<String> materialKeys;
+
 			size_t insertPos = 2;
 			size_t i = 0;
 			for (const auto& tex: textures) {
 				String key = "tex_" + tex.name;
+				materialKeys += key;
 				bool isPrimary = i == 0;
 
 				auto& fieldData = data.getFieldData();
 				const String backupKey = i == 0 ? "image" : (i == 1 ? "image1" : "");
-				const String& srcData = fieldData[fieldData.hasKey(key) || backupKey.isEmpty() ? key : backupKey].asString("");
+				if (!fieldData.hasKey(key) && !backupKey.isEmpty() && fieldData.hasKey(backupKey)) {
+					auto& writeableField = data.getWriteableFieldData();
+					writeableField[key] = writeableField[backupKey];
+					writeableField.removeKey(backupKey);
+				}
+				const String& srcData = fieldData[key].asString("");
 
 				const auto label = context.makeLabel("- " + tex.name);
 				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources(), context.getProjectWindow());
@@ -570,6 +578,10 @@ public:
 				
 				i++;
 			}
+
+			std_ex::erase_if_key(data.getWriteableFieldData().asMap(), [&] (const String& key) {
+				return (key.startsWith("tex_") || key.startsWith("image")) && !materialKeys.contains(key);
+			});
 
 			for (const auto& block: uniformBlocks) {
 				for (const auto& uniform: block.uniforms) {
