@@ -464,12 +464,59 @@ bool Project::isAssetSaveNotificationEnabled() const
 	return assetNotifyImportEnabled;
 }
 
+namespace {
+	bool equalWithNormalisedLineBreaks(gsl::span<const std::byte> as, gsl::span<const std::byte> bs)
+	{
+		auto getNext = [&](gsl::span<const std::byte> vs, size_t& idx) -> std::optional<std::byte>
+		{
+			if (idx >= vs.size()) {
+				return std::nullopt;
+			}
+			
+			constexpr auto cr = static_cast<std::byte>('\r');
+			constexpr auto lf = static_cast<std::byte>('\n');
+
+			// Check for \r\n chain
+			if (idx + 1 < vs.size()) {
+				if (vs[idx] == cr && vs[idx + 1] == lf) {
+					idx += 2;
+					return lf;
+				}
+			}
+
+			// Check for lone \r
+			if (vs[idx] == cr) {
+				++idx;
+				return lf;
+			}
+
+			// Just return the next character
+			return vs[idx++];
+		};
+
+		size_t idxA = 0;
+		size_t idxB = 0;
+
+		while (true) {
+			auto a = getNext(as, idxA);
+			auto b = getNext(bs, idxB);
+			if (a != b) {
+				return false;
+			}
+			if (!a && !b) {
+				// Done
+				return true;
+			}
+		}
+	}
+}
+
 bool Project::writeAssetToDisk(const Path& path, gsl::span<const std::byte> data)
 {
 	const Path filePath = getAssetsSrcPath() / path;
 	auto oldData = fileSystemCache->readFile(filePath);
 	
-	if (!std::equal(oldData.begin(), oldData.end(), data.begin(), data.end())) {
+	if (!equalWithNormalisedLineBreaks(oldData, data)) {
 		fileSystemCache->writeFile(filePath, data);
 		if (assetNotifyImportEnabled) {
 			notifyAssetFilesModified(gsl::span<const Path>(&path, 1));
