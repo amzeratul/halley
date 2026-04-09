@@ -23,34 +23,47 @@ public:
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
+	bool alwaysSend{ false };
 
 	NetworkComponent() {
+	}
+
+	NetworkComponent(bool alwaysSend)
+		: alwaysSend(std::move(alwaysSend))
+	{
 	}
 
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
-		
+		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::serialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		return _node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		
+		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::deserialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
-		
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)) == 0) _node.removeKey("alwaysSend");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
-		
+		using namespace Halley::EntitySerialization;
+		if (_fieldName == "alwaysSend") {
+			return Halley::ConfigNodeHelper<decltype(alwaysSend)>::serialize(alwaysSend, _context);
+		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
 	void deserializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName, const Halley::ConfigNode& _node) {
-		
+		using namespace Halley::EntitySerialization;
+		if (_fieldName == "alwaysSend") {
+			Halley::ConfigNodeHelper<decltype(alwaysSend)>::deserialize(alwaysSend, _context, _node);
+			return;
+		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
