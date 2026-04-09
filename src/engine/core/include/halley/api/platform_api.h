@@ -125,6 +125,7 @@ namespace Halley
 		virtual void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) = 0;
 		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
 		virtual void setParameter(const String& name, const String& value) {}
+		virtual std::optional<String> getConnectCLIString() const { return {}; }
 	};
 
 	// This is the join callback, see PlatformAPI's method for more details
