@@ -131,6 +131,7 @@ namespace Halley
 	struct PlatformJoinCallbackParameters {
 		// Fill these as necessary
 		String param;
+		std::unique_ptr<MultiplayerLobby> lobby;
 	};
 	using PlatformJoinCallback = std::function<void(PlatformJoinCallbackParameters)>;
 	using PlatformPreparingToJoinCallback = std::function<void(void)>;

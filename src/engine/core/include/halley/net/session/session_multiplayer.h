@@ -94,7 +94,7 @@ namespace Halley {
 
 		void setNetworkQuality(NetworkService::Quality level);
 
-		MultiplayerLobby& getLobby();
+		MultiplayerLobby* tryGetLobby() const;
 
 	protected:
 		virtual void onStarted();

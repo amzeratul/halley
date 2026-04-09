@@ -206,9 +206,9 @@ void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 	service->setSimulateQualityLevel(level);
 }
 
-MultiplayerLobby& SessionMultiplayer::getLobby()
+MultiplayerLobby* SessionMultiplayer::tryGetLobby() const
 {
-	return *lobby;
+	return lobby.get();
 }
 
 void SessionMultiplayer::onStarted()
@@ -324,6 +324,8 @@ void SessionMultiplayer::onJoinCallback()
 		Logger::logDev("Starting multiplayer session as a client, connecting to " + joinLobbyParameters->param);
 		setState(SessionState::JoiningSession);
 		session->join(joinLobbyParameters->param);
+		lobby = std::move(joinLobbyParameters->lobby);
+		Logger::logDev("Got lobby: " + toString(!!lobby));
 		api.platform->setJoinCallback({});
 		joinLobbyParameters.reset();
 	} else {
@@ -333,7 +335,7 @@ void SessionMultiplayer::onJoinCallback()
 
 void SessionMultiplayer::onPlatformJoinCallback(PlatformJoinCallbackParameters params)
 {
-	joinLobbyParameters = params;
+	joinLobbyParameters = std::move(params);
 	if (joinLobbyInstance != nullptr) {
 		joinLobbyInstance->onJoinCallback();
 	}
