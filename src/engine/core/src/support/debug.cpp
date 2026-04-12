@@ -464,6 +464,9 @@ std::string_view StackDebugTrace::getValue(gsl::span<char> buffer) const
 	case Type::Double:
 		(void) snprintf(buffer.data(), buffer.size(), "%f", value.doubleValue);
 		return std::string_view(buffer.data(), strlen(buffer.data()));
+	case Type::Pointer:
+		(void) snprintf(buffer.data(), buffer.size(), "%p", value.ptrValue);
+		return std::string_view(buffer.data(), strlen(buffer.data()));
 	}
 	return {};
 }

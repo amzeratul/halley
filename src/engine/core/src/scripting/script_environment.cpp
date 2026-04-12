@@ -38,14 +38,21 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 
 void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
 {
-	deltaTime = time;
-
-	currentGraph = graphState.getScriptGraphPtr();
-	if (!currentGraph) {
+	if (!graphState.getScriptGraphPtr()) {
 		throw Exception("Unable to update script state, script not set.", HalleyExceptions::Entity);
 	}
+	if (!curEntity.isValid()) {
+		throw Exception("Unable to update script state, invalid entityId.", HalleyExceptions::Entity);
+	}
 
-	const auto trace = StackDebugTrace("scriptId", currentGraph->getAssetId());
+	if (currentGraph != nullptr) {
+		throw Exception("Unable to update script state: " + graphState.getScriptId() + " for " + getWorld().getEntity(curEntity).getName() + ")"
+			+ " - script update already in progress: " + currentGraph->getAssetId() + " for " + getWorld().getEntity(currentEntity).getName(), HalleyExceptions::Entity);
+	}
+
+	deltaTime = time;
+	currentGraph = graphState.getScriptGraphPtr();
+	const auto trace1 = StackDebugTrace("scriptId", currentGraph->getAssetId());
 
 	ProfilerEvent event(ProfilerEventType::ScriptUpdate, currentGraph->getAssetId(), reinterpret_cast<uint64_t>(this));
 
@@ -53,6 +60,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentEntityVariables = &entityVariables;
 	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
+
+	const auto trace2 = StackDebugTrace("currentState", currentState);
 
 	try {
 		auto& threads = graphState.getThreads();
@@ -110,6 +119,11 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 		Logger::logError("Exception while executing script \"" + currentGraph->getAssetId() + "\" attached to entity \"" + name + "\":");
 		Logger::logException(e);
 	}
+
+	HalleyAssertDev(currentGraph == graphState.getScriptGraphPtr());
+	HalleyAssertDev(currentState == &graphState);
+	HalleyAssertDev(currentEntity == curEntity);
+	HalleyAssertDev(currentEntityVariables == &entityVariables);
 
 	currentGraph = nullptr;
 	currentState = nullptr;
@@ -209,6 +223,11 @@ void ScriptEnvironment::terminateStateWith(const ScriptGraph* scriptGraph)
 
 void ScriptEnvironment::stopState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, bool allThreads)
 {
+	if (currentGraph != nullptr) {
+		throw Exception("Unable to stop script state: " + graphState.getScriptId() + " for " + getWorld().getEntity(curEntity).getName() + ")"
+			+ " - script update already in progress: " + currentGraph->getAssetId() + " for " + getWorld().getEntity(currentEntity).getName(), HalleyExceptions::Entity);
+	}
+
 	currentGraph = graphState.getScriptGraphPtr();
 	if (!currentGraph) {
 		throw Exception("Unable to terminate script state, script not set.", HalleyExceptions::Entity);
@@ -307,7 +326,10 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 
 void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin)
 {
+	HalleyAssertDev(currentState != nullptr);
+
 	if (node) {
+		const auto trace = StackDebugTrace("currentState", currentState);
 		auto& state = currentState->getNodeState(node.value());
 		if (state.threadCount == 0 && !thread.isWatcher()) {
 			initNode(node.value(), state);

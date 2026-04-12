@@ -94,6 +94,14 @@ namespace Halley {
 			doRegister();
 		}
 
+		[[nodiscard]] StackDebugTrace(std::string_view name, void* value)
+			: name(name)
+			, type(Type::Pointer)
+		{
+			this->value.ptrValue = value;
+			doRegister();
+		}
+
 #if defined(DEV_BUILD) || defined(_DEBUG)
 		~StackDebugTrace()
 		{
@@ -117,7 +125,8 @@ namespace Halley {
 		enum class Type : uint8_t {
 			StringView,
 			Int64,
-			Double
+			Double,
+			Pointer
 		};
 
 		std::string_view name;
@@ -125,6 +134,7 @@ namespace Halley {
 		union {
 			int64_t int64Value;
 			double doubleValue;
+			void* ptrValue;
 		} value;
 		const Type type;
 
