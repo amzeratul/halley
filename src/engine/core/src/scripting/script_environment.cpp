@@ -20,6 +20,7 @@
 
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/support/profiler.h"
+#include "halley/utils/scoped_guard.h"
 #include "nodes/script_network.h"
 #include "system_messages/play_network_animation_system_message.h"
 #include "system_messages/play_network_sound_system_message.h"
@@ -36,7 +37,12 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 	serializationContext.entityContext = this;
 }
 
-void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
+bool ScriptEnvironment::hasCurrentState() const
+{
+	return !stateStack.empty();
+}
+
+void ScriptEnvironment::pushState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, Time deltaTime)
 {
 	if (!graphState.getScriptGraphPtr()) {
 		throw Exception("Unable to update script state, script not set.", HalleyExceptions::Entity);
@@ -45,38 +51,63 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 		throw Exception("Unable to update script state, invalid entityId.", HalleyExceptions::Entity);
 	}
 
-	if (currentGraph != nullptr) {
-		throw Exception("Unable to update script state: " + graphState.getScriptId() + " for " + getWorld().getEntity(curEntity).getName() + ")"
-			+ " - script update already in progress: " + currentGraph->getAssetId() + " for " + getWorld().getEntity(currentEntity).getName(), HalleyExceptions::Entity);
-	}
+	auto& s = stateStack.emplace_back();
+	s.deltaTime = deltaTime;
+	s.graph = graphState.getScriptGraphPtr();
+	s.state = &graphState;
+	s.entityVariables = &entityVariables;
+	s.graph->assignTypes(*nodeTypeCollection);
+	s.entity = curEntity;
+}
 
-	deltaTime = time;
-	currentGraph = graphState.getScriptGraphPtr();
-	const auto trace1 = StackDebugTrace("scriptId", currentGraph->getAssetId());
+void ScriptEnvironment::pushStateCopy(const ScriptGraph& graph)
+{
+	auto& s = stateStack.emplace_back(getState());
+	s.graph = &graph;
+}
 
-	ProfilerEvent event(ProfilerEventType::ScriptUpdate, currentGraph->getAssetId(), reinterpret_cast<uint64_t>(this));
+void ScriptEnvironment::popState()
+{
+	HalleyAssertDev(!stateStack.empty());
+	stateStack.pop_back();
+}
 
-	currentState = &graphState;
-	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(*nodeTypeCollection);
-	currentEntity = curEntity;
+ScriptEnvironment::CurState& ScriptEnvironment::getState()
+{
+	HalleyAssertDev(!stateStack.empty());
+	return stateStack.back();
+}
 
-	const auto trace2 = StackDebugTrace("currentState", currentState);
+const ScriptEnvironment::CurState& ScriptEnvironment::getState() const
+{
+	HalleyAssertDev(!stateStack.empty());
+	return stateStack.back();
+}
+
+void ScriptEnvironment::updateState(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
+{
+	pushState(graphState, curEntity, entityVariables, time);
+	auto statePop = ScopedGuard([this] { popState(); });
+
+	auto& s = getState();
+	const auto trace1 = StackDebugTrace("scriptId", s.graph->getAssetId());
+	const auto trace2 = StackDebugTrace("currentState", s.state);
+	ProfilerEvent event(ProfilerEventType::ScriptUpdate, s.graph->getAssetId(), reinterpret_cast<uint64_t>(this));
 
 	try {
 		auto& threads = graphState.getThreads();
 
-		const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
+		const bool hashChanged = graphState.getGraphHash() != s.graph->getHash();
 		if (!graphState.hasStarted() || hashChanged) {
 			if (graphState.hasStarted()) {
 				// i.e. we're here because the script changed
-				terminateStateWith(currentGraph->getPreviousVersion(graphState.getGraphHash()));
+				terminateStateWith(s.graph->getPreviousVersion(graphState.getGraphHash()));
 			}
 
-			graphState.start(currentGraph->getHash());
+			graphState.start(s.graph->getHash());
 			graphState.prepareStates(serializationContext, time);
-			if (currentGraph->getStartNode()) {
-				threads.push_back(startThread(ScriptStateThread(*currentGraph->getStartNode(), 0)));
+			if (s.graph->getStartNode()) {
+				threads.push_back(startThread(ScriptStateThread(*s.graph->getStartNode(), 0)));
 			}
 		} else {
 			graphState.prepareStates(serializationContext, time);
@@ -103,7 +134,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 				pendingThreads.clear();
 			}
 		}
-		currentThread = nullptr;
+		s.thread = nullptr;
 		removeStoppedThreads();
 
 		// Clean up if done
@@ -116,24 +147,15 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	} catch (const std::exception& e) {
 		auto entity = getWorld().tryGetEntity(curEntity);
 		String name = entity.isValid() ? entity.getName() : "<invalidEntity>";
-		Logger::logError("Exception while executing script \"" + currentGraph->getAssetId() + "\" attached to entity \"" + name + "\":");
+		Logger::logError("Exception while executing script \"" + s.graph->getAssetId() + "\" attached to entity \"" + name + "\":");
 		Logger::logException(e);
 	}
-
-	HalleyAssertDev(currentGraph == graphState.getScriptGraphPtr());
-	HalleyAssertDev(currentState == &graphState);
-	HalleyAssertDev(currentEntity == curEntity);
-	HalleyAssertDev(currentEntityVariables == &entityVariables);
-
-	currentGraph = nullptr;
-	currentState = nullptr;
-	currentEntityVariables = nullptr;
-	currentEntity = EntityId();
 }
 
 bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads)
 {
-	currentThread = &thread;
+	auto& s = getState();
+	s.thread = &thread;
 	float& timeLeft = thread.getTimeSlice();
 
 	std::array<IScriptNodeType::OutputNode, 32> outputBuffer;
@@ -141,10 +163,10 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 	while (timeLeft > 0 && thread.isRunning()) {
 		// Get node type
 		const auto nodeId = thread.getCurNode().value();
-		const auto& node = currentGraph->getNodes().at(nodeId);
+		const auto& node = s.graph->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
-		currentInputPin = thread.getCurInputPin();
+		s.inputPin = thread.getCurInputPin();
 
 		const auto trace = StackDebugTrace("nodeType", node.getType());
 
@@ -211,10 +233,9 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 void ScriptEnvironment::terminateStateWith(const ScriptGraph* scriptGraph)
 {
 	if (scriptGraph) {
-		const auto* prevGraph = currentGraph;
-		currentGraph = scriptGraph;
+		pushStateCopy(*scriptGraph);
+		auto statePop = ScopedGuard([this] { popState(); });
 		doTerminateState();
-		currentGraph = prevGraph;
 		Logger::logDev("Script restarted after changing");
 	} else {
 		Logger::logError("Could not terminate state properly, previous state is missing?");
@@ -223,37 +244,20 @@ void ScriptEnvironment::terminateStateWith(const ScriptGraph* scriptGraph)
 
 void ScriptEnvironment::stopState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, bool allThreads)
 {
-	if (currentGraph != nullptr) {
-		throw Exception("Unable to stop script state: " + graphState.getScriptId() + " for " + getWorld().getEntity(curEntity).getName() + ")"
-			+ " - script update already in progress: " + currentGraph->getAssetId() + " for " + getWorld().getEntity(currentEntity).getName(), HalleyExceptions::Entity);
-	}
-
-	currentGraph = graphState.getScriptGraphPtr();
-	if (!currentGraph) {
-		throw Exception("Unable to terminate script state, script not set.", HalleyExceptions::Entity);
-	}
-
-	currentState = &graphState;
-	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(*nodeTypeCollection);
-	currentEntity = curEntity;
+	pushState(graphState, curEntity, entityVariables, 0);
+	auto statePop = ScopedGuard([this] { popState(); });
 
 	if (allThreads) {
 		doTerminateState();
 	} else {
-		if (const auto startNodeId = currentGraph->getStartNode()) {
+		if (const auto startNodeId = getState().graph->getStartNode()) {
 			abortCodePath(*startNodeId, {}, true);
 		}
-		const auto& threads = currentState->getThreads();
+		const auto& threads = getState().state->getThreads();
 		if (std::none_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isRunning(); })) {
 			doTerminateState();
 		}
 	}
-
-	currentGraph = nullptr;
-	currentState = nullptr;
-	currentEntityVariables = nullptr;
-	currentEntity = EntityId();
 }
 
 void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
@@ -263,20 +267,22 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 
 void ScriptEnvironment::doTerminateState()
 {
-	for (auto& thread: currentState->getThreads()) {
+	auto curState = getState().state;
+
+	for (auto& thread: curState->getThreads()) {
 		terminateThread(thread, false);
 	}
-	currentState->getThreads().clear();
+	curState->getThreads().clear();
 
-	if (!currentState->isTerminated()) {
-		for (auto& node: currentGraph->getNodes()) {
+	if (!curState->isTerminated()) {
+		for (auto& node: getState().graph->getNodes()) {
 			if (node.getType() == "destructor") {
 				runDestructor(node.getId());
 			}
 		}
 	}
 
-	currentState->markTerminated();
+	curState->markTerminated();
 }
 
 void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
@@ -285,10 +291,11 @@ void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
 	auto& t = threads.emplace_back(startThread(ScriptStateThread(nodeId, 0)));
 	t.getTimeSlice() = std::numeric_limits<float>::max();
 
+	const auto& s = getState();
 	while (true) {
 		Vector<ScriptStateThread> pending;
 		for (auto& t: threads) {
-			updateThread(*currentState, t, pending);
+			updateThread(*s.state, t, pending);
 		}
 		if (pending.empty()) {
 			break;
@@ -300,20 +307,21 @@ void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
 
 ScriptStateThread ScriptEnvironment::startThread(ScriptStateThread thread)
 {
-	if (!currentState->hasStarted()) {
-		currentState->start(currentGraph->getHash());
-		currentState->prepareStates(serializationContext, 0);
+	const auto curState = getState().state;
+	if (!curState->hasStarted()) {
+		curState->start(getState().graph->getHash());
+		curState->prepareStates(serializationContext, 0);
 	}
 
 	for (const auto& s: thread.getStack()) {
-		auto& nThreads = currentState->getNodeState(s.node).threadCount;
+		auto& nThreads = curState->getNodeState(s.node).threadCount;
 		HalleyAssertDev(nThreads >= 1);
 		++nThreads;
 	}
 
 	if (thread.getCurNode()) {
 		const auto nodeId = thread.getCurNode().value();
-		initNode(nodeId, currentState->getNodeState(nodeId));
+		initNode(nodeId, curState->getNodeState(nodeId));
 	}
 
 	return thread;
@@ -326,11 +334,9 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 
 void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin)
 {
-	HalleyAssertDev(currentState != nullptr);
-
 	if (node) {
-		const auto trace = StackDebugTrace("currentState", currentState);
-		auto& state = currentState->getNodeState(node.value());
+		const auto trace = StackDebugTrace("currentState", getState().state);
+		auto& state = getState().state->getNodeState(node.value());
 		if (state.threadCount == 0 && !thread.isWatcher()) {
 			initNode(node.value(), state);
 			thread.advanceToNode(node, outputPin, inputPin);
@@ -345,14 +351,14 @@ void ScriptEnvironment::initNode(GraphNodeId nodeId, ScriptState::NodeState& nod
 {
 	HalleyAssertDev(nodeState.threadCount == 0);
 	nodeState.threadCount++;
-	currentState->startNode(currentGraph->getNodes()[nodeId], nodeState);
+	getState().state->startNode(getState().graph->getNodes()[nodeId], nodeState);
 }
 
 size_t ScriptEnvironment::forkThread(ScriptStateThread& thread, gsl::span<IScriptNodeType::OutputNode> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
 {
 	size_t n = 0;
 	for (size_t j = firstIdx; j < outputNodes.size(); ++j) {
-		if (outputNodes[j].dstNode && currentState->getNodeState(outputNodes[j].dstNode.value()).threadCount == 0) {
+		if (outputNodes[j].dstNode && getState().state->getNodeState(outputNodes[j].dstNode.value()).threadCount == 0) {
 			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin, outputNodes[j].inputPin), pendingThreads);
 			++n;
 		}
@@ -362,7 +368,7 @@ size_t ScriptEnvironment::forkThread(ScriptStateThread& thread, gsl::span<IScrip
 
 void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
 {
-	for (auto& other: currentState->getThreads()) {
+	for (auto& other: getState().state->getThreads()) {
 		if (&thread != &other && other.isMerging() && other.getCurNode() == thread.getCurNode()) {
 			thread.merge(other);
 			other.setMerging(false);
@@ -380,13 +386,13 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 {
 	thread.advanceToNode({}, 0, 0);
 	
-	auto& state = *currentState;
+	auto& state = *getState().state;
 	
 	auto& threadStack = thread.getStack();
 	const auto n = static_cast<int>(threadStack.size());
 	for (int i = n; --i >= 0;) {
 		const auto nodeId = threadStack[i].node;
-		const auto& node = currentGraph->getNodes()[nodeId];
+		const auto& node = getState().graph->getNodes()[nodeId];
 
 		auto& nodeState = state.getNodeState(nodeId);
 
@@ -407,7 +413,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 		}
 
 		if (nodeState.threadCount == 0) {
-			if (node.getNodeType().hasDestructor(node, *currentGraph)) {
+			if (node.getNodeType().hasDestructor(node, *getState().graph)) {
 				node.getNodeType().destructor(*this, node, nodeState.data);
 			}
 			state.finishNode(node, nodeState, true);
@@ -418,11 +424,12 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 
 void ScriptEnvironment::removeStoppedThreads()
 {
-	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
+	std_ex::erase_if(getState().state->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
 }
 
 void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool newState)
 {
+	auto currentState = getState().state;
 	if (thread.isWatcher() != newState) {
 		if (newState && (!thread.getCurNode() || currentState->getNodeState(*thread.getCurNode()).threadCount == currentState->getNodeState(*thread.getCurNode()).watcherCount + 1)) {
 			// If this is the last non-watcher thread on this node, don't bother setting as watcher, terminate instead
@@ -461,7 +468,7 @@ void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
 	} else {
 		for (uint8_t i = 0; i < 8; ++i) {
 			if ((cancelMask & (1 << i)) != 0) {
-				auto& node = currentGraph->getNodes()[nodeId];
+				auto& node = getState().graph->getNodes()[nodeId];
 				const auto pinIdx = node.getNodeType().getNthOutputPinIdx(node, i);
 				HalleyAssertDev(node.getPinType(pinIdx).isCancellable);
 				abortCodePath(nodeId, pinIdx, false);
@@ -472,9 +479,7 @@ void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
 
 void ScriptEnvironment::abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin, bool includeCurNode)
 {
-	HalleyAssertDev(currentState != nullptr);
-
-	for (auto& thread: currentState->getThreads()) {
+	for (auto& thread: getState().state->getThreads()) {
 		if (thread.stackGoesThrough(node, outputPin) || (includeCurNode && thread.getCurNode() == node)) {
 			terminateThread(thread, false);
 		}
@@ -484,16 +489,16 @@ void ScriptEnvironment::abortCodePath(GraphNodeId node, std::optional<GraphPinId
 void ScriptEnvironment::callFunction(ScriptStateThread& thread)
 {
 	const auto nodeId = thread.getCurNode().value();
-	advanceThread(thread, currentGraph->getCallee(nodeId), 0, 0);
+	advanceThread(thread, getState().graph->getCallee(nodeId), 0, 0);
 }
 
 void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t outputPins, Vector<ScriptStateThread>& pendingThreads)
 {
 	const auto returnNodeId = thread.getCurNode().value();
-	const auto nodeId = currentGraph->getReturnTo(returnNodeId);
+	const auto nodeId = getState().graph->getReturnTo(returnNodeId);
 
 	if (nodeId) {
-		const auto& node = currentGraph->getNodes()[*nodeId];
+		const auto& node = getState().graph->getNodes()[*nodeId];
 		const auto& nodeType = node.getNodeType();
 		std::array<IScriptNodeType::OutputNode, 32> outputBuffer;
 		const auto outputNodes = nodeType.getOutputNodes(node, outputPins, outputBuffer);
@@ -508,7 +513,7 @@ void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t ou
 void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pending)
 {
 	Vector<GraphNodeId> toStart;
-	currentState->processMessages(toStart);
+	getState().state->processMessages(toStart);
 	for (const auto nodeId: toStart) {
 		pending.push_back(startThread(ScriptStateThread(nodeId, 0)));
 	}
@@ -517,9 +522,10 @@ void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pe
 void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread>& pending)
 {
 	std::array<IScriptNodeType::OutputNode, 32> outputBuffer;
-	for (auto& event: currentState->processControlEvents()) {
+	const auto& s = getState();
+	for (auto& event: s.state->processControlEvents()) {
 		if (event.type == ScriptState::ControlEventType::StartThread) {
-			const auto& node = currentGraph->getNodes()[event.nodeId];
+			const auto& node = s.graph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
 
 			const auto outputs = nodeType.getOutputNodes(node, 1, outputBuffer);
@@ -532,14 +538,14 @@ void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread
 			auto* nodeData = dynamic_cast<ScriptTransferToHostData*>(getNodeData(event.nodeId));
 			dynamic_cast<const ScriptTransferToHost&>(nodeType).setParameters(node, *nodeData, std::move(event.params));
 		} else if (event.type == ScriptState::ControlEventType::CancelThread) {
-			const auto& node = currentGraph->getNodes()[event.nodeId];
+			const auto& node = s.graph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
 			const auto outputs = nodeType.getOutputNodes(node, 1, outputBuffer);
 			if (const auto dstNode = outputs[0].dstNode) {
 				abortCodePath(*dstNode, {}, true);
 			}
 		} else if (event.type == ScriptState::ControlEventType::NotifyReturn) {
-			const auto& node = currentGraph->getNodes()[event.nodeId];
+			const auto& node = s.graph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
 			auto* nodeData = dynamic_cast<ScriptTransferToHostData*>(getNodeData(event.nodeId));
 			dynamic_cast<const ScriptTransferToHost&>(nodeType).notifyReturn(node, *nodeData, std::move(event.params));
@@ -567,17 +573,17 @@ UUID ScriptEnvironment::getUUIDFromEntityId(EntityId id) const
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId) const
 {
-	return world.tryGetEntity(entityId.isValid() ? entityId : currentEntity);
+	return world.tryGetEntity(entityId.isValid() ? entityId : getState().entity);
 }
 
 const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
 {
-	return currentGraph;
+	return getState().graph;
 }
 
 size_t& ScriptEnvironment::getNodeCounter(GraphNodeId nodeId)
 {
-	return currentState->getNodeCounter(nodeId);
+	return getState().state->getNodeCounter(nodeId);
 }
 
 void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
@@ -662,22 +668,22 @@ bool ScriptEnvironment::isNetworkConnected() const
 
 int ScriptEnvironment::getCurrentFrameNumber() const
 {
-	return currentState->getCurrentFrameNumber();
+	return getState().state->getCurrentFrameNumber();
 }
 
 Time ScriptEnvironment::getDeltaTime() const
 {
-	return deltaTime;
+	return getState().deltaTime;
 }
 
 EntityId ScriptEnvironment::getCurrentEntityId() const
 {
-	return currentEntity;
+	return getState().entity;
 }
 
 GraphPinId ScriptEnvironment::getCurrentInputPin() const
 {
-	return currentInputPin;
+	return getState().inputPin;
 }
 
 World& ScriptEnvironment::getWorld()
@@ -692,8 +698,9 @@ Resources& ScriptEnvironment::getResources()
 
 void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage message)
 {
+	const auto& s = getState();
 	if (!dstEntity.isValid()) {
-		dstEntity = currentEntity;
+		dstEntity = s.entity;
 	}
 
 	const auto entity = tryGetEntity(dstEntity);
@@ -712,9 +719,9 @@ void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage mess
 		return;
 	}
 
-	if (dstEntity == currentEntity && message.type.script == currentState->getScriptId() && message.delay <= 0.00001f) {
+	if (dstEntity == s.entity && message.type.script == s.state->getScriptId() && message.delay <= 0.00001f) {
 		// Quick path for instant self messages
-		currentState->receiveMessage(std::move(message));
+		s.state->receiveMessage(std::move(message));
 	} else {
 		scriptOutbox.emplace_back(dstEntity, std::move(message));
 	}
@@ -725,7 +732,7 @@ void ScriptEnvironment::sendEntityMessage(EntityMessageData message)
 	HalleyAssertDev(!message.messageName.isEmpty());
 
 	if (!message.targetEntity.isValid()) {
-		message.targetEntity = currentEntity;
+		message.targetEntity = getState().entity;
 	}
 
 	entityOutbox.emplace_back(std::move(message));
@@ -788,21 +795,22 @@ Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntit
 
 void ScriptEnvironment::startHostThread(int node, ConfigNode params)
 {
-	getInterface<IScriptSystemInterface>().startHostThread(currentEntity, currentGraph->getAssetId(), node, std::move(params));
+	getInterface<IScriptSystemInterface>().startHostThread(getState().entity, getState().graph->getAssetId(), node, std::move(params));
 }
 
 void ScriptEnvironment::cancelHostThread(int node)
 {
-	getInterface<IScriptSystemInterface>().cancelHostThread(currentEntity, currentGraph->getAssetId(), node);
+	getInterface<IScriptSystemInterface>().cancelHostThread(getState().entity, getState().graph->getAssetId(), node);
 }
 
 void ScriptEnvironment::returnHostThread(ConfigNode params)
 {
-	const auto threadRootId = currentThread->getStack()[0].node;
+	const auto& s = getState();
+	const auto threadRootId = s.thread->getStack()[0].node;
 
 	OptionalLite<GraphNodeId> rootNodeId;
 
-	const auto& node = currentGraph->getNodes()[threadRootId];
+	const auto& node = s.graph->getNodes()[threadRootId];
 	const auto& pinConfigs = node.getNodeType().getPinConfiguration(node);
 	const auto& pins = node.getPins();
 	for (size_t i = 0; i < pins.size(); ++i) {
@@ -817,7 +825,7 @@ void ScriptEnvironment::returnHostThread(ConfigNode params)
 	}
 
 	if (rootNodeId) {
-		getInterface<IScriptSystemInterface>().sendReturnHostThread(currentEntity, currentGraph->getAssetId(), *rootNodeId, std::move(params));
+		getInterface<IScriptSystemInterface>().sendReturnHostThread(s.entity, s.graph->getAssetId(), *rootNodeId, std::move(params));
 	}
 }
 
@@ -852,7 +860,7 @@ void ScriptEnvironment::setScriptTargetRetriever(ScriptTargetRetriever scriptTar
 
 gsl::span<const ConfigNode> ScriptEnvironment::getStartParams() const
 {
-	return currentState ? currentState->getStartParams() : gsl::span<const ConfigNode>();
+	return getState().state ? getState().state->getStartParams() : gsl::span<const ConfigNode>();
 }
 
 const ScriptNodeTypeCollection& ScriptEnvironment::getNodeTypeCollection() const
@@ -862,15 +870,15 @@ const ScriptNodeTypeCollection& ScriptEnvironment::getNodeTypeCollection() const
 
 void ScriptEnvironment::setFutureNodeValue(const ScriptGraphNode& node, std::optional<Future<ConfigNode>> future)
 {
-	if (currentState) {
-		currentState->setFutureNodeValue(node.getId(), std::move(future));
+	if (getState().state) {
+		getState().state->setFutureNodeValue(node.getId(), std::move(future));
 	}
 }
 
 std::optional<Future<ConfigNode>> ScriptEnvironment::getFutureNodeValue(const ScriptGraphNode& node)
 {
-	if (currentState) {
-		return currentState->getFutureNodeValue(node.getId());
+	if (getState().state) {
+		return getState().state->getFutureNodeValue(node.getId());
 	}
 	return {};
 }
@@ -882,7 +890,7 @@ bool ScriptEnvironment::isDevMode() const
 
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
-	return currentState->getNodeState(nodeId).data;
+	return getState().state->getNodeState(nodeId).data;
 }
 
 void ScriptEnvironment::assignTypes(const ScriptGraph& graph)
@@ -904,7 +912,7 @@ ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, Grap
 	HalleyAssertDev(pin.connections.size() == 1);
 
 	const auto& dst = pin.connections[0];
-	const auto& dstNode = currentGraph->getNodes()[dst.dstNode.value()];
+	const auto& dstNode = getState().graph->getNodes()[dst.dstNode.value()];
 	return dstNode.getNodeType().getData(*this, dstNode, dst.dstPin, getNodeData(dst.dstNode.value()));
 }
 
@@ -926,7 +934,7 @@ EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, Graph
 			}
 		}
 	}
-	return disconnectedIsSelf ? currentEntity : EntityId();
+	return disconnectedIsSelf ? getState().entity : EntityId();
 }
 
 EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, GraphPinId pinN)
@@ -1000,11 +1008,11 @@ ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope)
 {
 	switch (scope) {
 	case ScriptVariableScope::Local:
-		return currentState->getLocalVariables();
+		return getState().state->getLocalVariables();
 	case ScriptVariableScope::Shared:
-		return currentState->getSharedVariables();
+		return getState().state->getSharedVariables();
 	case ScriptVariableScope::Entity:
-		return *currentEntityVariables;
+		return *getState().entityVariables;
 	default:
 		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
 	}
@@ -1014,11 +1022,11 @@ const ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope
 {
 	switch (scope) {
 	case ScriptVariableScope::Local:
-		return currentState->getLocalVariables();
+		return getState().state->getLocalVariables();
 	case ScriptVariableScope::Shared:
-		return currentState->getSharedVariables();
+		return getState().state->getSharedVariables();
 	case ScriptVariableScope::Entity:
-		return *currentEntityVariables;
+		return *getState().entityVariables;
 	default:
 		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
 	}
@@ -1061,11 +1069,8 @@ const VariableTable* ScriptEnvironment::getVariableTable() const
 
 ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId)
 {
-	currentGraph = graphState.getScriptGraphPtr();
-	currentState = &graphState;
-	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(*nodeTypeCollection);
-	currentEntity = curEntity;
+	pushState(graphState, curEntity, entityVariables, 0);
+	auto statePop = ScopedGuard([this] { popState(); });
 
 	ConfigNode result = [&] () -> ConfigNode {
 		const auto& node = graphState.getScriptGraphPtr()->getNodes().at(nodeId);
@@ -1103,11 +1108,6 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 			}
 		}
 	}();
-
-	currentGraph = nullptr;
-	currentState = nullptr;
-	currentEntityVariables = nullptr;
-	currentEntity = EntityId();
 
 	return result;
 }

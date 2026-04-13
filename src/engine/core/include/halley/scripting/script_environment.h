@@ -72,8 +72,8 @@ namespace Halley {
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost = true);
     	virtual ~ScriptEnvironment() = default;
 
-    	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
-
+        bool hasCurrentState() const;
+    	void updateState(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
     	void stopState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, bool allThreads);
     	void terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
 		ConfigNode readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId);
@@ -185,13 +185,17 @@ namespace Halley {
         bool isHost = false;
         bool inputEnabled = true;
 
-        GraphPinId currentInputPin = 0;
-    	const ScriptGraph* currentGraph = nullptr;
-    	ScriptState* currentState = nullptr;
-        ScriptVariables* currentEntityVariables = nullptr;
-        ScriptStateThread* currentThread = nullptr;
-        EntityId currentEntity;
-        Time deltaTime = 0;
+        struct CurState {
+    		const ScriptGraph* graph = nullptr;
+    		ScriptState* state = nullptr;
+	        ScriptVariables* entityVariables = nullptr;
+	        ScriptStateThread* thread = nullptr;
+	        EntityId entity;
+	        GraphPinId inputPin = 0;
+	        Time deltaTime = 0;
+        };
+        Vector<CurState> stateStack;
+
         EntitySerializationContext serializationContext;
 
         Vector<std::pair<EntityId, ScriptMessage>> scriptOutbox;
@@ -201,8 +205,15 @@ namespace Halley {
         ScriptTargetRetriever scriptTargetRetriever;
 
         const VariableTable* variableTable = nullptr;
+        
+        void pushState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, Time deltaTime);
+        void pushStateCopy(const ScriptGraph& graph);
+        void popState();
+        CurState& getState();
+        const CurState& getState() const;
 
     private:
+
         bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
         void terminateStateWith(const ScriptGraph* scriptGraph);
         void doTerminateState();

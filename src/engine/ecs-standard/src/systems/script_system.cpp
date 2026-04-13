@@ -332,6 +332,8 @@ private:
 		}
 
 		auto& env = getScriptingService().getEnvironment();
+		HalleyAssertDev(!env.hasCurrentState());
+
 		for (auto& e: scriptables) {
 			const auto entityId = e.entityId;
 			auto entity = getWorld().tryGetEntity(entityId);
@@ -350,7 +352,7 @@ private:
 				auto& state = *statePtr;
 				if (!state.getFrameFlag()) {
 					if (hasTransform || !state.getScriptGraphPtr()->needsTransform()) {
-						env.update(t, state, entityId, scriptable.variables);
+						env.updateState(t, state, entityId, scriptable.variables);
 					} else if (state.hasStarted()) {
 						env.stopState(state, entityId, scriptable.variables, true);
 						state.reset(); // This makes sure it won't be auto-terminated, and will restart when needed
@@ -555,7 +557,7 @@ private:
 		scriptable.activeStates.addState(state);
 		state->setTags(std::move(tags));
 		state->setStartParams(std::move(params));
-		getScriptingService().getEnvironment().update(0, *state, entityId, scriptable.variables);
+		getScriptingService().getEnvironment().updateState(0, *state, entityId, scriptable.variables);
 		return state;
 	}
 
