@@ -678,7 +678,7 @@ Time ScriptEnvironment::getDeltaTime() const
 
 EntityId ScriptEnvironment::getCurrentEntityId() const
 {
-	return getState().entity;
+	return hasCurrentState() ? getState().entity : EntityId();
 }
 
 GraphPinId ScriptEnvironment::getCurrentInputPin() const
@@ -698,9 +698,11 @@ Resources& ScriptEnvironment::getResources()
 
 void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage message)
 {
-	const auto& s = getState();
+	const auto curEntity = getCurrentEntityId();
+	auto* curState = hasCurrentState() ? getState().state : nullptr;
+
 	if (!dstEntity.isValid()) {
-		dstEntity = s.entity;
+		dstEntity = curEntity;
 	}
 
 	const auto entity = tryGetEntity(dstEntity);
@@ -719,9 +721,9 @@ void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage mess
 		return;
 	}
 
-	if (dstEntity == s.entity && message.type.script == s.state->getScriptId() && message.delay <= 0.00001f) {
+	if (dstEntity == curEntity && curState && message.type.script == curState->getScriptId() && message.delay <= 0.00001f) {
 		// Quick path for instant self messages
-		s.state->receiveMessage(std::move(message));
+		curState->receiveMessage(std::move(message));
 	} else {
 		scriptOutbox.emplace_back(dstEntity, std::move(message));
 	}
@@ -732,7 +734,7 @@ void ScriptEnvironment::sendEntityMessage(EntityMessageData message)
 	HalleyAssertDev(!message.messageName.isEmpty());
 
 	if (!message.targetEntity.isValid()) {
-		message.targetEntity = getState().entity;
+		message.targetEntity = getCurrentEntityId();
 	}
 
 	entityOutbox.emplace_back(std::move(message));
