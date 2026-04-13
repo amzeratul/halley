@@ -250,6 +250,8 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 		return;
 	}
 
+	const auto trace = StackDebugTrace("audioVoice", source->getName());
+
 	ProfilerEvent event(ProfilerEventType::AudioRenderVoice, source->getName(), reinterpret_cast<uint64_t>(this));
 
 	// Check delay

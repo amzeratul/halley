@@ -54,6 +54,7 @@ bool AudioSourceClip::isLooping()
 
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
+	const auto trace = StackDebugTrace("audioClip", clip->getName());
 	HalleyAssertDev(isReady());
 
 	// Set stream end positions
