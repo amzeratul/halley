@@ -372,8 +372,12 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
         if (!networkComponent->ownerId) {
             networkComponent->ownerId = peerId;
         } else if (networkComponent->ownerId != peerId) {
-            Logger::logDev("Ignore attempt to reassign ownership of " + ref.getName() + "(" + toString(entityId.value & 0xffffffff) +
-            	") from peer #" + toString(int(networkComponent->ownerId.value())) + " to #" + toString(int(peerId)) + ".");
+        	// This can be a legimite call if the host creates an outbound entity for one peer, for
+        	// some entity created/owned by another peer...
+        	if (peerId != 0 || !networkComponent->dataInterpolatorSet.isReady()) {
+        		Logger::logDev("Ignore attempt to reassign ownership of " + ref.getName() + "(" + toString(entityId.value & 0xffffffff) +
+					") from peer #" + toString(int(networkComponent->ownerId.value())) + " to #" + toString(int(peerId)) + ".");
+        	}
         }
 		return networkComponent->dataInterpolatorSet;
 	} else {
