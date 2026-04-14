@@ -74,7 +74,7 @@ public:
 				const auto playerPeer = playerEntity->network.ownerId.value_or(0);
 				return playerPeer == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
 			}
-			Logger::logWarning("Couldn't find player entity to check lock status");
+			Logger::logWarning("Couldn't find player entity " + toString(iter->second.playerId) + " to check lock status", true);
 			return LockStatus::AcquiredByOther;
 		}
 
@@ -83,7 +83,11 @@ public:
 				return e->network.authorityId == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
 			}
 		} else {
-			Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId));
+			if (auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
+				Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId) + " (" + entity.getName() + ")", true);
+			} else {
+				Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId), true);
+			}
 		}
 
 		return LockStatus::Unlocked;
