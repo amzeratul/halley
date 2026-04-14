@@ -70,6 +70,12 @@ namespace Halley {
 
 	class StackDebugTrace {
 	public:
+		[[nodiscard]] StackDebugTrace(std::string_view name)
+			: name(name)
+			, type(Type::Undefined)
+		{			
+		}
+
 		[[nodiscard]] StackDebugTrace(std::string_view name, std::string_view value)
 			: name(name)
 			, strValue(value)
@@ -105,7 +111,9 @@ namespace Halley {
 #if defined(DEV_BUILD) || defined(_DEBUG)
 		~StackDebugTrace()
 		{
-			Debug::unregisterDebugTrace(*this);
+			if (type != Type::Undefined) {
+				Debug::unregisterDebugTrace(*this);
+			}
 		}
 #endif
 
@@ -118,11 +126,48 @@ namespace Halley {
 		[[nodiscard]] bool isString() const { return type == Type::StringView; }
 		[[nodiscard]] std::string_view getValue(gsl::span<char> buffer) const;
 
+		void setValue(std::string_view value)
+		{
+			if (this->type == Type::Undefined) {
+				doRegister();
+			}
+			this->type = Type::StringView;
+			this->strValue = value;
+		}
+
+		void setValue(int64_t value)
+		{
+			if (this->type == Type::Undefined) {
+				doRegister();
+			}
+			this->type = Type::Int64;
+			this->value.int64Value = value;
+		}
+
+		void setValue(double value)
+		{
+			if (this->type == Type::Undefined) {
+				doRegister();
+			}
+			this->type = Type::Double;
+			this->value.doubleValue = value;
+		}
+
+		void setValue(void* value)
+		{
+			if (this->type == Type::Undefined) {
+				doRegister();
+			}
+			this->type = Type::Pointer;
+			this->value.ptrValue = value;
+		}
+
 		void* operator new(size_t) = delete;
 		void* operator new(size_t, void*) = delete;
 
 	private:
 		enum class Type : uint8_t {
+			Undefined,
 			StringView,
 			Int64,
 			Double,
@@ -136,7 +181,7 @@ namespace Halley {
 			double doubleValue;
 			void* ptrValue;
 		} value;
-		const Type type;
+		Type type;
 
 		void doRegister() const
 		{

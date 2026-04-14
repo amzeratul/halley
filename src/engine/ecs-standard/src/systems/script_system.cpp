@@ -321,14 +321,15 @@ private:
 		struct Entry {
 			EntityId entityId;
 			ScriptableComponent* scriptable;
-			bool hasTransform;
+			std::optional<WorldPosition> pos;
 		};
 
 		// Make a copy since script updates can result in World entity refresh, which invalidates iterators
 		auto scriptables = VectorTemp<Entry>(getWorld().getUpdateMemoryPool());
 		scriptables.reserve(scriptableFamily.size());
 		for (auto& e : scriptableFamily) {
-			scriptables.emplace_back(Entry{ e.entityId, &e.scriptable, e.transform2D.hasValue() });
+			auto pos = e.transform2D.hasValue() ? std::optional(e.transform2D->getWorldPosition()) : std::nullopt;
+			scriptables.emplace_back(Entry{ e.entityId, &e.scriptable, pos });
 		}
 
 		auto& env = getScriptingService().getEnvironment();
@@ -341,10 +342,19 @@ private:
 				// Entity no longer valid, can't access ScriptableComponent
 				continue;
 			}
-			const auto trace = StackDebugTrace("entityName", entity.getName());
+
+			auto traceSubWorld = StackDebugTrace("subWorld");
+			auto traceY = StackDebugTrace("y");
+			auto traceX = StackDebugTrace("x");
+			if (e.pos) {
+				traceSubWorld.setValue(static_cast<int64_t>(e.pos->subWorld));
+				traceY.setValue(e.pos->pos.y);
+				traceX.setValue(e.pos->pos.x);
+			}
+			const auto traceName = StackDebugTrace("entityName", entity.getName());
 
 			auto& scriptable = *e.scriptable;
-			bool hasTransform = e.hasTransform;
+			bool hasTransform = e.pos.has_value();
 
 			scriptable.activeStates.terminateMarkedDead(env, entityId, scriptable.variables);
 
