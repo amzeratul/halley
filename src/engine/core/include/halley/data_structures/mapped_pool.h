@@ -54,6 +54,7 @@ namespace Halley {
 
 	public:
 		MappedPool(size_t maxBlocks = 64)
+			: nBlocks(0)
 		{
 			blocks.reserve(maxBlocks);
 		}
@@ -67,12 +68,16 @@ namespace Halley {
 			// Figure which block it goes into, and make sure that exists
 			const size_t blockIdx = entryIdx / blockLen;
 			if (blockIdx >= blocks.size()) {
+				HalleyAssertDev(blockIdx == blocks.size()); // Ensure no blocks are skipped
+
 				// We never grow beyond pre-reserved size as that could cause a block pointer invalidation, which would make MappedPool::get() thread-unsafe.
 				// Locking that method in a mutex would perform too slowly
-				if (blocks.size() + 1 > blocks.capacity()) {
+				const auto newSize = blocks.size() + 1;
+				if (newSize > blocks.capacity()) {
 					throw Exception("Run out of maximum space on MappedPool", HalleyExceptions::Utils);
 				}
 				blocks.push_back(Block(blocks.size()));
+				nBlocks = static_cast<uint32_t>(newSize);
 			}
 			auto& block = blocks[blockIdx];
 
@@ -108,39 +113,39 @@ namespace Halley {
 		}
 
 		T* get(int64_t externalIdx) {
-			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
-			auto rev = static_cast<uint32_t>(externalIdx >> 32);
+			const uint32_t idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
+			const uint32_t rev = static_cast<uint32_t>(externalIdx >> 32);
 
-			int blockN = idx / blockLen;
-			if (blockN < 0 || blockN >= int(blocks.capacity())) {
+			const size_t blockN = idx / blockLen;
+			const auto localIdx = idx % blockLen;
+			if (blockN >= nBlocks) { // Reading directly from blocks.size() here is dangerous
 				return nullptr;
 			}
 
 			auto& block = blocks[blockN];
-			int localIdx = idx % blockLen;
 			auto& data = block.data[localIdx];
 			if (data.revision != rev) {
 				return nullptr;
 			}
-			return reinterpret_cast<T*>(&(data.data));
+			return reinterpret_cast<T*>(&data.data);
 		}
 
 		const T* get(int64_t externalIdx) const {
-			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
-			auto rev = static_cast<uint32_t>(externalIdx >> 32);
+			const uint32_t idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
+			const uint32_t rev = static_cast<uint32_t>(externalIdx >> 32);
 
-			int blockN = idx / blockLen;
-			if (blockN < 0 || blockN >= int(blocks.capacity())) {
+			const size_t blockN = idx / blockLen;
+			const auto localIdx = idx % blockLen;
+			if (blockN >= nBlocks) {
 				return nullptr;
 			}
 
-			auto& block = blocks[blockN];
-			int localIdx = idx % blockLen;
-			auto& data = block.data[localIdx];
+			const auto& block = blocks[blockN];
+			const auto& data = block.data[localIdx];
 			if (data.revision != rev) {
 				return nullptr;
 			}
-			return reinterpret_cast<const T*>(&(data.data));
+			return reinterpret_cast<const T*>(&data.data);
 		}
 
 		uint32_t getNumAllocs() const
@@ -150,6 +155,7 @@ namespace Halley {
 
 	private:
 		VectorStd<Block, uint32_t, false> blocks; // Ensure no SBO
+		std::atomic<uint32_t> nBlocks; // This replicates blocks size, but can be safely read without a lock
 		uint32_t next = 0;
 		uint32_t nAllocs = 0;
 
