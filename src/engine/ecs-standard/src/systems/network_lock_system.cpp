@@ -81,6 +81,14 @@ public:
 		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
 			if (e->network.authorityId) {
 				return e->network.authorityId == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+			} else {
+				const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) {
+					return lock.first == targetId;
+				});
+
+				if (iter != e->network.locks.end()) {
+					return iter->second == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+				}
 			}
 		} else {
 			if (auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
@@ -109,6 +117,19 @@ public:
 		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
 			if (e->network.authorityId) {
 				return e->network.authorityId == myPeerId;
+			} else {
+				const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) {
+					return lock.first == targetId;
+				});
+
+				if (iter != e->network.locks.end()) {
+					if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
+						const auto playerPeer = playerEntity->network.ownerId.value_or(0);
+						return iter->second == playerPeer;
+					}
+					Logger::logWarning("Couldn't find player entity to check lock availability");
+					return false;
+				}
 			}
 		}
 

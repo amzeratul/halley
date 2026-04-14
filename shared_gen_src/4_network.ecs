@@ -33,6 +33,7 @@ component:
       type: 'Halley::Vector<std::pair<Halley::EntityId, uint8_t>>'
       canSave: false
       canEdit: false
+      canNetwork: true
   - alwaysSend:
       type: bool
       defaultValue: false
