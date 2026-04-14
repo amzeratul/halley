@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #include <halley.hpp>
@@ -44,24 +44,24 @@ protected:
 	Halley::TempMemoryPool& getTempMemoryPool() const {
 		return doGetWorld().getUpdateMemoryPool();
 	}
-	void sendMessage(NetworkEntityLockSystemMessage msg, std::function<void(Halley::ConfigNode)> callback = {}) {
+	void sendMessage(NetworkEntityLockSystemMessage msg, std::function<void(Halley::ConfigNode)> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
 		Halley::String targetSystem = "";
-		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
 		if (n != 1) {
 		    throw Halley::Exception("Sending non-multicast NetworkEntityLockSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
 		}
 	}
 
-	void sendMessage(const Halley::String& targetSystem, NetworkEntityLockSystemMessage msg, std::function<void(Halley::ConfigNode)> callback = {}) {
-		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+	void sendMessage(const Halley::String& targetSystem, NetworkEntityLockSystemMessage msg, std::function<void(Halley::ConfigNode)> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
 		if (n != 1) {
 		    throw Halley::Exception("Sending non-multicast NetworkEntityLockSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
 		}
 	}
 
-	size_t sendMessage(NetworkPeerDisconnectSystemMessage msg, std::function<void()> callback = {}) {
+	size_t sendMessage(NetworkPeerDisconnectSystemMessage msg, std::function<void()> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
 		Halley::String targetSystem = "";
-		return sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+		return sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
 	}
 
 

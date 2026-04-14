@@ -570,7 +570,10 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	Vector<String> entityMsgsReceived;
 	for (auto& msg : system.messages) {
 		if (msg.send) {
-			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntityId"), "entityId"), VariableSchema(TypeSchema(msg.name + "Message"), "msg") }, "sendMessage"), "sendMessageGeneric(entityId, std::move(msg));");
+			sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("void"), { 
+				VariableSchema(TypeSchema("Halley::EntityId"), "entityId"),
+				VariableSchema(TypeSchema(msg.name + "Message"), "msg")
+			}, "sendMessage"), "sendMessageGeneric(entityId, std::move(msg));");
 		}
 		if (msg.receive) {
 			hasReceiveEntityMessage = true;
@@ -589,12 +592,13 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 				Vector<VariableSchema> parameters = {
 					VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
-					VariableSchema(TypeSchema("std::function<void(" + (sysMsg.returnType == "void" ? "" : sysMsg.returnType) + ")>"), "callback", "{}")
+					VariableSchema(TypeSchema("std::function<void(" + (sysMsg.returnType == "void" ? "" : sysMsg.returnType) + ")>"), "callback", "{}"),
+					VariableSchema(TypeSchema("std::optional<Halley::SystemMessageDestination>"), "dst", "std::nullopt")
 				};
 
 				Vector<String> body;
 				body.emplace_back("Halley::String targetSystem = \"\";");
-				body.emplace_back(String(sysMsg.multicast ? "return " : "const size_t n = ") + "sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);");
+				body.emplace_back(String(sysMsg.multicast ? "return " : "const size_t n = ") + "sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);");
 				if (!sysMsg.multicast) {
 					body.emplace_back("if (n != 1) {");
 					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + Halley::toString(n) + \" systems receiving it (expecting exactly one).\", Halley::HalleyExceptions::Entity);");

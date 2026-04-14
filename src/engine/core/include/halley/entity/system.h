@@ -106,7 +106,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename F>
-		size_t sendSystemMessageGeneric(T msg, F returnLambda, const String& targetSystem)
+		size_t sendSystemMessageGeneric(T msg, F returnLambda, const String& targetSystem, std::optional<SystemMessageDestination> msgDst = std::nullopt)
 		{
 			SystemMessageContext context;
 
@@ -134,7 +134,7 @@ namespace Halley {
 				};
 			}
 			
-			return doSendSystemMessage(std::move(context), targetSystem, T::messageDestination);
+			return doSendSystemMessage(std::move(context), targetSystem, msgDst.value_or(T::messageDestination));
 		}
 
 		template <typename T>
