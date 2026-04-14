@@ -57,6 +57,13 @@ String EntityId::toString() const
 	return Halley::toString(value);
 }
 
+String EntityId::toDetailedString() const
+{
+	const uint32_t idx = static_cast<uint32_t>(value & 0xFFFFFFFFll);
+	const uint32_t rev = static_cast<uint32_t>(value >> 32);
+	return Halley::toString(idx) + ":" + Halley::toString(rev);
+}
+
 void EntityId::serialize(Serializer& s) const
 {
 	if (auto* world = s.getOptions().world) {

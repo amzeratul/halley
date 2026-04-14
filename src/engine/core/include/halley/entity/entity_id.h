@@ -32,6 +32,7 @@ namespace Halley {
 		operator bool() const { return isValid(); }
 
 		String toString() const;
+		String toDetailedString() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
