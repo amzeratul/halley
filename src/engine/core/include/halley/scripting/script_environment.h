@@ -132,7 +132,7 @@ namespace Halley {
         World& getWorld();
         Resources& getResources();
 
-    	void sendScriptMessage(EntityId dstEntity, ScriptMessage message);
+    	void sendScriptMessage(EntityId dstEntity, ScriptMessage message, std::optional<SystemMessageDestination> = std::nullopt);
         void sendEntityMessage(EntityMessageData message);
         void sendSystemMessage(SystemMessageData message);
 

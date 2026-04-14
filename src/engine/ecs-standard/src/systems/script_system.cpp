@@ -204,6 +204,11 @@ public:
 		sendLocalMessage(e.entityId, msg.msg);
 	}
 
+	void onMessageReceived(SendScriptMsgNetworkSystemMessage msg) override
+	{
+		sendLocalMessage(msg.entityId, msg.msg);
+	}
+
 	void onMessageReceived(const TerminateScriptsWithTagSystemMessage& msg) override
 	{
 		const auto* scriptable = scriptableFamily.tryFind(msg.scriptableId);
@@ -240,12 +245,12 @@ public:
 		sendMessage(CancelHostScriptThreadSystemMessage(scriptId, entityId, nodeId));
 	}
 
-	void sendScriptMessage(EntityId entityId, ScriptMessage message) override
+	void sendScriptMessage(EntityId entityId, ScriptMessage message, std::optional<SystemMessageDestination> destination) override
 	{
-		if (!getWorld().isEntityNetworkAuthority(entityId)) {
-			sendRemoteMessage(entityId, std::move(message));
-		} else {
+		if (destination == SystemMessageDestination::Local || (!destination && getWorld().isEntityNetworkAuthority(entityId))) {
 			sendLocalMessage(entityId, std::move(message));
+		} else {
+			sendRemoteMessage(entityId, std::move(message), destination);
 		}
 	}
 
@@ -426,7 +431,7 @@ private:
 		auto& env = getScriptingService().getEnvironment();
 		auto scriptOutbound = env.getOutboundScriptMessages();
 		for (auto& msg: scriptOutbound) {
-			sendScriptMessage(msg.first, std::move(msg.second));
+			sendScriptMessage(msg.first, std::move(msg.second), std::nullopt);
 		}
 
 		auto entityOutbound = env.getOutboundEntityMessages();
@@ -435,9 +440,13 @@ private:
 		}
 	}
 
-	void sendRemoteMessage(EntityId dst, ScriptMessage msg)
+	void sendRemoteMessage(EntityId entityId, ScriptMessage msg, std::optional<SystemMessageDestination> dst)
 	{
-		sendMessage(dst, SendScriptMsgMessage(std::move(msg)));
+		if (dst) {
+			sendMessage(SendScriptMsgNetworkSystemMessage(entityId, std::move(msg)), {}, dst);
+		} else {
+			sendMessage(entityId, SendScriptMsgMessage(std::move(msg)));
+		}
 	}
 
 	void sendLocalMessage(EntityId dst, ScriptMessage msg)

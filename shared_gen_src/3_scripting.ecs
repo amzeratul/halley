@@ -125,6 +125,16 @@ message:
 ---
 
 systemMessage:
+  name: SendScriptMsgNetwork
+  members:
+  - entityId: 'Halley::EntityId'
+  - msg: 'Halley::ScriptMessage'
+  serializable: true
+  destination: host
+
+---
+
+systemMessage:
   name: StartHostScriptThread
   members:
   - script: 'Halley::String'
@@ -198,6 +208,7 @@ system:
   - TerminateScriptsWithTag: receive
   - StartHostScriptThread: send receive
   - CancelHostScriptThread: send receive
+  - SendScriptMsgNetwork: send receive
 
 ---
 

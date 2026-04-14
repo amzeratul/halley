@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #include <halley.hpp>
 using namespace Halley;
 
@@ -32,6 +32,7 @@ using namespace Halley;
 #include "system_messages/play_network_animation_system_message.h"
 #include "system_messages/play_network_sound_system_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
+#include "system_messages/send_script_msg_network_system_message.h"
 #include "system_messages/start_host_script_thread_system_message.h"
 #include "system_messages/cancel_host_script_thread_system_message.h"
 #include "system_messages/network_peer_disconnect_system_message.h"
@@ -106,10 +107,11 @@ public:
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {
 		Vector<std::unique_ptr<SystemMessageReflector>> result;
-		result.reserve(7);
+		result.reserve(8);
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<PlayNetworkAnimationSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<PlayNetworkSoundSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<TerminateScriptsWithTagSystemMessage>>());
+		result.push_back(std::make_unique<SystemMessageReflectorImpl<SendScriptMsgNetworkSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<StartHostScriptThreadSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<CancelHostScriptThreadSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<NetworkPeerDisconnectSystemMessage>>());

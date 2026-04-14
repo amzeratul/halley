@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #include <halley.hpp>
@@ -19,6 +19,7 @@
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
 #include "system_messages/start_host_script_thread_system_message.h"
 #include "system_messages/cancel_host_script_thread_system_message.h"
+#include "system_messages/send_script_msg_network_system_message.h"
 
 // Generated file; do not modify.
 template <typename T>
@@ -99,6 +100,8 @@ public:
 
 	virtual void onMessageReceived(CancelHostScriptThreadSystemMessage msg) = 0;
 
+	virtual void onMessageReceived(SendScriptMsgNetworkSystemMessage msg) = 0;
+
 	ScriptSystemBase()
 		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex, SetEntityVariableMessage::messageIndex})
 	{
@@ -153,6 +156,21 @@ protected:
 		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
 		if (n != 1) {
 		    throw Halley::Exception("Sending non-multicast CancelHostScriptThreadSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
+		}
+	}
+
+	void sendMessage(SendScriptMsgNetworkSystemMessage msg, std::function<void()> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
+		Halley::String targetSystem = "";
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
+		if (n != 1) {
+		    throw Halley::Exception("Sending non-multicast SendScriptMsgNetworkSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
+		}
+	}
+
+	void sendMessage(const Halley::String& targetSystem, SendScriptMsgNetworkSystemMessage msg, std::function<void()> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
+		if (n != 1) {
+		    throw Halley::Exception("Sending non-multicast SendScriptMsgNetworkSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
 		}
 	}
 
@@ -229,6 +247,13 @@ private:
 		    context.setResult(result);
 		    break;
 		}
+		case SendScriptMsgNetworkSystemMessage::messageIndex: {
+		    auto& realMsg = reinterpret_cast<SendScriptMsgNetworkSystemMessage&>(*context.msg);
+		    Halley::VoidWrapper result;
+		    static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
+		    context.setResult(result);
+		    break;
+		}
 		}
 	}
 	bool canHandleSystemMessage(int msgIndex, const Halley::String& targetSystem) const override final {
@@ -237,6 +262,7 @@ private:
 		case TerminateScriptsWithTagSystemMessage::messageIndex: return true;
 		case StartHostScriptThreadSystemMessage::messageIndex: return true;
 		case CancelHostScriptThreadSystemMessage::messageIndex: return true;
+		case SendScriptMsgNetworkSystemMessage::messageIndex: return true;
 		}
 		return false;
 	}

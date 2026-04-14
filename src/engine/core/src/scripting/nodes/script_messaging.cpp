@@ -203,6 +203,7 @@ Vector<IGraphNodeType::SettingType> ScriptBroadcastMessage::getSettingTypes() co
 	return {
 		SettingType{ "message", "Halley::String", Vector<String>{""} },
 		SettingType{ "nParams", "Halley::Range<int, 0, 8>", Vector<String>{""} },
+		SettingType{ "destination", "std::optional<Halley::SystemMessageDestination>", Vector<String>{""} },
 	};
 }
 
@@ -256,6 +257,12 @@ std::pair<String, Vector<ColourOverride>> ScriptBroadcastMessage::getNodeDescrip
 		str.append(delayStr + " s", settingColour);
 	}
 
+	if (auto dst = node.getSettings()["destination"].asOptional<String>()) {
+		str.append(" [");
+		str.append(*dst, settingColour);
+		str.append("]");
+	}
+
 	return str.moveResults();
 }
 
@@ -285,7 +292,7 @@ IScriptNodeType::Result ScriptBroadcastMessage::doUpdate(ScriptEnvironment& envi
 	}
 
 	const auto entityId = readEntityId(environment, node, 2);
-	environment.sendScriptMessage(entityId, std::move(msg));
+	environment.sendScriptMessage(entityId, std::move(msg), node.getSettings()["destination"].asOptional<SystemMessageDestination>());
 	
 	return Result(ScriptNodeExecutionState::Done);
 }

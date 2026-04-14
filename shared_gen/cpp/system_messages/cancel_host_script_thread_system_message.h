@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class CancelHostScriptThreadSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 4 };
+	static constexpr int messageIndex{ 5 };
 	static const constexpr char* messageName{ "CancelHostScriptThread" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Host };
 	using ReturnType = void;

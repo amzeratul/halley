@@ -7,6 +7,7 @@
 #include "halley/scripting/script_message.h"
 
 namespace Halley {
+	enum class SystemMessageDestination;
 	class Animation;
 	class WorldPosition;
 	struct alignas(8) EntityId;
@@ -65,7 +66,7 @@ namespace Halley {
 		virtual void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) = 0;
 		virtual void startHostThread(EntityId entityId, const String& scriptId, int nodeId, ConfigNode params) = 0;
 		virtual void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) = 0;
-		virtual void sendScriptMessage(EntityId entityId, ScriptMessage message) = 0;
+		virtual void sendScriptMessage(EntityId entityId, ScriptMessage message, std::optional<SystemMessageDestination> destination) = 0;
 	};
 
 	class IScriptableQuerySystemInterface : public ISystemInterface {

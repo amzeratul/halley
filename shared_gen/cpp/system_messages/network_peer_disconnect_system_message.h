@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class NetworkPeerDisconnectSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 5 };
+	static constexpr int messageIndex{ 6 };
 	static const constexpr char* messageName{ "NetworkPeerDisconnect" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Local };
 	using ReturnType = void;
