@@ -106,8 +106,6 @@ public:
 			if (e->network.authorityId) {
 				return e->network.authorityId == myPeerId;
 			}
-		} else {
-			Logger::logError("Trying to check lock availability of unknown network entity " + toString(targetId));
 		}
 
 		return true;
