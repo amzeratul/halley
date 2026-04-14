@@ -67,39 +67,49 @@ public:
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId) const override
 	{
+		const auto myPeerId = getMyPeerId();
+
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			if (const NetworkFamily* playerEntity = networkFamily.tryFind(iter->second.playerId)) {
+				const auto playerPeer = playerEntity->network.ownerId.value_or(0);
+				return playerPeer == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+			}
+			Logger::logWarning("Couldn't find player entity to check lock status");
+			return LockStatus::AcquiredByOther;
+		}
+
 		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
-			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
-			if (iter != e->network.locks.end()) {
-				return iter->second == getMyPeerId() ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+			if (e->network.authorityId) {
+				return e->network.authorityId == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
 			}
 		} else {
-			//Logger::logError("Trying to get lock status of unknown network entity " + toString(targetId));
-			return LockStatus::Unlocked;
+			Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId));
 		}
+
 		return LockStatus::Unlocked;
 	}
 
 	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const override
 	{
-		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
-			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
-			if (iter != e->network.locks.end()) {
-				if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
-					const auto playerPeer = playerEntity->network.ownerId.value_or(0);
-					return iter->second == playerPeer;
-				}
-				Logger::logWarning("Couldn't find locker entity");
-				return false;
+		const auto myPeerId = getMyPeerId();
+
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
+				const auto playerPeer = playerEntity->network.ownerId.value_or(0);
+				return playerPeer == myPeerId;
 			}
-		} else if (getSessionService().isMultiplayer()) {
-			const auto entity = getWorld().tryGetEntity(targetId);
-			if (entity.isValid()) {
-				Logger::logWarning("Trying to get lock status of non-network entity \"" + entity.getName() + "\" (" + toString(entity.getEntityId().value & 0xffffffff) + ") (missing NetworkComponent?)", true);
-			} else if (targetId.isValid()) {
-				Logger::logWarning("Trying to get lock status of unknown entity " + toString(targetId.value & 0xffffffff), true);
-			}
-			return true;
+			Logger::logWarning("Couldn't find player entity to check lock availability");
+			return false;
 		}
+
+		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
+			if (e->network.authorityId) {
+				return e->network.authorityId == myPeerId;
+			}
+		} else {
+			Logger::logError("Trying to check lock availability of unknown network entity " + toString(targetId));
+		}
+
 		return true;
 	}
 
@@ -175,6 +185,12 @@ public:
 		return result;
 	}
 
+	void onPeerDisconnected(NetworkSession::PeerId peerId) override
+	{
+		checkStaleLocks(peerId);
+		sendMessage(NetworkPeerDisconnectSystemMessage(peerId));
+	}
+
 private:
 	struct LocalLock {
 		EntityId playerId;
@@ -184,12 +200,6 @@ private:
 	};
 	HashMap<EntityId, LocalLock> myLocks;
 	ListenerSetToken sessionChangedToken;
-
-	void onPeerDisconnected(NetworkSession::PeerId peerId) override
-	{
-		checkStaleLocks(peerId);
-		sendMessage(NetworkPeerDisconnectSystemMessage(peerId));
-	}
 
 	void checkStaleLocks(std::optional<NetworkSession::PeerId> otherPeerId)
 	{
