@@ -100,7 +100,7 @@ public:
 
 	virtual void onMessageReceived(CancelHostScriptThreadSystemMessage msg) = 0;
 
-	virtual void onMessageReceived(SendScriptMsgNetworkSystemMessage msg) = 0;
+	virtual void onMessageReceived(const SendScriptMsgNetworkSystemMessage& msg) = 0;
 
 	ScriptSystemBase()
 		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex, SetEntityVariableMessage::messageIndex})
@@ -159,19 +159,9 @@ protected:
 		}
 	}
 
-	void sendMessage(SendScriptMsgNetworkSystemMessage msg, std::function<void()> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
+	size_t sendMessage(SendScriptMsgNetworkSystemMessage msg, std::function<void()> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
 		Halley::String targetSystem = "";
-		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
-		if (n != 1) {
-		    throw Halley::Exception("Sending non-multicast SendScriptMsgNetworkSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
-		}
-	}
-
-	void sendMessage(const Halley::String& targetSystem, SendScriptMsgNetworkSystemMessage msg, std::function<void()> callback = {}, std::optional<Halley::SystemMessageDestination> dst = std::nullopt) {
-		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
-		if (n != 1) {
-		    throw Halley::Exception("Sending non-multicast SendScriptMsgNetworkSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
-		}
+		return sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem, dst);
 	}
 
 
@@ -250,7 +240,7 @@ private:
 		case SendScriptMsgNetworkSystemMessage::messageIndex: {
 		    auto& realMsg = reinterpret_cast<SendScriptMsgNetworkSystemMessage&>(*context.msg);
 		    Halley::VoidWrapper result;
-		    static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
+		    static_cast<T*>(this)->onMessageReceived(realMsg);
 		    context.setResult(result);
 		    break;
 		}

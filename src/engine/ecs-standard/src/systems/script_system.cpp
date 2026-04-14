@@ -204,7 +204,7 @@ public:
 		sendLocalMessage(e.entityId, msg.msg);
 	}
 
-	void onMessageReceived(SendScriptMsgNetworkSystemMessage msg) override
+	void onMessageReceived(const SendScriptMsgNetworkSystemMessage& msg) override
 	{
 		sendLocalMessage(msg.entityId, msg.msg);
 	}

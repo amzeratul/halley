@@ -131,6 +131,7 @@ systemMessage:
   - msg: 'Halley::ScriptMessage'
   serializable: true
   destination: host
+  multicast: true
 
 ---
 
