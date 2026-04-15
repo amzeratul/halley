@@ -167,15 +167,22 @@ bool SpritePainterEntry::isCompatibleWith(const SpritePainterEntry& other, const
 
 SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 {
-	setHandle("halley.texSize", [] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
+	setHandle("halley.texSize", [] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
 		if (const auto idx = stringViewToInt(autoVarArgs)) {
 			const auto tex = material.getTexture(*idx);
 			material.set(uniformName, tex ? Vector2f(tex->getSize()) : Vector2f());
 		}
 	});
+	
+	setHandle("halley.texRect", [] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
+	{
+		if (const auto idx = stringViewToInt(autoVarArgs)) {
+			material.set(uniformName, (idx == 0 ? sprite.getTexRect0() : (idx == 1 ? sprite.getTexRect1() : Rect4f())).toVector4());
+		}
+	});
 
-	setHandle("halley.texBPP", [] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
+	setHandle("halley.texBPP", [] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
 		if (const auto idx = stringViewToInt(autoVarArgs)) {
 			const auto tex = material.getTexture(*idx);
@@ -183,7 +190,7 @@ SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 		}
 	});
 
-	setHandle("halley.timeLoop", [this] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
+	setHandle("halley.timeLoop", [this] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
 		if (const auto cycleLen = stringViewToDouble(autoVarArgs)) {
 			const auto value = std::fmod(curTime / *cycleLen, 1.0);
@@ -228,7 +235,7 @@ void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite) const
 					if (!mat) {
 						mat = sprite.getMutableMaterial();
 					}
-					iter->second(*mat, uniform.name, split1);
+					iter->second(sprite, *mat, uniform.name, split1);
 				} else {
 					Vector<String> existingHandles;
 					for (const auto& [k, v]: handles) {
