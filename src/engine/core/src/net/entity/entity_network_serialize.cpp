@@ -426,13 +426,16 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
     byteSerializationContext.entitySerializationContext = &serializationContext;
 
-    // For any child entities that have a NetworkComponent, check if someone else grabbed
-    // authority. If so, do not serialize any component data for this child (and all its
-    // sub-children).
+    // Network components needs some special treatment.
+    // - Let only the host ever send NetworkComponent data.
+    // - For *child* entities, if someone else grabbed authority, do not serialize any
+    //   component data at all, for this child and all its sub-children.
+    const bool canSerializeNetworkComponent = session->isHost();
     if (parent && !remote) {
-        const auto networkComponent = entity.tryGetComponent<NetworkComponent>();
-        if (networkComponent && networkComponent->authorityId.has_value()) {
-            remote = networkComponent->authorityId != myPeerId;
+        if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>()) {
+            if (networkComponent->authorityId.has_value()) {
+                remote = networkComponent->authorityId != myPeerId;
+            }
         }
     }
 
@@ -444,6 +447,10 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
         auto& reflection = serializer.getOptions().world->getReflection();
 
         for (auto [componentId, component] : entity) {
+            if (!canSerializeNetworkComponent && componentId == NetworkComponent::componentIndex) {
+                continue;
+            }
+
             if (componentsIgnored.contains(componentId)) {
                 continue;
             }

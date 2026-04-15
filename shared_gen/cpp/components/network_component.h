@@ -36,6 +36,7 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::serialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::serialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		return _node;
@@ -43,12 +44,14 @@ public:
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::deserialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::deserialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
+		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("authorityId");
 		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("locks");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)) == 0) _node.removeKey("alwaysSend");
 	}
@@ -71,10 +74,12 @@ public:
 	}
 
 	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(authorityId)>::serialize(authorityId, _context, _serializer, componentIndex, "authorityId");
 		Halley::ByteSerializationHelper<decltype(locks)>::serialize(locks, _context, _serializer, componentIndex, "locks");
 	}
 
 	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(authorityId)>::deserialize(authorityId, _context, _deserializer, componentIndex, "authorityId");
 		Halley::ByteSerializationHelper<decltype(locks)>::deserialize(locks, _context, _deserializer, componentIndex, "locks");
 	}
 

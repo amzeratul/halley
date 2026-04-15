@@ -12,6 +12,7 @@ component:
       type: 'std::optional<uint8_t>'
       canSave: false
       canEdit: false
+      canNetwork: true
   - creatorId:
       type: 'std::optional<uint8_t>'
       canSave: false
