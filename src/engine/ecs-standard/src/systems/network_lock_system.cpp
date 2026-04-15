@@ -185,7 +185,6 @@ public:
 				l.refCount--;
 				if (l.refCount == 0) {
 					doLockReleaseForMe(targetId, l.withAuthority, l.destroyOnUnlock);
-					myLocks.erase(iter);
 				}
 			} else {
 				Logger::logError("Releasing network lock with handle that isn't locking it!");
@@ -279,8 +278,9 @@ private:
 	{
 		if (isHost()) {
 			doEntityLock(targetId, getMyPeerId(), false, withAuthority, destroyOnUnlock);
+			myLocks.erase(targetId);
 		} else {
-			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=] (ConfigNode result) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=, this] (ConfigNode result) mutable
             {
 				bool success = result["success"].asBool(false);
 
@@ -293,6 +293,8 @@ private:
 						Logger::logWarning("client failed to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
 					}
 				}
+
+				myLocks.erase(targetId);
             });
 		}
 	}
