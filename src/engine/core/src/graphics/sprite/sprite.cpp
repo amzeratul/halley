@@ -663,19 +663,24 @@ Sprite& Sprite::crop(Vector4f sides)
 		std::swap(sides.x, sides.z);
 	}
 	const auto absScale = scale.abs();
-	sides /= Vector4f(absScale.x, absScale.y, absScale.x, absScale.y);
+	sides /= Vector4f(absScale, absScale);
 	
 	const auto origSize = getSize();
 	const auto origPivot = getAbsolutePivot();
 	setSize(origSize - (sides.xy() + sides.zw()));
 	setAbsolutePivot(origPivot - sides.xy());
 
-	const auto texRect0 = vertexAttrib.texRect0;
-	const auto texScale0 = Rect4f(texRect0).getSize() / origSize;
-	vertexAttrib.texRect0 = texRect0 + Vector4f(texScale0 * sides.xy(), -texScale0 * sides.zw());
-	const auto texRect1 = vertexAttrib.texRect1;
-	const auto texScale1 = Rect4f(texRect1).getSize() / origSize;
-	vertexAttrib.texRect1 = texRect1 + Vector4f(texScale1 * sides.xy(), -texScale1 * sides.zw());
+	auto sample = [] (const Vector4f& r, const Vector2f& p) {
+		return Vector2f(lerp(r.x, r.z, p.x), lerp(r.y, r.w, p.y));
+	};
+
+	const auto relTex = Vector4f(sides.xy() / origSize, Vector2f(1.0f, 1.0f) - (sides.zw() / origSize));
+	const auto r0 = vertexAttrib.texRect0;
+	vertexAttrib.texRect0 = Vector4f(sample(r0, relTex.xy()), sample(r0, relTex.zw()));
+
+	// Splitting texRect1 leads to undesired results, it's almost certainly not desired
+	//const auto r1 = vertexAttrib.texRect1;
+	//vertexAttrib.texRect1 = Vector4f(sample(r1, relTex.xy()), sample(r1, relTex.zw()));
 
 	return *this;
 }
