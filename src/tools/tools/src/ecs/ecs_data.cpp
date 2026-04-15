@@ -217,7 +217,7 @@ void ECSData::addSource(CodegenSourceInfo info)
 			addType(document);
 		}
 		else {
-			throw Exception("YAML parse error in codegen definitions: unknown type\nat " + curPos, HalleyExceptions::Tools);
+			Logger::logError("YAML parse error in codegen definitions: unknown type\nat " + curPos);
 		}
 	}
 }
@@ -231,7 +231,7 @@ void ECSData::addComponent(YAML::Node rootNode, bool generate)
 		components[comp.name] = comp;
 	}
 	else {
-		throw Exception("Component already declared: " + comp.name, HalleyExceptions::Tools);
+		Logger::logError("Component already declared: " + comp.name);
 	}
 }
 
@@ -243,7 +243,7 @@ void ECSData::addSystem(YAML::Node rootNode, bool generate)
 		systems[sys.name] = sys;
 	}
 	else {
-		throw Exception("System already declared: " + sys.name, HalleyExceptions::Tools);
+		Logger::logError("System already declared: " + sys.name);
 	}
 }
 
@@ -255,7 +255,7 @@ void ECSData::addMessage(YAML::Node rootNode, bool generate)
 		msg.id = int(messages.size());
 		messages[msg.name] = msg;
 	} else {
-		throw Exception("Message already declared: " + msg.name, HalleyExceptions::Tools);
+		Logger::logError("Message already declared: " + msg.name);
 	}
 }
 
@@ -267,7 +267,7 @@ void ECSData::addSystemMessage(YAML::Node rootNode, bool generate)
 		msg.id = int(systemMessages.size());
 		systemMessages[msg.name] = msg;
 	} else {
-		throw Exception("System message already declared: " + msg.name, HalleyExceptions::Tools);
+		Logger::logError("System message already declared: " + msg.name);
 	}
 }
 
@@ -279,7 +279,7 @@ void ECSData::addType(YAML::Node rootNode)
 		types[t.name] = t;
 	}
 	else {
-		throw Exception("Type already declared: " + t.name, HalleyExceptions::Tools);
+		Logger::logError("Type already declared: " + t.name);
 	}
 }
 
