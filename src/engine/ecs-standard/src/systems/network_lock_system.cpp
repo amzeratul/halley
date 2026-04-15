@@ -138,24 +138,27 @@ public:
 
 	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) override
 	{
-		const auto iter = myLocks.find(targetId);
-		if (iter != myLocks.end()) {
-			// Locked by some local entity
-			if (iter->second.playerId == playerId) {
-				// Already locked by this player, just increment count!
-				iter->second.refCount++;
-                if (acquireAuthority && !iter->second.withAuthority && getSessionService().isMultiplayer()) {
-                    Logger::logWarning("Tried to acquire lock, with authority, for entity already locked");
-                }
-				return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
-			} else {
-				// Locked by someone else
-				return Future<NetworkLockHandle>::makeImmediate({});
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			// Checks the refCount - can be zero on a peer if the lock has been lifted, but the
+			// message sent to the host is about to be delivered still...
+			if (auto& lock = iter->second; lock.refCount > 0) {
+				// Locked by some local entity
+				if (lock.playerId == playerId) {
+					// Already locked by this player, just increment count!
+					lock.refCount++;
+					if (acquireAuthority && !lock.withAuthority && getSessionService().isMultiplayer()) {
+						Logger::logWarning("Tried to acquire lock, with authority, for entity already locked");
+					}
+					return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
+				} else {
+					// Locked by someone else
+					return Future<NetworkLockHandle>::makeImmediate({});
+				}
 			}
 		}
 
 		// Not locked locally, try to lock
-		return doLockAcquireForMe(targetId, acquireAuthority).then([=] (bool success) -> NetworkLockHandle
+		return doLockAcquireForMe(targetId, acquireAuthority).then([=, this] (bool success) -> NetworkLockHandle
 		{
 			if (success) {
 				auto& l = myLocks[targetId];
@@ -178,16 +181,18 @@ public:
 
 	void lockRelease(EntityId playerId, EntityId targetId) override
 	{
-		const auto iter = myLocks.find(targetId);
-		if (iter != myLocks.end()) {
-			auto& l = iter->second;
-			if (l.playerId == playerId) {
-				l.refCount--;
-				if (l.refCount == 0) {
-					doLockReleaseForMe(targetId, l.withAuthority, l.destroyOnUnlock);
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			if (auto& lock = iter->second; lock.refCount > 0) {
+				if (lock.playerId == playerId) {
+					lock.refCount--;
+					if (lock.refCount == 0) {
+						doLockReleaseForMe(targetId, lock.withAuthority, lock.destroyOnUnlock);
+					}
+				} else {
+					Logger::logError("Releasing network lock with handle that isn't locking it!");
 				}
 			} else {
-				Logger::logError("Releasing network lock with handle that isn't locking it!");
+				Logger::logError("Releasing network lock with refCount=0");
 			}
 		} else {
 			Logger::logError("Releasing network lock for entity that isn't locked!");
