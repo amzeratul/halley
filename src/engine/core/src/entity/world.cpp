@@ -408,6 +408,9 @@ ConstEntityRef World::tryGetEntity(EntityId id) const
 
 Entity* World::tryGetRawEntity(EntityId id)
 {
+	if (!id) {
+		return nullptr;
+	}
 	auto* v = entityMap->get(id.value);
 	if (v == nullptr) {
 		return nullptr;
@@ -417,6 +420,9 @@ Entity* World::tryGetRawEntity(EntityId id)
 
 const Entity* World::tryGetRawEntity(EntityId id) const
 {
+	if (!id) {
+		return nullptr;
+	}
 	const auto* v = entityMap->get(id.value);
 	if (v == nullptr) {
 		return nullptr;
