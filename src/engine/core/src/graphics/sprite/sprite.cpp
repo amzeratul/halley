@@ -159,23 +159,24 @@ Rect4f Sprite::getLocalAABB() const
 	return Rect4f(offset, sz + offset);
 }
 
+Rect4f Sprite::getUnrotatedAABB() const
+{
+	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
+	const Vector2f pivot = getPivot();
+	const auto pos = getPosition();
+	const auto offsetPos = pos - (sz * pivot);
+	return Rect4f(offsetPos, offsetPos + sz);
+}
+
 Rect4f Sprite::getAABB() const
 {
 	// PERFORMANCE CRITICAL CODE
 	
-	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
-
-	//HalleyAssertDev(!std::isnan(sz.x));
-	//HalleyAssertDev(!std::isnan(sz.y));
-	
 	if (!rotated) {
-		// No rotation, give exact bounding box
-		const Vector2f pivot = getPivot();
-		const auto pos = getPosition();
-		const auto offsetPos = pos - (sz * pivot);
-		return Rect4f(offsetPos, offsetPos + sz);
+		return getUnrotatedAABB();
 	} else {
 		// This is a coarse test; will give a few false positives
+		const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 		constexpr float sqrt2 = 1.4142135623730950488016887242097f;
 		const Vector2f sz2 = sz * sqrt2;
 		return getPosition() + Rect4f(-sz2, sz2); // Could use offset here, but that would also need to take rotation into account

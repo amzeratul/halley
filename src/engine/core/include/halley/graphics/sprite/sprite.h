@@ -176,6 +176,7 @@ namespace Halley
 		void setRectInfo(const RectInfo& info);
 
 		Rect4f getLocalAABB() const;
+		Rect4f getUnrotatedAABB() const;
 		Rect4f getAABB() const;
 		Rect4f getUncroppedAABB() const;
 		
