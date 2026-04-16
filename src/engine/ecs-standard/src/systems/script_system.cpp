@@ -348,9 +348,9 @@ private:
 				continue;
 			}
 
-			auto traceSubWorld = StackDebugTrace("subWorld");
-			auto traceY = StackDebugTrace("y");
-			auto traceX = StackDebugTrace("x");
+			auto traceSubWorld = StackDebugTrace("subWorld", std::nullopt);
+			auto traceY = StackDebugTrace("y", std::nullopt);
+			auto traceX = StackDebugTrace("x", std::nullopt);
 			if (e.pos) {
 				traceSubWorld.setValue(static_cast<int64_t>(e.pos->subWorld));
 				traceY.setValue(e.pos->pos.y);

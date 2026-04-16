@@ -70,7 +70,7 @@ namespace Halley {
 
 	class StackDebugTrace {
 	public:
-		[[nodiscard]] StackDebugTrace(std::string_view name)
+		[[nodiscard]] StackDebugTrace(std::string_view name, std::nullopt_t)
 			: name(name)
 			, type(Type::Undefined)
 		{			
