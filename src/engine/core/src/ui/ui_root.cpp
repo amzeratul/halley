@@ -289,7 +289,8 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 
 	for (size_t i = 0; i < widgetsCache.size(); ++i) {
 		auto& w = widgetsCache[i];
-		const auto trace = StackDebugTrace("widgetId", w->getId());
+		const auto trace2 = StackDebugTrace("widgetClass", typeid(w).name());
+		const auto trace1 = StackDebugTrace("widgetId", w->getId());
 		if (w->getParent() && w->getParent()->isGuardedUpdate()) {
 			bool crashed = false;
 			try {
