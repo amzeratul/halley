@@ -18,13 +18,15 @@ public:
 
 	Halley::Colour4f colour{ "#FFFFFF" };
 	float intensity{ 1 };
+	bool propagate{ true };
 
 	ColourComponent() {
 	}
 
-	ColourComponent(Halley::Colour4f colour, float intensity)
+	ColourComponent(Halley::Colour4f colour, float intensity, bool propagate)
 		: colour(std::move(colour))
 		, intensity(std::move(intensity))
+		, propagate(std::move(propagate))
 	{
 	}
 
@@ -33,6 +35,7 @@ public:
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(colour)>::serialize(colour, Halley::Colour4f{ "#FFFFFF" }, _context, _node, componentName, "colour", makeMask(Type::Prefab, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(intensity)>::serialize(intensity, float{ 1 }, _context, _node, componentName, "intensity", makeMask(Type::Prefab, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(propagate)>::serialize(propagate, bool{ true }, _context, _node, componentName, "propagate", makeMask(Type::Prefab));
 		return _node;
 	}
 
@@ -40,12 +43,14 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(colour)>::deserialize(colour, Halley::Colour4f{ "#FFFFFF" }, _context, _node, componentName, "colour", makeMask(Type::Prefab, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(intensity)>::deserialize(intensity, float{ 1 }, _context, _node, componentName, "intensity", makeMask(Type::Prefab, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(propagate)>::deserialize(propagate, bool{ true }, _context, _node, componentName, "propagate", makeMask(Type::Prefab));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
 		if ((_mask & makeMask(Type::Prefab, Type::Dynamic, Type::Network)) == 0) _node.removeKey("colour");
 		if ((_mask & makeMask(Type::Prefab, Type::Dynamic, Type::Network)) == 0) _node.removeKey("intensity");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("propagate");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

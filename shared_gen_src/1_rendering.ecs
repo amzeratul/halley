@@ -39,6 +39,11 @@ component:
       canEdit: true
       canModifyDynamic: true
       canNetwork: true
+  - propagate:
+      type: bool
+      defaultValue: true
+      canSave: false
+      canEdit: true
 
 ---
 
