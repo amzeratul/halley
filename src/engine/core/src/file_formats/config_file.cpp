@@ -156,7 +156,6 @@ void ConfigObserver::update()
 	if (file) {
 		assetVersion = file->getAssetVersion();
 		node = &file->getRoot();
-		HalleyAssertDev(node->getType() == ConfigNodeType::Map);
 	}
 }
 
