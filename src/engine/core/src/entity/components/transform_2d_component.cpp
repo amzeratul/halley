@@ -47,6 +47,11 @@ void Transform2DComponent::onHierarchyChanged()
 	markDirtyShallow(0xFF);
 }
 
+void Transform2DComponent::onWorldPartitionChanged()
+{
+	worldPartition = entity.getWorldPartition();
+}
+
 void Transform2DComponent::updateParentTransform()
 {
 	parentTransform = entity.hasParent() ? entity.getParent().tryGetComponent<Transform2DComponent>() : nullptr;

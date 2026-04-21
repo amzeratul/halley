@@ -195,8 +195,7 @@ void Entity::markHierarchyDirty()
 	hierarchyRevision++;
 
 	// Notify transform
-	auto transform = tryGetComponent<Transform2DComponent>();
-	if (transform) {
+	if (auto* transform = tryGetComponent<Transform2DComponent>()) {
 		transform->onHierarchyChanged();
 	}
 	
@@ -215,7 +214,15 @@ void Entity::propagateChildrenChange()
 
 void Entity::propagateChildWorldPartition(WorldPartitionId newWorldPartition)
 {
-	worldPartition = newWorldPartition;
+	if (worldPartition != newWorldPartition) {
+		worldPartition = newWorldPartition;
+		
+		// Notify transform
+		if (auto* transform = tryGetComponent<Transform2DComponent>()) {
+			transform->onWorldPartitionChanged();
+		}
+	}
+
 	for (auto& child : children) {
 		child->propagateChildWorldPartition(newWorldPartition);
 	}

@@ -66,6 +66,7 @@ public:
 
 	void onAddedToEntity(Halley::EntityRef& entity);
 	void onHierarchyChanged();
+	void onWorldPartitionChanged();
 
 	uint16_t getRevision() const { return revision; }
 	uint16_t getSubWorldRevision() const { return subWorldRevision; }
