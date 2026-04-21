@@ -17,7 +17,14 @@ namespace Halley {
         virtual void startRender(bool waitForSpriteLoad, bool depthQueriesEnabled, std::optional<uint16_t> worldPartition) {}
         virtual void endRender() {}
 
-        virtual void draw(SpriteMaskBase mask, Painter& painter) {}
+        void draw(SpriteMaskBase mask, Painter& painter)
+        {
+	        drawOpaque(mask, painter);
+	        drawTransparent(mask, painter);
+        }
+
+        virtual void drawOpaque(SpriteMaskBase mask, Painter& painter) {}
+        virtual void drawTransparent(SpriteMaskBase mask, Painter& painter) {}
         virtual void clear() {}
     };
 

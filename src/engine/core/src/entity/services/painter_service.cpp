@@ -49,7 +49,10 @@ bool PainterService::hasFrameData() const
 void PainterService::draw(SpriteMaskBase mask, Painter& painter)
 {
 	for (auto& p: getFrameData().painters) {
-		p->draw(mask, painter);
+		p->drawOpaque(mask, painter);
+	}
+	for (auto& p: getFrameData().painters) {
+		p->drawTransparent(mask, painter);
 	}
 }
 

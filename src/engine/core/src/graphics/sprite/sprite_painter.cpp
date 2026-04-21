@@ -394,7 +394,7 @@ void SpritePainter::add(Rect4f bounds)
 	extraBounds.push_back(bounds);
 }
 
-void SpritePainter::draw(SpriteMaskBase mask, Painter& painter)
+void SpritePainter::drawTransparent(SpriteMaskBase mask, Painter& painter)
 {
 	if (dirty) {
 		std::sort(sprites.begin(), sprites.end());
@@ -410,11 +410,11 @@ void SpritePainter::draw(SpriteMaskBase mask, Painter& painter)
 		const auto type = s.getType();
 		
 		if (type == SpritePainterEntryType::SpriteRef || type == SpritePainterEntryType::SpriteCached) {
-			draw(s.getSprites(cachedSprites), painter, view, s.getClip());
+			doDraw(s.getSprites(cachedSprites), painter, view, s.getClip());
 		} else if (type == SpritePainterEntryType::TextRef || type == SpritePainterEntryType::TextCached) {
-			draw(s.getTexts(cachedText), painter, view, s.getClip());
+			doDraw(s.getTexts(cachedText), painter, view, s.getClip());
 		} else if (type == SpritePainterEntryType::Callback) {
-			draw(callbacks.at(s.getIndex()), painter, s.getClip());
+			doDraw(callbacks.at(s.getIndex()), painter, s.getClip());
 		}
 	}
 	painter.flush();
@@ -576,7 +576,7 @@ SpritePainterMaterialParamUpdater& SpritePainter::getParamUpdater()
 	return paramUpdater;
 }
 
-void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
+void SpritePainter::doDraw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
 	for (const auto& sprite: sprites) {
 		if (sprite.isInView(view)) {
@@ -597,14 +597,14 @@ void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect
 	}
 }
 
-void SpritePainter::draw(gsl::span<const TextRenderer> texts, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
+void SpritePainter::doDraw(gsl::span<const TextRenderer> texts, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
 	for (const auto& text: texts) {
 		text.draw(painter, clip);
 	}
 }
 
-void SpritePainter::draw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const
+void SpritePainter::doDraw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const
 {
 	if (clip) {
 		painter.setRelativeClip(clip.value());

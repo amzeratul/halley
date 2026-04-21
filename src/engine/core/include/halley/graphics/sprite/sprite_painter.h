@@ -105,7 +105,7 @@ namespace Halley
 		void add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(Rect4f bounds);
 
-		void draw(SpriteMaskBase mask, Painter& painter) override;
+		void drawTransparent(SpriteMaskBase mask, Painter& painter) override;
 		std::optional<Rect4f> getBounds() const;
 
 		SpritePainterMaterialParamUpdater& getParamUpdater();
@@ -123,9 +123,9 @@ namespace Halley
 
 		mutable TempMemoryPool memoryPool;
 
-		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
-		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
-		void draw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const;
+		void doDraw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
+		void doDraw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
+		void doDraw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const;
 
 		Vector<uint32_t> getSpriteDrawOrder(int mask, Rect4f view, bool reorder) const;
 		Vector<uint32_t> getSpriteDrawOrderReordered(int mask, Rect4f view) const;
