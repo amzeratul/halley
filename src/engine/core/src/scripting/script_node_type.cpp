@@ -279,6 +279,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptSpriteAlpha>());
 	addScriptNode(std::make_unique<ScriptSpriteActionPoint>());
 	addScriptNode(std::make_unique<ScriptColourGradient>());
+    addScriptNode(std::make_unique<ScriptSpriteCenter>());
 	addScriptNode(std::make_unique<ScriptBranch>());
 	addScriptNode(std::make_unique<ScriptMergeAll>());
 	addScriptNode(std::make_unique<ScriptLogicGateAnd>());

@@ -409,3 +409,56 @@ ConfigNode ScriptColourGradient::doGetData(ScriptEnvironment& environment, const
 	return (gradient.evaluatePrecomputed(samplePos) + bias).toConfigNode();
 }
 
+
+
+Vector<IGraphNodeType::SettingType> ScriptSpriteCenter::getSettingTypes() const
+{
+	return { };
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptSpriteCenter::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::to_array({
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	});
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSpriteCenter::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Return sprite rect center position");
+	return str.moveResults();
+}
+
+String ScriptSpriteCenter::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "EntityId";
+	} else if (elementIdx == 1) {
+		return "Position";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+String ScriptSpriteCenter::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Sprite Center";
+}
+
+ConfigNode ScriptSpriteCenter::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto entity = environment.tryGetEntity(readEntityId(environment, node, 0));
+	if (!entity.isValid()) {
+		return {};
+	}
+	const auto* spriteComponent = entity.tryGetComponent<SpriteComponent>();
+	if (spriteComponent == nullptr) {
+		return {};
+	}
+	return ConfigNode(spriteComponent->sprite.getAABB().getCenter());
+}
+
