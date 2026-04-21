@@ -12,7 +12,7 @@ namespace Halley {
 		{
 			const auto key = nextKey++;
 			entries.emplace_back(Entry{ std::move(value), key, priority});
-			std::sort(entries.begin(), entries.end());
+			std::stable_sort(entries.begin(), entries.end());
 			return key;
 		}
 
