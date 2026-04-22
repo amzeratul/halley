@@ -33,7 +33,7 @@ template <typename F>
 void Sprite::paintWithClip(Painter& painter, const std::optional<Rect4f>& extClip, F f) const
 {
 	const bool needsClip = hasClip || extClip;
-	if (needsClip) {
+	if (needsClip) [[unlikely]] {
 		const Rect4f finalClip = Rect4f::optionalIntersect(getAbsoluteClip(), extClip).value();
 
 		const auto onScreen = getAABB().intersection(finalClip);
@@ -47,14 +47,14 @@ void Sprite::paintWithClip(Painter& painter, const std::optional<Rect4f>& extCli
 
 	f();
 
-	if (needsClip) {
+	if (needsClip) [[unlikely]] {
 		painter.setClip();
 	}
 }
 
 void Sprite::draw(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
-	if (sliced) {
+	if (sliced) [[unlikely]] {
 		drawSliced(painter, slices, extClip);
 	} else {
 		drawNormal(painter, extClip);
@@ -68,7 +68,7 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
-	if (material && material->getDefinitionPtr()) {
+	if (material && material->getDefinitionPtr()) [[likely]] {
 		HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 
 		paintWithClip(painter, extClip, [&] ()
@@ -80,7 +80,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
-	if (material && material->getDefinitionPtr()) {
+	if (material && material->getDefinitionPtr()) [[likely]] {
 		HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 		
 		paintWithClip(painter, extClip, [&] ()
@@ -99,14 +99,14 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optio
 
 void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter, bool waitForLoad) // static
 {
-	if (sprites.empty()) {
+	if (sprites.empty()) [[unlikely]] {
 		return;
 	}
 
 	auto& material = sprites[0].material;
 	HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 	
-	if (!waitForLoad && !material->areAllTexturesLoaded()) {
+	if (!waitForLoad && !material->areAllTexturesLoaded()) [[unlikely]] {
 		material->markInActiveUse();
 		return;
 	}
@@ -116,7 +116,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter, bool waitFo
 	char* vertexData;
 	Vector<char> vertices;
 	const size_t vertexDataSize = sprites.size() * spriteSize;
-	if (vertexDataSize <= 4096) {
+	if (vertexDataSize <= 4096) [[likely]] {
 		vertexData = buffer;
 	} else {
 		vertices.resize(vertexDataSize);
@@ -134,7 +134,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter, bool waitFo
 
 void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter, bool waitForLoad)
 {
-	if (n == 0) {
+	if (n == 0) [[unlikely]] {
 		return;
 	}
 
@@ -172,9 +172,9 @@ Rect4f Sprite::getAABB() const
 {
 	// PERFORMANCE CRITICAL CODE
 	
-	if (!rotated) {
+	if (!rotated) [[likely]] {
 		return getUnrotatedAABB();
-	} else {
+	} else [[unlikely]] {
 		// This is a coarse test; will give a few false positives
 		const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 		constexpr float sqrt2 = 1.4142135623730950488016887242097f;
@@ -186,11 +186,11 @@ Rect4f Sprite::getAABB() const
 Rect4f Sprite::getUncroppedAABB() const
 {
 	const Vector2f sz = getUncroppedScaledSize();
-	if (std::abs(getRotation().toRadians()) < 0.0001f) {
+	if (std::abs(getRotation().toRadians()) < 0.0001f) [[likely]] {
 		// No rotation, give exact bounding box
 		const Vector2f pivot = getUncroppedAbsolutePivot();
 		return getPosition() - pivot + Rect4f(Vector2f(), sz);
-	} else {
+	} else [[unlikely]] {
 		// This is a coarse test; will give a few false positives
 		constexpr float sqrt2 = 1.4142135623730950488016887242097f;
 		const Vector2f sz2 = sz * sqrt2;
@@ -200,7 +200,7 @@ Rect4f Sprite::getUncroppedAABB() const
 
 bool Sprite::isInView(Rect4f rect) const
 {
-	if (!visible) {
+	if (!visible) [[unlikely]] {
 		return false;
 	}
 
@@ -289,10 +289,10 @@ Sprite& Sprite::setAbsolutePivot(Vector2f v)
 {
 	vertexAttrib.pivot = v / size;
 
-	if (std::abs(size.x) < 0.000001f) {
+	if (std::abs(size.x) < 0.000001f) [[unlikely]] {
 		vertexAttrib.pivot.x = 0;
 	}
-	if (std::abs(size.y) < 0.000001f) {
+	if (std::abs(size.y) < 0.000001f) [[unlikely]] {
 		vertexAttrib.pivot.y = 0;
 	}
 	
@@ -322,7 +322,7 @@ Sprite& Sprite::setSize(Vector2f v)
 
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
-	if (materialName == "") {
+	if (materialName == "") [[unlikely]] {
 		materialName = MaterialDefinition::defaultMaterial;
 	}
 	setMaterial(resources.get<MaterialDefinition>(materialName));
@@ -359,7 +359,7 @@ MaterialUpdater Sprite::getMutableMaterial()
 
 bool Sprite::hasCompatibleMaterial(const Material& other) const
 {
-	if (!material) {
+	if (!material) [[unlikely]] {
 		return false;
 	}
 	return material->isCompatibleWith(other);
@@ -367,7 +367,7 @@ bool Sprite::hasCompatibleMaterial(const Material& other) const
 
 bool Sprite::isLoaded() const
 {
-	if (!material) {
+	if (!material) [[unlikely]] {
 		return true;
 	}
 	return material->areAllTexturesLoaded();
@@ -375,21 +375,21 @@ bool Sprite::isLoaded() const
 
 void Sprite::markInActiveUse() const
 {
-	if (material) {
+	if (material) [[likely]] {
 		material->markInActiveUse();
 	}
 }
 
 void Sprite::markBackgroundLoaded() const
 {
-	if (material) {
+	if (material) [[likely]] {
 		material->markBackgroundLoaded();
 	}
 }
 
 void Sprite::markLowPriorityBackgroundLoaded() const
 {
-	if (material) {
+	if (material) [[likely]] {
 		material->markLowPriorityBackgroundLoaded();
 	}
 }
@@ -418,7 +418,7 @@ Sprite& Sprite::setImage(Resources& resources, std::string_view imageName, std::
 
 	const auto sprite = resources.get<SpriteResource>(imageName);
 
-	if (materialName.empty()) {
+	if (materialName.empty()) [[unlikely]] {
 		materialName = sprite->getDefaultMaterialName();
 	}
 
