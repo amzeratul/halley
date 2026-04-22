@@ -646,11 +646,14 @@ Vector<Path> Path::enumerateDirectory(bool makeRelative) const
 		const auto dir = getNative(*this);
 		for (auto i = std::filesystem::recursive_directory_iterator(dir); i != end; ++i) {
 			std::filesystem::path fullPath = i->path();
-			if (std::filesystem::is_regular_file(fullPath.native())) {
-				if (makeRelative) {
-					result.push_back(Path(String(StringUTF32(fullPath.lexically_relative(dir).u32string()))));
-				} else {
-					result.push_back(Path(String(StringUTF32(fullPath.u32string()))));
+			std::error_code error;
+			if (std::filesystem::is_regular_file(fullPath.native(), error)) {
+				if (!error) {
+					if (makeRelative) {
+						result.push_back(Path(String(StringUTF32(fullPath.lexically_relative(dir).u32string()))));
+					} else {
+						result.push_back(Path(String(StringUTF32(fullPath.u32string()))));
+					}
 				}
 			}
 		}
