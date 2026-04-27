@@ -736,7 +736,7 @@ const Vector<std::shared_ptr<UIBehaviour>>& UIWidget::getBehaviours() const
 	return behaviours;
 }
 
-void UIWidget::replayInitialBehaviours(bool reversed)
+void UIWidget::replayInitialBehaviours(bool reversed, bool recursive)
 {
 	for (auto& b: initialBehaviours) {
 		if (!behaviours.contains(b)) {
@@ -747,6 +747,12 @@ void UIWidget::replayInitialBehaviours(bool reversed)
 		if (b->isInitial()) {
 			b->setReversed(reversed);
 			b->restart();
+		}
+	}
+
+	if (recursive) {
+		for (auto& c: getChildren()) {
+			c->replayInitialBehaviours(reversed, recursive);
 		}
 	}
 }

@@ -277,7 +277,7 @@ void UIWidgetEditor::addBehaviourToWidget()
 {
 	const auto windowSize = getRoot()->getRect().getSize() - Vector2f(900, 350);
 
-	const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, factory, windowSize, false, ChooseUIWidgetWindow::Mode::Behaviour, [=] (std::optional<String> result)
+	const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, uiEditor->getGameFactory(), windowSize, false, ChooseUIWidgetWindow::Mode::Behaviour, [=] (std::optional<String> result)
 	{
 		if (result) {
 			addBehaviourToWidget(result.value());
@@ -320,7 +320,7 @@ std::shared_ptr<UIWidget> UIWidgetEditor::makeBehaviourUI(ConfigNode& behaviourC
 
 	auto widget = factory.makeUI("halley/ui_widget_behaviour_editor");
 
-	const auto& properties = factory.getPropertiesForBehaviour(behaviourClass);
+	const auto& properties = uiEditor->getGameFactory().getPropertiesForBehaviour(behaviourClass);
 	widget->getWidgetAs<UILabel>("behaviourName")->setText(LocalisedString::fromUserString(properties.name));
 	populateBox(*widget->getWidget("behaviourFields"), behaviourConfig, properties.entries);
 

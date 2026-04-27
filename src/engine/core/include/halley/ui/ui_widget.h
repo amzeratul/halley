@@ -187,7 +187,7 @@ namespace Halley {
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
 		void clearBehaviours();
 		const Vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
-		void replayInitialBehaviours(bool reversed = false);
+		void replayInitialBehaviours(bool reversed = false, bool recursive = false);
 
 		std::optional<AudioHandle> playSound(const String& eventName);
 		std::optional<AudioHandle> playStyleSound(const String& keyId, const std::optional<String>& idOverride = {});

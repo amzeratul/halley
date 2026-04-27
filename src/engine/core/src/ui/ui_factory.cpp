@@ -308,6 +308,8 @@ Vector<String> UIFactory::getWidgetClassList(bool mustAllowChildren) const
 
 Vector<String> UIFactory::getBehaviourList() const
 {
+	Logger::logDev("Getting behaviour list at " + String(typeid(*this).name()) + " (" + toString(behaviourFactories.size()) + ")");
+
 	Vector<String> result;
 	result.reserve(behaviourProperties.size());
 	for (auto& p: behaviourProperties) {
