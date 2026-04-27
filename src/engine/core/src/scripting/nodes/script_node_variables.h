@@ -292,7 +292,7 @@ namespace Halley {
 	class ScriptFromVector final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "fromVector"; }
-		String getName() const override { return "From Vector2"; }
+		String getName() const override { return "From Vector2/3"; }
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/fromVector.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
 		

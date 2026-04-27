@@ -1177,7 +1177,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptFromVector::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::to_array({ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } });
+	const static auto data = std::to_array({
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output }
+	});
 	return data;
 }
 
@@ -1187,6 +1192,8 @@ String ScriptFromVector::getShortDescription(const ScriptGraphNode& node, const 
 		return getConnectedNodeName(node, graph, 0) + ".x";
 	} else if (elementIdx == 2) {
 		return getConnectedNodeName(node, graph, 0) + ".y";
+	} else if (elementIdx == 3) {
+		return getConnectedNodeName(node, graph, 0) + ".z";
 	}
 	return "";
 }
@@ -1205,6 +1212,8 @@ String ScriptFromVector::getPinDescription(const BaseGraphNode& node, PinType el
 		return "x";
 	} else if (elementIdx == 2) {
 		return "y";
+	} else if (elementIdx == 3) {
+		return "z";
 	} else {
 		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 	}
@@ -1212,10 +1221,15 @@ String ScriptFromVector::getPinDescription(const BaseGraphNode& node, PinType el
 
 ConfigNode ScriptFromVector::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
+	const auto& input = readDataPin(environment, node, 0);
+	const auto vec = input.asVector3f({});
+
 	if (pinN == 1) {
-		return ConfigNode(readDataPin(environment, node, 0).asVector2f({}).x);
+		return ConfigNode(vec.x);
 	} else if (pinN == 2) {
-		return ConfigNode(readDataPin(environment, node, 0).asVector2f({}).y);
+		return ConfigNode(vec.y);
+	} else if (pinN == 3) {
+		return ConfigNode(vec.z);
 	} else {
 		return {};
 	}
