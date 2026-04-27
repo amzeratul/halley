@@ -251,9 +251,10 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 	for (std::filesystem::directory_iterator iter(nativeRootDir); iter != std::filesystem::directory_iterator(); ++iter) {
 		const auto fullPath = iter->path();
 
-		if (std::filesystem::is_regular_file(fullPath)) {
+		std::error_code ec;
+		if (std::filesystem::is_regular_file(fullPath, ec)) {
 			dir.addFile(Path(fullPath.string()));
-		} else if (std::filesystem::is_directory(fullPath)) {
+		} else if (std::filesystem::is_directory(fullPath, ec)) {
 			const auto relPath = fullPath.lexically_relative(nativeRootDir);
 			if (dir.addDir(relPath.string())) {
 				// Defer recursion until loop is over, otherwise `dirs` can be modified and `dir` will be invalidated

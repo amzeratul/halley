@@ -51,7 +51,8 @@ int64_t FileSystem::getLastWriteTime(const Path& p)
 
 bool FileSystem::isFile(const Path& p)
 {
-	return is_regular_file(getNative(p));
+	std::error_code ec;
+	return is_regular_file(getNative(p), ec);
 }
 
 bool FileSystem::isDirectory(const Path& p)
