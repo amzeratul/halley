@@ -164,7 +164,7 @@ void FontImporter::getCharactersForScript(std::set<char32_t>& charsOutput, const
 	}
 	if (script == "korean" || script == "hangul") {
 		addList(charsOutput, gsl::span<const char32_t>(modernHangul));
-		//addRange(charsOutput, 0xAC00, 0xD7AF); // Hangul Syllables
+		addRange(charsOutput, 0x3131, 0x318E); // Hangul Compatibility Jamo
 	}
 	if (script == "japanese" || script == "chinese-simplified" || script == "chinese-traditional" || script == "korean" || script == "hiragana" || script == "katakana") {
 		addRange(charsOutput, 0x3000, 0x303F); // CJK Symbols and Punctuation
