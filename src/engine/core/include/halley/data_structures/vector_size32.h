@@ -138,7 +138,7 @@ namespace Halley {
 		{
 			if constexpr (std::is_trivially_copyable_v<T>) {
 				if (other.sbo_active() && (sbo_active() || empty())) {
-					memcpy(this, &other, sizeof(*this));
+					memcpy(static_cast<void*>(this), &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
 					shrink_to_fit();
@@ -160,7 +160,7 @@ namespace Halley {
 		{
 			if constexpr (std::is_same_v<T, U> && std::is_trivially_copyable_v<T>) {
 				if (other.sbo_active() && (sbo_active() || empty())) {
-					memcpy(this, &other, sizeof(*this));
+					memcpy(static_cast<void*>(this), &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
 					shrink_to_fit();
@@ -223,7 +223,7 @@ namespace Halley {
 
 			if constexpr (std::is_trivially_copyable_v<T>) {
 				if (other.sbo_active() && (sbo_active() || empty())) {
-					memcpy(this, &other, sizeof(*this));
+					memcpy(static_cast<void*>(this), &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
 					memcpy(data(), other.data(), other.size() * sizeof(T));
@@ -246,7 +246,7 @@ namespace Halley {
 
 			if constexpr (std::is_trivially_copyable_v<T>) {
 				if (other.sbo_active() && (sbo_active() || empty())) {
-					memcpy(this, &other, sizeof(*this));
+					memcpy(static_cast<void*>(this), &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
 					memcpy(data(), other.data(), other.size() * sizeof(T));
