@@ -462,6 +462,11 @@ void Particles::destroyOverlapping(const Circle& circle)
 	}
 }
 
+std::optional<Vector3f> Particles::getLastDespawnPos() const
+{
+	return lastDespawnPos;
+}
+
 void Particles::spawn(size_t n, float time, Vector3f origin)
 {
 	if (maxParticles) {
@@ -625,6 +630,7 @@ void Particles::removeDeadParticles()
 			for (const auto& system: onDeath) {
 				onSecondarySpawn(particles[i], system);
 			}
+			lastDespawnPos = particles[i].pos;
 
 			if (i != nParticlesAlive - 1) {
 				// Swap with last particle that's alive

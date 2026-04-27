@@ -124,6 +124,8 @@ namespace Halley {
 		void destroyOverlapping(const Polygon& polygon);
 		void destroyOverlapping(const Ellipse& ellipse);
 		void destroyOverlapping(const Circle& circle);
+		
+		std::optional<Vector3f> getLastDespawnPos() const;
 
 	private:
 		Random* rng;
@@ -187,6 +189,8 @@ namespace Halley {
 		Vector<EntityId> onSpawn;
 		Vector<EntityId> onDeath;
 		Vector<EntityId> onTrail;
+
+		std::optional<Vector3f> lastDespawnPos;
 
 		IParticleSpawner* secondarySpawner = nullptr;
 
