@@ -610,32 +610,48 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 {
 	const auto debugInfo = EntityFactory::DebugInfo("NetworkEntity " + toString(id), EntityLoadContextType::Network);
 
+	// Generate EntityData from prefab, with delta applied.
 	auto [entityData, prefab, prefabUUID] = parentSession->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID(), debugInfo);
 	if (!entityData) {
 		Logger::logError("Unable to instantiate network entity " + toString(static_cast<int>(id)));
 		return {};
 	}
 
+	EntityRef entity;
 	bool appliedOnExistingEntity = false;
+
 	if (allowExistingLookup) {
+		// If allowed, look for existing entity - if found, delta is applied to it, instead of creating a new entity.
 		const auto existingEntity = parentSession->getFactory().getWorld().findEntity(entityData->getInstanceUUID());
-		appliedOnExistingEntity = existingEntity && existingEntity->isValid();
+		if (existingEntity && existingEntity->isValid()) {
+			entity = existingEntity.value();
+			appliedOnExistingEntity = true;
+		}
 	}
 
-	const auto mask = EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network);
-	auto [entity, parentUUID] = parentSession->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), mask, debugInfo);
+	if (!appliedOnExistingEntity) {
+		// NB: This used to just call EntityFactory::loadEntityDelta(), but this doesn't properly
+		// handle some cases we need to cover here. So instead, let's create a new entity from
+		// prefab, then *update* immediately by applying the delta.
+		if (delta.getPrefab()) {
+			// Instantiate entity from prefab first.
+			EntityData prefabData(*delta.getInstanceUUID());
+			prefabData.setPrefab(*delta.getPrefab());
+			entity = parentSession->getFactory().createEntity(prefabData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
 
-	// EntityFactory::loadEntityDelta() returns an empty parentUUID if it applies the delta to
-	// an existing entity, but we still want/need to update parenting here.
-	if (!parentUUID && entityData->getParentUUID().isValid()) {
-		parentUUID = entityData->getParentUUID();
-	}
-
-	if (parentUUID) {
-		if (auto parentEntity = parentSession->getWorld().findEntity(parentUUID.value()); parentEntity) {
-			entity.setParent(parentEntity.value());
+			// Apply the update.
+			parentSession->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network));
 		} else {
-			Logger::logError("Parent " + toString(*parentUUID) + " not found for already instantiated network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
+			// No prefab in delta, try instantiating from delta directly.
+			entity = parentSession->getFactory().createEntity(*entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
+		}
+
+		if (const UUID& parentUUID = entityData->getParentUUID(); parentUUID.isValid()) {
+			if (auto parentEntity = parentSession->getWorld().findEntity(parentUUID); parentEntity) {
+				entity.setParent(parentEntity.value());
+			} else {
+				Logger::logError("Parent " + toString(parentUUID) + " not found for network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
+			}
 		}
 	}
 
