@@ -18,12 +18,12 @@ SystemMessageSchema::SystemMessageSchema(YAML::Node node, bool generate)
 
 	if (destination == SystemMessageDestination::AllClients || destination == SystemMessageDestination::RemoteClients) {
 		if (!multicast) {
-			throw Exception("Non-multicast system message \"" + name + "\" cannot be sent to all clients or remote clients.", HalleyExceptions::Tools);
+			Logger::logError("Non-multicast system message \"" + name + "\" cannot be sent to all clients or remote clients.");
 		}
 	}
 	if (destination != SystemMessageDestination::Local) {
 		if (!serializable) {
-			throw Exception("System message \"" + name + "\" must be serializable since it's sent over the network.", HalleyExceptions::Tools);
+			Logger::logError("System message \"" + name + "\" must be serializable since its sent over the network.");
 		}
 	}
 }
