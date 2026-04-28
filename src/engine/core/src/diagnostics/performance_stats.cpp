@@ -951,12 +951,15 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 		const Rect4f totalArea = Rect4f(rect.getTopLeft() + Vector2f(0, i * (boxHeight + spacing)), rect.getWidth(), boxHeight);
 		const Rect4f area = totalArea.grow(0, -20, 0, 0);
 
+		const int32_t localTimeMs = networkSession->getLocalSessionTimeMs();
+		const int32_t remoteTimeMs = networkSession->getPeerSessionTimeMs(networkSession->getRemotePeerAtIndex(i));
+
 		connLabel
 			.setPosition(totalArea.getTopLeft())
 			.setText("#" + toString(i + 1) +
 				": latency = " + toString(networkSession->getLatency(i)) + " ms"
-				", local = " + toString(networkSession->getLocalSessionTimeMs()) + " ms"
-				", remote = " + toString(networkSession->getPeerSessionTimeMs(networkSession->getRemotePeerAtIndex(i))) + " ms")
+				", local = " + toString(localTimeMs / 60000) + ":" + toString((localTimeMs / 1000) % 60, 10, 2) +
+				", remote = " + toString(remoteTimeMs / 60000) + ":" + toString((remoteTimeMs / 1000) % 60, 10, 2))
 			.draw(painter);
 
 		boxBg

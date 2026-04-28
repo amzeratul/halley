@@ -947,8 +947,9 @@ ConfigNode NetworkSession::doGetServerSideData(String uniqueKey)
 
 int32_t NetworkSession::getLocalSessionTimeMs() const
 {
-	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime);
-	return static_cast<int32_t>(milliseconds.count());
+	const auto elapsed = curTime - startTime;
+	const std::chrono::duration<double> seconds = elapsed;
+	return static_cast<int32_t>(seconds.count() * 1000.0);
 }
 
 int32_t NetworkSession::getPeerSessionTimeMs(PeerId clientId) const
