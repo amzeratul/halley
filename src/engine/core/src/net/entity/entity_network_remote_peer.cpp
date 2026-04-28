@@ -620,23 +620,27 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 	EntityRef entity;
 	bool appliedOnExistingEntity = false;
 
-	if (allowExistingLookup) {
-		// If allowed, look for existing entity - if found, delta is applied to it, instead of creating a new entity.
-		const auto existingEntity = parentSession->getFactory().getWorld().findEntity(entityData->getInstanceUUID());
-		if (existingEntity && existingEntity->isValid()) {
-			entity = existingEntity.value();
-			appliedOnExistingEntity = true;
+	const auto existingEntity = parentSession->getFactory().getWorld().findEntity(entityData->getInstanceUUID());
+	if (existingEntity && existingEntity->isValid()) {
+		if (!allowExistingLookup) {
+			// NB: this may be unlikely but possible to happen, if there's some network hickup.
+			Logger::logWarning("Can't create remote entity " + entityData->getName() + ", " +
+				entityData->getInstanceUUID().toString() + ", already exists");
+			return {};
 		}
+
+		entity = existingEntity.value();
+		appliedOnExistingEntity = true;
 	}
 
 	if (!appliedOnExistingEntity) {
 		// NB: This used to just call EntityFactory::loadEntityDelta(), but this doesn't properly
 		// handle some cases we need to cover here. So instead, let's create a new entity from
 		// prefab, then *update* immediately by applying the delta.
-		if (delta.getPrefab()) {
+		if (prefab) {
 			// Instantiate entity from prefab first.
-			EntityData prefabData(*delta.getInstanceUUID());
-			prefabData.setPrefab(*delta.getPrefab());
+			EntityData prefabData(entityData->getInstanceUUID());
+			prefabData.setPrefab(prefab->getAssetId());
 			entity = parentSession->getFactory().createEntity(prefabData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
 
 			// Apply the update.
@@ -645,13 +649,18 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 			// No prefab in delta, try instantiating from delta directly.
 			entity = parentSession->getFactory().createEntity(*entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 		}
+	} else {
+		// Apply update on the existing entity.
+		parentSession->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network));
+	}
 
-		if (const UUID& parentUUID = entityData->getParentUUID(); parentUUID.isValid()) {
-			if (auto parentEntity = parentSession->getWorld().findEntity(parentUUID); parentEntity) {
+	if (const UUID& parentUUID = entityData->getParentUUID(); parentUUID.isValid()) {
+		if (auto parentEntity = parentSession->getWorld().findEntity(parentUUID); parentEntity) {
+			if (parentEntity != entity.tryGetParent()) {
 				entity.setParent(parentEntity.value());
-			} else {
-				Logger::logError("Parent " + toString(parentUUID) + " not found for network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
 			}
+		} else {
+			Logger::logError("Parent " + toString(parentUUID) + " not found for network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
 		}
 	}
 
@@ -803,6 +812,11 @@ void EntityNetworkRemotePeer::createPendingEntity(const PendingEntity& pendingDa
 	HalleyAssertDev(pendingData.data);
 
 	const auto entity = createRemoteEntity(pendingData.id, pendingData.data.value(), pendingData.worldPartition != 0);
+
+	if (!entity.isValid()) {
+		Logger::logError("Error when creating pending entity - entity creation failed");
+		return;
+	}
 
 	if (const auto iter = inboundEntities.find(pendingData.id); iter != inboundEntities.end()) {
 		auto& remote = iter->second;
