@@ -22,10 +22,17 @@ void ECSData::loadSources(Vector<CodegenSourceInfo> files, bool throwOnValidatio
 		addSource(f);
 	}
 
-	if (throwOnValidationError) {
-		const auto error = validate();
-		if (error) {
-			throw Exception(*error, HalleyExceptions::Tools);
+	Vector<String> errors;
+	validate([&] (std::string_view err) {
+		errors += String(err);
+	});
+
+	if (!errors.empty()) {
+		String errorMsg = String::concatList(errors, "\n");
+		if (throwOnValidationError) {
+			throw Exception(std::move(errorMsg), HalleyExceptions::Tools);
+		} else {
+			Logger::logError(errorMsg);
 		}
 	}
 	
@@ -72,14 +79,16 @@ int ECSData::getRevision() const
 	return revision;
 }
 
-std::optional<String> ECSData::validate()
+void ECSData::validate(ValidateCallback reportError)
 {
+	HashMap<String, bool> componentUsed;
 	for (auto& comp: components) {
+		componentUsed[comp.first] = false;
 		for (auto& dep: comp.second.componentDependencies) {
 			if (dep == comp.second.name) {
-				return "Component " + comp.second.name + " depends on itself.";
+				reportError("Component " + comp.second.name + " depends on itself.");
 			} else if (components.find(dep) == components.end()) {
-				return "Component " + comp.second.name + " depends on missing component \"" + dep + "\"";
+				reportError("Component " + comp.second.name + " depends on missing component \"" + dep + "\"");
 			}
 		}
 	}
@@ -93,52 +102,58 @@ std::optional<String> ECSData::validate()
 				hasMain = true;
 			}
 			if (famNames.find(fam.name) != famNames.end()) {
-				return "System " + sys.second.name + " already has a family named " + fam.name;
+				reportError("System " + sys.second.name + " already has a family named " + fam.name);
 			}
 			famNames.emplace(fam.name);
 
 			for (auto& comp : fam.components) {
 				if (components.find(comp.name) == components.end()) {
-					return "Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".";
+					reportError("Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".");
+				} else {
+					componentUsed[comp.name] = true;
 				}
 			}
 		}
 
 		for (auto& msg : sys.second.messages) {
 			if (messages.find(msg.name) == messages.end()) {
-				return "Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".";
+				reportError("Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".");
 			}
 		}
 
 		if (!sys.second.systemMessages.empty() && sys.second.method == SystemMethod::Render) {
-			return "Render system \"" + sys.second.name + "\" cannot send or receive system messages.";
+			reportError("Render system \"" + sys.second.name + "\" cannot send or receive system messages.");
 		}
 		
 		for (auto& msg : sys.second.systemMessages) {
 			if (systemMessages.find(msg.name) == systemMessages.end()) {
-				return "Unknown system message \"" + msg.name + "\" in system \"" + sys.second.name + "\".";
+				reportError("Unknown system message \"" + msg.name + "\" in system \"" + sys.second.name + "\".");
 			}
 		}
 
 		for (auto& service : sys.second.services) {
 			if (types.find(service.name) == types.end()) {
-				return "Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".";
+				reportError("Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".");
 			}
 		}
 
 		if (sys.second.strategy == SystemStrategy::Individual || sys.second.strategy == SystemStrategy::Parallel) {
 			if (!hasMain) {
-				return "System " + sys.second.name + " needs to have a main family due to its strategy.";
+				reportError("System " + sys.second.name + " needs to have a main family due to its strategy.");
 			}
 			if (sys.second.strategy == SystemStrategy::Parallel) {
 				if (sys.second.families.size() != 1) {
-					return "System " + sys.second.name + " can only have one family due to its strategy.";
+					reportError("System " + sys.second.name + " can only have one family due to its strategy.");
 				}
 			}
 		}
 	}
 
-	return {};
+	for (const auto& [name, used]: componentUsed) {
+		if (!used) {
+			//Logger::logWarning("Component not used by any system: " + name);
+		}
+	}
 }
 
 void ECSData::process()

@@ -47,7 +47,9 @@ namespace Halley {
 		void addType(YAML::Node rootNode);
 		String getInclude(String typeName) const;
 
-    	std::optional<String> validate();
+		using ValidateCallback = std::function<void(std::string_view)>;
+
+    	void validate(ValidateCallback reportError);
 		void process();
 
     	HashMap<String, ComponentSchema> components;
