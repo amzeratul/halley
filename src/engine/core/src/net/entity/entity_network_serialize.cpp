@@ -667,7 +667,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         } else {
             // No child entity found, and we are at the root already. Something went wrong.
             // Let's skip this entity data and any components that follow.
-            Logger::logWarning("Entity '" + childInstanceUUID + "' not found while deserializing update, skip " + toString(size) + " bytes", true);
+            uint32_t totalSkipSize = size;
 
             deserializer.rewind(marker);
             deserializer.skipBytes(size);
@@ -676,6 +676,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 
             if (type == EntityNetworkChanges::Type::EntityIdentity) {
                 deserializer.skipBytes(size);
+                totalSkipSize += size;
 
                 fetchNextPage(deserializer, type, size);
             }
@@ -685,9 +686,13 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                 deserializer >> componentId;
 
                 deserializer.skipBytes(size);
+                totalSkipSize += size;
 
                 fetchNextPage(deserializer, type, size);
             }
+
+            Logger::logWarning("Child entity '" + childInstanceUUID + "' not found as child of " +
+                entity.getEntityId().toDetailedString() + " for deserializing update, skipped " + toString(totalSkipSize) + " bytes", true);
         }
     }
 
