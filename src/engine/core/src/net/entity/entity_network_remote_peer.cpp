@@ -1127,6 +1127,11 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 	int32_t latency = session.getLatency(session.getIndexOfRemotePeer(peerId));
 
 	for (auto& [_, inboundEntity] : inboundEntities) {
+		if (outboundEntities.contains(inboundEntity.worldId)) {
+			// TODO: this could be a flag in inboundEntity
+			HalleyAssertDebug(outboundEntities[inboundEntity.worldId].hasAuthorityOnly);
+			continue;
+		}
 		interpolateRemoteEntityPosition(inboundEntity, now, latency);
 	}
 
