@@ -240,5 +240,6 @@ namespace Halley {
 
     	EntityId getEntityIdFromUUID(const UUID& uuid) const override;
         UUID getUUIDFromEntityId(EntityId id) const override;
+        World* getEntityFactoryContextWorld() const override;
     };
 }

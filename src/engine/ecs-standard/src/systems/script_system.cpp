@@ -715,6 +715,11 @@ private:
 		}
 	}
 
+	World* getEntityFactoryContextWorld() const override
+	{
+		return &getWorld();
+	}
+
 	std::shared_ptr<ScriptState> getScriptState(EntityId entityId, const String& scriptName)
 	{
 		if (auto* e = scriptableFamily.tryFind(entityId)) {

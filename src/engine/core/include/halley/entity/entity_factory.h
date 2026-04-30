@@ -131,6 +131,7 @@ namespace Halley {
 		virtual EntityId getCurrentEntityId() const { return EntityId(); }
 		virtual bool isHeadless() const { return false; }
 		virtual bool canPreloadAssets() const { return true; }
+		virtual World* getEntityFactoryContextWorld() const { return nullptr; }
 	};
 
 	class EntityFactoryContext : public IEntityFactoryContext {
@@ -170,6 +171,7 @@ namespace Halley {
 
 		EntityId getEntityIdFromUUID(const UUID& uuid) const override;
 		UUID getUUIDFromEntityId(EntityId id) const override;
+		World* getEntityFactoryContextWorld() const override;
 
 		void addEntity(EntityRef entity);
 		void setEntities(Vector<EntityRef> entities);

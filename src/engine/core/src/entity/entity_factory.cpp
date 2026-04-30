@@ -210,6 +210,11 @@ UUID EntityFactoryContext::getUUIDFromEntityId(EntityId id) const
 	}
 }
 
+World* EntityFactoryContext::getEntityFactoryContextWorld() const
+{
+	return world;
+}
+
 void EntityFactoryContext::addEntity(EntityRef entity)
 {
 	if (entity.getWorldPartition() != getWorldPartition()) {

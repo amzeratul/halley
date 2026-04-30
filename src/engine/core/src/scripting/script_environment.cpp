@@ -571,6 +571,11 @@ UUID ScriptEnvironment::getUUIDFromEntityId(EntityId id) const
 	return UUID();
 }
 
+World* ScriptEnvironment::getEntityFactoryContextWorld() const
+{
+	return &world;
+}
+
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId) const
 {
 	return world.tryGetEntity(entityId.isValid() ? entityId : getState().entity);
