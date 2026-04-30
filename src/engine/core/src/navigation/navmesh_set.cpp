@@ -207,10 +207,8 @@ std::pair<OptionalLite<uint16_t>, WorldPosition> NavmeshSet::getNavMeshIdxAtWith
 	}
 
 	// Find closest and try again
-	if (auto p = getClosestPointTo(pos, maxDist, anisotropy, nudge, false, allowNonConnected)) {
-		if (auto idx = getNavMeshIdxAt(*p, allowNonConnected)) {
-			return { *idx, *p };
-		}
+	if (auto res = getClosestPointAndNavmeshIdxTo(pos, maxDist, anisotropy, nudge, false, allowNonConnected)) {
+		return { res->second, res->first };
 	}
 
 	return { std::nullopt, pos };
@@ -218,9 +216,19 @@ std::pair<OptionalLite<uint16_t>, WorldPosition> NavmeshSet::getNavMeshIdxAtWith
 
 std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float maxDist, float anisotropy, float nudge, bool anySubWorld, bool allowNonConnected) const
 {
+	if (auto res = getClosestPointAndNavmeshIdxTo(pos, maxDist, anisotropy, nudge, anySubWorld, allowNonConnected)) {
+		return res->first;
+	}
+	return std::nullopt;
+}
+
+std::optional<std::pair<WorldPosition, uint16_t>> NavmeshSet::getClosestPointAndNavmeshIdxTo(WorldPosition pos, float maxDist, float anisotropy, float nudge, bool anySubWorld, bool allowNonConnected) const
+{
 	std::optional<WorldPosition> bestPoint;
+	uint16_t bestNavmeshIdx = 0;
 	float bestDist = maxDist;
 
+	uint16_t i = 0;
 	for (const auto& navmesh: navmeshes) {
 		if ((navmesh.isConnectedSet() || allowNonConnected) && (anySubWorld || navmesh.getSubWorld() == pos.subWorld)) {
 			if (const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy, bestDist)) {
@@ -228,9 +236,11 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 				if (dist < bestDist) {
 					bestDist = dist;
 					bestPoint = WorldPosition(*curPoint, navmesh.getSubWorld());
+					bestNavmeshIdx = i;
 				}
 			}
 		}
+		++i;
 	}
 
 	if (bestPoint) {
@@ -238,26 +248,26 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 		const auto du = bestDist > 0.00001f ? ((bestPoint->pos - pos.pos) * scale).unit() : Vector2f(0, 1);
 
 		const auto p1 = *bestPoint + (du / scale) * nudge;
-		if (getNavMeshAt(p1, allowNonConnected)) {
-			return p1;
+		if (auto idx = getNavMeshIdxAt(p1, allowNonConnected)) {
+			return std::pair{ p1, *idx };
 		}
 
 		const auto p2 = *bestPoint + (du.orthoLeft() / scale) * nudge;
-		if (getNavMeshAt(p2, allowNonConnected)) {
-			return p2;
+		if (auto idx = getNavMeshIdxAt(p2, allowNonConnected)) {
+			return std::pair{ p2, *idx };
 		}
 
 		const auto p3 = *bestPoint + (du.orthoRight() / scale) * nudge;
-		if (getNavMeshAt(p3, allowNonConnected)) {
-			return p3;
+		if (auto idx = getNavMeshIdxAt(p3, allowNonConnected)) {
+			return std::pair{ p3, *idx };
 		}
 
 		const auto p4 = *bestPoint - (du / scale) * nudge;
-		if (getNavMeshAt(p4, allowNonConnected)) {
-			return p4;
+		if (auto idx = getNavMeshIdxAt(p4, allowNonConnected)) {
+			return std::pair{ p4, *idx };
 		}
 
-		return bestPoint;
+		return std::pair{ *bestPoint, bestNavmeshIdx };
 	}
 
 	return {};

@@ -42,6 +42,7 @@ namespace Halley {
 		OptionalLite<uint16_t> getNavMeshIdxAt(WorldPosition pos, bool allowNonConnected = false) const;
 		std::pair<OptionalLite<uint16_t>, WorldPosition> getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist = std::numeric_limits<float>::max(), float anisotropy = 1.0f, float nudge = 0.1f, bool allowNonConnected = false) const;
 		std::optional<WorldPosition> getClosestPointTo(WorldPosition pos, float maxDist = std::numeric_limits<float>::max(), float anisotropy = 1.0f, float nudge = 0.1f, bool anySubWorld = false, bool allowNonConnected = false) const;
+		std::optional<std::pair<WorldPosition, uint16_t>> getClosestPointAndNavmeshIdxTo(WorldPosition pos, float maxDist = std::numeric_limits<float>::max(), float anisotropy = 1.0f, float nudge = 0.1f, bool anySubWorld = false, bool allowNonConnected = false) const;
 
 		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;
 
