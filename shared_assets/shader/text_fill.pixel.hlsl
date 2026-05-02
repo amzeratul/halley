@@ -14,7 +14,7 @@ float4 main(VOut input) : SV_TARGET {
 	float texGrad = max(dx, dy);
 
 	float a = median(tex0.Sample(sampler0, input.texCoord0).rgb);
-	float s = max(u_smoothness * texGrad, 0.001);
+	float s = max(u_smoothness * texGrad * 0.5, 0.001);
 	float inEdge = 0.5;
 
 	float edge0 = clamp(inEdge - s, 0.01, 0.98);
