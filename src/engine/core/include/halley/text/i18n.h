@@ -65,8 +65,6 @@ namespace Halley {
 
 		const String& getKey() const;
 
-		void reportDrawing(StringOutputType type, const String& id, const StringOutputMetrics& metrics) const;
-
 	private:
 		explicit LocalisedString(String string, const I18N* i18n);
 		explicit LocalisedString(const I18N& i18n, String key, String string);

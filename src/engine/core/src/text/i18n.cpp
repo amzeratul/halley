@@ -509,12 +509,3 @@ const String& LocalisedString::getKey() const
 {
 	return key;
 }
-
-void LocalisedString::reportDrawing(StringOutputType type, const String& id, const StringOutputMetrics& metrics) const
-{
-	if (i18n) {
-		if (auto* server = i18n->tryGetStringOutputServer()) {
-			server->reportString(type, id, *this, metrics);
-		}
-	}
-}

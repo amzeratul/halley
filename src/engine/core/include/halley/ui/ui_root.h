@@ -6,6 +6,7 @@
 #include "ui_input.h"
 
 namespace Halley {
+	class StringOutputServer;
 	class I18N;
 	enum class JoystickType;
 	enum class UIWidgetUpdateType;
@@ -160,6 +161,8 @@ namespace Halley {
 			setSharedData(id, data);
 			return data;
 		}
+
+		StringOutputServer* tryGetStringOutputServer() const;
 
 	private:
 		String id;

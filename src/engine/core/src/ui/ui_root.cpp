@@ -538,6 +538,11 @@ bool UIRoot::isInputActive() const
 	return group->inputActive;
 }
 
+StringOutputServer* UIRoot::tryGetStringOutputServer() const
+{
+	return i18n ? i18n->tryGetStringOutputServer() : nullptr;
+}
+
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse

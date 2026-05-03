@@ -48,7 +48,9 @@ void UILabel::draw(UIPainter& painter) const
 		painter.draw(renderer);
 	}
 
-	text.reportDrawing(StringOutputType::Generic, toString(this), {}); // TODO: collect this data properly
+	if (auto* stringOutputServer = getRoot()->tryGetStringOutputServer()) {
+		stringOutputServer->reportString(StringOutputType::Generic, toString(this), text, {}); // TODO: collect this data properly
+	}
 }
 
 void UILabel::update(Time t, bool moved)
