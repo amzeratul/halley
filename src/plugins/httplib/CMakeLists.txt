@@ -6,6 +6,7 @@ set(SOURCES
     "contrib/cpp-httplib/httplib.cc"
 
     "src/httplib_plugin.cpp"
+    "src/httplib_server.cpp"
     "src/httplib_web_api.cpp"
     "src/httplib_http_request.cpp"
     )
@@ -13,6 +14,7 @@ set(SOURCES
 set(HEADERS
     "contrib/cpp-httplib/httplib.h"
 
+    "src/httplib_server.h"
     "src/httplib_web_api.h"
     "src/httplib_http_request.h"
 )

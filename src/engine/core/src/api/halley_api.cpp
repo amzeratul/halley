@@ -42,6 +42,9 @@ void HalleyAPI::assign()
 	if (webInternal) {
 		web = webInternal.get();
 	}
+	if (webServerInternal) {
+		webServer = webServerInternal.get();
+	}
 }
 
 void HalleyAPI::init()
@@ -76,10 +79,16 @@ void HalleyAPI::init()
 	if (webInternal) {
 		webInternal->init();
 	}
+	if (webServerInternal) {
+		webServerInternal->init();
+	}
 }
 
 void HalleyAPI::deInit()
 {
+	if (webServerInternal) {
+		webServerInternal->deInit();
+	}
 	if (webInternal) {
 		webInternal->deInit();
 	}
@@ -117,9 +126,9 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	auto api = std::make_unique<HalleyAPI>();
 	api->coreInternal = core;
 
-	HalleyAPIFlags::Flags flagList[] = { HalleyAPIFlags::System, HalleyAPIFlags::Video, HalleyAPIFlags::Input, HalleyAPIFlags::Audio, HalleyAPIFlags::Network, HalleyAPIFlags::Platform, HalleyAPIFlags::Movie, HalleyAPIFlags::Analytics, HalleyAPIFlags::Web };
-	PluginType pluginTypes[] = { PluginType::SystemAPI, PluginType::GraphicsAPI, PluginType::InputAPI, PluginType::AudioOutputAPI, PluginType::NetworkAPI, PluginType::PlatformAPI, PluginType::MovieAPI, PluginType::AnalyticsAPI, PluginType::WebAPI };
-	String names[] = { "System", "Graphics", "Input", "AudioOutput", "Network", "Platform", "Movie", "Analytics", "Web" };
+	HalleyAPIFlags::Flags flagList[] = { HalleyAPIFlags::System, HalleyAPIFlags::Video, HalleyAPIFlags::Input, HalleyAPIFlags::Audio, HalleyAPIFlags::Network, HalleyAPIFlags::Platform, HalleyAPIFlags::Movie, HalleyAPIFlags::Analytics, HalleyAPIFlags::Web, HalleyAPIFlags::WebServer };
+	PluginType pluginTypes[] = { PluginType::SystemAPI, PluginType::GraphicsAPI, PluginType::InputAPI, PluginType::AudioOutputAPI, PluginType::NetworkAPI, PluginType::PlatformAPI, PluginType::MovieAPI, PluginType::AnalyticsAPI, PluginType::WebAPI, PluginType::WebServerAPI };
+	String names[] = { "System", "Graphics", "Input", "AudioOutput", "Network", "Platform", "Movie", "Analytics", "Web", "WebServer"};
 
 	constexpr size_t n = std::end(flagList) - std::begin(flagList);
 	for (size_t i = 0; i < n; ++i) {
@@ -168,6 +177,9 @@ void HalleyAPI::setAPI(PluginType pluginType, HalleyAPIInternal* api)
 		return;
 	case PluginType::WebAPI:
 		webInternal.reset(dynamic_cast<WebAPIInternal*>(api));
+		return;
+	case PluginType::WebServerAPI:
+		webServerInternal.reset(dynamic_cast<WebServerAPIInternal*>(api));
 		return;
 	}
 }

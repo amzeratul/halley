@@ -76,11 +76,57 @@ namespace Halley
 		}
 	};
 
+	class HTTPServerRequest	{
+	public:
+
+	};
+
+	class HTTPServerDataSink {
+	public:
+		virtual ~HTTPServerDataSink() = default;
+
+		virtual void write(gsl::span<const std::byte> bytes) = 0;
+		virtual void done() = 0;
+	};
+
+	class HTTPServerResponse {
+	public:
+		using Callback = std::function<bool(HTTPServerDataSink& sink)>;
+
+		virtual ~HTTPServerResponse() = default;
+
+		virtual void setContent(const String& data, const String& dataType)
+		{
+			setContent(gsl::as_bytes(data.asSpan()), dataType);
+		}
+
+		virtual void setContent(gsl::span<const std::byte> data, const String& dataType) = 0;
+		virtual void setChunkedContentProvider(const String& dataType, Callback callback) = 0;
+	};
+
+	class HTTPServer {
+	public:
+		using Handler = std::function<void(const HTTPServerRequest& request, HTTPServerResponse& response)>;
+
+		virtual ~HTTPServer() = default;
+
+		virtual void endpointGet(const String& endpoint, Handler handler) = 0;
+		virtual void listen(const String& address, int port) = 0;
+	};
+
 	class WebAPI
 	{
 	public:
 		virtual ~WebAPI() {}
 
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(HTTPMethod method, const String& url) = 0;
+	};
+
+	class WebServerAPI
+	{
+	public:
+		virtual ~WebServerAPI() {}
+
+		virtual std::unique_ptr<HTTPServer> makeHTTPServer() { return {}; }
 	};
 }

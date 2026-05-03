@@ -104,5 +104,11 @@ namespace Halley
 	public:
 		virtual ~WebAPIInternal() {}
 	};
+
+	class WebServerAPIInternal : public WebServerAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~WebServerAPIInternal() {}
+	};
 }
 
