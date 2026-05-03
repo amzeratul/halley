@@ -12,6 +12,7 @@
 #include "halley/support/logger.h"
 #include "halley/ui/widgets/ui_tooltip.h"
 #include "halley/graphics/render_context.h"
+#include "halley/text/string_output_server.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -218,11 +219,12 @@ bool UIRootGroup::isMainRoot(UIRoot* root) const
 }
 
 
-UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect, std::shared_ptr<UIRootGroup> group)
+UIRoot::UIRoot(const HalleyAPI& api, const I18N& i18n, Rect4f rect, std::shared_ptr<UIRootGroup> group)
 	: id("root")
 	, inputAPI(api.input)
 	, audioAPI(api.audio)
 	, uiRect(rect)
+	, i18n(&i18n)
 	, dummyInput(std::make_shared<InputButtonBase>(4))
 	, mouseRemap([](Vector2f p) { return p; })
 	, group(std::move(group))
@@ -853,11 +855,20 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::
 
 void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 {
+	auto* stringOutputServer = i18n ? i18n->tryGetStringOutputServer() : nullptr;
+	if (stringOutputServer) {
+		stringOutputServer->startUI(*this);
+	}
+
 	auto p = UIPainter(painter, mask, layer);
 
 	for (auto& c: getChildren()) {
 		c->doDraw(p);
 		p.setAdjustedLayerToNextHighest();
+	}
+
+	if (stringOutputServer) {
+		stringOutputServer->endUI(*this);
 	}
 }
 

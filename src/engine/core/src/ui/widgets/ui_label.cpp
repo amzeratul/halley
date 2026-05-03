@@ -1,5 +1,6 @@
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/text/i18n.h"
+#include "halley/text/string_output_server.h"
 
 using namespace Halley;
 
@@ -46,6 +47,8 @@ void UILabel::draw(UIPainter& painter) const
 	} else {
 		painter.draw(renderer);
 	}
+
+	text.reportDrawing(StringOutputType::Generic, toString(this), {}); // TODO: collect this data properly
 }
 
 void UILabel::update(Time t, bool moved)

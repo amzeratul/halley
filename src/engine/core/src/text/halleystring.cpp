@@ -1430,3 +1430,13 @@ gsl::span<char> String::asSpan()
 	return gsl::span<char>(&(*this)[0], length());
 }
 
+gsl::span<const std::byte> String::asByteSpan() const
+{
+	return gsl::as_bytes(asSpan());
+}
+
+gsl::span<std::byte> String::asWriteableByteSpan()
+{
+	return gsl::as_writable_bytes(asSpan());
+}
+

@@ -315,12 +315,19 @@ void I18N::checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>
 	}
 }
 
-StringOutputServer& I18N::getStringOutputServer(const HalleyAPI& api)
+bool I18N::createStringOutputServer(const HalleyAPI& api, const String& host, int port)
 {
-	if (!stringOutputServer) {
-		stringOutputServer = std::make_unique<StringOutputServer>(api.webServer);
+	stringOutputServer = std::make_unique<StringOutputServer>();
+	if (api.webServer) {
+		return stringOutputServer->startServer(api.webServer, host, port);
+	} else {
+		return false;
 	}
-	return *stringOutputServer;
+}
+
+StringOutputServer* I18N::tryGetStringOutputServer() const
+{
+	return stringOutputServer.get();
 }
 
 
@@ -334,8 +341,9 @@ LocalisedString& LocalisedString::operator+=(const LocalisedString& str)
 	return *this;
 }
 
-LocalisedString::LocalisedString(String string)
-	: string(std::move(string))
+LocalisedString::LocalisedString(String string, const I18N* i18n)
+	: i18n(i18n)
+	, string(std::move(string))
 {
 }
 
@@ -349,47 +357,47 @@ LocalisedString::LocalisedString(const I18N& i18n, String key, String string)
 
 LocalisedString LocalisedString::fromHardcodedString(const char* str)
 {
-	return LocalisedString(String(str));
+	return LocalisedString(String(str), nullptr);
 }
 
 LocalisedString LocalisedString::fromHardcodedString(const String& str)
 {
-	return LocalisedString(String(str));
+	return LocalisedString(String(str), nullptr);
 }
 
 LocalisedString LocalisedString::fromUserString(const String& str)
 {
-	return LocalisedString(str);
+	return LocalisedString(str, nullptr);
 }
 
 LocalisedString LocalisedString::fromNumber(int number, int base, int width, char fill)
 {
-	return LocalisedString(Halley::toString(number, base, width, fill));
+	return LocalisedString(Halley::toString(number, base, width, fill), nullptr);
 }
 
 LocalisedString LocalisedString::fromNumber(float number, const I18NLanguage& language, int precisionDigits, bool fixed)
 {
-	return LocalisedString(Halley::toString(number, precisionDigits, language.getDecimalSeparator(), fixed));
+	return LocalisedString(Halley::toString(number, precisionDigits, language.getDecimalSeparator(), fixed), nullptr);
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) const
 {
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()));
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()), i18n);
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const
 {
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()));
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()), i18n);
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const
 {
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()));
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()), i18n);
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const
 {
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()).replaceAll("{3}", tok3.getString()));
+	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()).replaceAll("{3}", tok3.getString()), i18n);
 }
 
 LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks) const
@@ -401,7 +409,7 @@ LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> 
 	for (int i = 0; i < int(toks.size()); ++i) {
 		str = str.replaceAll("{" + Halley::toString(i) + "}", toks[i].getString());
 	}
-	return LocalisedString(str);
+	return LocalisedString(str, i18n);
 }
 
 std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const
@@ -434,7 +442,7 @@ std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceToken
 	builder.append(str.substr(lastPos));
 
 	auto result = builder.moveResults();
-	return { LocalisedString(std::move(result.first)), std::move(result.second) };
+	return { LocalisedString(std::move(result.first), i18n), std::move(result.second) };
 }
 
 LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens) const
@@ -443,12 +451,12 @@ LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedS
 	for (const auto& token : tokens) {
 		curString = string.replaceAll("{" + token.first + "}", token.second.getString());
 	}
-	return LocalisedString(curString);
+	return LocalisedString(curString, i18n);
 }
 
 LocalisedString LocalisedString::replaceToken(const String& pattern, const LocalisedString& token) const
 {
-	return fromUserString(string.replaceAll(pattern, token.getString()));
+	return LocalisedString(string.replaceAll(pattern, token.getString()), i18n);
 }
 
 const String& LocalisedString::getString() const
@@ -478,12 +486,12 @@ bool LocalisedString::operator<(const LocalisedString& other) const
 
 LocalisedString LocalisedString::operator+(const LocalisedString& other) const
 {
-	return LocalisedString(string + other.string);
+	return LocalisedString(string + other.string, i18n);
 }
 
 bool LocalisedString::checkForUpdates()
 {
-	if (i18n) {
+	if (i18n && !key.isEmpty()) {
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
 			const auto newValue = i18n->get(key);
@@ -500,4 +508,13 @@ bool LocalisedString::checkForUpdates()
 const String& LocalisedString::getKey() const
 {
 	return key;
+}
+
+void LocalisedString::reportDrawing(StringOutputType type, const String& id, const StringOutputMetrics& metrics) const
+{
+	if (i18n) {
+		if (auto* server = i18n->tryGetStringOutputServer()) {
+			server->reportString(type, id, *this, metrics);
+		}
+	}
 }

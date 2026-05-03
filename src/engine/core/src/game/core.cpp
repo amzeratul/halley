@@ -28,6 +28,7 @@
 #include "halley/utils/algorithm.h"
 #include "halley/utils/halley_iostream.h"
 #include "halley/resources/resource_unloader.h"
+#include "halley/text/string_output_server.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -436,6 +437,12 @@ void Core::tickFrame(Time time)
 		return;
 	}
 
+	auto* i18n = game->tryGetI18N();
+	auto* stringOutputServer = i18n ? i18n->tryGetStringOutputServer() : nullptr;
+	if (stringOutputServer) {
+		stringOutputServer->startFrame();
+	}
+
 	for (auto* c: startFrameCallbacks) {
 		c->onStartFrame();
 	}
@@ -479,6 +486,10 @@ void Core::tickFrame(Time time)
 
 	endFrameData(multithreaded, time);
 	BaseFrameData::setThreadFrameData(nullptr);
+
+	if (stringOutputServer) {
+		stringOutputServer->endFrame();
+	}
 
 	curStageFrames++;
 }

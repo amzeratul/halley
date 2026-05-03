@@ -6,6 +6,7 @@
 #include "ui_input.h"
 
 namespace Halley {
+	class I18N;
 	enum class JoystickType;
 	enum class UIWidgetUpdateType;
 	class InputAPI;
@@ -81,7 +82,7 @@ namespace Halley {
 		friend class UIRootGroup;
 
 	public:
-		explicit UIRoot(const HalleyAPI& api, Rect4f rect = {}, std::shared_ptr<UIRootGroup> group = {});
+		explicit UIRoot(const HalleyAPI& api, const I18N& i18n, Rect4f rect = {}, std::shared_ptr<UIRootGroup> group = {});
 		~UIRoot();
 
 		std::shared_ptr<UIRootGroup> getGroup() const;
@@ -167,6 +168,7 @@ namespace Halley {
 		Rect4f uiRect;
 
 		IUIRootSettingsProvider* provider = nullptr;
+		const I18N* i18n = nullptr;
 
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> mouseExclusive; // A widget that's taking exclusive control of mouse

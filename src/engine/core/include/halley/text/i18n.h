@@ -19,6 +19,9 @@ namespace Halley {
 	class I18N;
 	class I18NLanguage;
 
+	struct StringOutputMetrics;
+	enum class StringOutputType;
+
 	class LocalisedString
 	{
 		friend class I18N;
@@ -62,8 +65,10 @@ namespace Halley {
 
 		const String& getKey() const;
 
+		void reportDrawing(StringOutputType type, const String& id, const StringOutputMetrics& metrics) const;
+
 	private:
-		explicit LocalisedString(String string);
+		explicit LocalisedString(String string, const I18N* i18n);
 		explicit LocalisedString(const I18N& i18n, String key, String string);
 
 		const I18N* i18n = nullptr;
@@ -121,7 +126,8 @@ namespace Halley {
 		Vector<uint32_t> getCodepointsUsedBy(const I18NLanguage& language) const;
 		void checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>> fonts) const;
 
-		StringOutputServer& getStringOutputServer(const HalleyAPI& api);
+		bool createStringOutputServer(const HalleyAPI& api, const String& host, int port);
+		StringOutputServer* tryGetStringOutputServer() const;
 
 	private:
 		I18NLanguage currentLanguage;

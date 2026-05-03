@@ -85,6 +85,7 @@ namespace Halley
 	public:
 		virtual ~HTTPServerDataSink() = default;
 
+		virtual void write(const String& data) { write(data.asByteSpan()); }
 		virtual void write(gsl::span<const std::byte> bytes) = 0;
 		virtual void done() = 0;
 	};
@@ -95,11 +96,7 @@ namespace Halley
 
 		virtual ~HTTPServerResponse() = default;
 
-		virtual void setContent(const String& data, const String& dataType)
-		{
-			setContent(gsl::as_bytes(data.asSpan()), dataType);
-		}
-
+		virtual void setContent(const String& data, const String& dataType) { setContent(data.asByteSpan(), dataType); }
 		virtual void setContent(gsl::span<const std::byte> data, const String& dataType) = 0;
 		virtual void setChunkedContentProvider(const String& dataType, Callback callback) = 0;
 	};

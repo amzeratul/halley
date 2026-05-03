@@ -142,6 +142,8 @@ namespace Halley {
 		[[nodiscard]] Bytes toBytes() const;
 		[[nodiscard]] gsl::span<const char> asSpan() const;
 		[[nodiscard]] gsl::span<char> asSpan();
+		[[nodiscard]] gsl::span<const std::byte> asByteSpan() const;
+		[[nodiscard]] gsl::span<std::byte> asWriteableByteSpan();
 
 		[[nodiscard]] static const Character* stringPtrTrim(Character *chr,size_t len,size_t startPos);
 		[[nodiscard]] static const Character* stringTrim(String &str,size_t startPos);

@@ -35,7 +35,7 @@ namespace Halley {
 
 	class HTTPLibWebServer : public HTTPServer {
 	public:
-		~HTTPLibWebServer();
+		~HTTPLibWebServer() override;
 
 		void endpointGet(const String& endpoint, Handler handler) override;
 		void listen(const String& host, int port) override;

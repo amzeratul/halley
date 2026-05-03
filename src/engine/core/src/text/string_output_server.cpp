@@ -4,17 +4,16 @@
 
 using namespace Halley;
 
-StringOutputServer::StringOutputServer(WebServerAPI* webServerAPI)
-	: webServerAPI(webServerAPI)
+StringOutputServer::StringOutputServer()
 {
 }
 
 StringOutputServer::~StringOutputServer()
 {
-	stop();
+	stopServer();
 }
 
-bool StringOutputServer::start(const String& host, int port)
+bool StringOutputServer::startServer(WebServerAPI* webServerAPI, const String& host, int port)
 {
 	if (webServerAPI && !httpServer) {
 		httpServer = webServerAPI->makeHTTPServer();
@@ -28,7 +27,7 @@ bool StringOutputServer::start(const String& host, int port)
 	return false;
 }
 
-bool StringOutputServer::stop()
+bool StringOutputServer::stopServer()
 {
 	if (httpServer) {
 		httpServer = {};
@@ -37,10 +36,46 @@ bool StringOutputServer::stop()
 	return false;
 }
 
+void StringOutputServer::startFrame()
+{
+	// TODO
+}
+
+void StringOutputServer::endFrame()
+{
+	// TODO
+}
+
+void StringOutputServer::startUI(const UIRoot& uiRoot)
+{
+	// TODO
+}
+
+void StringOutputServer::endUI(const UIRoot& uiRoot)
+{
+	// TODO
+}
+
+void StringOutputServer::reportString(StringOutputType type, const String& id, const LocalisedString& string, const StringOutputMetrics& metrics)
+{
+	//Logger::logDev(id + ": " + string.getString(), true);
+}
+
 void StringOutputServer::setupEndpoints()
 {
 	httpServer->endpointGet("/test", [] (const HTTPServerRequest& request, HTTPServerResponse& response)
 	{
 		response.setContent("Hello world", "text/html");
+	});
+
+	httpServer->endpointGet("/strings", [] (const HTTPServerRequest& request, HTTPServerResponse& response)
+	{
+		// TODO
+		response.setChunkedContentProvider("text/event-stream", [=] (HTTPServerDataSink& sink) -> bool
+		{
+			// TODO
+			//sink.write();
+			return true;
+		});
 	});
 }
