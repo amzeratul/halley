@@ -21,7 +21,7 @@ bool StringOutputServer::start(const String& host, int port)
 		if (httpServer) {
 			setupEndpoints();
 			httpServer->listen(host, port);
-			Logger::logDev("String output server listening on http://" + host + ":" + port);
+			Logger::logInfo("String output server listening on http://" + host + ":" + port);
 			return true;
 		}
 	}
