@@ -1,7 +1,10 @@
 #include <utility>
 #include "halley/text/i18n.h"
+
+#include "halley/api/halley_api.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/resources/resources.h"
+#include "halley/text/string_output_server.h"
 
 using namespace Halley;
 
@@ -16,6 +19,11 @@ I18N::I18N(Resources& resources, I18NLanguage currentLanguage, std::optional<I18
 	if (fallbackLanguage) {
 		setFallbackLanguage(*fallbackLanguage);
 	}
+}
+
+I18N::~I18N()
+{
+	
 }
 
 void I18N::update()
@@ -305,6 +313,14 @@ void I18N::checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>
 			}
 		}
 	}
+}
+
+StringOutputServer& I18N::getStringOutputServer(const HalleyAPI& api)
+{
+	if (!stringOutputServer) {
+		stringOutputServer = std::make_unique<StringOutputServer>(api.webServer);
+	}
+	return *stringOutputServer;
 }
 
 

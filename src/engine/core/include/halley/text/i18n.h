@@ -9,6 +9,10 @@
 #include "i18n_language.h"
 
 namespace Halley {
+	class StringOutputServer;
+}
+
+namespace Halley {
 	class ConfigNode;
 	class ConfigFile;
 	class ConfigObserver;
@@ -80,6 +84,7 @@ namespace Halley {
 	public:
 		I18N();
 		I18N(Resources& resources, I18NLanguage currentLanguage = I18NLanguage("en-GB"), std::optional<I18NLanguage> fallbackLanguage = {});
+		~I18N();
 
 		void update();
 		void loadStrings(Resources& resources);
@@ -116,12 +121,16 @@ namespace Halley {
 		Vector<uint32_t> getCodepointsUsedBy(const I18NLanguage& language) const;
 		void checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>> fonts) const;
 
+		StringOutputServer& getStringOutputServer(const HalleyAPI& api);
+
 	private:
 		I18NLanguage currentLanguage;
 		std::optional<I18NLanguage> fallbackLanguage;
 		HashMap<I18NLanguage, HashMap<String, String>> strings;
 		HashMap<String, ConfigObserver> observers;
 		int version = 0;
+
+		std::unique_ptr<StringOutputServer> stringOutputServer;
 
 		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
 	};
