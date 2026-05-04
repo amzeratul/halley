@@ -28,74 +28,68 @@ namespace Halley
 	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.', bool fixed = true)
 	{
 		HalleyAssertDev(precisionDigits >= -1 && precisionDigits <= 20);
-		std::stringstream str;
-		if (precisionDigits != -1) {
-			if (fixed) {
-				str << std::fixed;
+
+		constexpr int bufSize = 32;
+		std::array<char, bufSize> buffer;
+
+		const std::chars_format format = fixed ? std::chars_format::fixed : std::chars_format::general;
+		const std::to_chars_result result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), src, format, precisionDigits);
+		if (result.ec != std::errc()) [[unlikely]] {
+			return "";
+		}
+
+		// Replace decimal separator, if needed
+		if (decimalSeparator != '.') [[unlikely]] {
+			for (char* c = buffer.data(); c != result.ptr; ++c) {
+				if (*c == '.') {
+					*c = decimalSeparator;
+				}
 			}
-			str << std::setprecision(precisionDigits);
-		}
-		str << src;
-
-		String result;
-		if (precisionDigits == -1) {
-			result = String::prettyFloat(str.str());
-		} else {
-			result = str.str();
 		}
 
-		if (decimalSeparator != '.') {
-			result = result.replaceAll(String("."), String(decimalSeparator));
+		// Generate string
+		auto str = std::string_view(buffer.data(), result.ptr - buffer.data());
+
+		// Apply pretty float algorithm
+		if (precisionDigits == -1) [[likely]] {
+			str = String::prettyFloat(str, decimalSeparator);
 		}
 
-		return result;
+		return str;
 	}
 
 	template <typename T, typename std::enable_if<std::is_integral_v<T> && !std::is_same_v<T, bool>, int>::type = 0>
 	String toString(T value, int base = 10, int width = 1, char fill = '0', char thousandsSeparator = 0)
 	{
-		HalleyAssertDev(base == 10 || base == 16 || base == 8);
+		constexpr int maxWidth = 32;
+		constexpr int bufSize = 32;
 
-		std::stringstream ss;
-		if (base == 16) {
-			ss.setf(std::ios::hex, std::ios::basefield);
-		} else if (base == 8) {
-			ss.setf(std::ios::oct, std::ios::basefield);
+		HalleyAssertDebug(base >= 2 && base <= 36);
+		HalleyAssertDebug(width <= maxWidth);
+
+		std::array<char, bufSize + maxWidth> buffer;
+		const std::to_chars_result result = std::to_chars(buffer.data() + maxWidth, buffer.data() + buffer.size(), value, base);
+		if (result.ec != std::errc()) [[unlikely]] {
+			return "";
 		}
-		if (width > 1) {
-			ss << std::setfill(fill) << std::setw(width);
+
+		char* startPos = buffer.data() + maxWidth;
+		char* endPos = result.ptr;
+
+		const size_t len = endPos - startPos;
+		if (static_cast<int>(len) < width) {
+			const auto diff = width - static_cast<int>(len);
+			HalleyAssertDebug(diff <= maxWidth);
+			memset(startPos - diff, fill, diff);
+			startPos -= diff;
 		}
 
-		ss << value;
+		const auto str = std::string_view(startPos, endPos - startPos);
 
-		if (thousandsSeparator != 0) {
-			std::stringstream ss2;
-
-			auto str = ss.str();
-			const size_t signLen = str[0] == '-' ? 1 : 0;
-			const size_t totalLen = str.length();
-			const size_t numLen = totalLen - signLen;
-			size_t firstBlockLen = numLen % 3;
-			if (firstBlockLen == 0) {
-				firstBlockLen = 3;
-			}
-			firstBlockLen += signLen;
-
-			size_t pos = 0;
-			size_t remaining = totalLen;
-			for (size_t len = firstBlockLen; remaining > 0; ) {
-				ss2 << std::string_view(str).substr(pos, len);
-				pos += len;
-				remaining -= len;
-				len = 3;
-
-				if (remaining > 0) {
-					ss2 << thousandsSeparator;
-				}
-			}
-			return ss2.str();
+		if (thousandsSeparator != 0) [[unlikely]] {
+			return String::integerAddThousandsSeparator(str, thousandsSeparator);
 		} else {
-			return ss.str();
+			return str;
 		}
 	}
 

@@ -149,8 +149,10 @@ namespace Halley {
 		[[nodiscard]] static const Character* stringTrim(String &str,size_t startPos);
 
 		// Number tidy up functions
-		[[nodiscard]] static String prettyFloat(String src);
+		[[nodiscard]] static String prettyFloat(String src, char decimalSeparator = '.');
+		[[nodiscard]] static std::string_view prettyFloat(std::string_view src, char decimalSeparator = '.');
 		[[nodiscard]] static String prettySize(uint64_t bytes);
+		[[nodiscard]] static String integerAddThousandsSeparator(std::string_view str, char thousandsSeparator);
 
 		// Unicode routines
 		[[nodiscard]] StringUTF16 getUTF16() const;

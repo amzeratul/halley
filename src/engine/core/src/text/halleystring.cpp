@@ -660,38 +660,6 @@ void operator <<(double &p1, String &p2)
 	p1 = std::stof(p2.c_str());
 }
 
-float String::toFloat() const
-{
-	if (str == ".inf") {
-		return std::numeric_limits<float>::infinity();
-	} else if (str == "-.inf") {
-		return -std::numeric_limits<float>::infinity();
-	} else if (str == ".nan") {
-		return std::numeric_limits<float>::quiet_NaN();
-	}
-
-	if (str.at(length() - 1) == 'f') {
-		return std::stof(left(length() - 1).cppStr());
-	}
-	return std::stof(str);
-}
-
-double String::toDouble() const
-{
-	if (str == ".inf") {
-		return std::numeric_limits<double>::infinity();
-	} else if (str == "-.inf") {
-		return -std::numeric_limits<double>::infinity();
-	} else if (str == ".nan") {
-		return std::numeric_limits<double>::quiet_NaN();
-	}
-
-	if (str.at(length() - 1) == 'f') {
-		return std::stod(left(length() - 1).cppStr());
-	}
-	return std::stod(str);
-}
-
 int String::subToInteger(size_t start,size_t end) const
 {
 	int value = 0;
@@ -707,21 +675,42 @@ int String::subToInteger(size_t start,size_t end) const
 
 ////////////////
 // Pretty float
-String String::prettyFloat(String src)
+String String::prettyFloat(String src, char decimalSeparator)
 {
-	if (src.contains(".") || src.contains(",")) {
-		size_t len = src.length();
-		while (src.endsWith("0")) {
-			len--;
-			src.truncate(len);
-		}
+	const auto srcView = std::string_view(src);
+	const auto res = prettyFloat(srcView, decimalSeparator);
+	if (res != srcView) {
+		return String(res);
+	} else {
+		return src;
+	}
+}
 
-		if (src.endsWith(".") || src.endsWith(",")) {
-			len--;
-			src.truncate(len);
+std::string_view String::prettyFloat(std::string_view src, char decimalSeparator)
+{
+	if (src.empty()) [[unlikely]] {
+		return src;
+	}
+
+	bool foundSeparator = false;
+	size_t lastGoodIdx = 0;
+	const size_t len = src.length();
+
+	for (size_t i = 0; i < len; ++i) {
+		if (!foundSeparator) {
+			if (src[i] == decimalSeparator) {
+				foundSeparator = true;
+			} else {
+				lastGoodIdx = i;
+			}
+		} else {
+			if (src[i] != '0') {
+				lastGoodIdx = i;
+			}
 		}
 	}
-	return src;
+
+	return src.substr(0, lastGoodIdx + 1);
 }
 
 
@@ -1045,6 +1034,34 @@ String String::prettySize(uint64_t bytes)
 	return Halley::toString(double(bytes) / double(div), prec) + suffixes[steps];
 }
 
+String String::integerAddThousandsSeparator(std::string_view str, char thousandsSeparator)
+{
+	std::stringstream ss2;
+
+	const size_t signLen = str[0] == '-' ? 1 : 0;
+	const size_t totalLen = str.length();
+	const size_t numLen = totalLen - signLen;
+	size_t firstBlockLen = numLen % 3;
+	if (firstBlockLen == 0) {
+		firstBlockLen = 3;
+	}
+	firstBlockLen += signLen;
+
+	size_t pos = 0;
+	size_t remaining = totalLen;
+	for (size_t len = firstBlockLen; remaining > 0; ) {
+		ss2 << std::string_view(str).substr(pos, len);
+		pos += len;
+		remaining -= len;
+		len = 3;
+
+		if (remaining > 0) {
+			ss2 << thousandsSeparator;
+		}
+	}
+	return ss2.str();
+}
+
 Vector<String> String::split(char delimiter, size_t limit) const
 {
 	Vector<String> result;
@@ -1106,52 +1123,96 @@ void String::appendCharacter(int unicode)
 	// Backspace
 	if (unicode == 8 || unicode == 42) {
 		StringUTF32 utf32 = getUTF32();
-		utf32 = utf32.substr(0, utf32.length()-1);
+		if (!utf32.empty()) {
+			utf32.pop_back();
+		}
 		*this = String(utf32);
+	} else {
+		StringUTF32 utf32;
+		utf32 += static_cast<char32_t>(unicode);
+		*this += String(utf32);
+	}
+}
+
+namespace {
+	template <typename T>
+	T stringToInteger(std::string_view str, int base = 10)
+	{
+		if (str.front() == '+') [[unlikely]] {
+			str = str.substr(1);
+		}
+
+		T value;
+		const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.length(), value, base);
+		if (result.ec == std::errc::invalid_argument) [[unlikely]] {
+			throw Exception("Unable to convert string \"" + String(str) + "\" to integer: not a number", HalleyExceptions::Utils);
+		} else if (result.ec == std::errc::result_out_of_range) [[unlikely]] {
+			throw Exception("Unable to convert string \"" + String(str) + "\" to integer: out of range", HalleyExceptions::Utils);
+		}
+		return value;
 	}
 
-	else {
-		StringUTF32 utf32;
-		utf32 += wchar_t(unicode);
-		*this += String(utf32);
+	template <typename T>
+	T stringToFloat(std::string_view str)
+	{
+		if (str == ".inf") [[unlikely]] {
+			return std::numeric_limits<T>::infinity();
+		} else if (str == "-.inf") [[unlikely]] {
+			return -std::numeric_limits<T>::infinity();
+		} else if (str == ".nan") [[unlikely]] {
+			return std::numeric_limits<T>::quiet_NaN();
+		} else if (str.empty()) [[unlikely]] {
+			return static_cast<T>(0);
+		}
+
+		if (str.front() == '+') [[unlikely]] {
+			str = str.substr(1);
+		}
+		if (str.back() == 'f') [[unlikely]] {
+			str = str.substr(0, str.size() - 1);
+		}
+
+		T value;
+		const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.length(), value);
+		if (result.ec == std::errc::invalid_argument) [[unlikely]] {
+			throw Exception("Unable to convert string \"" + String(str) + "\" to float: not a number", HalleyExceptions::Utils);
+		} else if (result.ec == std::errc::result_out_of_range) [[unlikely]] {
+			throw Exception("Unable to convert string \"" + String(str) + "\" to float: out of range", HalleyExceptions::Utils);
+		}
+		return value;
 	}
 }
 
 int32_t String::toInteger() const
 {
-	try {
-		return std::stoi(str);
-	} catch (const std::exception& e) {
-		throw Exception("Unable to convert string \"" + str + "\" to int32_t due to: " + e.what(), HalleyExceptions::Utils);
-	}
+	return stringToInteger<int32_t>(*this);
 }
 
 int64_t String::toInteger64() const
 {
-	try {
-		return std::stoll(str);
-	} catch (const std::exception& e) {
-		throw Exception("Unable to convert string \"" + str + "\" to int64_t due to: " + e.what(), HalleyExceptions::Utils);
-	}
+	return stringToInteger<int64_t>(*this);
 }
 
 uint32_t String::toUInteger() const
 {
-	try {
-		return std::stoul(str);
-	} catch (const std::exception& e) {
-		throw Exception("Unable to convert string \"" + str + "\" to uint32_t due to: " + e.what(), HalleyExceptions::Utils);
-	}
+	return stringToInteger<uint32_t>(*this);
 }
 
 uint64_t String::toUInteger64() const
 {
-	try {
-		return std::stoull(str);
-	} catch (const std::exception& e) {
-		throw Exception("Unable to convert string \"" + str + "\" to uint64_t due to: " + e.what(), HalleyExceptions::Utils);
-	}
+	return stringToInteger<uint64_t>(*this);
 }
+
+float String::toFloat() const
+{
+	return stringToFloat<float>(*this);
+}
+
+double String::toDouble() const
+{
+	return stringToFloat<double>(*this);
+}
+
 
 String String::replaceAll(std::string_view before, std::string_view after) const
 {
