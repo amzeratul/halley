@@ -14,11 +14,11 @@ I18N::I18N()
 
 I18N::I18N(Resources& resources, I18NLanguage currentLanguage, std::optional<I18NLanguage> fallbackLanguage)
 {
-	loadStrings(resources);
 	setCurrentLanguage(currentLanguage);
 	if (fallbackLanguage) {
 		setFallbackLanguage(*fallbackLanguage);
 	}
+	loadStrings(resources);
 }
 
 I18N::~I18N()
@@ -54,11 +54,24 @@ void I18N::loadLocalisationFile(const ConfigFile& config)
 #endif
 }
 
+I18N::LangData& I18N::getLanguageData(const I18NLanguage& language)
+{
+	if (const auto iter = strings.find(language); iter != strings.end()) {
+		return iter->second;
+	}
+	strings[language] = LangData{ {}, static_cast<int>(languageIndices.size()) };
+	languageIndices += language;
+	return strings.at(language);
+}
+
 void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool allowUpdating)
 {
+	// Make sure this is index 0
+	getLanguageData(fallbackLanguage.value_or(currentLanguage));
+
 	for (auto& language: root.asMap()) {
 		auto langCode = I18NLanguage(language.first);
-		auto& lang = strings[langCode];
+		auto& lang = getLanguageData(langCode);
 		for (auto& e: language.second.asMap()) {
 			if (e.first == "null") {
 				Logger::logWarning("null key found on localisation file " + assetId);
@@ -66,12 +79,12 @@ void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool 
 			}
 
 			if (!allowUpdating) {
-				if (const auto iter = lang.find(e.first); iter != lang.end()) {
+				if (const auto iter = lang.strings.find(e.first); iter != lang.strings.end()) {
 					Logger::logError("Duplicated localisation key \"" + e.first + "\": Previously set to \"" + iter->second + "\", now \"" + e.second.asString() + "\" in " + assetId);
 					continue;
 				}
 			}
-			lang[e.first] = e.second.asString();
+			lang.strings[e.first] = e.second.asString();
 		}
 	}
 	++version;
@@ -83,12 +96,12 @@ void I18N::updateStrings(const I18NLanguage& language, HashMap<String, String> n
 		return;
 	}
 
-	auto& lang = strings[language];
+	auto& lang = getLanguageData(language);
 	for (auto& [k, v]: newStrings) {
 		if (v.isEmpty()) {
-			lang.erase(k);
+			lang.strings.erase(k);
 		} else {
-			lang[k] = std::move(v);
+			lang.strings[k] = std::move(v);
 		}
 	}
 	++version;
@@ -120,15 +133,35 @@ bool I18NVersionChecker::checkChanged()
 	return false;
 }
 
-void I18N::setCurrentLanguage(const I18NLanguage& code)
+void I18N::setCurrentLanguage(I18NLanguage language)
 {
-	currentLanguage = code;
+	currentLanguage = std::move(language);
 	++version;
 }
 
-void I18N::setFallbackLanguage(const I18NLanguage& code)
+const I18NLanguage& I18N::getCurrentLanguage() const
 {
-	fallbackLanguage = code;
+	return currentLanguage;
+}
+
+void I18N::setFallbackLanguage(std::optional<I18NLanguage> language)
+{
+	fallbackLanguage = std::move(language);
+}
+
+const std::optional<I18NLanguage>& I18N::getFallbackLanguage() const
+{
+	return fallbackLanguage;
+}
+
+void I18N::setSecondaryLanguage(std::optional<I18NLanguage> language)
+{
+	secondaryLanguage = std::move(language);
+}
+
+const std::optional<I18NLanguage>& I18N::getSecondaryLanguage() const
+{
+	return secondaryLanguage;
 }
 
 Vector<I18NLanguage> I18N::getLanguagesAvailable() const
@@ -147,9 +180,9 @@ LocalisedString I18N::get(const String& key) const
 	}
 
 #ifdef DEV_BUILD
-	return LocalisedString(*this, key, "#MISSING:" + key + "#");
+	return LocalisedString(*this, key, "#MISSING:" + key + "#", 0);
 #else
-	return LocalisedString(*this, key, "#MISSING#");
+	return LocalisedString(*this, key, "#MISSING#", 0);
 #endif
 }
 
@@ -161,18 +194,18 @@ std::optional<LocalisedString> I18N::tryGet(const String& key) const
 
 	auto curLang = strings.find(currentLanguage);
 	if (curLang != strings.end()) {
-		auto i = curLang->second.find(key);
-		if (i != curLang->second.end()) {
-			return LocalisedString(*this, key, i->second);
+		auto i = curLang->second.strings.find(key);
+		if (i != curLang->second.strings.end()) {
+			return LocalisedString(*this, key, i->second, curLang->second.index);
 		}
 	}
 
 	if (fallbackLanguage && fallbackLanguage.value() != currentLanguage) {
 		auto defLang = strings.find(fallbackLanguage.value());
 		if (defLang != strings.end()) {
-			auto i = defLang->second.find(key);
-			if (i != defLang->second.end()) {
-				return LocalisedString(*this, key, i->second);
+			auto i = defLang->second.strings.find(key);
+			if (i != defLang->second.strings.end()) {
+				return LocalisedString(*this, key, i->second, defLang->second.index);
 			}
 		}
 	}
@@ -187,9 +220,9 @@ LocalisedString I18N::get(const String& key, const I18NLanguage& language) const
 	}
 
 #ifdef DEV_BUILD
-	return LocalisedString(*this, key, "#MISSING:" + key + "#");
+	return LocalisedString(*this, key, "#MISSING:" + key + "#", getLanguageIndex(language));
 #else
-	return LocalisedString(*this, key, "#MISSING#");
+	return LocalisedString(*this, key, "#MISSING#", getLanguageIndex(language));
 #endif
 }
 
@@ -197,9 +230,9 @@ std::optional<LocalisedString> I18N::tryGet(const String& key, const I18NLanguag
 {
 	auto curLang = strings.find(language);
 	if (curLang != strings.end()) {
-		auto i = curLang->second.find(key);
-		if (i != curLang->second.end()) {
-			return LocalisedString(*this, key, i->second);
+		auto i = curLang->second.strings.find(key);
+		if (i != curLang->second.strings.end()) {
+			return LocalisedString(*this, key, i->second, curLang->second.index);
 		}
 	}
 
@@ -215,9 +248,20 @@ LocalisedString I18N::getPreProcessedUserString(const String& string) const
 	}
 }
 
-const I18NLanguage& I18N::getCurrentLanguage() const
+const I18NLanguage& I18N::getLanguageFromIndex(int languageIdx) const
 {
-	return currentLanguage;
+	if (languageIdx < 0 || languageIdx >= static_cast<int>(languageIndices.size())) {
+		return languageIndices.front();
+	}
+	return languageIndices[languageIdx];
+}
+
+int I18N::getLanguageIndex(const I18NLanguage& language) const
+{
+	if (const auto iter = strings.find(language); iter != strings.end()) {
+		return iter->second.index;
+	}
+	return 0;
 }
 
 int I18N::getVersion() const
@@ -235,7 +279,7 @@ void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) cons
 	HashMap<String, Vector<String>> strToKeys;
 
 	const auto& strs = strings.at(currentLanguage);
-	for (const auto& [k, v]: strs) {
+	for (const auto& [k, v]: strs.strings) {
 		if (!k.startsWithAnyOf(ignoredPrefixes)) {
 			strToKeys[v.toString()] += k;
 		}
@@ -250,7 +294,7 @@ void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) cons
 			std::sort(ss.begin(), ss.end());
 		}
 	}
-	std::sort(sortedResults.begin(), sortedResults.end(), [&] (const auto& a, const auto& b) {
+	std::stable_sort(sortedResults.begin(), sortedResults.end(), [&] (const auto& a, const auto& b) {
 		return a.second.front() < b.second.front();
 	});
 
@@ -269,7 +313,7 @@ Vector<uint32_t> I18N::getCodepointsUsedBy(const I18NLanguage& language) const
 	std::set<uint32_t> characters;
 
 	if (const auto iter = strings.find(language); iter != strings.end()) {
-		for (const auto& [key, string]: iter->second) {
+		for (const auto& [key, string]: iter->second.strings) {
 			for (auto c: string.getUTF32()) {
 				characters.insert(c);
 			}
@@ -317,7 +361,7 @@ void I18N::checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>
 
 bool I18N::createStringOutputServer(const HalleyAPI& api, const String& host, int port)
 {
-	stringOutputServer = std::make_unique<StringOutputServer>();
+	stringOutputServer = std::make_unique<StringOutputServer>(*this);
 	if (api.webServer) {
 		return stringOutputServer->startServer(api.webServer, host, port);
 	} else {
@@ -347,11 +391,12 @@ LocalisedString::LocalisedString(String string, const I18N* i18n)
 {
 }
 
-LocalisedString::LocalisedString(const I18N& i18n, String key, String string)
+LocalisedString::LocalisedString(const I18N& i18n, String key, String string, int languageIndex)
 	: i18n(&i18n)
 	, key(std::move(key))
 	, string(std::move(string))
 	, i18nVersion(i18n.getVersion())
+	, languageIdx(languageIndex)
 {
 }
 
@@ -459,6 +504,14 @@ LocalisedString LocalisedString::replaceToken(const String& pattern, const Local
 	return LocalisedString(string.replaceAll(pattern, token.getString()), i18n);
 }
 
+LocalisedString LocalisedString::replaceLanguage(const I18NLanguage& language) const
+{
+	if (i18n) {
+		return i18n->get(key, language);
+	}
+	return *this;
+}
+
 const String& LocalisedString::getString() const
 {
 	return string;
@@ -494,7 +547,7 @@ bool LocalisedString::checkForUpdates()
 	if (i18n && !key.isEmpty()) {
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
-			const auto newValue = i18n->get(key);
+			const auto newValue = i18n->get(key, getLanguage(*i18n));
 			i18nVersion = curVersion;
 			if (string != newValue.string) {
 				string = newValue.string;
@@ -508,4 +561,14 @@ bool LocalisedString::checkForUpdates()
 const String& LocalisedString::getKey() const
 {
 	return key;
+}
+
+const I18NLanguage* LocalisedString::tryGetLanguage() const
+{
+	return i18n ? &i18n->getLanguageFromIndex(languageIdx) : nullptr;
+}
+
+const I18NLanguage& LocalisedString::getLanguage(const I18N& i18n) const
+{
+	return i18n.getLanguageFromIndex(languageIdx);
 }

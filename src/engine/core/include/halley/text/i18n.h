@@ -52,6 +52,8 @@ namespace Halley {
 		[[nodiscard]] LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens) const;
 		[[nodiscard]] LocalisedString replaceToken(const String& pattern, const LocalisedString& token) const;
 
+		[[nodiscard]] LocalisedString replaceLanguage(const I18NLanguage& language) const;
+
 		const String& getString() const;
 		const String& toString() const;
 
@@ -64,15 +66,18 @@ namespace Halley {
 		bool checkForUpdates();
 
 		const String& getKey() const;
+		const I18NLanguage* tryGetLanguage() const;
+		const I18NLanguage& getLanguage(const I18N& i18n) const;
 
 	private:
 		explicit LocalisedString(String string, const I18N* i18n);
-		explicit LocalisedString(const I18N& i18n, String key, String string);
+		explicit LocalisedString(const I18N& i18n, String key, String string, int languageIdx);
 
 		const I18N* i18n = nullptr;
 		String key;
 		String string;
 		int i18nVersion = 0;
+		int languageIdx = 0;
 	};
 
 	class II18N {
@@ -95,8 +100,16 @@ namespace Halley {
 
 		void updateStrings(const I18NLanguage& language, HashMap<String, String> strings);
 
-		void setCurrentLanguage(const I18NLanguage& code);
-		void setFallbackLanguage(const I18NLanguage& code);
+		void setCurrentLanguage(I18NLanguage language);
+		const I18NLanguage& getCurrentLanguage() const;
+
+		void setFallbackLanguage(std::optional<I18NLanguage> language);
+		const std::optional<I18NLanguage>& getFallbackLanguage() const;
+		
+		void setSecondaryLanguage(std::optional<I18NLanguage> language);
+		const std::optional<I18NLanguage>& getSecondaryLanguage() const;
+
+		const I18NLanguage& getLanguageFromIndex(int languageIdx) const;
 		Vector<I18NLanguage> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const override;
@@ -115,7 +128,6 @@ namespace Halley {
 			return result;
 		}
 
-		const I18NLanguage& getCurrentLanguage() const;
 		int getVersion() const;
 		
 		char getDecimalSeparator() const;
@@ -128,15 +140,26 @@ namespace Halley {
 		StringOutputServer* tryGetStringOutputServer() const;
 
 	private:
+		struct LangData {
+			HashMap<String, String> strings;
+			int index = 0;
+		};
+
 		I18NLanguage currentLanguage;
 		std::optional<I18NLanguage> fallbackLanguage;
-		HashMap<I18NLanguage, HashMap<String, String>> strings;
+		std::optional<I18NLanguage> secondaryLanguage;
+
+		HashMap<I18NLanguage, LangData> strings;
+		Vector<I18NLanguage> languageIndices;
+
 		HashMap<String, ConfigObserver> observers;
 		int version = 0;
 
 		std::unique_ptr<StringOutputServer> stringOutputServer;
 
+		LangData& getLanguageData(const I18NLanguage& language);
 		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
+		int getLanguageIndex(const I18NLanguage& language) const;
 	};
 
 	class I18NVersionChecker {

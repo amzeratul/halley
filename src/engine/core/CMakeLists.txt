@@ -390,6 +390,7 @@ set(SOURCES
         "src/text/i18n_language.cpp"
         "src/text/halleystring.cpp"
         "src/text/string_output_server.cpp"
+        "src/text/string_output_stream.cpp"
         "src/text/string_serializer.cpp"
         
         "src/time/stopwatch.cpp"
@@ -921,6 +922,7 @@ set(HEADERS
         "include/halley/text/string_converter.h"
         "include/halley/text/string_output_server.h"
         "include/halley/text/string_serializer.h"
+        "src/text/string_output_stream.h"
 
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
