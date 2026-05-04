@@ -10,7 +10,7 @@ float median(float3 rgb) {
 
 float4 main(VOut input) : SV_TARGET {
 	float dx = length(ddx(input.texCoord0.xy));
-	float dy = length(ddy(input.texCoord0.yy));
+	float dy = length(ddy(input.texCoord0.xy));
 	float texGrad = max(dx, dy);
 
 	float4 rgba = tex0.Sample(sampler0, input.texCoord0);
