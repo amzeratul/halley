@@ -26,6 +26,7 @@ namespace Halley {
 	public:
 		HTTPLibServerResponse(httplib::Response& response);
 
+		void setHeader(const String& header, const String& data) override;
 		void setContent(gsl::span<const std::byte> data, const String& contentType) override;
 		void setChunkedContentProvider(const String& contentType, Callback callback) override;
 

@@ -96,6 +96,7 @@ namespace Halley
 
 		virtual ~HTTPServerResponse() = default;
 
+		virtual void setHeader(const String& header, const String& data) = 0;
 		virtual void setContent(const String& data, const String& dataType) { setContent(data.asByteSpan(), dataType); }
 		virtual void setContent(gsl::span<const std::byte> data, const String& dataType) = 0;
 		virtual void setChunkedContentProvider(const String& dataType, Callback callback) = 0;

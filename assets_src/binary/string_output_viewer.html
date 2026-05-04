@@ -1,0 +1,39 @@
+<html>
+    <ul id="stringList">
+
+    </ul>
+</html>
+
+<script>
+    const evtSource = new EventSource("http://127.0.0.1:2357/strings")
+    const eventList = document.getElementById("stringList")
+
+    function updateEntry(li, data)
+    {
+        li.textContent = `${data.values["ja-JP"]}\r\n${data.values["en-GB"]}`
+    }
+
+    evtSource.addEventListener("addString", (event) => {
+        const data = JSON.parse(event.data)
+
+        const li = document.createElement("li")
+        li.setAttribute('style', 'white-space: pre;');
+
+        li.id = "stringData" + data.id
+        updateEntry(li, data)
+        eventList.appendChild(li)
+    });
+
+    evtSource.addEventListener("removeString", (event) => {
+        const data = JSON.parse(event.data)
+        const li = document.getElementById("stringData" + data.id)
+        eventList.removeChild(li)
+    });
+
+    evtSource.addEventListener("updateString", (event) => {
+        const data = JSON.parse(event.data)
+        const li = document.getElementById("stringData" + data.id)
+        updateEntry(li, data)
+    });
+
+</script>

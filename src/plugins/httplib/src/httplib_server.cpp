@@ -27,6 +27,11 @@ HTTPLibServerResponse::HTTPLibServerResponse(httplib::Response& response)
 {
 }
 
+void HTTPLibServerResponse::setHeader(const String& header, const String& data)
+{
+	response.set_header(header, data);
+}
+
 void HTTPLibServerResponse::setContent(gsl::span<const std::byte> data, const String& contentType)
 {
 	response.set_content(reinterpret_cast<const char*>(data.data()), data.size(), contentType.cppStr());

@@ -51,7 +51,6 @@ void StringOutputState::endFrame()
 		return !s.present;
 	});
 	if (erased) {
-		Logger::logDev("String erased");
 		frameModified = true;
 	}
 
@@ -177,7 +176,7 @@ StringOutputStringState& StringOutputStream::getString(const String& id, bool& e
 StringOutputStream::Event StringOutputStream::makeChangeEvent(const StringOutputStringState& str, bool isNew) const
 {
 	Event result;
-	result.type = isNew ? "addString" : "changeString";
+	result.type = isNew ? "addString" : "updateString";
 	result.data = str.toConfigNode();
 	return result;
 }

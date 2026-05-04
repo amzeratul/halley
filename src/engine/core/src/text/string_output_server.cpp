@@ -93,6 +93,7 @@ void StringOutputServer::setupEndpoints()
 		auto stream = std::make_shared<StringOutputStream>(*curState);
 		lock.unlock();
 
+		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setChunkedContentProvider("text/event-stream", [stream = std::move(stream)](HTTPServerDataSink& sink) mutable -> bool
 		{
 			stream->waitAndUpdateState();
