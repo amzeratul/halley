@@ -18,8 +18,8 @@ float4 main(VOut input) : SV_TARGET {
 	float inEdge = 0.5;
 	float outEdge = inEdge - clamp(u_outline, 0.0, 0.995) * 0.5;
 
-	float fillEdge0 = clamp(inEdge - s * 0.5, 0.01, 0.98);
-	float fillEdge1 = clamp(inEdge + s * 0.5, fillEdge0 + 0.01, 0.99);
+	float fillEdge0 = clamp(inEdge - s, 0.01, 0.98);
+	float fillEdge1 = clamp(inEdge + s, fillEdge0 + 0.01, 0.99);
 	float fillEdge = smoothstep(fillEdge0, fillEdge1, median(rgba.rgb)) * input.colour.a;
 
 	float edge0 = clamp(outEdge - s, 0.01, 0.98);
