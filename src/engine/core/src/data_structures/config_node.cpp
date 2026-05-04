@@ -1150,7 +1150,7 @@ String ConfigNode::asString() const
 				result += ", ";
 			}
 			first = false;
-			result += e.asString();
+			result += e.asString("null");
 		}
 		result += "]";
 		return result;
@@ -1168,7 +1168,7 @@ String ConfigNode::asString() const
 				result += ", ";
 			}
 			first = false;
-			result += k + ": " + v.asString();
+			result += k + ": " + v.asString("null");
 		}
 		result += "}";
 		return result;
