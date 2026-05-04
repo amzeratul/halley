@@ -1138,8 +1138,13 @@ namespace {
 	template <typename T>
 	T stringToInteger(std::string_view str, int base = 10)
 	{
-		if (str.front() == '+') [[unlikely]] {
+		if (str.starts_with("+")) [[unlikely]] {
 			str = str.substr(1);
+		}
+
+		if (str.starts_with("0x") || str.starts_with("0X")) [[unlikely]] {
+			base = 16;
+			str = str.substr(2);
 		}
 
 		T value;
