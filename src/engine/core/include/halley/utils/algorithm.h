@@ -10,7 +10,7 @@ namespace Halley
 {
 
 	template <typename Iter, typename T, typename F>
-	Iter findHighestScore(Iter begin, Iter end, T startScore, F eval)
+	[[nodiscard]] Iter findHighestScore(Iter begin, Iter end, T startScore, F eval)
 	{
 		Iter bestResult = end;
 		T bestScore = startScore;
@@ -25,7 +25,7 @@ namespace Halley
 	}
 
 	template <typename Iter, typename T, typename F>
-	Iter findLowestScore(Iter begin, Iter end, T startScore, F eval)
+	[[nodiscard]] Iter findLowestScore(Iter begin, Iter end, T startScore, F eval)
 	{
 		Iter bestResult = end;
 		T bestScore = startScore;
@@ -89,12 +89,12 @@ namespace Halley
 	};
 
 	template<typename Iter, typename W, typename R, typename F>
-	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
+	[[nodiscard]] auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
 	{
 		const size_t n = static_cast<size_t>(end - begin);
-		if (n == 0) {
+		if (n == 0) [[unlikely]] {
 			return end;
-		} else if (n == 1) {
+		} else if (n == 1) [[unlikely]] {
 			return begin;
 		}
 
@@ -103,7 +103,7 @@ namespace Halley
 		for (Iter iter = begin; iter != end; ++iter) {
 			totalWeight += weightFunc(deRefFunc(iter));
 		}
-		if (totalWeight <= 0) {
+		if (totalWeight <= 0) [[unlikely]] {
 			return end;
 		}
 
@@ -127,13 +127,13 @@ namespace Halley
 	}
 
 	template<typename Iter, typename W, typename R, typename F>
-	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
+	[[nodiscard]] auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
 	{
 		const size_t n = static_cast<size_t>(end - begin);
 
-		if (n == 0) {
+		if (n == 0) [[unlikely]] {
 			return end;
-		} else if (n == 1) {
+		} else if (n == 1) [[unlikely]] {
 			return begin;
 		}
 
@@ -148,7 +148,7 @@ namespace Halley
 			totalWeight += w;
 		}
 	
-		if (totalWeight <= 0) {
+		if (totalWeight <= 0) [[unlikely]] {
 			return end;
 		}
 
@@ -172,13 +172,13 @@ namespace Halley
 	}
 
 	template<typename Iter, typename W, typename R>
-	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
+	[[nodiscard]] auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
 	{
 		return pickRandomWeighted(begin, end, weightFunc, rng, DeReference<Iter>());
 	}
 
 	template<typename Iter, typename W, typename R>
-	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
+	[[nodiscard]] auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
 	{
 		return pickRandomWeightedOneCall(begin, end, weightFunc, rng, DeReference<Iter>());
 	}
@@ -186,12 +186,12 @@ namespace Halley
 	template<typename Iter, typename R>
 	void shuffle(Iter begin, Iter end, R& rng)
 	{
-		if (begin == end) {
+		if (begin == end) [[unlikely]] {
 			return;
 		}
 
 		size_t n = end - begin - 1;
-		for(size_t i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			size_t j = rng.getSizeT(i, n);
 			std::swap(begin[i], begin[j]);
 		}
@@ -200,31 +200,31 @@ namespace Halley
 
 namespace std_ex {
 	template <typename C, typename T>
-	bool contains(const C& container, const T& elem)
+	[[nodiscard]] constexpr bool contains(const C& container, const T& elem)
 	{
 		return std::find(container.begin(), container.end(), elem) != container.end();
 	}
 
 	template <typename T>
-	bool contains(const std::set<T>& container, const T& key)
+	[[nodiscard]] bool contains(const std::set<T>& container, const T& key)
 	{
 		return container.find(key) != container.end();
 	}
 
 	template <typename K, typename V, typename C>
-	bool contains(const std::map<K, V>& container, const C& key)
+	[[nodiscard]] bool contains(const std::map<K, V>& container, const C& key)
 	{
 		return container.find(key) != container.end();
 	}
 
 	template <typename K, typename V>
-	bool contains(const Halley::HashMap<K, V>& container, const K& key)
+	[[nodiscard]] bool contains(const Halley::HashMap<K, V>& container, const K& key)
 	{
 		return container.find(key) != container.end();
 	}
 
 	template <typename C, typename F>
-	bool contains_if(const C& container, F predicate)
+	[[nodiscard]] constexpr bool contains_if(const C& container, F predicate)
 	{
 		return std::find_if(container.begin(), container.end(), predicate) != container.end();
 	}
@@ -288,25 +288,25 @@ namespace std_ex {
 	}
 
 	template <typename C, typename V>
-	auto find(C& container, const V& value)
+	[[nodiscard]] constexpr auto find(C& container, const V& value)
 	{
 		return std::find(container.begin(), container.end(), value);
 	}
 
 	template <typename C, typename F>
-	auto find_if(const C& container, F predicate)
+	[[nodiscard]] constexpr auto find_if(const C& container, F predicate)
 	{
 		return std::find_if(container.begin(), container.end(), predicate);
 	}
 
 	template <typename C, typename F>
-	auto find_if(C& container, F predicate)
+	[[nodiscard]] constexpr auto find_if(C& container, F predicate)
 	{
 		return std::find_if(container.begin(), container.end(), predicate);
 	}
 
 	template <typename C, typename V>
-	std::optional<size_t> find_index(C& container, const V& value)
+	[[nodiscard]] constexpr std::optional<size_t> find_index(C& container, const V& value)
 	{
 		const auto iter = std::find(container.begin(), container.end(), value);
 		if (iter == container.end()) {
@@ -317,7 +317,7 @@ namespace std_ex {
 	}
 
 	template <typename C, typename V>
-	std::optional<size_t> find_index(const C& container, const V& value)
+	[[nodiscard]] constexpr std::optional<size_t> find_index(const C& container, const V& value)
 	{
 		const auto iter = std::find(container.begin(), container.end(), value);
 		if (iter == container.end()) {
@@ -328,7 +328,7 @@ namespace std_ex {
 	}
 
 	template <typename C, typename F>
-	std::optional<size_t> find_index_if(C& container, F predicate)
+	[[nodiscard]] constexpr std::optional<size_t> find_index_if(C& container, F predicate)
 	{
 		const auto iter = std::find_if(container.begin(), container.end(), predicate);
 		if (iter == container.end()) {
@@ -339,7 +339,7 @@ namespace std_ex {
 	}
 
 	template <typename C, typename F>
-	std::optional<size_t> find_index_if(const C& container, F predicate)
+	[[nodiscard]] constexpr std::optional<size_t> find_index_if(const C& container, F predicate)
 	{
 		const auto iter = std::find_if(container.begin(), container.end(), predicate);
 		if (iter == container.end()) {
