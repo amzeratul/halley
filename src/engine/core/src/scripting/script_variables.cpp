@@ -46,6 +46,11 @@ void ScriptVariables::load(const ConfigNode& node, const EntitySerializationCont
 	}
 }
 
+ConfigNode ScriptVariables::toConfigNode() const
+{
+	return ConfigNode(variables);
+}
+
 ConfigNode ScriptVariables::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType result;

@@ -81,6 +81,8 @@ namespace Halley {
 
     	Iterator begin() const;
         Iterator end() const;
+        
+    	Vector<String> getScriptIdList() const;
 
     private:
         struct State {

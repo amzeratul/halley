@@ -11,6 +11,7 @@ namespace Halley {
 		ScriptVariables(const ConfigNode& node, const EntitySerializationContext& context);
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
+		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		const ConfigNode& getVariable(const String& name) const;

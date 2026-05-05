@@ -152,6 +152,18 @@ ScriptStateSet::Iterator ScriptStateSet::end() const
 	return Iterator(*this, states.size());
 }
 
+Vector<String> ScriptStateSet::getScriptIdList() const
+{
+	Vector<String> result;
+	result.reserve(states.size());
+	for (const auto& state: states) {
+		if (state.state) {
+			result += state.state->getScriptId();
+		}
+	}
+	return result;
+}
+
 const std::shared_ptr<ScriptState>& ScriptStateSet::getState(size_t idx) const
 {
 	return states[idx].state;
