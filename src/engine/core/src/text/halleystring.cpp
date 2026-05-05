@@ -47,6 +47,39 @@ namespace {
 	{
 		return std::string_view(reinterpret_cast<const char*>(str.data()), str.length());
 	}
+
+	bool isSpace(char chr)
+	{
+		return (chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r');
+	}
+
+	constexpr std::string_view trimSpaces(std::string_view str, bool trimLeft = true, bool trimRight = true)
+	{
+		const size_t n = str.length();
+		size_t leftTrim = 0;
+		size_t rightTrim = 0;
+
+		if (trimLeft) {
+			for (size_t i = 0; i < n; ++i) {
+				if (isSpace(str[i])) {
+					leftTrim = i + 1;
+				} else {
+					break;
+				}
+			}
+		}
+		if (trimRight && leftTrim != n) {
+			for (size_t i = 0; i < n; ++i) {
+				if (isSpace(str[n - i - 1])) {
+					rightTrim = i + 1;
+				} else {
+					break;
+				}
+			}
+		}
+		
+		return str.substr(leftTrim, n - leftTrim - rightTrim);
+	}
 }
 
 String::String()
@@ -239,40 +272,26 @@ void String::truncate(size_t size)
 	setSize(size);
 }
 
-
-bool IsSpace(char chr)
-{
-	return (chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r');
-}
-
-
 String& String::trim(bool fromRight)
 {
-	int len = int(length());
-	size_t start = 0;
-	size_t n = len;
-
-	if (fromRight) {
-		for (int i=len;--i>=0;) {
-			if (IsSpace(operator[](i))) n = i;
-			else break;
-		}
-	} else {
-		for (int i=0;i<len;i++) {
-			if (IsSpace(operator[](i))) start = i+1;
-			else break;
-		}
-		n = len - start;
+	const auto view = std::string_view(*this);
+	const auto res = trimSpaces(view, !fromRight, fromRight);
+	if (view != res) {
+		*this = res;
 	}
 
-	*this = String(substr(start,n));
 	return *this;
 }
 
-
 String& String::trimBoth()
 {
-	return trim(true).trim(false);
+	const auto view = std::string_view(*this);
+	const auto res = trimSpaces(view);
+	if (view != res) {
+		*this = res;
+	}
+
+	return *this;
 }
 
 size_t String::length() const
@@ -433,15 +452,17 @@ bool String::asciiCompareNoCase(const Character *src) const
 
 bool String::isNumber() const
 {
+	auto trimmed = trimSpaces(std::string_view(*this));
+
 	bool foundSeparator = false;
 	bool foundDigit = false;
 	bool lastFound = false;
 	size_t i = 0;
-	for (const char *chr = c_str(); *chr; chr++) {
+
+	for (const auto& cur: trimmed) {
 		if (lastFound) {
 			return false;
 		}
-		char cur = *chr;
 
 		if (cur >= '0' && cur <= '9') {
 			foundDigit = true;
@@ -468,10 +489,10 @@ bool String::isNumber() const
 
 bool String::isInteger() const
 {
+	auto trimmed = trimSpaces(std::string_view(*this));
 	bool hasDigit = false;
 	int i = 0;
-	for (const char *chr = c_str(); *chr; chr++) {
-		char cur = *chr;
+	for (const auto& cur: trimmed) {
 		if (cur == '-' || cur == '+') {
 			if (i != 0) {
 				return false;
@@ -495,47 +516,6 @@ bool String::isAlphanumeric(uint32_t character)
 
 
 //
-
-const Character* String::stringPtrTrim(Character *chr,size_t len,size_t startPos)
-{
-	// String metrics
-	Character *read = chr;
-	size_t start = startPos;
-	size_t end = len;
-	bool isStart = true;
-	bool isEnd = false;
-	Character cur;
-
-	// Search for spaces
-	for (size_t i=start;i<len;i++) {
-		cur = read[i];
-		bool isSpace = (cur == ' ');
-		if (isStart) {
-			if (isSpace) start++;
-			else isStart = false;
-		}
-		if (isEnd) {
-			if (!isSpace) isEnd = false;
-		}
-		else {
-			if (isSpace) {
-				isEnd = true;
-				end = i;
-			}
-		}
-	}
-
-	// Apply changes to pointer
-	if (isEnd) chr[end] = 0;
-	return chr + start;
-}
-
-const Character* String::stringTrim(String &str,size_t startPos)
-{
-	// Get a pointer to the string data
-	Character *chr = const_cast<Character*> (str.c_str());
-	return stringPtrTrim(chr,str.length(),startPos);
-}
 
 String String::asciiLower() const
 {
@@ -1138,6 +1118,8 @@ namespace {
 	template <typename T>
 	T stringToInteger(std::string_view str, int base = 10)
 	{
+		str = trimSpaces(str);
+
 		if (str.starts_with("+")) [[unlikely]] {
 			str = str.substr(1);
 		}
@@ -1160,6 +1142,8 @@ namespace {
 	template <typename T>
 	T stringToFloat(std::string_view str)
 	{
+		str = trimSpaces(str);
+
 		if (str == ".inf") [[unlikely]] {
 			return std::numeric_limits<T>::infinity();
 		} else if (str == "-.inf") [[unlikely]] {

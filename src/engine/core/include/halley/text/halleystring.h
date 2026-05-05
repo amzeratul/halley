@@ -145,9 +145,6 @@ namespace Halley {
 		[[nodiscard]] gsl::span<const std::byte> asByteSpan() const;
 		[[nodiscard]] gsl::span<std::byte> asWriteableByteSpan();
 
-		[[nodiscard]] static const Character* stringPtrTrim(Character *chr,size_t len,size_t startPos);
-		[[nodiscard]] static const Character* stringTrim(String &str,size_t startPos);
-
 		// Number tidy up functions
 		[[nodiscard]] static String prettyFloat(String src, char decimalSeparator = '.');
 		[[nodiscard]] static std::string_view prettyFloat(std::string_view src, char decimalSeparator = '.');
