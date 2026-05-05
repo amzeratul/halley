@@ -13,7 +13,7 @@ namespace Halley
 	class AnimationPlayer
 	{
 	public:
-		using AnimationPlayId = size_t;
+		using AnimationPlayId = uint32_t;
 
 		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
 
