@@ -48,9 +48,11 @@ void UILabel::draw(UIPainter& painter) const
 		painter.draw(renderer);
 	}
 
-	if (auto* stringOutputServer = getRoot()->tryGetStringOutputServer()) {
-		uint64_t id = reinterpret_cast<uint64_t>(this) / 16;
-		stringOutputServer->reportString(toString(id), StringOutputType::Generic, text, {}); // TODO: collect this data properly
+	if (renderer.getColour().a > 0) {
+		if (auto* stringOutputServer = getRoot()->tryGetStringOutputServer()) {
+			uint64_t id = reinterpret_cast<uint64_t>(this) / 16;
+			stringOutputServer->reportString(toString(id), StringOutputType::Generic, text, {}); // TODO: collect this data properly
+		}
 	}
 }
 

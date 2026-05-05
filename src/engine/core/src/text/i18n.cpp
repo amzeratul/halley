@@ -425,34 +425,24 @@ LocalisedString LocalisedString::fromNumber(float number, const I18NLanguage& la
 	return LocalisedString(Halley::toString(number, precisionDigits, language.getDecimalSeparator(), fixed), nullptr);
 }
 
-LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) const
-{
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()), i18n);
-}
-
-LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const
-{
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()), i18n);
-}
-
-LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const
-{
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()), i18n);
-}
-
-LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const
-{
-	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()).replaceAll("{3}", tok3.getString()), i18n);
-}
-
 LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks) const
+{
+	Vector<const LocalisedString*> result;
+	result.reserve(toks.size());
+	for (const auto& t: toks) {
+		result += &t;
+	}
+	return doReplaceTokens(result.const_span());
+}
+
+LocalisedString LocalisedString::doReplaceTokens(gsl::span<const LocalisedString* const> toks) const
 {
 	if (toks.empty()) {
 		return *this;
 	}
 	auto str = string;
 	for (int i = 0; i < int(toks.size()); ++i) {
-		str = str.replaceAll("{" + Halley::toString(i) + "}", toks[i].getString());
+		str = str.replaceAll("{" + Halley::toString(i) + "}", toks[i]->getString());
 	}
 	return LocalisedString(str, i18n);
 }
@@ -473,7 +463,7 @@ std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceToken
 		}
 	}
 
-	std::sort(indices.begin(), indices.end(), [] (const auto& a, const auto& b) { return a.second < b.second; });
+	std::stable_sort(indices.begin(), indices.end(), [] (const auto& a, const auto& b) { return a.second < b.second; });
 
 	auto str = std::string_view(string);
 

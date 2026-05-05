@@ -22,6 +22,13 @@ namespace Halley {
 	struct StringOutputMetrics;
 	enum class StringOutputType;
 
+	namespace Detail {
+		template<typename T, typename...>
+		struct first {
+			typedef T type;
+		};
+	}
+
 	class LocalisedString
 	{
 		friend class I18N;
@@ -43,10 +50,13 @@ namespace Halley {
 		[[nodiscard]] static LocalisedString fromNumber(int number, int base = 10, int width = 1, char fill = '0');
 		[[nodiscard]] static LocalisedString fromNumber(float number, const I18NLanguage& code, int precisionDigits = -1, bool fixed = true);
 
-		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0) const;
-		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
-		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
-		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const;
+		template<typename... Ts>
+		[[nodiscard]] Detail::first<std::enable_if_t<std::is_convertible_v<Ts, const LocalisedString&>, LocalisedString>...>::type replaceTokens(const Ts&... toks)
+		{
+			auto tmp = std::to_array({ &toks... });
+			return doReplaceTokens(std::span(tmp));
+		}
+		
 		[[nodiscard]] LocalisedString replaceTokens(gsl::span<const LocalisedString> toks) const;
 		[[nodiscard]] std::pair<LocalisedString, Vector<ColourOverride>> replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const;
 		[[nodiscard]] LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens) const;
@@ -72,6 +82,8 @@ namespace Halley {
 	private:
 		explicit LocalisedString(String string, const I18N* i18n);
 		explicit LocalisedString(const I18N& i18n, String key, String string, int languageIdx);
+
+		[[nodiscard]] LocalisedString doReplaceTokens(gsl::span<const LocalisedString* const> toks) const;
 
 		const I18N* i18n = nullptr;
 		String key;
