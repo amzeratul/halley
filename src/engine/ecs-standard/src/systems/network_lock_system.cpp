@@ -35,7 +35,7 @@ public:
 		getWorld().setInterface(static_cast<INetworkLockSystemInterface*>(this));
 
 		initSession(getSessionService().getSession());
-		sessionChangedToken = getSessionService().addSessionChangeCallback([=] (SessionService::ChangeData data) {
+		sessionChangedToken = getSessionService().addSessionChangeCallback([this] (SessionService::ChangeData data) {
 			deInitSession(*data.oldSession);
 			initSession(*data.newSession);
 		});
@@ -139,21 +139,28 @@ public:
 	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) override
 	{
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			// Checks the refCount - can be zero on a peer if the lock has been lifted, but the
-			// message sent to the host is about to be delivered still...
-			if (auto& lock = iter->second; lock.refCount > 0) {
-				// Locked by some local entity
-				if (lock.playerId == playerId) {
-					// Already locked by this player, just increment count!
-					lock.refCount++;
-					if (acquireAuthority && !lock.withAuthority && getSessionService().isMultiplayer()) {
-						Logger::logWarning("Tried to acquire lock, with authority, for entity already locked");
+			auto& lock = iter->second;
+			if (lock.playerId.isValid()) {
+				// Checks the refCount - can be zero on a peer if the lock has been lifted, but the
+				// message sent to the host is about to be delivered still...
+				if (lock.refCount > 0) {
+					// Locked by some local entity
+					if (lock.playerId == playerId) {
+						// Already locked by this player, just increment count!
+						lock.refCount++;
+						if (acquireAuthority && !lock.withAuthority && getSessionService().isMultiplayer()) {
+							Logger::logWarning("Tried to acquire lock, with authority, for entity already locked");
+						}
+						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
+					} else {
+						// Locked by someone else
+						return Future<NetworkLockHandle>::makeImmediate({});
 					}
-					return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
-				} else {
-					// Locked by someone else
-					return Future<NetworkLockHandle>::makeImmediate({});
 				}
+			} else if (lock.refCount == 0) {
+				// Preliminary lock, waiting for result from host. Block any follow-up attempt.
+				Logger::logWarning("Tried to aquire lock, but previous request still pending");
+				return Future<NetworkLockHandle>::makeImmediate({});
 			}
 		}
 
@@ -256,9 +263,17 @@ private:
 			HalleyAssertDebug(!networkId.has_value());
 			return Future<bool>::makeImmediate(success);
 		} else {
+			if (!myLocks.contains(targetId)) {
+				// Store a preliminary lock, assigned to invalid player ID.
+				// This is done to ensure that follow-up locking attempts by the same client are
+				// blocked until the result is delivered.
+				LocalLock& l = myLocks[targetId];
+				l.playerId = {};
+			}
+
 			Promise<bool> promise;
 			auto future = promise.getFuture();
-			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, promise = std::move(promise)] (ConfigNode result) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, this, promise = std::move(promise)] (ConfigNode result) mutable
 			{
 				bool success = result["success"].asBool(false);
 
@@ -272,6 +287,11 @@ private:
                 	HalleyAssertDebug(!networkId.has_value());
                 	success = ok;
                 }
+
+				if (!success && !myLocks[targetId].playerId.isValid()) {
+					// On failure, remove any preliminary lock.
+					myLocks.erase(targetId);
+				}
 
 				promise.setValue(success);
 			});
@@ -374,7 +394,7 @@ private:
 		}
 	}
 
-	NetworkSession::PeerId getMyPeerId() const
+	[[nodiscard]] NetworkSession::PeerId getMyPeerId() const
 	{
 		if (!getSessionService().isMultiplayer()) {
 			return 0;
@@ -383,7 +403,7 @@ private:
 		return mpSession.getNetworkSession()->getMyPeerId().value_or(0);
 	}
 
-	bool isHost() const
+	[[nodiscard]] bool isHost() const
 	{
 		if (!getSessionService().isMultiplayer()) {
 			return true;
@@ -391,7 +411,7 @@ private:
 		return getSessionService().getMultiplayerSession().isHost();
 	}
 
-	bool isPeerPresent(NetworkSession::PeerId peerId)
+	[[nodiscard]] bool isPeerPresent(NetworkSession::PeerId peerId) const
 	{
 		if (peerId == getMyPeerId()) {
 			return true;
