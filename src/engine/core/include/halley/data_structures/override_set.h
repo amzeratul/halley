@@ -16,9 +16,9 @@ namespace Halley {
 			return key;
 		}
 
-		void remove(Key key)
+		bool remove(Key key)
 		{
-			std_ex::erase_if(entries, [&](const Entry& o) { return o.key == key; });
+			return std_ex::erase_if(entries, [&](const Entry& o) { return o.key == key; });
 		}
 
 		bool hasValue() const
@@ -39,6 +39,11 @@ namespace Halley {
 		const T* tryGetValue() const
 		{
 			return entries.empty() ? nullptr : &entries.back().value;
+		}
+
+		void clear()
+		{
+			entries.clear();
 		}
 
 	private:
