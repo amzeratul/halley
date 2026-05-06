@@ -724,6 +724,8 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
             auto result = serialize.deserializeEntityUpdate(msg.bytes, parentSession->getByteSerializationOptions());
         	if (result.position) {
         		updateRemoteEntityPosition(inboundEntity, result.position.value(), timestamp);
+        	} else {
+        		inboundEntity.positionUpdates.clear();
         	}
         } catch (const std::exception& e) {
             Logger::logError("Exception while processing update entity from network");

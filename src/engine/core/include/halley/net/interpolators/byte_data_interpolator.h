@@ -28,6 +28,11 @@ namespace Halley {
             this->enabled = enable;
         }
 
+        [[nodiscard]] bool isEnabled() const override
+        {
+            return enabled;
+        }
+
         void serialize(const void* value, size_t size, Serializer& serializer) override
         {
             HalleyAssertDev(size == sizeof(T));
@@ -55,8 +60,6 @@ namespace Halley {
         virtual void doDeserialize(T& value, Deserializer& deserializer) = 0;
 
     protected:
-        [[nodiscard]] bool isEnabled() const override { return enabled; }
-
         template <typename Intermediate = T, typename Discrete = T>
         static Discrete quantize(const Intermediate value, Intermediate granularity)
         {

@@ -516,6 +516,12 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     }
 #endif
 
+    if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>()) {
+        if (networkComponent->authorityId == myPeerId) {
+            Logger::logError("Rcv network update for entity " + entity.getEntityId().toDetailedString() + ", but have authority", true);
+        }
+    }
+
     if (parent) {
         entity.setParent(parent.value());
     }
@@ -605,20 +611,27 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
             if (component != nullptr) {
                 const size_t expectedEndPos = deserializer.getPosition() + size;
 
+                // Only done for transform components in root entities, skipped for child entities.
                 if (result && componentId == Transform2DComponent::componentIndex) {
-                    // Saves the current position before deserialization, and restores it afterward. Return the
-                    // new position in the function result instead.
-                    //
-                    // Only done for transform components in root entities, skipped for child entities.
-                    //
-                    // TODO: for debugging, shouldn't be needed as it's updated later.
-                    auto transform = reinterpret_cast<Transform2DComponent*>(component);
-                    auto pos = transform->getLocalPosition();
+                    // Check if position interpolation is enabled.
+                    // TODO: This lookup is kind of costly, as it is done again in deserializeNetwork().
+                    const auto* interpolator = byteSerializationContext.entityInterpolators->tryGetInterpolator(
+                        byteSerializationContext.entityId, componentId, "position");
 
-                    reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+                    if (interpolator && interpolator->isEnabled()) {
+                        // Saves the current position before deserialization, and restores it afterward. Return the
+                        // new position in the function result instead.
+                        // TODO: for debugging, shouldn't be needed as it's updated later.
+                        const auto transform = reinterpret_cast<Transform2DComponent*>(component);
+                        const auto pos = transform->getLocalPosition();
 
-                    result->position = transform->getLocalPosition();
-                    transform->setLocalPosition(pos);
+                        reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+
+                        result->position = transform->getLocalPosition();
+                        transform->setLocalPosition(pos);
+                    } else {
+                        reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+                    }
                 } else {
                     reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
                 }
