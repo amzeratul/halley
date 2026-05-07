@@ -125,9 +125,13 @@ void AudioEngine::run()
 	}
 
 	// OK, we've supplied it with enough buffers; if that was enough, then, sleep as long as no more buffers are needed
-	while (running && !needsMoreAudio()) {
+	for (int i = 0; running && !needsMoreAudio(); ++i) {
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(10us);
+
+		if (i == 2000) {
+			Logger::logError("Audio thread seems to be stalled", true);
+		}
 	}
 	
 	// When we get here, it means that buffers are needed again (either one wasn't enough, or we waited long enough),
