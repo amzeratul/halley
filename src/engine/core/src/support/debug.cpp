@@ -20,6 +20,9 @@
 \*****************************************************************/
 
 #include "halley/support/debug.h"
+
+#include <cinttypes>
+
 #include "halley/text/halleystring.h"
 #include <iostream>
 #include <sstream>
@@ -459,7 +462,7 @@ std::string_view StackDebugTrace::getValue(gsl::span<char> buffer) const
 	case Type::StringView:
 		return strValue;
 	case Type::Int64:
-		(void) snprintf(buffer.data(), buffer.size(), "%lli", value.int64Value);
+		(void) snprintf(buffer.data(), buffer.size(), "%" PRId64, value.int64Value);
 		return std::string_view(buffer.data(), strlen(buffer.data()));
 	case Type::Double:
 		(void) snprintf(buffer.data(), buffer.size(), "%f", value.doubleValue);

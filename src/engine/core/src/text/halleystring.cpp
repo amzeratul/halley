@@ -1114,6 +1114,14 @@ void String::appendCharacter(int unicode)
 	}
 }
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnan-infinity-disabled"
+#endif
+
+#ifdef NN_NINTENDO_SDK
+#include <nn/nn_Version.h>
+#endif
+
 namespace {
 	template <typename T>
 	T stringToInteger(std::string_view str, int base = 10)
@@ -1162,12 +1170,21 @@ namespace {
 		}
 
 		T value;
-		const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.length(), value);
+#if defined(NN_NINTENDO_SDK) && NN_SDK_VERSION_MAJOR < 22
+		if constexpr (std::is_same_v<T, float>) {
+			value = std::strtof(str.data(), nullptr);
+		} else {
+			value = std::strtod(str.data(), nullptr);
+		}
+#else
+		const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.length(), value, std::chars_format::general);
 		if (result.ec == std::errc::invalid_argument) [[unlikely]] {
 			throw Exception("Unable to convert string \"" + String(str) + "\" to float: not a number", HalleyExceptions::Utils);
 		} else if (result.ec == std::errc::result_out_of_range) [[unlikely]] {
 			throw Exception("Unable to convert string \"" + String(str) + "\" to float: out of range", HalleyExceptions::Utils);
 		}
+#endif
+
 		return value;
 	}
 }
