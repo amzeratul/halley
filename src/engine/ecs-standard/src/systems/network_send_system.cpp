@@ -196,13 +196,26 @@ private:
 
 			return "Ok.";
 		}, UIDebugConsoleSyntax());
+
+		consoleCommands.addCommand("disconnect", [this](Vector<String> args) -> String
+		{
+			if (getSessionService().getMultiplayerSession().isHost()) {
+				return "Not allowed on host.";
+			}
+
+			getSessionService().getMultiplayerSession().getNetworkSession()->close();
+			return "Bye.";
+		}, UIDebugConsoleSyntax());
 	}
 
-	void clearCheats()
+	void clearCheats() const
 	{
 		auto& consoleCommands = getDevService().getConsoleCommands();
 		consoleCommands.removeCommand("findNetworkEntityOutbound");
 		consoleCommands.removeCommand("logNetworkEntityUpdates");
+		consoleCommands.removeCommand("networkLag");
+		consoleCommands.removeCommand("networkQuality");
+		consoleCommands.removeCommand("disconnect");
 	}
 };
 
