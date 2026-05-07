@@ -8,7 +8,7 @@ SystemMessageDestination::SystemMessageDestination(const ConfigNode& node)
 		type = node["type"].asEnum<SystemMessageDestinationType>();
 		dstPeerId = node["dstPeerId"].asInt(0);
 	} else {
-		type = node["type"].asEnum(AllClients);
+		type = node.asEnum(AllClients);
 	}
 }
 
