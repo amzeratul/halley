@@ -141,6 +141,7 @@ set(SOURCES
         "src/entity/prefab.cpp"
         "src/entity/prefab_scene_data.cpp"
         "src/entity/system.cpp"
+        "src/entity/system_message.cpp"
         "src/entity/world.cpp"
         "src/entity/world_reflection.cpp"
         "src/entity/world_scene_data.cpp"

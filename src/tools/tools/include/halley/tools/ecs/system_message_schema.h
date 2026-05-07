@@ -12,7 +12,7 @@ namespace Halley
 		explicit SystemMessageSchema(YAML::Node node, bool generate);
 
 		String returnType;
-		SystemMessageDestination destination = SystemMessageDestination::Local;
+		SystemMessageDestinationType destination = SystemMessageDestinationType::Local;
 		bool multicast = false;
 	};
 }

@@ -203,7 +203,7 @@ Vector<IGraphNodeType::SettingType> ScriptBroadcastMessage::getSettingTypes() co
 	return {
 		SettingType{ "message", "Halley::String", Vector<String>{""} },
 		SettingType{ "nParams", "Halley::Range<int, 0, 8>", Vector<String>{""} },
-		SettingType{ "destination", "std::optional<Halley::SystemMessageDestination>", Vector<String>{""} },
+		SettingType{ "destination", "std::optional<Halley::SystemMessageDestinationType>", Vector<String>{""} },
 	};
 }
 

@@ -24,7 +24,7 @@
 
 namespace Halley {
 	class SystemMessage;
-	enum class SystemMessageDestination;
+	class SystemMessageDestination;
 	struct SystemMessageContext;
 	class UUID;
 	class ConfigNode;
@@ -44,6 +44,7 @@ namespace Halley {
 		virtual bool isConnected() const = 0;
 		virtual bool isOwner(ConstEntityRef entity) const = 0;
 		virtual bool isAuthority(ConstEntityRef entity) const = 0;
+		virtual uint8_t getMyPeerId() const = 0;
 	};
 
 	class World

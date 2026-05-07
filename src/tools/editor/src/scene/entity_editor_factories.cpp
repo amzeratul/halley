@@ -2551,7 +2551,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<ParticleSpawnAreaShape>("Halley::ParticleSpawnAreaShape"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<AssetType>("Halley::AssetType"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<AudioAttenuationCurve>("Halley::AudioAttenuationCurve", AudioAttenuationCurve::Linear));
-	factories.emplace_back(EnumFieldFactory::makeEnumFactory<SystemMessageDestination>("Halley::SystemMessageDestination"));
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<SystemMessageDestinationType>("Halley::SystemMessageDestinationType"));
 
 	return factories;
 }

@@ -14,7 +14,7 @@ SystemMessageSchema::SystemMessageSchema(YAML::Node node, bool generate)
 {
 	returnType = node["returnType"].as<std::string>("void");
 	multicast = node["multicast"].as<bool>(false);
-	destination = fromString<SystemMessageDestination>(node["destination"].as<std::string>("local"));
+	destination = fromString<SystemMessageDestinationType>(node["destination"].as<std::string>("local"));
 
 	if (destination == SystemMessageDestination::AllClients || destination == SystemMessageDestination::RemoteClients) {
 		if (!multicast) {

@@ -7,7 +7,7 @@
 #include "halley/scripting/script_message.h"
 
 namespace Halley {
-	enum class SystemMessageDestination;
+	class SystemMessageDestination;
 	class Animation;
 	class WorldPosition;
 	struct alignas(8) EntityId;

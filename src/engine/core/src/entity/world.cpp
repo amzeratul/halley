@@ -524,9 +524,10 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 {
 	// Choose where to send
 	const bool amITheHost = !networkInterface || networkInterface->isHost();
+	const auto myPeerId = networkInterface ? networkInterface->getMyPeerId() : 0;
 	bool sendLocal = false;
 	bool sendRemote = false;
-	switch (destination) {
+	switch (destination.type) {
 	case SystemMessageDestination::Local:
 		sendLocal = true;
 		break;
@@ -541,6 +542,10 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 	case SystemMessageDestination::RemoteClients:
 		sendLocal = false;
 		sendRemote = true;
+		break;
+	case SystemMessageDestinationType::SpecificPeer:
+		sendLocal = destination.dstPeerId == myPeerId;
+		sendRemote = destination.dstPeerId != myPeerId;
 		break;
 	}
 
@@ -585,7 +590,7 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 
 	if (sendRemote) {
 		sendNetworkSystemMessage(targetSystem, context, destination);
-		totalCount += (destination == SystemMessageDestination::Host ? 1 : 2) * systemCount; // Assume at least two clients for non-host sends
+		totalCount += (destination.type == SystemMessageDestination::Host ? 1 : 2) * systemCount; // Assume at least two clients for non-host sends
 	}
 
 	return totalCount;

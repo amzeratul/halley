@@ -467,11 +467,12 @@ void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageType, 
 
 void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback)
 {
-	HalleyAssertDev(destination != SystemMessageDestination::Local);
+	HalleyAssertDev(destination.type != SystemMessageDestination::Local);
+	HalleyAssertDev(destination.type != SystemMessageDestination::SpecificPeer || destination.dstPeerId != getMyPeerId());
 
 	// Only wait for responses from host
 	// In order to support responses from all players, this class needs to track which clients are in the session and probably include timeouts
-	const bool wantsResponse = destination == SystemMessageDestination::Host && callback;
+	const bool wantsResponse = destination.type == SystemMessageDestination::Host && callback;
 	if (!wantsResponse && callback) {
 		Logger::logError("Sending System Message " + toString(messageType) + " with a callback, but not sending it to host only, so it won't ever receive a remote response.");
 	}
@@ -485,9 +486,11 @@ void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageTyp
 	}
 
 	// Send
-	if (destination == SystemMessageDestination::Host) {
+	if (destination.type == SystemMessageDestination::Host) {
 		HalleyAssertDev(!isHost());
 		sendToPeer(std::move(msg), 0);
+	} else if (destination.type == SystemMessageDestinationType::SpecificPeer) {
+		sendToPeer(std::move(msg), destination.dstPeerId);
 	} else {
 		sendToAll(std::move(msg));
 	}
@@ -785,6 +788,11 @@ bool EntityNetworkSession::isAuthority(ConstEntityRef entity) const
 	}
 
 	return isOwner(entity);
+}
+
+uint8_t EntityNetworkSession::getMyPeerId() const
+{
+	return session->getMyPeerId().value_or(0);
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

@@ -12,23 +12,50 @@
 
 namespace Halley
 {
-	enum class SystemMessageDestination {
+	enum class SystemMessageDestinationType : uint8_t {
 		Local,
 		Host,
 		AllClients,
-		RemoteClients
+		RemoteClients,
+		SpecificPeer
 	};
 
 	template <>
-	struct EnumNames<SystemMessageDestination> {
+	struct EnumNames<SystemMessageDestinationType> {
 		constexpr auto operator()() const {
 			return std::to_array({
 				"local",
 				"host",
 				"allClients",
-				"remoteClients"
+				"remoteClients",
+				"specificPeer"
 			});
 		}
+	};
+
+	class SystemMessageDestination {
+	public:
+		using enum SystemMessageDestinationType;
+
+		SystemMessageDestinationType type;
+		uint8_t dstPeerId;
+
+		constexpr SystemMessageDestination(SystemMessageDestinationType type = Local, uint8_t dstPeerId = 0)
+			: type(type)
+			, dstPeerId(dstPeerId)
+		{
+		}
+
+		SystemMessageDestination(const ConfigNode& node);
+
+		constexpr bool operator==(const SystemMessageDestination& other) const = default;
+		constexpr bool operator!=(const SystemMessageDestination& other) const = default;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
+		String toString() const;
+		ConfigNode toConfigNode() const;
 	};
 	
 	class SystemMessage : public Message
