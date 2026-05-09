@@ -108,8 +108,9 @@ StringOutputStringState& StringOutputState::getString(const String& id)
 
 StringOutputStream::StringOutputStream(const StringOutputState& srcState)
 	: srcState(srcState)
-	, lastFrameSeen(srcState.frameNumber.load())
+	, lastFrameSeen(0)
 {
+	updateStrings();
 }
 
 void StringOutputStream::waitAndUpdateState()
@@ -159,6 +160,8 @@ void StringOutputStream::updateStrings()
 		}
 		return false;
 	});
+
+	lastFrameSeen = srcState.frameNumber;
 }
 
 StringOutputStringState& StringOutputStream::getString(const String& id, bool& exists)
