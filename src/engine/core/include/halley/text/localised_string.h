@@ -9,6 +9,7 @@
 namespace Halley {
 	class I18N;
 	class I18NLanguage;
+	class ILocStrOp;
 
 	namespace Detail {
 		template<typename T, typename...>
@@ -20,6 +21,7 @@ namespace Halley {
 	class LocalisedString
 	{
 		friend class I18N;
+		friend class ILocStrOp;
 
 	public:
 		LocalisedString();
@@ -41,8 +43,8 @@ namespace Halley {
 		template<typename... Ts>
 		[[nodiscard]] Detail::first<std::enable_if_t<std::is_convertible_v<Ts, const LocalisedString&>, LocalisedString>...>::type replaceTokens(const Ts&... toks)
 		{
-			auto tmp = std::to_array({ &toks... });
-			return doReplaceTokens(std::span(tmp));
+			auto tmp = Vector<LocalisedString>({ toks... });
+			return doReplaceTokens(std::move(tmp));
 		}
 		
 		[[nodiscard]] LocalisedString replaceTokens(gsl::span<const LocalisedString> toks) const;
@@ -51,6 +53,7 @@ namespace Halley {
 		[[nodiscard]] LocalisedString replaceToken(const String& pattern, const LocalisedString& token) const;
 
 		[[nodiscard]] LocalisedString replaceLanguage(const I18NLanguage& language) const;
+		void replaceLanguageInPlace(const I18NLanguage& language);
 
 		const String& getString() const;
 		const String& toString() const;
@@ -71,13 +74,18 @@ namespace Halley {
 		explicit LocalisedString(String string, const I18N* i18n);
 		explicit LocalisedString(const I18N& i18n, String key, String string, int languageIdx);
 
-		[[nodiscard]] LocalisedString doReplaceTokens(gsl::span<const LocalisedString* const> toks) const;
+		[[nodiscard]] LocalisedString doReplaceTokens(Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols = {}, Vector<ColourOverride>* outCols = nullptr) const;
+		[[nodiscard]] LocalisedString doReplaceTokens(Vector<String> ids, Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols = {}, Vector<ColourOverride>* outCols = nullptr) const;
+
+		void applyTransformOperation();
 
 		const I18N* i18n = nullptr;
 		String key;
 		String string;
 		int i18nVersion = 0;
 		int languageIdx = 0;
+
+		std::shared_ptr<ILocStrOp> transformOp;
 	};
 
 }

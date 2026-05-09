@@ -1,5 +1,6 @@
 #include "halley/text/localised_string.h"
 
+#include "localised_string_transform_operation.h"
 #include "halley/text/i18n.h"
 
 using namespace Halley;
@@ -54,81 +55,83 @@ LocalisedString LocalisedString::fromNumber(float number, const I18NLanguage& la
 	return LocalisedString(Halley::toString(number, precisionDigits, language.getDecimalSeparator(), fixed), nullptr);
 }
 
-LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks) const
-{
-	Vector<const LocalisedString*> result;
-	result.reserve(toks.size());
-	for (const auto& t: toks) {
-		result += &t;
-	}
-	return doReplaceTokens(result.const_span());
-}
-
-LocalisedString LocalisedString::doReplaceTokens(gsl::span<const LocalisedString* const> toks) const
-{
-	if (toks.empty()) {
-		return *this;
-	}
-	auto str = string;
-	for (int i = 0; i < int(toks.size()); ++i) {
-		str = str.replaceAll("{" + Halley::toString(i) + "}", toks[i]->getString());
-	}
-	return LocalisedString(str, i18n);
-}
-
 std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const
 {
-	HalleyAssertDev(toks.size() == colours.size());
-	if (toks.empty()) {
-		return { *this, {} };
-	}
+	Vector<ColourOverride> cols;
+	auto str = doReplaceTokens(Vector<LocalisedString>(toks.begin(), toks.end()), colours, &cols);
+	return { str, cols };
+}
 
-	Vector<std::pair<int, size_t>> indices;
-
-	for (int i = 0; i < int(toks.size()); ++i) {
-		const auto pos = string.find("{" + Halley::toString(i) + "}");
-		if (pos != String::npos) {
-			indices.emplace_back(i, pos);
-		}
-	}
-
-	std::stable_sort(indices.begin(), indices.end(), [] (const auto& a, const auto& b) { return a.second < b.second; });
-
-	auto str = std::string_view(string);
-
-	size_t lastPos = 0;
-	ColourStringBuilder builder;
-	for (const auto& index: indices) {
-		builder.append(str.substr(lastPos, index.second - lastPos));
-		builder.append(toks[index.first].getString(), colours[index.first]);
-		lastPos = index.second + 3;
-	}
-	builder.append(str.substr(lastPos));
-
-	auto result = builder.moveResults();
-	return { LocalisedString(std::move(result.first), i18n), std::move(result.second) };
+LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks) const
+{
+	return doReplaceTokens(Vector<LocalisedString>(toks.begin(), toks.end()));
 }
 
 LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens) const
 {
-	auto curString = string;
-	for (const auto& token : tokens) {
-		curString = string.replaceAll("{" + token.first + "}", token.second.getString());
+	Vector<String> ids;
+	Vector<LocalisedString> ts;
+	for (const auto& [k, v] : tokens) {
+		ids += k;
+		ts += v;
 	}
-	return LocalisedString(curString, i18n);
+	return doReplaceTokens(std::move(ids), std::move(ts));
 }
 
 LocalisedString LocalisedString::replaceToken(const String& pattern, const LocalisedString& token) const
 {
-	return LocalisedString(string.replaceAll(pattern, token.getString()), i18n);
+	Vector<String> ids;
+	Vector<LocalisedString> ts;
+	ids += pattern;
+	ts += token;
+	return doReplaceTokens(std::move(ids), std::move(ts));
+}
+
+LocalisedString LocalisedString::doReplaceTokens(Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols, Vector<ColourOverride>* outCols) const
+{
+	Vector<String> ids;
+	ids.reserve(toks.size());
+	for (size_t i = 0; i < toks.size(); ++i) {
+		ids += Halley::toString(i);
+	}
+
+	return doReplaceTokens(std::move(ids), std::move(toks), cols, outCols);
+}
+
+LocalisedString LocalisedString::doReplaceTokens(Vector<String> ids, Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols, Vector<ColourOverride>* outCols) const
+{
+	auto op = std::make_shared<LocStrOpReplaceTokens>(*this, std::move(ids), std::move(toks));
+	LocalisedString result = *this;
+	result.transformOp = std::move(op);
+	result.applyTransformOperation();
+	return result;
+}
+
+void LocalisedString::applyTransformOperation()
+{
+	if (transformOp) {
+		transformOp->eval(*this);
+	}
 }
 
 LocalisedString LocalisedString::replaceLanguage(const I18NLanguage& language) const
 {
-	if (i18n) {
-		return i18n->get(key, language);
+	auto result = *this;
+	if (result.transformOp) {
+		result.transformOp = result.transformOp->clone();
 	}
-	return *this;
+	result.replaceLanguageInPlace(language);
+	return result;
+}
+
+void LocalisedString::replaceLanguageInPlace(const I18NLanguage& language)
+{
+	if (transformOp) {
+		transformOp->setLanguage(language);
+		applyTransformOperation();
+	} else if (i18n) {
+		*this = i18n->get(key, language);
+	}
 }
 
 const String& LocalisedString::getString() const
@@ -166,11 +169,18 @@ bool LocalisedString::checkForUpdates()
 	if (i18n && !key.isEmpty()) {
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
-			const auto newValue = i18n->get(key, getLanguage(*i18n));
 			i18nVersion = curVersion;
-			if (string != newValue.string) {
-				string = newValue.string;
-				return true;
+			if (transformOp) {
+				if (transformOp->checkForUpdates()) {
+					applyTransformOperation();
+					return true;
+				}
+			} else {
+				const auto newValue = i18n->get(key, getLanguage(*i18n));
+				if (string != newValue.string) {
+					string = newValue.string;
+					return true;
+				}
 			}
 		}
 	}

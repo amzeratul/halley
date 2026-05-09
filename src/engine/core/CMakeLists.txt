@@ -394,6 +394,7 @@ set(SOURCES
         "src/text/i18n_language.cpp"
         "src/text/halleystring.cpp"
         "src/text/localised_string.cpp"
+        "src/text/localised_string_transform_operation.cpp"
         "src/text/string_output_server.cpp"
         "src/text/string_output_stream.cpp"
         "src/text/string_serializer.cpp"
@@ -931,6 +932,7 @@ set(HEADERS
         "include/halley/text/string_output_server.h"
         "include/halley/text/string_serializer.h"
         "src/text/string_output_stream.h"
+        "src/text/localised_string_transform_operation.h"
 
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
