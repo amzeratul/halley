@@ -20,6 +20,11 @@ cbuffer MaterialProperties : register(b2) {
 };
 
 float4 main(VOut input) : SV_TARGET {
+    float4 baseCol = tex0.Sample(sampler0, input.texCoord0.xy);
+    if (baseCol.a < 0.001) {
+        discard;
+    }
+
     const float gamma = 2.2;
     const float invGamma = 1.0 / gamma;
 
@@ -44,7 +49,7 @@ float4 main(VOut input) : SV_TARGET {
 
     float3 light = min(ambientLight + diffuseLight, float3(1.0, 1.0, 1.0));
 
-    float4 col = input.colour * pow(tex0.Sample(sampler0, input.texCoord0.xy), gamma) * u_colDiffuse;
+    float4 col = input.colour * pow(baseCol, gamma) * u_colDiffuse;
     float4 linearResult = col * float4(light, 1.0) + float4(emissiveLight + specularLight, 0);
     return pow(linearResult, invGamma);
 }
