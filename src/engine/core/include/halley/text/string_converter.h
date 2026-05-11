@@ -443,4 +443,15 @@ namespace Halley
 		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
 		return std::atof(buffer.data());
 	}
+
+	template <typename T>
+	String String::concat(gsl::span<const T> list, std::string_view separator)
+	{
+		Vector<String> text;
+		text.reserve(list.size());
+		for (const auto& l: list) {
+			text.push_back(Halley::toString(l));
+		}
+		return concatList(text, separator);
+	}
 }
