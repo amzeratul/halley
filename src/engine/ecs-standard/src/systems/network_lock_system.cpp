@@ -186,6 +186,33 @@ public:
 		}
 	}
 
+	bool lockAddRef(EntityId targetId) override
+	{
+		// Adding a lock reference assumes that there is a lock already. Just increase the ref count.
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			HalleyAssertDev(iter->second.refCount > 0); // Assumes that there is a lock already.
+			iter->second.refCount++;
+			return true;
+		}
+		Logger::logWarning("No lock found for " + targetId.toDetailedString() + ", can't add reference");
+		return false;
+	}
+
+	bool lockDecRef(EntityId targetId) override
+	{
+		// Decrease ref count, and release lock if there are no references left.
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			if (auto& lock = iter->second; lock.refCount > 1) {
+				lock.refCount--;
+			} else {
+				lockRelease(lock.playerId, targetId);
+			}
+			return true;
+		}
+		Logger::logWarning("No lock found for " + targetId.toDetailedString() + ", can't dec reference");
+		return false;
+	}
+
 	void lockRelease(EntityId playerId, EntityId targetId) override
 	{
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
