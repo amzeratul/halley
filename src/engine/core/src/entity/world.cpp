@@ -522,28 +522,30 @@ ComponentDeleterTable& World::getComponentDeleterTable()
 
 size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem, SystemMessageDestination destination)
 {
+	using enum SystemMessageDestinationType;
+
 	// Choose where to send
 	const bool amITheHost = !networkInterface || networkInterface->isHost();
 	const auto myPeerId = networkInterface ? networkInterface->getMyPeerId() : 0;
 	bool sendLocal = false;
 	bool sendRemote = false;
 	switch (destination.type) {
-	case SystemMessageDestination::Local:
+	case Local:
 		sendLocal = true;
 		break;
-	case SystemMessageDestination::AllClients:
+	case AllClients:
 		sendLocal = true;
 		sendRemote = true;
 		break;
-	case SystemMessageDestination::Host:
+	case Host:
 		sendLocal = amITheHost;
 		sendRemote = !amITheHost;
 		break;
-	case SystemMessageDestination::RemoteClients:
+	case RemoteClients:
 		sendLocal = false;
 		sendRemote = true;
 		break;
-	case SystemMessageDestinationType::SpecificPeer:
+	case SpecificPeer:
 		sendLocal = destination.dstPeerId == myPeerId;
 		sendRemote = destination.dstPeerId != myPeerId;
 		break;
@@ -590,7 +592,8 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 
 	if (sendRemote) {
 		sendNetworkSystemMessage(targetSystem, context, destination);
-		totalCount += (destination.type == SystemMessageDestination::Host ? 1 : 2) * systemCount; // Assume at least two clients for non-host sends
+		const int nDstPeers = destination.type == Host || destination.type == SpecificPeer ? 1 : 2;  // Assume at least two clients for non-host sends
+		totalCount += nDstPeers * systemCount;
 	}
 
 	return totalCount;
