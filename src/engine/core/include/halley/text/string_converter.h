@@ -363,6 +363,15 @@ namespace Halley
 		return toString(gsl::span<const T>(values), separator, std::move(f));
 	}
 
+	template<typename T, typename U>
+	struct ToStringConverter<std::pair<T, U>>
+	{
+		String operator()(const std::pair<T, U>& v) const
+		{
+			return "{" + toString(v.first) + ", " + toString(v.second) + "}";
+		}
+	};
+
 	template<typename T>
 	struct ToStringConverter<std::optional<T>>
 	{
