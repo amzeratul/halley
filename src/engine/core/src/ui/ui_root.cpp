@@ -308,8 +308,11 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 				w->clear();
 			}
 		} else {
-			HalleyAssertDev(w->getRoot() == this);
-			w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
+			if (w->getRoot() == this) {
+				w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
+			} else {
+				Logger::logError("Widget " + w->getId() + " [" + typeid(*w).name() + "] is not being updated as it no longer belongs to this UI root");
+			}
 		}
 	}
 
