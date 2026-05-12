@@ -293,7 +293,9 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
 	componentUI->setHandle(UIEventType::ButtonClicked, "deleteComponentButton", [=] (const UIEvent& event)
 	{
-		deleteComponent(componentType);
+		Concurrent::execute(Executors::getMainUpdateThread(), [this, componentType = componentType] () {
+			deleteComponent(componentType);
+		});
 	});
 	componentUI->setHandle(UIEventType::ButtonClicked, "copyComponentButton", [=] (const UIEvent& event)
 	{
