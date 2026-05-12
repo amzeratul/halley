@@ -40,23 +40,17 @@ void UIScene3D::draw(UIPainter& painter) const
 void UIScene3D::drawOnPainter(Painter& painter) const
 {
 	if (renderSurface->isReady()) {
-		Sprite sprite;
-		if (material) {
-			sprite = renderSurface->getSurfaceSprite(material).clone()
-				.setPosition(getPosition());
-		}
-		else {
-			sprite = renderSurface->getSurfaceSprite().clone()
-				.setPosition(getPosition());
-		}
-
-		sprite.draw(painter);
+		Sprite sprite = (material ? renderSurface->getSurfaceSprite(material) : renderSurface->getSurfaceSprite()).clone(false);
+		sprite
+			.setPosition(getPosition())
+			.setScale(1.0f / renderScale)
+			.draw(painter);
 	}
 }
 
 void UIScene3D::render(RenderContext& rc) const
 {
-	renderSurface->setSize(Vector2i(getSize()));
+	renderSurface->setSize(Vector2i(getSize() * renderScale));
 
 	if (renderSurface->isReady()) {
 		rc.with(camera).with(renderSurface->getRenderTarget()).bind([&](Painter& painter) {
@@ -114,6 +108,16 @@ Sprite UIScene3D::getSurfaceSprite() const
 		return renderSurface->getSurfaceSprite(material);
 	}
 	return renderSurface->getSurfaceSprite();
+}
+
+void UIScene3D::setRenderScale(float scale)
+{
+	renderScale = scale;
+}
+
+float UIScene3D::getRenderScale() const
+{
+	return renderScale;
 }
 
 std::shared_ptr<Halley::Material> UIScene3D::getMaterial()

@@ -30,6 +30,9 @@ namespace Halley {
 		std::shared_ptr<Material> getMaterial();
 
 		Sprite getSurfaceSprite() const;
+		
+		void setRenderScale(float scale);
+		float getRenderScale() const;
 
 	private:
 		Resources& resources;
@@ -40,6 +43,8 @@ namespace Halley {
 		Camera camera;
 
 		std::unique_ptr<RenderSurface> renderSurface;
+
+		float renderScale = 1.0f;
 
         void drawOnPainter(Painter& painter) const;
     };
