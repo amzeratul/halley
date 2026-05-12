@@ -228,12 +228,12 @@ void Options::setKeyboardLayout(String layout)
 	setOption("keyboardLayout", ConfigNode(std::move(layout)));
 }
 
-String Options::getLanguage() const
+I18NLanguage Options::getLanguage() const
 {
-	return getOption("language").asString("en-GB");
+	return I18NLanguage(getOption("language").asString("en-GB"));
 }
 
-void Options::setLanguage(String languageCode)
+void Options::setLanguage(I18NLanguage languageCode)
 {
-	setOption("language", ConfigNode(std::move(languageCode)));
+	setOption("language", languageCode.toConfigNode());
 }

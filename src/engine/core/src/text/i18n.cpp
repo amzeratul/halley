@@ -6,6 +6,7 @@
 #include "halley/resources/resources.h"
 #include "halley/text/localised_string.h"
 #include "halley/text/string_output_server.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -136,11 +137,21 @@ bool I18NVersionChecker::checkChanged()
 
 void I18N::setCurrentLanguage(I18NLanguage language)
 {
-	currentLanguage = std::move(language);
-	++version;
+	if (language != currentLanguage) {
+		currentLanguage = std::move(language);
+		++version;
+	}
 }
 
 const I18NLanguage& I18N::getCurrentLanguage() const
+{
+	if (tempOverrideLanguage) {
+		return *tempOverrideLanguage;
+	}
+	return currentLanguage;
+}
+
+const I18NLanguage& I18N::getChosenCurrentLanguage() const
 {
 	return currentLanguage;
 }
@@ -163,6 +174,19 @@ void I18N::setSecondaryLanguage(std::optional<I18NLanguage> language)
 const std::optional<I18NLanguage>& I18N::getSecondaryLanguage() const
 {
 	return secondaryLanguage;
+}
+
+void I18N::setTempOverrideLanguage(std::optional<I18NLanguage> language)
+{
+	if (language != tempOverrideLanguage) {
+		tempOverrideLanguage = std::move(language);
+		++version;
+	}
+}
+
+const std::optional<I18NLanguage>& I18N::getTempOverrideLanguage() const
+{
+	return tempOverrideLanguage;
 }
 
 Vector<I18NLanguage> I18N::getLanguagesAvailable() const
@@ -193,7 +217,9 @@ std::optional<LocalisedString> I18N::tryGet(const String& key) const
 		return std::nullopt;
 	}
 
-	auto curLang = strings.find(currentLanguage);
+	const auto& activeLanguage = getCurrentLanguage();
+
+	auto curLang = strings.find(activeLanguage);
 	if (curLang != strings.end()) {
 		auto i = curLang->second.strings.find(key);
 		if (i != curLang->second.strings.end()) {
@@ -201,7 +227,7 @@ std::optional<LocalisedString> I18N::tryGet(const String& key) const
 		}
 	}
 
-	if (fallbackLanguage && fallbackLanguage.value() != currentLanguage) {
+	if (fallbackLanguage && fallbackLanguage.value() != activeLanguage) {
 		auto defLang = strings.find(fallbackLanguage.value());
 		if (defLang != strings.end()) {
 			auto i = defLang->second.strings.find(key);
@@ -272,7 +298,7 @@ int I18N::getVersion() const
 
 char I18N::getDecimalSeparator() const
 {
-	return currentLanguage.getDecimalSeparator();
+	return getCurrentLanguage().getDecimalSeparator();
 }
 
 void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) const
@@ -373,4 +399,25 @@ bool I18N::createStringOutputServer(const HalleyAPI& api, const String& host, in
 StringOutputServer* I18N::tryGetStringOutputServer() const
 {
 	return stringOutputServer.get();
+}
+
+I18NLanguage I18N::getNextLanguageAvailable(const I18NLanguage& after) const
+{
+	auto langs = getLanguagesAvailable();
+	if (langs.empty()) {
+		return after;
+	}
+
+	std::sort(langs.begin(), langs.end());
+
+	if (std::optional<size_t> idx = std_ex::find_index(langs, after)) {
+		return langs.at((*idx + 1) % langs.size());
+	} else {
+		return langs.front();
+	}
+}
+
+void I18N::setCurrentLanguageToNextOneAvailable()
+{
+	setCurrentLanguage(getNextLanguageAvailable(getChosenCurrentLanguage()));
 }

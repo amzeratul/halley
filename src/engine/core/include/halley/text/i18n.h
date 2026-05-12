@@ -28,7 +28,7 @@ namespace Halley {
 	public:
 		I18N();
 		I18N(Resources& resources, I18NLanguage currentLanguage = I18NLanguage("en-GB"), std::optional<I18NLanguage> fallbackLanguage = {});
-		~I18N();
+		~I18N() override;
 
 		void update();
 		void loadStrings(Resources& resources);
@@ -37,13 +37,17 @@ namespace Halley {
 		void updateStrings(const I18NLanguage& language, HashMap<String, String> strings);
 
 		void setCurrentLanguage(I18NLanguage language);
-		const I18NLanguage& getCurrentLanguage() const;
+		const I18NLanguage& getCurrentLanguage() const; // Might be overriden by temp override
+		const I18NLanguage& getChosenCurrentLanguage() const; // One set by setCurrentLanguage
 
 		void setFallbackLanguage(std::optional<I18NLanguage> language);
 		const std::optional<I18NLanguage>& getFallbackLanguage() const;
 		
 		void setSecondaryLanguage(std::optional<I18NLanguage> language);
 		const std::optional<I18NLanguage>& getSecondaryLanguage() const;
+		
+		void setTempOverrideLanguage(std::optional<I18NLanguage> language);
+		const std::optional<I18NLanguage>& getTempOverrideLanguage() const;
 
 		const I18NLanguage& getLanguageFromIndex(int languageIdx) const;
 		Vector<I18NLanguage> getLanguagesAvailable() const;
@@ -74,6 +78,9 @@ namespace Halley {
 
 		bool createStringOutputServer(const HalleyAPI& api, const String& host, int port);
 		StringOutputServer* tryGetStringOutputServer() const;
+		
+		I18NLanguage getNextLanguageAvailable(const I18NLanguage& after) const;
+		void setCurrentLanguageToNextOneAvailable();
 
 	private:
 		struct LangData {
@@ -84,6 +91,7 @@ namespace Halley {
 		I18NLanguage currentLanguage;
 		std::optional<I18NLanguage> fallbackLanguage;
 		std::optional<I18NLanguage> secondaryLanguage;
+		std::optional<I18NLanguage> tempOverrideLanguage;
 
 		HashMap<I18NLanguage, LangData> strings;
 		Vector<I18NLanguage> languageIndices;

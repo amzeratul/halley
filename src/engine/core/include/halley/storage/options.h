@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/api/save_data.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/text/i18n_language.h"
 
 namespace Halley {
 	class AudioAPI;
@@ -50,8 +51,8 @@ namespace Halley {
 
 		String getKeyboardLayout() const;
 		void setKeyboardLayout(String layout);
-		String getLanguage() const;
-		void setLanguage(String languageCode);
+		I18NLanguage getLanguage() const;
+		void setLanguage(I18NLanguage language);
 
 		Vector2i getResolution(bool fullscreen) const;
 		void setResolution(bool fullscreen, Vector2i resolution);
