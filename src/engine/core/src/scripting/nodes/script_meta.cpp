@@ -53,16 +53,24 @@ Vector<IGraphNodeType::SettingType> ScriptLog::getSettingTypes() const
 
 std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	auto msg = getConnectedNodeName(node, graph, 2);
-	if (msg == "<empty>") {
-		msg = node.getSettings()["message"].asString("");
-	}
+	auto predefinedMsg = node.getSettings()["message"].asString("");
+	auto dynamicMessage = tryGetConnectedNodeName(node, graph, 2);
 
 	ColourStringBuilder str;
 	str.append("Log ");
-	str.append("\"" + msg + "\"", settingColour);
-	str.append(" with severity ");
 	str.append(toString(node.getSettings()["severity"].asEnum<LoggerLevel>(LoggerLevel::Dev)), settingColour);
+	str.append(": ");
+	if (!predefinedMsg.isEmpty()) {
+		str.append("\"" + predefinedMsg, settingColour);
+		if (dynamicMessage) {
+			str.append(" \" + ");
+		} else {
+			str.append("\"");
+		}
+	}
+	if (dynamicMessage) {
+		str.append(*dynamicMessage, parameterColour);
+	}
 	return str.moveResults();
 }
 
