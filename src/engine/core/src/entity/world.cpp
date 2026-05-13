@@ -524,9 +524,19 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 {
 	using enum SystemMessageDestinationType;
 
-	// Choose where to send
 	const bool amITheHost = !networkInterface || networkInterface->isHost();
-	const auto myPeerId = networkInterface ? networkInterface->getMyPeerId() : 0;
+	const uint8_t myPeerId = networkInterface ? networkInterface->getMyPeerId() : static_cast<uint8_t>(0);
+
+	// Pre-process specific peer
+	if (destination.type == SpecificPeer) {
+		if (destination.dstPeerId == 0) {
+			destination.type = Host;
+		} else if (destination.dstPeerId == myPeerId) {
+			destination.type = Local;
+		}
+	}
+
+	// Choose where to send
 	bool sendLocal = false;
 	bool sendRemote = false;
 	switch (destination.type) {
@@ -542,12 +552,8 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 		sendRemote = !amITheHost;
 		break;
 	case RemoteClients:
-		sendLocal = false;
-		sendRemote = true;
-		break;
 	case SpecificPeer:
-		sendLocal = destination.dstPeerId == myPeerId;
-		sendRemote = destination.dstPeerId != myPeerId;
+		sendRemote = true;
 		break;
 	}
 
