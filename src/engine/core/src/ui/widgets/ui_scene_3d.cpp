@@ -5,15 +5,16 @@
 #include "halley/graphics/render_target/render_surface.h"
 #include "halley/graphics/render_target/render_target_texture.h"
 #include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/mesh/mesh.h"
 
 using namespace Halley;
 
-UIScene3D::UIScene3D(String id, const HalleyAPI& api, Resources& resources)
+UIScene3D::UIScene3D(String id, const HalleyAPI& api, Resources& resources, Colour4f bgCol)
 	: UIWidget(std::move(id))
 	, resources(resources)
+	, bgCol(bgCol)
 {
 	renderSurface = std::make_unique<RenderSurface>(*api.video, resources);
-	bgCol = Colour4f(0.1f, 0.1f, 0.1f);
 }
 
 void UIScene3D::update(Time t, bool moved)
@@ -62,6 +63,23 @@ void UIScene3D::render(RenderContext& rc) const
 	}
 }
 
+std::shared_ptr<const Mesh> UIScene3D::loadMesh(const String& meshId)
+{
+	clearRenderers();
+	if (auto mesh = resources.tryGet<Mesh>(meshId)) {
+	    auto meshRenderer = std::make_unique<MeshRenderer>(mesh);
+		addRenderer(std::move(meshRenderer));
+
+		const auto [centre, size] = mesh->getCentreAndSize();
+		setOrbitCamera(centre, 0, 45, size.length() * 1.5f);
+
+		return mesh;
+	} else {
+		Logger::logError("Mesh not found: " + meshId);
+		return {};
+	}
+}
+
 void UIScene3D::addRenderer(std::unique_ptr<MeshRenderer> renderer)
 {
 	renderers += std::move(renderer);
@@ -85,6 +103,26 @@ Camera& UIScene3D::getCamera()
 const Camera& UIScene3D::getCamera() const
 {
 	return camera;
+}
+
+void UIScene3D::setOrbitCamera(Vector3f centre, float yawDegrees, float pitchDegrees, float distance, float fov)
+{
+	const auto yaw = Angle1f::fromDegrees(yawDegrees);
+	const auto pitch = Angle1f::fromDegrees(pitchDegrees);
+
+	const auto rot = Quaternion(Vector3f(0, 1, 0), -yaw) * Quaternion(Vector3f(1, 0, 0), pitch);
+	const Vector3f camDir = rot * Vector3f(0, 0, -1);
+	const Vector3f lookPos = centre;
+	const Vector3f camPos = lookPos + distance * camDir;
+
+	const auto cam = Camera()
+		.setPosition(camPos)
+		.setRotation(rot)
+		.setCameraType(CameraType::Perspective)
+		.setFieldOfView(Angle1f::fromDegrees(fov))
+		.setClippingPlanes(distance * 0.002f, distance * 2.0f);
+
+	setCamera(cam);
 }
 
 void UIScene3D::setBGColour(Colour4f colour)

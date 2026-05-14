@@ -1604,6 +1604,8 @@ public:
 			return AssetType::Texture;
 		} else if (strippedTypeName == "Font") {
 			return AssetType::Font;
+		} else if (strippedTypeName == "Mesh") {
+			return AssetType::Mesh;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}

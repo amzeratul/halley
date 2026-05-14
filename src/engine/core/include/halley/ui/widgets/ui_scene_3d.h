@@ -8,7 +8,7 @@ namespace Halley {
 
 	class UIScene3D : public UIWidget {
 	public:
-		explicit UIScene3D(String id, const HalleyAPI& api, Resources& resources);
+		explicit UIScene3D(String id, const HalleyAPI& api, Resources& resources, Colour4f bgCol = Colour4f(0.1f, 0.1f, 0.1f));
 
 		void update(Time t, bool moved) override;
 
@@ -16,12 +16,16 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void render(RenderContext& rc) const override;
 
+		std::shared_ptr<const Mesh> loadMesh(const String& meshId);
+
 		void addRenderer(std::unique_ptr<MeshRenderer> renderer);
 		void clearRenderers();
 
 		void setCamera(Camera camera);
 		Camera& getCamera();
 		const Camera& getCamera() const;
+
+		void setOrbitCamera(Vector3f centre, float yaw, float pitch, float distance, float fov = 45.0f);
 
 		void setBGColour(Colour4f colour);
 		Colour4f getBGColour() const;

@@ -92,24 +92,7 @@ void MeshEditor::onMouseOver(Vector2f mousePos)
 
 void MeshEditor::updateCamera()
 {
-	const float distance = meshSize.length() * 1.5f;
-
-	const auto yaw = Angle1f::fromDegrees(yawAndPitch.x);
-	const auto pitch = Angle1f::fromDegrees(yawAndPitch.y);
-
-	const auto rot = Quaternion(Vector3f(0, 1, 0), -yaw) * Quaternion(Vector3f(1, 0, 0), pitch);
-	const Vector3f camDir = rot * Vector3f(0, 0, -1);
-	const Vector3f lookPos = meshCentre;
-	const Vector3f camPos = lookPos + distance * camDir;
-
-	const auto cam = Camera()
-		.setPosition(camPos)
-		.setRotation(rot)
-		.setCameraType(CameraType::Perspective)
-		.setFieldOfView(Angle1f::fromDegrees(45.0f))
-		.setClippingPlanes(distance * 0.002f, distance * 2.0f);
-
-	scene3d->setCamera(cam);
+	scene3d->setOrbitCamera(meshCentre, yawAndPitch.x, yawAndPitch.y, meshSize.length() * 1.5f, 45);
 }
 
 void MeshEditor::onMouseDelta(Vector2f delta)
