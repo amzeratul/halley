@@ -361,6 +361,16 @@ const EntityNetworkChanges::Page& EntityNetworkChanges::findEntityByUUID(const U
     throw Exception("No journal page found for entity", HalleyExceptions::Network);
 }
 
+void EntityNetworkChanges::invalidateHashes()
+{
+    for (int p = 0; p < pp; p++) {
+        auto& page = pages[p];
+        if (page.type == Type::Component) {
+            page.hash = 0;
+        }
+    }
+}
+
 EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session, EntityRef& entity)
     : session(session)
     , rootEntity(entity)
@@ -712,7 +722,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     return type;
 }
 
-bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
+bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool sendFullUpdate)
 {
     bool modified = previous.empty();
     hasComponentsAddedOrRemoved = false;
@@ -728,7 +738,12 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
         // Fast check. We don't want to do the rather expensive work below if
         // nothing has changed since the last visit.
 
-        modified = journal != previousJournal;
+        if (sendFullUpdate) {
+            previousJournal.invalidateHashes();
+            modified = true;
+        } else {
+            modified = journal != previousJournal;
+        }
 
         if (modified) {
             // Something has changed. We need to do a more detailed inspection

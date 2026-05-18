@@ -75,6 +75,8 @@ namespace Halley {
 
         const Page& findEntityByUUID(const UUID& uuid, int& pageIdx) const;
 
+        void invalidateHashes();
+
     private:
         Page curPage;
 
@@ -101,7 +103,7 @@ namespace Halley {
         bool serializeEntityUpdate(const SerializerOptions& options);
         InboundResult deserializeEntityUpdate(const Bytes& bytes, const SerializerOptions& options);
 
-        bool processEntityUpdateChanges(Bytes& previous);
+        bool processEntityUpdateChanges(Bytes& previous, bool sendFullUpdate);
         bool hasEntityChanges(bool log) const;
 
         [[nodiscard]] size_t getBytes(Bytes& data, const SerializerOptions& options, bool log) const;

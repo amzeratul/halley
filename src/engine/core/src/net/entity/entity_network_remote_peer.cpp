@@ -339,18 +339,18 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			// created, its previous journal is still empty.
     			HalleyAssertDev(remote.hasAuthorityOnly);
     			// Just process and store the journal, but keep marked as "not modified" ...
-		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal, false);
     			// ... but set flag to force an update next tick, so we don't miss any changes.
     			remote.forceNextFastUpdate = true;
     			//Logger::logDev("populating outbound entity journal, authority-only, for " + entity.getName());
     		} else {
-    			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+    			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal, remote.forceNextFastUpdate);
     			modifiedInStructure = fastSerialize.hasEntityChanges(wantToLog);
 
     			// If the forceNextFastUpdate flag is set, mark as modified and to be sent, even if
     			// there is no change.
-    			if (!modified && remote.forceNextFastUpdate) {
-    				modified = true;
+    			if (remote.forceNextFastUpdate) {
+    				HalleyAssertDebug(modified);
     				remote.forceNextFastUpdate = false;
     			}
     		}
@@ -424,7 +424,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         // Binary serialization to (re-)build the update journal.
         auto serialize = EntityNetworkSerialize(parentSession, entity);
         if (serialize.serializeEntityUpdate(parentSession->getByteSerializationOptions())) {
-	        serialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+	        serialize.processEntityUpdateChanges(remote.fastUpdateJournal, false);
         } else {
 	        // If the fast update further above failed, for example because of a full journal,
         	// this one here will probably fail too - so we just drop the changes and retry
