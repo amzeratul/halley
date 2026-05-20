@@ -155,8 +155,8 @@ namespace Halley {
 		AudioPlay = 389,
 		AudioMute = 390,
 
-		Android_Menu = 246,
-		Android_Back = 398,
+		AndroidMenu = 246,
+		AndroidBack = 398,
 
 		Last = 400
 	};
@@ -195,6 +195,7 @@ namespace Halley {
 	class KeyCodes {
 	public:
 		static String toString(KeyCode code);
+		static String toName(KeyCode code);
 		static KeyCode fromString(const String& str);
 		static std::optional<KeyCode> tryFromString(const String& str);
 	};
