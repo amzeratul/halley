@@ -1078,10 +1078,8 @@ const VariableTable* ScriptEnvironment::getVariableTable() const
 
 ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId)
 {
-	pushState(graphState, curEntity, entityVariables, 0);
-	auto statePop = ScopedGuard([this] { popState(); });
-
-	ConfigNode result = [&] () -> ConfigNode {
+	const auto getResult = [&] () -> ConfigNode
+	{
 		const auto& node = graphState.getScriptGraphPtr()->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		if (pinId == static_cast<GraphPinId>(-1)) {
@@ -1116,7 +1114,16 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 				return {};
 			}
 		}
-	}();
+	};
 
-	return result;
+	pushState(graphState, curEntity, entityVariables, 0);
+	auto statePop = ScopedGuard([this] { popState(); });
+	try {
+		return getResult();
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	} catch (...) {
+		Logger::logError("Unknown error while retrieving devcon data");
+	}
+	return {};
 }
