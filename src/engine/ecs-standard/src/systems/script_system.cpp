@@ -647,6 +647,9 @@ private:
 						if (!graph || graph->getAssetHash() != scriptHash) {
 							continue;
 						}
+
+						const auto trace = StackDebugTrace("script", graph->getAssetId());
+
 						auto indices = graph->getSubGraphIndicesForAssetId(scriptId);
 
 						if (scriptIdx >= 0 && scriptIdx < indices.size()) {

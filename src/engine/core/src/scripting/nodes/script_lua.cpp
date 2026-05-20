@@ -125,10 +125,13 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 			data.expr = LuaExpression(std::move(code));
 		}
 	}
+	HalleyAssertDev(data.expr);
 
 	const size_t argsN = data.args.size();
 	const size_t outputs = data.nOutputs;
 	const int firstInputPin = static_cast<int>(nFlowPins());
+
+	const auto trace = StackDebugTrace("luaExpression", data.expr->getExpression());
 
 	LuaFunctionCaller::startCall(state);
 	luaInterface.getLuaReference(*data.expr).pushToLuaStack();
