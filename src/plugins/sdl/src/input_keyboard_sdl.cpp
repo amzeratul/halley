@@ -92,34 +92,11 @@ KeyMods InputKeyboardSDL::getMods(int sdlMods) const
 
 String InputKeyboardSDL::getButtonName(int code) const
 {
-	switch (code) {
-	case static_cast<int>(KeyCode::Esc):
-		return "Esc";
-	case static_cast<int>(KeyCode::Delete):
-		return "Del";
-	case static_cast<int>(KeyCode::Tab):
-		return "Tab";
-	case static_cast<int>(KeyCode::LCtrl):
-	case static_cast<int>(KeyCode::RCtrl):
-		return "Ctrl";
-	case static_cast<int>(KeyCode::LShift):
-	case static_cast<int>(KeyCode::RShift):
-		return "Shift";
-	case static_cast<int>(KeyCode::LAlt):
-	case static_cast<int>(KeyCode::RAlt):
-		return "Alt";
-	case static_cast<int>(KeyCode::Enter):
-		return "Enter";
-	case static_cast<int>(KeyCode::Space):
-		return "Space";
-	default:
-		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
-			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
-		} else {
-			auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code - 128));
-			return str;
-		}
+	if (auto name = KeyCodes::tryToName(static_cast<KeyCode>(code))) {
+		return *name;
 	}
+	auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code - 128));
+	return str;
 }
 
 void InputKeyboardSDL::update()

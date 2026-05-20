@@ -107,8 +107,8 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::BumperRight: return 5;
 		case JoystickButtonPosition::LeftStick: return 9;
 		case JoystickButtonPosition::RightStick: return 10;
-		case JoystickButtonPosition::PlatformAcceptButton: return 0;
-		case JoystickButtonPosition::PlatformCancelButton: return 1;
+		case JoystickButtonPosition::Accept: return 0;
+		case JoystickButtonPosition::Cancel: return 1;
 		case JoystickButtonPosition::TriggerLeft: return 15;
 		case JoystickButtonPosition::TriggerRight: return 16;
 		case JoystickButtonPosition::System: return 17;
@@ -124,8 +124,8 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::BumperRight: return 5;
 		case JoystickButtonPosition::LeftStick: return 6;
 		case JoystickButtonPosition::RightStick: return 7;
-		case JoystickButtonPosition::PlatformAcceptButton: return 0;
-		case JoystickButtonPosition::PlatformCancelButton: return 1;
+		case JoystickButtonPosition::Accept: return 0;
+		case JoystickButtonPosition::Cancel: return 1;
 		case JoystickButtonPosition::TriggerLeft: return 15;
 		case JoystickButtonPosition::TriggerRight: return 16;
 		case JoystickButtonPosition::System: return 17;
@@ -141,8 +141,8 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::BumperRight: return 5;
 		case JoystickButtonPosition::LeftStick: return 6;
 		case JoystickButtonPosition::RightStick: return 7;
-		case JoystickButtonPosition::PlatformAcceptButton: return 0;
-		case JoystickButtonPosition::PlatformCancelButton: return 1;
+		case JoystickButtonPosition::Accept: return 0;
+		case JoystickButtonPosition::Cancel: return 1;
 		case JoystickButtonPosition::TriggerLeft: return 10;
 		case JoystickButtonPosition::TriggerRight: return 11;
 		case JoystickButtonPosition::System: return 17;

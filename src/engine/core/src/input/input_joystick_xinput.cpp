@@ -284,8 +284,8 @@ int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) co
 		case JoystickButtonPosition::TriggerRight: return 11;
 		case JoystickButtonPosition::LeftStick: return 6;
 		case JoystickButtonPosition::RightStick: return 7;
-		case JoystickButtonPosition::PlatformAcceptButton: return 0;
-		case JoystickButtonPosition::PlatformCancelButton: return 1;
+		case JoystickButtonPosition::Accept: return 0;
+		case JoystickButtonPosition::Cancel: return 1;
 		case JoystickButtonPosition::DPadUp: return 12;
 		case JoystickButtonPosition::DPadRight: return 13;
 		case JoystickButtonPosition::DPadDown: return 14;

@@ -196,6 +196,7 @@ namespace Halley {
 	public:
 		static String toString(KeyCode code);
 		static String toName(KeyCode code);
+		static std::optional<String> tryToName(KeyCode code);
 		static KeyCode fromString(const String& str);
 		static std::optional<KeyCode> tryFromString(const String& str);
 	};

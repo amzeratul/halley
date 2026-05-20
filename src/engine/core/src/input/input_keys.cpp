@@ -99,12 +99,12 @@ private:
 		add(PrintScreen, "PrintScreen");
 		add(ScrollLock, "ScrollLock");
 		add(Pause, "Pause");
-		add(Insert, "Insert");
+		add(Insert, "Insert", "Ins");
 		add(Home, "Home");
-		add(PageUp, "PageUp");
-		add(Delete, "Delete");
+		add(PageUp, "PageUp", "PgUp");
+		add(Delete, "Delete", "Del");
 		add(End, "End");
-		add(PageDown, "PageDown");
+		add(PageDown, "PageDown", "PgDn");
 		add(Right, "Right");
 		add(Left, "Left");
 		add(Down, "Down");
@@ -167,6 +167,16 @@ String KeyCodes::toString(KeyCode code)
 String KeyCodes::toName(KeyCode code)
 {
 	return getMapping().toName.at(static_cast<size_t>(code));
+}
+
+std::optional<String> KeyCodes::tryToName(KeyCode code)
+{
+	const auto& toName = getMapping().toName;
+	const auto idx = static_cast<size_t>(code);
+	if (idx >= toName.size() || toName[idx].empty()) {
+		return std::nullopt;
+	}
+	return toName[idx];
 }
 
 KeyCode KeyCodes::fromString(const String& str)

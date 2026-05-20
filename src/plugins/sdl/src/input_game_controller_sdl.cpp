@@ -116,8 +116,8 @@ int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position)
 		case JoystickButtonPosition::TriggerRight: return SDL_CONTROLLER_BUTTON_MAX + 1;
 		case JoystickButtonPosition::LeftStick: return SDL_CONTROLLER_BUTTON_LEFTSTICK;
 		case JoystickButtonPosition::RightStick: return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-		case JoystickButtonPosition::PlatformAcceptButton: return SDL_CONTROLLER_BUTTON_A;
-		case JoystickButtonPosition::PlatformCancelButton: return SDL_CONTROLLER_BUTTON_B;
+		case JoystickButtonPosition::Accept: return SDL_CONTROLLER_BUTTON_A;
+		case JoystickButtonPosition::Cancel: return SDL_CONTROLLER_BUTTON_B;
 		case JoystickButtonPosition::DPadUp: return SDL_CONTROLLER_BUTTON_DPAD_UP;
 		case JoystickButtonPosition::DPadRight: return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
 		case JoystickButtonPosition::DPadDown: return SDL_CONTROLLER_BUTTON_DPAD_DOWN;

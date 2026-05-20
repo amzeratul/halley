@@ -2,22 +2,47 @@
 
 using namespace Halley;
 
+std::pair<String, ControlBindingAxisDirection> ControlBinding::parseAxis(std::string_view axisName)
+{
+	auto name = axisName.substr(0, axisName.size() - 1);
+	auto dir = axisName.substr(axisName.size() - 1, 1) == "+" ? ControlBindingAxisDirection::Positive : ControlBindingAxisDirection::Negative;
+	return { name, dir };
+}
+
 ControlBinding::ControlBinding(const ConfigNode& node)
 {
-	bindingType = node["type"].asEnum<ControlBindingType>();
+	if (node.hasKey("type")) {
+		bindingType = node["type"].asEnum<ControlBindingType>();
+		loadValue(bindingType, node["value"]);
+	} else {
+		const auto& m = node.asMap();
+		if (m.size() == 1) {
+			for (auto& [k, v]: m) {
+				bindingType = fromString<ControlBindingType>(k);
+				loadValue(bindingType, v);
+			}
+		}
+	}
+}
 
-	switch (bindingType) {
+void ControlBinding::loadValue(ControlBindingType type, const ConfigNode& value)
+{
+	switch (type) {
 	case ControlBindingType::GamepadButton:
-		gamepadButton = node["value"].asEnum<JoystickButtonPosition>();
+		gamepadButton = value.asEnum<JoystickButtonPosition>();
 		break;
 	case ControlBindingType::GamepadAxis:
-		gamepadAxis = node["value"].asEnum<JoystickAxisPosition>();
+	{
+		auto [name, dir] = parseAxis(value.asString());
+		gamepadAxis = fromString<JoystickAxisPosition>(name);
+		gamepadAxisDirection = dir;
 		break;
+	}
 	case ControlBindingType::KeyboardButton:
-		keyCode = node["value"].asEnum<KeyCode>();
+		keyCode = value.asEnum<KeyCode>();
 		break;
 	case ControlBindingType::MouseButton:
-		mouseButton = node["value"].asEnum<MouseButton>();
+		mouseButton = value.asEnum<MouseButton>();
 		break;
 	}
 }
@@ -33,7 +58,7 @@ ConfigNode ControlBinding::toConfigNode() const
 		result["value"] = gamepadButton;
 		break;
 	case ControlBindingType::GamepadAxis:
-		result["value"] = gamepadAxis;
+		result["value"] = gamepadAxis + (gamepadAxisDirection == ControlBindingAxisDirection::Positive ? "+" : "-");
 		break;
 	case ControlBindingType::KeyboardButton:
 		result["value"] = keyCode;
@@ -44,6 +69,27 @@ ConfigNode ControlBinding::toConfigNode() const
 	}
 
 	return result;
+}
+
+ControlInheritedBinding::ControlInheritedBinding(const ConfigNode& node)
+{
+	const auto& m = node.asMap();
+	if (m.size() == 1) {
+		for (auto& [k, v]: m) {
+			bindingType = fromString<ControlBindingType>(k);
+			sourceId = v.asString("");
+		}
+	}
+}
+
+ControlBindingType ControlInheritedBinding::getBindingType() const
+{
+	return bindingType;
+}
+
+const String& ControlInheritedBinding::getSourceId() const
+{
+	return sourceId;
 }
 
 ControlBindingType ControlBinding::getBindingType() const
@@ -69,10 +115,11 @@ void ControlBinding::bindGamepadButton(JoystickButtonPosition button)
 	gamepadButton = button;
 }
 
-void ControlBinding::bindGamepadAxis(JoystickAxisPosition axis)
+void ControlBinding::bindGamepadAxis(JoystickAxisPosition axis, ControlBindingAxisDirection direction)
 {
 	bindingType = ControlBindingType::GamepadAxis;
 	gamepadAxis = axis;
+	gamepadAxisDirection = direction;
 }
 
 void ControlBinding::unbind()
@@ -80,10 +127,10 @@ void ControlBinding::unbind()
 	bindingType = ControlBindingType::None;
 }
 
-JoystickAxisPosition ControlBinding::getJoystickAxis() const
+std::pair<JoystickAxisPosition, ControlBindingAxisDirection> ControlBinding::getJoystickAxis() const
 {
 	HalleyAssertDev(bindingType == ControlBindingType::GamepadAxis);
-	return gamepadAxis;
+	return { gamepadAxis, gamepadAxisDirection };
 }
 
 JoystickButtonPosition ControlBinding::getJoystickButtonPosition() const
@@ -107,14 +154,27 @@ KeyCode ControlBinding::getKeyCode() const
 ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 {
 	bindingId = node["bindingId"].asString();
+	bindingTargetType = node["bindingTargetType"].asEnum(ControlBindingTargetType::Button);
+	groupId = node["groupId"].asString();
 	exclusivityGroup = node["exclusivityGroup"].asString("");
 	inputTypes = node["inputTypes"].asVector<InputType>({});
 	defaultBindings = node["defaultBindings"].asVector<ControlBinding>({});
+	inheritedBindings = node["inheritedBindings"].asVector<ControlInheritedBinding>({});
 }
 
 const String& ControlBindingConfig::getBindingId() const
 {
 	return bindingId;
+}
+
+ControlBindingTargetType ControlBindingConfig::getTargetType() const
+{
+	return bindingTargetType;
+}
+
+const String& ControlBindingConfig::getGroupId() const
+{
+	return groupId;
 }
 
 const String& ControlBindingConfig::getExclusivityGroup() const
@@ -132,12 +192,23 @@ const Vector<ControlBinding>& ControlBindingConfig::getDefaultBindings() const
 	return defaultBindings;
 }
 
+const Vector<ControlInheritedBinding>& ControlBindingConfig::getInheritedBindings() const
+{
+	return inheritedBindings;
+}
+
 ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 {
 	bindingConfigs = node["bindingConfigs"].asVector<ControlBindingConfig>({});
+	bindingSlots = node["bindingSlots"].asVector<Vector<InputType>>({});
 }
 
 const Vector<ControlBindingConfig>& ControlBindingConfigs::getBindings() const
 {
 	return bindingConfigs;
+}
+
+const Vector<Vector<InputType>>& ControlBindingConfigs::getBindingSlots() const
+{
+	return bindingSlots;
 }
