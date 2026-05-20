@@ -137,6 +137,9 @@ void Camera::updateProjection(bool flipVertical)
 		projection = Matrix4f::makeOrtho2D(-w/2, w/2, flipVertical ? h/2 : -h/2, flipVertical ? -h/2 : h/2, -1000, 1000);
 	} else if (type == CameraType::Perspective) {
 		projection = Matrix4f::makePerspective(nearPlane, farPlane, w / h, fov);
+		if (!flipVertical) {
+			projection = Matrix4f::makeScaling(Vector3f(1, -1, 1)) * projection;
+		}
 	}
 
 	// Camera properties
