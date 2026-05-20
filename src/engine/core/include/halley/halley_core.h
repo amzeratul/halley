@@ -57,6 +57,8 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "halley/graphics/window.h"
 
+#include "halley/input/control_binding_config.h"
+#include "halley/input/control_bindings.h"
 #include "halley/input/input_exclusive.h"
 #include "halley/input/input_joystick.h"
 #include "halley/input/input_keyboard.h"

@@ -62,6 +62,8 @@ set(SOURCES
         "src/graphics/texture.cpp"
         "src/graphics/texture_descriptor.cpp"
 
+        "src/input/control_binding_config.cpp"
+        "src/input/control_bindings.cpp"
         "src/input/input_button_base.cpp"
         "src/input/input_device.cpp"
         "src/input/input_exclusive.cpp"
@@ -521,6 +523,8 @@ set(HEADERS
         
         "include/halley/halley_core.h"
         
+        "include/halley/input/control_binding_config.h"
+        "include/halley/input/control_bindings.h"
         "include/halley/input/input_button_base.h"
         "include/halley/input/input_device.h"
         "include/halley/input/input_exclusive.h"
