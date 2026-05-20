@@ -21,8 +21,10 @@
 
 #pragma once
 
+#include "halley/text/string_converter.h"
+
 namespace Halley {
-	enum class KeyCode {
+	enum class KeyCode : uint16_t {
 		Unknown = 0,
 
 		Enter = '\r',
@@ -189,4 +191,38 @@ namespace Halley {
 	{
 		return static_cast<KeyMods>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
 	}
+
+	class KeyCodes {
+	public:
+		static String toString(KeyCode code);
+		static KeyCode fromString(const String& str);
+		static std::optional<KeyCode> tryFromString(const String& str);
+	};
+	
+	template<>
+	struct ToStringConverter<KeyCode>
+	{
+		String operator()(KeyCode s) const
+		{
+			return KeyCodes::toString(s);
+		}
+	};
+
+	template<>
+	struct FromStringConverter<KeyCode>
+	{
+		KeyCode operator()(const String& s) const
+		{
+			return KeyCodes::fromString(s);
+		}
+	};
+
+	template <>
+	struct TryFromStringConverter<KeyCode> {
+		std::optional<KeyCode> operator()(const String& s) const
+		{
+			return KeyCodes::tryFromString(s);
+		}
+	};
+
 }

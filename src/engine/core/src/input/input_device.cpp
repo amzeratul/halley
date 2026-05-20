@@ -47,6 +47,25 @@ int InputDevice::getButtonAtPosition(JoystickButtonPosition position) const
 	return -1;
 }
 
+int InputDevice::getAxisAtPosition(JoystickAxisPosition position) const
+{
+	switch (position) {
+	case JoystickAxisPosition::LeftStickX:
+		return 0;
+	case JoystickAxisPosition::LeftStickY:
+		return 1;
+	case JoystickAxisPosition::RightStickX:
+		return 2;
+	case JoystickAxisPosition::RightStickY:
+		return 3;
+	case JoystickAxisPosition::TriggerLeft:
+		return 4;
+	case JoystickAxisPosition::TriggerRight:
+		return 5;
+	}
+	return -1;
+}
+
 bool InputDevice::isAnyButtonPressed()
 {
 	return false;

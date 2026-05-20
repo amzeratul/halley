@@ -30,10 +30,9 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
-	enum class KeyCode;
 	class InputExclusiveButton;
 
-	enum class InputType {
+	enum class InputType : uint8_t {
 		None,
 		Keyboard,
 		Mouse,
@@ -41,7 +40,20 @@ namespace Halley {
 		Virtual
 	};
 
-	enum class JoystickType {
+	template <>
+	struct EnumNames<InputType> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"none",
+				"keyboard",
+				"mouse",
+				"gamepad",
+				"virtual"
+			});
+		}
+	};
+
+	enum class JoystickType : uint8_t {
 		None,
 		Generic,
 		Xbox,
@@ -51,7 +63,7 @@ namespace Halley {
 		SwitchRightJoycon
 	};
 
-	enum class DefaultInputButtons {
+	enum class DefaultInputButtons : uint8_t {
 		Primary,
 		Secondary,
 		Accept,
@@ -91,7 +103,7 @@ namespace Halley {
 		}
 	};
 
-	enum class JoystickButtonPosition
+	enum class JoystickButtonPosition : uint8_t
 	{
 		FaceTop,
 		FaceRight,
@@ -114,7 +126,58 @@ namespace Halley {
 		System
 	};
 
-	enum class MouseButton {
+	template <>
+	struct EnumNames<JoystickButtonPosition> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"faceTop",
+				"faceRight",
+				"faceBottom",
+				"faceLeft",
+				"bumperLeft",
+				"bumperRight",
+				"triggerLeft",
+				"triggerRight",
+				"leftStick",
+				"rightStick",
+				"select",
+				"start",
+				"platformAcceptButton",
+				"platformCancelButton",
+				"dPadUp",
+				"dPadRight",
+				"dPadDown",
+				"dPadLeft",
+				"system"
+			});
+		}
+	};
+
+	enum class JoystickAxisPosition : uint8_t
+	{
+		LeftStickX,
+		LeftStickY,
+		RightStickX,
+		RightStickY,
+		TriggerLeft,
+		TriggerRight
+	};
+
+	template <>
+	struct EnumNames<JoystickAxisPosition> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"leftStickX",
+				"leftStickY",
+				"rightStickX",
+				"rightStickY",
+				"triggerLeft",
+				"triggerRight"
+			});
+		}
+	};
+
+	enum class MouseButton : uint8_t {
 		Left,
 		Middle,
 		Right,
@@ -126,6 +189,25 @@ namespace Halley {
 		WheelLeft,
 		WheelRight,
 		WheelLeftRight
+	};
+
+	template <>
+	struct EnumNames<MouseButton> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"left",
+				"middle",
+				"right",
+				"b4",
+				"b5",
+				"wheelUp",
+				"wheelDown",
+				"wheelUpDown",
+				"wheelLeft",
+				"wheelRight",
+				"wheelLeftRight"
+			});
+		}
 	};
 
 	using InputButton = int;
@@ -146,6 +228,7 @@ namespace Halley {
 		virtual String getButtonName(int code) const;
 		virtual String getButtonName(int code, std::optional<JoystickType> typeOverride) const;
 		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
+		virtual int getAxisAtPosition(JoystickAxisPosition position) const;
 
 		virtual bool isAnyButtonPressed();
 		virtual bool isAnyButtonPressedRepeat();

@@ -5,7 +5,7 @@
 #include "halley/maths/rect.h"
 
 namespace Halley {
-	enum class KeyCode;
+	enum class KeyCode : uint16_t;
 	enum class KeyMods : uint8_t;
 	class UIWidget;
 

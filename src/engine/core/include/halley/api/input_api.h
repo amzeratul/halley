@@ -18,7 +18,7 @@ namespace Halley
 		String name;
 	};
 
-	enum class MouseCursorMode {
+	enum class MouseCursorMode : uint8_t {
 		Arrow,
 		IBeam,
 		Wait,

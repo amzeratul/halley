@@ -68,6 +68,7 @@ set(SOURCES
         "src/input/input_joystick.cpp"
         "src/input/input_joystick_xinput.cpp"
         "src/input/input_keyboard.cpp"
+        "src/input/input_keys.cpp"
         "src/input/input_manual.cpp"
         "src/input/input_touch.cpp"
         "src/input/input_vibration.cpp"

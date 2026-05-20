@@ -32,7 +32,7 @@
 #include "halley/utils/convertible_to.h"
 
 namespace Halley {
-	enum class KeyCode;
+	enum class KeyCode : uint16_t;
 	using spInputDevice = std::shared_ptr<InputDevice>;
 	class InputExclusiveButton;
 	class InputExclusiveAxis;

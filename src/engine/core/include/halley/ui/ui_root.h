@@ -8,7 +8,7 @@
 namespace Halley {
 	class StringOutputServer;
 	class I18N;
-	enum class JoystickType;
+	enum class JoystickType : uint8_t;
 	enum class UIWidgetUpdateType;
 	class InputAPI;
 	class UIStyle;

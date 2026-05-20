@@ -12,8 +12,8 @@
 #include "halley/text/i18n.h"
 
 namespace Halley {
-	enum class MouseCursorMode;
-	enum class JoystickType;
+	enum class MouseCursorMode : uint8_t;
+	enum class JoystickType : uint8_t;
 	class UIEvent;
 	class UIValidator;
 	class UIDataBind;
