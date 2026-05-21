@@ -60,7 +60,7 @@ namespace Halley {
 
 		ControlBinding* tryGetBinding(std::string_view bindingId, size_t slot);
 
-		void applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
+		void applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, std::optional<int> chordButton, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
 		void applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig) const;
 	};
 }

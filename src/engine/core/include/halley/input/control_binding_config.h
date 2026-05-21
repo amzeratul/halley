@@ -67,24 +67,34 @@ namespace Halley {
 		ControlBindingType getBindingType() const;
 
 		void bindMouseButton(MouseButton button);
-		void bindKeyboardButton(KeyCode button);
-		void bindGamepadButton(JoystickButtonPosition button);
+		void bindKeyboardButton(KeyCode button, std::optional<KeyCode> chord = {});
+		void bindGamepadButton(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
 		void bindGamepadAxis(JoystickAxisPosition axis, ControlBindingAxisDirection direction);
 		void unbind();
 
-		std::pair<JoystickAxisPosition, ControlBindingAxisDirection> getJoystickAxis() const;
-		JoystickButtonPosition getJoystickButtonPosition() const;
+		std::pair<JoystickAxisPosition, ControlBindingAxisDirection> getGamepadAxis() const;
+		std::pair<JoystickButtonPosition, std::optional<JoystickButtonPosition>> getGamepadButtonPosition() const;
+		std::pair<KeyCode, std::optional<KeyCode>> getKeyCode() const;
 		MouseButton getMouseButton() const;
-		KeyCode getKeyCode() const;
+
+		std::pair<int, std::optional<int>> getGamepadButtonIdx(const InputDevice& gamepad) const;
+		std::pair<int, ControlBindingAxisDirection> getGamepadAxisIdx(const InputDevice& gamepad) const;
+		std::pair<int, std::optional<int>> getKeyboardButtonIdx() const;
+		int getMouseButtonIdx() const;
 
 	private:
 		ControlBindingType bindingType = ControlBindingType::None;
 
-		MouseButton mouseButton = MouseButton::Left;
-		KeyCode keyCode = KeyCode::Unknown;
-		JoystickButtonPosition gamepadButton = JoystickButtonPosition::Accept;
-		JoystickAxisPosition gamepadAxis = JoystickAxisPosition::LeftStickX;
-		ControlBindingAxisDirection gamepadAxisDirection = ControlBindingAxisDirection::Positive;
+		std::optional<MouseButton> mouseButton;
+		
+		std::optional<KeyCode> keyCode;
+		std::optional<KeyCode> keyCodeChord;
+		
+		std::optional<JoystickButtonPosition> gamepadButton;
+		std::optional<JoystickButtonPosition> gamepadButtonChord;
+
+		std::optional<JoystickAxisPosition> gamepadAxis;
+		std::optional<ControlBindingAxisDirection> gamepadAxisDirection;
 		
 		void loadValue(ControlBindingType type, const ConfigNode& value);
 	};
@@ -115,6 +125,7 @@ namespace Halley {
 		const Vector<ControlBinding>& getDefaultBindings() const;
 		const Vector<ControlInheritedBinding>& getInheritedBindings() const;
 		bool isHidden() const;
+		bool isDevOnly() const;
 
 	private:
 	    String bindingId;
@@ -125,6 +136,7 @@ namespace Halley {
 		Vector<ControlBinding> defaultBindings;
 		Vector<ControlInheritedBinding> inheritedBindings;
 		bool hidden;
+		bool devOnly;
 	};
 
 	class ControlBindingConfigs {

@@ -176,17 +176,20 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 
 		for (const auto& binding: bs) {
 			if (binding.getBindingType() == ControlBindingType::KeyboardButton) {
-				applyButtonBinding(dst, mapper, keyboard, static_cast<int>(binding.getKeyCode()), bindingConfig, pendingState);
+				const auto [b0, b1] = binding.getKeyboardButtonIdx();
+				applyButtonBinding(dst, mapper, keyboard, b0, b1, bindingConfig, pendingState);
 			} else if (binding.getBindingType() == ControlBindingType::MouseButton) {
-				applyButtonBinding(dst, mapper, mouse, static_cast<int>(binding.getMouseButton()), bindingConfig, pendingState);
+				auto b0 = binding.getMouseButtonIdx();
+				applyButtonBinding(dst, mapper, mouse, b0, std::nullopt, bindingConfig, pendingState);
 			} else if (binding.getBindingType() == ControlBindingType::GamepadButton) {
 				for (const auto& gamepad: gamepads) {
-					applyButtonBinding(dst, mapper, gamepad, gamepad->getButtonAtPosition(binding.getJoystickButtonPosition()), bindingConfig, pendingState);
+					const auto [b0, b1] = binding.getGamepadButtonIdx(*gamepad);
+					applyButtonBinding(dst, mapper, gamepad, b0, b1, bindingConfig, pendingState);
 				}
 			} else if (binding.getBindingType() == ControlBindingType::GamepadAxis) {
-				auto [axis, axisDir] = binding.getJoystickAxis();
 				for (const auto& gamepad: gamepads) {
-					applyAxisBinding(dst, mapper, gamepad, gamepad->getAxisAtPosition(axis), axisDir, bindingConfig);
+					auto [axis, axisDir] = binding.getGamepadAxisIdx(*gamepad);
+					applyAxisBinding(dst, mapper, gamepad, axis, axisDir, bindingConfig);
 				}
 			}
 		}
@@ -203,11 +206,15 @@ uint32_t ControlBindings::getVersion() const
 	return version;
 }
 
-void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
+void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, std::optional<int> chordButton, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
 {
 	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
-		auto n = mapper.getVirtualButtonId(bindingConfig.getBindingId());
-		dst.bindButton(n, device, button);
+		const auto n = mapper.getVirtualButtonId(bindingConfig.getBindingId());
+		if (chordButton) {
+			dst.bindButtonChord(n, device, *chordButton, button);
+		} else {
+			dst.bindButton(n, device, button);
+		}
 	} else if (bindingConfig.getTargetType() == ControlBindingTargetType::Axis) {
 		const auto [axisId, axisDir] = ControlBinding::parseAxis(bindingConfig.getBindingId());
 		const auto n = mapper.getVirtualAxisId(axisId);
