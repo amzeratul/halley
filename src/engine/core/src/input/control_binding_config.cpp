@@ -195,6 +195,24 @@ int ControlBinding::getMouseButtonIdx() const
 	return static_cast<int>(getMouseButton());
 }
 
+ControlBinding ControlBinding::convertToGamepadAxis() const
+{
+	if (bindingType == ControlBindingType::GamepadButton && gamepadButton && !gamepadButtonChord) {
+		if (gamepadButton == JoystickButtonPosition::TriggerLeft) {
+			ControlBinding result;
+			result.bindGamepadAxis(JoystickAxisPosition::TriggerLeft, ControlBindingAxisDirection::Positive);
+			return result;
+		} else if (gamepadButton == JoystickButtonPosition::TriggerRight) {
+			ControlBinding result;
+			result.bindGamepadAxis(JoystickAxisPosition::TriggerRight, ControlBindingAxisDirection::Positive);
+			return result;
+		} else {
+			return *this;
+		}
+	}
+	return {};
+}
+
 ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 {
 	bindingId = node["bindingId"].asString();

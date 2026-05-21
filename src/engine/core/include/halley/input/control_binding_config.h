@@ -82,6 +82,8 @@ namespace Halley {
 		std::pair<int, std::optional<int>> getKeyboardButtonIdx() const;
 		int getMouseButtonIdx() const;
 
+		[[nodiscard]] ControlBinding convertToGamepadAxis() const;
+
 	private:
 		ControlBindingType bindingType = ControlBindingType::None;
 

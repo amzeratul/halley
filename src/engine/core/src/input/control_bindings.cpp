@@ -96,8 +96,10 @@ void ControlBindings::resolve() const
 			if (auto idx = findSlotIdx(dst, inhBinding.getBindingType())) {
 				const auto& src = resolvedBindings.at(inhBinding.getSourceId());
 				for (const auto& srcBinding: src) {
-					if (srcBinding.getBindingType() == inhBinding.getBindingType()) {
+					if (inhBinding.getBindingType() == srcBinding.getBindingType()) {
 						dst[*idx] = srcBinding;
+					} else if (inhBinding.getBindingType() == ControlBindingType::GamepadAxis && srcBinding.getBindingType() == ControlBindingType::GamepadButton) {
+						dst[*idx] = srcBinding.convertToGamepadAxis();
 					}
 				}
 			} else {
