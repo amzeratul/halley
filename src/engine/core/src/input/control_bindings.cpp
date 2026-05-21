@@ -29,38 +29,39 @@ const ControlBindingConfigs& ControlBindings::getConfig() const
 	return config;
 }
 
+std::optional<size_t> ControlBindings::findSlotIdx(const Vector<ControlBinding>& bs, ControlBindingType type) const
+{
+	InputType inputType = InputType::None;
+	switch (type) {
+	case ControlBindingType::GamepadAxis:
+	case ControlBindingType::GamepadButton:
+		inputType = InputType::Gamepad;
+		break;
+	case ControlBindingType::KeyboardButton:
+		inputType = InputType::Keyboard;
+		break;
+	case ControlBindingType::MouseButton:
+		inputType = InputType::Mouse;
+	}
+
+	const auto& slots = config.getBindingSlots();
+	for (size_t i = 0; i < slots.size(); ++i) {
+		if (bs[i].getBindingType() == ControlBindingType::None && slots[i].contains(inputType)) {
+			return i;
+		}
+	}
+	return std::nullopt;	
+}
+
 void ControlBindings::loadDefaults()
 {
 	bindings.clear();
-	const auto& slots = config.getBindingSlots();
-
-	// Find first compatible slot
-	auto findSlotIdx = [&] (const Vector<ControlBinding>& bs, ControlBindingType type) -> std::optional<size_t> {
-		InputType inputType = InputType::None;
-		switch (type) {
-		case ControlBindingType::GamepadAxis:
-		case ControlBindingType::GamepadButton:
-			inputType = InputType::Gamepad;
-			break;
-		case ControlBindingType::KeyboardButton:
-			inputType = InputType::Keyboard;
-			break;
-		case ControlBindingType::MouseButton:
-			inputType = InputType::Mouse;
-		}
-
-		for (size_t i = 0; i < slots.size(); ++i) {
-			if (bs[i].getBindingType() == ControlBindingType::None && slots[i].contains(inputType)) {
-				return i;
-			}
-		}
-		return std::nullopt;
-	};
+	const auto& nSlots = config.getBindingSlots().size();
 
 	// Bind defaults
 	for (const auto& bindingConfig: config.getBindings()) {
 		auto& dst = bindings[bindingConfig.getBindingId()];
-		dst.resize(slots.size());
+		dst.resize(nSlots);
 
 		for (const auto& defBinding: bindingConfig.getDefaultBindings()) {
 			if (auto idx = findSlotIdx(dst, defBinding.getBindingType())) {
@@ -71,14 +72,25 @@ void ControlBindings::loadDefaults()
 		}
 	}
 
+	modified = true;
+	resolve();
+}
+
+void ControlBindings::resolve() const
+{
+	if (!modified) {
+		return;
+	}
+
+	resolvedBindings = bindings;
+
 	// Bind inherited
-	// TODO: this needs to stay in sync somehow
 	for (const auto& bindingConfig: config.getBindings()) {
-		auto& dst = bindings[bindingConfig.getBindingId()];
+		auto& dst = resolvedBindings[bindingConfig.getBindingId()];
 
 		for (const auto& inhBinding: bindingConfig.getInheritedBindings()) {
 			if (auto idx = findSlotIdx(dst, inhBinding.getBindingType())) {
-				const auto& src = bindings.at(inhBinding.getSourceId());
+				const auto& src = resolvedBindings.at(inhBinding.getSourceId());
 				for (const auto& srcBinding: src) {
 					if (srcBinding.getBindingType() == inhBinding.getBindingType()) {
 						dst[*idx] = srcBinding;
@@ -89,12 +101,15 @@ void ControlBindings::loadDefaults()
 			}
 		}
 	}
+
+	modified = false;
 }
 
 void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindKeyboardButton(code);
+		modified = true;
 	}
 }
 
@@ -102,6 +117,7 @@ void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot,
 {
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindGamepadButton(button);
+		modified = true;
 	}
 }
 
@@ -109,6 +125,7 @@ void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, J
 {
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindGamepadAxis(axis, dir);
+		modified = true;
 	}
 }
 
@@ -116,6 +133,7 @@ void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, M
 {
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindMouseButton(button);
+		modified = true;
 	}
 }
 
@@ -123,12 +141,14 @@ void ControlBindings::unbind(std::string_view bindingId, size_t slot)
 {
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->unbind();
+		modified = true;
 	}
 }
 
 const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bindingId) const
 {
-	if (const auto iter = bindings.find(bindingId); iter != bindings.end()) {
+	resolve();
+	if (const auto iter = resolvedBindings.find(bindingId); iter != resolvedBindings.end()) {
 		return iter->second;
 	}
 	return dummyBindings;
@@ -136,12 +156,14 @@ const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bind
 
 void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const
 {
+	resolve();
+
 	dst.clearBindings();
 
 	AxisPendingState pendingState;
 
 	for (const auto& bindingConfig: config.getBindings()) {
-		const auto& bs = bindings.at(bindingConfig.getBindingId());
+		const auto& bs = resolvedBindings.at(bindingConfig.getBindingId());
 
 		for (const auto& binding: bs) {
 			if (binding.getBindingType() == ControlBindingType::KeyboardButton) {
@@ -195,8 +217,8 @@ void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<In
 	const auto iter = std_ex::find_if(axes, [&] (AxisPending& axis) {
 		return axis.axisId == axisId && axis.device == device;
 	});
-	AxisPending* dst = nullptr;
 
+	AxisPending* dst;
 	if (iter != axes.end()) {
 		dst = &*iter;
 	} else {
