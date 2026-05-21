@@ -2,6 +2,7 @@
 
 #include "halley/api/audio_api.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/input/control_bindings.h"
 using namespace Halley;
 
 Options::Options(std::shared_ptr<ISaveData> saveData)
@@ -187,6 +188,27 @@ void Options::setAudioEventLogging(std::optional<LoggerLevel> level, const std::
 void Options::loadAudioEventLogging(AudioAPI& audioAPI) const
 {
 	audioAPI.setEventLogging(getOption("audio_log_level").asOptional<LoggerLevel>(), getOption("audio_log_prefix").asOptional<String>());
+}
+
+void Options::loadControlBindings(ControlBindingConfigs config)
+{
+	controlBindings = std::make_shared<ControlBindings>(config);
+	controlBindings->load(getOption("control_bindings"));
+}
+
+ControlBindings& Options::getControlBindings() const
+{
+	if (!controlBindings) {
+		throw Exception("Control bindings not set", HalleyExceptions::Utils);
+	}
+	return *controlBindings;
+}
+
+void Options::saveControlBindings()
+{
+	if (controlBindings) {
+		setOption("control_bindings", controlBindings->toConfigNode());
+	}
 }
 
 float Options::getVolume(std::string_view bus) const

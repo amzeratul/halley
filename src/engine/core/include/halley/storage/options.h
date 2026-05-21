@@ -4,6 +4,8 @@
 #include "halley/text/i18n_language.h"
 
 namespace Halley {
+	class ControlBindings;
+	class ControlBindingConfigs;
 	class AudioAPI;
 
 	enum class AudioOutputType {
@@ -73,9 +75,14 @@ namespace Halley {
 		void setAudioEventLogging(std::optional<LoggerLevel> level, const std::optional<String>& prefix);
 		void loadAudioEventLogging(AudioAPI& audioAPI) const;
 
+		void loadControlBindings(ControlBindingConfigs config);
+		ControlBindings& getControlBindings() const;
+		void saveControlBindings();
+
 	protected:
 		
 		std::shared_ptr<ISaveData> saveData;
+		std::shared_ptr<ControlBindings> controlBindings;
 
 		ConfigNode options;
 		bool modified = false;

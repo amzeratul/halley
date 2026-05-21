@@ -6,21 +6,24 @@
 
 using namespace Halley;
 
-ControlBindings::ControlBindings(const ControlBindingConfigs& config)
-	: config(config)
+ControlBindings::ControlBindings(ControlBindingConfigs config)
+	: config(std::move(config))
 {
 	loadDefaults();
 }
 
 void ControlBindings::load(const ConfigNode& node)
 {
-	bindings = node["bindings"].asHashMap<String, Vector<ControlBinding>>();
+	// TODO
+	//bindings = node["bindings"].asHashMap<String, Vector<ControlBinding>>();
+	resolve();
 }
 
 ConfigNode ControlBindings::toConfigNode() const
 {
+	// TODO
 	ConfigNode result;
-	result["bindings"] = bindings;
+	//result["bindings"] = bindings;
 	return result;
 }
 
@@ -73,6 +76,7 @@ void ControlBindings::loadDefaults()
 	}
 
 	modified = true;
+	++version;
 	resolve();
 }
 
@@ -110,6 +114,7 @@ void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyC
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindKeyboardButton(code);
 		modified = true;
+		++version;
 	}
 }
 
@@ -118,6 +123,7 @@ void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot,
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindGamepadButton(button);
 		modified = true;
+		++version;
 	}
 }
 
@@ -126,6 +132,7 @@ void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, J
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindGamepadAxis(axis, dir);
 		modified = true;
+		++version;
 	}
 }
 
@@ -134,6 +141,7 @@ void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, M
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->bindMouseButton(button);
 		modified = true;
+		++version;
 	}
 }
 
@@ -142,6 +150,7 @@ void ControlBindings::unbind(std::string_view bindingId, size_t slot)
 	if (auto* binding = tryGetBinding(bindingId, slot)) {
 		binding->unbind();
 		modified = true;
+		++version;
 	}
 }
 
@@ -187,6 +196,11 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 	for (const auto& axis: pendingState.axes) {
 		dst.bindAxisButton(axis.axisId, axis.device, axis.negativeButton.value_or(-1), axis.positiveButton.value_or(-1));
 	}
+}
+
+uint32_t ControlBindings::getVersion() const
+{
+	return version;
 }
 
 void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const

@@ -14,7 +14,7 @@ namespace Halley {
 
 	class ControlBindings {
 	public:
-		ControlBindings(const ControlBindingConfigs& config);
+		ControlBindings(ControlBindingConfigs config);
 
 		void load(const ConfigNode& node);
 		ConfigNode toConfigNode() const;
@@ -31,6 +31,7 @@ namespace Halley {
 		const Vector<ControlBinding>& getBindings(std::string_view bindingId) const;
 
 		void apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const;
+		uint32_t getVersion() const;
 
 	private:
 		struct AxisPending {
@@ -46,12 +47,13 @@ namespace Halley {
 			void addButton(int axisId, std::shared_ptr<InputDevice> device, int button, ControlBindingAxisDirection dir);
 		};
 
-		const ControlBindingConfigs& config;
+		ControlBindingConfigs config;
 		HashMap<String, Vector<ControlBinding>> bindings;
 		Vector<ControlBinding> dummyBindings;
 
 		mutable HashMap<String, Vector<ControlBinding>> resolvedBindings;
 		mutable bool modified = false;
+		uint32_t version = 0;
 
 		void resolve() const;
 		std::optional<size_t> findSlotIdx(const Vector<ControlBinding>& bs, ControlBindingType type) const;
