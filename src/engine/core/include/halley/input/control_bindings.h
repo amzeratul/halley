@@ -34,17 +34,26 @@ namespace Halley {
 		uint32_t getVersion() const;
 
 	private:
-		struct AxisPending {
+		struct AxisButtonPending {
 			int axisId;
 			std::shared_ptr<InputDevice> device;
 			std::optional<int> negativeButton;
 			std::optional<int> positiveButton;
 		};
 
+		struct AxisAxisPending {
+			int axisId;
+			std::shared_ptr<InputDevice> device;
+			int deviceAxis;
+			float scale;
+		};
+
 		struct AxisPendingState {
-			Vector<AxisPending> axes;
+			Vector<AxisButtonPending> axisButtons;
+			Vector<AxisAxisPending> axisAxes;
 
 			void addButton(int axisId, std::shared_ptr<InputDevice> device, int button, ControlBindingAxisDirection dir);
+			void addAxis(int axisId, std::shared_ptr<InputDevice> device, int deviceAxis, float scale);
 		};
 
 		ControlBindingConfigs config;
@@ -61,6 +70,6 @@ namespace Halley {
 		ControlBinding* tryGetBinding(std::string_view bindingId, size_t slot);
 
 		void applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, std::optional<int> chordButton, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
-		void applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig) const;
+		void applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
 	};
 }

@@ -189,15 +189,18 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 			} else if (binding.getBindingType() == ControlBindingType::GamepadAxis) {
 				for (const auto& gamepad: gamepads) {
 					auto [axis, axisDir] = binding.getGamepadAxisIdx(*gamepad);
-					applyAxisBinding(dst, mapper, gamepad, axis, axisDir, bindingConfig);
+					applyAxisBinding(dst, mapper, gamepad, axis, axisDir, bindingConfig, pendingState);
 				}
 			}
 		}
 	}
 
-	// Pending axis buttons
-	for (const auto& axis: pendingState.axes) {
+	// Pending axes
+	for (const auto& axis: pendingState.axisButtons) {
 		dst.bindAxisButton(axis.axisId, axis.device, axis.negativeButton.value_or(-1), axis.positiveButton.value_or(-1));
+	}
+	for (const auto& axis: pendingState.axisAxes) {
+		dst.bindAxis(axis.axisId, axis.device, axis.deviceAxis, axis.scale);
 	}
 }
 
@@ -222,28 +225,28 @@ void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindin
 	}
 }
 
-void ControlBindings::applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig) const
+void ControlBindings::applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
 {
 	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
 		Logger::logError("Binding axis to button is not supported, bindingId = " + bindingConfig.getBindingId());
 	} else if (bindingConfig.getTargetType() == ControlBindingTargetType::Axis) {
 		const auto [axisId, axisDir] = ControlBinding::parseAxis(bindingConfig.getBindingId());
 		const auto n = mapper.getVirtualAxisId(axisId);
-		dst.bindAxis(n, device, axis, axisDir == dir ? 1.0f : -1.0f);
+		pendingState.addAxis(n, device, axis, axisDir == dir ? 1.0f : -1.0f);
 	}
 }
 
 void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<InputDevice> device, int button, ControlBindingAxisDirection dir)
 {
-	const auto iter = std_ex::find_if(axes, [&] (AxisPending& axis) {
+	const auto iter = std_ex::find_if(axisButtons, [&] (AxisButtonPending& axis) {
 		return axis.axisId == axisId && axis.device == device;
 	});
 
-	AxisPending* dst;
-	if (iter != axes.end()) {
+	AxisButtonPending* dst;
+	if (iter != axisButtons.end()) {
 		dst = &*iter;
 	} else {
-		dst = &axes.emplace_back(AxisPending{ axisId, device, {}, {} });
+		dst = &axisButtons.emplace_back(AxisButtonPending{ axisId, device, {}, {} });
 	}
 
 	if (dir == ControlBindingAxisDirection::Positive) {
@@ -251,6 +254,22 @@ void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<In
 	} else {
 		dst->negativeButton = button;
 	}
+}
+
+void ControlBindings::AxisPendingState::addAxis(int axisId, std::shared_ptr<InputDevice> device, int deviceAxis, float scale)
+{
+	const auto iter = std_ex::find_if(axisAxes, [&] (AxisAxisPending& axis) {
+		return axis.axisId == axisId && axis.device == device && axis.deviceAxis == deviceAxis;
+	});
+
+	AxisAxisPending* dst;
+	if (iter != axisAxes.end()) {
+		dst = &*iter;
+	} else {
+		dst = &axisAxes.emplace_back(AxisAxisPending{ axisId, device, deviceAxis, scale });
+	}
+
+	dst->scale = scale;
 }
 
 ControlBinding* ControlBindings::tryGetBinding(std::string_view bindingId, size_t slot)
