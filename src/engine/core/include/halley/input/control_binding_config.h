@@ -114,6 +114,7 @@ namespace Halley {
 		const Vector<InputType>& getInputTypes() const;
 		const Vector<ControlBinding>& getDefaultBindings() const;
 		const Vector<ControlInheritedBinding>& getInheritedBindings() const;
+		bool isHidden() const;
 
 	private:
 	    String bindingId;
@@ -123,6 +124,7 @@ namespace Halley {
 		Vector<InputType> inputTypes;
 		Vector<ControlBinding> defaultBindings;
 		Vector<ControlInheritedBinding> inheritedBindings;
+		bool hidden;
 	};
 
 	class ControlBindingConfigs {

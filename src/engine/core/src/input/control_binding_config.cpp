@@ -154,12 +154,13 @@ KeyCode ControlBinding::getKeyCode() const
 ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 {
 	bindingId = node["bindingId"].asString();
-	bindingTargetType = node["bindingTargetType"].asEnum(ControlBindingTargetType::Button);
+	bindingTargetType = bindingId.endsWith("+") || bindingId.endsWith("-") ? ControlBindingTargetType::Axis : ControlBindingTargetType::Button;
 	groupId = node["groupId"].asString("");
 	exclusivityGroup = node["exclusivityGroup"].asString("");
 	inputTypes = node["inputTypes"].asVector<InputType>({});
 	defaultBindings = node["defaultBindings"].asVector<ControlBinding>({});
 	inheritedBindings = node["inheritedBindings"].asVector<ControlInheritedBinding>({});
+	hidden = node["hidden"].asBool(false);
 }
 
 const String& ControlBindingConfig::getBindingId() const
@@ -197,9 +198,24 @@ const Vector<ControlInheritedBinding>& ControlBindingConfig::getInheritedBinding
 	return inheritedBindings;
 }
 
+bool ControlBindingConfig::isHidden() const
+{
+	return hidden;
+}
+
 ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 {
-	bindingConfigs = node["bindingConfigs"].asVector<ControlBindingConfig>({});
+	for (const auto& groupNode: node["bindings"]) {
+		const auto group = groupNode["group"].asString("");
+		const auto exclusivityGroup = groupNode["exclusivityGroup"].asString("");
+		for (const auto& nOrig: groupNode["entries"]) {
+			auto n = ConfigNode(nOrig);
+			n["group"] = group;
+			n["exclusivityGroup"] = exclusivityGroup;
+			bindingConfigs += ControlBindingConfig(n);
+		}
+	}
+
 	bindingSlots = node["bindingSlots"].asVector<Vector<InputType>>({});
 }
 
