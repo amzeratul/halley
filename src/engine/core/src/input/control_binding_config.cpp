@@ -278,8 +278,12 @@ ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 		const auto exclusivityGroup = groupNode["exclusivityGroup"].asString("");
 		for (const auto& nOrig: groupNode["entries"]) {
 			auto n = ConfigNode(nOrig);
-			n["group"] = group;
-			n["exclusivityGroup"] = exclusivityGroup;
+			if (!n.hasKey("group")) {
+				n["group"] = group;
+			}
+			if (!n.hasKey("exclusivityGroup")) {
+				n["exclusivityGroup"] = exclusivityGroup;
+			}
 			bindingConfigs += ControlBindingConfig(n);
 		}
 	}
