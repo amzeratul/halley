@@ -26,8 +26,8 @@ private:
 	{
 		using enum KeyCode;
 
-		toString.resize(static_cast<size_t>(Last), "");
-		toName.resize(static_cast<size_t>(Last), "");
+		toString.resize(static_cast<size_t>(Last) + 1, "");
+		toName.resize(static_cast<size_t>(Last) + 1, "");
 
 		add(Unknown, "Unknown");
 		add(Enter, "Enter");
