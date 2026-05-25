@@ -65,7 +65,7 @@ void UILabel::update(Time t, bool moved)
 		updateMarquee(t);
 	}
 	if (text.checkForUpdates()) {
-		updateText();
+		updateText(false);
 	}
 	if (moved || marqueeSpeed) {
 		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x - marqueePos, 0.0f) - textBounds.getTopLeft());
@@ -138,10 +138,10 @@ void UILabel::updateMinSize()
 	}
 }
 
-void UILabel::updateText() {
+void UILabel::updateText(bool allowReplay) {
 	renderer.setText(text);
 	needsMinSize = true;
-	if (replayOnModified) {
+	if (allowReplay && replayOnModified) {
 		replayInitialBehaviours();
 	}
 }
@@ -186,16 +186,17 @@ float UILabel::getCellWidth()
 void UILabel::setText(const LocalisedString& t)
 {
 	if (text != t) {
-		text = t;
-		updateText();
+		setText(LocalisedString(t));
 	}
 }
 
 void UILabel::setText(LocalisedString&& t)
 {
+	t.checkForUpdates();
 	if (text != t) {
+		const bool isEquivalent = text.isSameKeyAndTransform(t);
 		text = std::move(t);
-		updateText();
+		updateText(!isEquivalent);
 	}
 }
 

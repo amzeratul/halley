@@ -92,7 +92,7 @@ namespace Halley {
 		std::optional<Rect4f> worldClip;
 
 		void updateMinSize();
-		void updateText();
+		void updateText(bool allowReplay = true);
 		void updateMarquee(Time t);
 		float getCellWidth();
 	};

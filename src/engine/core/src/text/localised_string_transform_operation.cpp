@@ -86,3 +86,34 @@ std::shared_ptr<ILocStrOp> LocStrOpReplaceTokens::clone() const
 {
 	return std::make_shared<LocStrOpReplaceTokens>(original, ids, toks);
 }
+
+bool LocStrOpReplaceTokens::isEquivalentTo(const ILocStrOp& otherRaw) const
+{
+	if (auto* other = dynamic_cast<const LocStrOpReplaceTokens*>(&otherRaw)) {
+		return isEquivalentToReplaceTokens(*other);
+	} else {
+		return false;
+	}
+}
+
+bool LocStrOpReplaceTokens::isEquivalentToReplaceTokens(const LocStrOpReplaceTokens& other) const
+{
+	if (toks.size() != other.toks.size()) {
+		return false;
+	}
+	if (!original.isSameKeyAndTransform(other.original)) {
+		return false;
+	}
+
+	const size_t n = toks.size();
+	for (size_t i = 0; i < n; ++i) {
+		if (ids[i] != other.ids[i]) {
+			return false;
+		}
+		if (!toks[i].isSameKeyAndTransform(other.toks[i])) {
+			return false;
+		}
+	}
+
+	return true;
+}

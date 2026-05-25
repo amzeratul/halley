@@ -39,6 +39,11 @@ namespace Halley {
 		LocalisedString& operator=(LocalisedString&& other) noexcept = default;
 		
 		LocalisedString& operator+=(const LocalisedString& str);
+		[[nodiscard]] LocalisedString operator+(const LocalisedString& other) const;
+
+		[[nodiscard]] bool operator==(const LocalisedString& other) const;
+		[[nodiscard]] bool operator!=(const LocalisedString& other) const;
+		[[nodiscard]] bool operator<(const LocalisedString& other) const;
 
 		[[nodiscard]] static LocalisedString fromHardcodedString(const char* str);
 		[[nodiscard]] static LocalisedString fromHardcodedString(const String& str);
@@ -64,11 +69,7 @@ namespace Halley {
 		const String& getString() const;
 		const String& toString() const;
 
-		bool operator==(const LocalisedString& other) const;
-		bool operator!=(const LocalisedString& other) const;
-		bool operator<(const LocalisedString& other) const;
-
-		LocalisedString operator+(const LocalisedString& other) const;
+		bool isSameKeyAndTransform(const LocalisedString& other) const;
 
 		bool checkForUpdates();
 

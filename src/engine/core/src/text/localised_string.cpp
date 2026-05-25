@@ -144,6 +144,20 @@ const String& LocalisedString::toString() const
 	return string;
 }
 
+bool LocalisedString::isSameKeyAndTransform(const LocalisedString& other) const
+{
+	if (key != other.key) {
+		return false;
+	}
+
+	if (transformOp && other.transformOp) {
+		return transformOp->isEquivalentTo(*other.transformOp);
+	} else {
+		// Equivalent if neither has a transform; otherwise one has it and the other doesn't
+		return !transformOp && !other.transformOp;
+	}
+}
+
 bool LocalisedString::operator==(const LocalisedString& other) const
 {
 	return string == other.string;
@@ -171,6 +185,7 @@ bool LocalisedString::checkForUpdates()
 	if (i18n && !key.isEmpty()) {
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
+			const auto oldVersion = i18nVersion;
 			i18nVersion = curVersion;
 
 			if (transformOp) {
