@@ -49,6 +49,7 @@ namespace Halley {
 		void setTempOverrideLanguage(std::optional<I18NLanguage> language);
 		const std::optional<I18NLanguage>& getTempOverrideLanguage() const;
 
+		int getLanguageIndex(const I18NLanguage& language) const;
 		const I18NLanguage& getLanguageFromIndex(int languageIdx) const;
 		Vector<I18NLanguage> getLanguagesAvailable() const;
 
@@ -103,7 +104,6 @@ namespace Halley {
 
 		LangData& getLanguageData(const I18NLanguage& language);
 		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
-		int getLanguageIndex(const I18NLanguage& language) const;
 	};
 
 	class I18NVersionChecker {

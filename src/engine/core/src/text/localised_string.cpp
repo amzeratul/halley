@@ -178,7 +178,10 @@ bool LocalisedString::checkForUpdates()
 					return true;
 				}
 			} else {
-				const auto newValue = i18n->get(key, getLanguage(*i18n));
+				const auto& language = i18n->getCurrentLanguage();
+				languageIdx = i18n->getLanguageIndex(language);
+
+				const auto newValue = i18n->get(key, language);
 				if (string != newValue.string) {
 					string = newValue.string;
 					return true;
