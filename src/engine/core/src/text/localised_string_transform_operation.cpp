@@ -1,10 +1,13 @@
 #include "localised_string_transform_operation.h"
 
+#include "halley/utils/algorithm.h"
+
 using namespace Halley;
 
-void ILocStrOp::setString(LocalisedString& dst, String value)
+void ILocStrOp::setString(LocalisedString& dst, String value, Vector<LocalisedString::TokenInfo> tokenInfos)
 {
 	dst.string = std::move(value);
+	dst.tokenInfo = std::move(tokenInfos);
 }
 
 LocStrOpReplaceTokens::LocStrOpReplaceTokens(LocalisedString original, Vector<String> ids, Vector<LocalisedString> toks)
@@ -21,38 +24,45 @@ void LocStrOpReplaceTokens::eval(LocalisedString& dst)
 		return;
 	}
 
-	auto str = original.getString();
-	for (size_t i = 0; i < toks.size(); ++i) {
-		str = str.replaceAll("{" + ids[i] + "}", toks[i].getString());
-	}
-	setString(dst, str);
+	Vector<LocalisedString::TokenInfo> tokenInfo;
 
-	/*
-	Vector<std::pair<int, size_t>> indices;
-
-	for (int i = 0; i < int(toks.size()); ++i) {
-		const auto pos = string.find("{" + Halley::toString(i) + "}");
-		if (pos != String::npos) {
-			indices.emplace_back(i, pos);
+	String result;
+	auto strRemaining = std::string_view(original.getString());
+	while (!strRemaining.empty()) {
+		auto bracketStart = strRemaining.find('{');
+		auto bracketEnd = strRemaining.find('}', bracketStart);
+		if (bracketEnd == std::string::npos) {
+			bracketStart = std::string::npos;
 		}
+
+		// Everything before {
+		result += strRemaining.substr(0, bracketStart);
+
+		if (bracketStart == std::string::npos) {
+			// Done
+			break;
+		} else {
+			// Everything inside {}
+			const auto tokenId = strRemaining.substr(bracketStart + 1, bracketEnd - bracketStart - 1);
+
+			if (auto idx = std_ex::find_index(ids, tokenId)) {
+				const auto& token = toks[*idx];
+				const auto p0 = String::getUTF32Len(result);
+				const auto len = String::getUTF32Len(token.getString());
+				tokenInfo += LocalisedString::TokenInfo{ static_cast<uint32_t>(p0), static_cast<uint16_t>(len), static_cast<uint16_t>(*idx) };
+				result += token.getString();
+			} else {
+				// Token not found, write out original string
+				result += "{";
+				result += tokenId;
+				result += "}";
+			}
+		}
+
+		// Update remaining
+		strRemaining = strRemaining.substr(bracketEnd + 1);
 	}
-
-	std::stable_sort(indices.begin(), indices.end(), [] (const auto& a, const auto& b) { return a.second < b.second; });
-
-	auto str = std::string_view(string);
-
-	size_t lastPos = 0;
-	ColourStringBuilder builder;
-	for (const auto& index: indices) {
-		builder.append(str.substr(lastPos, index.second - lastPos));
-		builder.append(toks[index.first].getString(), colours[index.first]);
-		lastPos = index.second + 3;
-	}
-	builder.append(str.substr(lastPos));
-
-	auto result = builder.moveResults();
-	return { LocalisedString(std::move(result.first), i18n), std::move(result.second) };
-	*/
+	setString(dst, result, tokenInfo);
 }
 
 bool LocStrOpReplaceTokens::checkForUpdates()

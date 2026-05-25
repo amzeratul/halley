@@ -24,6 +24,12 @@ namespace Halley {
 		friend class ILocStrOp;
 
 	public:
+		struct TokenInfo {
+			uint32_t pos;
+			uint16_t len; // This means the maximum token length is 2^16-1
+			uint16_t idx;
+		};
+
 		LocalisedString();
 
 		LocalisedString(const LocalisedString& other) = default;
@@ -70,22 +76,27 @@ namespace Halley {
 		const I18NLanguage* tryGetLanguage() const;
 		const I18NLanguage& getLanguage(const I18N& i18n) const;
 
+		const Vector<TokenInfo>& getTokenInfo() const;
+		Vector<ColourOverride> makeColourOverrides(gsl::span<const std::optional<Colour4f>> colours) const;
+
 	private:
 		explicit LocalisedString(String string, const I18N* i18n);
 		explicit LocalisedString(const I18N& i18n, String key, String string, int languageIdx);
 
-		[[nodiscard]] LocalisedString doReplaceTokens(Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols = {}, Vector<ColourOverride>* outCols = nullptr) const;
-		[[nodiscard]] LocalisedString doReplaceTokens(Vector<String> ids, Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols = {}, Vector<ColourOverride>* outCols = nullptr) const;
+		[[nodiscard]] LocalisedString doReplaceTokens(Vector<LocalisedString> toks) const;
+		[[nodiscard]] LocalisedString doReplaceTokens(Vector<String> ids, Vector<LocalisedString> toks) const;
 
 		void applyTransformOperation();
 
-		const I18N* i18n = nullptr;
-		String key;
 		String string;
+		String key;
+
+		const I18N* i18n = nullptr;
 		int i18nVersion = 0;
 		int languageIdx = 0;
 
 		std::shared_ptr<ILocStrOp> transformOp;
+		Vector<TokenInfo> tokenInfo;
 	};
 
 }

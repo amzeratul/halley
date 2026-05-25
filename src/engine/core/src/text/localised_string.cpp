@@ -16,15 +16,15 @@ LocalisedString& LocalisedString::operator+=(const LocalisedString& str)
 }
 
 LocalisedString::LocalisedString(String string, const I18N* i18n)
-	: i18n(i18n)
-	, string(std::move(string))
+	: string(std::move(string))
+	, i18n(i18n)
 {
 }
 
 LocalisedString::LocalisedString(const I18N& i18n, String key, String string, int languageIndex)
-	: i18n(&i18n)
+	: string(std::move(string))
 	, key(std::move(key))
-	, string(std::move(string))
+	, i18n(&i18n)
 	, i18nVersion(i18n.getVersion())
 	, languageIdx(languageIndex)
 {
@@ -57,8 +57,8 @@ LocalisedString LocalisedString::fromNumber(float number, const I18NLanguage& la
 
 std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const
 {
-	Vector<ColourOverride> cols;
-	auto str = doReplaceTokens(Vector<LocalisedString>(toks.begin(), toks.end()), colours, &cols);
+	auto str = doReplaceTokens(Vector<LocalisedString>(toks.begin(), toks.end()));
+	auto cols = str.makeColourOverrides(colours);
 	return { str, cols };
 }
 
@@ -87,7 +87,7 @@ LocalisedString LocalisedString::replaceToken(const String& pattern, const Local
 	return doReplaceTokens(std::move(ids), std::move(ts));
 }
 
-LocalisedString LocalisedString::doReplaceTokens(Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols, Vector<ColourOverride>* outCols) const
+LocalisedString LocalisedString::doReplaceTokens(Vector<LocalisedString> toks) const
 {
 	Vector<String> ids;
 	ids.reserve(toks.size());
@@ -95,10 +95,10 @@ LocalisedString LocalisedString::doReplaceTokens(Vector<LocalisedString> toks, g
 		ids += Halley::toString(i);
 	}
 
-	return doReplaceTokens(std::move(ids), std::move(toks), cols, outCols);
+	return doReplaceTokens(std::move(ids), std::move(toks));
 }
 
-LocalisedString LocalisedString::doReplaceTokens(Vector<String> ids, Vector<LocalisedString> toks, gsl::span<const std::optional<Colour4f>> cols, Vector<ColourOverride>* outCols) const
+LocalisedString LocalisedString::doReplaceTokens(Vector<String> ids, Vector<LocalisedString> toks) const
 {
 	auto op = std::make_shared<LocStrOpReplaceTokens>(*this, std::move(ids), std::move(toks));
 	LocalisedString result = *this;
@@ -161,7 +161,9 @@ bool LocalisedString::operator<(const LocalisedString& other) const
 
 LocalisedString LocalisedString::operator+(const LocalisedString& other) const
 {
-	return LocalisedString(string + other.string, i18n);
+	auto result = LocalisedString(string + other.string, i18n);
+	result.tokenInfo = tokenInfo + other.tokenInfo;
+	return result;
 }
 
 bool LocalisedString::checkForUpdates()
@@ -200,4 +202,24 @@ const I18NLanguage* LocalisedString::tryGetLanguage() const
 const I18NLanguage& LocalisedString::getLanguage(const I18N& i18n) const
 {
 	return i18n.getLanguageFromIndex(languageIdx);
+}
+
+const Vector<LocalisedString::TokenInfo>& LocalisedString::getTokenInfo() const
+{
+	return tokenInfo;
+}
+
+Vector<ColourOverride> LocalisedString::makeColourOverrides(gsl::span<const std::optional<Colour4f>> colours) const
+{
+	// TODO: could remove redundant transitions if two tokens are adjacent
+
+	Vector<ColourOverride> result;
+	result.reserve(tokenInfo.size() * 2);
+	for (const auto& token: tokenInfo) {
+		if (token.idx < colours.size()) {
+			result += ColourOverride(token.pos, colours[token.idx]);
+			result += ColourOverride(token.pos + token.len, std::nullopt);
+		}
+	}
+	return result;
 }

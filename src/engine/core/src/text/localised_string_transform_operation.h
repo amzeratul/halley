@@ -12,7 +12,7 @@ namespace Halley {
         virtual std::shared_ptr<ILocStrOp> clone() const = 0;
 
     protected:
-        static void setString(LocalisedString& dst, String value);
+        static void setString(LocalisedString& dst, String value, Vector<LocalisedString::TokenInfo> tokenInfos);
     };
 
     class LocStrOpReplaceTokens : public ILocStrOp {
