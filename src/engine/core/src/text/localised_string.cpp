@@ -172,18 +172,16 @@ bool LocalisedString::checkForUpdates()
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
 			i18nVersion = curVersion;
+
 			if (transformOp) {
 				if (transformOp->checkForUpdates()) {
 					applyTransformOperation();
 					return true;
 				}
 			} else {
-				const auto& language = i18n->getCurrentLanguage();
-				languageIdx = i18n->getLanguageIndex(language);
-
-				const auto newValue = i18n->get(key, language);
-				if (string != newValue.string) {
-					string = newValue.string;
+				auto newValue = i18n->get(key);
+				if (newValue.string != string || newValue.languageIdx != languageIdx) {
+					*this = std::move(newValue);
 					return true;
 				}
 			}
