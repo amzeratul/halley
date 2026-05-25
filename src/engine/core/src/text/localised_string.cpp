@@ -107,6 +107,15 @@ LocalisedString LocalisedString::doReplaceTokens(Vector<String> ids, Vector<Loca
 	return result;
 }
 
+LocalisedString LocalisedString::substr(size_t offset, size_t count) const
+{
+	auto op = std::make_shared<LocStrOpSubstr>(*this, offset, count);
+	LocalisedString result = *this;
+	result.transformOp = std::move(op);
+	result.applyTransformOperation();
+	return result;
+}
+
 void LocalisedString::applyTransformOperation()
 {
 	if (transformOp) {
@@ -142,6 +151,16 @@ const String& LocalisedString::getString() const
 const String& LocalisedString::toString() const
 {
 	return string;
+}
+
+size_t LocalisedString::getLengthUTF8() const
+{
+	return string.length();
+}
+
+size_t LocalisedString::getLengthUTF32() const
+{
+	return String::getUTF32Len(string);
 }
 
 bool LocalisedString::isSameKeyAndTransform(const LocalisedString& other) const

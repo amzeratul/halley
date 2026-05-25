@@ -33,4 +33,22 @@ namespace Halley {
 
     	bool isEquivalentToReplaceTokens(const LocStrOpReplaceTokens& other) const;
     };
+
+    class LocStrOpSubstr : public ILocStrOp {
+    public:
+        LocStrOpSubstr(LocalisedString original, size_t offset, size_t count);
+
+        void eval(LocalisedString& dst) override;
+        bool checkForUpdates() override;
+        void setLanguage(const I18NLanguage& language) override;
+        std::shared_ptr<ILocStrOp> clone() const override;
+        bool isEquivalentTo(const ILocStrOp& other) const override;
+
+    private:
+        LocalisedString original;
+        size_t offset;
+        size_t count;
+
+    	bool isEquivalentToSubstr(const LocStrOpSubstr& other) const;
+    };
 }

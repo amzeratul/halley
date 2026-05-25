@@ -63,11 +63,16 @@ namespace Halley {
 		[[nodiscard]] LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens) const;
 		[[nodiscard]] LocalisedString replaceToken(const String& pattern, const LocalisedString& token) const;
 
+		[[nodiscard]] LocalisedString substr(size_t offset, size_t count = String::npos) const;
+
 		[[nodiscard]] LocalisedString replaceLanguage(const I18NLanguage& language) const;
 		void replaceLanguageInPlace(const I18NLanguage& language);
 
 		const String& getString() const;
 		const String& toString() const;
+
+		[[nodiscard]] size_t getLengthUTF8() const;
+		[[nodiscard]] size_t getLengthUTF32() const;
 
 		bool isSameKeyAndTransform(const LocalisedString& other) const;
 

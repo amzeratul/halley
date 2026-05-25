@@ -21,6 +21,7 @@ LocStrOpReplaceTokens::LocStrOpReplaceTokens(LocalisedString original, Vector<St
 void LocStrOpReplaceTokens::eval(LocalisedString& dst)
 {
 	if (toks.empty()) {
+		dst = original;
 		return;
 	}
 
@@ -116,4 +117,58 @@ bool LocStrOpReplaceTokens::isEquivalentToReplaceTokens(const LocStrOpReplaceTok
 	}
 
 	return true;
+}
+
+
+
+LocStrOpSubstr::LocStrOpSubstr(LocalisedString original, size_t offset, size_t count)
+	: original(std::move(original))
+	, offset(offset)
+	, count(count)
+{
+}
+
+void LocStrOpSubstr::eval(LocalisedString& dst)
+{
+	auto tokenInfo = original.getTokenInfo();
+	auto result32 = original.getString().getUTF32().substr(offset, count);
+
+	for (auto& token: tokenInfo) {
+		if (token.pos >= offset) {
+			token.pos -= static_cast<uint32_t>(offset);
+		} else {
+			token.pos = 0;
+		}
+	}
+
+	setString(dst, String(result32), tokenInfo);
+}
+
+bool LocStrOpSubstr::checkForUpdates()
+{
+	return original.checkForUpdates();
+}
+
+void LocStrOpSubstr::setLanguage(const I18NLanguage& language)
+{
+	original.replaceLanguageInPlace(language);
+}
+
+std::shared_ptr<ILocStrOp> LocStrOpSubstr::clone() const
+{
+	return std::make_shared<LocStrOpSubstr>(original, offset, count);
+}
+
+bool LocStrOpSubstr::isEquivalentTo(const ILocStrOp& otherRaw) const
+{
+	if (auto* other = dynamic_cast<const LocStrOpSubstr*>(&otherRaw)) {
+		return isEquivalentToSubstr(*other);
+	} else {
+		return false;
+	}
+}
+
+bool LocStrOpSubstr::isEquivalentToSubstr(const LocStrOpSubstr& other) const
+{
+	return offset == other.offset && count == other.count && original.isSameKeyAndTransform(other.original);
 }
