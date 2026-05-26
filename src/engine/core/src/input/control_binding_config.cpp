@@ -289,6 +289,10 @@ ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 	}
 
 	bindingSlots = node["bindingSlots"].asVector<Vector<InputType>>({});
+
+	for (const auto& binding: bindingConfigs) {
+		bindingIds.emplace(binding.getBindingId());
+	}
 }
 
 const Vector<ControlBindingConfig>& ControlBindingConfigs::getBindings() const
@@ -299,4 +303,9 @@ const Vector<ControlBindingConfig>& ControlBindingConfigs::getBindings() const
 const Vector<Vector<InputType>>& ControlBindingConfigs::getBindingSlots() const
 {
 	return bindingSlots;
+}
+
+const HashSet<String>& ControlBindingConfigs::getBindingIds() const
+{
+	return bindingIds;
 }

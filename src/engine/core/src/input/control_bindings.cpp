@@ -9,21 +9,19 @@ using namespace Halley;
 ControlBindings::ControlBindings(ControlBindingConfigs config)
 	: config(std::move(config))
 {
-	loadDefaults();
+	resolve(true);
 }
 
 void ControlBindings::load(const ConfigNode& node)
 {
-	// TODO
-	//bindings = node["bindings"].asHashMap<String, Vector<ControlBinding>>();
-	resolve();
+	userBindings = node["userBindings"].asHashMap<String, ControlBinding>();
+	resolve(true);
 }
 
 ConfigNode ControlBindings::toConfigNode() const
 {
-	// TODO
 	ConfigNode result;
-	//result["bindings"] = bindings;
+	result["userBindings"] = userBindings;
 	return result;
 }
 
@@ -56,14 +54,44 @@ std::optional<size_t> ControlBindings::findSlotIdx(const Vector<ControlBinding>&
 	return std::nullopt;	
 }
 
-void ControlBindings::loadDefaults()
+void ControlBindings::resetToDefaults()
 {
-	bindings.clear();
+	if (!userBindings.empty()) {
+		userBindings.clear();
+
+		modified = true;
+		++version;
+		resolve(true);
+	}
+}
+
+void ControlBindings::resetToDefaults(gsl::span<int> slots)
+{
+	bool mod = false;
+	for (auto slot: slots) {
+		const String suffix = String(":") + slot;
+		mod = std_ex::erase_if_key(userBindings, [&] (const String& k) { return k.endsWith(suffix); }) || mod;
+	}
+
+	if (mod) {
+		modified = true;
+		++version;
+		resolve(true);
+	}
+}
+
+void ControlBindings::resolve(bool force) const
+{
+	if (!modified && !force) {
+		return;
+	}
+
+	resolvedBindings.clear();
 	const auto& nSlots = config.getBindingSlots().size();
 
 	// Bind defaults
 	for (const auto& bindingConfig: config.getBindings()) {
-		auto& dst = bindings[bindingConfig.getBindingId()];
+		auto& dst = resolvedBindings[bindingConfig.getBindingId()];
 		dst.resize(nSlots);
 
 		for (const auto& defBinding: bindingConfig.getDefaultBindings()) {
@@ -75,18 +103,23 @@ void ControlBindings::loadDefaults()
 		}
 	}
 
-	modified = true;
-	++version;
-	resolve();
-}
+	// Bind user
+	for (const auto& [key, binding]: userBindings) {
+		const auto split = key.split(':');
+		const auto id = split[0];
+		const auto slot = split[1].toInteger();
 
-void ControlBindings::resolve() const
-{
-	if (!modified) {
-		return;
+		if (const auto iter = resolvedBindings.find(id); iter != resolvedBindings.end()) {
+			auto& dst = iter->second;
+			if (slot >= 0 && slot < static_cast<int>(dst.size())) {
+				dst[slot] = binding;
+			} else {
+				Logger::logError("Unable to bind user control for " + id + " at slot " + slot + ": slot not found");
+			}
+		} else {
+			Logger::logError("Unable to bind user control for " + id + " at slot " + slot + ": id not found");
+		}
 	}
-
-	resolvedBindings = bindings;
 
 	// Bind inherited
 	for (const auto& bindingConfig: config.getBindings()) {
@@ -113,7 +146,7 @@ void ControlBindings::resolve() const
 
 void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
-	if (auto* binding = tryGetBinding(bindingId, slot)) {
+	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		binding->bindKeyboardButton(code);
 		modified = true;
 		++version;
@@ -122,7 +155,7 @@ void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyC
 
 void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button)
 {
-	if (auto* binding = tryGetBinding(bindingId, slot)) {
+	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		binding->bindGamepadButton(button);
 		modified = true;
 		++version;
@@ -131,7 +164,7 @@ void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot,
 
 void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, ControlBindingAxisDirection dir)
 {
-	if (auto* binding = tryGetBinding(bindingId, slot)) {
+	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		binding->bindGamepadAxis(axis, dir);
 		modified = true;
 		++version;
@@ -140,7 +173,7 @@ void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, J
 
 void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button)
 {
-	if (auto* binding = tryGetBinding(bindingId, slot)) {
+	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		binding->bindMouseButton(button);
 		modified = true;
 		++version;
@@ -149,7 +182,7 @@ void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, M
 
 void ControlBindings::unbind(std::string_view bindingId, size_t slot)
 {
-	if (auto* binding = tryGetBinding(bindingId, slot)) {
+	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		binding->unbind();
 		modified = true;
 		++version;
@@ -158,7 +191,7 @@ void ControlBindings::unbind(std::string_view bindingId, size_t slot)
 
 const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bindingId) const
 {
-	resolve();
+	resolve(resolvedBindings.empty());
 	if (const auto iter = resolvedBindings.find(bindingId); iter != resolvedBindings.end()) {
 		return iter->second;
 	}
@@ -167,7 +200,7 @@ const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bind
 
 void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const
 {
-	resolve();
+	resolve(resolvedBindings.empty());
 
 	dst.clearBindings();
 
@@ -274,14 +307,18 @@ void ControlBindings::AxisPendingState::addAxis(int axisId, std::shared_ptr<Inpu
 	dst->scale = scale;
 }
 
-ControlBinding* ControlBindings::tryGetBinding(std::string_view bindingId, size_t slot)
+ControlBinding* ControlBindings::tryGetUserBinding(std::string_view bindingId, size_t slot)
 {
-	if (const auto iter = bindings.find(bindingId); iter != bindings.end()) {
-		auto& bs = iter->second;
-
-		if (slot < bs.size()) {
-			return &bs[slot];
-		}
+	if (slot >= config.getBindingSlots().size()) {
+		Logger::logError("Invalid control slot number: " + toString(slot));
+		return nullptr;
 	}
-	return nullptr;
+
+	if (!config.getBindingIds().contains(bindingId)) {
+		Logger::logError("Invalid control binding: " + String(bindingId));
+		return nullptr;
+	}
+
+	const String key = String(bindingId) + ":" + slot;
+	return &userBindings[key];
 }

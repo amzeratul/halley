@@ -148,9 +148,11 @@ namespace Halley {
 
 		const Vector<ControlBindingConfig>& getBindings() const;
 		const Vector<Vector<InputType>>& getBindingSlots() const;
+		const HashSet<String>& getBindingIds() const;
 
 	private:
 		Vector<ControlBindingConfig> bindingConfigs;
 		Vector<Vector<InputType>> bindingSlots;
+		HashSet<String> bindingIds;
 	};
 }

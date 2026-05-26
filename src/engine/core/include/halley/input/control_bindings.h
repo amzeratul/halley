@@ -21,7 +21,9 @@ namespace Halley {
 
 		const ControlBindingConfigs& getConfig() const;
 
-		void loadDefaults();
+		void resetToDefaults();
+		void resetToDefaults(gsl::span<int> slots);
+
 		void bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code);
 		void bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button);
 		void bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, ControlBindingAxisDirection dir);
@@ -57,17 +59,17 @@ namespace Halley {
 		};
 
 		ControlBindingConfigs config;
-		HashMap<String, Vector<ControlBinding>> bindings;
+		HashMap<String, ControlBinding> userBindings;
 		Vector<ControlBinding> dummyBindings;
 
 		mutable HashMap<String, Vector<ControlBinding>> resolvedBindings;
 		mutable bool modified = false;
 		uint32_t version = 0;
 
-		void resolve() const;
+		void resolve(bool force) const;
 		std::optional<size_t> findSlotIdx(const Vector<ControlBinding>& bs, ControlBindingType type) const;
 
-		ControlBinding* tryGetBinding(std::string_view bindingId, size_t slot);
+		ControlBinding* tryGetUserBinding(std::string_view bindingId, size_t slot);
 
 		void applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, std::optional<int> chordButton, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
 		void applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
