@@ -139,47 +139,70 @@ UIEvent::UIEvent(UIEventType type, String sourceId, ConfigNode data)
 
 bool UIEvent::getBoolData() const
 {
-	return configData["bool"].asBool();
+	return getRawData("bool").asBool();
 }
 
 bool UIEvent::getBoolData2() const
 {
-	return configData["bool2"].asBool();
+	return getRawData("bool2").asBool();
 }
 
 int UIEvent::getIntData() const
 {
-	return configData["int"].asInt();
+	return getRawData("int").asInt();
 }
 
 int UIEvent::getIntData2() const
 {
-	return configData["int2"].asInt();
+	return getRawData("int2").asInt();
 }
 
 KeyCode UIEvent::getKeyCode() const
 {
-	return KeyCode(configData["keyCode"].asInt());
+	return KeyCode(getRawData("keyCode").asInt());
 }
 
 KeyMods UIEvent::getKeyMods() const
 {
-	return KeyMods(configData["keyMods"].asInt());
+	return KeyMods(getRawData("keyMods").asInt());
 }
 
 float UIEvent::getFloatData() const
 {
-	return configData["float"].asFloat();
+	return getRawData("float").asFloat();
 }
 
 Vector2f UIEvent::getVectorData() const
 {
-	return configData["vector"].asVector2f();
+	return getRawData("vector").asVector2f();
 }
 
 Rect4f UIEvent::getRectData() const
 {
-	return Rect4f(configData["rect0"].asVector2f(), configData["rect1"].asVector2f());
+	return Rect4f(getRawData("rect0").asVector2f(), getRawData("rect1").asVector2f());
+}
+
+String UIEvent::getData() const
+{
+	return getRawData("str").asString();
+}
+
+String UIEvent::getStringData() const
+{
+	return getRawData("str").asString();
+}
+
+String UIEvent::getStringData2() const
+{
+	return getRawData("str2").asString();
+}
+
+const ConfigNode& UIEvent::getRawData(const String& key) const
+{
+	if (!configData.hasKey(key)) {
+		throw Exception("UIEvent with type " + toString(static_cast<int>(type)) + " has no key \"" + key + "\"", HalleyExceptions::UI);
+	}
+	return configData[key];
 }
 
 const ConfigNode& UIEvent::getConfigData() const
@@ -217,17 +240,3 @@ const String& UIEvent::getSourceId() const
 	return sourceId;
 }
 
-String UIEvent::getData() const
-{
-	return configData["str"].asString();
-}
-
-String UIEvent::getStringData() const
-{
-	return configData["str"].asString();
-}
-
-String UIEvent::getStringData2() const
-{
-	return configData["str2"].asString();
-}

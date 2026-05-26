@@ -132,6 +132,8 @@ namespace Halley {
 		String sourceId;
 		ConfigNode configData;
 		UIWidget* curWidget = nullptr;
+
+		const ConfigNode& getRawData(const String& key) const;
 	};
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;
