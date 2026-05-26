@@ -146,11 +146,23 @@ public:
 				if (lock.refCount > 0) {
 					// Locked by some local entity
 					if (lock.playerId == playerId) {
-						// Already locked by this player, just increment count!
-						lock.refCount++;
-						if (acquireAuthority && !lock.withAuthority && getSessionService().isMultiplayer()) {
-							Logger::logWarning("Tried to acquire lock, with authority, for entity already locked");
+						// Already locked by this player.
+						if (!acquireAuthority && lock.withAuthority) {
+							// Tries to obtain a non-authoritive lock, but already has a lock with
+							// authority. This isn't good - reject the attempt.
+							Logger::logError("Tried to acquire lock, for entity already locked with authority");
+							return Future<NetworkLockHandle>::makeImmediate({});
 						}
+
+						if (acquireAuthority && !lock.withAuthority) {
+							// Wants to lock with authority, but already has a lock without. Let's
+							// allow this, but we need to "promote" the lock.
+							lock.withAuthority = true;
+						}
+
+						// Increment lock count!
+						lock.refCount++;
+
 						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
 					} else {
 						// Locked by someone else
@@ -296,6 +308,7 @@ private:
 				// blocked until the result is delivered.
 				LocalLock& l = myLocks[targetId];
 				l.playerId = {};
+				l.withAuthority = withAuthority;
 			}
 
 			Promise<bool> promise;
