@@ -322,6 +322,12 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 	header.type = NetworkSessionMessageType::ToPeer;
 	header.srcPeerId = myPeerId ? myPeerId.value() : 0;
 	header.dstPeerId = peerId;
+
+	if (header.srcPeerId == header.dstPeerId) {
+		Logger::logError("Unable to send Network message to myself.");
+		Logger::logError(Debug::getCallStack());
+	}
+
 	packet.addHeader(header);
 
 	for (const auto& peer: peers) {
