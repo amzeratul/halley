@@ -217,7 +217,7 @@ ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 {
 	bindingId = node["bindingId"].asString();
 	bindingTargetType = bindingId.endsWith("+") || bindingId.endsWith("-") ? ControlBindingTargetType::Axis : ControlBindingTargetType::Button;
-	groupId = node["groupId"].asString("");
+	groupId = node["group"].asString("");
 	exclusivityGroup = node["exclusivityGroup"].asString("");
 	inputTypes = node["inputTypes"].asVector<InputType>({});
 	defaultBindings = node["defaultBindings"].asVector<ControlBinding>({});
