@@ -146,6 +146,7 @@ namespace Halley {
 		ControlBindingConfigs() = default;
 	    ControlBindingConfigs(const ConfigNode& node);
 
+		const ControlBindingConfig& getBinding(const String& id) const;
 		const Vector<ControlBindingConfig>& getBindings() const;
 		const Vector<Vector<InputType>>& getBindingSlots() const;
 		const HashSet<String>& getBindingIds() const;

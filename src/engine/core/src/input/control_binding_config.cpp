@@ -295,6 +295,17 @@ ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 	}
 }
 
+const ControlBindingConfig& ControlBindingConfigs::getBinding(const String& id) const
+{
+	// This might be kinda slow...
+	for (const auto& b: bindingConfigs) {
+		if (b.getBindingId() == id) {
+			return b;
+		}
+	}
+	throw Exception("Binding not found: " + id, 0);
+}
+
 const Vector<ControlBindingConfig>& ControlBindingConfigs::getBindings() const
 {
 	return bindingConfigs;
