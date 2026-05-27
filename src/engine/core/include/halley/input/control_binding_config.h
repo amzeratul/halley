@@ -69,6 +69,9 @@ namespace Halley {
 
 		[[nodiscard]] ControlBinding convertToGamepadAxis() const;
 
+		bool operator==(const ControlBinding& other) const = default;
+		bool operator!=(const ControlBinding& other) const = default;
+
 	private:
 		ControlBindingType bindingType = ControlBindingType::None;
 

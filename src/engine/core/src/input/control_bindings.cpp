@@ -15,6 +15,7 @@ ControlBindings::ControlBindings(ControlBindingConfigs config)
 void ControlBindings::load(const ConfigNode& node)
 {
 	userBindings = node["userBindings"].asHashMap<String, ControlBinding>();
+	clearRedundantBindings();
 	resolve(true);
 }
 
@@ -54,6 +55,22 @@ std::optional<size_t> ControlBindings::findSlotIdx(const Vector<ControlBinding>&
 	return std::nullopt;	
 }
 
+Vector<ControlBinding> ControlBindings::getDefaultBindings(const ControlBindingConfig& bindingConfig) const
+{
+	Vector<ControlBinding> dst;
+	dst.resize(config.getBindingSlots().size());
+
+	for (const auto& defBinding: bindingConfig.getDefaultBindings()) {
+		if (auto idx = findSlotIdx(dst, defBinding.getBindingType())) {
+			dst[*idx] = defBinding;
+		} else {
+			Logger::logError("Unable to bind default controls for " + bindingConfig.getBindingId());
+		}
+	}
+
+	return dst;
+}
+
 void ControlBindings::resetToDefaults()
 {
 	if (!userBindings.empty()) {
@@ -82,8 +99,7 @@ void ControlBindings::resetToDefaults(gsl::span<int> slots)
 
 bool ControlBindings::hasChanges() const
 {
-	// TODO
-	return false;
+	return !userBindings.empty();
 }
 
 void ControlBindings::resolve(bool force) const
@@ -93,20 +109,10 @@ void ControlBindings::resolve(bool force) const
 	}
 
 	resolvedBindings.clear();
-	const auto& nSlots = config.getBindingSlots().size();
 
 	// Bind defaults
 	for (const auto& bindingConfig: config.getBindings()) {
-		auto& dst = resolvedBindings[bindingConfig.getBindingId()];
-		dst.resize(nSlots);
-
-		for (const auto& defBinding: bindingConfig.getDefaultBindings()) {
-			if (auto idx = findSlotIdx(dst, defBinding.getBindingType())) {
-				dst[*idx] = defBinding;
-			} else {
-				Logger::logError("Unable to bind default controls for " + bindingConfig.getBindingId());
-			}
-		}
+		resolvedBindings[bindingConfig.getBindingId()] = getDefaultBindings(bindingConfig);
 	}
 
 	// Bind user
@@ -150,10 +156,32 @@ void ControlBindings::resolve(bool force) const
 	modified = false;
 }
 
+void ControlBindings::clearRedundantBindings()
+{
+	Vector<String> toErase;
+
+	for (const auto& [key, binding]: userBindings) {
+		const auto split = key.split(':');
+		const auto id = split[0];
+		const auto slot = split[1].toInteger();
+
+		if (getDefaultBindings(config.getBinding(id))[slot] == binding) {
+			toErase += key;
+		}
+	}
+
+	if (!toErase.empty()) {
+		std_ex::erase_if_key(userBindings, [&] (const String& key) { return toErase.contains(key); });
+		modified = true;
+		++version;
+	}
+}
+
 void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindKeyboardButton(code)) {
+			clearRedundantBindings();
 			modified = true;
 			++version;
 		}
@@ -164,6 +192,7 @@ void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot,
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindGamepadButton(button)) {
+			clearRedundantBindings();
 			modified = true;
 			++version;
 		}
@@ -174,6 +203,7 @@ void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, J
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindGamepadAxis(axis, dir)) {
+			clearRedundantBindings();
 			modified = true;
 			++version;
 		}
@@ -184,6 +214,7 @@ void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, M
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindMouseButton(button)) {
+			clearRedundantBindings();
 			modified = true;
 			++version;
 		}
@@ -194,6 +225,7 @@ void ControlBindings::unbind(std::string_view bindingId, size_t slot)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->unbind()) {
+			clearRedundantBindings();
 			modified = true;
 			++version;
 		}

@@ -69,10 +69,13 @@ namespace Halley {
 
 		void resolve(bool force) const;
 		std::optional<size_t> findSlotIdx(const Vector<ControlBinding>& bs, ControlBindingType type) const;
+		Vector<ControlBinding> getDefaultBindings(const ControlBindingConfig& bindingConfig) const;
 
 		ControlBinding* tryGetUserBinding(std::string_view bindingId, size_t slot);
 
 		void applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, std::optional<int> chordButton, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
 		void applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, JoystickAxisDirection dir, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const;
+
+		void clearRedundantBindings();
 	};
 }
