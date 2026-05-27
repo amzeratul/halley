@@ -138,6 +138,13 @@ public:
 
 	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) override
 	{
+		if (const auto target = tryFindNetworkRoot(targetId); target != nullptr) {
+			targetId = target->entityId;
+		} else {
+			Logger::logError("Tried to acquire lock, but " + targetId.toDetailedString() + " not found, or misses Network component");
+			return Future<NetworkLockHandle>::makeImmediate({});
+		}
+
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
 			auto& lock = iter->second;
 			if (lock.playerId.isValid()) {
