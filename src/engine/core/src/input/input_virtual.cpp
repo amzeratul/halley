@@ -448,8 +448,10 @@ String InputVirtual::getButtonName(int code) const
 			}
 		}
 		return binds.front().device->getButtonName(binds.front().a);
+	} else if (type == InputType::Mouse) {
+		return toString(static_cast<MouseButton>(code));
 	} else {
-		return "-";
+		return "";
 	}
 }
 
