@@ -35,6 +35,7 @@ namespace Halley {
 		void reset();
 
 		bool isModified() const;
+		void markModified();
 
 		void setOption(std::string_view name, ConfigNode value);
 		ConfigNode getOption(std::string_view name) const;

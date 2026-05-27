@@ -111,36 +111,56 @@ ControlBindingType ControlBinding::getBindingType() const
 	return bindingType;
 }
 
-void ControlBinding::bindMouseButton(MouseButton button)
+bool ControlBinding::bindMouseButton(MouseButton button)
 {
-	bindingType = ControlBindingType::MouseButton;
-	mouseButton = button;
+	if (bindingType != ControlBindingType::MouseButton || mouseButton != button) {
+		bindingType = ControlBindingType::MouseButton;
+		mouseButton = button;
+		return true;
+	}
+	return false;
 }
 
-void ControlBinding::bindKeyboardButton(KeyCode button, std::optional<KeyCode> buttonChord)
+bool ControlBinding::bindKeyboardButton(KeyCode button, std::optional<KeyCode> buttonChord)
 {
-	bindingType = ControlBindingType::KeyboardButton;
-	keyCode = button;
-	keyCodeChord = buttonChord;
+	if (bindingType != ControlBindingType::KeyboardButton || keyCode != button || keyCodeChord != buttonChord) {
+		bindingType = ControlBindingType::KeyboardButton;
+		keyCode = button;
+		keyCodeChord = buttonChord;
+		return true;
+	}
+	return false;
 }
 
-void ControlBinding::bindGamepadButton(JoystickButtonPosition button, std::optional<JoystickButtonPosition> buttonChord)
+bool ControlBinding::bindGamepadButton(JoystickButtonPosition button, std::optional<JoystickButtonPosition> buttonChord)
 {
-	bindingType = ControlBindingType::GamepadButton;
-	gamepadButton = button;
-	gamepadButtonChord = buttonChord;
+	if (bindingType != ControlBindingType::GamepadButton || gamepadButton != button || gamepadButtonChord != buttonChord) {
+		bindingType = ControlBindingType::GamepadButton;
+		gamepadButton = button;
+		gamepadButtonChord = buttonChord;
+		return true;
+	}
+	return false;
 }
 
-void ControlBinding::bindGamepadAxis(JoystickAxisPosition axis, JoystickAxisDirection direction)
+bool ControlBinding::bindGamepadAxis(JoystickAxisPosition axis, JoystickAxisDirection direction)
 {
-	bindingType = ControlBindingType::GamepadAxis;
-	gamepadAxis = axis;
-	gamepadAxisDirection = direction;
+	if (bindingType != ControlBindingType::GamepadAxis || gamepadAxis != axis || gamepadAxisDirection != direction) {
+		bindingType = ControlBindingType::GamepadAxis;
+		gamepadAxis = axis;
+		gamepadAxisDirection = direction;
+		return true;
+	}
+	return false;
 }
 
-void ControlBinding::unbind()
+bool ControlBinding::unbind()
 {
-	bindingType = ControlBindingType::None;
+	if (bindingType != ControlBindingType::None) {
+		bindingType = ControlBindingType::None;
+		return true;
+	}
+	return false;
 }
 
 std::pair<JoystickAxisPosition, JoystickAxisDirection> ControlBinding::getGamepadAxis() const

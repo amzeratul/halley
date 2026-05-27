@@ -39,7 +39,7 @@ void Options::reset()
 	options["devFlags"] = ConfigNode::MapType();
 	options["keyboardLayout"] = "qwerty";
 	options["resolution"] = Vector2i(1280, 720);
-	modified = true;
+	markModified();
 
 	onReset();
 }
@@ -47,6 +47,11 @@ void Options::reset()
 bool Options::isModified() const
 {
 	return modified;
+}
+
+void Options::markModified()
+{
+	modified = true;
 }
 
 void Options::load(ConfigNode node)
@@ -66,7 +71,7 @@ void Options::setOption(std::string_view name, ConfigNode value)
 {
 	if (options[name] != value) {
 		options[name] = std::move(value);
-		modified = true;
+		markModified();
 	}
 }
 
@@ -78,7 +83,7 @@ ConfigNode Options::getOption(std::string_view name) const
 void Options::setDevValue(std::string_view name, float value)
 {
 	options["devValues"][name] = value;
-	modified = true;
+	markModified();
 }
 
 float Options::getDevValue(std::string_view name, float defaultValue) const
@@ -89,7 +94,7 @@ float Options::getDevValue(std::string_view name, float defaultValue) const
 void Options::setDevFlag(std::string_view name, bool value)
 {
 	options["devFlags"][name] = value;
-	modified = true;
+	markModified();
 }
 
 bool Options::getDevFlag(std::string_view name, bool defaultValue) const
@@ -219,7 +224,7 @@ float Options::getVolume(std::string_view bus) const
 void Options::setVolume(std::string_view bus, float value)
 {
 	options["volume"][bus] = value;
-	modified = true;
+	markModified();
 }
 
 void Options::applyVolumes(AudioAPI& audio)

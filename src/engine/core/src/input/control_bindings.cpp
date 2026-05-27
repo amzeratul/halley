@@ -80,6 +80,12 @@ void ControlBindings::resetToDefaults(gsl::span<int> slots)
 	}
 }
 
+bool ControlBindings::hasChanges() const
+{
+	// TODO
+	return false;
+}
+
 void ControlBindings::resolve(bool force) const
 {
 	if (!modified && !force) {
@@ -147,45 +153,50 @@ void ControlBindings::resolve(bool force) const
 void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		binding->bindKeyboardButton(code);
-		modified = true;
-		++version;
+		if (binding->bindKeyboardButton(code)) {
+			modified = true;
+			++version;
+		}
 	}
 }
 
 void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		binding->bindGamepadButton(button);
-		modified = true;
-		++version;
+		if (binding->bindGamepadButton(button)) {
+			modified = true;
+			++version;
+		}
 	}
 }
 
 void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		binding->bindGamepadAxis(axis, dir);
-		modified = true;
-		++version;
+		if (binding->bindGamepadAxis(axis, dir)) {
+			modified = true;
+			++version;
+		}
 	}
 }
 
 void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		binding->bindMouseButton(button);
-		modified = true;
-		++version;
+		if (binding->bindMouseButton(button)) {
+			modified = true;
+			++version;
+		}
 	}
 }
 
 void ControlBindings::unbind(std::string_view bindingId, size_t slot)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		binding->unbind();
-		modified = true;
-		++version;
+		if (binding->unbind()) {
+			modified = true;
+			++version;
+		}
 	}
 }
 

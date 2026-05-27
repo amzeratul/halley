@@ -78,6 +78,21 @@ namespace Halley {
 		SwitchRightJoycon
 	};
 
+	template <>
+	struct EnumNames<JoystickType> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"none",
+				"generic",
+				"xbox",
+				"playstation",
+				"switchFull",
+				"switchLeftJoycon",
+				"switchRightJoycon"
+			});
+		}
+	};
+
 	enum class DefaultInputButtons : uint8_t {
 		Primary,
 		Secondary,

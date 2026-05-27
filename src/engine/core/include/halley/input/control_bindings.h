@@ -23,6 +23,7 @@ namespace Halley {
 
 		void resetToDefaults();
 		void resetToDefaults(gsl::span<int> slots);
+		bool hasChanges() const;
 
 		void bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code);
 		void bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button);

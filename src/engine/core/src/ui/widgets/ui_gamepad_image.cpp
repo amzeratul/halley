@@ -50,7 +50,7 @@ void UIGamepadImage::setAlwaysShow(bool enabled, bool force)
 
 void UIGamepadImage::refreshSprite()
 {
-	if (curType) {
+	if (curType && curType != JoystickType::None) {
 		setSprite(iconRetriever(button, curType.value()).setColour(colour));
 	} else {
 		setSprite(Sprite());
