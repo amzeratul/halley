@@ -104,175 +104,117 @@ int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position)
 	const bool playstation = joystickType == JoystickType::Playstation;
 
 	switch (position) {
-		case JoystickButtonPosition::FaceTop: return nintendo ? SDL_CONTROLLER_BUTTON_X : SDL_CONTROLLER_BUTTON_Y;
-		case JoystickButtonPosition::FaceRight: return nintendo ? SDL_CONTROLLER_BUTTON_A : SDL_CONTROLLER_BUTTON_B;
-		case JoystickButtonPosition::FaceBottom: return nintendo ? SDL_CONTROLLER_BUTTON_B : SDL_CONTROLLER_BUTTON_A;
-		case JoystickButtonPosition::FaceLeft: return nintendo ? SDL_CONTROLLER_BUTTON_Y : SDL_CONTROLLER_BUTTON_X;
-		case JoystickButtonPosition::Select: return playstation ? SDL_CONTROLLER_BUTTON_TOUCHPAD : SDL_CONTROLLER_BUTTON_BACK;
-		case JoystickButtonPosition::Start: return SDL_CONTROLLER_BUTTON_START;
-		case JoystickButtonPosition::BumperLeft: return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-		case JoystickButtonPosition::BumperRight: return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-		case JoystickButtonPosition::TriggerLeft: return SDL_CONTROLLER_BUTTON_MAX;
-		case JoystickButtonPosition::TriggerRight: return SDL_CONTROLLER_BUTTON_MAX + 1;
-		case JoystickButtonPosition::LeftStick: return SDL_CONTROLLER_BUTTON_LEFTSTICK;
-		case JoystickButtonPosition::RightStick: return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-		case JoystickButtonPosition::Accept: return SDL_CONTROLLER_BUTTON_A;
-		case JoystickButtonPosition::Cancel: return SDL_CONTROLLER_BUTTON_B;
-		case JoystickButtonPosition::DPadUp: return SDL_CONTROLLER_BUTTON_DPAD_UP;
-		case JoystickButtonPosition::DPadRight: return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
-		case JoystickButtonPosition::DPadDown: return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-		case JoystickButtonPosition::DPadLeft: return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-		case JoystickButtonPosition::System: return SDL_CONTROLLER_BUTTON_GUIDE;
-		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
+	case JoystickButtonPosition::FaceTop:
+		return nintendo ? SDL_CONTROLLER_BUTTON_X : SDL_CONTROLLER_BUTTON_Y;
+	case JoystickButtonPosition::FaceRight:
+		return nintendo ? SDL_CONTROLLER_BUTTON_A : SDL_CONTROLLER_BUTTON_B;
+	case JoystickButtonPosition::FaceBottom:
+		return nintendo ? SDL_CONTROLLER_BUTTON_B : SDL_CONTROLLER_BUTTON_A;
+	case JoystickButtonPosition::FaceLeft:
+		return nintendo ? SDL_CONTROLLER_BUTTON_Y : SDL_CONTROLLER_BUTTON_X;
+	case JoystickButtonPosition::Select:
+		return playstation ? SDL_CONTROLLER_BUTTON_TOUCHPAD : SDL_CONTROLLER_BUTTON_BACK;
+	case JoystickButtonPosition::Start:
+		return SDL_CONTROLLER_BUTTON_START;
+	case JoystickButtonPosition::BumperLeft:
+		return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+	case JoystickButtonPosition::BumperRight:
+		return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+	case JoystickButtonPosition::TriggerLeft:
+		return SDL_CONTROLLER_BUTTON_MAX;
+	case JoystickButtonPosition::TriggerRight:
+		return SDL_CONTROLLER_BUTTON_MAX + 1;
+	case JoystickButtonPosition::LeftStick:
+		return SDL_CONTROLLER_BUTTON_LEFTSTICK;
+	case JoystickButtonPosition::RightStick:
+		return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+	case JoystickButtonPosition::Accept:
+		return SDL_CONTROLLER_BUTTON_A;
+	case JoystickButtonPosition::Cancel:
+		return SDL_CONTROLLER_BUTTON_B;
+	case JoystickButtonPosition::DPadUp:
+		return SDL_CONTROLLER_BUTTON_DPAD_UP;
+	case JoystickButtonPosition::DPadRight:
+		return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+	case JoystickButtonPosition::DPadDown:
+		return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+	case JoystickButtonPosition::DPadLeft:
+		return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+	case JoystickButtonPosition::System:
+		return SDL_CONTROLLER_BUTTON_GUIDE;
+	case JoystickButtonPosition::Misc1:
+		return SDL_CONTROLLER_BUTTON_MISC1;
+	case JoystickButtonPosition::Paddle1:
+		return SDL_CONTROLLER_BUTTON_PADDLE1;
+	case JoystickButtonPosition::Paddle2:
+		return SDL_CONTROLLER_BUTTON_PADDLE2;
+	case JoystickButtonPosition::Paddle3:
+		return SDL_CONTROLLER_BUTTON_PADDLE3;
+	case JoystickButtonPosition::Paddle4:
+		return SDL_CONTROLLER_BUTTON_PADDLE4;
+	case JoystickButtonPosition::TouchPad:
+		return SDL_CONTROLLER_BUTTON_TOUCHPAD;
+	default: 
+		throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
 	}
 }
 
-String InputGameControllerSDL::getButtonName(int code) const
+std::optional<JoystickButtonPosition> InputGameControllerSDL::getPositionForButton(int code) const
 {
-	return getButtonName(code, {});
-}
+	const bool nintendo = joystickType == JoystickType::SwitchFull || joystickType == JoystickType::SwitchLeftJoycon || joystickType == JoystickType::SwitchRightJoycon;
+	const bool playstation = joystickType == JoystickType::Playstation;
 
-String InputGameControllerSDL::getButtonName(int code, std::optional<JoystickType> typeOverride) const
-{
-	const auto type = typeOverride.value_or(joystickType);
+	using enum JoystickButtonPosition;
 
-	if (type == JoystickType::Xbox || type == JoystickType::Generic) {
-		auto buttons = std::array<const char*, 23>{
-			"xbox_a",
-			"xbox_b",
-			"xbox_x",
-			"xbox_y",
-			"xbox_back",
-			"xbox_guide",
-			"xbox_start",
-			"xbox_lsb",
-			"xbox_rsb",
-			"xbox_lb",
-			"xbox_rb",
-			"xbox_dpad_up",
-			"xbox_dpad_down",
-			"xbox_dpad_left",
-			"xbox_dpad_right",
-			"xbox_share",
-			"xbox_paddle1",
-			"xbox_paddle2",
-			"xbox_paddle3",
-			"xbox_paddle4",
-			"",
-			"xbox_lt",
-			"xbox_rt",
-		};
-		return buttons[code];
-	} else if (type == JoystickType::Playstation) {
-		auto buttons = std::array<const char*, 23>{
-			"playstation_cross",
-			"playstation_circle",
-			"playstation_square",
-			"playstation_triangle",
-			"playstation_share",
-			"playstation_guide",
-			"playstation_option",
-			"playstation_l3",
-			"playstation_r3",
-			"playstation_l1",
-			"playstation_r1",
-			"playstation_dpad_up",
-			"playstation_dpad_down",
-			"playstation_dpad_left",
-			"playstation_dpad_right",
-			"playstation_microphone",
-			"",
-			"",
-			"",
-			"",
-			"playstation_touchpad",
-			"playstation_l2",
-			"playstation_r2",
-		};
-		return buttons[code];
-	} else if (type == JoystickType::SwitchFull) {
-		auto buttons = std::array<const char*, 23>{
-			"switch_a",
-			"switch_b",
-			"switch_x",
-			"switch_y",
-			"switch_minus",
-			"switch_guide",
-			"switch_plus",
-			"switch_lsb",
-			"switch_rsb",
-			"switch_l",
-			"switch_r",
-			"switch_dpad_up",
-			"switch_dpad_down",
-			"switch_dpad_left",
-			"switch_dpad_right",
-			"switch_capture",
-			"",
-			"",
-			"",
-			"",
-			"",
-			"switch_zl",
-			"switch_zr",
-		};
-		return buttons[code];
-	} else if (type == JoystickType::SwitchLeftJoycon) {
-		auto buttons = std::array<const char*, 23>{
-			"switch_alt_a",
-			"switch_alt_b",
-			"switch_alt_x",
-			"switch_alt_y",
-			"switch_minus",
-			"switch_guide",
-			"switch_plus",
-			"switch_lsb",
-			"switch_rsb",
-			"switch_alt_sl",
-			"switch_alt_sr",
-			"switch_dpad_up",
-			"switch_dpad_down",
-			"switch_dpad_left",
-			"switch_dpad_right",
-			"switch_capture",
-			"",
-			"",
-			"",
-			"",
-			"",
-			"switch_zl",
-			"switch_zr",
-		};
-		return buttons[code];
-	} else if (type == JoystickType::SwitchRightJoycon) {
-		auto buttons = std::array<const char*, 23>{
-			"switch_alt_a",
-			"switch_alt_b",
-			"switch_alt_x",
-			"switch_alt_y",
-			"switch_minus",
-			"switch_guide",
-			"switch_plus",
-			"switch_lsb",
-			"switch_rsb",
-			"switch_alt_sl",
-			"switch_alt_sr",
-			"switch_dpad_up",
-			"switch_dpad_down",
-			"switch_dpad_left",
-			"switch_dpad_right",
-			"switch_capture",
-			"",
-			"",
-			"",
-			"",
-			"",
-			"switch_zl",
-			"switch_zr",
-		};
-		return buttons[code];
-	} else {
-		return InputJoystick::getButtonName(code);
+	switch (code) {
+	case SDL_CONTROLLER_BUTTON_A:
+		return nintendo ? FaceRight : FaceBottom;
+    case SDL_CONTROLLER_BUTTON_B:
+		return nintendo ? FaceBottom : FaceRight;
+    case SDL_CONTROLLER_BUTTON_X:
+		return nintendo ? FaceTop : FaceLeft;
+    case SDL_CONTROLLER_BUTTON_Y:
+		return nintendo ? FaceLeft : FaceTop;
+    case SDL_CONTROLLER_BUTTON_BACK:
+		return Select;
+    case SDL_CONTROLLER_BUTTON_GUIDE:
+		return System;
+    case SDL_CONTROLLER_BUTTON_START:
+		return Start;
+    case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+		return LeftStick;
+    case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+		return RightStick;
+    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+		return BumperLeft;
+    case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+		return BumperRight;
+    case SDL_CONTROLLER_BUTTON_DPAD_UP:
+		return DPadUp;
+    case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		return DPadDown;
+    case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		return DPadLeft;
+    case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+		return DPadRight;
+	case SDL_CONTROLLER_BUTTON_MISC1:
+		return Misc1;
+    case SDL_CONTROLLER_BUTTON_PADDLE1:
+		return Paddle1;
+    case SDL_CONTROLLER_BUTTON_PADDLE2:
+		return Paddle2;
+    case SDL_CONTROLLER_BUTTON_PADDLE3:
+		return Paddle3;
+    case SDL_CONTROLLER_BUTTON_PADDLE4:
+		return Paddle4;
+	case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+		return playstation ? Select : TouchPad;
+	case SDL_CONTROLLER_BUTTON_MAX:
+		return TriggerLeft;
+	case SDL_CONTROLLER_BUTTON_MAX + 1:
+		return TriggerRight;
+	default: 
+		throw Exception("Unknown button for SDL controller: " + toString(code), HalleyExceptions::InputPlugin);
 	}
 }
 

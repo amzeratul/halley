@@ -35,9 +35,9 @@ namespace Halley {
 	public:
 		static float defaultAxisAdjust(float value);
 
-		virtual ~InputJoystick() override = default;
+		~InputJoystick() override = default;
 
-		virtual std::string_view getName() const override;
+		std::string_view getName() const override;
 		JoystickType getJoystickType() const override;
 		InputType getInputType() const override;
 
@@ -49,10 +49,10 @@ namespace Halley {
 
 		virtual void update(Time t);
 
-		std::pair<float, float> getVibration() const final override;
-		void setVibration(float low, float high) final override;
-		void vibrate(spInputVibration vibration) final override;
-		void stopVibrating() final override;
+		std::pair<float, float> getVibration() const final;
+		void setVibration(float low, float high) final;
+		void vibrate(spInputVibration vibration) final;
+		void stopVibrating() final;
 
 		bool isEnabled() const override;
 		void setEnabled(bool enabled);
@@ -65,6 +65,11 @@ namespace Halley {
 		bool isAnyButtonDown() override;
 
 		void setAxisAdjust(std::function<float (float)> f);
+
+		String getButtonName(int code) const override;
+		String getAxisName(int index) const override;
+		static std::string_view getJoystickButtonName(JoystickType type, JoystickButtonPosition position);
+		static std::string_view getJoystickAxisName(JoystickType type, JoystickAxisPosition position);
 
 	protected:
 		Vector<float> axes;

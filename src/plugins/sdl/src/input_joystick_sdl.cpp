@@ -94,65 +94,127 @@ int InputJoystickSDL::getSDLJoystickId() const
 
 int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 {
+	using enum JoystickButtonPosition;
+
 	switch (position) {
 #if defined(linux)
 		// Linux 'xpad' driver defaults
-		case JoystickButtonPosition::FaceTop: return 3;
-		case JoystickButtonPosition::FaceRight: return 1;
-		case JoystickButtonPosition::FaceBottom: return 0;
-		case JoystickButtonPosition::FaceLeft: return 2;
-		case JoystickButtonPosition::Select: return 6;
-		case JoystickButtonPosition::Start: return 7;
-		case JoystickButtonPosition::BumperLeft: return 4;
-		case JoystickButtonPosition::BumperRight: return 5;
-		case JoystickButtonPosition::LeftStick: return 9;
-		case JoystickButtonPosition::RightStick: return 10;
-		case JoystickButtonPosition::Accept: return 0;
-		case JoystickButtonPosition::Cancel: return 1;
-		case JoystickButtonPosition::TriggerLeft: return 15;
-		case JoystickButtonPosition::TriggerRight: return 16;
-		case JoystickButtonPosition::System: return 17;
+		case FaceTop: return 3;
+		case FaceRight: return 1;
+		case FaceBottom: return 0;
+		case FaceLeft: return 2;
+		case Select: return 6;
+		case Start: return 7;
+		case BumperLeft: return 4;
+		case BumperRight: return 5;
+		case LeftStick: return 9;
+		case RightStick: return 10;
+		case Accept: return 0;
+		case Cancel: return 1;
+		case TriggerLeft: return 15;
+		case TriggerRight: return 16;
+		case System: return 17;
 #elif defined(__APPLE__)
 		// Mac OS '360Controller' driver defaults
-		case JoystickButtonPosition::FaceTop: return 3;
-		case JoystickButtonPosition::FaceRight: return 1;
-		case JoystickButtonPosition::FaceBottom: return 0;
-		case JoystickButtonPosition::FaceLeft: return 2;
-		case JoystickButtonPosition::Select: return 9;
-		case JoystickButtonPosition::Start: return 8;
-		case JoystickButtonPosition::BumperLeft: return 4;
-		case JoystickButtonPosition::BumperRight: return 5;
-		case JoystickButtonPosition::LeftStick: return 6;
-		case JoystickButtonPosition::RightStick: return 7;
-		case JoystickButtonPosition::Accept: return 0;
-		case JoystickButtonPosition::Cancel: return 1;
-		case JoystickButtonPosition::TriggerLeft: return 15;
-		case JoystickButtonPosition::TriggerRight: return 16;
-		case JoystickButtonPosition::System: return 17;
+		case FaceTop: return 3;
+		case FaceRight: return 1;
+		case FaceBottom: return 0;
+		case FaceLeft: return 2;
+		case Select: return 9;
+		case Start: return 8;
+		case BumperLeft: return 4;
+		case BumperRight: return 5;
+		case LeftStick: return 6;
+		case RightStick: return 7;
+		case Accept: return 0;
+		case Cancel: return 1;
+		case TriggerLeft: return 15;
+		case TriggerRight: return 16;
+		case System: return 17;
 #else
 		// Windows defaults
-		case JoystickButtonPosition::FaceTop: return 3;
-		case JoystickButtonPosition::FaceRight: return 1;
-		case JoystickButtonPosition::FaceBottom: return 0;
-		case JoystickButtonPosition::FaceLeft: return 2;
-		case JoystickButtonPosition::Select: return 8;
-		case JoystickButtonPosition::Start: return 9;
-		case JoystickButtonPosition::BumperLeft: return 4;
-		case JoystickButtonPosition::BumperRight: return 5;
-		case JoystickButtonPosition::LeftStick: return 6;
-		case JoystickButtonPosition::RightStick: return 7;
-		case JoystickButtonPosition::Accept: return 0;
-		case JoystickButtonPosition::Cancel: return 1;
-		case JoystickButtonPosition::TriggerLeft: return 10;
-		case JoystickButtonPosition::TriggerRight: return 11;
-		case JoystickButtonPosition::System: return 17;
+		case FaceTop: return 3;
+		case FaceRight: return 1;
+		case FaceBottom: return 0;
+		case FaceLeft: return 2;
+		case Select: return 8;
+		case Start: return 9;
+		case BumperLeft: return 4;
+		case BumperRight: return 5;
+		case LeftStick: return 6;
+		case RightStick: return 7;
+		case Accept: return 0;
+		case Cancel: return 1;
+		case TriggerLeft: return 10;
+		case TriggerRight: return 11;
+		case System: return 17;
 #endif
-		case JoystickButtonPosition::DPadUp: return baseButtons;
-		case JoystickButtonPosition::DPadRight: return baseButtons + 1;
-		case JoystickButtonPosition::DPadDown: return baseButtons + 2;
-		case JoystickButtonPosition::DPadLeft: return baseButtons + 3;
+		case DPadUp: return baseButtons;
+		case DPadRight: return baseButtons + 1;
+		case DPadDown: return baseButtons + 2;
+		case DPadLeft: return baseButtons + 3;
 		default: throw Exception("Invalid parameter", HalleyExceptions::Input);
 	}
+}
+
+std::optional<JoystickButtonPosition> InputJoystickSDL::getPositionForButton(int code) const
+{
+	using enum JoystickButtonPosition;
+
+	switch (code) {
+#if defined(linux)
+		// Linux 'xpad' driver defaults
+		case 3: return FaceTop;
+		case 1: return FaceRight;
+		case 0: return FaceBottom;
+		case 2: return FaceLeft;
+		case 6: return Select;
+		case 7: return Start;
+		case 4: return BumperLeft;
+		case 5: return BumperRight;
+		case 9: return LeftStick;
+		case 10: return RightStick;
+		case 15: return TriggerLeft;
+		case 16: return TriggerRight;
+		case 17: return System;
+#elif defined(__APPLE__)
+		// Mac OS '360Controller' driver defaults
+		case 3: return FaceTop;
+		case 1: return FaceRight;
+		case 0: return FaceBottom;
+		case 2: return FaceLeft;
+		case 9: return Select;
+		case 8: return Start;
+		case 4: return BumperLeft;
+		case 5: return BumperRight;
+		case 6: return LeftStick;
+		case 7: return RightStick;
+		case 15: return TriggerLeft;
+		case 16: return TriggerRight;
+		case 17: return System;
+#else
+		// Windows defaults
+		case 3: return FaceTop;
+		case 1: return FaceRight;
+		case 0: return FaceBottom;
+		case 2: return FaceLeft;
+		case 8: return Select;
+		case 9: return Start;
+		case 4: return BumperLeft;
+		case 5: return BumperRight;
+		case 6: return LeftStick;
+		case 7: return RightStick;
+		case 10: return TriggerLeft;
+		case 11: return TriggerRight;
+		case 17: return System;
+#endif
+	}
+
+	if (code >= baseButtons && code <= baseButtons + 3) {
+		return static_cast<JoystickButtonPosition>(static_cast<int>(DPadUp) + (code - baseButtons));
+	}
+
+	throw Exception("Invalid parameter", HalleyExceptions::Input);
 }
 
 std::string_view InputJoystickSDL::getName() const

@@ -16,14 +16,13 @@ namespace Halley {
 		void update(Time t) override;
 		void close();
 
-		std::string_view getName() const final override;
+		std::string_view getName() const override;
 		String getMapping() const;
 		JoystickType getJoystickType() const override;
 		int getSDLJoystickId() const;
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
-		String getButtonName(int code) const override;
-		String getButtonName(int code, std::optional<JoystickType> typeOverride) const override;
+		std::optional<JoystickButtonPosition> getPositionForButton(int code) const override;
 
 		bool hasLED() const override;
 		void setLED(Colour4c colour) const override;

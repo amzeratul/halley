@@ -271,54 +271,55 @@ void InputJoystickXInput::update(Time t)
 
 int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) const
 {
+	using enum JoystickButtonPosition;
 	switch (position) {
-		case JoystickButtonPosition::FaceTop: return 3;
-		case JoystickButtonPosition::FaceRight: return 1;
-		case JoystickButtonPosition::FaceBottom: return 0;
-		case JoystickButtonPosition::FaceLeft: return 2;
-		case JoystickButtonPosition::Select: return 8;
-		case JoystickButtonPosition::Start: return 9;
-		case JoystickButtonPosition::BumperLeft: return 4;
-		case JoystickButtonPosition::BumperRight: return 5;
-		case JoystickButtonPosition::TriggerLeft: return 10;
-		case JoystickButtonPosition::TriggerRight: return 11;
-		case JoystickButtonPosition::LeftStick: return 6;
-		case JoystickButtonPosition::RightStick: return 7;
-		case JoystickButtonPosition::Accept: return 0;
-		case JoystickButtonPosition::Cancel: return 1;
-		case JoystickButtonPosition::DPadUp: return 12;
-		case JoystickButtonPosition::DPadRight: return 13;
-		case JoystickButtonPosition::DPadDown: return 14;
-		case JoystickButtonPosition::DPadLeft: return 15;
-		case JoystickButtonPosition::System: return 16;
+		case FaceTop: return 3;
+		case FaceRight: return 1;
+		case FaceBottom: return 0;
+		case FaceLeft: return 2;
+		case Select: return 8;
+		case Start: return 9;
+		case BumperLeft: return 4;
+		case BumperRight: return 5;
+		case TriggerLeft: return 10;
+		case TriggerRight: return 11;
+		case LeftStick: return 6;
+		case RightStick: return 7;
+		case Accept: return 0;
+		case Cancel: return 1;
+		case DPadUp: return 12;
+		case DPadRight: return 13;
+		case DPadDown: return 14;
+		case DPadLeft: return 15;
+		case System: return 16;
 		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
 	}
 }
 
-String InputJoystickXInput::getButtonName(int code) const
+std::optional<JoystickButtonPosition> InputJoystickXInput::getPositionForButton(int code) const
 {
-	auto buttons = std::array<const char*, 17>{
-		"xbox_a",
-		"xbox_b",
-		"xbox_x",
-		"xbox_y",
-		"xbox_lb",
-		"xbox_rb",
-		"xbox_lsb",
-		"xbox_rsb",
-		"xbox_back",
-		"xbox_start",
-		"xbox_lt",
-		"xbox_rt",
-		"xbox_dpad_up",
-		"xbox_dpad_right",
-		"xbox_dpad_down",
-		"xbox_dpad_left",
-		"xbox_guide"
-	};
-	return buttons[code];
+	using enum JoystickButtonPosition;
+	switch (code) {
+		case 0: return FaceBottom;
+		case 1: return FaceRight;
+		case 2: return FaceLeft;
+		case 3: return FaceTop;
+		case 4: return BumperLeft;
+		case 5: return BumperRight;
+		case 6: return LeftStick;
+		case 7: return RightStick;
+		case 8: return Select;
+		case 9: return Start;
+		case 10: return TriggerLeft;
+		case 11: return TriggerRight;
+		case 12: return DPadUp;
+		case 13: return DPadRight;
+		case 14: return DPadDown;
+		case 15: return DPadLeft;
+		case 16: return System;
+		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
+	}
 }
-
 
 void InputJoystickXInput::doSetVibration(float low, float high)
 {

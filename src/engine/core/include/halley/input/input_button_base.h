@@ -76,5 +76,13 @@ namespace Halley {
 		virtual void onButtonsCleared();
 	};
 
+	class InputMouse : public InputButtonBase {
+	public:
+		InputType getInputType() const override;
+		std::string_view getName() const override;
+
+		String getButtonName(int code) const override;
+	};
+
 	typedef std::shared_ptr<InputButtonBase> spInputButtonBase;
 }

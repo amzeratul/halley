@@ -62,6 +62,31 @@ void InputButtonBase::onButtonReleased(int code)
 void InputButtonBase::onButtonsCleared()
 {}
 
+InputType InputMouse::getInputType() const
+{
+	return InputType::Mouse;
+}
+
+std::string_view InputMouse::getName() const
+{
+	return "Mouse";
+}
+
+String InputMouse::getButtonName(int code) const
+{
+	constexpr auto names = std::to_array({
+		"left",
+		"middle",
+		"right",
+		"b4",
+		"b5",
+		"wheel_up",
+		"wheel_down",
+		"wheel"
+	});
+	return names.at(code);
+}
+
 void InputButtonBase::onButtonStatus(int code, bool down)
 {
 	// This method should probably not be used with the two above

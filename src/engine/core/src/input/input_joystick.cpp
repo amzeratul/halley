@@ -144,6 +144,162 @@ void InputJoystick::setAxisAdjust(std::function<float(float)> f)
 	axisAdjust = f;
 }
 
+String InputJoystick::getButtonName(int code) const
+{
+	if (const auto pos = getPositionForButton(code)) {
+		return getJoystickButtonName(getJoystickType(), *pos);
+	}
+	return "";
+}
+
+String InputJoystick::getAxisName(int index) const
+{
+	if (const auto pos = getPositionForAxis(index)) {
+		return getJoystickAxisName(getJoystickType(), *pos);
+	}
+	return "";
+}
+
+std::string_view InputJoystick::getJoystickButtonName(JoystickType type, JoystickButtonPosition position)
+{
+	if (type == JoystickType::Xbox || type == JoystickType::Generic) {
+		constexpr auto buttons = std::to_array({
+			"xbox_a",
+			"xbox_b",
+			"xbox_x",
+			"xbox_y",
+			"xbox_lb",
+			"xbox_rb",
+			"xbox_lt",
+			"xbox_rt",
+			"xbox_lsb",
+			"xbox_rsb",
+			"xbox_back",
+			"xbox_start",
+			"xbox_dpad_up",
+			"xbox_dpad_right",
+			"xbox_dpad_down",
+			"xbox_dpad_left",
+			"xbox_guide",
+			"xbox_share",
+			"",
+			"xbox_paddle1",
+			"xbox_paddle2",
+			"xbox_paddle3",
+			"xbox_paddle4",
+			"xbox_a",
+			"xbox_b",
+		});
+		return buttons[static_cast<int>(position)];
+	} else if (type == JoystickType::Playstation) {
+		auto buttons = std::to_array({
+			"playstation_cross",
+			"playstation_circle",
+			"playstation_square",
+			"playstation_triangle",
+			"playstation_l1",
+			"playstation_r1",
+			"playstation_l2",
+			"playstation_r2",
+			"playstation_l3",
+			"playstation_r3",
+			"playstation_touchpad",
+			"playstation_option",
+			"playstation_dpad_up",
+			"playstation_dpad_right",
+			"playstation_dpad_down",
+			"playstation_dpad_left",
+			"playstation_guide",
+			"playstation_share",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"playstation_cross",
+			"playstation_circle",
+		});
+		return buttons[static_cast<int>(position)];
+	} else if (type == JoystickType::SwitchFull) {
+		auto buttons = std::to_array({
+			"switch_b",
+			"switch_a",
+			"switch_y",
+			"switch_x",
+			"switch_l",
+			"switch_r",
+			"switch_zl",
+			"switch_zr",
+			"switch_lsb",
+			"switch_rsb",
+			"switch_minus",
+			"switch_plus",
+			"switch_dpad_up",
+			"switch_dpad_right",
+			"switch_dpad_down",
+			"switch_dpad_left",
+			"switch_guide",
+			"switch_capture",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"switch_a",
+			"switch_b",
+		});
+		return buttons[static_cast<int>(position)];
+	} else if (type == JoystickType::SwitchLeftJoycon || type == JoystickType::SwitchRightJoycon) {
+		auto buttons = std::to_array({
+			"switch_alt_b",
+			"switch_alt_a",
+			"switch_alt_y",
+			"switch_alt_x",
+			"switch_alt_sl",
+			"switch_alt_sr",
+			"switch_zl",
+			"switch_zr",
+			"switch_lsb",
+			"switch_rsb",
+			"switch_minus",
+			"switch_plus",
+			"switch_dpad_up",
+			"switch_dpad_right",
+			"switch_dpad_down",
+			"switch_dpad_left",
+			"switch_guide",
+			"switch_capture",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"switch_a",
+			"switch_b",
+		});
+		return buttons[static_cast<int>(position)];
+	}
+	return "";
+}
+
+std::string_view InputJoystick::getJoystickAxisName(JoystickType type, JoystickAxisPosition position)
+{
+	if (position == JoystickAxisPosition::TriggerLeft) {
+		return getJoystickButtonName(type, JoystickButtonPosition::TriggerLeft);
+	} else if (position == JoystickAxisPosition::TriggerRight) {
+		return getJoystickButtonName(type, JoystickButtonPosition::TriggerRight);
+	} else if (position >= JoystickAxisPosition::LeftStickX && position <= JoystickAxisPosition::RightStickY) {
+		auto axes = std::to_array({
+			"left_stick_x",
+			"left_stick_y",
+			"right_stick_x",
+			"right_stick_y",
+		});
+		return axes[static_cast<int>(position)];
+	}
+	return "";
+}
+
 void InputJoystick::doSetVibration(float low, float high)
 {
 }

@@ -37,41 +37,9 @@ String InputDevice::getButtonName(int code) const
 	return "";
 }
 
-String InputDevice::getButtonName(int code, std::optional<JoystickType> typeOverride) const
-{
-	return getButtonName(code);
-}
-
 String InputDevice::getAxisName(int index) const
 {
-	switch (index) {
-	case 0:
-		return "left_stick_x";
-	case 1:
-		return "left_stick_y";
-	case 2:
-		return "right_stick_x";
-	case 3:
-		return "right_stick_y";
-	case 4:
-		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerLeft));
-	case 5:
-		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerRight));
-	default:
-		return "";
-	}
-}
-
-String InputDevice::getAxisName(int index, std::optional<JoystickType> typeOverride) const
-{
-	switch (index) {
-	case 4:
-		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerLeft), typeOverride);
-	case 5:
-		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerRight), typeOverride);
-	default:
-		return getAxisName(index);
-	}
+	return "";
 }
 
 int InputDevice::getButtonAtPosition(JoystickButtonPosition position) const
@@ -96,6 +64,19 @@ int InputDevice::getAxisAtPosition(JoystickAxisPosition position) const
 		return 5;
 	}
 	return -1;
+}
+
+std::optional<JoystickButtonPosition> InputDevice::getPositionForButton(int code) const
+{
+	return std::nullopt;
+}
+
+std::optional<JoystickAxisPosition> InputDevice::getPositionForAxis(int code) const
+{
+	if (code >= 0 && code <= 5) {
+		return static_cast<JoystickAxisPosition>(code);
+	}
+	return std::nullopt;
 }
 
 bool InputDevice::isAnyButtonPressed()

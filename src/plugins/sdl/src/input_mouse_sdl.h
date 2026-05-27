@@ -29,8 +29,9 @@ namespace Halley {
 #pragma warning(disable: 4250)
 #endif
 
-	class InputMouseSDL final : public InputButtonBase {
+	class InputMouseSDL final : public InputMouse {
 		friend class InputSDL;
+
 	public:
 		Vector2f getPosition() const override;
 		void setPosition(Vector2f position) override;
@@ -40,8 +41,6 @@ namespace Halley {
 		void clearPresses() override;
 
 		void update();
-		InputType getInputType() const override;
-		std::string_view getName() const override;
 
 	private:
 		InputMouseSDL();

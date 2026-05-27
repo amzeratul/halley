@@ -38,6 +38,7 @@ namespace Halley {
 		int getSDLJoystickId() const;
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
+		std::optional<JoystickButtonPosition> getPositionForButton(int code) const override;
 
 	private:
 		int getSDLAxisIndex(int axis);

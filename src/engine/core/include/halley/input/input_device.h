@@ -120,10 +120,10 @@ namespace Halley {
 
 	enum class JoystickButtonPosition : uint8_t
 	{
-		FaceTop,
-		FaceRight,
 		FaceBottom,
+		FaceRight,
 		FaceLeft,
+		FaceTop,
 		BumperLeft,
 		BumperRight,
 		TriggerLeft,
@@ -132,23 +132,30 @@ namespace Halley {
 		RightStick,
 		Select,
 		Start,
-		Accept,
-		Cancel,
 		DPadUp,
 		DPadRight,
 		DPadDown,
 		DPadLeft,
-		System
+		System,
+		Misc1,
+		TouchPad,
+		Paddle1,
+		Paddle2,
+		Paddle3,
+		Paddle4,
+		Accept,
+		Cancel,
+		COUNT
 	};
 
 	template <>
 	struct EnumNames<JoystickButtonPosition> {
 		constexpr auto operator()() const {
 			return std::to_array({
-				"faceTop",
-				"faceRight",
 				"faceBottom",
+				"faceRight",
 				"faceLeft",
+				"faceTop",
 				"bumperLeft",
 				"bumperRight",
 				"triggerLeft",
@@ -157,13 +164,20 @@ namespace Halley {
 				"rightStick",
 				"select",
 				"start",
-				"accept",
-				"cancel",
 				"dPadUp",
 				"dPadRight",
 				"dPadDown",
 				"dPadLeft",
-				"system"
+				"system",
+				"misc1",
+				"touchPad",
+				"paddle1",
+				"paddle2",
+				"paddle3",
+				"paddle4",
+				"accept",
+				"cancel",
+				"COUNT"
 			});
 		}
 	};
@@ -256,11 +270,11 @@ namespace Halley {
 		virtual size_t getNumberAxes();
 
 		virtual String getButtonName(int code) const;
-		virtual String getButtonName(int code, std::optional<JoystickType> typeOverride) const;
 		virtual String getAxisName(int index) const;
-		virtual String getAxisName(int index, std::optional<JoystickType> typeOverride) const;
 		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 		virtual int getAxisAtPosition(JoystickAxisPosition position) const;
+		virtual std::optional<JoystickButtonPosition> getPositionForButton(int code) const;
+		virtual std::optional<JoystickAxisPosition> getPositionForAxis(int code) const;
 
 		virtual bool isAnyButtonPressed();
 		virtual bool isAnyButtonPressedRepeat();

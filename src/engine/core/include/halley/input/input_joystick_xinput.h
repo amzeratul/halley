@@ -38,7 +38,7 @@ namespace Halley {
 	
 		void update(Time t) override;
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
-		String getButtonName(int code) const override;
+		std::optional<JoystickButtonPosition> getPositionForButton(int code) const override;
 
 	private:
 		int index;
