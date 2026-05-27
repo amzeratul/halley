@@ -807,6 +807,39 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(ConvertibleTo<int> 
 	return bestResult;
 }
 
+std::pair<InputDevice*, int> InputVirtual::getPhysicalAxis(ConvertibleTo<int> axis, InputDevice* device) const
+{
+	if (!device) {
+		device = lastDevice.lock().get();
+	}
+
+	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
+	{
+		const auto typeA = a.getInputType();
+		const auto typeB = b.getInputType();
+		return (typeA == typeB)
+			|| (typeA == InputType::Keyboard && typeB == InputType::Mouse)
+			|| (typeA == InputType::Mouse && typeB == InputType::Keyboard);
+	};
+
+	std::pair<InputDevice*, int> bestResult = { nullptr, 0 };
+	int bestScore = 0;
+
+	for (const auto& binding : axes.at(axis.value).binds) {
+		if (binding.device.get() == device) {
+			return { binding.device.get(), binding.a };
+		}
+
+		const int score = isCompatible(*binding.device, *device) ? 1 : 0;
+		if (score > bestScore) {
+			bestResult = { binding.device.get(), binding.a };
+			bestScore = score;
+		}
+	}
+
+	return bestResult;
+}
+
 std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiveButton& button, InputDevice* device) const
 {
 	if (!device) {
@@ -827,6 +860,41 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiv
 
 	for (const auto& binding: buttons[button.button]) {
 		if (checkBinds(button.activeBinds, binding)) {
+			if (binding.device.get() == device) {
+				return { binding.device.get(), binding.a };
+			}
+
+			const int score = isCompatible(*binding.device, *device) ? 1 : 0;
+			if (score > bestScore) {
+				bestResult = { binding.device.get(), binding.a };
+				bestScore = score;
+			}
+		}
+	}
+
+	return bestResult;
+}
+
+std::pair<InputDevice*, int> InputVirtual::getPhysicalAxis(const InputExclusiveAxis& axis, InputDevice* device) const
+{
+	if (!device) {
+		device = lastDevice.lock().get();
+	}
+
+	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
+	{
+		const auto typeA = a.getInputType();
+		const auto typeB = b.getInputType();
+		return (typeA == typeB)
+			|| (typeA == InputType::Keyboard && typeB == InputType::Mouse)
+			|| (typeA == InputType::Mouse && typeB == InputType::Keyboard);
+	};
+
+	std::pair<InputDevice*, int> bestResult = { nullptr, 0 };
+	int bestScore = 0;
+
+	for (const auto& binding: axes[axis.axis].binds) {
+		if (checkBinds(axis.activeBinds, binding)) {
 			if (binding.device.get() == device) {
 				return { binding.device.get(), binding.a };
 			}

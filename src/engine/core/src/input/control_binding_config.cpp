@@ -2,10 +2,10 @@
 
 using namespace Halley;
 
-std::pair<String, ControlBindingAxisDirection> ControlBinding::parseAxis(std::string_view axisName)
+std::pair<String, JoystickAxisDirection> ControlBinding::parseAxis(std::string_view axisName)
 {
 	auto name = axisName.substr(0, axisName.size() - 1);
-	auto dir = axisName.substr(axisName.size() - 1, 1) == "+" ? ControlBindingAxisDirection::Positive : ControlBindingAxisDirection::Negative;
+	auto dir = axisName.substr(axisName.size() - 1, 1) == "+" ? JoystickAxisDirection::Positive : JoystickAxisDirection::Negative;
 	return { name, dir };
 }
 
@@ -72,7 +72,7 @@ ConfigNode ControlBinding::toConfigNode() const
 		result["value"] = (gamepadButtonChord ? toString(*gamepadButtonChord) + "+" : String()) + gamepadButton;
 		break;
 	case ControlBindingType::GamepadAxis:
-		result["value"] = gamepadAxis + (gamepadAxisDirection == ControlBindingAxisDirection::Positive ? "+" : "-");
+		result["value"] = gamepadAxis + (gamepadAxisDirection == JoystickAxisDirection::Positive ? "+" : "-");
 		break;
 	case ControlBindingType::KeyboardButton:
 		result["value"] = (keyCodeChord ? toString(*keyCodeChord) + "+" : String()) + keyCode;
@@ -131,7 +131,7 @@ void ControlBinding::bindGamepadButton(JoystickButtonPosition button, std::optio
 	gamepadButtonChord = buttonChord;
 }
 
-void ControlBinding::bindGamepadAxis(JoystickAxisPosition axis, ControlBindingAxisDirection direction)
+void ControlBinding::bindGamepadAxis(JoystickAxisPosition axis, JoystickAxisDirection direction)
 {
 	bindingType = ControlBindingType::GamepadAxis;
 	gamepadAxis = axis;
@@ -143,7 +143,7 @@ void ControlBinding::unbind()
 	bindingType = ControlBindingType::None;
 }
 
-std::pair<JoystickAxisPosition, ControlBindingAxisDirection> ControlBinding::getGamepadAxis() const
+std::pair<JoystickAxisPosition, JoystickAxisDirection> ControlBinding::getGamepadAxis() const
 {
 	HalleyAssertDev(bindingType == ControlBindingType::GamepadAxis);
 	HalleyAssertDev(gamepadAxis);
@@ -178,7 +178,7 @@ std::pair<int, std::optional<int>> ControlBinding::getGamepadButtonIdx(const Inp
 	return { gamepad.getButtonAtPosition(button), chord ? std::optional(gamepad.getButtonAtPosition(*chord)) : std::nullopt };
 }
 
-std::pair<int, ControlBindingAxisDirection> ControlBinding::getGamepadAxisIdx(const InputDevice& gamepad) const
+std::pair<int, JoystickAxisDirection> ControlBinding::getGamepadAxisIdx(const InputDevice& gamepad) const
 {
 	auto [axis, dir] = getGamepadAxis();
 	return { gamepad.getAxisAtPosition(axis), dir };
@@ -200,11 +200,11 @@ ControlBinding ControlBinding::convertToGamepadAxis() const
 	if (bindingType == ControlBindingType::GamepadButton && gamepadButton && !gamepadButtonChord) {
 		if (gamepadButton == JoystickButtonPosition::TriggerLeft) {
 			ControlBinding result;
-			result.bindGamepadAxis(JoystickAxisPosition::TriggerLeft, ControlBindingAxisDirection::Positive);
+			result.bindGamepadAxis(JoystickAxisPosition::TriggerLeft, JoystickAxisDirection::Positive);
 			return result;
 		} else if (gamepadButton == JoystickButtonPosition::TriggerRight) {
 			ControlBinding result;
-			result.bindGamepadAxis(JoystickAxisPosition::TriggerRight, ControlBindingAxisDirection::Positive);
+			result.bindGamepadAxis(JoystickAxisPosition::TriggerRight, JoystickAxisDirection::Positive);
 			return result;
 		} else {
 			return *this;

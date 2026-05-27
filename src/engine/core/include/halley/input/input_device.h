@@ -52,6 +52,21 @@ namespace Halley {
 			});
 		}
 	};
+	
+	enum class InputSubType : uint8_t {
+		Button,
+		Axis
+	};
+
+	template <>
+	struct EnumNames<InputSubType> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"button",
+				"axis"
+			});
+		}
+	};
 
 	enum class JoystickType : uint8_t {
 		None,
@@ -177,6 +192,21 @@ namespace Halley {
 		}
 	};
 
+	enum class JoystickAxisDirection : uint8_t {
+		Positive,
+		Negative
+	};
+	
+	template <>
+	struct EnumNames<JoystickAxisDirection> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"positive",
+				"negative"
+			});
+		}
+	};
+
 	enum class MouseButton : uint8_t {
 		Left,
 		Middle,
@@ -227,6 +257,8 @@ namespace Halley {
 
 		virtual String getButtonName(int code) const;
 		virtual String getButtonName(int code, std::optional<JoystickType> typeOverride) const;
+		virtual String getAxisName(int index) const;
+		virtual String getAxisName(int index, std::optional<JoystickType> typeOverride) const;
 		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 		virtual int getAxisAtPosition(JoystickAxisPosition position) const;
 

@@ -162,7 +162,7 @@ void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot,
 	}
 }
 
-void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, ControlBindingAxisDirection dir)
+void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		binding->bindGamepadAxis(axis, dir);
@@ -260,7 +260,7 @@ void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindin
 	}
 }
 
-void ControlBindings::applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, ControlBindingAxisDirection dir, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
+void ControlBindings::applyAxisBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int axis, JoystickAxisDirection dir, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
 {
 	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
 		Logger::logError("Binding axis to button is not supported, bindingId = " + bindingConfig.getBindingId());
@@ -271,7 +271,7 @@ void ControlBindings::applyAxisBinding(InputVirtual& dst, const IControlBindingM
 	}
 }
 
-void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<InputDevice> device, int button, ControlBindingAxisDirection dir)
+void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<InputDevice> device, int button, JoystickAxisDirection dir)
 {
 	const auto iter = std_ex::find_if(axisButtons, [&] (AxisButtonPending& axis) {
 		return axis.axisId == axisId && axis.device == device;
@@ -284,7 +284,7 @@ void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<In
 		dst = &axisButtons.emplace_back(AxisButtonPending{ axisId, device, {}, {} });
 	}
 
-	if (dir == ControlBindingAxisDirection::Positive) {
+	if (dir == JoystickAxisDirection::Positive) {
 		dst->positiveButton = button;
 	} else {
 		dst->negativeButton = button;

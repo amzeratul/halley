@@ -40,24 +40,9 @@ namespace Halley {
 		}
 	};
 
-	enum class ControlBindingAxisDirection : uint8_t {
-		Positive,
-		Negative
-	};
-	
-	template <>
-	struct EnumNames<ControlBindingAxisDirection> {
-		constexpr auto operator()() const {
-			return std::to_array({
-				"positive",
-				"negative"
-			});
-		}
-	};
-
 	class ControlBinding {
 	public:
-		static std::pair<String, ControlBindingAxisDirection> parseAxis(std::string_view axisName);
+		static std::pair<String, JoystickAxisDirection> parseAxis(std::string_view axisName);
 
 		ControlBinding() = default;
 	    ControlBinding(const ConfigNode& node);
@@ -69,16 +54,16 @@ namespace Halley {
 		void bindMouseButton(MouseButton button);
 		void bindKeyboardButton(KeyCode button, std::optional<KeyCode> chord = {});
 		void bindGamepadButton(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
-		void bindGamepadAxis(JoystickAxisPosition axis, ControlBindingAxisDirection direction);
+		void bindGamepadAxis(JoystickAxisPosition axis, JoystickAxisDirection direction);
 		void unbind();
 
-		std::pair<JoystickAxisPosition, ControlBindingAxisDirection> getGamepadAxis() const;
+		std::pair<JoystickAxisPosition, JoystickAxisDirection> getGamepadAxis() const;
 		std::pair<JoystickButtonPosition, std::optional<JoystickButtonPosition>> getGamepadButtonPosition() const;
 		std::pair<KeyCode, std::optional<KeyCode>> getKeyCode() const;
 		MouseButton getMouseButton() const;
 
 		std::pair<int, std::optional<int>> getGamepadButtonIdx(const InputDevice& gamepad) const;
-		std::pair<int, ControlBindingAxisDirection> getGamepadAxisIdx(const InputDevice& gamepad) const;
+		std::pair<int, JoystickAxisDirection> getGamepadAxisIdx(const InputDevice& gamepad) const;
 		std::pair<int, std::optional<int>> getKeyboardButtonIdx() const;
 		int getMouseButtonIdx() const;
 
@@ -96,7 +81,7 @@ namespace Halley {
 		std::optional<JoystickButtonPosition> gamepadButtonChord;
 
 		std::optional<JoystickAxisPosition> gamepadAxis;
-		std::optional<ControlBindingAxisDirection> gamepadAxisDirection;
+		std::optional<JoystickAxisDirection> gamepadAxisDirection;
 		
 		void loadValue(ControlBindingType type, const ConfigNode& value);
 	};

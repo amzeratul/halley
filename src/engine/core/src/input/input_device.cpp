@@ -42,6 +42,38 @@ String InputDevice::getButtonName(int code, std::optional<JoystickType> typeOver
 	return getButtonName(code);
 }
 
+String InputDevice::getAxisName(int index) const
+{
+	switch (index) {
+	case 0:
+		return "left_stick_x";
+	case 1:
+		return "left_stick_y";
+	case 2:
+		return "right_stick_x";
+	case 3:
+		return "right_stick_y";
+	case 4:
+		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerLeft));
+	case 5:
+		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerRight));
+	default:
+		return "";
+	}
+}
+
+String InputDevice::getAxisName(int index, std::optional<JoystickType> typeOverride) const
+{
+	switch (index) {
+	case 4:
+		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerLeft), typeOverride);
+	case 5:
+		return getButtonName(getButtonAtPosition(JoystickButtonPosition::TriggerRight), typeOverride);
+	default:
+		return getAxisName(index);
+	}
+}
+
 int InputDevice::getButtonAtPosition(JoystickButtonPosition position) const
 {
 	return -1;
