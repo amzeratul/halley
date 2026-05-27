@@ -46,13 +46,21 @@ std::optional<size_t> ControlBindings::findSlotIdx(const Vector<ControlBinding>&
 		inputType = InputType::Mouse;
 	}
 
+	std::optional<size_t> bestResult;
+	size_t bestIdx = std::numeric_limits<size_t>::max();
+
 	const auto& slots = config.getBindingSlots();
 	for (size_t i = 0; i < slots.size(); ++i) {
-		if (bs[i].getBindingType() == ControlBindingType::None && slots[i].contains(inputType)) {
-			return i;
+		if (bs[i].getBindingType() == ControlBindingType::None) {
+			const auto idx = std_ex::find_index(slots[i], inputType);
+			if (idx && *idx < bestIdx) {
+				bestResult = i;
+				bestIdx = *idx;
+			}
 		}
 	}
-	return std::nullopt;	
+
+	return bestResult;
 }
 
 Vector<ControlBinding> ControlBindings::getDefaultBindings(const ControlBindingConfig& bindingConfig) const
