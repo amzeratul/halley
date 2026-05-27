@@ -185,59 +185,83 @@ void ControlBindings::clearRedundantBindings()
 	}
 }
 
-void ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
+bool ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindKeyboardButton(code)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
+			return true;
 		}
 	}
+	return false;
 }
 
-void ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button)
+bool ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindGamepadButton(button)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
+			return true;
 		}
 	}
+	return false;
 }
 
-void ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir)
+bool ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindGamepadAxis(axis, dir)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
+			return true;
 		}
 	}
+	return false;
 }
 
-void ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button)
+bool ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->bindMouseButton(button)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
+			return true;
 		}
 	}
+	return false;
 }
 
-void ControlBindings::unbind(std::string_view bindingId, size_t slot)
+bool ControlBindings::bind(std::string_view bindingId, size_t slot, ControlBinding newBinding)
+{
+	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
+		if (*binding != newBinding) {
+			*binding = newBinding;
+			clearRedundantBindings();
+			modified = true;
+			++version;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ControlBindings::unbind(std::string_view bindingId, size_t slot)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (binding->unbind()) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
+			return true;
 		}
 	}
+	return false;
 }
 
 const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bindingId) const

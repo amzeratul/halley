@@ -25,11 +25,12 @@ namespace Halley {
 		void resetToDefaults(gsl::span<int> slots);
 		bool hasChanges() const;
 
-		void bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code);
-		void bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button);
-		void bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir);
-		void bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button);
-		void unbind(std::string_view bindingId, size_t slot);
+		bool bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code);
+		bool bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button);
+		bool bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir);
+		bool bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button);
+		bool bind(std::string_view bindingId, size_t slot, ControlBinding binding);
+		bool unbind(std::string_view bindingId, size_t slot);
 
 		const Vector<ControlBinding>& getBindings(std::string_view bindingId) const;
 
