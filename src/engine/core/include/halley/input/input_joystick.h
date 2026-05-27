@@ -70,6 +70,7 @@ namespace Halley {
 		String getAxisName(int index) const override;
 		static std::string_view getJoystickButtonName(JoystickType type, JoystickButtonPosition position);
 		static std::string_view getJoystickAxisName(JoystickType type, JoystickAxisPosition position);
+		static String getJoystickAxisName(JoystickType type, JoystickAxisPosition position, JoystickAxisDirection direction);
 
 	protected:
 		Vector<float> axes;

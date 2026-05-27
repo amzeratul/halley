@@ -300,6 +300,11 @@ std::string_view InputJoystick::getJoystickAxisName(JoystickType type, JoystickA
 	return "";
 }
 
+String InputJoystick::getJoystickAxisName(JoystickType type, JoystickAxisPosition position, JoystickAxisDirection direction)
+{
+	return getJoystickAxisName(type, position) + String(direction == JoystickAxisDirection::Positive ? "+" : "-");
+}
+
 void InputJoystick::doSetVibration(float low, float high)
 {
 }

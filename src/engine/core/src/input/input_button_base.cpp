@@ -74,17 +74,7 @@ std::string_view InputMouse::getName() const
 
 String InputMouse::getButtonName(int code) const
 {
-	constexpr auto names = std::to_array({
-		"left",
-		"middle",
-		"right",
-		"b4",
-		"b5",
-		"wheel_up",
-		"wheel_down",
-		"wheel"
-	});
-	return names.at(code);
+	return toString(static_cast<MouseButton>(code));
 }
 
 void InputButtonBase::onButtonStatus(int code, bool down)
