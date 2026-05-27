@@ -20,7 +20,7 @@ namespace Halley {
 
 	private:
 		httplib::Headers headers;
-		httplib::Progress progress;
+		httplib::DownloadProgress progress;
 
 		HTTPMethod method;
 		String host;
