@@ -357,7 +357,9 @@ void ControlBindings::applyAxisBinding(InputVirtual& dst, const IControlBindingM
 void ControlBindings::AxisPendingState::addButton(int axisId, std::shared_ptr<InputDevice> device, int button, JoystickAxisDirection dir)
 {
 	const auto iter = std_ex::find_if(axisButtons, [&] (AxisButtonPending& axis) {
-		return axis.axisId == axisId && axis.device == device;
+		return axis.axisId == axisId
+			&& axis.device == device
+			&& (dir == JoystickAxisDirection::Positive ? axis.positiveButton : axis.negativeButton) == std::nullopt;
 	});
 
 	AxisButtonPending* dst;
