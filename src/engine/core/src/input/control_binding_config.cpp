@@ -89,16 +89,16 @@ ConfigNode ControlBinding::toConfigNode() const
 
 	switch (bindingType) {
 	case ControlBindingType::GamepadButton:
-		result["value"] = (gamepadButtonChord ? toString(*gamepadButtonChord) + "+" : String()) + gamepadButton;
+		result["value"] = (gamepadButtonChord ? toString(*gamepadButtonChord) + "+" : String()) + *gamepadButton;
 		break;
 	case ControlBindingType::GamepadAxis:
-		result["value"] = gamepadAxis + (gamepadAxisDirection == JoystickAxisDirection::Positive ? "+" : "-");
+		result["value"] = *gamepadAxis + (gamepadAxisDirection == JoystickAxisDirection::Positive ? "+" : "-");
 		break;
 	case ControlBindingType::KeyboardButton:
-		result["value"] = (keyCodeChord ? toString(*keyCodeChord) + "+" : String()) + keyCode;
+		result["value"] = (keyCodeChord ? toString(*keyCodeChord) + "+" : String()) + *keyCode;
 		break;
 	case ControlBindingType::MouseButton:
-		result["value"] = mouseButton;
+		result["value"] = *mouseButton;
 		break;
 	}
 
@@ -199,7 +199,7 @@ std::pair<JoystickButtonPosition, std::optional<JoystickButtonPosition>> Control
 {
 	HalleyAssertDev(bindingType == ControlBindingType::GamepadButton);
 	HalleyAssertDev(gamepadButton);
-	return { *gamepadButton, gamepadButtonChord };
+	return { *gamepadButton, gamepadButtonChord.to_optional() };
 }
 
 MouseButton ControlBinding::getMouseButton() const
@@ -213,7 +213,7 @@ std::pair<KeyCode, std::optional<KeyCode>> ControlBinding::getKeyCode() const
 {
 	HalleyAssertDev(bindingType == ControlBindingType::KeyboardButton);
 	HalleyAssertDev(keyCode);
-	return { *keyCode, keyCodeChord };
+	return { *keyCode, keyCodeChord.to_optional() };
 }
 
 std::pair<int, std::optional<int>> ControlBinding::getGamepadButtonIdx(const InputDevice& gamepad) const
@@ -255,6 +255,33 @@ ControlBinding ControlBinding::convertToGamepadAxis() const
 		}
 	}
 	return {};
+}
+
+uint64_t ControlBinding::getHash() const
+{
+	uint64_t result = 0;
+	char* dst = reinterpret_cast<char*>(&result);
+	size_t pos = 0;
+	auto feed = [&] (const auto& v) {
+		memcpy(dst + pos, &v, sizeof(v));
+		pos += sizeof(v);
+	};
+
+	feed(bindingType);
+	if (bindingType == ControlBindingType::GamepadButton) {
+		feed(gamepadButton);
+		feed(gamepadButtonChord);
+	} else if (bindingType == ControlBindingType::GamepadAxis) {
+		feed(gamepadAxis);
+		feed(gamepadAxisDirection);
+	} else if (bindingType == ControlBindingType::KeyboardButton) {
+		feed(keyCode);
+		feed(keyCodeChord);
+	} else if (bindingType == ControlBindingType::MouseButton) {
+		feed(mouseButton);
+	}
+
+	return result;
 }
 
 ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
@@ -333,6 +360,7 @@ ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 	}
 
 	bindingSlots = node["bindingSlots"].asVector<Vector<InputType>>({});
+	exclusionGroups = node["exclusionGroups"].asVector<Vector<String>>({});
 
 	for (const auto& binding: bindingConfigs) {
 		bindingIds.emplace(binding.getBindingId());
@@ -363,4 +391,19 @@ const Vector<Vector<InputType>>& ControlBindingConfigs::getBindingSlots() const
 const HashSet<String>& ControlBindingConfigs::getBindingIds() const
 {
 	return bindingIds;
+}
+
+bool ControlBindingConfigs::areGroupsInConflict(const String& group0, const String& group1) const
+{
+	if (group0 == group1) {
+		return true;
+	}
+
+	for (const auto& group: exclusionGroups) {
+		if (group.contains(group0) && group.contains(group1)) {
+			return true;
+		}
+	}
+
+	return false;
 }

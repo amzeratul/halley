@@ -77,19 +77,21 @@ namespace Halley {
 		bool operator==(const ControlBinding& other) const = default;
 		bool operator!=(const ControlBinding& other) const = default;
 
+		uint64_t getHash() const;
+
 	private:
 		ControlBindingType bindingType = ControlBindingType::None;
 
-		std::optional<MouseButton> mouseButton;
+		OptionalLite<MouseButton> mouseButton;
 		
-		std::optional<KeyCode> keyCode;
-		std::optional<KeyCode> keyCodeChord;
+		OptionalLite<KeyCode> keyCode;
+		OptionalLite<KeyCode> keyCodeChord;
 		
-		std::optional<JoystickButtonPosition> gamepadButton;
-		std::optional<JoystickButtonPosition> gamepadButtonChord;
+		OptionalLite<JoystickButtonPosition> gamepadButton;
+		OptionalLite<JoystickButtonPosition> gamepadButtonChord;
 
-		std::optional<JoystickAxisPosition> gamepadAxis;
-		std::optional<JoystickAxisDirection> gamepadAxisDirection;
+		OptionalLite<JoystickAxisPosition> gamepadAxis;
+		OptionalLite<JoystickAxisDirection> gamepadAxisDirection;
 		
 		void loadValue(ControlBindingType type, const ConfigNode& value);
 	};
@@ -143,10 +145,23 @@ namespace Halley {
 		const Vector<ControlBindingConfig>& getBindings() const;
 		const Vector<Vector<InputType>>& getBindingSlots() const;
 		const HashSet<String>& getBindingIds() const;
+		bool areGroupsInConflict(const String& group0, const String& group1) const;
 
 	private:
 		Vector<ControlBindingConfig> bindingConfigs;
 		Vector<Vector<InputType>> bindingSlots;
 		HashSet<String> bindingIds;
+		Vector<Vector<String>> exclusionGroups;
+	};
+}
+
+namespace std {
+	template<>
+	struct hash<Halley::ControlBinding>
+	{
+		size_t operator()(const Halley::ControlBinding& v) const noexcept
+		{
+			return v.getHash();
+		}
 	};
 }

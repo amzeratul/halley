@@ -143,6 +143,9 @@ void ControlBindings::resolve(bool force) const
 		}
 	}
 
+	// We must detect conflicts BEFORE inheriting, otherwise those will be flagged
+	conflicts = detectConflicts();
+
 	// Bind inherited
 	for (const auto& bindingConfig: config.getBindings()) {
 		auto& dst = resolvedBindings[bindingConfig.getBindingId()];
@@ -273,12 +276,6 @@ const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bind
 		return iter->second;
 	}
 	return dummyBindings;
-}
-
-Vector<std::pair<String, String>> ControlBindings::getConflicts() const
-{
-	// TODO
-	return {};
 }
 
 void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const
@@ -494,4 +491,59 @@ std::optional<ControlBinding> ControlBindings::scanForPressGamepad(const InputDe
 	}
 
 	return std::nullopt;
+}
+
+const Vector<ControlBindings::Conflict>& ControlBindings::getConflicts() const
+{
+	return conflicts;
+}
+
+Vector<ControlBindings::Conflict> ControlBindings::detectConflicts() const
+{
+	struct Entry {
+		String id;
+		int slot;
+		String group;
+	};
+	HashMap<ControlBinding, Vector<Entry>> entries;
+
+	for (const auto& bindingConfig: config.getBindings()) {
+		if (bindingConfig.isHidden()) {
+			continue;
+		}
+		const auto& group = bindingConfig.getExclusivityGroup();
+		if (group.isEmpty()) {
+			continue;
+		}
+
+		if (const auto iter = resolvedBindings.find(bindingConfig.getBindingId()); iter != resolvedBindings.end()) {
+			int slot = 0;
+			for (const auto& binding: iter->second) {
+				if (binding.getBindingType() != ControlBindingType::None) {
+					entries[binding] += Entry { bindingConfig.getBindingId(), slot, group };
+				}
+				++slot;
+			}
+		}
+	}
+
+	Vector<Conflict> result;
+
+	// Add any double-bound entries
+	for (const auto& [binding, es]: entries) {
+		if (es.size() > 1) {
+			const auto& entry0 = es[0];
+
+			for (size_t i = 1; i < es.size(); ++i) {
+				const auto& entry1 = es[i];
+
+				if (config.areGroupsInConflict(entry0.group, entry1.group)) {
+					Logger::logDev("Conflict between " + entry0.id + ":" + entry0.slot + " and " + entry1.id + ":" + entry1.slot);
+					result += Conflict{ entry0.id, entry1.id, entry0.slot, entry1.slot };
+				}
+			}
+		}
+	}
+
+	return result;
 }
