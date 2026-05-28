@@ -131,6 +131,22 @@ ControlBindingType ControlBinding::getBindingType() const
 	return bindingType;
 }
 
+InputType ControlBinding::getBindingInputType() const
+{
+	switch (bindingType) {
+	case ControlBindingType::GamepadButton:
+	case ControlBindingType::GamepadAxis:
+		return InputType::Gamepad;
+	case ControlBindingType::KeyboardButton:
+		return InputType::Keyboard;
+	case ControlBindingType::MouseButton:
+		return InputType::Mouse;
+	case ControlBindingType::None:
+		return InputType::None;
+	}
+	return InputType::None;
+}
+
 bool ControlBinding::bind(MouseButton button)
 {
 	if (bindingType != ControlBindingType::MouseButton || mouseButton != button) {
@@ -295,6 +311,7 @@ ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 	inheritedBindings = node["inheritedBindings"].asVector<ControlInheritedBinding>({});
 	hidden = node["hidden"].asBool(false);
 	devOnly = node["devOnly"].asBool(false);
+	optional = node["optional"].asBool(false);
 }
 
 const String& ControlBindingConfig::getBindingId() const
@@ -340,6 +357,16 @@ bool ControlBindingConfig::isHidden() const
 bool ControlBindingConfig::isDevOnly() const
 {
 	return devOnly;
+}
+
+bool ControlBindingConfig::isOptional() const
+{
+	return optional;
+}
+
+bool ControlBindingConfig::requiresInputType(InputType input) const
+{
+	return !optional && inputTypes.contains(input);
 }
 
 ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)

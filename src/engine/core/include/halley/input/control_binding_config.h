@@ -55,6 +55,7 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 
 		ControlBindingType getBindingType() const;
+		InputType getBindingInputType() const;
 
 		bool bind(MouseButton button);
 		bool bind(KeyCode button, std::optional<KeyCode> chord = {});
@@ -123,8 +124,11 @@ namespace Halley {
 		const Vector<ControlInheritedBinding>& getInheritedBindings() const;
 		bool isHidden() const;
 		bool isDevOnly() const;
+		bool isOptional() const;
+	    
+		bool requiresInputType(InputType input) const;
 
-	private:
+    private:
 	    String bindingId;
 		ControlBindingTargetType bindingTargetType = ControlBindingTargetType::Button;
 		String groupId;
@@ -134,6 +138,7 @@ namespace Halley {
 		Vector<ControlInheritedBinding> inheritedBindings;
 		bool hidden;
 		bool devOnly;
+		bool optional;
 	};
 
 	class ControlBindingConfigs {

@@ -15,11 +15,17 @@ namespace Halley {
 
 	class ControlBindings {
 	public:
-		struct Conflict {
-			String id1;
-			String id2;
-			int slot1;
-			int slot2;
+		enum class ErrorType {
+			Conflict,
+			Missing
+		};
+
+		struct ErrorInfo {
+			ErrorType type;
+			String id;
+			int slot = 0;
+			String otherId;
+			int otherSlot = 0;
 		};
 
 		ControlBindings(ControlBindingConfigs config);
@@ -41,7 +47,7 @@ namespace Halley {
 		bool unbind(std::string_view bindingId, size_t slot);
 
 		const Vector<ControlBinding>& getBindings(std::string_view bindingId) const;
-		const Vector<Conflict>& getConflicts() const;
+		const Vector<ErrorInfo>& getErrors() const;
 
 		void apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const;
 		uint32_t getVersion() const;
@@ -80,7 +86,7 @@ namespace Halley {
 		mutable bool modified = false;
 		uint32_t version = 0;
 
-		mutable Vector<Conflict> conflicts;
+		mutable Vector<ErrorInfo> conflicts;
 
 		void resolve(bool force) const;
 		std::optional<size_t> findSlotIdx(const Vector<ControlBinding>& bs, ControlBindingType type) const;
@@ -97,6 +103,6 @@ namespace Halley {
 		static std::optional<ControlBinding> scanForPressMouse(const InputDevice& mouse);
 		static std::optional<ControlBinding> scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis);
 
-		Vector<Conflict> detectConflicts() const;
+		Vector<ErrorInfo> resolveErrors() const;
 	};
 }

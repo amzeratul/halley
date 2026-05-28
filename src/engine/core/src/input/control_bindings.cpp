@@ -144,7 +144,7 @@ void ControlBindings::resolve(bool force) const
 	}
 
 	// We must detect conflicts BEFORE inheriting, otherwise those will be flagged
-	conflicts = detectConflicts();
+	conflicts = resolveErrors();
 
 	// Bind inherited
 	for (const auto& bindingConfig: config.getBindings()) {
@@ -259,8 +259,13 @@ bool ControlBindings::bind(std::string_view bindingId, size_t slot, ControlBindi
 bool ControlBindings::unbind(std::string_view bindingId, size_t slot)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->unbind()) {
-			clearRedundantBindings();
+		const auto prevType = binding->getBindingType(); // Newly created ones will register no change, but are still an insertion
+		const bool changed = binding->unbind();
+
+		// Clear anyway, otherwise clearing a default-empty slot will result in a redundant entry
+		clearRedundantBindings();
+
+		if (changed || prevType == ControlBindingType::None) {
 			modified = true;
 			++version;
 			return true;
@@ -493,19 +498,31 @@ std::optional<ControlBinding> ControlBindings::scanForPressGamepad(const InputDe
 	return std::nullopt;
 }
 
-const Vector<ControlBindings::Conflict>& ControlBindings::getConflicts() const
+const Vector<ControlBindings::ErrorInfo>& ControlBindings::getErrors() const
 {
 	return conflicts;
 }
 
-Vector<ControlBindings::Conflict> ControlBindings::detectConflicts() const
+Vector<ControlBindings::ErrorInfo> ControlBindings::resolveErrors() const
 {
+	Vector<ErrorInfo> result;
+
 	struct Entry {
 		String id;
 		int slot;
 		String group;
 	};
 	HashMap<ControlBinding, Vector<Entry>> entries;
+
+	const auto& slots = config.getBindingSlots();
+	Vector<InputType> checkForMissingBindingTypes;
+	for (const auto& slot: slots) {
+		for (const auto type: slot) {
+			if (!checkForMissingBindingTypes.contains(type)) {
+				checkForMissingBindingTypes += type;
+			}
+		}
+	}
 
 	for (const auto& bindingConfig: config.getBindings()) {
 		if (bindingConfig.isHidden()) {
@@ -517,29 +534,46 @@ Vector<ControlBindings::Conflict> ControlBindings::detectConflicts() const
 		}
 
 		if (const auto iter = resolvedBindings.find(bindingConfig.getBindingId()); iter != resolvedBindings.end()) {
+			Vector<InputType> presentTypes;
+
 			int slot = 0;
 			for (const auto& binding: iter->second) {
 				if (binding.getBindingType() != ControlBindingType::None) {
+					if (!presentTypes.contains(binding.getBindingInputType())) {
+						presentTypes += binding.getBindingInputType();
+					}
 					entries[binding] += Entry { bindingConfig.getBindingId(), slot, group };
 				}
 				++slot;
 			}
+
+			// Consider mouse and keyboard to be the same
+			if (presentTypes.contains(InputType::Keyboard) && !presentTypes.contains(InputType::Mouse)) {
+				presentTypes += InputType::Mouse;
+			} else if (presentTypes.contains(InputType::Mouse) && !presentTypes.contains(InputType::Keyboard)) {
+				presentTypes += InputType::Keyboard;
+			}
+
+			// Check if it expects a type to be present, but isn't
+			for (const auto& expectedEntry: checkForMissingBindingTypes) {
+				if (!presentTypes.contains(expectedEntry) && bindingConfig.requiresInputType(expectedEntry)) {
+					const auto slotIdx = std_ex::find_index_if(slots, [&] (const Vector<InputType>& types) {
+						return types.contains(expectedEntry);
+					});
+					result += ErrorInfo{ ErrorType::Missing, bindingConfig.getBindingId(), static_cast<int>(slotIdx.value_or(0)), "", 0 };
+				}
+			}
 		}
 	}
-
-	Vector<Conflict> result;
 
 	// Add any double-bound entries
 	for (const auto& [binding, es]: entries) {
 		if (es.size() > 1) {
 			const auto& entry0 = es[0];
-
 			for (size_t i = 1; i < es.size(); ++i) {
 				const auto& entry1 = es[i];
-
 				if (config.areGroupsInConflict(entry0.group, entry1.group)) {
-					Logger::logDev("Conflict between " + entry0.id + ":" + entry0.slot + " and " + entry1.id + ":" + entry1.slot);
-					result += Conflict{ entry0.id, entry1.id, entry0.slot, entry1.slot };
+					result += ErrorInfo{ ErrorType::Conflict, entry0.id, entry0.slot,  entry1.id, entry1.slot };
 				}
 			}
 		}
