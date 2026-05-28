@@ -320,6 +320,10 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 	for (int i = static_cast<int>(widgetsCache.size()); --i >= 0; ) {
 		auto& w = widgetsCache[i];
 		if (w->getRoot() == this) {
+			if (w->getEventHandler().pump()) {
+				// Needs additional update to handle new events...
+				w->doUpdate(UIWidgetUpdateType::Partial, 0, activeInputType, joystickType, nullptr);
+			}
 			w->doPostUpdate();
 		} else {
 			Logger::logError("Error on UIRoot::updateWidgets(), widget \"" + w->getId() + "\" (" + typeid(*w).name() +
