@@ -127,6 +127,7 @@ namespace Halley {
 		bool isOptional() const;
 	    
 		bool requiresInputType(InputType input) const;
+	    bool hasRelevantBindings(const Vector<InputType>& types) const;
 
     private:
 	    String bindingId;

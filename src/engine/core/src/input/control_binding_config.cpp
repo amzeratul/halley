@@ -369,6 +369,27 @@ bool ControlBindingConfig::requiresInputType(InputType input) const
 	return !optional && inputTypes.contains(input);
 }
 
+bool ControlBindingConfig::hasRelevantBindings(const Vector<InputType>& types) const
+{
+	for (const auto& t: inputTypes) {
+		if (types.contains(t)) {
+			return true;
+		}
+	}
+	for (const auto& b: defaultBindings) {
+		if (types.contains(b.getBindingInputType())) {
+			return true;
+		}
+	}
+	for (const auto& b: inheritedBindings) {
+		// TODO
+		//if (types.contains(b.getBindingType())) {
+		//	return true;
+		//}
+	}
+	return false;
+}
+
 ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 {
 	for (const auto& groupNode: node["bindings"]) {
