@@ -75,7 +75,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	drawAfterChildren(painter);
 }
 
-void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>& dst)
+void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>* dst)
 {
 	const auto traceId = StackDebugTrace("widgetId", getId());
 #ifdef DEV_BUILD
@@ -110,8 +110,8 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 
 		addNewChildren(inputType);
 
-		if (isActive()) {
-			collectWidgetsForUpdating(dst);
+		if (dst && isActive()) {
+			collectWidgetsForUpdating(*dst);
 		}
 	}
 }

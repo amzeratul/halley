@@ -13,6 +13,7 @@
 #include "halley/ui/widgets/ui_tooltip.h"
 #include "halley/graphics/render_context.h"
 #include "halley/text/string_output_server.h"
+#include "halley/ui/ui_event_handler.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -296,7 +297,7 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 		if (w->getParent() && w->getParent()->isGuardedUpdate()) {
 			bool crashed = false;
 			try {
-				w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
+				w->doUpdate(type, t, activeInputType, joystickType, &widgetsCache);
 			} catch (const std::exception& e) {
 				Logger::logException(e);
 				crashed = true;
@@ -309,7 +310,7 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 			}
 		} else {
 			if (w->getRoot() == this) {
-				w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
+				w->doUpdate(type, t, activeInputType, joystickType, &widgetsCache);
 			} else {
 				Logger::logError("Widget " + w->getId() + " [" + typeid(*w).name() + "] is not being updated as it no longer belongs to this UI root");
 			}

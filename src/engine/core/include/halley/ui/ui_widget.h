@@ -276,7 +276,7 @@ namespace Halley {
 
 	private:
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>& dst);
+		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>* dst);
 		void doPostUpdate();
 
 		void setParent(UIParent* parent);

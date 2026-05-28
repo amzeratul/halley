@@ -39,8 +39,12 @@ void UIEventHandler::queue(UIEvent event, UIEventDirection direction)
 	eventQueue.emplace_back(std::move(event));
 }
 
-void UIEventHandler::pump()
+bool UIEventHandler::pump()
 {
+	if (eventQueue.empty()) {
+		return false;
+	}
+
 	while (!eventQueue.empty()) {
 		decltype(eventQueue) events = std::move(eventQueue);
 		eventQueue.clear();
@@ -48,6 +52,7 @@ void UIEventHandler::pump()
 			handle(event);
 		}
 	}
+	return true;
 }
 
 void UIEventHandler::setWidget(UIWidget* uiWidget)
