@@ -47,14 +47,19 @@ namespace Halley {
 		ControlBinding() = default;
 	    ControlBinding(const ConfigNode& node);
 
+		ControlBinding(MouseButton button);
+		ControlBinding(KeyCode button, std::optional<KeyCode> chord = {});
+		ControlBinding(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
+		ControlBinding(JoystickAxisPosition axis, JoystickAxisDirection direction);
+
 		ConfigNode toConfigNode() const;
 
 		ControlBindingType getBindingType() const;
 
-		bool bindMouseButton(MouseButton button);
-		bool bindKeyboardButton(KeyCode button, std::optional<KeyCode> chord = {});
-		bool bindGamepadButton(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
-		bool bindGamepadAxis(JoystickAxisPosition axis, JoystickAxisDirection direction);
+		bool bind(MouseButton button);
+		bool bind(KeyCode button, std::optional<KeyCode> chord = {});
+		bool bind(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
+		bool bind(JoystickAxisPosition axis, JoystickAxisDirection direction);
 		bool unbind();
 
 		std::pair<JoystickAxisPosition, JoystickAxisDirection> getGamepadAxis() const;

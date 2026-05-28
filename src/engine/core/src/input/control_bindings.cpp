@@ -1,8 +1,10 @@
 #include "halley/input/control_bindings.h"
 
 #include "../support/StackWalker/StackWalker.h"
+#include "halley/api/input_api.h"
 #include "halley/input/input_virtual.h"
 #include "halley/utils/algorithm.h"
+#include "halley/input/input_keyboard.h"
 
 using namespace Halley;
 
@@ -188,7 +190,7 @@ void ControlBindings::clearRedundantBindings()
 bool ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bindKeyboardButton(code)) {
+		if (binding->bind(code)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
@@ -201,7 +203,7 @@ bool ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyC
 bool ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bindGamepadButton(button)) {
+		if (binding->bind(button)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
@@ -214,7 +216,7 @@ bool ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot,
 bool ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bindGamepadAxis(axis, dir)) {
+		if (binding->bind(axis, dir)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
@@ -227,7 +229,7 @@ bool ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, J
 bool ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button)
 {
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bindMouseButton(button)) {
+		if (binding->bind(button)) {
 			clearRedundantBindings();
 			modified = true;
 			++version;
@@ -271,6 +273,12 @@ const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bind
 		return iter->second;
 	}
 	return dummyBindings;
+}
+
+Vector<std::pair<String, String>> ControlBindings::getConflicts() const
+{
+	// TODO
+	return {};
 }
 
 void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const
@@ -396,4 +404,92 @@ ControlBinding* ControlBindings::tryGetUserBinding(std::string_view bindingId, s
 
 	const String key = String(bindingId) + ":" + slot;
 	return &userBindings[key];
+}
+
+std::optional<ControlBinding> ControlBindings::scanForPress(const InputAPI& inputAPI, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes)
+{
+	const auto& inputTypes = config.getInputTypes();
+	
+	if (inputTypes.contains(InputType::Keyboard) && std_ex::contains(acceptedInputTypes, InputType::Keyboard)) {
+		for (size_t i = 0; i < inputAPI.getNumberOfKeyboards(); ++i) {
+			if (auto kb = inputAPI.getKeyboard(static_cast<int>(i))) {
+				if (auto res = scanForPressKeyboard(*kb)) {
+					return res;
+				}
+			}
+		}
+	}
+
+	if (inputTypes.contains(InputType::Mouse) && std_ex::contains(acceptedInputTypes, InputType::Mouse)) {
+		for (size_t i = 0; i < inputAPI.getNumberOfMice(); ++i) {
+			if (auto mouse = inputAPI.getMouse(static_cast<int>(i))) {
+				if (auto res = scanForPressMouse(*mouse)) {
+					return res;
+				}
+			}
+		}
+	}
+
+	if (inputTypes.contains(InputType::Gamepad) && std_ex::contains(acceptedInputTypes, InputType::Gamepad)) {
+		for (size_t i = 0; i < inputAPI.getNumberOfJoysticks(); ++i) {
+			if (auto gamepad = inputAPI.getJoystick(static_cast<int>(i))) {
+				if (auto res = scanForPressGamepad(*gamepad, config.getTargetType() == ControlBindingTargetType::Button, config.getTargetType() == ControlBindingTargetType::Axis)) {
+					return res;
+				}
+			}
+		}
+	}
+
+	return {};
+}
+
+std::optional<ControlBinding> ControlBindings::scanForPress(const InputDevice& device, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes)
+{
+	const auto& inputTypes = config.getInputTypes();
+	const auto type = device.getInputType();
+	if (type == InputType::Gamepad && inputTypes.contains(InputType::Gamepad) && std_ex::contains(acceptedInputTypes, InputType::Gamepad)) {
+		return scanForPressGamepad(device, config.getTargetType() == ControlBindingTargetType::Button, config.getTargetType() == ControlBindingTargetType::Axis);
+	} else if (type == InputType::Keyboard && inputTypes.contains(InputType::Keyboard) && std_ex::contains(acceptedInputTypes, InputType::Keyboard)) {
+		return scanForPressKeyboard(device);
+	} else if (type == InputType::Mouse && inputTypes.contains(InputType::Mouse) && std_ex::contains(acceptedInputTypes, InputType::Mouse)) {
+		return scanForPressMouse(device);
+	}
+	return std::nullopt;
+}
+
+std::optional<ControlBinding> ControlBindings::scanForPressKeyboard(const InputDevice& keyboard)
+{
+	for (auto b: keyboard.getButtonsPressed()) {
+		return ControlBinding(static_cast<KeyCode>(b));
+	}
+	return std::nullopt;
+}
+
+std::optional<ControlBinding> ControlBindings::scanForPressMouse(const InputDevice& mouse)
+{
+	for (auto b: mouse.getButtonsPressed()) {
+		return ControlBinding(static_cast<MouseButton>(b));
+	}
+	return std::nullopt;
+}
+
+std::optional<ControlBinding> ControlBindings::scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis)
+{
+	if (button) {
+		for (auto b: gamepad.getButtonsPressed()) {
+			if (auto pos = gamepad.getPositionForButton(b)) {
+				return ControlBinding(*pos);
+			}
+		}
+	}
+	
+	if (axis) {
+		for (auto [axis, dir]: gamepad.getAxesMoved()) {
+			if (auto pos = gamepad.getPositionForAxis(axis)) {
+				return ControlBinding(*pos, dir);
+			}
+		}
+	}
+
+	return std::nullopt;
 }
