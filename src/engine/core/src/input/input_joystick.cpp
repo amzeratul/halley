@@ -24,7 +24,7 @@
 using namespace Halley;
 
 
-float InputJoystick::getAxis(int n)
+float InputJoystick::getAxis(int n) const
 {
 	if (n >= 0 && n < int(axes.size())) {
 		return axisAdjust(axes[n]);
@@ -59,17 +59,17 @@ InputType InputJoystick::getInputType() const
 	return InputType::Gamepad;
 }
 
-size_t InputJoystick::getNumberAxes()
+size_t InputJoystick::getNumberAxes() const
 {
 	return axes.size();
 }
 
-size_t InputJoystick::getNumberHats()
+size_t InputJoystick::getNumberHats() const
 {
 	return hats.size();
 }
 
-std::shared_ptr<InputDevice> InputJoystick::getHat(int n)
+std::shared_ptr<InputDevice> InputJoystick::getHat(int n) const
 {
 	return hats.at(n);
 }
@@ -109,7 +109,7 @@ void InputJoystick::clearPresses()
 	}
 }
 
-bool InputJoystick::isAnyButtonPressed()
+bool InputJoystick::isAnyButtonPressed() const
 {
 	for (auto& hat: hats) {
 		if (hat->isAnyButtonPressed()) {
@@ -119,7 +119,7 @@ bool InputJoystick::isAnyButtonPressed()
 	return InputButtonBase::isAnyButtonPressed();
 }
 
-bool InputJoystick::isAnyButtonReleased()
+bool InputJoystick::isAnyButtonReleased() const
 {
 	for (auto& hat: hats) {
 		if (hat->isAnyButtonReleased()) {
@@ -129,7 +129,7 @@ bool InputJoystick::isAnyButtonReleased()
 	return InputButtonBase::isAnyButtonReleased();
 }
 
-bool InputJoystick::isAnyButtonDown()
+bool InputJoystick::isAnyButtonDown() const
 {
 	for (auto& hat: hats) {
 		if (hat->isAnyButtonDown()) {

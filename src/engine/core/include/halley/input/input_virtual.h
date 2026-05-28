@@ -46,20 +46,20 @@ namespace Halley {
 		~InputVirtual() override;
 
 		bool isEnabled() const override;
-		size_t getNumberHats() override;
-		std::shared_ptr<InputDevice> getHat(int /*n*/) override;
+		size_t getNumberHats() const override;
+		std::shared_ptr<InputDevice> getHat(int /*n*/) const override;
 
-		size_t getNumberButtons() override;
-		size_t getNumberAxes() override;
+		size_t getNumberButtons() const override;
+		size_t getNumberAxes() const override;
 
-		bool isAnyButtonPressed() override;
-		bool isAnyButtonReleased() override;
-		bool isAnyButtonDown() override;
+		bool isAnyButtonPressed() const override;
+		bool isAnyButtonReleased() const override;
+		bool isAnyButtonDown() const override;
 
-		bool isButtonPressed(InputButton code) override;
-		bool isButtonPressedRepeat(InputButton code) override;
-		bool isButtonReleased(InputButton code) override;
-		bool isButtonDown(InputButton code) override;
+		bool isButtonPressed(InputButton code) const override;
+		bool isButtonPressedRepeat(InputButton code) const override;
+		bool isButtonReleased(InputButton code) const override;
+		bool isButtonDown(InputButton code) const override;
 
 		bool isButtonPressed(InputButton code, gsl::span<const uint32_t> activeBinds);
 		bool isButtonPressedRepeat(InputButton code, gsl::span<const uint32_t> activeBinds);
@@ -72,8 +72,8 @@ namespace Halley {
 
 		String getButtonName(int code) const override;
 
-		float getAxis(int n) override;
-		int getAxisRepeat(int n) override;
+		float getAxis(int n) const override;
+		int getAxisRepeat(int n) const override;
 
 		float getAxis(int n, gsl::span<const uint32_t> activeBinds);
 

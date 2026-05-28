@@ -41,11 +41,11 @@ namespace Halley {
 		JoystickType getJoystickType() const override;
 		InputType getInputType() const override;
 
-		size_t getNumberAxes() override;
-		size_t getNumberHats() override;
+		size_t getNumberAxes() const override;
+		size_t getNumberHats() const override;
 
-		float getAxis(int n) override;
-		std::shared_ptr<InputDevice> getHat(int n) override;
+		float getAxis(int n) const override;
+		std::shared_ptr<InputDevice> getHat(int n) const override;
 
 		virtual void update(Time t);
 
@@ -60,9 +60,9 @@ namespace Halley {
 		void clearAxes() override;
 		void clearPresses() override;
 
-		bool isAnyButtonPressed() override;
-		bool isAnyButtonReleased() override;
-		bool isAnyButtonDown() override;
+		bool isAnyButtonPressed() const override;
+		bool isAnyButtonReleased() const override;
+		bool isAnyButtonDown() const override;
 
 		void setAxisAdjust(std::function<float (float)> f);
 

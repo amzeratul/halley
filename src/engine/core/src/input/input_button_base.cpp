@@ -119,66 +119,66 @@ void InputButtonBase::clearPresses()
 	onButtonsCleared();
 }
 
-bool InputButtonBase::isAnyButtonPressed()
+bool InputButtonBase::isAnyButtonPressed() const
 {
 	return anyButtonPressed;
 }
 
-bool InputButtonBase::isAnyButtonPressedRepeat()
+bool InputButtonBase::isAnyButtonPressedRepeat() const
 {
 	return anyButtonPressedRepeat;
 }
 
-bool InputButtonBase::isAnyButtonReleased()
+bool InputButtonBase::isAnyButtonReleased() const
 {
 	return anyButtonReleased;
 }
 
-bool InputButtonBase::isAnyButtonDown()
+bool InputButtonBase::isAnyButtonDown() const
 {
 	return std::any_of(buttonDown.begin(), buttonDown.end(), [] (const auto& v) { return v != 0; });
 }
 
-bool InputButtonBase::isButtonPressed(InputButton code)
+bool InputButtonBase::isButtonPressed(InputButton code) const
 {
 	if (code < 0 || code >= int(buttonPressed.size())) return false;
 	return buttonPressed[code] != 0;
 }
 
-bool InputButtonBase::isButtonPressedRepeat(InputButton code)
+bool InputButtonBase::isButtonPressedRepeat(InputButton code) const
 {
 	if (code < 0 || code >= int(buttonPressedRepeat.size())) return false;
 	return buttonPressedRepeat[code] != 0;
 }
 
-bool InputButtonBase::isButtonReleased(InputButton code)
+bool InputButtonBase::isButtonReleased(InputButton code) const
 {
 	if (code < 0 || code >= int(buttonReleased.size())) return false;
 	return buttonReleased[code] != 0;
 }
 
-bool InputButtonBase::isButtonDown(InputButton code)
+bool InputButtonBase::isButtonDown(InputButton code) const
 {
 	if (code < 0 || code >= int(buttonDown.size())) return false;
 	return buttonDown[code] != 0;
 }
 
-bool InputButtonBase::isButtonPressed(KeyCode code)
+bool InputButtonBase::isButtonPressed(KeyCode code) const
 {
 	return isButtonPressed(static_cast<int>(code));
 }
 
-bool InputButtonBase::isButtonPressedRepeat(KeyCode code)
+bool InputButtonBase::isButtonPressedRepeat(KeyCode code) const
 {
 	return isButtonPressedRepeat(static_cast<int>(code));
 }
 
-bool InputButtonBase::isButtonReleased(KeyCode code)
+bool InputButtonBase::isButtonReleased(KeyCode code) const
 {
 	return isButtonReleased(static_cast<int>(code));
 }
 
-bool InputButtonBase::isButtonDown(KeyCode code)
+bool InputButtonBase::isButtonDown(KeyCode code) const
 {
 	return isButtonDown(static_cast<int>(code));
 }

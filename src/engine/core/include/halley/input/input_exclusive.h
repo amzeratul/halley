@@ -96,17 +96,17 @@ namespace Halley {
     	void setEnabled(bool enabled);
         bool isEnabled() const override;
 
-        size_t getNumberButtons() override;
-	    size_t getNumberAxes() override;
+        size_t getNumberButtons() const override;
+	    size_t getNumberAxes() const override;
 	    String getButtonName(int code) const override;
 
-    	bool isButtonPressed(InputButton code) override;
-	    bool isButtonPressedRepeat(InputButton code) override;
-	    bool isButtonReleased(InputButton code) override;
-	    bool isButtonDown(InputButton code) override;
+    	bool isButtonPressed(InputButton code) const override;
+	    bool isButtonPressedRepeat(InputButton code) const override;
+	    bool isButtonReleased(InputButton code) const override;
+	    bool isButtonDown(InputButton code) const override;
 
-    	float getAxis(int axis) override;
-	    int getAxisRepeat(int axis) override;
+    	float getAxis(int axis) const override;
+	    int getAxisRepeat(int axis) const override;
 
     private:
         std::shared_ptr<InputVirtual> input;

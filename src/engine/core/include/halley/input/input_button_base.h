@@ -29,22 +29,22 @@ namespace Halley {
 	public:
 		InputButtonBase(int nButtons = -1);
 
-		size_t getNumberButtons() override { return buttonDown.size(); }
+		size_t getNumberButtons() const override { return buttonDown.size(); }
 
-		bool isAnyButtonPressed() override;
-		bool isAnyButtonPressedRepeat() override;
-		bool isAnyButtonReleased() override;
-		bool isAnyButtonDown() override;
+		bool isAnyButtonPressed() const override;
+		bool isAnyButtonPressedRepeat() const override;
+		bool isAnyButtonReleased() const override;
+		bool isAnyButtonDown() const override;
 
-		bool isButtonPressed(InputButton code) override;
-		bool isButtonPressedRepeat(InputButton code) override;
-		bool isButtonReleased(InputButton code) override;
-		bool isButtonDown(InputButton code) override;
+		bool isButtonPressed(InputButton code) const override;
+		bool isButtonPressedRepeat(InputButton code) const override;
+		bool isButtonReleased(InputButton code) const override;
+		bool isButtonDown(InputButton code) const override;
 
-		bool isButtonPressed(KeyCode code);
-		bool isButtonPressedRepeat(KeyCode code);
-		bool isButtonReleased(KeyCode code);
-		bool isButtonDown(KeyCode code);
+		bool isButtonPressed(KeyCode code) const;
+		bool isButtonPressedRepeat(KeyCode code) const;
+		bool isButtonReleased(KeyCode code) const;
+		bool isButtonDown(KeyCode code) const;
 
 		void clearButton(InputButton code) override;
 		void clearButtonPress(InputButton code) override;

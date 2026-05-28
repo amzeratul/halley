@@ -58,27 +58,27 @@ bool InputVirtual::isEnabled() const
 	return false;
 }
 
-size_t InputVirtual::getNumberHats()
+size_t InputVirtual::getNumberHats() const
 {
 	return 0;
 }
 
-std::shared_ptr<InputDevice> InputVirtual::getHat(int)
+std::shared_ptr<InputDevice> InputVirtual::getHat(int) const
 {
 	return std::shared_ptr<InputDevice>();
 }
 
-size_t InputVirtual::getNumberButtons()
+size_t InputVirtual::getNumberButtons() const
 {
 	return buttons.size();
 }
 
-size_t InputVirtual::getNumberAxes()
+size_t InputVirtual::getNumberAxes() const
 {
 	return axes.size();
 }
 
-bool InputVirtual::isAnyButtonPressed()
+bool InputVirtual::isAnyButtonPressed() const
 {
 	for (auto& binds : buttons) {
 		for (auto& bind : binds) {
@@ -90,7 +90,7 @@ bool InputVirtual::isAnyButtonPressed()
 	return false;
 }
 
-bool InputVirtual::isAnyButtonReleased()
+bool InputVirtual::isAnyButtonReleased() const
 {
 	for (auto& binds : buttons) {
 		for (auto& bind : binds) {
@@ -102,7 +102,7 @@ bool InputVirtual::isAnyButtonReleased()
 	return false;
 }
 
-bool InputVirtual::isAnyButtonDown()
+bool InputVirtual::isAnyButtonDown() const
 {
 	for (auto& binds : buttons) {
 		for (auto& bind : binds) {
@@ -114,7 +114,7 @@ bool InputVirtual::isAnyButtonDown()
 	return false;
 }
 
-bool InputVirtual::isButtonPressed(InputButton code)
+bool InputVirtual::isButtonPressed(InputButton code) const
 {
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonPressed()) {
@@ -124,7 +124,7 @@ bool InputVirtual::isButtonPressed(InputButton code)
 	return false;
 }
 
-bool InputVirtual::isButtonPressedRepeat(InputButton code)
+bool InputVirtual::isButtonPressedRepeat(InputButton code) const
 {
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonPressedRepeat()) {
@@ -134,7 +134,7 @@ bool InputVirtual::isButtonPressedRepeat(InputButton code)
 	return false;
 }
 
-bool InputVirtual::isButtonReleased(InputButton code)
+bool InputVirtual::isButtonReleased(InputButton code) const
 {
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonReleased()) {
@@ -144,7 +144,7 @@ bool InputVirtual::isButtonReleased(InputButton code)
 	return false;
 }
 
-bool InputVirtual::isButtonDown(InputButton code)
+bool InputVirtual::isButtonDown(InputButton code) const
 {
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonDown()) {
@@ -243,7 +243,7 @@ void InputVirtual::clearButtonRelease(InputButton code)
 	}
 }
 
-float InputVirtual::getAxis(int n)
+float InputVirtual::getAxis(int n) const
 {
 	if (n < 0 || n >= axes.size()) {
 		Logger::logError("Attempting to read out of bounds virtual axis: " + toString(n) + " (has " + toString(axes.size()) + " axes)", true);
@@ -252,7 +252,7 @@ float InputVirtual::getAxis(int n)
 	return axes.at(n).getValue();
 }
 
-int InputVirtual::getAxisRepeat(int n)
+int InputVirtual::getAxisRepeat(int n) const
 {
 	if (n < 0 || n >= axes.size()) {
 		Logger::logError("Attempting to read out of bounds virtual axis: " + toString(n) + " (has " + toString(axes.size()) + " axes)", true);

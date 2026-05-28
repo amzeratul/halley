@@ -157,12 +157,12 @@ InputType InputExclusive::getInputType() const
 	return InputType::Virtual;
 }
 
-size_t InputExclusive::getNumberButtons()
+size_t InputExclusive::getNumberButtons() const
 {
 	return buttons.size();
 }
 
-size_t InputExclusive::getNumberAxes()
+size_t InputExclusive::getNumberAxes() const
 {
 	return axes.size();
 }
@@ -172,32 +172,32 @@ String InputExclusive::getButtonName(int code) const
 	return input->getButtonName(buttons.at(code));
 }
 
-bool InputExclusive::isButtonPressed(InputButton code)
+bool InputExclusive::isButtonPressed(InputButton code) const
 {
 	return enabled ? buttonsExclusive.at(code)->isPressed() : false;
 }
 
-bool InputExclusive::isButtonPressedRepeat(InputButton code)
+bool InputExclusive::isButtonPressedRepeat(InputButton code) const
 {
 	return enabled ? buttonsExclusive.at(code)->isPressedRepeat() : false;
 }
 
-bool InputExclusive::isButtonReleased(InputButton code)
+bool InputExclusive::isButtonReleased(InputButton code) const
 {
 	return enabled ? buttonsExclusive.at(code)->isReleased() : false;
 }
 
-bool InputExclusive::isButtonDown(InputButton code)
+bool InputExclusive::isButtonDown(InputButton code) const
 {
 	return enabled ? buttonsExclusive.at(code)->isDown() : false;
 }
 
-float InputExclusive::getAxis(int i)
+float InputExclusive::getAxis(int i) const
 {
 	return enabled ? axesExclusive.at(i)->getAxis() : 0.0f;
 }
 
-int InputExclusive::getAxisRepeat(int i)
+int InputExclusive::getAxisRepeat(int i) const
 {
 	return enabled ? axesExclusive.at(i)->getAxisRepeat() : 0;
 }

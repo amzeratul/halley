@@ -41,8 +41,8 @@ namespace Halley {
 		void releaseButton(int n);
 		void setAxis(int n, float value);
 
-		size_t getNumberAxes() override;
-		float getAxis(int n) override;
+		size_t getNumberAxes() const override;
+		float getAxis(int n) const override;
 
 		bool isManual() const override;
 

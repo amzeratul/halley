@@ -117,7 +117,7 @@ void InputMouseSDL::update()
 	onButtonStatus(static_cast<int>(MouseButton::WheelLeftRight), false);
 }
 
-float InputMouseSDL::getAxis(int n)
+float InputMouseSDL::getAxis(int n) const
 {
 	if (n == 0) {
 		return relMove.x;

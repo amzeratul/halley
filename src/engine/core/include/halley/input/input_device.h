@@ -281,8 +281,8 @@ namespace Halley {
 
 		virtual bool isEnabled() const;
 
-		virtual size_t getNumberButtons();
-		virtual size_t getNumberAxes();
+		virtual size_t getNumberButtons() const;
+		virtual size_t getNumberAxes() const;
 
 		virtual String getButtonName(int code) const;
 		virtual String getAxisName(int index) const;
@@ -291,18 +291,18 @@ namespace Halley {
 		virtual std::optional<JoystickButtonPosition> getPositionForButton(int code) const;
 		virtual std::optional<JoystickAxisPosition> getPositionForAxis(int code) const;
 
-		virtual bool isAnyButtonPressed();
-		virtual bool isAnyButtonPressedRepeat();
-		virtual bool isAnyButtonReleased();
-		virtual bool isAnyButtonDown();
+		virtual bool isAnyButtonPressed() const;
+		virtual bool isAnyButtonPressedRepeat() const;
+		virtual bool isAnyButtonReleased() const;
+		virtual bool isAnyButtonDown() const;
 
-		virtual bool isButtonPressed(InputButton code);
-		virtual bool isButtonPressedRepeat(InputButton code);
-		virtual bool isButtonReleased(InputButton code);
-		virtual bool isButtonDown(InputButton code);
-		virtual KeyMods getKeyMods();
+		virtual bool isButtonPressed(InputButton code) const;
+		virtual bool isButtonPressedRepeat(InputButton code) const;
+		virtual bool isButtonReleased(InputButton code) const;
+		virtual bool isButtonDown(InputButton code) const;
+		virtual KeyMods getKeyMods() const;
 
-		virtual bool hasAnyInput();
+		virtual bool hasAnyInput() const;
 
 		virtual void clearButton(InputButton code);
 		virtual void clearButtonPress(InputButton code);
@@ -310,11 +310,11 @@ namespace Halley {
 		virtual void clearPresses();
 		virtual void clearAxes();
 
-		virtual float getAxis(int n);
-		virtual int getAxisRepeat(int n);
+		virtual float getAxis(int n) const;
+		virtual int getAxisRepeat(int n) const;
 
-		virtual size_t getNumberHats();
-		virtual std::shared_ptr<InputDevice> getHat(int n);
+		virtual size_t getNumberHats() const;
+		virtual std::shared_ptr<InputDevice> getHat(int n) const;
 
 		virtual std::pair<float, float> getVibration() const;
 		virtual void setVibration(float low, float high);
@@ -337,6 +337,9 @@ namespace Halley {
 		virtual std::optional<int> getPlayerIndex() const;
 		virtual bool hasLED() const;
 		virtual void setLED(Colour4c colour) const;
+
+		Vector<int> getButtonsPressed() const;
+		Vector<std::pair<int, JoystickAxisDirection>> getAxesMoved(float threshold = 0.5f) const;
 
 	private:
 		uint16_t deviceId = 0;

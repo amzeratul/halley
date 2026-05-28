@@ -54,7 +54,7 @@ void InputKeyboard::onKeyReleased(KeyCode code, KeyMods mods)
 	onButtonReleased(static_cast<int>(code));
 }
 
-KeyMods InputKeyboard::getKeyMods()
+KeyMods InputKeyboard::getKeyMods() const
 {
 	uint8_t result = 0;
 

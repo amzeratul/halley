@@ -71,12 +71,12 @@ void Halley::InputManual::setAxis(int n, float value)
 	axes.at(n) = value;
 }
 
-size_t Halley::InputManual::getNumberAxes()
+size_t Halley::InputManual::getNumberAxes() const
 {
 	return axes.size();
 }
 
-float Halley::InputManual::getAxis(int n)
+float Halley::InputManual::getAxis(int n) const
 {
 	return axes.at(n);
 }

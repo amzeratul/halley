@@ -22,12 +22,12 @@ bool InputDevice::isEnabled() const
 	return true;
 }
 
-size_t InputDevice::getNumberButtons()
+size_t InputDevice::getNumberButtons() const
 {
 	return 0;
 }
 
-size_t InputDevice::getNumberAxes()
+size_t InputDevice::getNumberAxes() const
 {
 	return 0;
 }
@@ -79,52 +79,52 @@ std::optional<JoystickAxisPosition> InputDevice::getPositionForAxis(int code) co
 	return std::nullopt;
 }
 
-bool InputDevice::isAnyButtonPressed()
+bool InputDevice::isAnyButtonPressed() const
 {
 	return false;
 }
 
-bool InputDevice::isAnyButtonPressedRepeat()
+bool InputDevice::isAnyButtonPressedRepeat() const
 {
 	return false;
 }
 
-bool InputDevice::isAnyButtonReleased()
+bool InputDevice::isAnyButtonReleased() const
 {
 	return false;
 }
 
-bool InputDevice::isAnyButtonDown()
+bool InputDevice::isAnyButtonDown() const
 {
 	return false;
 }
 
-bool InputDevice::isButtonPressed(InputButton code)
+bool InputDevice::isButtonPressed(InputButton code) const
 {
 	return false;
 }
 
-bool InputDevice::isButtonPressedRepeat(InputButton code)
+bool InputDevice::isButtonPressedRepeat(InputButton code) const
 {
 	return false;
 }
 
-bool InputDevice::isButtonReleased(InputButton code)
+bool InputDevice::isButtonReleased(InputButton code) const
 {
 	return false;
 }
 
-bool InputDevice::isButtonDown(InputButton code)
+bool InputDevice::isButtonDown(InputButton code) const
 {
 	return false;
 }
 
-KeyMods InputDevice::getKeyMods()
+KeyMods InputDevice::getKeyMods() const
 {
 	return KeyMods::None;
 }
 
-bool InputDevice::hasAnyInput()
+bool InputDevice::hasAnyInput() const
 {
 	if (isAnyButtonPressed() || isAnyButtonReleased()) {
 		return true;
@@ -159,17 +159,17 @@ void InputDevice::clearAxes()
 {
 }
 
-float InputDevice::getAxis(int)
+float InputDevice::getAxis(int) const
 {
 	return 0;
 }
 
-int InputDevice::getAxisRepeat(int)
+int InputDevice::getAxisRepeat(int) const
 {
 	return 0;
 }
 
-size_t InputDevice::getNumberHats()
+size_t InputDevice::getNumberHats() const
 {
 	return 0;
 }
@@ -188,7 +188,36 @@ void InputDevice::setLED(Colour4c colour) const
 {
 }
 
-std::shared_ptr<InputDevice> InputDevice::getHat(int)
+Vector<int> InputDevice::getButtonsPressed() const
+{
+	Vector<int> result;
+
+	const auto n = static_cast<int>(getNumberButtons());
+	for (int i = 0; i < n; ++i) {
+		if (isButtonPressed(i)) {
+			result += i;
+		}
+	}
+
+	return result;
+}
+
+Vector<std::pair<int, JoystickAxisDirection>> InputDevice::getAxesMoved(float threshold) const
+{
+	Vector<std::pair<int, JoystickAxisDirection>> result;
+
+	const auto n = static_cast<int>(getNumberAxes());
+	for (int i = 0; i < n; ++i) {
+		const float value = getAxis(i);
+		if (std::abs(value) >= threshold) {
+			result += { i, value > 0 ? JoystickAxisDirection::Positive : JoystickAxisDirection::Negative };
+		}
+	}
+
+	return result;
+}
+
+std::shared_ptr<InputDevice> InputDevice::getHat(int) const
 {
 	return {};
 }
