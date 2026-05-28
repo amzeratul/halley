@@ -138,15 +138,20 @@ namespace Halley {
 	private:
 
 		struct Bind {
+			enum class Mode {
+				Button,
+				Axis,
+				AxisEmulation
+			};
+
 			spInputDevice device;
 			int a = -1;
 			int b = -1;
-			bool isAxis = false;
-			bool isAxisEmulation = false;
+			Mode mode = Mode::Button;
 			std::optional<KeyMods> mods;
 			float scale = 1.0f;
 
-			Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods = {}, float scale = 1.0f);
+			Bind(spInputDevice d, int a, int b, Mode mode, std::optional<KeyMods> mods = {}, float scale = 1.0f);
 
 			bool isButtonPressed() const;
 			bool isButtonPressedRepeat() const;

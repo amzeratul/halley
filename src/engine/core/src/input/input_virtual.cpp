@@ -116,6 +116,9 @@ bool InputVirtual::isAnyButtonDown() const
 
 bool InputVirtual::isButtonPressed(InputButton code) const
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonPressed()) {
 			return true;
@@ -126,6 +129,9 @@ bool InputVirtual::isButtonPressed(InputButton code) const
 
 bool InputVirtual::isButtonPressedRepeat(InputButton code) const
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonPressedRepeat()) {
 			return true;
@@ -136,6 +142,9 @@ bool InputVirtual::isButtonPressedRepeat(InputButton code) const
 
 bool InputVirtual::isButtonReleased(InputButton code) const
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonReleased()) {
 			return true;
@@ -146,6 +155,9 @@ bool InputVirtual::isButtonReleased(InputButton code) const
 
 bool InputVirtual::isButtonDown(InputButton code) const
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	for (auto& bind : buttons.at(code)) {
 		if (bind.isButtonDown()) {
 			return true;
@@ -156,6 +168,9 @@ bool InputVirtual::isButtonDown(InputButton code) const
 
 bool InputVirtual::isButtonPressed(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
 		if (checkBinds(activeBinds, bind) && bind.isButtonPressed()) {
@@ -167,6 +182,9 @@ bool InputVirtual::isButtonPressed(InputButton code, gsl::span<const uint32_t> a
 
 bool InputVirtual::isButtonPressedRepeat(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
 		if (checkBinds(activeBinds, bind) && bind.isButtonPressedRepeat()) {
@@ -178,6 +196,9 @@ bool InputVirtual::isButtonPressedRepeat(InputButton code, gsl::span<const uint3
 
 bool InputVirtual::isButtonReleased(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
 		if (checkBinds(activeBinds, bind) && bind.isButtonReleased()) {
@@ -189,6 +210,9 @@ bool InputVirtual::isButtonReleased(InputButton code, gsl::span<const uint32_t> 
 
 bool InputVirtual::isButtonDown(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
+	if (code < 0 || code >= static_cast<int>(buttons.size())) {
+		return false;
+	}
 	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
 		if (checkBinds(activeBinds, bind) && bind.isButtonDown()) {
@@ -200,6 +224,9 @@ bool InputVirtual::isButtonDown(InputButton code, gsl::span<const uint32_t> acti
 
 float InputVirtual::getAxis(int n, gsl::span<const uint32_t> activeBinds)
 {
+	if (n < 0 || n >= static_cast<int>(axes.size())) {
+		return false;
+	}
 	refreshExclusives();
 	float value = 0;
 	for (auto& bind: axes.at(n).binds) {
@@ -245,18 +272,16 @@ void InputVirtual::clearButtonRelease(InputButton code)
 
 float InputVirtual::getAxis(int n) const
 {
-	if (n < 0 || n >= axes.size()) {
-		Logger::logError("Attempting to read out of bounds virtual axis: " + toString(n) + " (has " + toString(axes.size()) + " axes)", true);
-		return 0;
+	if (n < 0 || n >= static_cast<int>(axes.size())) {
+		return false;
 	}
 	return axes.at(n).getValue();
 }
 
 int InputVirtual::getAxisRepeat(int n) const
 {
-	if (n < 0 || n >= axes.size()) {
-		Logger::logError("Attempting to read out of bounds virtual axis: " + toString(n) + " (has " + toString(axes.size()) + " axes)", true);
-		return 0;
+	if (n < 0 || n >= static_cast<int>(axes.size())) {
+		return false;
 	}
 	return axes.at(n).curRepeatValue;
 }
@@ -266,7 +291,7 @@ void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, Conver
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n.value).push_back(Bind(std::move(device), deviceN.value, -1, false));
+	buttons.at(n.value).push_back(Bind(std::move(device), deviceN.value, -1, Bind::Mode::Button));
 	exclusiveDirty = true;
 }
 
@@ -275,7 +300,7 @@ void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCod
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n.value).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, false, mods));
+	buttons.at(n.value).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, Bind::Mode::Button, mods));
 	exclusiveDirty = true;
 }
 
@@ -284,7 +309,7 @@ void InputVirtual::bindButtonChord(ConvertibleTo<int> n, spInputDevice device, C
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n.value).push_back(Bind(std::move(device), deviceButton0.value, deviceButton1.value, false));
+	buttons.at(n.value).push_back(Bind(std::move(device), deviceButton0.value, deviceButton1.value, Bind::Mode::Button));
 	exclusiveDirty = true;
 }
 
@@ -293,7 +318,7 @@ void InputVirtual::bindAxis(ConvertibleTo<int> n, spInputDevice device, Converti
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n.value).binds.push_back(Bind(std::move(device), deviceN.value, -1, true, {}, scale));
+	axes.at(n.value).binds.push_back(Bind(std::move(device), deviceN.value, -1, Bind::Mode::Axis, {}, scale));
 	exclusiveDirty = true;
 }
 
@@ -302,7 +327,7 @@ void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, Co
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n.value).binds.push_back(Bind(std::move(device), negativeButton.value, positiveButton.value, true));
+	axes.at(n.value).binds.push_back(Bind(std::move(device), negativeButton.value, positiveButton.value, Bind::Mode::AxisEmulation));
 	exclusiveDirty = true;
 }
 
@@ -311,7 +336,7 @@ void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, Ke
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n.value).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), true, mods));
+	axes.at(n.value).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), Bind::Mode::AxisEmulation, mods));
 	exclusiveDirty = true;
 }
 
@@ -510,7 +535,7 @@ void InputVirtual::updateLastDevice()
 		for (auto& buttonBinds: buttons) {
 			for (auto& bind: buttonBinds) {
 				if (bind.device && !bind.device->isManual()) {
-					if (!bind.isAxisEmulation && bind.device->isButtonPressed(bind.a)) {
+					if (bind.mode != Bind::Mode::AxisEmulation && bind.device->isButtonPressed(bind.a)) {
 						setLastDevice(bind.device);
 						return;
 					}
@@ -520,9 +545,9 @@ void InputVirtual::updateLastDevice()
 		for (auto& axisBind: axes) {
 			for (auto& bind: axisBind.binds) {
 				if (bind.device && !bind.device->isManual()) {
-					if ((!bind.isAxisEmulation && fabs(bind.device->getAxis(bind.a)) > 0.1f)
-						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.a))
-						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.b))) {
+					if ((bind.mode != Bind::Mode::AxisEmulation && fabs(bind.device->getAxis(bind.a)) > 0.1f)
+						|| (bind.mode == Bind::Mode::AxisEmulation && bind.device->isButtonDown(bind.a))
+						|| (bind.mode == Bind::Mode::AxisEmulation && bind.device->isButtonDown(bind.b))) {
 						setLastDevice(bind.device);
 						return;
 					}
@@ -532,12 +557,11 @@ void InputVirtual::updateLastDevice()
 	}
 }
 
-InputVirtual::Bind::Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods, float scale)
+InputVirtual::Bind::Bind(spInputDevice d, int a, int b, Mode mode, std::optional<KeyMods> mods, float scale)
 	: device(std::move(d))
 	, a(a)
 	, b(b)
-	, isAxis(axis)
-	, isAxisEmulation(axis && b != -1)
+	, mode(mode)
 	, mods(mods)
 	, scale(scale)
 {}
@@ -625,7 +649,7 @@ bool InputVirtual::Bind::checkMods() const
 
 float InputVirtual::Bind::getAxis() const
 {
-	if (isAxisEmulation) {
+	if (mode == Mode::AxisEmulation) {
 		const int left = device->isButtonDown(a) ? 1 : 0;
 		const int right = device->isButtonDown(b) ? 1 : 0;
 		return static_cast<float>(right - left) * scale;
@@ -636,7 +660,7 @@ float InputVirtual::Bind::getAxis() const
 
 std::pair<uint32_t, uint32_t> InputVirtual::Bind::getPhysicalButtonIds() const
 {
-	if (isAxis && !isAxisEmulation) {
+	if (mode == Mode::Axis) {
 		const auto idA = (static_cast<uint32_t>(device->getId()) << 16) | static_cast<uint32_t>(0x100) | static_cast<uint32_t>(a);
 		return { idA, 0 };
 	} else {

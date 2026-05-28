@@ -141,25 +141,33 @@ bool InputButtonBase::isAnyButtonDown() const
 
 bool InputButtonBase::isButtonPressed(InputButton code) const
 {
-	if (code < 0 || code >= int(buttonPressed.size())) return false;
+	if (code < 0 || code >= static_cast<int>(buttonPressed.size())) {
+		return false;
+	}
 	return buttonPressed[code] != 0;
 }
 
 bool InputButtonBase::isButtonPressedRepeat(InputButton code) const
 {
-	if (code < 0 || code >= int(buttonPressedRepeat.size())) return false;
+	if (code < 0 || code >= static_cast<int>(buttonPressedRepeat.size())) {
+		return false;
+	}
 	return buttonPressedRepeat[code] != 0;
 }
 
 bool InputButtonBase::isButtonReleased(InputButton code) const
 {
-	if (code < 0 || code >= int(buttonReleased.size())) return false;
+	if (code < 0 || code >= static_cast<int>(buttonReleased.size())) {
+		return false;
+	}
 	return buttonReleased[code] != 0;
 }
 
 bool InputButtonBase::isButtonDown(InputButton code) const
 {
-	if (code < 0 || code >= int(buttonDown.size())) return false;
+	if (code < 0 || code >= static_cast<int>(buttonDown.size())) {
+		return false;
+	}
 	return buttonDown[code] != 0;
 }
 
