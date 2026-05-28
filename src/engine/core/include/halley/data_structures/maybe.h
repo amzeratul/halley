@@ -13,15 +13,28 @@ namespace Halley
 	template <typename T>
 	using MaybeRefWrap = std::optional<std::reference_wrapper<T>>;
 
+	namespace Detail {
+		template<typename T, bool = std::is_enum_v<T>>
+		struct underlying_type {
+			using type = T;
+		};
+
+		template<typename T>
+		struct underlying_type<T, true> : std::underlying_type<T> {
+		};
+	}
+
 	template <typename T>
 	class OptionalLite {
+		using StorageType = std::conditional_t<std::is_enum_v<T>, typename Detail::underlying_type<T>::type, T>;
+
 	public:
 		constexpr OptionalLite()
 			: val(getDefaultValue())
 		{}
 
 		constexpr OptionalLite(T value)
-			: val(value)
+			: val(StorageType(value))
 		{}
 
 		constexpr OptionalLite(std::nullptr_t)
@@ -33,13 +46,13 @@ namespace Halley
 		{}
 
 		constexpr OptionalLite(std::optional<T> value)
-			: val(value ? *value : getDefaultValue())
+			: val(value ? StorageType(*value) : getDefaultValue())
 		{
 		}
 
 		[[maybe_unused]] constexpr OptionalLite& operator=(T v)
 		{
-			val = v;
+			val = static_cast<StorageType>(v);
 			return *this;
 		}
 
@@ -58,19 +71,19 @@ namespace Halley
 		[[nodiscard]] constexpr const T& value() const
 		{
 			HalleyAssertDev(has_value());
-			return val;
+			return reinterpret_cast<const T&>(val);
 		}
 
 		[[nodiscard]] constexpr T& value()
 		{
 			HalleyAssertDev(has_value());
-			return val;
+			return reinterpret_cast<T&>(val);
 		}
 
 		[[nodiscard]] constexpr T value_or(T def) const
 		{
 			if (has_value()) {
-				return val;
+				return value();
 			} else {
 				return def;
 			}
@@ -115,7 +128,7 @@ namespace Halley
 
 		[[nodiscard]] constexpr bool operator==(const T& other) const
 		{
-			return val == other;
+			return has_value() && value() == other;
 		}
 
 		[[nodiscard]] constexpr bool operator!=(const OptionalLite& other) const
@@ -125,7 +138,7 @@ namespace Halley
 
 		[[nodiscard]] constexpr bool operator!=(const T& other) const
 		{
-			return val != other;
+			return !has_value() || value() != other;
 		}
 
 		[[nodiscard]] constexpr bool operator<(const OptionalLite& other) const
@@ -166,7 +179,7 @@ namespace Halley
 
 		[[nodiscard]] constexpr std::optional<T> to_optional() const
 		{
-			return has_value() ? std::optional<T>(val) : std::nullopt;
+			return has_value() ? std::optional<T>(value()) : std::nullopt;
 		}
 
 		void reset()
@@ -175,28 +188,28 @@ namespace Halley
 		}
 
 	private:
-		T val;
+		StorageType val;
 
-		constexpr static T getDefaultValue()
+		constexpr static StorageType getDefaultValue()
 		{
-			static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>);
+			static_assert(std::is_integral_v<StorageType> || std::is_floating_point_v<StorageType>);
 			
-			if constexpr (std::is_integral_v<T>) {
-				if constexpr (std::numeric_limits<T>::is_signed) {
-					return std::numeric_limits<T>::min();
+			if constexpr (std::is_integral_v<StorageType>) {
+				if constexpr (std::numeric_limits<StorageType>::is_signed) {
+					return std::numeric_limits<StorageType>::min();
 				} else {
-					return std::numeric_limits<T>::max();
+					return std::numeric_limits<StorageType>::max();
 				}
-			} else if constexpr (std::is_floating_point_v<T>) {
-				return std::numeric_limits<T>::quiet_NaN();
+			} else if constexpr (std::is_floating_point_v<StorageType>) {
+				return std::numeric_limits<StorageType>::quiet_NaN();
 			} else {
-				return T();
+				return StorageType();
 			}
 		}
 
-		constexpr static bool isDefaultValue(T value)
+		constexpr static bool isDefaultValue(StorageType value)
 		{
-			if constexpr (std::is_floating_point_v<T>) {
+			if constexpr (std::is_floating_point_v<StorageType>) {
 				return std::isnan(value);
 			} else {
 				return value == getDefaultValue();
