@@ -155,13 +155,17 @@ namespace Halley {
 		[[nodiscard]] StringUTF16 getUTF16() const;
 		[[nodiscard]] StringUTF32 getUTF32() const;
 		[[nodiscard]] size_t getUTF32Len() const;
-		[[nodiscard]] static size_t getUTF32Len(std::string_view str);
 
 		// Static unicode routines
+		[[nodiscard]] static size_t getUTF8Len(std::string_view utf8);
 		[[nodiscard]] static size_t getUTF8Len(std::u16string_view utf16);
 		[[nodiscard]] static size_t getUTF8Len(std::wstring_view utf16);
 		[[nodiscard]] static size_t getUTF8Len(std::u32string_view utf32);
 		[[nodiscard]] static size_t getUTF16Len(const StringUTF32 &utf32);
+		[[nodiscard]] static size_t getUTF32Len(std::string_view str);
+		[[nodiscard]] static size_t getUTF32Len(std::u32string_view str);
+		[[nodiscard]] static std::pair<char32_t, int> extractNextCharacter(std::string_view str);
+		[[nodiscard]] static std::pair<char32_t, int> extractNextCharacter(std::u32string_view str);
 
 		[[nodiscard]] inline std::string& cppStr() { return str; }
 		[[nodiscard]] inline const std::string& cppStr() const { return str; }

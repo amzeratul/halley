@@ -351,8 +351,8 @@ void TextRenderer::generateSprites() const
 	generateGlyphsIfNeeded();
 }
 
-void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const
-{
+template <typename T>
+void TextRenderer::doGenerateLayout(std::basic_string_view<T> text, Vector<GlyphLayout>* layouts, Vector2f& extents) const {
 	const bool floorEnabled = font->shouldFloorGlyphPosition();
 	const auto floorAlign = [floorEnabled] (Vector2f a) { return floorEnabled ? a.floor() : a; };
 
@@ -364,7 +364,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 	float curAscender = 0;
 
 	if (layouts) {
-		layouts->resize(text.size());
+		layouts->resize(String::getUTF32Len(text));
 	}
 
 	const Font::Glyph* lastGlyph = nullptr;
@@ -380,8 +380,10 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 
 	// Go through every character
 	const size_t n = text.size();
-	for (size_t i = 0; i < n; i++) {
-		const char32_t c = text[i];
+	size_t i = 0;
+	for (size_t idx = 0; idx < n; ) {
+		const auto [c, stride] = String::extractNextCharacter(text.substr(idx));
+		idx += stride;
 		curFont.setPos(i);
 		curFontSize.setPos(i);
 		
@@ -445,6 +447,8 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		if (i == n - 1) {
 			lineBreak(true);
 		}
+
+		i++;
 	}
 
 	extents = Vector2f(gotExtents ? maxX : 0.0f, std::max(getLineHeight(*font, size, false), height));
@@ -457,6 +461,16 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 			}
 		}
 	}
+}
+
+void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const
+{
+	doGenerateLayout(std::u32string_view(text), layouts, extents);
+}
+
+void TextRenderer::generateLayout(const String& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const
+{
+	doGenerateLayout(std::string_view(text), layouts, extents);
 }
 
 void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLayout>& layouts) const
@@ -544,6 +558,17 @@ Vector2f TextRenderer::getExtents() const
 	extents = getExtents(text);
 	hasExtents = true;
 	return extents;
+}
+
+Vector2f TextRenderer::getExtents(const String& str) const
+{
+	if (!font) {
+		return {};
+	}
+
+	Vector2f result;
+	generateLayout(str, nullptr, result);
+	return result;
 }
 
 Vector2f TextRenderer::getExtents(const StringUTF32& str) const

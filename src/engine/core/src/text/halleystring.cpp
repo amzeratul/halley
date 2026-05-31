@@ -916,48 +916,15 @@ StringUTF16 String::getUTF16() const
 
 StringUTF32 String::getUTF32() const
 {
-	StringUTF32 result(getUTF32Len(), wchar_t(0));
+	StringUTF32 result(getUTF32Len(), static_cast<char32_t>(0));
 
 	size_t len = length();
 	size_t dst = 0;
-	utf32type dstChar = 0;
-	for (size_t i=0; i<len;) {
-		unsigned int c0 = static_cast<unsigned char>(operator[](i++));
-
-		// 1 byte
-		if ((c0 >> 7) == 0) {
-			dstChar = utf32type(c0);
-		}
-
-		// 2 bytes
-		else if ((c0 >> 5) == 0x06) {
-			unsigned int c1 = static_cast<unsigned char>(operator[](i++));
-			if ((c1 >> 6) == 0x02) {
-				dstChar = ((c0 & 0x1F) << 6) | (c1 & 0x3F);
-			}
-		}
-
-		// 3 bytes
-		else if ((c0 >> 4) == 0x0E) {
-			unsigned int c1 = static_cast<unsigned char>(operator[](i++));
-			unsigned int c2 = static_cast<unsigned char>(operator[](i++));
-			if ((c1 >> 6) == 0x02 && (c2 >> 6) == 0x02) {
-				dstChar = ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
-			}
-		}
-
-		// 4 bytes
-		else if ((c0 >> 3) == 0x1E) {
-			unsigned int c1 = static_cast<unsigned char>(operator[](i++));
-			unsigned int c2 = static_cast<unsigned char>(operator[](i++));
-			unsigned int c3 = static_cast<unsigned char>(operator[](i++));
-			if ((c1 >> 6) == 0x02 && (c2 >> 6) == 0x02 && (c3 >> 6) == 0x02) {
-				dstChar = ((c0 & 0x07) << 18) | ((c1 & 0x03F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
-			}
-		}
-
-		result[dst++] = dstChar;
-		dstChar = 0;
+	const auto src = std::string_view(*this);
+	for (size_t i = 0; i < len;) {
+		const auto [c, stride] = extractNextCharacter(src.substr(i));
+		result[dst++] = c;
+		i += stride;
 	}
 
 	return result;
@@ -968,35 +935,70 @@ size_t String::getUTF32Len() const
 	return getUTF32Len(*this);
 }
 
+size_t String::getUTF8Len(std::string_view utf8)
+{
+	return utf8.length();
+}
+
 size_t String::getUTF32Len(std::string_view str)
 {
 	size_t len = str.length();
 	size_t result = 0;
 	for (size_t i = 0; i < len;) {
-		unsigned int c0 = static_cast<unsigned char>(str[i++]);
-
-		// 1 byte
-		if ((c0 >> 7) == 0) {
-		}
-
-		// 2 bytes
-		else if ((c0 >> 5) == 0x06) {
-			i++;
-		}
-
-		// 3 bytes
-		else if ((c0 >> 4) == 0x0E) {
-			i += 2;
-		}
-
-		// 4 bytes
-		else if ((c0 >> 3) == 0x1E) {
-			i += 3;
-		}
-
+		const auto [c, stride] = extractNextCharacter(str.substr(i));
+		i += stride;
 		result++;
 	}
 	return result;
+}
+
+size_t String::getUTF32Len(std::u32string_view str)
+{
+	return str.length();
+}
+
+std::pair<char32_t, int> String::extractNextCharacter(std::string_view str)
+{
+	uint32_t c0 = static_cast<uint8_t>(str[0]);
+
+	// 1 byte
+	if ((c0 >> 7) == 0) {
+		return { static_cast<char32_t>(c0), 1 };
+	}
+
+	// 2 bytes
+	else if ((c0 >> 5) == 0x06) {
+		uint32_t c1 = static_cast<uint8_t>(str[1]);
+		if ((c1 >> 6) == 0x02) {
+			return { ((c0 & 0x1F) << 6) | (c1 & 0x3F), 2 };
+		}
+	}
+
+	// 3 bytes
+	else if ((c0 >> 4) == 0x0E) {
+		uint32_t c1 = static_cast<uint8_t>(str[1]);
+		uint32_t c2 = static_cast<uint8_t>(str[2]);
+		if ((c1 >> 6) == 0x02 && (c2 >> 6) == 0x02) {
+			return { ((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F), 3 };
+		}
+	}
+
+	// 4 bytes
+	else if ((c0 >> 3) == 0x1E) {
+		uint32_t c1 = static_cast<uint8_t>(str[1]);
+		uint32_t c2 = static_cast<uint8_t>(str[2]);
+		uint32_t c3 = static_cast<uint8_t>(str[3]);
+		if ((c1 >> 6) == 0x02 && (c2 >> 6) == 0x02 && (c3 >> 6) == 0x02) {
+			return { ((c0 & 0x07) << 18) | ((c1 & 0x03F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F), 4 };
+		}
+	}
+
+	return { 0, 1 };
+}
+
+std::pair<char32_t, int> String::extractNextCharacter(std::u32string_view str)
+{
+	return { str[0], 1 };
 }
 
 String String::prettySize(uint64_t bytes)

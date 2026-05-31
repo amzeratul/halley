@@ -215,7 +215,12 @@ namespace Halley
 
 		void generateLayoutIfNeeded() const;
 		void generateGlyphsIfNeeded() const;
+
 		void generateLayout(const StringUTF32& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const;
+		void generateLayout(const String& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const;
+		template <typename T>
+		void doGenerateLayout(std::basic_string_view<T> text, Vector<GlyphLayout>* layouts, Vector2f& extents) const;
+
 		void generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLayout>& layouts) const;
 		static size_t getGlyphCount(const StringUTF32& text);
 	};
