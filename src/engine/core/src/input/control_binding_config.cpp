@@ -326,6 +326,7 @@ ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 	devOnly = node["devOnly"].asBool(false);
 	optional = node["optional"].asBool(false);
 	critical = node["critical"].asBool(false);
+	toggle = node["toggle"].asBool(false);
 }
 
 const String& ControlBindingConfig::getBindingId() const
@@ -386,6 +387,11 @@ bool ControlBindingConfig::isOptional() const
 bool ControlBindingConfig::isCritical() const
 {
 	return critical;
+}
+
+bool ControlBindingConfig::isToggle() const
+{
+	return toggle;
 }
 
 bool ControlBindingConfig::requiresInputType(InputType input) const

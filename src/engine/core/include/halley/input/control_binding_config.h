@@ -127,6 +127,7 @@ namespace Halley {
 		bool isDevOnly() const;
 		bool isOptional() const;
 		bool isCritical() const;
+		bool isToggle() const;
 	    
 		bool requiresInputType(InputType input) const;
 	    bool hasRelevantBindings(const Vector<InputType>& types) const;
@@ -144,6 +145,7 @@ namespace Halley {
 		bool devOnly;
 		bool optional;
 		bool critical;
+		bool toggle;
 	};
 
 	class ControlBindingConfigs {

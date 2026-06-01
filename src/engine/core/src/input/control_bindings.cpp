@@ -333,7 +333,7 @@ void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindin
 {
 	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
 		const auto n = mapper.getVirtualButtonId(bindingConfig.getBindingId());
-		dst.bindButton(n, device, keyCode, mods == KeyMods::None ? std::nullopt : std::optional(mods));
+		dst.bindButton(n, device, keyCode, mods == KeyMods::None ? std::nullopt : std::optional(mods), bindingConfig.isToggle());
 	} else {
 		applyButtonBinding(dst, mapper, device, static_cast<int>(keyCode), {}, bindingConfig, pendingState);
 	}
@@ -344,9 +344,9 @@ void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindin
 	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
 		const auto n = mapper.getVirtualButtonId(bindingConfig.getBindingId());
 		if (chordButton) {
-			dst.bindButtonChord(n, device, *chordButton, button);
+			dst.bindButtonChord(n, device, *chordButton, button, bindingConfig.isToggle());
 		} else {
-			dst.bindButton(n, device, button);
+			dst.bindButton(n, device, button, bindingConfig.isToggle());
 		}
 	} else if (bindingConfig.getTargetType() == ControlBindingTargetType::Axis) {
 		const auto [axisId, axisDir] = ControlBinding::parseAxis(bindingConfig.getBindingId());

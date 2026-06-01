@@ -90,9 +90,9 @@ namespace Halley {
 		Vector2f getWheelMove() const override;
 		Vector2i getWheelMoveDiscrete() const override;
 
-		void bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton);
-		void bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {});
-		void bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1);
+		void bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton, bool toggle = false);
+		void bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {}, bool toggle = false);
+		void bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1, bool toggle = false);
 		void bindAxis(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceAxis, float scale = 1.0f);
 		void bindAxisButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> negativeButton, ConvertibleTo<int> positiveButton);
 		void bindAxisButton(ConvertibleTo<int> n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods = {});
@@ -138,8 +138,9 @@ namespace Halley {
 	private:
 
 		struct Bind {
-			enum class Mode {
+			enum class Mode : uint8_t {
 				Button,
+				ButtonToggle,
 				Axis,
 				AxisEmulation
 			};
@@ -148,6 +149,7 @@ namespace Halley {
 			int a = -1;
 			int b = -1;
 			Mode mode = Mode::Button;
+			bool toggleState = false;
 			std::optional<KeyMods> mods;
 			float scale = 1.0f;
 
@@ -160,6 +162,8 @@ namespace Halley {
 			bool checkMods() const;
 
 			float getAxis() const;
+
+			void updateToggle();
 
 			std::pair<uint32_t, uint32_t> getPhysicalButtonIds() const;
 		};

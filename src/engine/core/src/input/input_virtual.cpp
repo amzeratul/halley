@@ -286,30 +286,30 @@ int InputVirtual::getAxisRepeat(int n) const
 	return axes.at(n).curRepeatValue;
 }
 
-void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceN)
+void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceN, bool toggle)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n.value).push_back(Bind(std::move(device), deviceN.value, -1, Bind::Mode::Button));
+	buttons.at(n.value).push_back(Bind(std::move(device), deviceN.value, -1, toggle ? Bind::Mode::ButtonToggle : Bind::Mode::Button));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods)
+void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods, bool toggle)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n.value).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, Bind::Mode::Button, mods));
+	buttons.at(n.value).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, toggle ? Bind::Mode::ButtonToggle : Bind::Mode::Button, mods));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1)
+void InputVirtual::bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1, bool toggle)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n.value).push_back(Bind(std::move(device), deviceButton0.value, deviceButton1.value, Bind::Mode::Button));
+	buttons.at(n.value).push_back(Bind(std::move(device), deviceButton0.value, deviceButton1.value, toggle ? Bind::Mode::ButtonToggle : Bind::Mode::Button));
 	exclusiveDirty = true;
 }
 
@@ -487,6 +487,11 @@ void InputVirtual::update(Time t)
 	for (auto& axis: axes) {
 		axis.curRepeatValue = axis.repeat.update(axis.getValue(), t);
 	}
+	for (auto& button: buttons) {
+		for (auto& bind: button) {
+			bind.updateToggle();
+		}
+	}
 
 	for (auto& pos: positions) {
 		if (pos.direct) {
@@ -571,15 +576,17 @@ bool InputVirtual::Bind::isButtonPressed() const
 	if (!checkMods()) {
 		return false;
 	}
-	if (b == -1) {
-		// Single bind
-		if (device->isButtonPressed(a)) {
-			return true;
-		}
-	} else {
-		// Chord bind
-		if ((device->isButtonPressed(a) && device->isButtonDown(b)) || (device->isButtonPressed(b) && device->isButtonDown(a))) {
-			return true;
+	if (mode == Mode::Button) {
+		if (b == -1) {
+			// Single bind
+			if (device->isButtonPressed(a)) {
+				return true;
+			}
+		} else {
+			// Chord bind
+			if ((device->isButtonPressed(a) && device->isButtonDown(b)) || (device->isButtonPressed(b) && device->isButtonDown(a))) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -590,15 +597,17 @@ bool InputVirtual::Bind::isButtonPressedRepeat() const
 	if (!checkMods()) {
 		return false;
 	}
-	if (b == -1) {
-		// Single bind
-		if (device->isButtonPressedRepeat(a)) {
-			return true;
-		}
-	} else {
-		// Chord bind
-		if (device->isButtonPressedRepeat(a) && device->isButtonDown(b)) {
-			return true;
+	if (mode == Mode::Button) {
+		if (b == -1) {
+			// Single bind
+			if (device->isButtonPressedRepeat(a)) {
+				return true;
+			}
+		} else {
+			// Chord bind
+			if (device->isButtonPressedRepeat(a) && device->isButtonDown(b)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -609,17 +618,20 @@ bool InputVirtual::Bind::isButtonReleased() const
 	if (!checkMods()) {
 		return false;
 	}
-	if (b == -1) {
-		// Single bind
-		if (device->isButtonReleased(a)) {
-			return true;
-		}
-	} else {
-		// Chord bind
-		const bool aReleased = device->isButtonReleased(a);
-		const bool bReleased = device->isButtonReleased(b);
-		if ((aReleased && bReleased) || (aReleased && device->isButtonDown(b)) || (bReleased && device->isButtonDown(a))) {
-			return true;
+
+	if (mode == Mode::Button) {
+		if (b == -1) {
+			// Single bind
+			if (device->isButtonReleased(a)) {
+				return true;
+			}
+		} else {
+			// Chord bind
+			const bool aReleased = device->isButtonReleased(a);
+			const bool bReleased = device->isButtonReleased(b);
+			if ((aReleased && bReleased) || (aReleased && device->isButtonDown(b)) || (bReleased && device->isButtonDown(a))) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -630,13 +642,18 @@ bool InputVirtual::Bind::isButtonDown() const
 	if (!checkMods()) {
 		return false;
 	}
-	if (b == -1) {
-		if (device->isButtonDown(a)) {
-			return true;
-		}
-	} else {
-		if (device->isButtonDown(a) && device->isButtonDown(b)) {
-			return true;
+
+	if (mode == Mode::ButtonToggle) {
+		return toggleState;
+	} else if (mode == Mode::Button) {
+		if (b == -1) {
+			if (device->isButtonDown(a)) {
+				return true;
+			}
+		} else {
+			if (device->isButtonDown(a) && device->isButtonDown(b)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -655,6 +672,15 @@ float InputVirtual::Bind::getAxis() const
 		return static_cast<float>(right - left) * scale;
 	} else {
 		return device->getAxis(a) * scale;
+	}
+}
+
+void InputVirtual::Bind::updateToggle()
+{
+	if (mode == Mode::ButtonToggle) {
+		if (device->isButtonPressed(a)) {
+			toggleState = !toggleState;
+		}
 	}
 }
 
