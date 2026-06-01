@@ -420,14 +420,14 @@ ControlBinding* ControlBindings::tryGetUserBinding(std::string_view bindingId, s
 	return &userBindings[key];
 }
 
-std::optional<ControlBinding> ControlBindings::scanForPress(const InputAPI& inputAPI, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes)
+std::optional<ControlBinding> ControlBindings::scanForPress(const InputAPI& inputAPI, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes, bool allowChords)
 {
 	const auto& inputTypes = config.getInputTypes();
 	
 	if (inputTypes.contains(InputType::Keyboard) && std_ex::contains(acceptedInputTypes, InputType::Keyboard)) {
 		for (size_t i = 0; i < inputAPI.getNumberOfKeyboards(); ++i) {
 			if (auto kb = inputAPI.getKeyboard(static_cast<int>(i))) {
-				if (auto res = scanForPressKeyboard(*kb)) {
+				if (auto res = scanForPressKeyboard(*kb, allowChords)) {
 					return res;
 				}
 			}
@@ -437,7 +437,7 @@ std::optional<ControlBinding> ControlBindings::scanForPress(const InputAPI& inpu
 	if (inputTypes.contains(InputType::Mouse) && std_ex::contains(acceptedInputTypes, InputType::Mouse)) {
 		for (size_t i = 0; i < inputAPI.getNumberOfMice(); ++i) {
 			if (auto mouse = inputAPI.getMouse(static_cast<int>(i))) {
-				if (auto res = scanForPressMouse(*mouse)) {
+				if (auto res = scanForPressMouse(*mouse, allowChords)) {
 					return res;
 				}
 			}
@@ -447,7 +447,7 @@ std::optional<ControlBinding> ControlBindings::scanForPress(const InputAPI& inpu
 	if (inputTypes.contains(InputType::Gamepad) && std_ex::contains(acceptedInputTypes, InputType::Gamepad)) {
 		for (size_t i = 0; i < inputAPI.getNumberOfJoysticks(); ++i) {
 			if (auto gamepad = inputAPI.getJoystick(static_cast<int>(i))) {
-				if (auto res = scanForPressGamepad(*gamepad, config.getTargetType() == ControlBindingTargetType::Button, config.getTargetType() == ControlBindingTargetType::Axis)) {
+				if (auto res = scanForPressGamepad(*gamepad, config.getTargetType() == ControlBindingTargetType::Button, config.getTargetType() == ControlBindingTargetType::Axis, allowChords)) {
 					return res;
 				}
 			}
@@ -457,42 +457,64 @@ std::optional<ControlBinding> ControlBindings::scanForPress(const InputAPI& inpu
 	return {};
 }
 
-std::optional<ControlBinding> ControlBindings::scanForPress(const InputDevice& device, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes)
+std::optional<ControlBinding> ControlBindings::scanForPress(const InputDevice& device, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes, bool allowChords)
 {
 	const auto& inputTypes = config.getInputTypes();
 	const auto type = device.getInputType();
 	if (type == InputType::Gamepad && inputTypes.contains(InputType::Gamepad) && std_ex::contains(acceptedInputTypes, InputType::Gamepad)) {
-		return scanForPressGamepad(device, config.getTargetType() == ControlBindingTargetType::Button, config.getTargetType() == ControlBindingTargetType::Axis);
+		return scanForPressGamepad(device, config.getTargetType() == ControlBindingTargetType::Button, config.getTargetType() == ControlBindingTargetType::Axis, allowChords);
 	} else if (type == InputType::Keyboard && inputTypes.contains(InputType::Keyboard) && std_ex::contains(acceptedInputTypes, InputType::Keyboard)) {
-		return scanForPressKeyboard(device);
+		return scanForPressKeyboard(device, allowChords);
 	} else if (type == InputType::Mouse && inputTypes.contains(InputType::Mouse) && std_ex::contains(acceptedInputTypes, InputType::Mouse)) {
-		return scanForPressMouse(device);
+		return scanForPressMouse(device, allowChords);
 	}
 	return std::nullopt;
 }
 
-std::optional<ControlBinding> ControlBindings::scanForPressKeyboard(const InputDevice& keyboard)
+std::optional<ControlBinding> ControlBindings::scanForPressKeyboard(const InputDevice& keyboard, bool allowChords)
 {
-	for (auto b: keyboard.getButtonsPressed()) {
-		return ControlBinding(static_cast<KeyCode>(b));
+	const auto& buttons = allowChords ? keyboard.getButtonsReleased() : keyboard.getButtonsPressed();
+
+	for (auto b: buttons) {
+		const auto code = static_cast<KeyCode>(b);
+		const bool isModButton =
+			code == KeyCode::LCtrl || code == KeyCode::RCtrl
+			|| code == KeyCode::LAlt || code == KeyCode::RAlt
+			|| code == KeyCode::LShift || code == KeyCode::RShift
+			|| code == KeyCode::LMod || code == KeyCode::RMod;
+		const auto mods = allowChords && !isModButton ? keyboard.getKeyMods() : KeyMods::None;
+		return ControlBinding(code, mods);
 	}
 	return std::nullopt;
 }
 
-std::optional<ControlBinding> ControlBindings::scanForPressMouse(const InputDevice& mouse)
+std::optional<ControlBinding> ControlBindings::scanForPressMouse(const InputDevice& mouse, bool allowChords)
 {
+	// TODO: allow mouse chords?
+
 	for (auto b: mouse.getButtonsPressed()) {
 		return ControlBinding(static_cast<MouseButton>(b));
 	}
 	return std::nullopt;
 }
 
-std::optional<ControlBinding> ControlBindings::scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis)
+std::optional<ControlBinding> ControlBindings::scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis, bool allowChords)
 {
 	if (button) {
-		for (auto b: gamepad.getButtonsPressed()) {
+		const auto& buttons = allowChords ? gamepad.getButtonsReleased() : gamepad.getButtonsPressed();
+
+		for (auto b: buttons) {
 			if (auto pos = gamepad.getPositionForButton(b)) {
-				return ControlBinding(*pos);
+				std::optional<JoystickButtonPosition> chord;
+
+				if (allowChords) {
+					const auto held = gamepad.getButtonsDown();
+					if (!held.empty()) {
+						chord = gamepad.getPositionForButton(held.front());
+					}
+				}
+
+				return ControlBinding(*pos, chord);
 			}
 		}
 	}

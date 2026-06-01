@@ -52,8 +52,8 @@ namespace Halley {
 		void apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const;
 		uint32_t getVersion() const;
 
-		static std::optional<ControlBinding> scanForPress(const InputAPI& api, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes);
-		static std::optional<ControlBinding> scanForPress(const InputDevice& device, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes);
+		static std::optional<ControlBinding> scanForPress(const InputAPI& api, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes, bool allowChords);
+		static std::optional<ControlBinding> scanForPress(const InputDevice& device, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes, bool allowChords);
 
 	private:
 		struct AxisButtonPending {
@@ -100,9 +100,9 @@ namespace Halley {
 
 		void clearRedundantBindings();
 
-		static std::optional<ControlBinding> scanForPressKeyboard(const InputDevice& keyboard);
-		static std::optional<ControlBinding> scanForPressMouse(const InputDevice& mouse);
-		static std::optional<ControlBinding> scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis);
+		static std::optional<ControlBinding> scanForPressKeyboard(const InputDevice& keyboard, bool allowChords);
+		static std::optional<ControlBinding> scanForPressMouse(const InputDevice& mouse, bool allowChords);
+		static std::optional<ControlBinding> scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis, bool allowChords);
 
 		Vector<ErrorInfo> resolveErrors() const;
 	};
