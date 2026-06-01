@@ -159,7 +159,7 @@ namespace {
 }
 
 
-String KeyCodes::toString(KeyCode code)
+String KeyCodes::toString(KeyCode code, KeyMods mods)
 {
 	return getMapping().toString.at(static_cast<size_t>(code));
 }
@@ -167,6 +167,22 @@ String KeyCodes::toString(KeyCode code)
 String KeyCodes::toName(KeyCode code)
 {
 	return getMapping().toName.at(static_cast<size_t>(code));
+}
+
+String KeyCodes::toName(KeyMods mods)
+{
+	if (mods == KeyMods::Ctrl) {
+		return "Ctrl";
+	} else if (mods == KeyMods::Alt) {
+		return "Alt";
+	} else if (mods == KeyMods::Shift) {
+		return "Shift";
+	} else if (mods == KeyMods::Mod) {
+		return "Mod";
+	} else {
+		Logger::logError("Cannot convert key mods to name: " + Halley::toString(int(mods)));
+		return "?";
+	}
 }
 
 std::optional<String> KeyCodes::tryToName(KeyCode code)
@@ -196,4 +212,30 @@ std::optional<KeyCode> KeyCodes::tryFromString(const String& str)
 		return iter->second;
 	}
 	return std::nullopt;
+}
+
+std::pair<KeyCode, KeyMods> KeyCodes::fromStringWithMods(const String& str)
+{
+	KeyMods mods = KeyMods::None;
+	KeyCode code = KeyCode::Unknown;
+
+	const auto split = String(str).split('+');
+	for (size_t i = 0 ; i < split.size(); ++i) {
+		if (i == split.size() - 1) {
+			// Last one is key code
+			code = fromString(split[i]);
+		} else {
+			if (split[i] == "Ctrl") {
+				mods = mods | KeyMods::Ctrl;
+			} else if (split[i] == "Shift") {
+				mods = mods | KeyMods::Ctrl;
+			} else if (split[i] == "Alt") {
+				mods = mods | KeyMods::Ctrl;
+			} if (split[i] == "Mod") {
+				mods = mods | KeyMods::Ctrl;
+			}
+		}
+	}
+
+	return { code, mods };
 }

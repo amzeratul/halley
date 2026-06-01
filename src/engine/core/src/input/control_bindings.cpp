@@ -296,8 +296,8 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 
 		for (const auto& binding: bs) {
 			if (binding.getBindingType() == ControlBindingType::KeyboardButton) {
-				const auto [b0, b1] = binding.getKeyboardButtonIdx();
-				applyButtonBinding(dst, mapper, keyboard, b0, b1, bindingConfig, pendingState);
+				const auto [keyCode, keyMods] = binding.getKeyCode();
+				applyButtonBinding(dst, mapper, keyboard, keyCode, keyMods, bindingConfig, pendingState);
 			} else if (binding.getBindingType() == ControlBindingType::MouseButton) {
 				auto b0 = binding.getMouseButtonIdx();
 				applyButtonBinding(dst, mapper, mouse, b0, std::nullopt, bindingConfig, pendingState);
@@ -327,6 +327,16 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 uint32_t ControlBindings::getVersion() const
 {
 	return version;
+}
+
+void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, KeyCode keyCode, KeyMods mods, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
+{
+	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
+		const auto n = mapper.getVirtualButtonId(bindingConfig.getBindingId());
+		dst.bindButton(n, device, keyCode, mods == KeyMods::None ? std::nullopt : std::optional(mods));
+	} else {
+		applyButtonBinding(dst, mapper, device, static_cast<int>(keyCode), {}, bindingConfig, pendingState);
+	}
 }
 
 void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, int button, std::optional<int> chordButton, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const

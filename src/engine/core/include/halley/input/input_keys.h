@@ -194,11 +194,13 @@ namespace Halley {
 
 	class KeyCodes {
 	public:
-		static String toString(KeyCode code);
+		static String toString(KeyCode code, KeyMods mods = KeyMods::None);
 		static String toName(KeyCode code);
+		static String toName(KeyMods mods);
 		static std::optional<String> tryToName(KeyCode code);
 		static KeyCode fromString(const String& str);
 		static std::optional<KeyCode> tryFromString(const String& str);
+		static std::pair<KeyCode, KeyMods> fromStringWithMods(const String& str);
 	};
 	
 	template<>

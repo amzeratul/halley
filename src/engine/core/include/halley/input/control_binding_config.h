@@ -48,7 +48,7 @@ namespace Halley {
 	    ControlBinding(const ConfigNode& node);
 
 		ControlBinding(MouseButton button);
-		ControlBinding(KeyCode button, std::optional<KeyCode> chord = {});
+		ControlBinding(KeyCode button, KeyMods mods = KeyMods::None);
 		ControlBinding(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
 		ControlBinding(JoystickAxisPosition axis, JoystickAxisDirection direction);
 
@@ -58,14 +58,14 @@ namespace Halley {
 		InputType getBindingInputType() const;
 
 		bool bind(MouseButton button);
-		bool bind(KeyCode button, std::optional<KeyCode> chord = {});
+		bool bind(KeyCode button, KeyMods mods = KeyMods::None);
 		bool bind(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord = {});
 		bool bind(JoystickAxisPosition axis, JoystickAxisDirection direction);
 		bool unbind();
 
 		std::pair<JoystickAxisPosition, JoystickAxisDirection> getGamepadAxis() const;
 		std::pair<JoystickButtonPosition, std::optional<JoystickButtonPosition>> getGamepadButtonPosition() const;
-		std::pair<KeyCode, std::optional<KeyCode>> getKeyCode() const;
+		std::pair<KeyCode, KeyMods> getKeyCode() const;
 		MouseButton getMouseButton() const;
 
 		std::pair<int, std::optional<int>> getGamepadButtonIdx(const InputDevice& gamepad) const;
@@ -86,7 +86,7 @@ namespace Halley {
 		OptionalLite<MouseButton> mouseButton;
 		
 		OptionalLite<KeyCode> keyCode;
-		OptionalLite<KeyCode> keyCodeChord;
+		OptionalLite<KeyMods> keyMods;
 		
 		OptionalLite<JoystickButtonPosition> gamepadButton;
 		OptionalLite<JoystickButtonPosition> gamepadButtonChord;

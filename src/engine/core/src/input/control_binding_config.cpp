@@ -30,9 +30,9 @@ ControlBinding::ControlBinding(MouseButton button)
 	bind(button);
 }
 
-ControlBinding::ControlBinding(KeyCode button, std::optional<KeyCode> chord)
+ControlBinding::ControlBinding(KeyCode button, KeyMods mods)
 {
-	bind(button, chord);
+	bind(button, mods);
 }
 
 ControlBinding::ControlBinding(JoystickButtonPosition button, std::optional<JoystickButtonPosition> chord)
@@ -73,7 +73,7 @@ void ControlBinding::loadValue(ControlBindingType type, const ConfigNode& value)
 		break;
 	}
 	case ControlBindingType::KeyboardButton:
-		std::tie(keyCode, keyCodeChord) = parseChord<KeyCode>(value.asString());
+		std::tie(keyCode, keyMods) = KeyCodes::fromStringWithMods(value.asString());
 		break;
 	case ControlBindingType::MouseButton:
 		mouseButton = value.asEnum<MouseButton>();
@@ -95,7 +95,7 @@ ConfigNode ControlBinding::toConfigNode() const
 		result["value"] = *gamepadAxis + (gamepadAxisDirection == JoystickAxisDirection::Positive ? "+" : "-");
 		break;
 	case ControlBindingType::KeyboardButton:
-		result["value"] = (keyCodeChord ? toString(*keyCodeChord) + "+" : String()) + *keyCode;
+		result["value"] = KeyCodes::toString(*keyCode, *keyMods);
 		break;
 	case ControlBindingType::MouseButton:
 		result["value"] = *mouseButton;
@@ -158,13 +158,13 @@ bool ControlBinding::bind(MouseButton button)
 	return false;
 }
 
-bool ControlBinding::bind(KeyCode button, std::optional<KeyCode> buttonChord)
+bool ControlBinding::bind(KeyCode button, KeyMods mods)
 {
-	if (bindingType != ControlBindingType::KeyboardButton || keyCode != button || keyCodeChord != buttonChord) {
+	if (bindingType != ControlBindingType::KeyboardButton || keyCode != button || keyMods != mods) {
 		*this = ControlBinding();
 		bindingType = ControlBindingType::KeyboardButton;
 		keyCode = button;
-		keyCodeChord = buttonChord;
+		keyMods = mods;
 		return true;
 	}
 	return false;
@@ -225,11 +225,11 @@ MouseButton ControlBinding::getMouseButton() const
 	return *mouseButton;
 }
 
-std::pair<KeyCode, std::optional<KeyCode>> ControlBinding::getKeyCode() const
+std::pair<KeyCode, KeyMods> ControlBinding::getKeyCode() const
 {
 	HalleyAssertDev(bindingType == ControlBindingType::KeyboardButton);
 	HalleyAssertDev(keyCode);
-	return { *keyCode, keyCodeChord.to_optional() };
+	return { *keyCode, *keyMods };
 }
 
 std::pair<int, std::optional<int>> ControlBinding::getGamepadButtonIdx(const InputDevice& gamepad) const
@@ -246,8 +246,20 @@ std::pair<int, JoystickAxisDirection> ControlBinding::getGamepadAxisIdx(const In
 
 std::pair<int, std::optional<int>> ControlBinding::getKeyboardButtonIdx() const
 {
-	auto [button, chord] = getKeyCode();
-	return { static_cast<int>(button), chord ? std::optional(static_cast<int>(*chord)) : std::nullopt };
+	auto [button, mods] = getKeyCode();
+	std::optional<int> chord;
+
+	if (mods == KeyMods::Ctrl) {
+		chord = static_cast<int>(KeyCode::LCtrl);
+	} else if (mods == KeyMods::Shift) {
+		chord = static_cast<int>(KeyCode::LShift);
+	} else if (mods == KeyMods::Alt) {
+		chord = static_cast<int>(KeyCode::LAlt);
+	} else if (mods == KeyMods::Mod) {
+		chord = static_cast<int>(KeyCode::LMod);
+	}
+
+	return { static_cast<int>(button), chord };
 }
 
 int ControlBinding::getMouseButtonIdx() const
@@ -292,7 +304,7 @@ uint64_t ControlBinding::getHash() const
 		feed(gamepadAxisDirection);
 	} else if (bindingType == ControlBindingType::KeyboardButton) {
 		feed(keyCode);
-		feed(keyCodeChord);
+		feed(keyMods);
 	} else if (bindingType == ControlBindingType::MouseButton) {
 		feed(mouseButton);
 	}
