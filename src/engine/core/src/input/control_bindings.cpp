@@ -510,7 +510,7 @@ Vector<ControlBindings::ErrorInfo> ControlBindings::resolveErrors() const
 	struct Entry {
 		String id;
 		int slot;
-		String group;
+		const ControlBindingConfig* config = nullptr;
 	};
 	HashMap<ControlBinding, Vector<Entry>> entries;
 
@@ -542,7 +542,7 @@ Vector<ControlBindings::ErrorInfo> ControlBindings::resolveErrors() const
 					if (!presentTypes.contains(binding.getBindingInputType())) {
 						presentTypes += binding.getBindingInputType();
 					}
-					entries[binding] += Entry { bindingConfig.getBindingId(), slot, group };
+					entries[binding] += Entry { bindingConfig.getBindingId(), slot, &bindingConfig };
 				}
 				++slot;
 			}
@@ -572,8 +572,8 @@ Vector<ControlBindings::ErrorInfo> ControlBindings::resolveErrors() const
 			const auto& entry0 = es[0];
 			for (size_t i = 1; i < es.size(); ++i) {
 				const auto& entry1 = es[i];
-				if (config.areGroupsInConflict(entry0.group, entry1.group)) {
-					result += ErrorInfo{ ErrorType::Conflict, entry0.id, entry0.slot,  entry1.id, entry1.slot };
+				if (config.areBindingsMutuallyExclusive(*entry0.config, *entry1.config)) {
+					result += ErrorInfo{ ErrorType::Conflict, entry0.id, entry0.slot, entry1.id, entry1.slot };
 				}
 			}
 		}

@@ -306,12 +306,14 @@ ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 	bindingTargetType = bindingId.endsWith("+") || bindingId.endsWith("-") ? ControlBindingTargetType::Axis : ControlBindingTargetType::Button;
 	groupId = node["group"].asString("");
 	exclusivityGroup = node["exclusivityGroup"].asString("");
+	canOverlap = node["canOverlap"].asVector<String>({});
 	inputTypes = node["inputTypes"].asVector<InputType>({});
 	defaultBindings = node["defaultBindings"].asVector<ControlBinding>({});
 	inheritedBindings = node["inheritedBindings"].asVector<ControlInheritedBinding>({});
 	hidden = node["hidden"].asBool(false);
 	devOnly = node["devOnly"].asBool(false);
 	optional = node["optional"].asBool(false);
+	critical = node["critical"].asBool(false);
 }
 
 const String& ControlBindingConfig::getBindingId() const
@@ -332,6 +334,11 @@ const String& ControlBindingConfig::getGroupId() const
 const String& ControlBindingConfig::getExclusivityGroup() const
 {
 	return exclusivityGroup;
+}
+
+const Vector<String>& ControlBindingConfig::getCanOverlap() const
+{
+	return canOverlap;
 }
 
 const Vector<InputType>& ControlBindingConfig::getInputTypes() const
@@ -362,6 +369,11 @@ bool ControlBindingConfig::isDevOnly() const
 bool ControlBindingConfig::isOptional() const
 {
 	return optional;
+}
+
+bool ControlBindingConfig::isCritical() const
+{
+	return critical;
 }
 
 bool ControlBindingConfig::requiresInputType(InputType input) const
@@ -441,14 +453,22 @@ const HashSet<String>& ControlBindingConfigs::getBindingIds() const
 	return bindingIds;
 }
 
-bool ControlBindingConfigs::areGroupsInConflict(const String& group0, const String& group1) const
+bool ControlBindingConfigs::areBindingsMutuallyExclusive(const ControlBindingConfig& a, const ControlBindingConfig& b) const
 {
-	if (group0 == group1) {
+	HalleyAssertDev(a.getBindingId() != b.getBindingId());
+
+	if (a.getCanOverlap().contains(b.getBindingId()) || b.getCanOverlap().contains(a.getBindingId())) {
+		return false;
+	}
+
+	const auto& groupA = a.getExclusivityGroup();
+	const auto& groupB = b.getExclusivityGroup();
+	if (groupA == groupB) {
 		return true;
 	}
 
 	for (const auto& group: exclusionGroups) {
-		if (group.contains(group0) && group.contains(group1)) {
+		if (group.contains(groupA) && group.contains(groupB)) {
 			return true;
 		}
 	}

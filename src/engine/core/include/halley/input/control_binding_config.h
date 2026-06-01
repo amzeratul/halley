@@ -119,12 +119,14 @@ namespace Halley {
 		ControlBindingTargetType getTargetType() const;
 	    const String& getGroupId() const;
 	    const String& getExclusivityGroup() const;
+		const Vector<String>& getCanOverlap() const;
 		const Vector<InputType>& getInputTypes() const;
 		const Vector<ControlBinding>& getDefaultBindings() const;
 		const Vector<ControlInheritedBinding>& getInheritedBindings() const;
 		bool isHidden() const;
 		bool isDevOnly() const;
 		bool isOptional() const;
+		bool isCritical() const;
 	    
 		bool requiresInputType(InputType input) const;
 	    bool hasRelevantBindings(const Vector<InputType>& types) const;
@@ -134,12 +136,14 @@ namespace Halley {
 		ControlBindingTargetType bindingTargetType = ControlBindingTargetType::Button;
 		String groupId;
 	    String exclusivityGroup;
+		Vector<String> canOverlap;
 		Vector<InputType> inputTypes;
 		Vector<ControlBinding> defaultBindings;
 		Vector<ControlInheritedBinding> inheritedBindings;
 		bool hidden;
 		bool devOnly;
 		bool optional;
+		bool critical;
 	};
 
 	class ControlBindingConfigs {
@@ -151,7 +155,7 @@ namespace Halley {
 		const Vector<ControlBindingConfig>& getBindings() const;
 		const Vector<Vector<InputType>>& getBindingSlots() const;
 		const HashSet<String>& getBindingIds() const;
-		bool areGroupsInConflict(const String& group0, const String& group1) const;
+		bool areBindingsMutuallyExclusive(const ControlBindingConfig& a, const ControlBindingConfig& b) const;
 
 	private:
 		Vector<ControlBindingConfig> bindingConfigs;
