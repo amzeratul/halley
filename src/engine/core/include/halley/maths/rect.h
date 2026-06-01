@@ -376,6 +376,30 @@ namespace Halley {
 			return r;
 		}
 
+		[[nodiscard]] constexpr Rect2D findInnerRectWithAspectRatio(Vector2D<T> size) const
+		{
+			static_assert(std::is_floating_point_v<T>);
+			return findInnerRectWithAspectRatio(size.x / size.y);
+		}
+
+		[[nodiscard]] constexpr Rect2D findInnerRectWithAspectRatio(float ar) const
+		{
+			static_assert(std::is_floating_point_v<T>);
+			const auto w = getSize().x;
+			const auto h = getSize().y;
+			const auto myAR = w / h;
+
+			if (floatEquals(myAR, ar)) {
+				return *this;
+			} else if (myAR > ar) {
+				const float offset = (w - (h * ar)) * 0.5f;
+				return Rect2D(getTopLeft() + Vector2f(offset, 0), getBottomRight() + Vector2f(-offset, 0));
+			} else {
+				const float offset = (h - (w / ar)) * 0.5f;
+				return Rect2D(getTopLeft() + Vector2f(0, offset), getBottomRight() + Vector2f(0, -offset));
+			}
+		}
+
 		String toString() const
 		{
 			return String("[") + p1.toString() + " " + p2.toString() + "]";
