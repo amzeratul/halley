@@ -112,6 +112,7 @@ namespace Halley
 		void setSpriteFilter(SpriteFilter f);
 
 		Vector2f getExtents() const;
+		Vector2f getExtents(const String& str) const;
 		Vector2f getExtents(const StringUTF32& str) const;
 		Vector2f getCharacterPosition(size_t character) const;
 		size_t getCharacterAt(const Vector2f& position) const;
