@@ -288,7 +288,7 @@ int InputVirtual::getAxisRepeat(int n) const
 
 void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceN, bool toggle)
 {
-	if (!lastDevice.lock()) {
+	if (!lastDeviceSet || (device->getInputType() == InputType::Gamepad && lastJoystickType == JoystickType::None)) {
 		setLastDevice(device);
 	}
 	buttons.at(n.value).push_back(Bind(std::move(device), deviceN.value, -1, toggle ? Bind::Mode::ButtonToggle : Bind::Mode::Button));
@@ -297,7 +297,7 @@ void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, Conver
 
 void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods, bool toggle)
 {
-	if (!lastDevice.lock()) {
+	if (!lastDeviceSet || (device->getInputType() == InputType::Gamepad && lastJoystickType == JoystickType::None)) {
 		setLastDevice(device);
 	}
 	buttons.at(n.value).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, toggle ? Bind::Mode::ButtonToggle : Bind::Mode::Button, mods));
@@ -306,7 +306,7 @@ void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCod
 
 void InputVirtual::bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1, bool toggle)
 {
-	if (!lastDevice.lock()) {
+	if (!lastDeviceSet || (device->getInputType() == InputType::Gamepad && lastJoystickType == JoystickType::None)) {
 		setLastDevice(device);
 	}
 	buttons.at(n.value).push_back(Bind(std::move(device), deviceButton0.value, deviceButton1.value, toggle ? Bind::Mode::ButtonToggle : Bind::Mode::Button));
@@ -315,7 +315,7 @@ void InputVirtual::bindButtonChord(ConvertibleTo<int> n, spInputDevice device, C
 
 void InputVirtual::bindAxis(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceN, float scale)
 {
-	if (!lastDevice.lock()) {
+	if (!lastDeviceSet || (device->getInputType() == InputType::Gamepad && lastJoystickType == JoystickType::None)) {
 		setLastDevice(device);
 	}
 	axes.at(n.value).binds.push_back(Bind(std::move(device), deviceN.value, -1, Bind::Mode::Axis, {}, scale));
@@ -324,7 +324,7 @@ void InputVirtual::bindAxis(ConvertibleTo<int> n, spInputDevice device, Converti
 
 void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> negativeButton, ConvertibleTo<int> positiveButton)
 {
-	if (!lastDevice.lock()) {
+	if (!lastDeviceSet || (device->getInputType() == InputType::Gamepad && lastJoystickType == JoystickType::None)) {
 		setLastDevice(device);
 	}
 	axes.at(n.value).binds.push_back(Bind(std::move(device), negativeButton.value, positiveButton.value, Bind::Mode::AxisEmulation));
@@ -333,7 +333,7 @@ void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, Co
 
 void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods)
 {
-	if (!lastDevice.lock()) {
+	if (!lastDeviceSet || (device->getInputType() == InputType::Gamepad && lastJoystickType == JoystickType::None)) {
 		setLastDevice(device);
 	}
 	axes.at(n.value).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), Bind::Mode::AxisEmulation, mods));
@@ -766,11 +766,7 @@ void InputVirtual::setRepeat(float first, float hold)
 
 JoystickType InputVirtual::getJoystickType() const
 {
-	if (auto ld = lastDevice.lock()) {
-		return ld->getJoystickType();
-	} else {
-		return JoystickType::None;
-	}
+	return lastJoystickType;
 }
 
 InputType InputVirtual::getInputType() const
@@ -780,11 +776,14 @@ InputType InputVirtual::getInputType() const
 
 void InputVirtual::setLastDevice(const std::shared_ptr<InputDevice>& device)
 {
-	const auto parent = device->getParent();
-	if (parent) {
+	lastDeviceSet = true;
+	if (const auto parent = device->getParent()) {
 		setLastDevice(parent);
 	} else {
 		lastDevice = device;
+		if (device->getInputType() == InputType::Gamepad) {
+			lastJoystickType = device->getJoystickType();
+		}
 	}
 }
 

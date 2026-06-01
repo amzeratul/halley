@@ -204,6 +204,8 @@ namespace Halley {
 
 		spInputDevice vibrationOverride;
 		std::weak_ptr<InputDevice> lastDevice;
+		JoystickType lastJoystickType = JoystickType::None;
+		bool lastDeviceSet = false;
 		bool lastDeviceFrozen = false;
 		
 		float repeatDelayFirst;
