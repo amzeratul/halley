@@ -396,6 +396,9 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, AudioBuffersRef
 			}
 		}
 	}
+	if (listener.regions.empty()) {
+		mixRegion(0, buffers, 1, 1);
+	}
 
 	// Clear voice buffers
 	for (auto& e: emitters) {
@@ -407,7 +410,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, AudioBuffersRef
 
 void AudioEngine::mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion& region, AudioBuffersRef& outputBuffers, float prevGain, float gain)
 {
-	mixRegion(region, outputBuffers, prevGain, gain);
+	mixRegion(region.getId(), outputBuffers, prevGain, gain);
 
 	for (auto& neighbour: region.getNeighbours()) {
 		if (auto iter = regions.find(neighbour.props.id); iter != regions.end()) {
@@ -417,13 +420,13 @@ void AudioEngine::mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion
 
 			if (neighbour.props.lowPassHz) {
 				auto regionBuffer = pool->getBuffers(nChannels, numSamples, true);
-				mixRegion(otherRegion, regionBuffer, 1, 1);
+				mixRegion(otherRegion.getId(), regionBuffer, 1, 1);
 
 				neighbour.filter.processSamples(regionBuffer);
 
 				AudioMixer::mixAudio(regionBuffer.getSampleSpans(), outputBuffers.getSampleSpans(), gain0, gain1);
 			} else {
-				mixRegion(otherRegion, outputBuffers, gain0, gain1);
+				mixRegion(otherRegion.getId(), outputBuffers, gain0, gain1);
 			}
 		} else {
 			Logger::logError("Audio Region \"" + region.getName() + "\" has unknown neighbour \"" + neighbour.name + "\"", true);
@@ -431,11 +434,10 @@ void AudioEngine::mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion
 	}
 }
 
-void AudioEngine::mixRegion(const AudioRegion& region, AudioBuffersRef& buffers, float prevGain, float gain)
+void AudioEngine::mixRegion(AudioRegionId regionId, AudioBuffersRef& buffers, float prevGain, float gain)
 {
 	for (auto& e: emitters) {
-		const auto regionId = e.second->getRegion();
-		if (regionId == region.getId()) {
+		if (e.second->getRegion() == regionId) {
 			for (auto& v: e.second->getVoices()) {
 				if (v->isPlaying()) {
 					v->mixTo(buffers.getBuffers(), prevGain, gain);
