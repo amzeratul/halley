@@ -202,6 +202,34 @@ Vector<int> InputDevice::getButtonsPressed() const
 	return result;
 }
 
+Vector<int> InputDevice::getButtonsReleased() const
+{
+	Vector<int> result;
+
+	const auto n = static_cast<int>(getNumberButtons());
+	for (int i = 0; i < n; ++i) {
+		if (isButtonReleased(i)) {
+			result += i;
+		}
+	}
+
+	return result;
+}
+
+Vector<int> InputDevice::getButtonsDown() const
+{
+	Vector<int> result;
+
+	const auto n = static_cast<int>(getNumberButtons());
+	for (int i = 0; i < n; ++i) {
+		if (isButtonDown(i)) {
+			result += i;
+		}
+	}
+
+	return result;
+}
+
 Vector<std::pair<int, JoystickAxisDirection>> InputDevice::getAxesMoved(float threshold) const
 {
 	Vector<std::pair<int, JoystickAxisDirection>> result;

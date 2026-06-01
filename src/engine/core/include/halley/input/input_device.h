@@ -339,6 +339,8 @@ namespace Halley {
 		virtual void setLED(Colour4c colour) const;
 
 		Vector<int> getButtonsPressed() const;
+		Vector<int> getButtonsReleased() const;
+		Vector<int> getButtonsDown() const;
 		Vector<std::pair<int, JoystickAxisDirection>> getAxesMoved(float threshold = 0.5f) const;
 
 	private:
