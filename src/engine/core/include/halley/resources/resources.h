@@ -110,36 +110,51 @@ namespace Halley {
 		{
 			for (const auto& e: enumerate<T>()) {
 				preload<T>(e);
+				std::this_thread::yield();
 			}
 		}
 
 		template <typename T>
-		Vector<Future<void>> preloadAllParallel(size_t nThreadsReq) const
+		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq) const
 		{
-			const auto entries = enumerate<T>();
-			const auto nEntries = entries.size();
-			const auto nThreads = std::min(nEntries, nThreadsReq);
 			Vector<Future<void>> pending;
 
-			for (size_t i = 0; i < nThreads; ++i) {
-				auto e0 = (nEntries * i) / nThreads;
-				auto e1 = (nEntries * (i + 1)) / nThreads;
-
-				Vector<String> es;
-				es.reserve(e1 - e0);
-				for (size_t e = e0; e < e1; ++e) {
-					es.push_back(std::move(entries[e]));
-				}
-
-				pending += Concurrent::execute([this, es = std::move(es)]
+			if (nThreadsReq == 1) {
+				pending += Concurrent::execute([this]
 				{
-					for (auto& e: es) {
-						preload<T>(e);
-					}
+					preloadAll<T>();
 				});
+			} else {
+				const auto entries = enumerate<T>();
+				const auto nEntries = entries.size();
+				const auto nThreads = std::min(nEntries, nThreadsReq);
+
+				for (size_t i = 0; i < nThreads; ++i) {
+					auto e0 = (nEntries * i) / nThreads;
+					auto e1 = (nEntries * (i + 1)) / nThreads;
+
+					Vector<String> es;
+					es.reserve(e1 - e0);
+					for (size_t e = e0; e < e1; ++e) {
+						es.push_back(std::move(entries[e]));
+					}
+
+					pending += Concurrent::execute([this, es = std::move(es)]
+					{
+						for (auto& e: es) {
+							preload<T>(e);
+						}
+					});
+				}
 			}
 
 			return pending;
+		}
+
+		template <typename T>
+		Future<void> preloadAllParallel(size_t nThreadsReq) const
+		{
+			return Concurrent::whenAll(preloadAllParallelAsVector<T>(nThreadsReq));
 		}
 
 		template <typename T>
