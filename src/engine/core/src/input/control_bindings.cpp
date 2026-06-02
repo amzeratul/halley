@@ -46,6 +46,9 @@ std::optional<size_t> ControlBindings::findSlotIdx(const Vector<ControlBinding>&
 		break;
 	case ControlBindingType::MouseButton:
 		inputType = InputType::Mouse;
+		break;
+	case ControlBindingType::None:
+		inputType = InputType::None;
 	}
 
 	std::optional<size_t> bestResult;
