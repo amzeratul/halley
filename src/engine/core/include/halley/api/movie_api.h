@@ -4,8 +4,7 @@
 
 namespace Halley {
 	class ResourceDataStream;
-	class VideoAPI;
-	class AudioAPI;
+	class HalleyAPI;
 	class Resources;
 	class MoviePlayer;
 
