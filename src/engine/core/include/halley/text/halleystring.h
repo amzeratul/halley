@@ -129,6 +129,13 @@ namespace Halley {
 		[[nodiscard]] double toDouble() const;
 		[[nodiscard]] int subToInteger(size_t start,size_t end) const;
 
+		[[nodiscard]] static int32_t toInteger(std::string_view str);
+		[[nodiscard]] static int64_t toInteger64(std::string_view str);
+		[[nodiscard]] static uint32_t toUInteger(std::string_view str);
+		[[nodiscard]] static uint64_t toUInteger64(std::string_view str);
+		[[nodiscard]] static float toFloat(std::string_view str);
+		[[nodiscard]] static double toDouble(std::string_view str);
+
 		// std::string methods
 		[[nodiscard]] const char* c_str() const;
 		[[nodiscard]] String substr(size_t pos, size_t len=npos) const;
@@ -172,6 +179,9 @@ namespace Halley {
 
 		[[nodiscard]] Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 		[[nodiscard]] Vector<String> split(String delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
+
+		[[nodiscard]] static std::pair<std::string_view, std::string_view> split(std::string_view src, char delimeter);
+		[[nodiscard]] static std::string_view splitAndAdvance(std::string_view& src, char delimeter);
 
 		[[nodiscard]] static String concatList(gsl::span<const String> list, std::string_view separator);
 

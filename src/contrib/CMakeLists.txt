@@ -76,6 +76,16 @@ set(SOURCES
         )
 
 set(HEADERS
+        "fast_float/ascii_number.h"
+        "fast_float/bigint.h"
+        "fast_float/constexpr_feature_detect.h"
+        "fast_float/decimal_to_binary.h"
+        "fast_float/digit_comparison.h"
+        "fast_float/fast_float.h"
+        "fast_float/fast_table.h"
+        "fast_float/float_common.h"
+        "fast_float/parse_number.h"
+     
         "gsl/assert"
         "gsl/byte"
         "gsl/gsl"

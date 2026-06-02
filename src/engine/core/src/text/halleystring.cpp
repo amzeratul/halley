@@ -39,6 +39,7 @@
 #include <cstring>
 #include "halley/support/assert.h"
 #include "halley/text/string_converter.h"
+#include "../contrib/fast_float/fast_float.h"
 
 using namespace Halley;
 
@@ -640,18 +641,6 @@ void operator <<(double &p1, String &p2)
 	p1 = std::stof(p2.c_str());
 }
 
-int String::subToInteger(size_t start,size_t end) const
-{
-	int value = 0;
-	int chr;
-	const char *data = c_str();
-	for (size_t i=start;i<end;i++) {
-		chr = int(data[i])-int('0');
-		if (chr >= 0 && chr <= 9) value = 10*value+chr;
-	}
-	return value;
-}
-
 
 ////////////////
 // Pretty float
@@ -1088,6 +1077,22 @@ Vector<String> String::split(String delimiter, size_t limit) const
 	return result;
 }
 
+std::pair<std::string_view, std::string_view> String::split(std::string_view src, char delimeter)
+{
+	if (const auto pos = src.find(delimeter); pos != std::string_view::npos) {
+		return { src.substr(0, pos), src.substr(pos + 1) };
+	} else {
+		return { src, {} };
+	}
+}
+
+std::string_view String::splitAndAdvance(std::string_view& src, char delimeter)
+{
+	auto [res, next] = split(src, delimeter);
+	src = next;
+	return res;
+}
+
 String String::concatList(gsl::span<const String> list, std::string_view separator)
 {
 	std::stringstream ss;
@@ -1120,10 +1125,6 @@ void String::appendCharacter(int unicode)
 #pragma clang diagnostic ignored "-Wnan-infinity-disabled"
 #endif
 
-#ifdef NN_NINTENDO_SDK
-#include <nn/nn_Version.h>
-#endif
-
 namespace {
 	template <typename T>
 	T stringToInteger(std::string_view str, int base = 10)
@@ -1140,7 +1141,7 @@ namespace {
 		}
 
 		T value;
-		const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.length(), value, base);
+		const fast_float::from_chars_result result = fast_float::from_chars(str.data(), str.data() + str.length(), value, base);
 		if (result.ec == std::errc::invalid_argument) [[unlikely]] {
 			throw Exception("Unable to convert string \"" + String(str) + "\" to integer: not a number", HalleyExceptions::Utils);
 		} else if (result.ec == std::errc::result_out_of_range) [[unlikely]] {
@@ -1172,20 +1173,12 @@ namespace {
 		}
 
 		T value;
-#if defined(NN_NINTENDO_SDK) && NN_SDK_VERSION_MAJOR < 22
-		if constexpr (std::is_same_v<T, float>) {
-			value = std::strtof(str.data(), nullptr);
-		} else {
-			value = std::strtod(str.data(), nullptr);
-		}
-#else
-		const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.length(), value, std::chars_format::general);
+		const fast_float::from_chars_result result = fast_float::from_chars(str.data(), str.data() + str.length(), value);
 		if (result.ec == std::errc::invalid_argument) [[unlikely]] {
 			throw Exception("Unable to convert string \"" + String(str) + "\" to float: not a number", HalleyExceptions::Utils);
 		} else if (result.ec == std::errc::result_out_of_range) [[unlikely]] {
 			throw Exception("Unable to convert string \"" + String(str) + "\" to float: out of range", HalleyExceptions::Utils);
 		}
-#endif
 
 		return value;
 	}
@@ -1221,6 +1214,40 @@ double String::toDouble() const
 	return stringToFloat<double>(*this);
 }
 
+int String::subToInteger(size_t start, size_t end) const
+{
+	return toInteger(std::string_view(*this).substr(start, end - start));
+}
+
+int32_t String::toInteger(std::string_view str)
+{
+	return stringToInteger<int32_t>(str);
+}
+
+int64_t String::toInteger64(std::string_view str)
+{
+	return stringToInteger<int64_t>(str);
+}
+
+uint32_t String::toUInteger(std::string_view str)
+{
+	return stringToInteger<uint32_t>(str);
+}
+
+uint64_t String::toUInteger64(std::string_view str)
+{
+	return stringToInteger<uint64_t>(str);
+}
+
+float String::toFloat(std::string_view str)
+{
+	return stringToFloat<float>(str);
+}
+
+double String::toDouble(std::string_view str)
+{
+	return stringToFloat<double>(str);
+}
 
 String String::replaceAll(std::string_view before, std::string_view after) const
 {
