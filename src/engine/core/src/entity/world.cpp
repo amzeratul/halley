@@ -242,7 +242,13 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 				} else {
 					parentInfo = " (root)";
 				}
-				throw Exception("Error creating entity \"" +name + "\"" + parentInfo + " - UUID " + toString(uuid) + " already exists as " + (oldEntity->name ? *oldEntity->name : String()), HalleyExceptions::Entity);
+				if (oldEntity->worldPartition == worldPartition) {
+					throw Exception("Error creating entity \"" + name + "\"" + parentInfo + " - UUID " + toString(uuid) + " already exists as " + (oldEntity->name ? *oldEntity->name : String()), HalleyExceptions::Entity);
+				} else {
+					Logger::logError("Error creating entity \"" + name + "\"" + parentInfo + " - UUID " + toString(uuid) +
+						" already exists as " + (oldEntity->name ? *oldEntity->name : String()) +
+						" in world partition " + toString(oldEntity->worldPartition));
+				}
 			} else if (oldEntity->fromNetwork) {
 				// NOTE: Currently this can happen on network clients sometimes. An empty entity
 				// seems to be alive still. For now, log an error instead of throwing an exception.
