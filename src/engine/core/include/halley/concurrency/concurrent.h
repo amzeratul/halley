@@ -44,6 +44,18 @@ namespace Halley
 			return future.getFuture();
 		}
 
+		template <typename T>
+		auto whenAll(T&& ts) -> Future<void>
+		{
+			return whenAll(ts.begin(), ts.end());
+		}
+
+		template <typename T>
+		auto waitAll(T&& ts)
+		{
+			return whenAll(ts).wait();
+		}
+
 		template <typename T, typename F>
 		void foreach(ExecutionQueue& e, T begin, T end, F f)
 		{
