@@ -10,6 +10,7 @@
 #include "halley/audio/audio_clip.h"
 #include <chrono>
 
+#include "halley/api/halley_api.h"
 #include "halley/audio/audio_clip_streaming.h"
 #include "halley/audio/audio_position.h"
 #include "halley/support/logger.h"
@@ -17,11 +18,10 @@
 using namespace Halley;
 using namespace std::chrono_literals;
 
-MoviePlayer::MoviePlayer(VideoAPI& video, AudioAPI& audio)
+MoviePlayer::MoviePlayer(const HalleyAPI& halleyAPI)
 	: maxVideoFrames(7)
 	, maxAudioSamples(20000)
-	, video(video)
-	, audio(audio)
+	, halleyAPI(halleyAPI)
 	, threadRunning(false)
 	, threadAborted(false)
 	, aliveFlag(std::make_shared<MoviePlayerAliveFlag>())
@@ -63,14 +63,14 @@ void MoviePlayer::play(float gain, String bus)
 		waitForVideoInfo();
 
 		if (needsYV12Conversion()) {
-			renderTexture = video.createTexture(getSize());
+			renderTexture = halleyAPI.video->createTexture(getSize());
 			auto desc = TextureDescriptor(getSize(), TextureFormat::RGBA);
 			desc.useFiltering = true;
 			desc.isRenderTarget = true;
 			renderTexture->load(std::move(desc));
 			renderTexture->waitForLoad();
 
-			renderTarget = video.createTextureRenderTarget();
+			renderTarget = halleyAPI.video->createTextureRenderTarget();
 			renderTarget->setTarget(0, renderTexture);
 			renderTarget->setViewPort(Rect4i(Vector2i(), getSize()));
 		}
@@ -157,9 +157,9 @@ void MoviePlayer::update(Time t)
 		if (state == MoviePlayerState::StartingToPlay) {
 			if (pendingFrames.size() >= 3) {
 				if (streamingClip) {
-					auto emitter = audio.createEmitter(AudioPosition::makeFixed());
+					auto emitter = halleyAPI.audio->createEmitter(AudioPosition::makeFixed());
 					emitter->detach();
-					audioHandle = audio.play(streamingClip, emitter, audioGain, false, audioBus);
+					audioHandle = halleyAPI.audio->play(streamingClip, emitter, audioGain, false, audioBus);
 				}
 				state = MoviePlayerState::Playing;
 			}
@@ -227,7 +227,8 @@ void MoviePlayer::startThread()
 	if (!threadRunning) {
 		threadRunning = true;
 		threadAborted = false;
-		workerThread = std::thread([=] () {
+
+		workerThread = halleyAPI.system->createThread("VideoPlayer", ThreadPriority::High, [this] () {
 			try {
 				threadEntry();
 			} catch (Exception& e) {
@@ -367,12 +368,12 @@ void MoviePlayer::setVideoSize(Vector2i size)
 
 VideoAPI& MoviePlayer::getVideoAPI() const
 {
-	return video;
+	return *halleyAPI.video;
 }
 
 AudioAPI& MoviePlayer::getAudioAPI() const
 {
-	return audio;
+	return *halleyAPI.audio;
 }
 
 void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descriptor)
@@ -390,7 +391,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 
 			if (alive->isAlive) {
 				if (recycleTexture.empty()) {
-					tex = video.createTexture(descriptor.size);
+					tex = halleyAPI.video->createTexture(descriptor.size);
 				}
 				else {
 					tex = recycleTexture.front();

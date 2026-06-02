@@ -20,7 +20,7 @@ namespace Halley
 	class MFMoviePlayer : public MoviePlayer
 	{
 	public:
-		MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data);
+		MFMoviePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data);
 		~MFMoviePlayer() noexcept override;
 
 	protected:

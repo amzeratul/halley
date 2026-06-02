@@ -10,6 +10,8 @@
 
 namespace Halley
 {
+	class HalleyAPI;
+	class SystemAPI;
 	class RenderContext;
 	class TextureDescriptor;
 	class VideoAPI;
@@ -59,7 +61,7 @@ namespace Halley
 	class MoviePlayer
 	{
 	public:
-		MoviePlayer(VideoAPI& video, AudioAPI& audio);
+		MoviePlayer(const HalleyAPI& halleyAPI);
 		virtual ~MoviePlayer();
 
 		void play(float gain = 1.0f, String audioBus = "");
@@ -106,8 +108,7 @@ namespace Halley
 		int maxAudioSamples;
 
 	private:
-		VideoAPI& video;
-		AudioAPI& audio;
+		const HalleyAPI& halleyAPI;
 
 		MoviePlayerState state = MoviePlayerState::Uninitialised;
 

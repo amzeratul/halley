@@ -15,6 +15,6 @@ namespace Halley {
 		virtual ~MovieAPI() = default;
 
 		virtual bool canPlayVideo() const { return false; }
-		virtual std::shared_ptr<MoviePlayer> makePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data) = 0;
+		virtual std::shared_ptr<MoviePlayer> makePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data) = 0;
     };
 }

@@ -19,8 +19,8 @@ using namespace Halley;
 #pragma comment(lib, "strmiids.lib")
 */
 
-MFMoviePlayer::MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data)
-	: MoviePlayer(video, audio)
+MFMoviePlayer::MFMoviePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data)
+	: MoviePlayer(halleyAPI)
 	, data(std::move(data))
 {
 	init();

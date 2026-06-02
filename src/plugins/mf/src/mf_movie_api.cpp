@@ -28,7 +28,7 @@ void MFMovieAPI::deInit()
 	MFShutdown();
 }
 
-std::shared_ptr<MoviePlayer> MFMovieAPI::makePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data)
+std::shared_ptr<MoviePlayer> MFMovieAPI::makePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data)
 {
-	return std::make_shared<MFMoviePlayer>(video, audio, data);
+	return std::make_shared<MFMoviePlayer>(halleyAPI, data);
 }
