@@ -117,6 +117,8 @@ bool MaterialParameter::set(const ConfigNode& node)
 		}
 	case ShaderParameterType::UInt:
 		return set(node.asInt({}));
+	case ShaderParameterType::Invalid:
+		return false;
 	}
 	return false;
 }
