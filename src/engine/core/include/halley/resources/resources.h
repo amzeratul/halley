@@ -115,12 +115,12 @@ namespace Halley {
 		}
 
 		template <typename T>
-		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq) const
+		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq, ExecutionQueue& queue) const
 		{
 			Vector<Future<void>> pending;
 
 			if (nThreadsReq == 1) {
-				pending += Concurrent::execute([this]
+				pending += Concurrent::execute(queue, [this]
 				{
 					preloadAll<T>();
 				});
@@ -139,7 +139,7 @@ namespace Halley {
 						es.push_back(std::move(entries[e]));
 					}
 
-					pending += Concurrent::execute([this, es = std::move(es)]
+					pending += Concurrent::execute(queue, [this, es = std::move(es)]
 					{
 						for (auto& e: es) {
 							preload<T>(e);
@@ -152,9 +152,15 @@ namespace Halley {
 		}
 
 		template <typename T>
+		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq) const
+		{
+			return preloadAllParallelAsVector<T>(nThreadsReq, Executors::getCPUAux());
+		}
+
+		template <typename T>
 		Future<void> preloadAllParallel(size_t nThreadsReq) const
 		{
-			return Concurrent::whenAll(preloadAllParallelAsVector<T>(nThreadsReq));
+			return Concurrent::whenAll(preloadAllParallelAsVector<T>(nThreadsReq, Executors::getCPUAux()));
 		}
 
 		template <typename T>

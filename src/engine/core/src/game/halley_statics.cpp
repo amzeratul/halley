@@ -63,15 +63,23 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 	setupGlobals();
 
 #if HAS_THREADS
-	auto makeThread = [=] (String name, std::function<void()> runnable) -> std::thread
+	auto makeThread = [=] (String name, std::function<void()> runnable, ThreadPriority priority) -> std::thread
 	{
 		if (system) {
-			return system->createThread(name, ThreadPriority::Normal, runnable);
+			return system->createThread(name, priority, runnable);
 		} else {
-			return std::thread([=] () {
-				runnable();
-			});
+			return std::thread([=] () { runnable(); });
 		}
+	};
+
+	auto makeThreadNormalPriority = [=] (String name, std::function<void()> runnable) -> std::thread
+	{
+		return makeThread(std::move(name), std::move(runnable), ThreadPriority::Normal);
+	};
+
+	auto makeThreadLowPriority = [=] (String name, std::function<void()> runnable) -> std::thread
+	{
+		return makeThread(std::move(name), std::move(runnable), ThreadPriority::Low);
 	};
 
 	size_t nCPU = maxThreads;
@@ -82,9 +90,9 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 		nCPU = std::max(size_t(4), maxThreads - 4);
 	}
 
-	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), nCPU, makeThread);
-	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), nAuxCPU, makeThread);
-	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), nDiskIO, makeThread);
+	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), nCPU, makeThreadNormalPriority);
+	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), nAuxCPU, makeThreadLowPriority);
+	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), nDiskIO, makeThreadNormalPriority);
 #endif
 }
 
