@@ -163,7 +163,7 @@ String InputJoystick::getAxisName(int index) const
 std::string_view InputJoystick::getJoystickButtonName(JoystickType type, JoystickButtonPosition position)
 {
 	if (type == JoystickType::Xbox || type == JoystickType::Generic) {
-		constexpr auto buttons = std::to_array({
+		auto buttons = std::to_array({
 			"xbox_a",
 			"xbox_b",
 			"xbox_x",
