@@ -38,8 +38,11 @@ MoviePlayer::~MoviePlayer()
 	stopThread();
 }
 
-void MoviePlayer::play()
+void MoviePlayer::play(float gain, String bus)
 {
+	audioGain = gain;
+	audioBus = bus;
+
 	if (state == MoviePlayerState::Paused) {
 		if (!useCustomThreads()) {
 			startThread();
@@ -154,7 +157,9 @@ void MoviePlayer::update(Time t)
 		if (state == MoviePlayerState::StartingToPlay) {
 			if (pendingFrames.size() >= 3) {
 				if (streamingClip) {
-					audioHandle = audio.play(streamingClip, AudioPosition::makeFixed(), 0.5f);
+					auto emitter = audio.createEmitter(AudioPosition::makeFixed());
+					emitter->detach();
+					audioHandle = audio.play(streamingClip, emitter, audioGain, false, audioBus);
 				}
 				state = MoviePlayerState::Playing;
 			}

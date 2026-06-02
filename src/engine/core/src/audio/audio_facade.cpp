@@ -338,7 +338,7 @@ AudioHandle AudioFacade::doPostEvent(const String& name, AudioEmitterId emitterI
 	}
 }
 
-AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop, AudioFade fade)
+AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop, String busId, AudioFade fade)
 {
 	uint32_t id = curEventId++;
 	const auto emitterId = emitter ? emitter->getId() : 0;
@@ -348,8 +348,8 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitt
 		return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 	}
 
-	enqueue([=] () {
-		engine->play(id, clip, emitterId, volume, loop, fade);
+	enqueue([=, busId = std::move(busId)] () {
+		engine->play(id, clip, emitterId, volume, loop, busId, fade);
 	});
 	playingSounds.push_back(id);
 
@@ -400,7 +400,7 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosit
 
 	enqueue([=] () {
 		engine->createEmitter(emitterId, position, true);
-		engine->play(id, clip, emitterId, volume, loop, {});
+		engine->play(id, clip, emitterId, volume, loop, "", {});
 	});
 	playingSounds.push_back(id);
 	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);

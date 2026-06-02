@@ -62,7 +62,7 @@ namespace Halley
 		MoviePlayer(VideoAPI& video, AudioAPI& audio);
 		virtual ~MoviePlayer();
 
-		void play();
+		void play(float gain = 1.0f, String audioBus = "");
 		void pause();
 		void reset();
 		void stop();
@@ -126,6 +126,9 @@ namespace Halley
 
 		Time time = 0;
 		int framesRendered = 0;
+
+		float audioGain = 1.0f;
+		String audioBus;
 
 		void startThread();
 		void stopThread();
