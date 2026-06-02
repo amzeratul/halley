@@ -164,7 +164,7 @@ void MFMoviePlayer::init()
 						UINT64 aspectRatioRaw;
 						nativeType->GetUINT64(MF_MT_PIXEL_ASPECT_RATIO, &aspectRatioRaw);
 
-						Logger::logInfo("Video stream found with majorType " + guidToString(majorType) + ", frameSize " + toString(videoSize) );
+						//Logger::logInfo("Video stream found with majorType " + guidToString(majorType) + ", frameSize " + toString(videoSize) );
 
 						uint32_t stride;
 						hr = nativeType->GetUINT32(MF_MT_DEFAULT_STRIDE, &stride);
@@ -179,7 +179,7 @@ void MFMoviePlayer::init()
 							minStride = -1;
 							auto origSubType = GUID_NULL;
 							hr = nativeType->GetGUID(MF_MT_SUBTYPE, &origSubType);
-							Logger::logInfo("Original subType: " + guidToString(origSubType));
+							//Logger::logInfo("Original subType: " + guidToString(origSubType));
 
 							if (SUCCEEDED(hr)) {
 								LONG tmp;
