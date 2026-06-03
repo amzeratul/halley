@@ -5,6 +5,7 @@
 #include "halley/maths/ray.h"
 #include "halley/support/debug.h"
 #include "halley/support/logger.h"
+#include "halley/time/stopwatch.h"
 using namespace Halley;
 
 NavmeshSet::NavmeshSet()
@@ -640,6 +641,8 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 	}
 
 	constexpr size_t maxLookAhead = 30;
+	constexpr size_t stride = 3;
+	constexpr float recencyBias = 1.1f; // Bias towards points that are further away, this avoids duplicated work
 
 	// This algorithm is run in two passes; the first one only accepts paths which are substantially shorter, the second one accepts most simplifications
 	for (int pass = 0; pass < 2; ++pass) {
@@ -650,13 +653,13 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 		costs.resize(points.size());
 		for (size_t i = 0; i < points.size(); ++i) {
 			if (i < points.size() - 1) {
-				costs[i] = findRayCollision(points[i], points[i + 1], nodeIds[i]).second;
+				costs[i] = findRayCollision(points[i], points[i + 1], nodeIds[i]).distance;
 			} else {
 				costs[i] = 0;
 			}
 		}
 
-		for (size_t i = 1; i < points.size() - 1; ++i) {
+		for (size_t i = 1; i < points.size() - 1; i += stride) {
 			// This point can be removed if the previous point has direct line of sight to one of the points after this
 
 			const auto p0 = points.at(i - 1);
@@ -679,15 +682,15 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 				const auto col = findRayCollision(p0, p2, nodeIds[i - 1]);
 				oldCost += costs[j - 1];
 				
-				if (col.first) {
+				if (col.collision) {
 					// Blocked, give up
 					break;
 				} else {
 					// No collision, so this is a candidate for removal
 					// (Keep searching for a better candidate)
 
-					float costRatio = col.second / oldCost;
-					if (costRatio < bestRatio) {
+					float costRatio = col.distance / oldCost;
+					if (costRatio < bestRatio * recencyBias) {
 						bestRatio = costRatio;
 						bestCandidate = j;
 					}
@@ -761,9 +764,9 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 			const auto d = makePoint(a.pos + d1s);
 
 			// See if either path is acceptable
-			if (c && isPathClear({ a, *c, b })) {
+			if (c && isPathClear(std::to_array({ a, *c, b }))) {
 				result.push_back(*c);
-			} else if (d && isPathClear({ a, *d, b })) {
+			} else if (d && isPathClear(std::to_array({ a, *d, b }))) {
 				result.push_back(*d);
 			} else {
 				// Try a more zig-zaggy path, composed of half of one leg, then the full other leg, followed by another half leg
@@ -771,10 +774,10 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 				const auto f = makePoint(a.pos + 0.5f * d1s + d0s);
 				const auto g = makePoint(a.pos + 0.5f * d0s);
 				const auto h = makePoint(a.pos + 0.5f * d0s + d1s);
-				if (e && f && isPathClear({ a, *e, *f, b })) {
+				if (e && f && isPathClear(std::to_array({ a, *e, *f, b }))) {
 					result.push_back(*e);
 					result.push_back(*f);
-				} else if (g && h && isPathClear({ a, *g, *h, b})) {
+				} else if (g && h && isPathClear(std::to_array({ a, *g, *h, b}))) {
 					result.push_back(*g);
 					result.push_back(*h);
 				}
@@ -787,29 +790,22 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 	points = std::move(result);
 }
 
-bool NavmeshSet::isPathClear(std::initializer_list<const NavigationPath::Point> points) const
-{
-	if (points.size() < 2) {
-		return false;
-	}
-
-	for (size_t i = 1; i < points.size(); ++i) {
-		if (findRayCollision(*(points.begin() + (i - 1)), *(points.begin() + i)).first) {
-			return false;
-		}
-	}
-	return true;
-}
-
 bool NavmeshSet::isPathClear(gsl::span<const NavigationPath::Point> points) const
 {
 	if (points.size() < 2) {
 		return false;
 	}
 
+	std::optional<uint16_t> curNodeId = navmeshes[points[0].navmeshId].getNodeAt(points[0].pos.pos);
+
 	for (size_t i = 1; i < points.size(); ++i) {
-		if (findRayCollision(points[i - 1], points[i]).first) {
+		const auto result = findRayCollision(points[i - 1], points[i], curNodeId);
+		if (result.collision) {
 			return false;
+		} else if (result.endNodePos && result.endNavmesh == points[i].navmeshId) {
+			curNodeId = result.endNodePos.to_optional();
+		} else {
+			curNodeId = {};
 		}
 	}
 	return true;
@@ -847,7 +843,7 @@ bool NavmeshSet::isPathClear(gsl::span<const WorldPosition> points) const
 			}
 		}
 
-		if (findRayCollision(prevPoint, curPoint, *prevNodeId).first) {
+		if (findRayCollision(prevPoint, curPoint, *prevNodeId).collision) {
 			return false;
 		}
 
@@ -857,23 +853,18 @@ bool NavmeshSet::isPathClear(gsl::span<const WorldPosition> points) const
 	return true;
 }
 
-std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const
+NavmeshSet::RayResult NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to, std::optional<uint16_t> startNodeId) const
 {
-	auto& navmesh = navmeshes[from.navmeshId];
-	auto nodeId = navmesh.getNodeAt(from.pos.pos);
+	const auto& navmesh = navmeshes[from.navmeshId];
+	const auto nodeId = startNodeId ? *startNodeId : navmesh.getNodeAt(from.pos.pos);
 	if (!nodeId) {
-		return { std::optional(from.pos.pos), 0.0f };
+		return { std::optional(from.pos.pos), 0.0f, std::nullopt, std::nullopt };
 	}
-	return findRayCollision(from, to, *nodeId);
-}
-
-std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const
-{
-	auto& navmesh = navmeshes[from.navmeshId];
+	
 	const auto delta = to.pos.pos - from.pos.pos;
 	const float len = delta.length();
 	const auto dir = delta / len;
-	return navmesh.findRayCollision(Ray(from.pos.pos, dir), len, startNodeId, 0, this);
+	return navmesh.findRayCollision(Ray(from.pos.pos, dir), len, *nodeId, 0, this);
 }
 
 ResourceMemoryUsage NavmeshSet::getMemoryUsage() const

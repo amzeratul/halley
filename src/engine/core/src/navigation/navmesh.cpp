@@ -140,6 +140,11 @@ void Navmesh::setId(uint16_t id)
 	this->id = id;
 }
 
+uint16_t Navmesh::getId() const
+{
+	return id;
+}
+
 const Polygon& Navmesh::getPolygon(int id) const
 {
 	return polygons[id];
@@ -566,19 +571,19 @@ std::optional<Vector2f> Navmesh::findRayCollision(Vector2f from, Vector2f to) co
 std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) const
 {
 	if (const auto startNode = getNodeAt(ray.p)) {
-		return findRayCollision(ray, maxDistance, startNode.value()).first;
+		return findRayCollision(ray, maxDistance, startNode.value()).collision;
 	} else {
 		return Vector2f(ray.p);
 	}
 }
 
 
-std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet) const
+Navmesh::RayResult Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet) const
 {
 	return findRayCollision(this, ray, maxDistance, initialPolygon, weightedDistance, navmeshSet);
 }
 
-std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet)
+Navmesh::RayResult Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet)
 {
 	float distanceLeft = maxDistance;
 	NodeId curPoly = initialPolygon;
@@ -588,7 +593,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
 		if (!edgeIdx) {
 			// Something went wrong
-			return { ray.p, weightedDistance };
+			return RayResult(ray.p, weightedDistance, std::nullopt, std::nullopt);
 		}
 
 		const auto nextPoly = curNavmesh->nodes.at(curPoly).connections.at(edgeIdx.value());
@@ -600,7 +605,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 			edgeIdx = poly.getExitEdge(ray, edgeIdx.value() + 1);
 			if (!edgeIdx) {
 				//Logger::logError("Could not recover from navmesh ping-pong, aborting.");
-				return { ray.p, weightedDistance };
+				return RayResult(ray.p, weightedDistance, std::nullopt, std::nullopt);
 			}
 		}
 
@@ -642,7 +647,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 		weightedDistance += std::min(distMoved, distanceLeft) * (curNavmesh->weights.empty() ? 1.0f : curNavmesh->weights.at(curPoly));
 		distanceLeft -= distMoved;
 		if (distanceLeft < epsilon) {
-			return { {}, weightedDistance };
+			return RayResult(std::nullopt, weightedDistance, curPoly, curNavmesh->getId());
 		}
 
 		// Move to the next polygon on navmesh
@@ -666,12 +671,12 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 				}
 			}
 
-			return { intersection.value(), weightedDistance };
+			return RayResult{ intersection.value(), weightedDistance, std::nullopt, std::nullopt };
 		}
 	}
 
 	// No collisions
-	return { std::nullopt, weightedDistance };
+	return RayResult{ std::nullopt, weightedDistance, std::nullopt, std::nullopt };
 }
 
 void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)

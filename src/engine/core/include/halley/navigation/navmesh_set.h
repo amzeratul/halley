@@ -46,11 +46,11 @@ namespace Halley {
 
 		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;
 
-		bool isPathClear(std::initializer_list<const NavigationPath::Point> points) const;
 		bool isPathClear(gsl::span<const NavigationPath::Point> points) const;
 		bool isPathClear(gsl::span<const WorldPosition> points) const;
-		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const;
-		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const;
+
+		using RayResult = Navmesh::RayResult;
+		RayResult findRayCollision(NavigationPath::Point from, NavigationPath::Point to, std::optional<uint16_t> startNodeId = std::nullopt) const;
 
 		ResourceMemoryUsage getMemoryUsage() const override;
 

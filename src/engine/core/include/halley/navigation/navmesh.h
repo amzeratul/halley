@@ -105,6 +105,20 @@ namespace Halley {
 
 			size_t getSizeBytes() const;
 		};
+
+		struct RayResult {
+			RayResult(std::optional<Vector2f> collision, float distance, OptionalLite<NodeId> endNodePos, OptionalLite<uint16_t> endNavmesh)
+				: collision(collision)
+				, distance(distance)
+				, endNodePos(endNodePos)
+				, endNavmesh(endNavmesh)
+			{}
+
+			std::optional<Vector2f> collision;
+			float distance;
+			OptionalLite<NodeId> endNodePos;
+			OptionalLite<uint16_t> endNavmesh;
+		};
 		
 		Navmesh();
 		Navmesh(const ConfigNode& nodeData);
@@ -116,6 +130,7 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
 		void setId(uint16_t id);
+		uint16_t getId() const;
 
 		[[nodiscard]] std::optional<Vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
 		[[nodiscard]] std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const;
@@ -139,7 +154,7 @@ namespace Halley {
 		// Otherwise returns collision point
 		[[nodiscard]] std::optional<Vector2f> findRayCollision(Vector2f from, Vector2f to) const;
 		[[nodiscard]] std::optional<Vector2f> findRayCollision(Ray ray, float maxDistance) const;
-		[[nodiscard]] std::pair<std::optional<Vector2f>, float> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance = 0, const NavmeshSet* navmeshSet = nullptr) const;
+		[[nodiscard]] RayResult findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance = 0, const NavmeshSet* navmeshSet = nullptr) const;
 
 		void setWorldPosition(Vector2f offset, Vector2i worldGridPos);
 		[[nodiscard]] Vector2i getWorldGridPos() const { return worldGridPos; }
@@ -237,6 +252,6 @@ namespace Halley {
 
 		OptionalLite<uint16_t> getNavmeshFromEdge(NodeAndConn edge) const;
 
-		static std::pair<std::optional<Vector2f>, float> findRayCollision(const Navmesh* navmesh, Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance = 0, const NavmeshSet* navmeshSet = nullptr);
+		static RayResult findRayCollision(const Navmesh* navmesh, Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance = 0, const NavmeshSet* navmeshSet = nullptr);
 	};
 }
