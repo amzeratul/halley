@@ -543,7 +543,7 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 		
 		points.emplace_back(WorldPosition(0.5f * (edge.a + edge.b), subWorld), id);
 	}
-	points.emplace_back(WorldPosition(query.from.pos, subWorld), id);
+	points.emplace_back(WorldPosition(query.to.pos, subWorld), id);
 
 	// Check for NaN/inf
 	for (auto& p: points) {
