@@ -245,7 +245,7 @@ void StopwatchIntervalLogger::logPoint(std::string_view name)
 
 	if (state.time) {
 		uint64_t us = duration_cast<microseconds>(now - *state.time).count();
-		Logger::logDev("Time [" + toString(us, 10, 8, ' ', ' ') + " us] " + state.name + " -> " + name, true);
+		Logger::logDev("Time [" + toString(us, 10, 8, ' ', ' ') + " us] " + name + "  [prev: " + state.name + "]", true);
 	}
 
 	state.time = now;
