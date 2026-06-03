@@ -168,6 +168,8 @@ Future<std::optional<LocStringSet>> LocalisationClient::getStrings(std::optional
 	{
 		if (response->getResponseCode() == 200) {
 			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));
+		} else {
+			Logger::logError("Server returned error " + toString(response->getResponseCode()) + ": " + response->getBody());
 		}
 		return std::nullopt;
 	});
@@ -183,6 +185,7 @@ Future<int> LocalisationClient::getStringsVersion()
 			auto body = JSONConvert::parseConfig(response->getBody());
 			return body["version"].asInt(-1);
 		} else {
+			Logger::logError("Server returned error " + toString(response->getResponseCode()) + ": " + response->getBody());
 			return -2;
 		}
 	});
