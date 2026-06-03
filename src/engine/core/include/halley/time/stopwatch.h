@@ -113,4 +113,19 @@ namespace Halley {
 		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
 		int64_t toAdd = 0;
 	};
+
+	class StopwatchIntervalLogger {
+	public:
+		static void logPoint(std::string_view name);
+		static void reset();
+
+	private:
+		class ThreadState {
+		public:
+			std::optional<std::chrono::time_point<std::chrono::high_resolution_clock>> time;
+			std::string_view name;
+		};
+
+		static thread_local ThreadState threadState;
+	};
 }

@@ -20,6 +20,7 @@
 \*****************************************************************/
 
 #include "halley/time/stopwatch.h"
+#include "halley/time/stopwatch.h"
 
 #include "halley/utils/utils.h"
 
@@ -236,3 +237,25 @@ int64_t StopwatchRollingAveraging::lastElapsedNanoSeconds() const
 	const auto index = (pos + nsTaken.size() - 1) % nsTaken.size();
 	return nsTaken[index];
 }
+
+void StopwatchIntervalLogger::logPoint(std::string_view name)
+{
+	auto now = high_resolution_clock::now();
+	auto& state = threadState;
+
+	if (state.time) {
+		uint64_t us = duration_cast<microseconds>(now - *state.time).count();
+		Logger::logDev("Time [" + toString(us, 10, 8, ' ', ' ') + " us] " + state.name + " -> " + name, true);
+	}
+
+	state.time = now;
+	state.name = name;
+}
+
+void StopwatchIntervalLogger::reset()
+{
+	threadState.time = std::nullopt;
+	threadState.name = {};
+}
+
+thread_local StopwatchIntervalLogger::ThreadState StopwatchIntervalLogger::threadState;
