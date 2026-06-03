@@ -132,6 +132,7 @@ namespace Halley {
 		[[nodiscard]] size_t getNumNodes() const { return nodes.size(); }
 		[[nodiscard]] std::optional<NodeId> getNodeAt(Vector2f position) const;
 		[[nodiscard]] bool containsPoint(Vector2f position) const;
+		[[nodiscard]] bool containsPoint(WorldPosition position) const;
 		[[nodiscard]] std::optional<Vector2f> getClosestPointTo(Vector2f pos, float anisotropy = 1.0f, float maxDist = std::numeric_limits<float>::max()) const;
 		
 		// Returns empty if no collision is found (i.e. fully contained within navmesh)

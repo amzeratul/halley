@@ -16,10 +16,6 @@ namespace Halley {
 				: pos(pos)
 				, navmeshId(navmeshId)
 			{}
-			Point(Vector2f pos, int subWorld, uint16_t navmeshId = std::numeric_limits<uint16_t>::max())
-				: pos(pos, subWorld)
-				, navmeshId(navmeshId)
-			{}
 		};
 
 		Vector<Point> path;

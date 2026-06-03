@@ -196,6 +196,10 @@ std::optional<Navmesh::NodeId> Navmesh::getNodeAt(Vector2f position) const
 
 bool Navmesh::containsPoint(Vector2f position) const
 {
+	if (!boundingCircle.contains(position)) {
+		return false;
+	}
+
 	const auto& polyIndices = getPolygonsAt(position, false);
 	
 	for (auto i: polyIndices) {
@@ -205,6 +209,11 @@ bool Navmesh::containsPoint(Vector2f position) const
 	}
 
 	return false;
+}
+
+bool Navmesh::containsPoint(WorldPosition position) const
+{
+	return subWorld == position.subWorld && containsPoint(position.pos);
 }
 
 std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotropy, float maxDist) const
@@ -525,16 +534,16 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 	Vector<NavigationPath::Point> points;
 	points.reserve(nodePath.size() + 1);
 
-	points.emplace_back(query.from.pos, subWorld, id);
+	points.emplace_back(WorldPosition(query.from.pos, subWorld), id);
 	for (size_t i = 1; i < nodePath.size(); ++i) {
 		const auto cur = nodePath[i - 1];
 
 		const auto& prevPoly = polygons[cur.node];
 		const auto edge = prevPoly.getEdge(cur.connectionIdx);
 		
-		points.emplace_back(0.5f * (edge.a + edge.b), subWorld, id);
+		points.emplace_back(WorldPosition(0.5f * (edge.a + edge.b), subWorld), id);
 	}
-	points.emplace_back(query.to.pos, subWorld, id);
+	points.emplace_back(WorldPosition(query.from.pos, subWorld), id);
 
 	// Check for NaN/inf
 	for (auto& p: points) {

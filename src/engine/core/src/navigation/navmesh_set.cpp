@@ -191,7 +191,7 @@ OptionalLite<uint16_t> NavmeshSet::getNavMeshIdxAt(WorldPosition pos, bool allow
 {
 	uint16_t i = 0;
 	for (const auto& navmesh: navmeshes) {
-		if ((navmesh.isConnectedSet() || allowNonConnected) && navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
+		if ((allowNonConnected || navmesh.isConnectedSet()) && navmesh.containsPoint(pos)) {
 			return i;
 		}
 		i++;
@@ -230,7 +230,7 @@ std::optional<std::pair<WorldPosition, uint16_t>> NavmeshSet::getClosestPointAnd
 
 	uint16_t i = 0;
 	for (const auto& navmesh: navmeshes) {
-		if ((navmesh.isConnectedSet() || allowNonConnected) && (anySubWorld || navmesh.getSubWorld() == pos.subWorld)) {
+		if ((allowNonConnected || navmesh.isConnectedSet()) && (anySubWorld || navmesh.getSubWorld() == pos.subWorld)) {
 			if (const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy, bestDist)) {
 				const float dist = (*curPoint - pos.pos).length();
 				if (dist < bestDist) {
@@ -244,27 +244,29 @@ std::optional<std::pair<WorldPosition, uint16_t>> NavmeshSet::getClosestPointAnd
 	}
 
 	if (bestPoint) {
-		const auto scale = Vector2f(1.0f, anisotropy);
-		const auto du = bestDist > 0.00001f ? ((bestPoint->pos - pos.pos) * scale).unit() : Vector2f(0, 1);
+		if (nudge > 0) {
+			const auto scale = Vector2f(1.0f, anisotropy);
+			const auto du = bestDist > 0.00001f ? ((bestPoint->pos - pos.pos) * scale).unit() : Vector2f(0, 1);
 
-		const auto p1 = *bestPoint + (du / scale) * nudge;
-		if (auto idx = getNavMeshIdxAt(p1, allowNonConnected)) {
-			return std::pair{ p1, *idx };
-		}
+			const auto p1 = *bestPoint + (du / scale) * nudge;
+			if (auto idx = getNavMeshIdxAt(p1, allowNonConnected)) {
+				return std::pair{ p1, *idx };
+			}
 
-		const auto p2 = *bestPoint + (du.orthoLeft() / scale) * nudge;
-		if (auto idx = getNavMeshIdxAt(p2, allowNonConnected)) {
-			return std::pair{ p2, *idx };
-		}
+			const auto p2 = *bestPoint + (du.orthoLeft() / scale) * nudge;
+			if (auto idx = getNavMeshIdxAt(p2, allowNonConnected)) {
+				return std::pair{ p2, *idx };
+			}
 
-		const auto p3 = *bestPoint + (du.orthoRight() / scale) * nudge;
-		if (auto idx = getNavMeshIdxAt(p3, allowNonConnected)) {
-			return std::pair{ p3, *idx };
-		}
+			const auto p3 = *bestPoint + (du.orthoRight() / scale) * nudge;
+			if (auto idx = getNavMeshIdxAt(p3, allowNonConnected)) {
+				return std::pair{ p3, *idx };
+			}
 
-		const auto p4 = *bestPoint - (du / scale) * nudge;
-		if (auto idx = getNavMeshIdxAt(p4, allowNonConnected)) {
-			return std::pair{ p4, *idx };
+			const auto p4 = *bestPoint - (du / scale) * nudge;
+			if (auto idx = getNavMeshIdxAt(p4, allowNonConnected)) {
+				return std::pair{ p4, *idx };
+			}
 		}
 
 		return std::pair{ *bestPoint, bestNavmeshIdx };
