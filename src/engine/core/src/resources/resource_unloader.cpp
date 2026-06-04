@@ -130,11 +130,18 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	// Preload
 	if (canPreload) {
 		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
+			bool preloadingAny = false;
 			for (auto& s: states[state].states) {
 				if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
 					s.markAsLoading = true;
 					curMemoryUsage += s.memoryUsage;
+					preloadingAny = true;
+				} else if (s.loaded && !s.res->isLoaded()) {
+					preloadingAny = true;
 				}
+			}
+			if (preloadingAny) { // Don't proceed to the next category if we had to preload anything on the current category
+				break;
 			}
 		}
 	}
