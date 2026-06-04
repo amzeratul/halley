@@ -315,7 +315,7 @@ namespace Halley
 		bool requestLoading() const;
 		bool requestUnloading() const;
 		virtual bool canUnload() const;
-		void waitForLoad(bool acceptFailed = false) const;
+		void waitForLoad(bool acceptFailed = false, std::optional<int> notifyIfMoreThanUs = 10'000) const;
 		Future<void> onLoad() const;
 
 		void startFrame(Time dt) const override;

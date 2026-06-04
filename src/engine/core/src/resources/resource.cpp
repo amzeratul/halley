@@ -1,5 +1,6 @@
 #include "halley/resources/resource.h"
 #include "halley/support/exception.h"
+#include "halley/time/stopwatch.h"
 
 using namespace Halley;
 
@@ -217,15 +218,25 @@ void AsyncResource::loadingFailed()
 	doneLoading();
 }
 
-void AsyncResource::waitForLoad(bool acceptFailed) const
+void AsyncResource::waitForLoad(bool acceptFailed, std::optional<int> notifyIfMoreThanUs) const
 {
 	markActivelyInUse();
 
 	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
+		auto timer = Stopwatch(notifyIfMoreThanUs.has_value());
+
 		while (loadState != State::Loaded) {
 			//Logger::logDev("Waiting for asset load: " + getAssetId());
 			loadWait.wait(lock);
+		}
+
+		if (notifyIfMoreThanUs) {
+			timer.pause();
+			const auto us = timer.elapsedMicroseconds();
+			if (us > *notifyIfMoreThanUs) {
+				Logger::logDev("Waited " + toString(us, 10, 1, '0', ' ') + " us for " + getAssetId() + " to load");
+			}
 		}
 	}
 	if (failed && !acceptFailed) {
