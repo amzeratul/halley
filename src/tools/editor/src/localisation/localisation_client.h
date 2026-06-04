@@ -46,6 +46,7 @@ namespace Halley {
 		void signOut();
 
 		Future<bool> putOriginalStrings(const LocStringUploadData& data, bool drySend = false);
+		Future<bool> putOriginalStringOrder(const ConfigNode& data, bool drySend = false);
 		Future<bool> putStringProperties(const Vector<LocStringProperties>& data);
 		Future<std::optional<LocStringSet>> getStrings(std::optional<String> chunkId = std::nullopt, int minVersion = 0);
 		Future<int> getStringsVersion();

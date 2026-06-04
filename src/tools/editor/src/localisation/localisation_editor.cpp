@@ -89,6 +89,11 @@ void LocalisationEditor::onMakeUI()
 		uploadOriginalStrings();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "uploadOrder", [=] (const UIEvent& event)
+	{
+		uploadOriginalStringOrder();
+	});
+
 	setHandle(UIEventType::ButtonClicked, "download", [=] (const UIEvent& event)
 	{
 		downloadTranslations();
@@ -808,6 +813,30 @@ void LocalisationEditor::uploadOriginalStrings()
 		}
 
 		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, *client, std::move(uploadData), std::move(localisedIn)));
+	}
+}
+
+void LocalisationEditor::uploadOriginalStringOrder()
+{
+	if (localStrings && remoteStrings) {
+		ConfigNode chunkList = ConfigNode::SequenceType();
+
+		for (auto& chunk: localStrings->originalLanguage->getChunks()) {
+			Vector<String> keys;
+			keys.reserve(chunk.entries.size());
+			for (const auto& entry: chunk.entries) {
+				keys += entry.getKey();
+			}
+
+			ConfigNode chunkData;
+			chunkData["chunkId"] = chunk.name;
+			chunkData["keys"] = keys;
+			chunkList.push_back(std::move(chunkData));
+		}
+
+		ConfigNode data;
+		data["chunks"] = std::move(chunkList);
+		client->putOriginalStringOrder(data);
 	}
 }
 

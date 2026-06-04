@@ -101,6 +101,16 @@ children:
                   size: [200, 0]
                   text: Upload Original...
                 fill: [centreHorizontal, centreVertical]
+              - uuid: 9b64881e-9276-4fd6-9dd3-c441c7c834ed
+                widget:
+                  active: false
+                  class: button
+                  enabled: true
+                  icon: ui/upload.png
+                  id: uploadOrder
+                  size: [200, 0]
+                  text: Upload Order
+                fill: [centreHorizontal, centreVertical]
               - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
                 widget:
                   class: button

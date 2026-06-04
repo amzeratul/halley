@@ -141,6 +141,7 @@ namespace Halley {
         void uploadProjectProperties(HalleyVersion version);
 
 		void uploadOriginalStrings();
+		void uploadOriginalStringOrder();
         void downloadTranslations();
 
         Vector<I18NLanguage> getLanguages() const;

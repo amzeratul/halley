@@ -140,6 +140,18 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocStringUploadData& d
 	}
 }
 
+Future<bool> LocalisationClient::putOriginalStringOrder(const ConfigNode& data, bool drySend)
+{
+	const auto url = "/strings-chunk-order/" + Encode::encodeURL(project);
+
+	if (drySend) {
+		Logger::logDev("Dry sending:\n" + JSONConvert::generateJSON(data));
+		return Future<bool>::makeImmediate(true);
+	} else {
+		return sendWithAuthorizationSimple(HTTPMethod::PUT, url, data);
+	}
+}
+
 Future<bool> LocalisationClient::putStringProperties(const Vector<LocStringProperties>& data)
 {
 	const auto url = "/strings-properties/" + Encode::encodeURL(project);
