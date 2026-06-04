@@ -15,12 +15,14 @@ namespace Halley {
 	class PainterService : public Service
 	{
 	public:
-		PainterService();
+		PainterService(bool waitForSpriteLoad = true);
 		~PainterService() override;
 		
 		void startUpdate(Resources& resources, Time t);
-		void startRender(bool waitForSpriteLoad = true);
+		void startRender();
 		void endRender();
+
+		void setWaitForSpriteLoad(bool wait);
 
 		BaseFrameData& getFrameData();
 		bool hasFrameData() const;
@@ -55,6 +57,7 @@ namespace Halley {
 	private:
 		bool updateEnabled = true;
 		bool depthQueriesEnabled = false;
+		bool waitForSpriteLoad = true;
 		std::optional<uint16_t> worldPartition;
 		std::optional<Colour4f> clearColour;
 		std::optional<uint8_t> stencilClear;

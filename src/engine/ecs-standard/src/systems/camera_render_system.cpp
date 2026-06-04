@@ -23,7 +23,7 @@ public:
 		}
 
 		auto& painterService = getPainterService();
-		painterService.startRender(!getDevService().isEditorMode());
+		painterService.startRender();
 
 		if (painterService.hasRenderGraph()) {
 			auto& renderGraph = painterService.getRenderGraph();

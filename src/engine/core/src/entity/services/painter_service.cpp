@@ -4,7 +4,8 @@
 
 using namespace Halley;
 
-PainterService::PainterService()
+PainterService::PainterService(bool waitForSpriteLoad)
+	: waitForSpriteLoad(waitForSpriteLoad)
 {
 	clearColour = Colour4f::fromHexString("#B0B0B0");
 	stencilClear = static_cast<uint8_t>(0);
@@ -22,7 +23,7 @@ void PainterService::startUpdate(Resources& resources, Time t)
 	}
 }
 
-void PainterService::startRender(bool waitForSpriteLoad)
+void PainterService::startRender()
 {
 	for (auto& p: getFrameData().painters) {
 		p->startRender(waitForSpriteLoad, depthQueriesEnabled, worldPartition);
@@ -34,6 +35,11 @@ void PainterService::endRender()
 	for (auto& p: getFrameData().painters) {
 		p->endRender();
 	}
+}
+
+void PainterService::setWaitForSpriteLoad(bool wait)
+{
+	waitForSpriteLoad = wait;
 }
 
 BaseFrameData& PainterService::getFrameData()
