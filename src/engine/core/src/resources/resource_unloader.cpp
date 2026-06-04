@@ -77,19 +77,26 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	}
 
 	// Anything marked as "Load" will be loaded
+	int nWaitingToLoad = 0;
 	for (auto& s: states[ResourceDesiredLoadState::Load].states) {
+		if (!s.res->isLoaded()) {
+			++nWaitingToLoad;
+		}
 		if (!s.loaded) {
 			s.markAsLoading = true;
 			curMemoryUsage += s.memoryUsage;
 		}
 	}
+	const bool canPreload = nWaitingToLoad == 0;
 	
 	// Figure out how much more memory we'd need if we wanted to load all preloads
 	size_t memoryUsageWithAllPreloads = curMemoryUsage;
-	for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
-		for (auto& s: states[state].states) {
-			if (!s.loaded) {
-				memoryUsageWithAllPreloads += s.memoryUsage;
+	if (canPreload) {
+		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
+			for (auto& s: states[state].states) {
+				if (!s.loaded) {
+					memoryUsageWithAllPreloads += s.memoryUsage;
+				}
 			}
 		}
 	}
@@ -121,11 +128,13 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	}
 
 	// Preload
-	for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
-		for (auto& s: states[state].states) {
-			if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
-				s.markAsLoading = true;
-				curMemoryUsage += s.memoryUsage;
+	if (canPreload) {
+		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
+			for (auto& s: states[state].states) {
+				if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+					s.markAsLoading = true;
+					curMemoryUsage += s.memoryUsage;
+				}
 			}
 		}
 	}
