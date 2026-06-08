@@ -7,6 +7,7 @@ namespace Halley {
 		Added,
 		Removed,
 		Modified,
+		ModifiedMinor,
 		Renamed,
 		Noop
 	};
@@ -18,6 +19,7 @@ namespace Halley {
 				"added",
 				"removed",
 				"modified",
+				"modifiedMinor",
 				"renamed",
 				"noop"
 			});

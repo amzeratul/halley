@@ -95,27 +95,35 @@ ConfigNode LocStringUploadChunkData::toConfigNode() const
 {
 	ConfigNode keys;
 	ConfigNode values;
-	ConfigNode keysToKeep;
 	ConfigNode keyRenames;
+	ConfigNode keyMinorRevisions;
 
 	bool hasSend = false;
 
+	using enum LocStringUploadEntryType;
+
 	for (const auto& entry: entries) {
 		if (entry.send) {
-			if (entry.type == LocStringUploadEntryType::Noop) {
-				keysToKeep.push_back(ConfigNode(entry.key));
+			if (entry.type == Noop) {
+				keys.push_back(ConfigNode(entry.key));
+				values.push_back({});
 			} else {
 				hasSend = true;
-				if (entry.type == LocStringUploadEntryType::Added || entry.type == LocStringUploadEntryType::Modified) {
+				if (entry.type == Added || entry.type == Modified || entry.type == ModifiedMinor) {
 					keys.push_back(ConfigNode(entry.key));
 					values.push_back(ConfigNode(entry.value));
-				} else if (entry.type == LocStringUploadEntryType::Renamed) {
-					keysToKeep.push_back(ConfigNode(entry.key));
+					if (entry.type == ModifiedMinor) {
+						keyMinorRevisions.push_back(ConfigNode(entry.key));
+					}
+				} else if (entry.type == Renamed) {
+					keys.push_back(ConfigNode(entry.key));
+					values.push_back({});
 					keyRenames.push_back(ConfigNode(std::pair(*entry.oldKey, entry.key)));
 				}
 			}
 		} else if (entry.remoteValue) {
-			keysToKeep.push_back(ConfigNode(entry.key));
+			keys.push_back(ConfigNode(entry.key));
+			values.push_back({});
 		}
 	}
 
@@ -128,8 +136,8 @@ ConfigNode LocStringUploadChunkData::toConfigNode() const
 	result["chunkId"] = chunkId;
 	result["keys"] = std::move(keys);
 	result["values"] = std::move(values);
-	result["keysToKeep"] = std::move(keysToKeep);
 	result["keyRenames"] = std::move(keyRenames);
+	result["keyMinorRevisions"] = std::move(keyMinorRevisions);
 	return result;
 }
 
