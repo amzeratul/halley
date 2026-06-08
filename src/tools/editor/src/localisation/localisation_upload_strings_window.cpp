@@ -12,6 +12,7 @@ LocUploadStringsGrid::LocUploadStringsGrid(UIFactory& factory, LocStringUploadDa
 {
 	tickSprite = Sprite().setImage(factory.getResources(), "ui/check.png");
 	locSprite = Sprite().setImage(factory.getResources(), "ui/localised.png");
+	minorRevSprite = Sprite().setImage(factory.getResources(), "ui/spellcheck.png");
 
 	setLineColourFilter([=] (int row) {
 		return getRowColour(row);
@@ -34,11 +35,11 @@ size_t LocUploadStringsGrid::getSrcRowCount() const
 std::pair<Vector<float>, Vector<String>> LocUploadStringsGrid::getColumns() const
 {
 	const float width = getSize().x - 1;
-	const float fixedWidth = 25 + 25 + 120 + 40;
+	const float fixedWidth = 25 + 25 + 25 + 120 + 40;
 	const float remainingWidth = width - fixedWidth;
 
-	Vector<float> sizes = { 25.0f, 25.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.4f, remainingWidth * 0.4f };
-	Vector<String> names { "Send", "Loc", "Group", "Status", "Key", "Previous Value", "New Value" };
+	Vector<float> sizes = { 25.0f, 25.0f, 25.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.4f, remainingWidth * 0.4f };
+	Vector<String> names { "Send", "Loc", "Min", "Group", "Status", "Key", "Previous Value", "New Value" };
 	return { sizes, names };
 }
 
@@ -46,20 +47,22 @@ void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector
 {
 	const auto& e = getEntry(idx);
 
-	int len = 7;
+	int nSprites = 3;
+	int len = 5 + nSprites;
 
 	strs.resize(len);
-	strs[2] = Path(getChunk(idx).chunkId).getFilenameStr();
-	strs[3] = getTypeDesc(e.type);
-	strs[4] = (e.oldKey ? "*" : "") + e.key;
-	strs[5] = e.remoteValue.value_or("");
-	strs[6] = e.value;
+	strs[nSprites + 0] = Path(getChunk(idx).chunkId).getFilenameStr();
+	strs[nSprites + 1] = getTypeDesc(e.type, e.minorRevision);
+	strs[nSprites + 2] = (e.oldKey ? "*" : "") + e.key;
+	strs[nSprites + 3] = e.remoteValue.value_or("");
+	strs[nSprites + 4] = e.value;
 
 	colours.resize(len, textCol);
 
 	sprites.resize(len, {});
 	sprites[0] = e.send ? tickSprite : Sprite();
 	sprites[1] = keysLocalisedIn.contains(e.oldKey.value_or(e.key)) ? locSprite : Sprite();
+	sprites[2] = e.minorRevision ? minorRevSprite : Sprite();
 }
 
 String LocUploadStringsGrid::getCellToolTip(int row, int col, const String& columnName) const
@@ -77,6 +80,8 @@ String LocUploadStringsGrid::getCellToolTip(int row, int col, const String& colu
 			} else {
 				return "Not localised";
 			}
+		} else if (columnName == "Min") {
+			return e.minorRevision ? "Minor revision" : "";
 		} else if (columnName == "Status") {
 			return "Status: " + toString(e.type);
 		} else if (columnName == "Key") {
@@ -124,7 +129,7 @@ LocStringUploadChunkData::Entry& LocUploadStringsGrid::getEntry(int idx) const
 	return uploadData.getChunks()[i.first].entries[i.second];
 }
 
-String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type) const
+String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type, bool minor) const
 {
 	switch (type) {
 	case LocStringUploadEntryType::Added:
@@ -132,7 +137,7 @@ String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type) const
 	case LocStringUploadEntryType::Renamed:
 		return "REN";
 	case LocStringUploadEntryType::Modified:
-		return "MOD";
+		return minor ? "MIN" : "MOD";
 	case LocStringUploadEntryType::Removed:
 		return "DEL";
 	case LocStringUploadEntryType::Noop:
@@ -143,16 +148,18 @@ String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type) const
 
 std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 {
+	constexpr float alpha = 0.2f;
+
 	const auto& e = getEntry(row);
 	switch (e.type) {
 	case LocStringUploadEntryType::Added:
-		return Colour4f(0.2f, 1.0f, 0.2f, 0.1f);
+		return Colour4f(0.2f, 1.0f, 0.2f, alpha);
 	case LocStringUploadEntryType::Renamed:
-		return Colour4f(0.2f, 0.2f, 1.0f, 0.1f);
+		return Colour4f(0.2f, 0.2f, 1.0f, alpha);
 	case LocStringUploadEntryType::Removed:
-		return Colour4f(1.0f, 0.2f, 0.2f, 0.1f);
+		return Colour4f(1.0f, 0.2f, 0.2f, alpha);
 	case LocStringUploadEntryType::Modified:
-		return Colour4f(1.0f, 1.0f, 0.2f, 0.1f);
+		return e.minorRevision ? Colour4f(0.2f, 1.0f, 1.0f, alpha) : Colour4f(1.0f, 1.0f, 0.2f, alpha * 1.5f);
 	}
 	return {};
 }
@@ -202,6 +209,14 @@ void LocUploadStringsWindow::onMakeUI()
 	
 	setHandle(UIEventType::ButtonClicked, "unmarkSend", [this] (const UIEvent& event) {
 		markSend(false);
+	});
+	
+	setHandle(UIEventType::ButtonClicked, "markMinor", [this] (const UIEvent& event) {
+		markMinor(true);
+	});
+	
+	setHandle(UIEventType::ButtonClicked, "unmarkMinor", [this] (const UIEvent& event) {
+		markMinor(false);
 	});
 	
 	setHandle(UIEventType::ButtonClicked, "selectGroup", [this] (const UIEvent& event) {
@@ -323,6 +338,11 @@ void LocUploadStringsWindow::markSend(bool toSend)
 	markSend(grid->getSelectedLines(), toSend);
 }
 
+void LocUploadStringsWindow::markMinor(bool minor)
+{
+	markMinor(grid->getSelectedLines(), minor);
+}
+
 void LocUploadStringsWindow::markAllSend(bool toSend)
 {
 	HashSet<int> lines;
@@ -340,6 +360,17 @@ void LocUploadStringsWindow::markSend(const HashSet<int>& lines, bool toSend)
 	}
 	updateSummary();
 	grid->refreshFilter();
+}
+
+void LocUploadStringsWindow::markMinor(const HashSet<int>& lines, bool minor)
+{
+	for (auto line: lines) {
+		auto& e = grid->getEntry(line);
+		if (e.type == LocStringUploadEntryType::Modified) {
+			e.minorRevision = minor;
+		}
+	}
+	grid->refreshColours();
 }
 
 void LocUploadStringsWindow::selectGroup()

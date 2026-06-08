@@ -57,11 +57,13 @@ children:
                 fill: [fillHorizontal, top]
             fill: [fillHorizontal, fillVertical]
           - uuid: 637fc458-d77e-42e6-af41-d892bfd188b7
+            proportion: 0
             sizer:
               columnProportions: []
               gap: 5
             widget:
               class: widget
+              size: [800, 0]
             children:
               - uuid: 005d1a6c-cdc2-4440-8b6c-a43311511096
                 border: [0, 0, 10, 0]
@@ -81,16 +83,32 @@ children:
                 proportion: 1
                 widget:
                   class: button
+                  icon: ui/check.png
                   id: markSend
-                  size: [200, 0]
+                  size: [0, 0]
                   text: Mark Send
               - uuid: dd7071ce-586d-47f5-9998-2d1108158327
                 proportion: 1
                 widget:
                   class: button
                   id: unmarkSend
-                  size: [200, 0]
+                  size: [0, 0]
                   text: Unmark Send
+              - uuid: e1126e41-ec86-4b6d-8161-28b70778f485
+                proportion: 1
+                widget:
+                  class: button
+                  icon: ui/spellcheck.png
+                  id: markMinor
+                  size: [0, 0]
+                  text: Mark Minor
+              - uuid: f2c864ea-94d7-4e26-9193-4fc7b3537b79
+                proportion: 1
+                widget:
+                  class: button
+                  id: unmarkMinor
+                  size: [0, 0]
+                  text: Unmark Minor
             fill: [centreHorizontal, fillVertical]
           - uuid: 62451afc-b01e-401b-a3ea-9fe52c3e01f4
             border: [0, 10, 0, 0]

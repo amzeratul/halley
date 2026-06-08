@@ -109,10 +109,10 @@ ConfigNode LocStringUploadChunkData::toConfigNode() const
 				values.push_back({});
 			} else {
 				hasSend = true;
-				if (entry.type == Added || entry.type == Modified || entry.type == ModifiedMinor) {
+				if (entry.type == Added || entry.type == Modified) {
 					keys.push_back(ConfigNode(entry.key));
 					values.push_back(ConfigNode(entry.value));
-					if (entry.type == ModifiedMinor) {
+					if (entry.type == Modified && entry.minorRevision) {
 						keyMinorRevisions.push_back(ConfigNode(entry.key));
 					}
 				} else if (entry.type == Renamed) {

@@ -7,7 +7,6 @@ namespace Halley {
 		Added,
 		Removed,
 		Modified,
-		ModifiedMinor,
 		Renamed,
 		Noop
 	};
@@ -19,7 +18,6 @@ namespace Halley {
 				"added",
 				"removed",
 				"modified",
-				"modifiedMinor",
 				"renamed",
 				"noop"
 			});
@@ -35,6 +33,7 @@ namespace Halley {
 			std::optional<String> oldKey;
 			LocStringUploadEntryType type;
 			bool send = true;
+			bool minorRevision = false;
 		};
 
 		String chunkId;

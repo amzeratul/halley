@@ -29,9 +29,10 @@ namespace Halley {
 
         Sprite tickSprite;
         Sprite locSprite;
+        Sprite minorRevSprite;
         
     	void generateMapping();
-        String getTypeDesc(LocStringUploadEntryType type) const;
+        String getTypeDesc(LocStringUploadEntryType type, bool minor) const;
         std::optional<Colour4f> getRowColour(int row) const;
     };
 
@@ -71,8 +72,10 @@ namespace Halley {
         void updateSummary();
         void updateButtons();
         void markSend(bool toSend);
+        void markMinor(bool minor);
         void markAllSend(bool toSend);
         void markSend(const HashSet<int>& lines, bool toSend);
+        void markMinor(const HashSet<int>& lines, bool minor);
         void selectGroup();
         void selectGroup(const String& id);
 
