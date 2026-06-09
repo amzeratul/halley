@@ -37,6 +37,59 @@ namespace Halley {
 	typedef std::wstring StringUTF16;
 	typedef std::u32string StringUTF32;
 
+	template <typename T>
+	class UnicodeViewIterator {
+	public:
+		constexpr UnicodeViewIterator(std::basic_string_view<T> view = {})
+			: view(view)
+		{
+			next();
+		}
+
+#ifdef __cpp_lib_concepts
+	    using iterator_concept = std::contiguous_iterator_tag;
+#endif // __cpp_lib_concepts
+	    using iterator_category = std::forward_iterator_tag;
+	    using value_type        = char32_t;
+
+		value_type operator*() const { return nextValue; }
+		
+		UnicodeViewIterator& operator++() { next(); return *this; }
+		UnicodeViewIterator operator++(int) const { auto i = UnicodeViewIterator(this); i.next(); return i; }
+
+		bool operator==(const UnicodeViewIterator& other) const { return view == other.view; }
+		bool operator!=(const UnicodeViewIterator& other) const { return view != other.view; }
+
+		friend void swap(UnicodeViewIterator& a, UnicodeViewIterator& b) noexcept { std::swap(a.view, b.view); }
+
+	private:
+		std::basic_string_view<T> view;
+		char32_t nextValue;
+
+		constexpr void next();
+	};
+
+	template <typename T>
+	class UnicodeView {
+	public:
+		constexpr UnicodeView(std::basic_string_view<T> view)
+			: view(view)
+		{}
+
+		[[nodiscard]] constexpr UnicodeViewIterator<T> begin() const
+		{
+			return UnicodeViewIterator<T>(view);
+		}
+		
+		[[nodiscard]] constexpr UnicodeViewIterator<T> end() const
+		{
+			return UnicodeViewIterator<T>(std::basic_string_view<T>());
+		}
+
+	private:
+		std::basic_string_view<T> view;
+	};
+
 	// String class
 	class String {
 	public:
@@ -173,6 +226,9 @@ namespace Halley {
 		[[nodiscard]] static size_t getUTF32Len(std::u32string_view str);
 		[[nodiscard]] static std::pair<char32_t, int> extractNextCharacter(std::string_view str);
 		[[nodiscard]] static std::pair<char32_t, int> extractNextCharacter(std::u32string_view str);
+		[[nodiscard]] static std::optional<char32_t> extractNextCharacterAndAdvance(std::string_view& str);
+		[[nodiscard]] static std::optional<char32_t> extractNextCharacterAndAdvance(std::u32string_view& str);
+		[[nodiscard]] UnicodeView<char> getUnicodeView() const;
 
 		[[nodiscard]] inline std::string& cppStr() { return str; }
 		[[nodiscard]] inline const std::string& cppStr() const { return str; }
@@ -264,6 +320,12 @@ namespace Halley {
 	bool operator!= (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
 
 	using StringArray = Vector<String>;
+
+	template <typename T>
+	constexpr void UnicodeViewIterator<T>::next()
+	{
+		nextValue = String::extractNextCharacterAndAdvance(view).value_or(0);
+	}
 }
 
 namespace std {

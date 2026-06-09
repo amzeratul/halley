@@ -990,6 +990,37 @@ std::pair<char32_t, int> String::extractNextCharacter(std::u32string_view str)
 	return { str[0], 1 };
 }
 
+std::optional<char32_t> String::extractNextCharacterAndAdvance(std::string_view& str)
+{
+	if (str.empty()) {
+		return std::nullopt;
+	}
+
+	auto [c, advance] = extractNextCharacter(str);
+	if (c == 0 && advance == 0) {
+		return std::nullopt;
+	} else {
+		str = str.substr(advance);
+		return c;
+	}
+}
+
+UnicodeView<char> String::getUnicodeView() const
+{
+	return UnicodeView<char>(std::string_view(*this));
+}
+
+std::optional<char32_t> String::extractNextCharacterAndAdvance(std::u32string_view& str)
+{
+	auto [c, advance] = extractNextCharacter(str);
+	if (c == 0 && advance == 0) {
+		return std::nullopt;
+	} else {
+		str = str.substr(advance);
+		return c;
+	}
+}
+
 String String::prettySize(uint64_t bytes)
 {
 	uint64_t value = bytes;
