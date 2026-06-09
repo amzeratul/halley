@@ -14,6 +14,7 @@ namespace Halley {
 
 			Secondary,
 			Tertiary,
+			Quaternary,
 			
 			NumberOfButtons
 		};
@@ -48,6 +49,7 @@ namespace Halley {
 		int hold = -1;
 		int secondary = -1;
 		int tertiary = -1;
+		int quaternary = -1;
 		int xAxis = -1;
 		int yAxis = -1;
 		int xAxisAlt = -1;

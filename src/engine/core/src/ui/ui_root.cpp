@@ -446,6 +446,9 @@ void UIRoot::updateGamepadInput(const spInputDevice& input)
 		if (b.tertiary != -1) {
 			results.setButton(UIGamepadInput::Button::Tertiary, input->isButtonPressed(b.tertiary), input->isButtonPressedRepeat(b.tertiary), input->isButtonReleased(b.tertiary), input->isButtonDown(b.tertiary));
 		}
+		if (b.quaternary != -1) {
+			results.setButton(UIGamepadInput::Button::Quaternary, input->isButtonPressed(b.quaternary), input->isButtonPressedRepeat(b.quaternary), input->isButtonReleased(b.quaternary), input->isButtonDown(b.quaternary));
+		}
 		results.setAxis(UIGamepadInput::Axis::X, (b.xAxis != -1 ? input->getAxis(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxis(b.xAxisAlt) : 0));
 		results.setAxis(UIGamepadInput::Axis::Y, (b.yAxis != -1 ? input->getAxis(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxis(b.yAxisAlt) : 0));
 		results.setAxisRepeat(UIGamepadInput::Axis::X, (b.xAxis != -1 ? input->getAxisRepeat(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxisRepeat(b.xAxisAlt) : 0));
