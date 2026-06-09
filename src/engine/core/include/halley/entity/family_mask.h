@@ -3,6 +3,7 @@
 #include <bitset>
 #include "halley/data_structures/maybe_ref.h"
 #include <gsl/span>
+#include "halley/support/assert.h"
 
 class MaskStorage;
 
