@@ -41,12 +41,29 @@ int LocalisationStats::getWordCount(const String& line, const I18NLanguage& lang
 	bool isInWord = false;
 	int count = 0;
 
-	for (auto c: line.getUTF32()) {
-		const bool isWordCharacter = std::find(start, end, c) == end;
-		if (isWordCharacter && !isInWord) {
-			++count;
+	int squareBracketDepth = 0;
+	int curlyBraceDepth = 0;
+
+	for (auto c: line.getUnicodeView()) {
+		const bool isDelimiter = std::find(start, end, c) != end;
+		if (isDelimiter) {
+			if (c == '[') {
+				squareBracketDepth++;
+			} else if (c == ']') {
+				squareBracketDepth--;
+			} else if (c == '{') {
+				curlyBraceDepth++;
+			} else if (c == '}') {
+				curlyBraceDepth--;
+			}
 		}
-		isInWord = isWordCharacter;
+
+		if (!isDelimiter && !isInWord) { // Word starting
+			if (squareBracketDepth == 0 && curlyBraceDepth == 0) {
+				++count;
+			}
+		}
+		isInWord = !isDelimiter;
 	}
 
 	return count;
