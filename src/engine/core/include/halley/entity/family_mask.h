@@ -9,7 +9,7 @@ class MaskStorage;
 namespace Halley {
 	class HalleyStatics;
 
-	constexpr static int maxComponents = 256; // Increasing this number has performance consequences
+	constexpr static int maxComponents = 512; // Increasing this number has performance consequences
 
 	namespace FamilyMask {
 		using RealType = std::bitset<maxComponents>;
@@ -44,16 +44,19 @@ namespace Halley {
 
 
 		inline void setBit(RealType& mask, int bit) {
+			HalleyAssertDebug(bit < maxComponents);
 			mask[bit] = true;
 		}
 
 		inline bool hasBit(HandleType handle, int bit, MaskStorage& storage) {
+			HalleyAssertDebug(bit < maxComponents);
 			return handle.getRealValue(storage)[bit];
 		}
 
 		inline bool hasAnyBit(HandleType handle, gsl::span<const int> bits, MaskStorage& storage) {
 			const auto& val = handle.getRealValue(storage);
 			for (auto bit: bits) {
+				HalleyAssertDebug(bit < maxComponents);
 				if (val[bit]) {
 					return true;
 				}
