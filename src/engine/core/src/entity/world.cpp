@@ -287,7 +287,7 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 	// Find entities to move
 	Vector<Entity*> entitiesToMove;
 	for (auto& e: other.entities) {
-		if (!worldPartition || e->worldPartition == worldPartition) {
+		if (!e->fromNetwork && (!worldPartition || e->worldPartition == worldPartition)) {
 			entitiesToMove.push_back(e);
 			e->alive = false;
 			e->dirty = true;

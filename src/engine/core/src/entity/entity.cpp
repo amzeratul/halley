@@ -420,7 +420,7 @@ std::optional<uint8_t> Entity::getAuthorityPeerId() const
 void Entity::setFromNetwork(bool fromNetwork)
 {
 	this->fromNetwork = fromNetwork;
-	for (auto& c: children) {
+	for (const auto& c: children) {
 		c->setFromNetwork(fromNetwork);
 	}
 }
@@ -435,15 +435,11 @@ void Entity::doDestroy(World& world, bool updateParenting)
 	HalleyAssertDev(alive);
 
 	if (fromNetwork) {
-		if (!world.isTerminating()) {
-			if (worldPartition == 0) {
-				throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
-			} else if (getOwnerPeerId().value_or(0) != 0) {
-				Logger::logError("Destroying entity " + entityId.toString() + " that was created from network");
-			}
+		if (!world.isTerminating() && worldPartition == 0) {
+			throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
 		}
 	}
-	
+
 	if (updateParenting) {
 		setParent(nullptr, false);
 	}
