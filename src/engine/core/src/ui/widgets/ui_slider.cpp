@@ -22,7 +22,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 		spinControl->setMaximumValue(maxValue);
 		UIWidget::add(spinControl, 0, {}, UISizerAlignFlags::Centre);
 
-		bindData(id + "_input", value, [=](float value)
+		bindData(id + "_input", value, [=, this](float value)
 		{
 			fromInput = true;
 			setValue(value);
@@ -39,7 +39,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 		updateLabel();
 	}
 
-	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
+	setHandle(UIEventType::MouseWheel, [=, this] (const UIEvent& event)
 	{
 		setValue(getValue() - float(event.getIntData()) * granularity.value_or(1.0f) * mouseWheelSpeed);
 	});

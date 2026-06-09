@@ -231,7 +231,7 @@ UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 
 void UITreeList::setupEvents()
 {
-	setHandle(UIEventType::TreeCollapseHandle, [=] (const UIEvent& event)
+	setHandle(UIEventType::TreeCollapseHandle, [=, this] (const UIEvent& event)
 	{
 		auto elem = root.tryFindId(event.getStringData());
 		if (elem) {
@@ -241,7 +241,7 @@ void UITreeList::setupEvents()
 		sendEvent(UIEvent(UIEventType::TreeItemExpanded, getId(), event.getStringData(), false));
 	});
 
-	setHandle(UIEventType::TreeExpandHandle, [=](const UIEvent& event)
+	setHandle(UIEventType::TreeExpandHandle, [=, this](const UIEvent& event)
 	{
 		auto elem = root.tryFindId(event.getStringData());
 		if (elem) {
@@ -466,11 +466,11 @@ void UITreeListControls::setExpanded(bool expanded)
 
 void UITreeListControls::setupUI()
 {
-	setHandle(UIEventType::ButtonClicked, "expand", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "expand", [=, this] (const UIEvent& event)
 	{
 		sendEvent(UIEvent(UIEventType::TreeExpandHandle, getId(), getId()));
 	});
-	setHandle(UIEventType::ButtonClicked, "collapse", [=](const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "collapse", [=, this](const UIEvent& event)
 	{
 		sendEvent(UIEvent(UIEventType::TreeCollapseHandle, getId(), getId()));
 	});

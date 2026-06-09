@@ -181,7 +181,7 @@ std::optional<AudioSpec> AudioFacade::getAudioSpec() const
 
 void AudioFacade::setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller)
 {
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->setBufferSizeController(controller);
 	});
 }
@@ -190,7 +190,7 @@ void AudioFacade::setDebugListener(IAudioDebugDataListener* listener)
 {
 	debugListener = listener;
 	const bool enabled = listener != nullptr;
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->setGenerateDebugData(enabled);
 	});
 }
@@ -199,7 +199,7 @@ void AudioFacade::setEventLogging(std::optional<LoggerLevel> level, std::optiona
 {
 	this->eventLogging = level;
 	this->eventLoggingPrefix = prefix;
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->setEventLogging(level, prefix);
 	});
 }
@@ -216,14 +216,14 @@ std::optional<String> AudioFacade::getEventLoggingPrefix() const
 
 void AudioFacade::resetObjectLimits()
 {
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->resetObjectLimits();
 	});
 }
 
 void AudioFacade::resetBuses()
 {
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->resetBuses();
 	});
 }
@@ -253,7 +253,7 @@ AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 {
 	const auto emitterId = curEmitterId++;
 
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->createEmitter(emitterId, position, false);
 	});
 
@@ -269,7 +269,7 @@ AudioRegionHandle AudioFacade::createRegion(const String& name)
 {
 	const auto regionId = curRegionId++;
 
-	enqueue([=]() {
+	enqueue([=, this]() {
 		engine->createRegion(regionId, name);
 	});
 
@@ -318,7 +318,7 @@ AudioHandle AudioFacade::doPostEvent(const AudioEvent& event, AudioEmitterId emi
 {
 	const auto id = curEventId++;
 
-	enqueue([=, &event]() {
+	enqueue([=, this, &event]() {
 		engine->postEvent(id, event, emitterId);
 	});
 	playingSounds.push_back(id);
@@ -348,7 +348,7 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitt
 		return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 	}
 
-	enqueue([=, busId = std::move(busId)] () {
+	enqueue([=, this, busId = std::move(busId)] () {
 		engine->play(id, clip, emitterId, volume, loop, busId, fade);
 	});
 	playingSounds.push_back(id);
@@ -366,7 +366,7 @@ AudioHandle AudioFacade::play(std::shared_ptr<const AudioObject> audioObject, Au
 		return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 	}
 
-	enqueue([=] () {
+	enqueue([=, this] () {
 		engine->play(id, audioObject, emitterId, volume, fade);
 	});
 	playingSounds.push_back(id);
@@ -381,7 +381,7 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 
 	if (resources->exists<AudioEvent>(name)) {
 		const auto event = resources->get<AudioEvent>(name);
-		enqueue([=]() {
+		enqueue([=, this]() {
 			engine->createEmitter(emitterId, position, true);
 			engine->postEvent(id, *event, emitterId);
 		});
@@ -398,7 +398,7 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosit
 	uint32_t id = curEventId++;
 	const auto emitterId = curEmitterId++;
 
-	enqueue([=] () {
+	enqueue([=, this] () {
 		engine->createEmitter(emitterId, position, true);
 		engine->play(id, clip, emitterId, volume, loop, "", {});
 	});
@@ -446,21 +446,21 @@ void AudioFacade::stopAllMusic(float fadeOutTime)
 
 void AudioFacade::setMasterVolume(float volume)
 {
-	enqueue([=] () {
+	enqueue([=, this] () {
 		engine->setMasterGain(volumeToGain(volume));
 	});
 }
 
 void AudioFacade::setBusVolume(const String& busName, float volume, AudioFade fade, const String& volumeId)
 {
-	enqueue([=] () {
+	enqueue([=, this] () {
 		engine->setBusGain(busName, volumeToGain(volume), fade, volumeId);
 	});
 }
 
 void AudioFacade::setOutputChannels(Vector<AudioChannelData> audioChannelData)
 {
-	enqueue([=, audioChannelData = std::move(audioChannelData)] () mutable
+	enqueue([=, this, audioChannelData = std::move(audioChannelData)] () mutable
 	{
 		engine->setOutputChannels(std::move(audioChannelData));
 	});
@@ -491,7 +491,7 @@ const AudioProperties& AudioFacade::getAudioProperties() const
 
 void AudioFacade::setListener(AudioListenerData listener)
 {
-	enqueue([=] () {
+	enqueue([=, this] () {
 		engine->setListener(listener);
 	});
 }

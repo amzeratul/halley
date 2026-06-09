@@ -96,7 +96,7 @@ void DevConServerConnection::onReceiveMessage(DevCon::SetClientDataMsg& msg)
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 	: service(std::move(s))
 {
-	service->startListening([=] (NetworkService::Acceptor& a)
+	service->startListening([=, this] (NetworkService::Acceptor& a)
 	{
 		connections.push_back(std::make_shared<DevConServerConnection>(*this, connId++, a.accept()));
 		initConnection(*connections.back());

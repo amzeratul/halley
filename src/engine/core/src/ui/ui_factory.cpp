@@ -72,41 +72,41 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 		loadDefaultColourScheme();
 	}
 	
-	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); }, getBaseWidgetProperties());
-	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); }, getLabelProperties());
-	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); }, getButtonProperties());
-	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); }, getTextInputProperties());
-	addFactory("spinControl", [=] (const ConfigNode& node) { return makeSpinControl(node); }, getSpinControlProperties());
-	addFactory("spinControl2", [=] (const ConfigNode& node) { return makeSpinControl2(node); }, getSpinControl2Properties());
-	addFactory("list", [=] (const ConfigNode& node) { return makeList(node); }, getListProperties());
-	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); }, getDropdownProperties());
-	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); }, getCheckboxProperties());
-	addFactory("image", [=] (const ConfigNode& node) { return makeImage(node); }, getImageProperties());
-	addFactory("multiImage", [=](const ConfigNode& node) { return makeMultiImage(node); }, getMultiImageProperties());
-	addFactory("animation", [=] (const ConfigNode& node) { return makeAnimation(node); }, getAnimationProperties());
-	addFactory("scrollBar", [=] (const ConfigNode& node) { return makeScrollBar(node); }, getScrollBarProperties());
-	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); }, getScrollPaneProperties());
-	addFactory("scrollBarPane", [=] (const ConfigNode& node) { return makeScrollBarPane(node); }, getScrollBarPaneProperties());
-	addFactory("slider", [=] (const ConfigNode& node) { return makeSlider(node); }, getSliderProperties());
-	addFactory("horizontalDiv", [=] (const ConfigNode& node) { return makeHorizontalDiv(node); }, getHorizontalDivProperties());
-	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); }, getVerticalDivProperties());
-	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); }, getTabbedPaneProperties());
-	addFactory("pagedPane", [=] (const ConfigNode& node) { return makePagedPane(node); }, getPagedPaneProperties());
-	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); }, getFramedImageProperties());
-	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); }, getHybridListProperties());
-	addFactory("spinList", [=](const ConfigNode& node) { return makeSpinList(node); }, getSpinListProperties());
-	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); }, getOptionListMorpherProperties());
-	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); }, getTreeListProperties());
-	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); }, getDebugConsoleProperties());
-	addFactory("renderSurface", [=](const ConfigNode& node) { return makeRenderSurface(node); }, getRenderSurfaceProperties());
-	addFactory("customPaint", [=](const ConfigNode& node) { return makeCustomPaint(node); }, getCustomPaintProperties());
-	addFactory("resizeDivider", [=](const ConfigNode& node) { return makeResizeDivider(node); }, getResizeDividerProperties());
-	addFactory("scene3d", [=](const ConfigNode& node) { return makeScene3d(node); }, getScene3dProperties());
-	addFactory("placeholder", [=](const ConfigNode& node) { return makePlaceholder(node); }, getPlaceholderProperties());
+	addFactory("widget", [=, this] (const ConfigNode& node) { return makeBaseWidget(node); }, getBaseWidgetProperties());
+	addFactory("label", [=, this] (const ConfigNode& node) { return makeLabel(node); }, getLabelProperties());
+	addFactory("button", [=, this] (const ConfigNode& node) { return makeButton(node); }, getButtonProperties());
+	addFactory("textInput", [=, this] (const ConfigNode& node) { return makeTextInput(node); }, getTextInputProperties());
+	addFactory("spinControl", [=, this] (const ConfigNode& node) { return makeSpinControl(node); }, getSpinControlProperties());
+	addFactory("spinControl2", [=, this] (const ConfigNode& node) { return makeSpinControl2(node); }, getSpinControl2Properties());
+	addFactory("list", [=, this] (const ConfigNode& node) { return makeList(node); }, getListProperties());
+	addFactory("dropdown", [=, this] (const ConfigNode& node) { return makeDropdown(node); }, getDropdownProperties());
+	addFactory("checkbox", [=, this] (const ConfigNode& node) { return makeCheckbox(node); }, getCheckboxProperties());
+	addFactory("image", [=, this] (const ConfigNode& node) { return makeImage(node); }, getImageProperties());
+	addFactory("multiImage", [=, this](const ConfigNode& node) { return makeMultiImage(node); }, getMultiImageProperties());
+	addFactory("animation", [=, this] (const ConfigNode& node) { return makeAnimation(node); }, getAnimationProperties());
+	addFactory("scrollBar", [=, this] (const ConfigNode& node) { return makeScrollBar(node); }, getScrollBarProperties());
+	addFactory("scrollPane", [=, this] (const ConfigNode& node) { return makeScrollPane(node); }, getScrollPaneProperties());
+	addFactory("scrollBarPane", [=, this] (const ConfigNode& node) { return makeScrollBarPane(node); }, getScrollBarPaneProperties());
+	addFactory("slider", [=, this] (const ConfigNode& node) { return makeSlider(node); }, getSliderProperties());
+	addFactory("horizontalDiv", [=, this] (const ConfigNode& node) { return makeHorizontalDiv(node); }, getHorizontalDivProperties());
+	addFactory("verticalDiv", [=, this] (const ConfigNode& node) { return makeVerticalDiv(node); }, getVerticalDivProperties());
+	addFactory("tabbedPane", [=, this] (const ConfigNode& node) { return makeTabbedPane(node); }, getTabbedPaneProperties());
+	addFactory("pagedPane", [=, this] (const ConfigNode& node) { return makePagedPane(node); }, getPagedPaneProperties());
+	addFactory("framedImage", [=, this] (const ConfigNode& node) { return makeFramedImage(node); }, getFramedImageProperties());
+	addFactory("hybridList", [=, this] (const ConfigNode& node) { return makeHybridList(node); }, getHybridListProperties());
+	addFactory("spinList", [=, this](const ConfigNode& node) { return makeSpinList(node); }, getSpinListProperties());
+	addFactory("optionListMorpher", [=, this](const ConfigNode& node) { return makeOptionListMorpher(node); }, getOptionListMorpherProperties());
+	addFactory("treeList", [=, this](const ConfigNode& node) { return makeTreeList(node); }, getTreeListProperties());
+	addFactory("debugConsole", [=, this](const ConfigNode& node) { return makeDebugConsole(node); }, getDebugConsoleProperties());
+	addFactory("renderSurface", [=, this](const ConfigNode& node) { return makeRenderSurface(node); }, getRenderSurfaceProperties());
+	addFactory("customPaint", [=, this](const ConfigNode& node) { return makeCustomPaint(node); }, getCustomPaintProperties());
+	addFactory("resizeDivider", [=, this](const ConfigNode& node) { return makeResizeDivider(node); }, getResizeDividerProperties());
+	addFactory("scene3d", [=, this](const ConfigNode& node) { return makeScene3d(node); }, getScene3dProperties());
+	addFactory("placeholder", [=, this](const ConfigNode& node) { return makePlaceholder(node); }, getPlaceholderProperties());
 
-	addBehaviourFactory("slide", [=](const ConfigNode& node) { return makeSlideBehaviour(node); }, getSlideBehaviourProperties());
-	addBehaviourFactory("fade", [=](const ConfigNode& node) { return makeFadeBehaviour(node); }, getFadeBehaviourProperties());
-	addBehaviourFactory("fullscreen", [=](const ConfigNode& node) { return makeFullscreenBehaviour(node); }, getFullscreenBehaviourProperties());
+	addBehaviourFactory("slide", [=, this](const ConfigNode& node) { return makeSlideBehaviour(node); }, getSlideBehaviourProperties());
+	addBehaviourFactory("fade", [=, this](const ConfigNode& node) { return makeFadeBehaviour(node); }, getFadeBehaviourProperties());
+	addBehaviourFactory("fullscreen", [=, this](const ConfigNode& node) { return makeFullscreenBehaviour(node); }, getFullscreenBehaviourProperties());
 }
 
 UIFactory::~UIFactory()

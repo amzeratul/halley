@@ -19,7 +19,7 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 	sprite = style.getSprite("background");
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
-	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {
+	setHandle(UIEventType::SetHovered, [=, this] (const UIEvent& event) {
 		const auto hoveredChild = std::find_if(getChildren().begin(), getChildren().end(), [=](std::shared_ptr<UIWidget> child) { return child->getId() == event.getSourceId(); });
 		const auto childIdx = int(hoveredChild - getChildren().begin());
 

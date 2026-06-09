@@ -34,7 +34,7 @@ String GameConsole::onHelp(Vector<String> args)
 
 GameConsole::GameConsole()
 {
-	registerConsoleCommand("help", [=](Vector<String> args) -> String { return onHelp(std::move(args)); });
+	registerConsoleCommand("help", [=, this](Vector<String> args) -> String { return onHelp(std::move(args)); });
 }
 
 void GameConsole::sendMessage(const String& string)

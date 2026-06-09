@@ -210,7 +210,7 @@ private:
 
 	void initConsoleCommands(DevService& devService)
 	{
-		devService.getConsoleCommands().addCommand("audioLogEvents", [=] (Vector<String> args) -> String {
+		devService.getConsoleCommands().addCommand("audioLogEvents", [=, this] (Vector<String> args) -> String {
 			if (auto* audio = getAPI().audio) {
 				std::optional<String> prefix;
 				if (!args.empty()) {

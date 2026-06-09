@@ -18,22 +18,22 @@ UISpinControl::UISpinControl(String id, UIStyle style, float value)
 	UIWidget::add(textInput, 1);
 	UIWidget::add(rightButton, 0, Vector4f(), UISizerAlignFlags::Centre);
 
-	setHandle(UIEventType::ButtonClicked, id + "_left", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, id + "_left", [=, this] (const UIEvent& event)
 	{
 		setValue(getValue() - increment);
 	});
-	setHandle(UIEventType::ButtonClicked, id + "_right", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, id + "_right", [=, this] (const UIEvent& event)
 	{
 		setValue(getValue() + increment);
 	});
 
-	setHandle(UIEventType::FocusLost, id + "_textinput", [=] (const UIEvent& event)
+	setHandle(UIEventType::FocusLost, id + "_textinput", [=, this] (const UIEvent& event)
 	{
 		auto valueString = textInput->getText();
 		setValue(valueString.isEmpty() ? getValue() : valueString.toFloat());
 		refreshTextInput();
 	});
-	setHandle(UIEventType::TextSubmit, id + "_textinput", [=] (const UIEvent& event)
+	setHandle(UIEventType::TextSubmit, id + "_textinput", [=, this] (const UIEvent& event)
 	{
 		auto valueString = textInput->getText();
 		setValue(valueString.isEmpty() ? getValue() : valueString.toFloat());

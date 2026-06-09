@@ -31,22 +31,22 @@ void UIGoToPopup::onMakeUI()
 	getWidgetAs<UISpinControl2>("posX")->setValue(startValue.x);
 	getWidgetAs<UISpinControl2>("posY")->setValue(startValue.y);
 
-	setHandle(UIEventType::ButtonClicked, "ok", [=](const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "ok", [=, this](const UIEvent& event)
 	{
 		onOK();
 	});
 	
-	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "cancel", [=, this](const UIEvent& event)
 	{
 		onCancel();
 	});
 
-	setHandle(UIEventType::TextSubmit, "posX", [=](const UIEvent& event)
+	setHandle(UIEventType::TextSubmit, "posX", [=, this](const UIEvent& event)
 	{
 		onOK();
 	});
 
-	setHandle(UIEventType::TextSubmit, "posY", [=](const UIEvent& event)
+	setHandle(UIEventType::TextSubmit, "posY", [=, this](const UIEvent& event)
 	{
 		onOK();
 	});

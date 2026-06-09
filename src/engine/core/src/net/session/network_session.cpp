@@ -37,7 +37,7 @@ void NetworkSession::host(uint16_t maxClients)
 	this->maxClients = maxClients;
 	type = NetworkSessionType::Host;
 	sessionSharedData = makeSessionSharedData();
-	hostAddress = service.startListening([=](NetworkService::Acceptor& a) {
+	hostAddress = service.startListening([=, this](NetworkService::Acceptor& a) {
 		onConnection(a);
 	});
 

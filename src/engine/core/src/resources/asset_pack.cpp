@@ -136,7 +136,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 	size_t size = size_t(ps.at(1).toInteger());
 
 	if (stream) {
-		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
+		return std::make_unique<ResourceDataStream>(path, [=, this] () -> std::unique_ptr<ResourceDataReader> {
 			return std::make_unique<PackDataReader>(*this, pos, size);
 		});
 	} else {

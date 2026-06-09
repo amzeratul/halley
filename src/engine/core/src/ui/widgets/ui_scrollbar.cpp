@@ -29,7 +29,7 @@ UIScrollBar::UIScrollBar(String id, UIScrollDirection direction, UIStyle style, 
 		UIWidget::add(b1);
 	}
 
-	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, [=, this] (const UIEvent& event)
 	{
 		if (event.getSourceId() == "b0") {
 			scrollLines(-1);
@@ -38,7 +38,7 @@ UIScrollBar::UIScrollBar(String id, UIScrollDirection direction, UIStyle style, 
 		}
 	});
 
-	setHandle(UIEventType::Dragged, [=] (const UIEvent& event)
+	setHandle(UIEventType::Dragged, [=, this] (const UIEvent& event)
 	{
 		onScrollDrag(event.getVectorData() - bar->getPosition());
 	});

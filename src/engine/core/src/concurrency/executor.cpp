@@ -189,7 +189,7 @@ void Executor::stop()
 SingleThreadExecutor::SingleThreadExecutor(String name, MakeThread makeThread)
 	: executor(queue)
 {
-	thread = makeThread(std::move(name), [=] ()
+	thread = makeThread(std::move(name), [=, this] ()
 	{
 		executor.runForever();
 	});

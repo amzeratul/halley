@@ -144,7 +144,7 @@ UIDebugConsoleController::UIDebugConsoleController()
 {
 	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
 	
-	baseCommandSet->addCommand("help", [=](Vector<String>)
+	baseCommandSet->addCommand("help", [=, this](Vector<String>)
 	{
 		return runHelp();
 	});
@@ -154,7 +154,7 @@ UIDebugConsoleController::UIDebugConsoleController(Resources& resources, const H
 {
 	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
 	
-	baseCommandSet->addCommand("help", [=](Vector<String>)
+	baseCommandSet->addCommand("help", [=, this](Vector<String>)
 	{
 		return runHelp();
 	});
@@ -472,7 +472,7 @@ void UIDebugConsole::setup()
 	add(factory.makeUI("halley/debug_console"), 1);
 
 	inputField = getWidgetAs<UITextInput>("input");
-	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> Future<Vector<StringUTF32>>
+	inputField->setAutoCompleteHandle([=, this] (const StringUTF32& str) -> Future<Vector<StringUTF32>>
 	{
 		if (controller) {
 			return controller->getAutoComplete(str);
@@ -481,15 +481,15 @@ void UIDebugConsole::setup()
 		}
 	});
 
-	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "ok", [=, this] (const UIEvent& event)
 	{
 		getWidgetAs<UITextInput>("input")->submit();
 	});
 	
-	setHandle(UIEventType::TextSubmit, "input", [=] (const UIEvent& event)
+	setHandle(UIEventType::TextSubmit, "input", [=, this] (const UIEvent& event)
 	{
 		auto cmd = event.getStringData();
-		Concurrent::execute(Executors::getMainUpdateThread(), [=]() {
+		Concurrent::execute(Executors::getMainUpdateThread(), [=, this]() {
 			if (controller) {
 				runCommand(cmd);
 			}
@@ -509,7 +509,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	args.erase(args.begin());
 	std_ex::erase_if(args, [](const auto& arg) {return arg.isEmpty();});
 	
-	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainUpdateThread(), [=] (UIDebugConsoleResponse result) {
+	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainUpdateThread(), [=, this] (UIDebugConsoleResponse result) {
 		if (!result.getResponse().isEmpty()) {
 			addLine(result.getResponse(), result.hasError() ? errorResponseColour : responseColour);
 		}

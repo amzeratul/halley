@@ -72,7 +72,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	std::cout << ConsoleColour(Console::GREEN) << "Halley v" << getHalleyVersion().toString() << " is initializing..." << ConsoleColour() << std::endl;
 
 	// Debugging initialization
-	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=] (std::string_view error) {
+	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=, this] (std::string_view error) {
 		onTerminatedInError(error);
 	});
 
@@ -458,7 +458,7 @@ void Core::tickFrame(Time time)
 	
 	if (multithreaded) {
 		if (!updateThread) {
-			updateThread = std::make_unique<SingleThreadExecutor>("update", [=] (String name, std::function<void()> run)
+			updateThread = std::make_unique<SingleThreadExecutor>("update", [=, this] (String name, std::function<void()> run)
 			{
 				return api->system->createThread(name, ThreadPriority::High, run);
 			});

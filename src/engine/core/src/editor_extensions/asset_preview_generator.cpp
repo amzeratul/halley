@@ -103,7 +103,7 @@ AssetPreviewData AssetPreviewGenerator::makeSpritePreviewData(AssetType assetTyp
 
 Future<AssetPreviewData> AssetPreviewGenerator::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)
 {
-	return Concurrent::execute(renderQueue, [=] () -> AssetPreviewData
+	return Concurrent::execute(renderQueue, [=, this] () -> AssetPreviewData
 	{
 		return makeSpritePreviewData(assetType, id, size, *curRC);
 	});

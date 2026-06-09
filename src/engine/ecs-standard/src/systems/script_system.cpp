@@ -507,12 +507,12 @@ private:
 
 	void addConsoleCommands()
 	{
-		auto getScripts = UIDebugConsoleSyntax::Callback([=] () -> Vector<String>
+		auto getScripts = UIDebugConsoleSyntax::Callback([=, this] () -> Vector<String>
 		{
 			return getResources().enumerate<ScriptGraph>();
 		});
 
-		getDevService().getConsoleCommands().addCommand("scriptRun", [=] (Vector<String> args) -> String
+		getDevService().getConsoleCommands().addCommand("scriptRun", [=, this] (Vector<String> args) -> String
 		{
 			if (!args.empty() && args.size() <= 2) {
 				if (!getResources().exists<ScriptGraph>(args[0])) {
@@ -525,7 +525,7 @@ private:
 			return "Usage: scriptRun <scriptName> [tag=player]";
 		}, { { { "scriptId", getScripts } } });
 
-		getDevService().getConsoleCommands().addCommand("eval", [=] (Vector<String> args) -> String
+		getDevService().getConsoleCommands().addCommand("eval", [=, this] (Vector<String> args) -> String
 		{
 			try {
 				return getScriptingService().evaluateExpression(String::concatList(args, " ")).asString("null");

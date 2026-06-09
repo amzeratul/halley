@@ -94,7 +94,7 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& a
 	auto path = (basePath / assetDb->getDatabase(type).get(asset).path).string();
 
 	if (stream) {
-		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
+		return std::make_unique<ResourceDataStream>(path, [=, this] () -> std::unique_ptr<ResourceDataReader> {
 			return system.getDataReader(path);
 		});
 	} else if (cache) {

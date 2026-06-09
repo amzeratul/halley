@@ -108,7 +108,7 @@ void UIImage::setLocalClip(std::optional<Rect4f> c)
 
 void UIImage::setSelectable(Colour4f normalColour, Colour4f selColour)
 {
-	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetSelected, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			sprite.setColour(selColour);
@@ -122,7 +122,7 @@ void UIImage::setSelectable(Colour4f normalColour, Colour4f selColour)
 
 void UIImage::setSelectable(Sprite normalSprite, Sprite selectedSprite)
 {
-	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetSelected, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			sprite = selectedSprite;
@@ -137,7 +137,7 @@ void UIImage::setSelectable(Sprite normalSprite, Sprite selectedSprite)
 
 void UIImage::setDisablable(Colour4f normalColour, Colour4f disabledColour)
 {
-	setHandle(UIEventType::SetEnabled, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetEnabled, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			sprite.setColour(normalColour);
@@ -151,7 +151,7 @@ void UIImage::setDisablable(Colour4f normalColour, Colour4f disabledColour)
 
 void UIImage::setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour, Colour4f selColour)
 {
-	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetSelected, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			sprite.setColour(selColour);
@@ -162,7 +162,7 @@ void UIImage::setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour
 		sendEventDown(event, false);
 	});
 
-	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetHovered, [=, this] (const UIEvent& event)
 	{
 		const bool hovered = event.getBoolData();
 		const bool selected = event.getBoolData2();
@@ -239,7 +239,7 @@ void UIImageVisibleBehaviour::setParentVisible(bool curVisible)
 
 void UIImage::setHoverable(Colour4f normalColour, Colour4f selColour)
 {
-	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetHovered, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			sprite.setColour(selColour);
@@ -253,7 +253,7 @@ void UIImage::setHoverable(Colour4f normalColour, Colour4f selColour)
 
 void UIImage::setHoverable(Sprite normalSprite, Sprite selectedSprite)
 {
-	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetHovered, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			sprite = selectedSprite;

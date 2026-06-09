@@ -109,7 +109,7 @@ private:
 			modesToCapture.insert(pc.mode);
 		}
 		for (const auto& mode: modesToCapture) {
-			renderGraph.setImageOutputCallback(toString(mode), [=] (Image& image) { onImageCaptured(mode, image); });
+			renderGraph.setImageOutputCallback(toString(mode), [=, this] (Image& image) { onImageCaptured(mode, image); });
 		}
 	}
 
@@ -223,7 +223,7 @@ private:
 
 	void setupCheats()
 	{
-		getDevService().getConsoleCommands().addCommand("renderOutput", [=] (const Vector<String>& args) -> String
+		getDevService().getConsoleCommands().addCommand("renderOutput", [=, this] (const Vector<String>& args) -> String
 		{
 			if (args.size() == 1) {
 				const bool success = setRenderNode(args.at(0));

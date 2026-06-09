@@ -328,7 +328,7 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 	}
 
 	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
-	getTargetRenderContext(rc).with(camera).bind([=] (Painter& painter)
+	getTargetRenderContext(rc).with(camera).bind([=, this] (Painter& painter)
 	{
 		painter.pushDebugGroup(id);
 		if (colourClear || depthClear || stencilClear) {
@@ -350,7 +350,7 @@ void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, cons
 	if (srcTexture) {
 		auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
 		if (img) {
-			getTargetRenderContext(rc).bind([=] (Painter& painter)
+			getTargetRenderContext(rc).bind([=, this] (Painter& painter)
 			{
 				painter.pushDebugGroup(id);
 				srcTexture->copyToImage(painter, *img);
@@ -363,7 +363,7 @@ void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, cons
 
 void RenderGraphNode::renderNodeBlitTexture(std::shared_ptr<const Texture> texture, const RenderContext& rc)
 {
-	getTargetRenderContext(rc).bind([=] (Painter& painter)
+	getTargetRenderContext(rc).bind([=, this] (Painter& painter)
 	{
 		painter.pushDebugGroup(id);
 		painter.blitTexture(texture);
@@ -440,7 +440,7 @@ void RenderGraphNode::disconnectInput(uint8_t inputPin)
 	for (auto& other : pin.others) {
 		auto* otherNode = other.node;
 		auto& outputPin = otherNode->outputPins.at(other.otherId);
-		std_ex::erase_if(outputPin.others, [=](const OtherPin& o) { return o.node == this; });
+		std_ex::erase_if(outputPin.others, [=, this](const OtherPin& o) { return o.node == this; });
 	}
 	pin.others = {};
 }

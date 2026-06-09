@@ -506,7 +506,7 @@ void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPee
 
 	SystemMessageCallback callback;
 	if (msg.wantsResponse) {
-		callback = [=](std::byte*, Bytes serializedData)
+		callback = [=, this](std::byte*, Bytes serializedData)
 		{
 			sendToPeer(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
 		};

@@ -191,7 +191,7 @@ void InspectorServer::setListening(bool listening)
 		}
 
 		if (listening) {
-			interestHandle = connection->getParent().registerInterest("inspector", ConfigNode(params), [=](size_t idx, ConfigNode result)
+			interestHandle = connection->getParent().registerInterest("inspector", ConfigNode(params), [=, this](size_t idx, ConfigNode result)
 			{
 				onData(std::move(result));
 			}, connection->getId());

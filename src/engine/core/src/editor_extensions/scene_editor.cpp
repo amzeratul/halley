@@ -594,7 +594,7 @@ void SceneEditor::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> en
 		selectedEntityIds[i] = getWorld().findEntity(uuids[i]).value_or(EntityRef()).getEntityId();
 	}
 
-	auto selectedEntities = std_ex::transform(selectedEntityIds, [=] (EntityId id) { return getWorld().getEntity(id); });
+	auto selectedEntities = std_ex::transform(selectedEntityIds, [=, this] (EntityId id) { return getWorld().getEntity(id); });
 	gizmoCollection->setSelectedEntities(std::move(selectedEntities), std::move(entityDatas));
 
 	onEntitiesSelected(selectedEntityIds);

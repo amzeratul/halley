@@ -7,7 +7,7 @@ public:
 	void init()
 	{
 		updateSession();
-		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (SessionService::ChangeData session) {
+		sessionChangeToken = getSessionService().addSessionChangeCallback([=, this] (SessionService::ChangeData session) {
 			updateSession();
 		});
 
@@ -66,7 +66,7 @@ private:
 			return { "best", "average", "bad", "veryBad" };
 		});
 		
-		consoleCommands.addCommand("networkQuality", [=](Vector<String> args) -> String
+		consoleCommands.addCommand("networkQuality", [=, this](Vector<String> args) -> String
 		{
 			const auto level = fromString<NetworkService::Quality>(args[0]);
 			getSessionService().getMultiplayerSession().setNetworkQuality(level);

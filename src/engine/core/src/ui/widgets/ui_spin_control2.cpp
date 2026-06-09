@@ -18,11 +18,11 @@ UISpinControl2::UISpinControl2(String id, UIStyle style, float value, bool allow
 	sizer->add(downButton, 1);
 	UIWidget::add(std::move(sizer), 0, Vector4f(0, -1, -5, -2), UISizerAlignFlags::Right);
 
-	setHandle(UIEventType::ButtonClicked, id + "_down", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, id + "_down", [=, this] (const UIEvent& event)
 	{
 		setValue(getValue() - increment);
 	});
-	setHandle(UIEventType::ButtonClicked, id + "_up", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, id + "_up", [=, this] (const UIEvent& event)
 	{
 		setValue(getValue() + increment);
 	});

@@ -8,7 +8,7 @@ public:
 	void init()
 	{
 		setupSession();
-		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (SessionService::ChangeData data) {
+		sessionChangeToken = getSessionService().addSessionChangeCallback([=, this] (SessionService::ChangeData data) {
 			setupSession();
 		});
 	}

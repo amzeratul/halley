@@ -229,7 +229,7 @@ std::optional<int> Game::getCurrentDisplay() const
 
 UIDebugConsoleCommands& Game::initBaseCommands()
 {
-	baseCommands.addCommand("displayRes", [=] (Vector<String> args) -> String {
+	baseCommands.addCommand("displayRes", [=, this] (Vector<String> args) -> String {
 		const auto idx = args[0].toInteger();
 		const auto res = Vector2i(args[1].toInteger(), args[2].toInteger());
 		const auto refresh = args[3].toInteger();

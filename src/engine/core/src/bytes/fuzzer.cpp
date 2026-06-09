@@ -46,33 +46,33 @@ FuzzerResults Fuzzer::runTrial(int n) const
 
 void Fuzzer::setupMutators()
 {
-	mutators.emplace_back([=] (Bytes& data)
+	mutators.emplace_back([=, this] (Bytes& data)
 	{
 		// Set random element to zero
 		rng.getRandomElement(data) = 0;
 	});
-	mutators.emplace_back([=] (Bytes& data)
+	mutators.emplace_back([=, this] (Bytes& data)
 	{
 		// Set random element to 0xFF
 		rng.getRandomElement(data) = 0xFF;
 	});
-	mutators.emplace_back([=] (Bytes& data)
+	mutators.emplace_back([=, this] (Bytes& data)
 	{
 		// Flip bits in random element
 		auto& e = rng.getRandomElement(data);
 		e = ~e;
 	});
-	mutators.emplace_back([=] (Bytes& data)
+	mutators.emplace_back([=, this] (Bytes& data)
 	{
 		// Delete random element
 		data.erase(data.begin() + rng.getRandomIndex(data));
 	});
-	mutators.emplace_back([=] (Bytes& data)
+	mutators.emplace_back([=, this] (Bytes& data)
 	{
 		// Insert zero
 		data.insert(data.begin() + rng.getRandomIndex(data), 0);
 	});
-	mutators.emplace_back([=] (Bytes& data)
+	mutators.emplace_back([=, this] (Bytes& data)
 	{
 		// Insert random
 		data.insert(data.begin() + rng.getRandomIndex(data), static_cast<unsigned char>(rng.getInt(0, 0xFF)));

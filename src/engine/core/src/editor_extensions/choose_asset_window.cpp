@@ -89,32 +89,32 @@ void ChooseAssetWindow::onMakeUI()
 
 	getWidgetAs<UITextInput>("search")->setCapturePageUpDown(false);
 
-	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "ok", [=, this] (const UIEvent& event)
 	{
 		accept();
 	});
 
-	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "cancel", [=, this](const UIEvent& event)
 	{
 		cancel();
 	});
 
-	setHandle(UIEventType::TextChanged, "search", [=](const UIEvent& event)
+	setHandle(UIEventType::TextChanged, "search", [=, this](const UIEvent& event)
 	{
 		setUserFilter(event.getStringData());
 	});
 
-	setHandle(UIEventType::TextSubmit, "search", [=](const UIEvent& event)
+	setHandle(UIEventType::TextSubmit, "search", [=, this](const UIEvent& event)
 	{
 		accept();
 	});
 
-	setHandle(UIEventType::ListAccept, "options", [=](const UIEvent& event)
+	setHandle(UIEventType::ListAccept, "options", [=, this](const UIEvent& event)
 	{
 		accept();
 	});
 
-	setHandle(UIEventType::ListSelectionChanged, "options", [=] (const UIEvent& event)
+	setHandle(UIEventType::ListSelectionChanged, "options", [=, this] (const UIEvent& event)
 	{
 		if (entries[curEntry].highlightCallback) {
 			entries[curEntry].highlightCallback(event.getStringData());
@@ -384,12 +384,12 @@ void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, 
 		auto item = tabs->addTextIconItem(filter.id, filter.showName ? filter.name : LocalisedString(), filter.icon, -1, {}, UISizerAlignFlags::Centre, filter.name);
 	}
 
-	bindData("tabs", defaultOption, [=] (const String& id)
+	bindData("tabs", defaultOption, [=, this] (const String& id)
 	{
 		setCategoryFilter(id);
 	});
 
-	bindData("options", "", [=](const String& id)
+	bindData("options", "", [=, this](const String& id)
 	{
 		onOptionSelected(id);
 	});

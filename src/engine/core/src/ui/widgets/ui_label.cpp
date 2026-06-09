@@ -215,7 +215,7 @@ void UILabel::setTextAndColours(std::pair<LocalisedString, Vector<ColourOverride
 void UILabel::setFutureText(Future<String> futureText)
 {
 	const auto flag = aliveFlag;
-	futureText.then(Executors::getMainUpdateThread(), [=] (const String& filtered)
+	futureText.then(Executors::getMainUpdateThread(), [=, this] (const String& filtered)
 	{
 		if (*flag) {
 			setText(LocalisedString::fromUserString(filtered));
@@ -320,7 +320,7 @@ void UILabel::setColour(Colour4f colour)
 
 void UILabel::setSelectable(TextRenderer normalRenderer, TextRenderer selectedRenderer, bool preserveAlpha)
 {
-	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetSelected, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			auto col = selectedRenderer.getColour();
@@ -372,7 +372,7 @@ void UILabel::setSelectable(TextRenderer selectedRenderer)
 
 void UILabel::setDisablable(TextRenderer normalRenderer, TextRenderer disabledRenderer)
 {
-	setHandle(UIEventType::SetEnabled, [=] (const UIEvent& event)
+	setHandle(UIEventType::SetEnabled, [=, this] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			setColour(normalRenderer.getColour());
@@ -389,7 +389,7 @@ void UILabel::setDisablable(TextRenderer normalRenderer, TextRenderer disabledRe
 
 void UILabel::setHoverable(TextRenderer normalRenderer, TextRenderer hoveredRenderer)
 {
-	setHandle(UIEventType::SetHovered, [=](const UIEvent& event)
+	setHandle(UIEventType::SetHovered, [=, this](const UIEvent& event)
 	{
 		if (event.getBoolData()) {
 			setColour(hoveredRenderer.getColour());

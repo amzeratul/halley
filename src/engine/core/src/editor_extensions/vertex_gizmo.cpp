@@ -15,7 +15,7 @@ VertexGizmo::VertexGizmo(SnapRules snapRules, String componentName, String field
 	, componentName(std::move(componentName))
 	, fieldName(std::move(fieldName))
 {
-	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
+	handle.setBoundsCheck([=, this] (Vector2f myPos, Vector2f mousePos) -> bool
 	{
 		return getMainHandle().contains(mousePos);
 	});

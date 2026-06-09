@@ -41,7 +41,7 @@ void UIConfirmationPopup::onMakeUI()
 		getWidget(toString(button))->setActive(std_ex::contains(buttons, button));
 	}
 
-	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, [=, this] (const UIEvent& event)
 	{
 		const auto button = fromString<ButtonType>(event.getSourceId());
 		callback(button);

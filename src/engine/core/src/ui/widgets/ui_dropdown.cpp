@@ -360,18 +360,18 @@ void UIDropdown::open()
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
 		addChild(dropdownWindow);
 
-		dropdownList->setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
+		dropdownList->setHandle(UIEventType::ListAccept, [=, this] (const UIEvent& event)
 		{
 			setSelectedOption(event.getIntData());
 			close();
 		});
 
-		dropdownList->setHandle(UIEventType::ListCancel, [=] (const UIEvent& event)
+		dropdownList->setHandle(UIEventType::ListCancel, [=, this] (const UIEvent& event)
 		{
 			close();
 		});
 
-		dropdownList->setHandle(UIEventType::ListHoveredChanged, [=] (const UIEvent& event)
+		dropdownList->setHandle(UIEventType::ListHoveredChanged, [=, this] (const UIEvent& event)
 		{
 			const int idx = event.getIntData();
 			const auto clampedIdx = clamp(idx, 0, static_cast<int>(options.size()) - 1);

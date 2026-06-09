@@ -110,7 +110,7 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 		return Future<ConfigNode>::makeImmediate(ConfigNode(std::move(data)));
 	});
 
-	setRPCHandle("pushSave", [=] (ConfigNode params) -> Future<ConfigNode> {
+	setRPCHandle("pushSave", [=, this] (ConfigNode params) -> Future<ConfigNode> {
 		const auto name = params["name"].asString();
 		const auto data = params["data"].asBytes();
 
@@ -226,7 +226,7 @@ void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 void DevConClient::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	if (interest->hasInterest("profiler")) {
-		Concurrent::execute([=] ()
+		Concurrent::execute([=, this] ()
 		{
 			auto bytes = Serializer::toBytes(*data, SerializerOptions(SerializerOptions::maxVersion));
 			interest->notifyInterest("profiler", 0, ConfigNode(std::move(bytes)));

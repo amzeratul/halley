@@ -343,13 +343,13 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 	
 	updateUI();
 
-	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
+	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=, this] (const UIEvent& event)
 	{
 		// Calling setMode() here directly can result in two events being sent in the same frame, resulting in an infinite ping-pong
 		requestSetMode(fromString<PolygonGizmoMode>(event.getStringData()));
 	});
 
-	ui->setHandle(UIEventType::ButtonClicked, "addComponent", [=] (const UIEvent& event)
+	ui->setHandle(UIEventType::ButtonClicked, "addComponent", [=, this] (const UIEvent& event)
 	{
 		sceneEditorWindow.addComponentToCurrentEntity(componentName);
 		loadEntity(PolygonGizmoMode::Append);
