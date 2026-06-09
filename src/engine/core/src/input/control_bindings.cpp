@@ -5,6 +5,7 @@
 #include "halley/input/input_virtual.h"
 #include "halley/utils/algorithm.h"
 #include "halley/input/input_keyboard.h"
+#include "halley/utils/hash.h"
 
 using namespace Halley;
 
@@ -89,8 +90,7 @@ void ControlBindings::resetToDefaults()
 	if (!userBindings.empty()) {
 		userBindings.clear();
 
-		modified = true;
-		++version;
+		markModified();
 		resolve(true);
 	}
 }
@@ -104,8 +104,7 @@ void ControlBindings::resetToDefaults(gsl::span<int> slots)
 	}
 
 	if (mod) {
-		modified = true;
-		++version;
+		markModified();
 		resolve(true);
 	}
 }
@@ -188,71 +187,44 @@ void ControlBindings::clearRedundantBindings()
 
 	if (!toErase.empty()) {
 		std_ex::erase_if_key(userBindings, [&] (const String& key) { return toErase.contains(key); });
-		modified = true;
-		++version;
+		markModified();
 	}
 }
 
 bool ControlBindings::bindKeyboard(std::string_view bindingId, size_t slot, KeyCode code)
 {
-	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bind(code)) {
-			clearRedundantBindings();
-			modified = true;
-			++version;
-			return true;
-		}
-	}
-	return false;
+	return bind(bindingId, slot, ControlBinding(code));
 }
 
 bool ControlBindings::bindGamepadButton(std::string_view bindingId, size_t slot, JoystickButtonPosition button)
 {
-	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bind(button)) {
-			clearRedundantBindings();
-			modified = true;
-			++version;
-			return true;
-		}
-	}
-	return false;
+	return bind(bindingId, slot, ControlBinding(button));
 }
 
 bool ControlBindings::bindGamepadAxis(std::string_view bindingId, size_t slot, JoystickAxisPosition axis, JoystickAxisDirection dir)
 {
-	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bind(axis, dir)) {
-			clearRedundantBindings();
-			modified = true;
-			++version;
-			return true;
-		}
-	}
-	return false;
+	return bind(bindingId, slot, ControlBinding(axis, dir));
 }
 
 bool ControlBindings::bindMouseButton(std::string_view bindingId, size_t slot, MouseButton button)
 {
-	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
-		if (binding->bind(button)) {
-			clearRedundantBindings();
-			modified = true;
-			++version;
-			return true;
-		}
-	}
-	return false;
+	return bind(bindingId, slot, ControlBinding(button));
 }
 
 bool ControlBindings::bind(std::string_view bindingId, size_t slot, ControlBinding newBinding)
 {
+	for (const auto& binding: getBindings(bindingId)) {
+		if (binding == newBinding) {
+			// Binding already assigned
+			return false;
+		}
+	}
+
 	if (auto* binding = tryGetUserBinding(bindingId, slot)) {
 		if (*binding != newBinding) {
-			*binding = newBinding;
+			*binding = std::move(newBinding);
 			clearRedundantBindings();
-			modified = true;
-			++version;
+			markModified();
 			return true;
 		}
 	}
@@ -269,12 +241,16 @@ bool ControlBindings::unbind(std::string_view bindingId, size_t slot)
 		clearRedundantBindings();
 
 		if (changed || prevType == ControlBindingType::None) {
-			modified = true;
-			++version;
+			markModified();
 			return true;
 		}
 	}
 	return false;
+}
+
+void ControlBindings::resolve()
+{
+	resolve(resolvedBindings.empty());
 }
 
 const Vector<ControlBinding>& ControlBindings::getBindings(std::string_view bindingId) const
@@ -330,6 +306,21 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 uint32_t ControlBindings::getVersion() const
 {
 	return version;
+}
+
+uint64_t ControlBindings::getHash() const
+{
+	if (hashVersion != version) {
+		Hash::Hasher hasher;
+		for (const auto& [k, v]: userBindings) {
+			hasher.feed(k);
+			v.feedToHash(hasher);
+		}
+		hash = hasher.digest();
+		hashVersion = version;
+	}
+
+	return hash;
 }
 
 void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& device, KeyCode keyCode, KeyMods mods, const ControlBindingConfig& bindingConfig, AxisPendingState& pendingState) const
@@ -615,4 +606,10 @@ Vector<ControlBindings::ErrorInfo> ControlBindings::resolveErrors() const
 	}
 
 	return result;
+}
+
+void ControlBindings::markModified()
+{
+	modified = true;
+	++version;
 }

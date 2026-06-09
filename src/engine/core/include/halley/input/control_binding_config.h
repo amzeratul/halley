@@ -79,6 +79,7 @@ namespace Halley {
 		bool operator!=(const ControlBinding& other) const = default;
 
 		uint64_t getHash() const;
+		void feedToHash(Hash::Hasher& hasher) const;
 
 	private:
 		ControlBindingType bindingType = ControlBindingType::None;

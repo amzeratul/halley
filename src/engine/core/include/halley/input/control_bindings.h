@@ -49,8 +49,10 @@ namespace Halley {
 		const Vector<ControlBinding>& getBindings(std::string_view bindingId) const;
 		const Vector<ErrorInfo>& getErrors() const;
 
+		void resolve();
 		void apply(InputVirtual& dst, const IControlBindingMapper& mapper, const std::shared_ptr<InputDevice>& mouse, const std::shared_ptr<InputDevice>& keyboard, const Vector<std::shared_ptr<InputDevice>>& gamepads) const;
 		uint32_t getVersion() const;
+		uint64_t getHash() const;
 
 		static std::optional<ControlBinding> scanForPress(const InputAPI& api, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes, bool allowChords);
 		static std::optional<ControlBinding> scanForPress(const InputDevice& device, const ControlBindingConfig& config, gsl::span<const InputType> acceptedInputTypes, bool allowChords);
@@ -85,6 +87,8 @@ namespace Halley {
 		mutable HashMap<String, Vector<ControlBinding>> resolvedBindings;
 		mutable bool modified = false;
 		uint32_t version = 0;
+		mutable uint32_t hashVersion = std::numeric_limits<uint32_t>::max();
+		mutable uint64_t hash;
 
 		mutable Vector<ErrorInfo> conflicts;
 
@@ -105,5 +109,7 @@ namespace Halley {
 		static std::optional<ControlBinding> scanForPressGamepad(const InputDevice& gamepad, bool button, bool axis, bool allowChords);
 
 		Vector<ErrorInfo> resolveErrors() const;
+
+		void markModified();
 	};
 }

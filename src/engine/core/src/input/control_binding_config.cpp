@@ -1,5 +1,7 @@
 #include "halley/input/control_binding_config.h"
 
+#include "halley/utils/hash.h"
+
 using namespace Halley;
 
 std::pair<String, JoystickAxisDirection> ControlBinding::parseAxis(std::string_view axisName)
@@ -310,6 +312,11 @@ uint64_t ControlBinding::getHash() const
 	}
 
 	return result;
+}
+
+void ControlBinding::feedToHash(Hash::Hasher& hasher) const
+{
+	hasher.feed(getHash());
 }
 
 ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
