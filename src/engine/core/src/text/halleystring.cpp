@@ -317,29 +317,24 @@ bool String::contains(std::u8string_view string, bool caseSensitive, bool paramI
 
 String String::left(size_t n) const
 {
-	return String(str.substr(0,n));
+	return String(str.substr(0, n));
 }
 
 String String::right(size_t n) const
 {
 	size_t len = size();
-	return String(str.substr(len-n,n));
+	return String(str.substr(len - n, n));
 }
 
-String String::mid(size_t start,size_t count) const
+String String::mid(size_t start, size_t count) const
 {
-	return String(str.substr(start,count));
+	return String(str.substr(start, count));
 }
 
 bool String::startsWith(std::string_view string, bool caseSensitive) const
 {
 	if (caseSensitive) {
-		const size_t strSize = string.size();
-		const size_t sz = size();
-		if (sz < strSize) {
-			return false;
-		}
-		return str.compare(0, strSize, string) == 0;
+		return std::string_view(str).starts_with(string);
 	} else {
 		return asciiLower().startsWith(String(string).asciiLower(), true);
 	}
@@ -364,12 +359,7 @@ bool String::startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive
 bool String::endsWith(std::string_view string, bool caseSensitive) const
 {
 	if (caseSensitive) {
-		const size_t strSize = string.size();
-		const size_t sz = size();
-		if (sz < strSize) {
-			return false;
-		}
-		return str.compare(sz - strSize, strSize, string) == 0;
+		return std::string_view(str).ends_with(string);
 	} else {
 		return asciiLower().endsWith(String(string).asciiLower(), true);
 	}
@@ -598,42 +588,42 @@ String& String::operator += (const Character &p)
 
 bool String::operator==(const char* rhp) const
 {
-	return str == rhp;
+	return std::string_view(str) == rhp;
 }
 
 bool String::operator==(const char8_t* rhp) const
 {
-	return str == rhp;
+	return std::string_view(str) == rhp;
 }
 
 bool String::operator==(std::string_view rhp) const
 {
-	return str == rhp;
+	return std::string_view(str) == rhp;
 }
 
 bool String::operator==(std::u8string_view rhp) const
 {
-	return str == toStringView(rhp);
+	return std::string_view(str) == toStringView(rhp);
 }
 
 bool String::operator!=(const char* rhp) const
 {
-	return str != rhp;
+	return std::string_view(str) != rhp;
 }
 
 bool String::operator!=(const char8_t* rhp) const
 {
-	return str != rhp;
+	return std::string_view(str) != rhp;
 }
 
 bool String::operator!=(std::string_view rhp) const
 {
-	return str != rhp;
+	return std::string_view(str) != rhp;
 }
 
 bool String::operator!=(std::u8string_view rhp) const
 {
-	return str != toStringView(rhp);
+	return std::string_view(str) != toStringView(rhp);
 }
 
 void operator <<(double &p1, String &p2)
