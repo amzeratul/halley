@@ -331,15 +331,17 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 
 Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 {
-	HalleyAssertDev(m != nullptr);
+	if (material != m) {
+		HalleyAssertDev(m != nullptr);
 
-	const bool hadMaterial = static_cast<bool>(material);
-	material = std::move(m);
-	rotateable = !material->getDefinition().hasTag("no_rotate");
+		const bool hadMaterial = static_cast<bool>(material);
+		material = std::move(m);
+		rotateable = !material->getDefinition().hasTag("no_rotate");
 
-	if (!hadMaterial && material->getNumTextureUnits() > 0) {
-		if (const auto& tex0 = material->getRawTexture(0)) {
-			setImageData(*tex0);
+		if (!hadMaterial && material->getNumTextureUnits() > 0) {
+			if (const auto& tex0 = material->getRawTexture(0)) {
+				setImageData(*tex0);
+			}
 		}
 	}
 
