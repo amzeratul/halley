@@ -58,6 +58,7 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 
 	auto& states = lastStates;
 	for (auto& [k, v]: states) {
+		v.curMemoryUsage = 0;
 		v.states.clear();
 	}
 	updateResourcesAndCollectStates(t, collection, states);

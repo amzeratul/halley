@@ -26,14 +26,14 @@ namespace Halley {
             bool markAsLoading = false;
             bool markAsUnloading = false;
 			ResourceDesiredLoadState desiredState = ResourceDesiredLoadState::Load;
-            size_t memoryUsage;
+            size_t memoryUsage = 0;
             Time timeSinceUse = 0;
 
             bool operator<(const LoadStateInfo& other) const;
 		};
 
         struct StateCollection {
-            size_t curMemoryUsage;
+            size_t curMemoryUsage = 0;
 	        Vector<LoadStateInfo> states;
 
             void sort();
