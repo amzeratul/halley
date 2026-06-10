@@ -632,6 +632,9 @@ namespace Halley {
 
 		bool hasEntityIdInAncestors(EntityId parentId) const
 		{
+			if (!parentId.isValid()) {
+				return false;
+			}
 			validate();
 			for (auto parent = getParent(); parent.isValid(); parent = parent.getParent()) {
 				if (parent.getEntityId() == parentId) {
