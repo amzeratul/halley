@@ -56,7 +56,10 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 
 	const bool verbose = false;
 
-	HashMap<ResourceDesiredLoadState, StateCollection> states;
+	auto& states = lastStates;
+	for (auto& [k, v]: states) {
+		v.states.clear();
+	}
 	updateResourcesAndCollectStates(t, collection, states);
 	
 	size_t startMemoryUsage = 0;
