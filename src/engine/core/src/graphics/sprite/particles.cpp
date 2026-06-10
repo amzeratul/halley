@@ -516,7 +516,7 @@ void Particles::initializeParticle(size_t index, float time, float totalTime, Ve
 		auto& anim = animationPlayers[index];
 		anim.update(0, sprite);
 		if (randomiseAnimationTime) {
-			anim.update(Random::getGlobal().getFloat({0.0f, 42.0f}), sprite);
+			anim.update(rng->getFloat({0.0f, 42.0f}), sprite);
 		}
 	} else if (!baseSprites.empty()) {
 		// Optimization: if there's only one baseSprite, and this sprite has a material, then we don't need to update it at all here
