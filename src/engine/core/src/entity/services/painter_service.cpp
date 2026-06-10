@@ -107,6 +107,7 @@ void PainterService::setRenderGraph(std::unique_ptr<RenderGraph> renderGraph)
 
 RenderGraph& PainterService::getRenderGraph()
 {
+	HalleyAssertDev(renderGraph);
 	return *renderGraph;
 }
 
