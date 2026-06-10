@@ -216,7 +216,9 @@ double LuaStackOps::popDouble()
 
 String LuaStackOps::popString()
 {
-	String value = lua_tostring(state.getRawState(), -1);
+	size_t len;
+	const char* str = lua_tolstring(state.getRawState(), -1, &len);
+	auto value = String(std::string_view(str, len));
 	pop();
 	return value;
 }
