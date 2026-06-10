@@ -175,7 +175,11 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		int getAddress(int pass, ShaderType stage) const;
+		int getAddress(int pass, ShaderType stage) const
+		{
+			constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+			return addresses[pass * shaderStageCount + static_cast<int>(stage)];
+		}
 	};
 
 	class MaterialAttribute
@@ -214,7 +218,11 @@ namespace Halley
 		MaterialTexture(String name, String defaultTexture, TextureSamplerType samplerType);
 
 		void loadAddresses(const MaterialDefinition& def);
-		unsigned int getAddress(int pass, ShaderType stage) const;
+		[[nodiscard]] unsigned int getAddress(int pass, ShaderType stage) const
+		{
+			constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+			return addresses[pass * shaderStageCount + int(stage)];
+		}
 
 		const String& getName() const { return name; }
 		const String& getDefaultTextureName() const { return defaultTextureName; }
@@ -366,8 +374,8 @@ namespace Halley
 
 		void setStencilReference(uint8_t value);
 
-		bool operator==(const MaterialDepthStencil& other) const;
-		bool operator!=(const MaterialDepthStencil& other) const;
+		constexpr bool operator==(const MaterialDepthStencil& other) const = default;
+		constexpr bool operator!=(const MaterialDepthStencil& other) const = default;
 
 		uint64_t getHash() const;
 

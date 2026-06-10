@@ -75,11 +75,6 @@ void MaterialUniformBlock::deserialize(Deserializer& s)
 	s >> uniforms;
 }
 
-int MaterialUniformBlock::getAddress(int pass, ShaderType stage) const
-{
-	return addresses[pass * shaderStageCount + static_cast<int>(stage)];
-}
-
 MaterialAttribute::MaterialAttribute()
 	: type(ShaderParameterType::Invalid)
     , location(-1)
@@ -170,11 +165,6 @@ void MaterialTexture::loadAddresses(const MaterialDefinition& definition)
 			addresses[i * shaderStageCount + j] = shader.getUniformLocation(name, ShaderType(j));
 		}
 	}
-}
-
-unsigned MaterialTexture::getAddress(int pass, ShaderType stage) const
-{
-	return addresses[pass * shaderStageCount + int(stage)];
 }
 
 void MaterialTexture::serialize(Serializer& s) const
@@ -748,36 +738,6 @@ void MaterialDepthStencil::deserialize(Deserializer& s)
 void MaterialDepthStencil::setStencilReference(uint8_t value)
 {
 	stencilReference = value;
-}
-
-bool MaterialDepthStencil::operator==(const MaterialDepthStencil& other) const
-{
-	return depthComparison == other.depthComparison
-		&& stencilComparison == other.stencilComparison
-		&& stencilOpPass == other.stencilOpPass
-		&& stencilOpDepthFail == other.stencilOpDepthFail
-		&& stencilOpStencilFail == other.stencilOpStencilFail
-		&& stencilReference == other.stencilReference
-		&& stencilWriteMask == other.stencilWriteMask
-		&& stencilReadMask == other.stencilReadMask
-		&& enableDepthTest == other.enableDepthTest
-		&& enableDepthWrite == other.enableDepthWrite
-		&& enableStencilTest == other.enableStencilTest;
-}
-
-bool MaterialDepthStencil::operator!=(const MaterialDepthStencil& other) const
-{
-	return depthComparison != other.depthComparison
-		|| stencilComparison != other.stencilComparison
-		|| stencilOpPass != other.stencilOpPass
-		|| stencilOpDepthFail != other.stencilOpDepthFail
-		|| stencilOpStencilFail != other.stencilOpStencilFail
-		|| stencilReference != other.stencilReference
-		|| stencilWriteMask != other.stencilWriteMask
-		|| stencilReadMask != other.stencilReadMask
-		|| enableDepthTest != other.enableDepthTest
-		|| enableDepthWrite != other.enableDepthWrite
-		|| enableStencilTest != other.enableStencilTest;
 }
 
 uint64_t MaterialDepthStencil::getHash() const

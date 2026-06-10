@@ -324,7 +324,7 @@ namespace Halley
 		void markLowPriorityBackgroundLoaded() const;
 		const UsagePattern& getUsagePattern() const;
 
-		bool isLoaded() const;
+		bool isLoaded() const { return loadState == State::Loaded; }
 		bool hasSucceeded() const;
 		bool hasFailed() const;
 

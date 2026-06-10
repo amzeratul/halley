@@ -203,11 +203,10 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 void ResourceUnloader::updateResourcesAndCollectStates(Time t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states)
 {
 	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
-		auto res = std::dynamic_pointer_cast<AsyncResource>(resource);
+		auto res = std::static_pointer_cast<AsyncResource>(resource);
 
 		res->startFrame(t);
 
-		const bool unloadable = res->canUnload();
 		const auto usagePattern = res->getUsagePattern();
 		const auto memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
 
@@ -216,7 +215,7 @@ void ResourceUnloader::updateResourcesAndCollectStates(Time t, ResourceCollectio
 		state.memoryUsage = memoryUsage.getTotal();
 		state.timeSinceUse = std::min(usagePattern.timeSinceInUse, usagePattern.timeSinceInBackground * 2.0); // Time spent in background counts as double
 
-		if (!unloadable || usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1) {
+		if (usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1 || !res->canUnload()) {
 			state.desiredState = ResourceDesiredLoadState::Load;
 		} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 1) {
 			state.desiredState = ResourceDesiredLoadState::Preload;

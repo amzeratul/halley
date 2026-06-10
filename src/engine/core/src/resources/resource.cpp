@@ -306,11 +306,6 @@ const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const
 	return usageData;
 }
 
-bool AsyncResource::isLoaded() const
-{
-	return loadState == State::Loaded;
-}
-
 bool AsyncResource::hasSucceeded() const
 {
 	return !failed;
