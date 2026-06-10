@@ -515,6 +515,24 @@ bool ConfigNode::compareTo(MathRelOp op, const ConfigNode& other) const
 	return false;
 }
 
+bool ConfigNode::operator==(std::string_view str) const
+{
+	if (getType() == ConfigNodeType::String) {
+		return asStringView() == str;
+	} else {
+		return asString() == str;
+	}
+}
+
+bool ConfigNode::operator!=(std::string_view str) const
+{
+	if (getType() == ConfigNodeType::String) {
+		return asStringView() != str;
+	} else {
+		return asString() != str;
+	}
+}
+
 ConfigNode& ConfigNode::operator=(Bytes value)
 {
 	reset();

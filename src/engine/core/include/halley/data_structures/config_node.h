@@ -345,6 +345,9 @@ namespace Halley {
 		bool operator<=(const ConfigNode& other) const;
 		bool compareTo(MathRelOp op, const ConfigNode& other) const;
 
+		bool operator==(std::string_view str) const;
+		bool operator!=(std::string_view str) const;
+
 		ConfigNodeType getType() const;
 
 		void serialize(Serializer& s) const;
