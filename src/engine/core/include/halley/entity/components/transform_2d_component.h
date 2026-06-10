@@ -57,6 +57,8 @@ public:
 	int getSubWorld() const;
 	void setSubWorld(int subWorld);
 
+	bool isTranslationOnly() const;
+
 	Halley::Vector2f transformPoint(const Halley::Vector2f& p) const;
 	Halley::Vector2f transformPointWithHeight(const Halley::Vector2f& p) const;
 	Halley::Vector2f inverseTransformPoint(const Halley::Vector2f& p) const;

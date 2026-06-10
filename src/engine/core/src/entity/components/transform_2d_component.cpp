@@ -136,7 +136,7 @@ WorldPosition Transform2DComponent::getWorldPosition() const
 
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
-	if (!isCached(CachedIndices::Position)) {
+	if (!isCached(CachedIndices::Position)) [[unlikely]] {
 		setCached(CachedIndices::Position);
 		cachedGlobalPos = parentTransform ? parentTransform->transformPoint(position) : position;
 	}
@@ -145,7 +145,7 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 
 Vector2f Transform2DComponent::getGlobalScale() const
 {
-	if (!isCached(CachedIndices::Scale)) {
+	if (!isCached(CachedIndices::Scale)) [[unlikely]] {
 		setCached(CachedIndices::Scale);
 		cachedGlobalScale = parentTransform ? parentTransform->getGlobalScale() * scale : scale;
 	}
@@ -154,7 +154,7 @@ Vector2f Transform2DComponent::getGlobalScale() const
 
 Angle1f Transform2DComponent::getGlobalRotation() const
 {
-	if (!isCached(CachedIndices::Rotation)) {
+	if (!isCached(CachedIndices::Rotation)) [[unlikely]] {
 		setCached(CachedIndices::Rotation);
 		cachedGlobalRotation = parentTransform ? parentTransform->getGlobalRotation() + rotation : rotation;
 	}
@@ -163,7 +163,7 @@ Angle1f Transform2DComponent::getGlobalRotation() const
 
 float Transform2DComponent::getGlobalHeight() const
 {
-	if (!isCached(CachedIndices::Height)) {
+	if (!isCached(CachedIndices::Height)) [[unlikely]] {
 		setCached(CachedIndices::Height);
 		cachedGlobalHeight = !fixedHeight && parentTransform ? parentTransform->getGlobalHeight() + height : height;
 	}
@@ -196,6 +196,13 @@ void Transform2DComponent::setSubWorld(int world)
 	}
 }
 
+bool Transform2DComponent::isTranslationOnly() const
+{
+	const auto scale = getGlobalScale();
+	const auto rotation = getGlobalRotation();
+	return floatEquals(rotation.getRadians(), 0.0f) && floatEquals(scale.x, 1.0f) && floatEquals(scale.y, 1.0f);
+}
+
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 {
 	const auto r = getGlobalRotation();
@@ -225,10 +232,10 @@ Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 	auto pos = (p - getGlobalPosition()) / s;
 
 	// Degenerate cases
-	if (std::abs(s.x) < 0.000001f) {
+	if (std::abs(s.x) < 0.000001f) [[unlikely]] {
 		pos.x = 0;
 	}
-	if (std::abs(s.y) < 0.000001f) {
+	if (std::abs(s.y) < 0.000001f) [[unlikely]] {
 		pos.y = 0;
 	}
 
@@ -286,7 +293,7 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8
 			(hasMaskBits<CachedIndices::Position, CachedIndices::Rotation, CachedIndices::Scale>(changeMask) ? getMaskBit<CachedIndices::Position>() : 0);
 
 		// Propagate to all children
-		if (entity.isValid()) {
+		if (entity.isValid()) [[likely]] {
 			for (auto& c: entity.getRawChildren()) {
 				if (const auto childTransform = c->tryGetComponent<Transform2DComponent>()) {
 					// Propagate change on all bits of the flag, since they all potentially affect others
@@ -309,7 +316,7 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8
 void Transform2DComponent::markDirtyShallow(uint8_t changeMask) const
 {
 	++revision;
-	if ((changeMask & (1 << static_cast<int>(CachedIndices::SubWorld))) != 0) {
+	if ((changeMask & (1 << static_cast<int>(CachedIndices::SubWorld))) != 0) [[unlikely]] {
 		++subWorldRevision;
 	}
 	cachedValues = cachedValues & ~changeMask;
