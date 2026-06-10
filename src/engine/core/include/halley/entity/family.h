@@ -21,12 +21,18 @@ namespace Halley {
 		explicit Family(FamilyMaskType inclusionMask, FamilyMaskType optionalMask);
 		virtual ~Family() {}
 
-		size_t count() const
+		[[nodiscard]] constexpr size_t count() const
 		{
 			return elemCount;
 		}
 
-		void* getElement(size_t n) const
+		template<typename T>
+		[[nodiscard]] constexpr T* getElement(size_t n) const
+		{
+			return static_cast<T*>(elems) + n;
+		}
+
+		[[nodiscard]] constexpr void* getRawElement(size_t n) const
 		{
 			return static_cast<char*>(elems) + (n * elemSize);
 		}

@@ -375,16 +375,16 @@ namespace Halley {
 
 	// Prefetch data from memory
 	static inline void prefetchL1(const void* p) {
-#ifdef _MSC_VER
+#if defined( _MSC_VER)
 		_mm_prefetch(static_cast<const char*>(p), _MM_HINT_T0);
-#else
+#elif !defined(NN_NINTENDO_SDK)
 		__builtin_prefetch(p);
 #endif
 	}
 	static inline void prefetchL2(const void* p) {
-#ifdef _MSC_VER
+#if defined( _MSC_VER)
 		_mm_prefetch(static_cast<const char*>(p), _MM_HINT_T1);
-#else
+#elif !defined(NN_NINTENDO_SDK)
 		__builtin_prefetch(p);
 #endif
 	}

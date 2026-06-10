@@ -21,7 +21,9 @@ namespace Halley {
 
 		void doInit(FamilyMaskType readMask, FamilyMaskType writeMask, World& world) noexcept;
 		
-		void* getElement(size_t index) const noexcept { return family->getElement(index); }
+		void* getRawElement(size_t index) const noexcept { return family->getRawElement(index); }
+		template <typename T>
+		T* getElement(size_t index) const noexcept { return family->getElement<T>(index); }
 		void setFamily(Family* family) noexcept;
 
 		void setOnEntitiesAdded(std::function<void(void*, size_t)> callback);
@@ -51,8 +53,12 @@ namespace Halley {
 		World* world = nullptr;
 	};
 
-#ifdef DEV_BUILD
+#if defined(DEV_BUILD) && !defined(NN_NINTENDO_SDK)
 #define FAMILY_BINDING_DEBUG_ITERATORS
+#endif
+
+#if !defined(NN_NINTENDO_SDK)
+#define FAMILY_BINDING_PREFETCH
 #endif
 	
 	template <typename T>
@@ -67,21 +73,23 @@ namespace Halley {
 	    using pointer           = T*;
 	    using reference         = T&;
 
-		FamilyBindingIterator()
+		constexpr FamilyBindingIterator()
 			: v(nullptr)
 		{}
-		FamilyBindingIterator(pointer v, uint32_t prefetchDist, uint32_t elemsLeft, World& world)
+		constexpr FamilyBindingIterator(pointer v, uint32_t prefetchDist, uint32_t elemsLeft, World& world)
 			: v(v)
+#ifdef FAMILY_BINDING_PREFETCH
 			, prefetchDist(prefetchDist)
 			, elemsLeft(elemsLeft)
+#endif
 #ifdef FAMILY_BINDING_DEBUG_ITERATORS
-			, world(&world)
 			, familyRevision(world.getFamilyRevision())
+			, world(&world)
 #endif
 		{}
-		FamilyBindingIterator(const FamilyBindingIterator& o) = default;
+		constexpr FamilyBindingIterator(const FamilyBindingIterator& o) = default;
 		
-		reference operator*() const
+		constexpr reference operator*() const
 		{
 #ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (familyRevision != world->getFamilyRevision()) {
@@ -91,7 +99,7 @@ namespace Halley {
 			return *v;
 		}
 
-		pointer operator->() const
+		constexpr pointer operator->() const
 		{
 #ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (familyRevision != world->getFamilyRevision()) {
@@ -101,7 +109,7 @@ namespace Halley {
 			return v;
 		}
 		
-		FamilyBindingIterator& operator++()
+		constexpr FamilyBindingIterator& operator++()
 		{
 #ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (familyRevision != world->getFamilyRevision()) {
@@ -109,27 +117,32 @@ namespace Halley {
 			}
 #endif
 
-			HalleyAssertDebug(elemsLeft > 0);
 			++v;
+
+#ifdef FAMILY_BINDING_PREFETCH
 			--elemsLeft;
 			if (prefetchDist > 0 && elemsLeft > prefetchDist) {
 				(v + prefetchDist)->prefetch();
 			}
+#endif
+
 			return *this;
 		}
 		
-		bool operator==(const FamilyBindingIterator& other) const { return v == other.v; }
-		bool operator!=(const FamilyBindingIterator& other) const { return v != other.v; }
+		[[nodiscard]] constexpr bool operator==(const FamilyBindingIterator& other) const { return v == other.v; }
+		[[nodiscard]] constexpr bool operator!=(const FamilyBindingIterator& other) const { return v != other.v; }
 
-		friend void swap(FamilyBindingIterator& a, FamilyBindingIterator& b) noexcept { std::swap(a.v, b.v); }
+		constexpr friend void swap(FamilyBindingIterator& a, FamilyBindingIterator& b) noexcept { std::swap(a.v, b.v); }
 
 	private:
 		pointer v;
+#ifdef FAMILY_BINDING_PREFETCH
 		uint32_t prefetchDist = 1;
 		uint32_t elemsLeft = 0;
+#endif
 #ifdef FAMILY_BINDING_DEBUG_ITERATORS
-		World* world = nullptr;
 		uint32_t familyRevision = 0;
+		World* world = nullptr;
 #endif
 	};
 
@@ -138,43 +151,47 @@ namespace Halley {
 	{
 	public:
 
-		FamilyBinding()
+		constexpr FamilyBinding()
 		{
 			bindFamily = &bindFamilyImpl;
 		}
 		
-		T& operator[](size_t index) {
+		[[nodiscard]] constexpr T& operator[](size_t index) {
 			HalleyAssertDebug(index < count());
 			return *getFamilyElement(index);
 		}
 		
-		const T& operator[](size_t index) const {
+		[[nodiscard]] constexpr const T& operator[](size_t index) const {
 			HalleyAssertDebug(index < count());
 			return *getFamilyElement(index);
 		}
 
-		FamilyBindingIterator<T> begin()
+		[[nodiscard]] constexpr FamilyBindingIterator<T> begin()
 		{
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (getFamily().isDirty()) {
 				throw Exception("Attempting to iterate through a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
 			}
+#endif
 			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()), *world);
 		}
 
-		FamilyBindingIterator<T> begin() const
+		[[nodiscard]] constexpr FamilyBindingIterator<T> begin() const
 		{
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (getFamily().isDirty()) {
 				throw Exception("Attempting to iterate through a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
 			}
+#endif
 			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()), *world);
 		}
 
-		FamilyBindingIterator<T> end()
+		[[nodiscard]] constexpr FamilyBindingIterator<T> end()
 		{
 			return FamilyBindingIterator(getFamilyElement(count()), 5, 0, *world);
 		}
 
-		FamilyBindingIterator<T> end() const
+		[[nodiscard]] constexpr FamilyBindingIterator<T> end() const
 		{
 			return FamilyBindingIterator(getFamilyElement(count()), 5, 0, *world);
 		}
@@ -184,9 +201,11 @@ namespace Halley {
 			if (count() != 1) {
 				throw Exception(String("Attempting to access family of ") + typeid(T).name() + " as singleton, but it has " + toString(count()) + " elements.", HalleyExceptions::Entity);
 			}
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (getFamily().isDirty()) {
 				throw Exception("Attempting to access a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
 			}
+#endif
 			return *getFamilyElement(0);
 		}
 
@@ -195,9 +214,11 @@ namespace Halley {
 			if (count() != 1) {
 				throw Exception(String("Attempting to access family of ") + typeid(T).name() + " as singleton, but it has " + toString(count()) + " elements.", HalleyExceptions::Entity);
 			}
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			if (getFamily().isDirty()) {
 				throw Exception("Attempting to access a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
 			}
+#endif
 			return *getFamilyElement(0);
 		}
 
@@ -302,8 +323,7 @@ namespace Halley {
 
 		T* getFamilyElement(size_t i) const
 		{
-			// WARNING: Strict aliasing rules violation
-			return reinterpret_cast<T*>(getElement(i));
+			return getElement<T>(i);
 		}
 
 		static void bindFamilyImpl(FamilyBindingBase& obj, World& world) noexcept

@@ -92,7 +92,7 @@ void System::doProcessMessages(FamilyBindingBase& family, int messageType, Vecto
 
 	const size_t sz = family.count();
 	for (size_t i = 0; i < sz; i++) {
-		const FamilyBase* elem = static_cast<FamilyBase*>(family.getElement(i));
+		const FamilyBase* elem = static_cast<FamilyBase*>(family.getRawElement(i));
 		if (std_ex::contains(targetIds, elem->entityId)) {
 			for (auto& msg: messages) {
 				if (msg.second == elem->entityId) {
