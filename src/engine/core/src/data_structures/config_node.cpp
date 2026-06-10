@@ -519,6 +519,8 @@ bool ConfigNode::operator==(std::string_view str) const
 {
 	if (getType() == ConfigNodeType::String) {
 		return asStringView() == str;
+	} else if (getType() == ConfigNodeType::Undefined) {
+		return false;
 	} else {
 		return asString() == str;
 	}
@@ -528,6 +530,8 @@ bool ConfigNode::operator!=(std::string_view str) const
 {
 	if (getType() == ConfigNodeType::String) {
 		return asStringView() != str;
+	} else if (getType() == ConfigNodeType::Undefined) {
+		return true;
 	} else {
 		return asString() != str;
 	}
