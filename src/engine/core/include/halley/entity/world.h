@@ -221,6 +221,15 @@ namespace Halley {
 			systemInterfaces[std::type_index(typeid(T))] = interface;
 		}
 
+		template <typename T>
+		const T* tryGetComponent(EntityId entityId)
+		{
+			if (auto e = tryGetRawEntity(entityId)) [[likely]] {
+				return e->tryGetComponent<T>(true);
+			}
+			return nullptr;
+		}
+
 		bool isHeadless() const;
 		void setHeadless(bool headless);
 

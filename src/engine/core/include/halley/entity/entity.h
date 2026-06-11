@@ -350,7 +350,7 @@ namespace Halley {
 		EntityRef& operator=(const EntityRef& other) = default;
 		EntityRef& operator=(EntityRef&& other) noexcept = default;
 
-		EntityRef(Entity& e, World& w)
+		constexpr EntityRef(Entity& e, World& w)
 			: entity(&e)
 			, world(&w)
 		{
@@ -977,7 +977,7 @@ namespace Halley {
 		{
 			HalleyAssertDev(isValid());
 #ifdef _DEBUG
-			HalleyAssertDev(entity->getEntityId() == entityId);
+			HalleyAssertDebug(entity->getEntityId() == entityId);
 #endif
 		}
 
@@ -1012,12 +1012,12 @@ namespace Halley {
 		ConstEntityRef& operator=(const ConstEntityRef& other) = default;
 		ConstEntityRef& operator=(ConstEntityRef&& other) = default;
 
-		ConstEntityRef(const Entity& e, const World& w)
+		constexpr ConstEntityRef(const Entity& e, const World& w)
 			: entity(&e)
 			, world(&w)
 		{}
 
-		ConstEntityRef(const EntityRef& e)
+		constexpr ConstEntityRef(const EntityRef& e)
 			: entity(e.entity)
 			, world(e.world)
 		{}

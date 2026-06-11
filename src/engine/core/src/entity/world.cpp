@@ -358,8 +358,8 @@ void World::destroyEntity(EntityRef entity)
 void World::doDestroyEntity(EntityId id)
 {
 	const auto e = tryGetRawEntity(id);
-	if (e) {
-		if (!e->isAlive()) {
+	if (e) [[likelly]] {
+		if (!e->isAlive()) [[unlikely]] {
 			Logger::logWarning("Attempting to destroy entity \"" + (e->name ? *e->name : String::emptyString()) + "\" which is already dead.");
 			return;
 		}
@@ -418,7 +418,7 @@ Entity* World::tryGetRawEntity(EntityId id)
 		return nullptr;
 	}
 	auto* v = entityMap->get(id.value);
-	if (v == nullptr) {
+	if (v == nullptr) [[unlikely]] {
 		return nullptr;
 	}
 	return *v;
@@ -430,7 +430,7 @@ const Entity* World::tryGetRawEntity(EntityId id) const
 		return nullptr;
 	}
 	const auto* v = entityMap->get(id.value);
-	if (v == nullptr) {
+	if (v == nullptr) [[unlikely]] {
 		return nullptr;
 	}
 	return *v;
