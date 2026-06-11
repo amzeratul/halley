@@ -22,7 +22,8 @@ namespace Halley {
     class ResourceUnloader {
 		struct LoadStateInfo {
             std::shared_ptr<const AsyncResource> res;
-            bool loaded = false;
+            bool usagePatternLoaded = false;
+            bool currentlyLoaded = false;
             bool markAsLoading = false;
             bool markAsUnloading = false;
 			ResourceDesiredLoadState desiredState = ResourceDesiredLoadState::Load;
@@ -51,7 +52,10 @@ namespace Halley {
 
         HashMap<ResourceDesiredLoadState, StateCollection> lastStates;
 
-        void updateCollection(Time t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);
-        void updateResourcesAndCollectStates(Time t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);
+        void updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);
+        void updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);
+
+        template<typename T>
+        static LoadStateInfo getStateInfo(const std::shared_ptr<Resource>& resource, float t);
     };
 }

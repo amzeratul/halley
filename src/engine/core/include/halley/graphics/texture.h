@@ -46,6 +46,7 @@ namespace Halley
 
 		ResourceMemoryUsage getMemoryUsage() const override;
 		ResourceMemoryUsage getEstimatedMemoryUsage() const override;
+		bool canUnload() const final;
 
 		void setAlphaMask(ImageMask mask);
 		bool hasOpaquePixels(Rect4i pixelBounds) const;
@@ -68,7 +69,6 @@ namespace Halley
 
 		void moveFrom(Texture& other);
 
-		bool canUnload() const override;
 		bool doRequestLoading() override;
 		bool doRequestUnloading() override;
 

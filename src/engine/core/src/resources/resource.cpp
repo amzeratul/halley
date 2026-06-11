@@ -67,7 +67,7 @@ float Resource::getAge() const
 	return age;
 }
 
-void Resource::startFrame(Time dt) const
+void Resource::startFrame(float dt) const
 {
 }
 
@@ -255,7 +255,7 @@ Future<void> AsyncResource::onLoad() const
 	}
 }
 
-void AsyncResource::startFrame(Time dt) const
+void AsyncResource::startFrame(float dt) const
 {
 	usageData.timeSinceInUse += dt;
 	usageData.timeSinceInBackground += dt;

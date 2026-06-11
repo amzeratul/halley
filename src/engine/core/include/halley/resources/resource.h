@@ -220,7 +220,7 @@ namespace Halley
 		void resetAge();
 		float getAge() const;
 
-		virtual void startFrame(Time dt) const;
+		virtual void startFrame(float dt) const;
 
 		void setUnloaded();
 		bool isUnloaded() const;
@@ -230,13 +230,13 @@ namespace Halley
 		virtual void reload(Resource&& resource);
 
 	private:
+		bool metaSet = false;
+		bool unloaded = false;
 		Metadata meta;
 		String assetId;
 		uint32_t assetIdx = 0;
 		int assetVersion = 0;
 		float age = 0;
-		bool metaSet = false;
-		bool unloaded = false;
 	};
 
 	class ResourceObserver
@@ -258,7 +258,7 @@ namespace Halley
 		int assetVersion = 0;
 	};
 
-	enum class ResourceDesiredLoadState {
+	enum class ResourceDesiredLoadState : uint8_t {
 		Undefined,
 	    Load,		// Used very recently, keep loaded no matter what
         Preload,    // Not in use, but likely to be used soon. Can be loaded if there's budget, or unloaded if we're running out
@@ -291,12 +291,12 @@ namespace Halley
 		};
 
 		struct UsagePattern {
-			Time timeSinceInUse = 0;
-			Time timeSinceInBackground = 0;
-			Time timeSinceInLowPriorityBackground = 0;
-			int framesSinceInUse = 0;
-			int framesSinceInBackground = 0;
-			int framesSinceInLowPriorityBackground = 0;
+			float timeSinceInUse = 0;
+			float timeSinceInBackground = 0;
+			float timeSinceInLowPriorityBackground = 0;
+			uint16_t framesSinceInUse = 0;
+			uint16_t framesSinceInBackground = 0;
+			uint16_t framesSinceInLowPriorityBackground = 0;
 			bool loaded = false;
 		};
 
@@ -318,7 +318,7 @@ namespace Halley
 		void waitForLoad(bool acceptFailed = false, std::optional<int> notifyIfMoreThanUs = 10'000) const;
 		Future<void> onLoad() const;
 
-		void startFrame(Time dt) const override;
+		void startFrame(float dt) const final;
 		void markActivelyInUse() const;
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
@@ -340,14 +340,14 @@ namespace Halley
 		std::atomic<State> loadState;
 		mutable ResourceDesiredLoadState desiredLoadState = ResourceDesiredLoadState::Undefined;
 
-		mutable ConditionVariable loadWait;
-		mutable Mutex loadMutex;
-		mutable Vector<Promise<void>> pendingPromises;
-
-		mutable UsagePattern usageData;
 		mutable std::atomic<bool> inUseThisFrame;
 		mutable std::atomic<bool> inBackgroundThisFrame;
 		mutable std::atomic<bool> inLowPriorityBackgroundThisFrame;
+		mutable UsagePattern usageData;
+
+		mutable ConditionVariable loadWait;
+		mutable Mutex loadMutex;
+		mutable Vector<Promise<void>> pendingPromises;
 	};
 
 	struct ResourceOptions {

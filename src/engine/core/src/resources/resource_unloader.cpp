@@ -1,5 +1,7 @@
 #include "halley/resources/resource_unloader.h"
 
+#include "halley/graphics/texture.h"
+
 using namespace Halley;
 
 ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget)
@@ -37,11 +39,11 @@ ResourceUnloader::ResourceUnloader(Resources& resources)
 void ResourceUnloader::update(Time t, const ResourceUnloaderRules& rules)
 {
 	for (auto& [type, rule]: rules.rules) {
-		updateCollection(t, resources.ofType(type), rule);
+		updateCollection(static_cast<float>(t), resources.ofType(type), rule);
 	}
 }
 
-void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules)
+void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules)
 {
 	if (!collection.isAsync()) {
 		return;
@@ -74,7 +76,7 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 
 	// Anything marked as "Unload" will be unloaded
 	for (auto& s: states[ResourceDesiredLoadState::Unload].states) {
-		if (s.loaded) {
+		if (s.usagePatternLoaded) {
 			s.markAsUnloading = true;
 			curMemoryUsage -= s.memoryUsage;
 		}
@@ -83,10 +85,10 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	// Anything marked as "Load" will be loaded
 	int nWaitingToLoad = 0;
 	for (auto& s: states[ResourceDesiredLoadState::Load].states) {
-		if (!s.res->isLoaded()) {
+		if (!s.currentlyLoaded) {
 			++nWaitingToLoad;
 		}
-		if (!s.loaded) {
+		if (!s.usagePatternLoaded) {
 			s.markAsLoading = true;
 			curMemoryUsage += s.memoryUsage;
 		}
@@ -98,7 +100,7 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	if (canPreload) {
 		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
 			for (auto& s: states[state].states) {
-				if (!s.loaded) {
+				if (!s.usagePatternLoaded) {
 					memoryUsageWithAllPreloads += s.memoryUsage;
 				}
 			}
@@ -108,7 +110,7 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	// Stale, unload if it makes space for preloads, or if we're above the "stale budget" (normally ~75% of total budget, so we have some headroom)
 	// Otherwise it's OK to keep them around
 	for (auto& s: states[ResourceDesiredLoadState::Stale].states) {
-		if (s.loaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
+		if (s.usagePatternLoaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
 			s.markAsUnloading = true;
 			memoryUsageWithAllPreloads -= s.memoryUsage;
 			curMemoryUsage -= s.memoryUsage;
@@ -121,7 +123,7 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	bool preloadUnloaded = false;
 	for (const auto state: { ResourceDesiredLoadState::PreloadLowPriority, ResourceDesiredLoadState::Preload }) {
 		for (auto& s: states[state].states) {
-			if (s.loaded && curMemoryUsage > rules.budget) {
+			if (s.usagePatternLoaded && curMemoryUsage > rules.budget) {
 				s.markAsUnloading = true;
 				curMemoryUsage -= s.memoryUsage;
 				preloadUnloaded = true;
@@ -136,11 +138,11 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
 			bool preloadingAny = false;
 			for (auto& s: states[state].states) {
-				if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+				if (!s.usagePatternLoaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
 					s.markAsLoading = true;
 					curMemoryUsage += s.memoryUsage;
 					preloadingAny = true;
-				} else if (s.loaded && !s.res->isLoaded()) {
+				} else if (s.usagePatternLoaded && !s.currentlyLoaded) {
 					preloadingAny = true;
 				}
 			}
@@ -204,40 +206,53 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	}
 }
 
-void ResourceUnloader::updateResourcesAndCollectStates(Time t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states)
+void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states)
 {
 	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
-		auto res = std::static_pointer_cast<AsyncResource>(resource);
-
-		res->startFrame(t);
-
-		const auto usagePattern = res->getUsagePattern();
-		const auto memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
-
 		LoadStateInfo state;
-		state.loaded = usagePattern.loaded;
-		state.memoryUsage = memoryUsage.getTotal();
-		state.timeSinceUse = std::min(usagePattern.timeSinceInUse, usagePattern.timeSinceInBackground * 2.0); // Time spent in background counts as double
-
-		if (usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1 || !res->canUnload()) {
-			state.desiredState = ResourceDesiredLoadState::Load;
-		} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 1) {
-			state.desiredState = ResourceDesiredLoadState::Preload;
-		} else if (usagePattern.framesSinceInLowPriorityBackground <= 1 || usagePattern.timeSinceInLowPriorityBackground < 1) {
-			state.desiredState = ResourceDesiredLoadState::PreloadLowPriority;
-		} else if (usagePattern.timeSinceInUse < 15 || usagePattern.timeSinceInBackground < 10) {
-			state.desiredState = ResourceDesiredLoadState::Stale;
+		if (collection.getAssetType() == AssetType::Texture) {
+			state = getStateInfo<Texture>(resource, t);
 		} else {
-			state.desiredState = ResourceDesiredLoadState::Unload;
+			state = getStateInfo<AsyncResource>(resource, t);
 		}
-		res->setDesiredLoadState(state.desiredState);
-
-		state.res = std::move(res);
 
 		auto& stateCollection = states[state.desiredState];
-		if (usagePattern.loaded) {
-			stateCollection.curMemoryUsage += memoryUsage.getTotal();
+		if (state.usagePatternLoaded) {
+			stateCollection.curMemoryUsage += state.memoryUsage;
 		}
 		stateCollection.states += std::move(state);
 	});
+}
+
+template <typename T>
+ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(const std::shared_ptr<Resource>& resource, float t)
+{
+	auto res = std::static_pointer_cast<T>(resource);
+
+	res->startFrame(t);
+
+	const auto usagePattern = res->getUsagePattern();
+	const auto memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
+
+	LoadStateInfo state;
+	state.usagePatternLoaded = usagePattern.loaded;
+	state.currentlyLoaded = res->isLoaded();
+	state.memoryUsage = memoryUsage.getTotal();
+	state.timeSinceUse = std::min(usagePattern.timeSinceInUse, usagePattern.timeSinceInBackground * 2.0f); // Time spent in background counts as double
+
+	if (usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1 || !res->canUnload()) {
+		state.desiredState = ResourceDesiredLoadState::Load;
+	} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 1) {
+		state.desiredState = ResourceDesiredLoadState::Preload;
+	} else if (usagePattern.framesSinceInLowPriorityBackground <= 1 || usagePattern.timeSinceInLowPriorityBackground < 1) {
+		state.desiredState = ResourceDesiredLoadState::PreloadLowPriority;
+	} else if (usagePattern.timeSinceInUse < 15 || usagePattern.timeSinceInBackground < 10) {
+		state.desiredState = ResourceDesiredLoadState::Stale;
+	} else {
+		state.desiredState = ResourceDesiredLoadState::Unload;
+	}
+	res->setDesiredLoadState(state.desiredState);
+
+	state.res = std::move(res);
+	return state;
 }
