@@ -350,7 +350,7 @@ namespace Halley {
 		EntityRef& operator=(const EntityRef& other) = default;
 		EntityRef& operator=(EntityRef&& other) noexcept = default;
 
-		constexpr EntityRef(Entity& e, World& w)
+		EntityRef(Entity& e, World& w)
 			: entity(&e)
 			, world(&w)
 		{
