@@ -31,13 +31,12 @@ namespace Halley
 		class Wrapper
 		{
 		public:
-			Wrapper(std::shared_ptr<Resource> resource, int loadDepth)
+			Wrapper() = default;
+			Wrapper(std::shared_ptr<Resource> resource)
 				: res(std::move(resource))
-				, depth(loadDepth)
 			{}
 
 			std::shared_ptr<Resource> res;
-			int depth;
 		};
 
 	public:
@@ -47,13 +46,12 @@ namespace Halley
 		explicit ResourceCollectionBase(Resources& parent, AssetType type);
 		virtual ~ResourceCollectionBase() = default;
 
-		void setResource(int curDepth, std::string_view assetId, std::shared_ptr<Resource> resource);
 		void setResourceLoader(ResourceLoaderFunc loader);
 		void setResourceEnumerator(ResourceEnumeratorFunc enumerator);
 
 		void clear();
 		void unload(std::string_view assetId);
-		void unloadAll(int minDepth = 0);
+		void unloadAll();
 		bool exists(std::string_view assetId) const;
 		void setFallback(std::string_view assetId);
 
@@ -68,13 +66,9 @@ namespace Halley
 
 		ResourceMemoryUsage getMemoryUsage() const;
 		void generateDetailedMemoryReport(std::optional<int> limit) const;
-		ResourceMemoryUsage getMemoryUsageAndAge(float time);
-		void age(float time);
 
 		virtual bool isAsync() const = 0;
 
-		/// <returns>How much memory was freed</returns>
-		ResourceMemoryUsage clearOldResources(float maxAge);
 		void notifyResourcesUnloaded();
 
 		template<typename F>
@@ -82,7 +76,9 @@ namespace Halley
 		{
 			SharedLock lock(mutex);
 			for (auto& r: resources) {
-				f(r.second.res);
+				if (r.res) {
+					f(r.res);
+				}
 			}
 		}
 
@@ -91,7 +87,9 @@ namespace Halley
 		{
 			SharedLock lock(mutex);
 			for (auto& r: resources) {
-				f(r.second.res);
+				if (r.res) {
+					f(r.res);
+				}
 			}
 		}
 
@@ -107,7 +105,8 @@ namespace Halley
 
 	private:
 		Resources& parent;
-		HashMap<String, Wrapper> resources;
+		HashMap<String, uint32_t> resourceMap;
+		Vector<Wrapper> resources;
 		String fallback;
 		AssetType type;
 		ResourceLoaderFunc resourceLoader;
@@ -118,6 +117,10 @@ namespace Halley
 		mutable SharedRecursiveMutex loadingMutex;
 		mutable ConditionVariableAny resourceLoaded;
 		HashSet<String> resourcesLoading;
+
+		Vector<uint32_t> freeIdxs;
+
+		Wrapper& allocateWrapper(const String& id);
 	};
 
 	template <typename T>

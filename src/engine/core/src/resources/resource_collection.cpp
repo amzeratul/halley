@@ -20,35 +20,37 @@ ResourceCollectionBase::ResourceCollectionBase(Resources& parent, AssetType type
 
 void ResourceCollectionBase::clear()
 {
+	UniqueLock lock(mutex);
+
 	resources.clear();
+	resourceMap.clear();
 }
 
 void ResourceCollectionBase::unload(std::string_view assetId)
 {
-	resources.erase(assetId);
+	UniqueLock lock(mutex);
+
+	if (const auto iter = resourceMap.find(assetId); iter != resourceMap.end()) {
+		const uint32_t idx = iter->second;
+		resources[idx].res = {};
+		resourceMap.erase(iter);
+		freeIdxs += idx;
+	}
 }
 
-void ResourceCollectionBase::unloadAll(int minDepth)
+void ResourceCollectionBase::unloadAll()
 {
-	for (auto iter = resources.begin(); iter != resources.end(); ) {
-		auto next = iter;
-		++next;
-
-		auto& res = (*iter).second;
-		if (res.depth >= minDepth) {
-			resources.erase(iter);
-		}
-
-		iter = next;
-	}
+	clear();
 }
 
 void ResourceCollectionBase::reload(std::string_view assetId)
 {
-	auto res = resources.find(assetId);
-	if (res != resources.end()) {
-		auto& resWrap = res->second;
-		auto& oldAsset = *resWrap.res;
+	SharedLock lock(mutex);
+	
+	const auto res = resourceMap.find(assetId);
+	if (res != resourceMap.end()) {
+		const auto idx = res->second;
+		auto& oldAsset = *resources[idx].res;
 		try {
 			const auto [newAsset, loaded] = loadAsset(assetId, ResourceLoadPriority::High, false);
 			newAsset->setAssetId(assetId);
@@ -101,7 +103,9 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsage() const
 	SharedLock lock(mutex);
 
 	for (auto& r: resources) {
-		usage += r.second.res->getMemoryUsage();
+		if (r.res) {
+			usage += r.res->getMemoryUsage();
+		}
 	}
 
 	return usage;
@@ -119,10 +123,12 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 	{
 		SharedLock lock(mutex);
 		for (auto& r: resources) {
-			const auto desiredState = isAsync() ?
-				dynamic_cast<AsyncResource&>(*r.second.res).getDesiredLoadState() :
-				ResourceDesiredLoadState::Undefined;
-			usages[desiredState].emplace_back(Info{ r.first, r.second.res->getMemoryUsage(), static_cast<int>(r.second.res.use_count()) });
+			if (auto& res = r.res) {
+				const auto desiredState = isAsync() ?
+					dynamic_cast<AsyncResource&>(*res).getDesiredLoadState() :
+					ResourceDesiredLoadState::Undefined;
+				usages[desiredState].emplace_back(Info{ res->getAssetId(), res->getMemoryUsage(), static_cast<int>(res.use_count()) });
+			}
 		}
 	}
 
@@ -171,80 +177,15 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 	}
 }
 
-void ResourceCollectionBase::age(float time)
-{
-	SharedLock lock(mutex);
-
-	for (auto& r: resources) {
-		const auto& resourcePtr = r.second.res;
-		// This code is dodgy
-		// It's designed for Texture, but that's held by a shared_ptr in SpriteSheet
-		if (resourcePtr.use_count() <= 2) {
-			resourcePtr->increaseAge(time);
-		} else {
-			resourcePtr->resetAge();
-		}
-	}
-}
-
-ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
-{
-	Vector<decltype(resources)::iterator> toDelete;
-	ResourceMemoryUsage usage;
-
-	{
-		SharedLock lock(mutex);
-
-		for (auto iter = resources.begin(); iter != resources.end(); ) {
-			auto next = iter;
-			++next;
-
-			auto& resourcePtr = iter->second.res;
-			if (resourcePtr.use_count() <= 2 && resourcePtr->getAge() > maxAge) {
-				usage += resourcePtr->getMemoryUsage();
-				resourcePtr->setUnloaded();
-				toDelete.push_back(iter);
-			}
-
-			iter = next;
-		}
-
-		for (auto& a: toDelete) {
-			resources.erase(a);
-		}
-	}
-
-	// Delete out of the lock to avoid stalling resources for too long
-	toDelete.clear();
-
-	return usage;
-}
-
 void ResourceCollectionBase::notifyResourcesUnloaded()
 {
 	SharedLock lock(mutex);
 
 	for (auto& r: resources) {
-		r.second.res->onOtherResourcesUnloaded();
-	}
-}
-
-ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)
-{
-	ResourceMemoryUsage usage;
-	SharedLock lock(mutex);
-
-	for (auto& r: resources) {
-		auto& resourcePtr = r.second.res;
-		if (resourcePtr.use_count() <= 2) {
-			resourcePtr->increaseAge(time);
-		} else {
-			resourcePtr->resetAge();
+		if (r.res) {
+			r.res->onOtherResourcesUnloaded();
 		}
-		usage += resourcePtr->getMemoryUsage();
 	}
-
-	return usage;
 }
 
 std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
@@ -298,9 +239,9 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 			// First of all, look in cache and return if it's there
 			// This is the most common case, and we use a shared lock to avoid stopping other threads
 			SharedLock lock(mutex);
-			if (const auto res = resources.find(assetId); res != resources.end()) {
+			if (const auto res = resourceMap.find(assetId); res != resourceMap.end()) {
 				// Found resource, all good
-				return res->second.res;
+				return resources[res->second].res;
 			}
 		}
 
@@ -316,9 +257,9 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 
 				// Should be loaded, try again
 				SharedLock lock2(mutex);
-				if (const auto res = resources.find(assetId); res != resources.end()) {
+				if (const auto res = resourceMap.find(assetId); res != resourceMap.end()) {
 					// Found resource
-					return res->second.res;
+					return resources[res->second].res;
 				} else {
 					// This means the previous one failed, we're giving up
 					Logger::logError("Resource not found after waiting for it to be loaded elsewhere: \"" + toString(type) + ":" + assetId + "\"");
@@ -364,7 +305,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		if (loaded) {
 			UniqueLock lock2(mutex);
 			newRes->setAssetIdx(curIdx++);
-			resources.emplace(assetId, Wrapper(newRes, 0));
+			allocateWrapper(assetId).res = newRes;
 		}
 
 		// Notify done loading
@@ -380,12 +321,24 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 	}
 }
 
+ResourceCollectionBase::Wrapper& ResourceCollectionBase::allocateWrapper(const String& id)
+{
+	if (freeIdxs.empty()) {
+		resourceMap.emplace(id, static_cast<uint32_t>(resources.size()));
+		return resources.emplace_back();
+	} else {
+		const auto idx = freeIdxs.back();
+		freeIdxs.pop_back();
+		resourceMap.emplace(id, idx);
+		return resources[idx];
+	}
+}
+
 bool ResourceCollectionBase::exists(std::string_view assetId) const
 {
 	// Look in cache
 	SharedLock lock(mutex);
-	const auto res = resources.find(assetId);
-	if (res != resources.end()) {
+	if (resourceMap.contains(assetId)) {
 		return true;
 	}
 	lock.unlock();
@@ -396,10 +349,6 @@ bool ResourceCollectionBase::exists(std::string_view assetId) const
 void ResourceCollectionBase::setFallback(std::string_view assetId)
 {
 	fallback = assetId;
-}
-
-void ResourceCollectionBase::setResource(int curDepth, std::string_view name, std::shared_ptr<Resource> resource) {
-	resources.emplace(name, Wrapper(std::move(resource), curDepth));
 }
 
 void ResourceCollectionBase::setResourceLoader(ResourceLoaderFunc loader)
