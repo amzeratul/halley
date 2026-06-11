@@ -172,12 +172,12 @@ float Transform2DComponent::getGlobalHeight() const
 
 int Transform2DComponent::getSubWorld() const
 {
-	if (subWorld) {
+	if (subWorld) [[unlikely]] {
 		return subWorld.value();
 	} else {
 		// Default value, default to parent, or to zero if no parent
-		if (parentTransform) {
-			if (!isCached(CachedIndices::SubWorld)) {
+		if (parentTransform) [[likely]] {
+			if (!isCached(CachedIndices::SubWorld)) [[unlikely]] {
 				setCached(CachedIndices::SubWorld);
 				cachedSubWorld = static_cast<int16_t>(parentTransform->getSubWorld());
 			}
