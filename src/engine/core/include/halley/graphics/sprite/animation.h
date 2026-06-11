@@ -151,7 +151,7 @@ namespace Halley
 
 		const String& getName() const { return name; }
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
-		std::shared_ptr<Material> getMaterial() const { return material; }
+		const std::shared_ptr<Material>& getMaterial() const { return material; }
 
 		const AnimationSequence& getSequence(std::string_view name) const;
 		const AnimationSequence& getSequence(size_t idx) const;

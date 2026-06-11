@@ -67,7 +67,8 @@ namespace Halley
 		static void drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter, bool waitForLoad = true);
 
 		Sprite& setMaterial(Resources& resources, String materialName = "");
-		Sprite& setMaterial(std::shared_ptr<const Material> material);
+		Sprite& setMaterial(const std::shared_ptr<const Material>& material);
+		Sprite& setMaterial(std::shared_ptr<const Material>&& material);
 		Sprite& setMaterial(std::shared_ptr<const MaterialDefinition> definition);
 		MaterialUpdater getMutableMaterial();
 		const Material& getMaterial() const
