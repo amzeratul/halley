@@ -7,12 +7,12 @@
 using namespace Halley;
 
 Particles::Particles()
-	: rng(&Random::getGlobal())
+	: rng(Random::getGlobal().getRawInt64())
 {
 }
 
 Particles::Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
-	: rng(&Random::getGlobal())
+	: rng(Random::getGlobal().getRawInt64())
 {
 	load(node, resources, context);
 }
@@ -492,20 +492,20 @@ void Particles::spawn(size_t n, float time, Vector3f origin)
 
 void Particles::initializeParticle(size_t index, float time, float totalTime, Vector3f origin)
 {
-	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(azimuth));
-	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(altitude));
+	const auto startAzimuth = Angle1f::fromDegrees(rng.getFloat(azimuth));
+	const auto startElevation = Angle1f::fromDegrees(rng.getFloat(altitude));
 	
 	auto& particle = particles[index];
 	particle.firstFrame = true;
 	particle.alive = true;
 	particle.time = time;
-	particle.ttl = rng->getFloat(ttl);
-	particle.trailTime = rng->getFloat(trailSpawnInterval) - time;
-	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f::fromDegrees(rng->getFloat(initialAngle));
-	particle.scale = rng->getFloat(initialScale);
+	particle.ttl = rng.getFloat(ttl);
+	particle.trailTime = rng.getFloat(trailSpawnInterval) - time;
+	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f::fromDegrees(rng.getFloat(initialAngle));
+	particle.scale = rng.getFloat(initialScale);
 
-	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
-	particle.angSpeed = rng->getFloat(angSpeed);
+	particle.vel = Vector3f(rng.getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
+	particle.angSpeed = rng.getFloat(angSpeed);
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
 	const auto spawnPosSmear = totalTime > 0.00001f ? lerp(position - lastPosition, Vector3f(), time / totalTime) : Vector3f();
@@ -516,12 +516,12 @@ void Particles::initializeParticle(size_t index, float time, float totalTime, Ve
 		auto& anim = animationPlayers[index];
 		anim.update(0, sprite);
 		if (randomiseAnimationTime) {
-			anim.update(rng->getFloat({0.0f, 42.0f}), sprite);
+			anim.update(rng.getFloat({0.0f, 42.0f}), sprite);
 		}
 	} else if (!baseSprites.empty()) {
 		// Optimization: if there's only one baseSprite, and this sprite has a material, then we don't need to update it at all here
 		if (!sprite.hasMaterial() || baseSprites.size() >= 2) {
-			sprite.copyFrom(rng->getRandomElement(baseSprites), false);
+			sprite.copyFrom(rng.getRandomElement(baseSprites), false);
 		}
 	}
 
@@ -589,13 +589,13 @@ void Particles::updateParticles(float time)
 			}
 
 			if (directionScatter > 0.00001f) {
-				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
+				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng.getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
 			}
 
 			if (!onTrail.empty()) {
 				particle.trailTime -= time;
 				if (particle.trailTime <= 0) { // Could be a while loop, but I'm worried about perf/infinite loops
-					particle.trailTime += rng->getFloat(trailSpawnInterval);
+					particle.trailTime += rng.getFloat(trailSpawnInterval);
 					for (const auto& system: onTrail) {
 						onSecondarySpawn(particle, system);
 					}
@@ -656,10 +656,10 @@ Vector3f Particles::getSpawnPosition(Vector3f origin) const
 
 	Vector2f pos;
 	if (spawnAreaShape == ParticleSpawnAreaShape::Rectangle) {
-		pos = Vector2f(rng->getFloat(-1, 1), rng->getFloat(-1, 1)) * spawnArea * 0.5f;
+		pos = Vector2f(rng.getFloat(-1, 1), rng.getFloat(-1, 1)) * spawnArea * 0.5f;
 	} else if (spawnAreaShape == ParticleSpawnAreaShape::Ellipse) {
-		const float radius = std::sqrt(rng->getFloat(0, 1));
-		const float angle = rng->getFloat(0.0f, 2.0f * pif());
+		const float radius = std::sqrt(rng.getFloat(0, 1));
+		const float angle = rng.getFloat(0.0f, 2.0f * pif());
 		pos = Vector2f(radius, 0).rotate(Angle1f::fromRadians(angle)) * spawnArea * 0.5f;
 	}
 	return origin + Vector3f(pos + spawnPositionOffset, startHeight);

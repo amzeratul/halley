@@ -8,6 +8,7 @@
 #include "halley/maths/circle.h"
 #include "halley/maths/colour_gradient.h"
 #include "halley/maths/ellipse.h"
+#include "halley/maths/random.h"
 
 namespace Halley {
 	class Polygon;
@@ -128,7 +129,6 @@ namespace Halley {
 		std::optional<Vector3f> getLastDespawnPos() const;
 
 	private:
-		Random* rng;
 		std::shared_ptr<Material> material;
 
 		bool enabled = true;
@@ -197,6 +197,8 @@ namespace Halley {
 		mutable std::optional<float> maxBorder;
 
 		SpawnPositionCallback spawnPositionCallback;
+
+		mutable Random rng;
 
 		void start();
 		void initializeParticle(size_t index, float time, float totalTime, Vector3f origin);

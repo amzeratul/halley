@@ -35,6 +35,8 @@ namespace Halley {
 	class Random {
 	public:
 		static Random& getGlobal();
+		static Random& getSharedGlobal();
+		static Random& getThreadGlobal();
 
 		Random(bool threadSafe = false);
 		Random(uint32_t seed, bool threadSafe = false);
@@ -42,9 +44,9 @@ namespace Halley {
 		Random(gsl::span<const std::byte> data, bool threadSafe = false);
 		~Random();
 
-		Random(const Random& other) = delete;
+		Random(const Random& other);
 		Random(Random&& other) noexcept;
-		Random& operator=(const Random& other) = delete;
+		Random& operator=(const Random& other);
 		Random& operator=(Random&& other) noexcept;
 
 		// NOTE THAT THIS IS INCLUSIVE ON MAX FOR INTEGER TYPES ONLY
@@ -95,16 +97,25 @@ namespace Halley {
 		void setSeed(gsl::span<Byte> data);
 
 		uint32_t getRawInt();
+		uint64_t getRawInt64();
 		float getRawFloat();
 		double getRawDouble();
 
 	private:
 		std::unique_ptr<MT199937AR> generator;
-		bool canSeed = true;
-		bool threadSafe = false;
-		Mutex mutex;
+		std::unique_ptr<Mutex> mutex;
 
 		uint32_t getRawIntUnsafe();
+
+		template <typename F>
+		auto withLock(F f) const
+		{
+			if (mutex) {
+				UniqueLock lock(*mutex);
+				return f();
+			}
+			return f();
+		}
 	};
 
 }
