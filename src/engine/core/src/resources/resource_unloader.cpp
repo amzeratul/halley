@@ -36,11 +36,44 @@ ResourceUnloader::ResourceUnloader(Resources& resources)
 {
 }
 
-void ResourceUnloader::update(Time t, const ResourceUnloaderRules& rules)
+void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 {
-	for (auto& [type, rule]: rules.rules) {
-		updateCollection(static_cast<float>(t), resources.ofType(type), rule);
+	if (pendingUpdate.isValid()) {
+		pendingUpdate.wait();
 	}
+	
+	const float dt = static_cast<float>(origDt);
+
+	for (const auto& [type, rule]: rules.rules) {
+		prepareCollection(dt, resources.ofType(type));
+	}
+
+	pendingUpdate = Concurrent::execute(Executors::getCPUAux(), [this, dt, rules = rules] {
+		for (auto& t: frameTimes) {
+			t += dt;
+		}
+		while (!frameTimes.empty() && frameTimes[0] > maxTimeLogged) {
+			frameTimes.erase(frameTimes.begin());
+		}
+		frameTimes.push_back(0);
+
+		for (const auto& [type, rule]: rules.rules) {
+			updateCollection(dt, resources.ofType(type), rule);
+		}
+
+		++frameIdx;
+	});
+}
+
+void ResourceUnloader::prepareCollection(float dt, ResourceCollectionBase& collection)
+{
+	if (!collection.isAsync()) {
+		return;
+	}
+
+	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
+		resource->startFrame(dt, frameIdx);
+	});
 }
 
 void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules)
@@ -224,29 +257,53 @@ void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollecti
 	});
 }
 
+float ResourceUnloader::getTimeSince(uint32_t idx) const
+{
+	const auto framesAgo = getFramesSince(idx);
+	const auto maxIdx = frameTimes.size() - 1;
+	if (framesAgo > maxIdx) {
+		return maxTimeLogged + 0.1f;
+	}
+
+	return frameTimes[maxIdx - framesAgo];
+}
+
+uint32_t ResourceUnloader::getFramesSince(uint32_t idx) const
+{
+	if (idx > frameIdx) {
+		return 0;
+	}
+	return frameIdx - idx;
+}
+
 template <typename T>
-ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(const std::shared_ptr<Resource>& resource, float t)
+ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(const std::shared_ptr<Resource>& resource, float t) const
 {
 	auto res = std::static_pointer_cast<T>(resource);
 
-	res->startFrame(t);
+	const AsyncResource::UsagePattern usagePattern = res->getUsagePattern();
+	const ResourceMemoryUsage memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
 
-	const auto usagePattern = res->getUsagePattern();
-	const auto memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
+	const uint32_t framesSinceInUse = getFramesSince(usagePattern.lastFrameInUse);
+	const uint32_t framesSinceInBackground = getFramesSince(usagePattern.lastFrameInBackground);
+	const uint32_t framesSinceInLowPriorityBackground = getFramesSince(usagePattern.lastFrameInBackgroundLowPriority);
+	const float timeSinceInUse = getTimeSince(usagePattern.lastFrameInUse);
+	const float timeSinceInBackground = getTimeSince(usagePattern.lastFrameInBackground);
+	const float timeSinceInLowPriorityBackground = getTimeSince(usagePattern.lastFrameInBackgroundLowPriority);
 
 	LoadStateInfo state;
 	state.usagePatternLoaded = usagePattern.loaded;
 	state.currentlyLoaded = res->isLoaded();
 	state.memoryUsage = memoryUsage.getTotal();
-	state.timeSinceUse = std::min(usagePattern.timeSinceInUse, usagePattern.timeSinceInBackground * 2.0f); // Time spent in background counts as double
+	state.timeSinceUse = std::min(timeSinceInUse, timeSinceInBackground * 2.0f); // Time spent in background counts as double
 
-	if (usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1 || !res->canUnload()) {
+	if (framesSinceInUse <= 1 || timeSinceInUse < 0.1 || !res->canUnload()) {
 		state.desiredState = ResourceDesiredLoadState::Load;
-	} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 1) {
+	} else if (framesSinceInBackground <= 1 || timeSinceInBackground < 1) {
 		state.desiredState = ResourceDesiredLoadState::Preload;
-	} else if (usagePattern.framesSinceInLowPriorityBackground <= 1 || usagePattern.timeSinceInLowPriorityBackground < 1) {
+	} else if (framesSinceInLowPriorityBackground <= 1 || timeSinceInLowPriorityBackground < 1) {
 		state.desiredState = ResourceDesiredLoadState::PreloadLowPriority;
-	} else if (usagePattern.timeSinceInUse < 15 || usagePattern.timeSinceInBackground < 10) {
+	} else if (timeSinceInUse < 15 || timeSinceInBackground < 10) {
 		state.desiredState = ResourceDesiredLoadState::Stale;
 	} else {
 		state.desiredState = ResourceDesiredLoadState::Unload;

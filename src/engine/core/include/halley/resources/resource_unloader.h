@@ -49,13 +49,23 @@ namespace Halley {
         Resources& resources;
         Time budgetMessageTimeout = 0;
         Time unloadPreloadMessageTimeout = 0;
+        uint32_t frameIdx = 1000;
+        Vector<float> frameTimes;
+
+        constexpr static float maxTimeLogged = 15.0; // seconds
 
         HashMap<ResourceDesiredLoadState, StateCollection> lastStates;
 
+        Future<void> pendingUpdate;
+
+        void prepareCollection(float t, ResourceCollectionBase& collection);
         void updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);
         void updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);
 
         template<typename T>
-        static LoadStateInfo getStateInfo(const std::shared_ptr<Resource>& resource, float t);
+        LoadStateInfo getStateInfo(const std::shared_ptr<Resource>& resource, float t) const;
+
+        float getTimeSince(uint32_t idx) const;
+        uint32_t getFramesSince(uint32_t idx) const;
     };
 }

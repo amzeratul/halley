@@ -67,7 +67,7 @@ float Resource::getAge() const
 	return age;
 }
 
-void Resource::startFrame(float dt) const
+void Resource::startFrame(float dt, uint32_t frameIdx) const
 {
 }
 
@@ -133,16 +133,7 @@ const Resource* ResourceObserver::getResourceBeingObserved() const
 AsyncResource::AsyncResource() 
 	: failed(false)
 	, loadState(State::Unloaded)
-	, inUseThisFrame(false)
-	, inBackgroundThisFrame(false)
 {
-	usageData.framesSinceInLowPriorityBackground = 1000;
-	usageData.framesSinceInBackground = 1000;
-	usageData.framesSinceInUse = 1000;
-	usageData.timeSinceInLowPriorityBackground = 1000.0;
-	usageData.timeSinceInBackground = 1000.0;
-	usageData.timeSinceInUse = 1000.0;
-	usageData.loaded = false;
 }
 
 AsyncResource::~AsyncResource()
@@ -255,50 +246,26 @@ Future<void> AsyncResource::onLoad() const
 	}
 }
 
-void AsyncResource::startFrame(float dt) const
+void AsyncResource::startFrame(float dt, uint32_t frameIdx) const
 {
-	usageData.timeSinceInUse += dt;
-	usageData.timeSinceInBackground += dt;
-	usageData.timeSinceInLowPriorityBackground += dt;
-	
-	usageData.framesSinceInUse++;
-	usageData.framesSinceInBackground++;
-	usageData.framesSinceInLowPriorityBackground++;
-
+	curFrame = frameIdx;
 	usageData.loaded = loadState == State::Loaded;
-
-	if (inUseThisFrame.load(std::memory_order_relaxed)) {
-		usageData.timeSinceInUse = 0;
-		usageData.framesSinceInBackground = 0;
-	}
-	if (inBackgroundThisFrame.load(std::memory_order_relaxed)) {
-		usageData.timeSinceInBackground = 0;
-		usageData.framesSinceInBackground = 0;
-	}
-	if (inLowPriorityBackgroundThisFrame.load(std::memory_order_relaxed)) {
-		usageData.timeSinceInLowPriorityBackground = 0;
-		usageData.framesSinceInLowPriorityBackground = 0;
-	}
-
-	inUseThisFrame.store(false, std::memory_order_relaxed);
-	inBackgroundThisFrame.store(false, std::memory_order_relaxed);
-	inLowPriorityBackgroundThisFrame.store(false, std::memory_order_relaxed);
 }
 
 void AsyncResource::markActivelyInUse() const
 {
-	inUseThisFrame.store(true, std::memory_order_relaxed);
+	usageData.lastFrameInUse = curFrame;
 	requestLoading();
 }
 
 void AsyncResource::markBackgroundLoaded() const
 {
-	inBackgroundThisFrame.store(true, std::memory_order_relaxed);
+	usageData.lastFrameInBackground = curFrame;
 }
 
 void AsyncResource::markLowPriorityBackgroundLoaded() const
 {
-	inLowPriorityBackgroundThisFrame.store(true, std::memory_order_relaxed);
+	usageData.lastFrameInBackgroundLowPriority = curFrame;
 }
 
 const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const
@@ -330,7 +297,7 @@ bool AsyncResource::requestLoading() const
 {
 	if (loadState == State::Unloaded) {
 		UniqueLock lock(loadMutex);
-		inUseThisFrame = true;
+		usageData.lastFrameInUse = curFrame;
 		if (loadState == State::Unloaded) {
 			return const_cast<AsyncResource*>(this)->doRequestLoading();
 		}
@@ -342,7 +309,7 @@ bool AsyncResource::requestUnloading() const
 {
 	if (loadState == State::Loaded) {
 		UniqueLock lock(loadMutex);
-		if (loadState == State::Loaded && !inUseThisFrame) {
+		if (loadState == State::Loaded && usageData.lastFrameInUse != curFrame) {
 			return const_cast<AsyncResource*>(this)->doRequestUnloading();
 		}
 	}

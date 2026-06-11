@@ -220,7 +220,7 @@ namespace Halley
 		void resetAge();
 		float getAge() const;
 
-		virtual void startFrame(float dt) const;
+		virtual void startFrame(float dt, uint32_t frameIdx) const;
 
 		void setUnloaded();
 		bool isUnloaded() const;
@@ -291,12 +291,9 @@ namespace Halley
 		};
 
 		struct UsagePattern {
-			float timeSinceInUse = 0;
-			float timeSinceInBackground = 0;
-			float timeSinceInLowPriorityBackground = 0;
-			uint16_t framesSinceInUse = 0;
-			uint16_t framesSinceInBackground = 0;
-			uint16_t framesSinceInLowPriorityBackground = 0;
+			uint32_t lastFrameInUse = 0;
+			uint32_t lastFrameInBackground = 0;
+			uint32_t lastFrameInBackgroundLowPriority = 0;
 			bool loaded = false;
 		};
 
@@ -318,7 +315,7 @@ namespace Halley
 		void waitForLoad(bool acceptFailed = false, std::optional<int> notifyIfMoreThanUs = 10'000) const;
 		Future<void> onLoad() const;
 
-		void startFrame(float dt) const final;
+		void startFrame(float dt, uint32_t frameIdx) const final;
 		void markActivelyInUse() const;
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
@@ -340,9 +337,7 @@ namespace Halley
 		std::atomic<State> loadState;
 		mutable ResourceDesiredLoadState desiredLoadState = ResourceDesiredLoadState::Undefined;
 
-		mutable std::atomic<bool> inUseThisFrame;
-		mutable std::atomic<bool> inBackgroundThisFrame;
-		mutable std::atomic<bool> inLowPriorityBackgroundThisFrame;
+		mutable uint32_t curFrame = 0;
 		mutable UsagePattern usageData;
 
 		mutable ConditionVariable loadWait;
