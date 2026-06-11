@@ -249,7 +249,6 @@ Future<void> AsyncResource::onLoad() const
 void AsyncResource::startFrame(float dt, uint32_t frameIdx) const
 {
 	curFrame = frameIdx;
-	usageData.loaded = loadState == State::Loaded;
 }
 
 void AsyncResource::markActivelyInUse() const
@@ -270,6 +269,7 @@ void AsyncResource::markLowPriorityBackgroundLoaded() const
 
 const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const
 {
+	usageData.loaded = loadState == State::Loaded;
 	return usageData;
 }
 
