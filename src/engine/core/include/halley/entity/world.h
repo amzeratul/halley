@@ -146,10 +146,9 @@ namespace Halley {
 			return addFamily(std::make_unique<FamilyImpl<T>>(*maskStorage));
 		}
 
-		const WorldReflection& getReflection() const;
-
-		MaskStorage& getMaskStorage() const noexcept;
-		ComponentDeleterTable& getComponentDeleterTable();
+		const WorldReflection& getReflection() const { return *reflection; }
+		MaskStorage& getMaskStorage() const noexcept { return *maskStorage; }
+		ComponentDeleterTable& getComponentDeleterTable() const { return *componentDeleterTable; }
 
 		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem, SystemMessageDestination destination);
 

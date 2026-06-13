@@ -30,26 +30,6 @@ Entity::Entity()
 
 Entity::~Entity() = default;
 
-void Entity::destroyComponents(ComponentDeleterTable& table)
-{
-	for (auto& component : components) {
-		deleteComponent(component.second, component.first, table);
-	}
-	components.clear();
-	liveComponents = 0;
-}
-
-void Entity::removeComponentById(World& world, int id)
-{
-	for (uint8_t i = 0; i < liveComponents; ++i) {
-		if (components[i].first == id) {
-			removeComponentAt(i);
-			markDirty(world);
-			return;
-		}
-	}
-}
-
 void Entity::addComponent(Component* component, int id, const char* componentName, ComponentDeleterTable& deleterTable)
 {
 	// Note that we can't simply delete component here in case of an exception, as deleting it requires using the deleter table from the world
@@ -62,7 +42,7 @@ void Entity::addComponent(Component* component, int id, const char* componentNam
 
 	// Ensure it's not already there
 	for (uint8_t i = 0; i < liveComponents; ++i) {
-		if (components[i].first == id) {
+		if (componentIds[i] == id) {
 			deleterTable.get(id)->destroy(component);
 			const auto& curName = name ? *name : String::emptyString();
 			throw Exception("Component " + String(componentName) + " (id " + toString(id) + ") already exists in Entity \"" + curName + "\".", HalleyExceptions::Entity);
@@ -70,21 +50,45 @@ void Entity::addComponent(Component* component, int id, const char* componentNam
 	}
 	
 	// Put it at the back of the list...
-	components.push_back(std::pair<int, Component*>(id, component));
+	componentIds.push_back(id);
+	componentPtrs.push_back(component);
 
 	// ...if there's dead components, swap with the first dead component...
-	if (static_cast<size_t>(liveComponents) < components.size()) {
-		std::swap(components[liveComponents], components.back());
+	if (static_cast<size_t>(liveComponents) < componentIds.size()) {
+		std::swap(componentIds[liveComponents], componentIds.back());
+		std::swap(componentPtrs[liveComponents], componentPtrs.back());
 	}
 
 	// ...and increase the list, therefore putting it in living component territory
 	++liveComponents;
 }
 
+void Entity::destroyComponents(ComponentDeleterTable& table)
+{
+	for (size_t i = 0; i < componentIds.size(); ++i) {
+		deleteComponent(componentPtrs[i], componentIds[i], table);
+	}
+	componentPtrs.clear();
+	componentIds.clear();
+	liveComponents = 0;
+}
+
+void Entity::removeComponentById(World& world, int id)
+{
+	for (uint8_t i = 0; i < liveComponents; ++i) {
+		if (componentIds[i] == id) {
+			removeComponentAt(i);
+			markDirty(world);
+			return;
+		}
+	}
+}
+
 void Entity::removeComponentAt(int i)
 {
 	// Put it at the end of the list of living components... (guaranteed to swap with living component)
-	std::swap(components[i], components[static_cast<size_t>(liveComponents) - 1]);
+	std::swap(componentIds[i], componentIds[static_cast<size_t>(liveComponents) - 1]);
+	std::swap(componentPtrs[i], componentPtrs[static_cast<size_t>(liveComponents) - 1]);
 
 	// ...then shrink that list, therefore moving it into dead component territory
 	--liveComponents;
@@ -101,19 +105,6 @@ void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable
 	TypeDeleterBase* deleter = table.get(id);
 	deleter->destroy(component);
 	//PoolPool::getPool(deleter->getSize())->free(component);
-}
-
-void Entity::keepOnlyComponentsWithIds(const Vector<int>& ids, World& world)
-{
-	for (uint8_t i = 0; i < liveComponents; ++i) {
-		if (std::find(ids.begin(), ids.end(), components[i].first) == ids.end()) {
-			std::swap(components[i], components[liveComponents - 1]);
-			--liveComponents;
-			--i;
-		}
-	}
-	
-	markDirty(world);
 }
 
 void Entity::onReady()
@@ -264,10 +255,11 @@ void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::sp
 		dirty = false;
 
 		// Delete stale components
-		for (size_t i = liveComponents; i < components.size(); ++i) {
-			deleteComponent(components[i].second, components[i].first, table);
+		for (size_t i = liveComponents; i < componentIds.size(); ++i) {
+			deleteComponent(componentPtrs[i], componentIds[i], table);
 		}
-		components.resize(liveComponents);
+		componentIds.resize(liveComponents);
+		componentPtrs.resize(liveComponents);
 
 		// Re-generate mask
 		if (!storage) {
@@ -275,9 +267,9 @@ void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::sp
 		} else {
 			auto m = FamilyMask::RealType();
 			bool componentsEnabled = enabled && parentEnabled;
-			for (auto i : components) {
-				if (componentsEnabled || std_ex::contains(alwaysEnabledComponents, i.first)) {
-					FamilyMask::setBit(m, i.first);
+			for (auto i : componentIds) {
+				if (componentsEnabled || std_ex::contains(alwaysEnabledComponents, i)) {
+					FamilyMask::setBit(m, i);
 				}
 			}
 			mask = FamilyMaskType(m, *storage);
@@ -468,8 +460,8 @@ bool Entity::hasAnyBit(const World& world, gsl::span<const int> indices) const
 size_t Entity::getMemoryUsage(ComponentDeleterTable& table) const
 {
 	size_t total = sizeof(*this);
-	for (const auto& c: components) {
-		total += table.get(c.first)->getSize();
+	for (const auto& c: componentIds) {
+		total += table.get(c)->getSize();
 	}
 	if (name) {
 		total += name->getSizeBytes();

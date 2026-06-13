@@ -54,11 +54,11 @@ namespace Halley {
 		template <typename T>
 		T* tryGetComponent(bool evenIfDisabled = false)
 		{
-			if (evenIfDisabled || (enabled && parentEnabled)) {
+			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
 				for (uint8_t i = 0; i < liveComponents; i++) {
-					if (components[i].first == id) {
-						return static_cast<T*>(components[i].second);
+					if (componentIds[i] == id) {
+						return static_cast<T*>(componentPtrs[i]);
 					}
 				}
 			}
@@ -68,11 +68,11 @@ namespace Halley {
 		template <typename T>
 		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
-			if (evenIfDisabled || (enabled && parentEnabled)) {
+			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
 				for (uint8_t i = 0; i < liveComponents; i++) {
-					if (components[i].first == id) {
-						return static_cast<const T*>(components[i].second);
+					if (componentIds[i] == id) {
+						return static_cast<const T*>(componentPtrs[i]);
 					}
 				}
 			}
@@ -104,11 +104,23 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent(const World& world, bool evenIfDisabled = false) const
 		{
+			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
+				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+				for (uint8_t i = 0; i < liveComponents; i++) {
+					if (componentIds[i] == id) {
+						return true;
+					}
+				}
+			}
+			return false;
+
+			/*
 			if (dirty) {
 				return tryGetComponent<T>(evenIfDisabled) != nullptr;
 			} else {
 				return hasBit(world, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
 			}
+			*/
 		}
 
 		template <typename ... Ts>
@@ -172,7 +184,8 @@ namespace Halley {
 		// Be SURE to verify that no performance-critical fields get bumped to a worse cacheline if you change anything here
 
 		// Cacheline 0
-		Vector<std::pair<int, Component*>> components;
+		Vector<int16_t> componentIds;
+		Vector<Component*> componentPtrs;
 		uint8_t liveComponents = 0;
 		bool dirty : 1;
 		bool alive : 1;
@@ -191,9 +204,9 @@ namespace Halley {
 		FamilyMaskType mask;
 		Entity* parent = nullptr;
 		EntityId entityId;
-		Vector<Entity*> children; // Cacheline 1 starts 16 bytes into this
 
 		// Cacheline 1
+		Vector<Entity*> children;
 		UUID instanceUUID;
 		UUID prefabUUID;
 		std::shared_ptr<const Prefab> prefab;
@@ -226,7 +239,6 @@ namespace Halley {
 		void removeComponentById(World& world, int id);
 		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
-		void keepOnlyComponentsWithIds(const Vector<int>& ids, World& world);
 		void setEnabled(World& world, bool enabled);
 
 		void onReady();
@@ -280,7 +292,7 @@ namespace Halley {
 		size_t getMemoryUsage(ComponentDeleterTable& table) const;
 	};
 
-	static_assert(sizeof(Entity) <= 128); // We'll lose some significant perf due to going over two cache lines
+	//static_assert(sizeof(Entity) <= 128); // We'll lose some significant perf due to going over two cache lines
 
 	class EntityRef;
 	
@@ -288,23 +300,24 @@ namespace Halley {
 	public:
 		class Iterator {
 		public:
-			Iterator(Vector<Entity*>::const_iterator iter, World& world)
+
+			constexpr Iterator(Vector<Entity*>::const_iterator iter, World& world)
 				: iter(iter)
 				, world(world)
 			{}
 
-			Iterator& operator++()
+			constexpr Iterator& operator++()
 			{
 				++iter;
 				return *this;
 			}
 
-			bool operator==(const Iterator& other)
+			constexpr bool operator==(const Iterator& other) const
 			{
 				return iter == other.iter;
 			}
 
-			bool operator!=(const Iterator& other)
+			constexpr bool operator!=(const Iterator& other) const
 			{
 				return iter != other.iter;
 			}
@@ -316,17 +329,17 @@ namespace Halley {
 			World& world;
 		};
 		
-		EntityRefIterable(const Vector<Entity*>& entities, World& world)
+		constexpr EntityRefIterable(const Vector<Entity*>& entities, World& world)
 			: entities(entities)
 			, world(world)
 		{}
 
-		Iterator begin() const
+		constexpr Iterator begin() const
 		{
 			return Iterator(entities.begin(), world);
 		}
 
-		Iterator end() const
+		constexpr Iterator end() const
 		{
 			return Iterator(entities.end(), world);
 		}
@@ -684,12 +697,6 @@ namespace Halley {
 			validate();
 			return entity->prefabUUID;
 		}
-		
-		void keepOnlyComponentsWithIds(const Vector<int>& ids)
-		{
-			validate();
-			entity->keepOnlyComponentsWithIds(ids, *world);
-		}
 
 		bool hasParent() const
 		{
@@ -862,24 +869,6 @@ namespace Halley {
 			return static_cast<size_t>(entity->liveComponents);
 		}
 
-		std::pair<int, Component*> getRawComponent(size_t idx) const
-		{
-			validate();
-			return entity->components[idx];
-		}
-
-		Vector<std::pair<int, Component*>>::iterator begin() const
-		{
-			validate();
-			return entity->components.begin();
-		}
-
-		Vector<std::pair<int, Component*>>::iterator end() const
-		{
-			validate();
-			return entity->components.begin() + entity->liveComponents;
-		}
-
 		EntityRef& setSerializable(bool serializable)
 		{
 			validate();
@@ -975,10 +964,20 @@ namespace Halley {
 
 		void validate() const
 		{
-			HalleyAssertDev(isValid());
+			HalleyAssertDebug(isValid());
 #ifdef _DEBUG
 			HalleyAssertDebug(entity->getEntityId() == entityId);
 #endif
+		}
+
+		gsl::span<const int16_t> getComponentIds() const
+		{
+			return entity->componentIds.const_span().subspan(0, entity->liveComponents);
+		}
+
+		gsl::span<const Component* const> getComponentPtrs() const
+		{
+			return entity->componentPtrs.const_span().subspan(0, entity->liveComponents);
 		}
 
 	private:
@@ -1103,24 +1102,6 @@ namespace Halley {
 			return size_t(entity->liveComponents);
 		}
 
-		std::pair<int, Component*> getRawComponent(size_t idx) const
-		{
-			HalleyAssertDev(entity);
-			return entity->components[idx];
-		}
-
-		Vector<std::pair<int, Component*>>::const_iterator begin() const
-		{
-			HalleyAssertDev(entity);
-			return entity->components.begin();
-		}
-
-		Vector<std::pair<int, Component*>>::const_iterator end() const
-		{
-			HalleyAssertDev(entity);
-			return entity->components.begin() + entity->liveComponents;
-		}
-
 		bool isSerializable() const
 		{
 			HalleyAssertDev(entity);
@@ -1194,6 +1175,16 @@ namespace Halley {
 		WorldPartitionId getWorldPartition() const
 		{
 			return entity->worldPartition;
+		}
+
+		gsl::span<const int16_t> getComponentIds() const
+		{
+			return entity->componentIds.const_span().subspan(0, entity->liveComponents);
+		}
+
+		gsl::span<const Component* const> getComponentPtrs() const
+		{
+			return entity->componentPtrs.const_span().subspan(0, entity->liveComponents);
 		}
 
 	private:

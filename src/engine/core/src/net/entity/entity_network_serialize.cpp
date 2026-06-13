@@ -456,7 +456,12 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     if (!remote) {
         auto& reflection = serializer.getOptions().world->getReflection();
 
-        for (auto [componentId, component] : entity) {
+        const auto ids = entity.getComponentIds();
+        const auto ptrs = entity.getComponentPtrs();
+        for (size_t i = 0; i < ids.size(); ++i) {
+            const auto& componentId = ids[i];
+            const auto& component = ptrs[i];
+
             if (!canSerializeNetworkComponent && componentId == NetworkComponent::componentIndex) {
                 continue;
             }
