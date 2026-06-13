@@ -30,47 +30,47 @@ namespace Halley {
 	    using pointer           = Pointer;
 	    using reference         = decltype(*Pointer());
 
-		VectorIterator() : v(nullptr) {}
-		VectorIterator(pointer v) : v(v) {}
+		constexpr VectorIterator() : v(nullptr) {}
+		constexpr VectorIterator(pointer v) : v(v) {}
 
 		template<typename OtherPointer>
-		VectorIterator(const VectorIterator<T, OtherPointer>& o) : v(o.v) {}
+		constexpr VectorIterator(const VectorIterator<T, OtherPointer>& o) : v(o.v) {}
 		
-		reference operator*() const { return *v; }
-		pointer operator->() const { return v; }
-		reference operator[](size_t n) const { return v[n]; }
+		constexpr reference operator*() const { return *v; }
+		constexpr pointer operator->() const { return v; }
+		constexpr reference operator[](size_t n) const { return v[n]; }
 		
-		VectorIterator& operator++() { ++v; return *this; }
-		VectorIterator& operator--() { --v; return *this; }
-		VectorIterator operator++(int) const { return VectorIterator(v + 1); }
-		VectorIterator operator--(int) const { return VectorIterator(v - 1); }
-		VectorIterator operator+(ptrdiff_t o) const { return VectorIterator(v + o); }
-		VectorIterator operator-(ptrdiff_t o) const { return VectorIterator(v - o); }
-		VectorIterator operator+=(ptrdiff_t o) { v += o; return *this; }
-		VectorIterator operator-=(ptrdiff_t o) { v -= o; return *this; }
+		constexpr VectorIterator& operator++() { ++v; return *this; }
+		constexpr VectorIterator& operator--() { --v; return *this; }
+		constexpr VectorIterator operator++(int) const { return VectorIterator(v + 1); }
+		constexpr VectorIterator operator--(int) const { return VectorIterator(v - 1); }
+		constexpr VectorIterator operator+(ptrdiff_t o) const { return VectorIterator(v + o); }
+		constexpr VectorIterator operator-(ptrdiff_t o) const { return VectorIterator(v - o); }
+		constexpr VectorIterator operator+=(ptrdiff_t o) { v += o; return *this; }
+		constexpr VectorIterator operator-=(ptrdiff_t o) { v -= o; return *this; }
 		
 		template<typename OtherPointer>
-		ptrdiff_t operator-(const VectorIterator<T, OtherPointer>& other) const { return v - other.v; }
+		constexpr ptrdiff_t operator-(const VectorIterator<T, OtherPointer>& other) const { return v - other.v; }
 
 		template<typename OtherPointer>
-		bool operator==(const VectorIterator<T, OtherPointer>& other) const { return v == other.v; }
+		constexpr bool operator==(const VectorIterator<T, OtherPointer>& other) const { return v == other.v; }
 
 		template<typename OtherPointer>
-		bool operator!=(const VectorIterator<T, OtherPointer>& other) const { return v != other.v; }
+		constexpr bool operator!=(const VectorIterator<T, OtherPointer>& other) const { return v != other.v; }
 
 		template<typename OtherPointer>
-		bool operator<(const VectorIterator<T, OtherPointer>& other) const { return v < other.v; }
+		constexpr bool operator<(const VectorIterator<T, OtherPointer>& other) const { return v < other.v; }
 
 		template<typename OtherPointer>
-		bool operator>(const VectorIterator<T, OtherPointer>& other) const { return v > other.v; }
+		constexpr bool operator>(const VectorIterator<T, OtherPointer>& other) const { return v > other.v; }
 
 		template<typename OtherPointer>
-		bool operator<=(const VectorIterator<T, OtherPointer>& other) const { return v <= other.v; }
+		constexpr bool operator<=(const VectorIterator<T, OtherPointer>& other) const { return v <= other.v; }
 
 		template<typename OtherPointer>
-		bool operator>=(const VectorIterator<T, OtherPointer>& other) const { return v >= other.v; }
+		constexpr bool operator>=(const VectorIterator<T, OtherPointer>& other) const { return v >= other.v; }
 
-		friend void swap(VectorIterator& a, VectorIterator& b) noexcept { std::swap(a.v, b.v); }
+		constexpr friend void swap(VectorIterator& a, VectorIterator& b) noexcept { std::swap(a.v, b.v); }
 
 		pointer v;
 	};
@@ -360,7 +360,7 @@ namespace Halley {
 
 		[[nodiscard]] reference at(size_t index)
 		{
-			if (index >= size()) {
+			if (index >= size()) [[unlikely]] {
 				char buffer[128];
 				snprintf(buffer, sizeof(buffer), "Index %zu out of vector range %zu", index, size());
 				HalleyExceptions::throwException(buffer, 217);
@@ -370,7 +370,7 @@ namespace Halley {
 
 		[[nodiscard]] const_reference at(size_t index) const
 		{
-			if (index >= size()) {
+			if (index >= size()) [[unlikely]] {
 				char buffer[128];
 				snprintf(buffer, sizeof(buffer), "Index %zu out of vector range %zu", index, size());
 				HalleyExceptions::throwException(buffer, 217);
@@ -508,7 +508,7 @@ namespace Halley {
 
 		iterator erase(const_iterator first, const_iterator last)
 		{
-			if (first == last) {
+			if (first == last) [[unlikely]] {
 				return de_const_iter(last);
 			}
 			const auto idx = first - begin();
@@ -810,7 +810,7 @@ namespace Halley {
 		std::optional<size_t> find_index(const T& value)
 		{
 			const auto iter = std::find(begin(), end(), value);
-			if (iter == end()) {
+			if (iter == end()) [[unlikely]] {
 				return {};
 			} else {
 				return iter - begin();
@@ -820,7 +820,7 @@ namespace Halley {
 		std::optional<size_t> find_index(const T& value) const
 		{
 			const auto iter = std::find(begin(), end(), value);
-			if (iter == end()) {
+			if (iter == end()) [[unlikely]] {
 				return {};
 			} else {
 				return iter - begin();
@@ -831,7 +831,7 @@ namespace Halley {
 		std::optional<size_t> find_index_if(F predicate)
 		{
 			const auto iter = std::find_if(begin(), end(), predicate);
-			if (iter == end()) {
+			if (iter == end()) [[unlikely]] {
 				return {};
 			} else {
 				return iter - begin();
@@ -842,7 +842,7 @@ namespace Halley {
 		std::optional<size_t> find_index_if(F predicate) const
 		{
 			const auto iter = std::find_if(begin(), end(), predicate);
-			if (iter == end()) {
+			if (iter == end()) [[unlikely]] {
 				return {};
 			} else {
 				return iter - begin();

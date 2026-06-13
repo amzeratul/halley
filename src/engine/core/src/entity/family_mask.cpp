@@ -44,7 +44,7 @@ public:
 	{
 		auto entry = MaskEntry(value, 0);
 		auto i = entries.find(entry);
-		if (i == entries.end()) {
+		if (i == entries.end()) [[unlikely]] {
 			// Not found, assign a new index
 			const int idx = static_cast<int>(values.size());
 			entry.idx = idx;
@@ -67,7 +67,7 @@ public:
 
 	RealType& retrieve(int handle)
 	{
-		if (handle == -1) {
+		if (handle == -1) [[unlikely]] {
 			return dummy;
 		} else {
 			return values[handle]->mask;

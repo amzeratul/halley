@@ -295,7 +295,7 @@ ResourceDesiredLoadState AsyncResource::getDesiredLoadState() const
 
 bool AsyncResource::requestLoading() const
 {
-	if (loadState == State::Unloaded) {
+	if (loadState.load(std::memory_order::relaxed) == State::Unloaded) {
 		UniqueLock lock(loadMutex);
 		usageData.lastFrameInUse = curFrame;
 		if (loadState == State::Unloaded) {
@@ -307,7 +307,7 @@ bool AsyncResource::requestLoading() const
 
 bool AsyncResource::requestUnloading() const
 {
-	if (loadState == State::Loaded) {
+	if (loadState.load(std::memory_order::relaxed) == State::Loaded) {
 		UniqueLock lock(loadMutex);
 		if (loadState == State::Loaded && usageData.lastFrameInUse != curFrame) {
 			return const_cast<AsyncResource*>(this)->doRequestUnloading();
