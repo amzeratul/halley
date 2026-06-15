@@ -93,7 +93,7 @@ void InputKeyboardSDL::setupMapping()
 KeyCode InputKeyboardSDL::getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const
 {
 	if (sdlKeyCode & SDLK_SCANCODE_MASK) {
-		return static_cast<KeyCode>(SDLK_SCANCODE_MASK ^ SDLK_SCANCODE_MASK);
+		return static_cast<KeyCode>(sdlKeyCode ^ SDLK_SCANCODE_MASK);
 	}
 
 	return virtualKeyCodeToHalley.value_or(sdlKeyCode, KeyCode::Unknown);
