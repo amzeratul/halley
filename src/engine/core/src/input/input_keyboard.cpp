@@ -39,9 +39,9 @@ TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, Softwa
 	return TextInputCapture(textInputData, std::move(data), std::move(capture));
 }
 
-void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
+void InputKeyboard::onKeyPressed(KeyCode code, KeyCode virtualCode, KeyMods mods)
 {
-	const auto key = KeyboardKeyPress(code, mods);
+	const auto key = KeyboardKeyPress(virtualCode, mods);
 	
 	if (!sendKeyPress(key)) {
 		keyPresses.push_back(key);
@@ -49,7 +49,7 @@ void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
 	}
 }
 
-void InputKeyboard::onKeyReleased(KeyCode code, KeyMods mods)
+void InputKeyboard::onKeyReleased(KeyCode code, KeyCode virtualCode, KeyMods mods)
 {
 	onButtonReleased(static_cast<int>(code));
 }

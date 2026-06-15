@@ -26,8 +26,8 @@ namespace Halley {
 		explicit InputKeyboard(int nButtons = -1, std::shared_ptr<IClipboard> clipboard = {});
 		virtual ~InputKeyboard() = default;
 
-		void onKeyPressed(KeyCode code, KeyMods mods);
-		void onKeyReleased(KeyCode code, KeyMods mods);
+		void onKeyPressed(KeyCode code, KeyCode virtualCode, KeyMods mods);
+		void onKeyReleased(KeyCode code, KeyCode virtualCode, KeyMods mods);
 
 		KeyMods getKeyMods() const override;
 		std::string_view getName() const override;

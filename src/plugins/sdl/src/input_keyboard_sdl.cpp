@@ -28,6 +28,7 @@ using namespace Halley;
 InputKeyboardSDL::InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard)
 	: InputKeyboard(SDL_NUM_SCANCODES, clipboard)
 {
+	setupMapping();
 	SDL_StartTextInput();
 }
 
@@ -40,36 +41,62 @@ void InputKeyboardSDL::processEvent(const SDL_Event& rawEvent)
 		//const SDL_TextEditingEvent& event = rawEvent.edit;
 	} else {
 		const SDL_KeyboardEvent& event = rawEvent.key;
+		const auto scanCode = static_cast<KeyCode>(event.keysym.scancode);
+		const auto virtualCode = getHalleyKeyCodeFromSDLVirtualKeyCode(event.keysym.sym);
+		const auto mods = getMods(event.keysym.mod);
+
 		switch (event.type) {
 			case SDL_KEYDOWN:
-				onKeyPressed(static_cast<KeyCode>(event.keysym.scancode), getMods(event.keysym.mod));
+				onKeyPressed(scanCode, virtualCode, mods);
 				break;
 			case SDL_KEYUP:
-				onKeyReleased(static_cast<KeyCode>(event.keysym.scancode), getMods(event.keysym.mod));
+				onKeyReleased(scanCode, virtualCode, mods);
 				break;
 		}
 	}
 }
 
+void InputKeyboardSDL::setupMapping()
+{
+	auto& v = virtualKeyCodeToHalley;
+
+	for (int16_t code = SDLK_a; code <= SDLK_z; ++code) {
+		v[code] = static_cast<KeyCode>(static_cast<int>(KeyCode::A) + (code - SDLK_a));
+	}
+
+	v[SDLK_RETURN] = KeyCode::Enter;
+    v[SDLK_ESCAPE] = KeyCode::Esc;
+    v[SDLK_BACKSPACE] = KeyCode::Backspace;
+    v[SDLK_TAB] = KeyCode::Tab;
+    v[SDLK_SPACE] = KeyCode::Space;
+    v[SDLK_COMMA] = KeyCode::Comma;
+    v[SDLK_MINUS] = KeyCode::Minus;
+    v[SDLK_PERIOD] = KeyCode::Period;
+    v[SDLK_SLASH] = KeyCode::Slash;
+    v[SDLK_0] = KeyCode::Num0;
+    v[SDLK_1] = KeyCode::Num1;
+    v[SDLK_2] = KeyCode::Num2;
+    v[SDLK_3] = KeyCode::Num3;
+    v[SDLK_4] = KeyCode::Num4;
+    v[SDLK_5] = KeyCode::Num5;
+    v[SDLK_6] = KeyCode::Num6;
+    v[SDLK_7] = KeyCode::Num7;
+    v[SDLK_8] = KeyCode::Num8;
+    v[SDLK_9] = KeyCode::Num9;
+    v[SDLK_SEMICOLON] = KeyCode::Semicolon;
+    v[SDLK_LEFTBRACKET] = KeyCode::LeftBracket;
+    v[SDLK_BACKSLASH] = KeyCode::Backslash;
+    v[SDLK_RIGHTBRACKET] = KeyCode::RightBracket;
+    v[SDLK_BACKQUOTE] = KeyCode::Grave;
+};
+
 KeyCode InputKeyboardSDL::getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const
 {
-	// Halley uses uppercase characters
-	if (sdlKeyCode >= 'a' && sdlKeyCode <= 'z') {
-		return KeyCode(sdlKeyCode - 32);
+	if (sdlKeyCode & SDLK_SCANCODE_MASK) {
+		return static_cast<KeyCode>(SDLK_SCANCODE_MASK ^ SDLK_SCANCODE_MASK);
 	}
 
-	// SDL has a special code for Delete for some reason
-	if (sdlKeyCode == SDLK_DELETE) {
-		return KeyCode::Delete;
-	}
-
-	// Halley moves scancodes to +128 offset
-	if ((sdlKeyCode & SDLK_SCANCODE_MASK) != 0) {
-		return KeyCode((sdlKeyCode & ~SDLK_SCANCODE_MASK) + 128);
-	}
-
-	// Otherwise, should be compatible
-	return KeyCode(sdlKeyCode);
+	return virtualKeyCodeToHalley.value_or(sdlKeyCode, KeyCode::Unknown);
 }
 
 KeyMods InputKeyboardSDL::getMods(int sdlMods) const
@@ -92,11 +119,7 @@ KeyMods InputKeyboardSDL::getMods(int sdlMods) const
 
 String InputKeyboardSDL::getButtonName(int code) const
 {
-	if (auto name = KeyCodes::tryToName(static_cast<KeyCode>(code))) {
-		return *name;
-	}
-	auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code));
-	return str;
+	return String(SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code)));
 }
 
 void InputKeyboardSDL::update()
