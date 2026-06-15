@@ -109,7 +109,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 
 	// Anything marked as "Unload" will be unloaded
 	for (auto& s: states[ResourceDesiredLoadState::Unload].states) {
-		if (s.usagePatternLoaded) {
+		if (s.loaded) {
 			s.markAsUnloading = true;
 			curMemoryUsage -= s.memoryUsage;
 		}
@@ -118,10 +118,8 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	// Anything marked as "Load" will be loaded
 	int nWaitingToLoad = 0;
 	for (auto& s: states[ResourceDesiredLoadState::Load].states) {
-		if (!s.currentlyLoaded) {
+		if (!s.loaded) {
 			++nWaitingToLoad;
-		}
-		if (!s.usagePatternLoaded) {
 			s.markAsLoading = true;
 			curMemoryUsage += s.memoryUsage;
 		}
@@ -133,7 +131,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	if (canPreload) {
 		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
 			for (auto& s: states[state].states) {
-				if (!s.usagePatternLoaded) {
+				if (!s.loaded) {
 					memoryUsageWithAllPreloads += s.memoryUsage;
 				}
 			}
@@ -143,7 +141,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	// Stale, unload if it makes space for preloads, or if we're above the "stale budget" (normally ~75% of total budget, so we have some headroom)
 	// Otherwise it's OK to keep them around
 	for (auto& s: states[ResourceDesiredLoadState::Stale].states) {
-		if (s.usagePatternLoaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
+		if (s.loaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
 			s.markAsUnloading = true;
 			memoryUsageWithAllPreloads -= s.memoryUsage;
 			curMemoryUsage -= s.memoryUsage;
@@ -156,7 +154,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	bool preloadUnloaded = false;
 	for (const auto state: { ResourceDesiredLoadState::PreloadLowPriority, ResourceDesiredLoadState::Preload }) {
 		for (auto& s: states[state].states) {
-			if (s.usagePatternLoaded && curMemoryUsage > rules.budget) {
+			if (s.loaded && curMemoryUsage > rules.budget) {
 				s.markAsUnloading = true;
 				curMemoryUsage -= s.memoryUsage;
 				preloadUnloaded = true;
@@ -171,11 +169,9 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
 			bool preloadingAny = false;
 			for (auto& s: states[state].states) {
-				if (!s.usagePatternLoaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+				if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
 					s.markAsLoading = true;
 					curMemoryUsage += s.memoryUsage;
-					preloadingAny = true;
-				} else if (s.usagePatternLoaded && !s.currentlyLoaded) {
 					preloadingAny = true;
 				}
 			}
@@ -250,7 +246,7 @@ void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollecti
 		}
 
 		auto& stateCollection = states[state.desiredState];
-		if (state.usagePatternLoaded) {
+		if (state.loaded) {
 			stateCollection.curMemoryUsage += state.memoryUsage;
 		}
 		stateCollection.states += std::move(state);
@@ -282,7 +278,8 @@ ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(const std::shared
 	auto res = std::static_pointer_cast<T>(resource);
 
 	const AsyncResource::UsagePattern usagePattern = res->getUsagePattern();
-	const ResourceMemoryUsage memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
+	const auto loaded = res->isLoaded();
+	const ResourceMemoryUsage memoryUsage = loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
 
 	const uint32_t framesSinceInUse = getFramesSince(usagePattern.lastFrameInUse);
 	const uint32_t framesSinceInBackground = getFramesSince(usagePattern.lastFrameInBackground);
@@ -292,8 +289,7 @@ ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(const std::shared
 	const float timeSinceInLowPriorityBackground = getTimeSince(usagePattern.lastFrameInBackgroundLowPriority);
 
 	LoadStateInfo state;
-	state.usagePatternLoaded = usagePattern.loaded;
-	state.currentlyLoaded = res->isLoaded();
+	state.loaded = loaded;
 	state.memoryUsage = memoryUsage.getTotal();
 	state.timeSinceUse = std::min(timeSinceInUse, timeSinceInBackground * 2.0f); // Time spent in background counts as double
 

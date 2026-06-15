@@ -22,8 +22,7 @@ namespace Halley {
     class ResourceUnloader {
 		struct LoadStateInfo {
             std::shared_ptr<const AsyncResource> res;
-            bool usagePatternLoaded = false;
-            bool currentlyLoaded = false;
+            bool loaded = false;
             bool markAsLoading = false;
             bool markAsUnloading = false;
 			ResourceDesiredLoadState desiredState = ResourceDesiredLoadState::Load;

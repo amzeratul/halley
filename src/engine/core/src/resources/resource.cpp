@@ -267,12 +267,6 @@ void AsyncResource::markLowPriorityBackgroundLoaded() const
 	usageData.lastFrameInBackgroundLowPriority = curFrame;
 }
 
-const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const
-{
-	usageData.loaded = loadState == State::Loaded;
-	return usageData;
-}
-
 bool AsyncResource::hasSucceeded() const
 {
 	return !failed;

@@ -294,7 +294,6 @@ namespace Halley
 			uint32_t lastFrameInUse = 0;
 			uint32_t lastFrameInBackground = 0;
 			uint32_t lastFrameInBackgroundLowPriority = 0;
-			bool loaded = false;
 		};
 
 		AsyncResource();
@@ -319,9 +318,9 @@ namespace Halley
 		void markActivelyInUse() const;
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
-		const UsagePattern& getUsagePattern() const;
+		const UsagePattern& getUsagePattern() const { return usageData; }
 
-		bool isLoaded() const { return loadState == State::Loaded; }
+		bool isLoaded() const { return loadState.load(std::memory_order_relaxed) == State::Loaded; }
 		bool hasSucceeded() const;
 		bool hasFailed() const;
 
