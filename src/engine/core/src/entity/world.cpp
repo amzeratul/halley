@@ -934,12 +934,18 @@ void World::processSystemMessages(TimeLine timeline)
 
 bool World::isEntityNetworkOwner(EntityId entityId) const
 {
-	return isEntityNetworkOwner(getEntity(entityId));
+	if (networkInterface) {
+		return networkInterface->isOwner(getEntity(entityId));
+	}
+	return true;
 }
 
 bool World::isEntityNetworkOwner(EntityRef entity) const
 {
-	return isEntityNetworkOwner(ConstEntityRef(entity));
+	if (networkInterface) {
+		return networkInterface->isOwner(ConstEntityRef(entity));
+	}
+	return true;
 }
 
 bool World::isEntityNetworkOwner(ConstEntityRef entity) const
@@ -952,12 +958,18 @@ bool World::isEntityNetworkOwner(ConstEntityRef entity) const
 
 bool World::isEntityNetworkAuthority(EntityId entityId) const
 {
-	return isEntityNetworkAuthority(getEntity(entityId));
+	if (networkInterface) {
+		return networkInterface->isAuthority(getEntity(entityId));
+	}
+	return true;
 }
 
 bool World::isEntityNetworkAuthority(EntityRef entity) const
 {
-	return isEntityNetworkAuthority(ConstEntityRef(entity));
+	if (networkInterface) {
+		return networkInterface->isAuthority(ConstEntityRef(entity));
+	}
+	return true;
 }
 
 bool World::isEntityNetworkAuthority(ConstEntityRef entity) const
