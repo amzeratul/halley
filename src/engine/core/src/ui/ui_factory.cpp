@@ -205,7 +205,9 @@ std::shared_ptr<UIWidget> UIFactory::makeUIWithHotReload(const String& configNam
 	auto uiDefinition = resources.get<UIDefinition>(configName);
 	auto ui = makeUI(*uiDefinition);
 	if (api.core->isDevMode()) {
-		ui->addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(*uiDefinition), observer));
+		if constexpr (isPCPlatform()) {
+			ui->addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(*uiDefinition), observer));
+		}
 	}
 	return ui;
 }
@@ -257,7 +259,9 @@ void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition, IUIRe
 	}
 
 	if (api.core->isDevMode()) {
-		target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition), observer, conditions));
+		if constexpr (isPCPlatform()) {
+			target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition), observer, conditions));
+		}
 	}
 }
 
@@ -396,7 +400,9 @@ std::shared_ptr<const UIColourScheme> UIFactory::getColourScheme() const
 
 void UIFactory::update()
 {
-	styleSheet->updateIfNeeded();
+	if constexpr (isPCPlatform()) {
+		styleSheet->updateIfNeeded();
+	}
 }
 
 Sprite UIFactory::makeAssetTypeIcon(AssetType type) const
