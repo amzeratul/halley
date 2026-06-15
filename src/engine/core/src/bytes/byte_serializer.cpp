@@ -158,8 +158,8 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 
 void Serializer::copyBytes(const void* src, size_t srcSize)
 {
-	if (!dryRun) {
-		if (dst.size() - size < srcSize) {
+	if (!dryRun) [[likely]] {
+		if (dst.size() - size < srcSize) [[unlikely]] {
 			throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
 		}
 		memcpy(dst.data() + size, src, srcSize);
