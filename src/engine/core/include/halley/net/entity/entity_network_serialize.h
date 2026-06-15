@@ -1,16 +1,13 @@
 #pragma once
 
-#include "entity_network_session.h"
 #include "halley/entity/entity.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
 #include "halley/utils/hash.h"
-#include "halley/net/interpolators/data_interpolator.h"
-#include "halley/net/interpolators/byte_data_interpolator.h"
-#include "components/network_component.h"
 
 namespace Halley {
 
+    class EntityNetworkSession;
     class IByteDataInterpolatorSet;
     class SerializerOptions;
 
@@ -27,7 +24,7 @@ namespace Halley {
 
         struct Page
         {
-            explicit Page() {};
+            explicit Page() = default;
 
             uint64_t hash = 0; // XXH64 over data in scratchpad
 
@@ -55,6 +52,7 @@ namespace Halley {
 
         void digest();
         bool isFull() const;
+        void reset();
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);
@@ -98,13 +96,13 @@ namespace Halley {
             std::optional<Vector2f> position;
         };
 
-        explicit EntityNetworkSerialize(const EntityNetworkSession* session, EntityRef& entity);
+        explicit EntityNetworkSerialize(const EntityNetworkSession* session);
 
-        bool serializeEntityUpdate(const SerializerOptions& options);
-        InboundResult deserializeEntityUpdate(const Bytes& bytes, const SerializerOptions& options);
+        bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
+        InboundResult deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options);
 
         bool processEntityUpdateChanges(Bytes& previous, bool sendFullUpdate);
-        bool hasEntityChanges(bool log) const;
+        bool hasEntityChanges(const EntityRef& entity, bool log) const;
 
         [[nodiscard]] size_t getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
         static size_t getBytesCapacity();
@@ -113,14 +111,7 @@ namespace Halley {
         class SerializationContext : public IEntityFactoryContext
         {
         public:
-            explicit SerializationContext(const EntityRef& root, const std::shared_ptr<const Prefab>& prefab = {})
-                : entity({})
-                , prefab(prefab)
-            {
-                if (const auto networkComponent = root.tryGetComponent<NetworkComponent>()) {
-                    interpolators = &networkComponent->byteDataInterpolatorSet;
-                }
-            }
+            explicit SerializationContext(const EntityRef& root, const std::shared_ptr<const Prefab>& prefab = {});
 
             EntityId getEntityIdFromUUID(const UUID &uuid) const override
             {
@@ -176,9 +167,8 @@ namespace Halley {
         static std::optional<std::pair<EntityRef, EntityRef>> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         const EntityNetworkSession* session;
-        NetworkSession::PeerId myPeerId;
+        uint8_t myPeerId;
 
-        EntityRef& rootEntity;
         EntityNetworkChanges journal;
 
         bool hasComponentsAddedOrRemoved;

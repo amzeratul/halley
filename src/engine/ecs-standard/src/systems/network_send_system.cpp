@@ -34,8 +34,9 @@ public:
 
 			// Now disable updates for nested entities.
 			for (const auto& e: networkFamily) {
-				if (e.network.sendUpdates) { // Could be processed already, as child of another entity.
-					disableSendUpdateForChildren(getWorld().getEntity(e.entityId), getWorld(), myPeerId);
+				// Entity could have been processed already, earlier in this loop, as child of another entity.
+				if (e.network.sendUpdates) [[likely]] {
+					disableSendUpdateForChildren(getWorld().getEntity(e.entityId), myPeerId);
 				}
 			}
 
@@ -43,7 +44,7 @@ public:
 			for (auto& e: networkFamily) {
 				// Try to automatically assign a peerId to any NetworkComponent that hasn't been bound yet.
 				// This is done for entities created locally; remote entities will be pre-populated.
-				if (!e.network.ownerId) {
+				if (!e.network.ownerId) [[unlikely]] {
 					auto entity = getWorld().getEntity(e.entityId);
 
 					if (isHost) {
@@ -87,30 +88,19 @@ private:
 	Vector<EntityNetworkUpdateInfo> entities;
 	ListenerSetToken sessionChangeToken;
 
-	static void disableSendUpdateForChildren(const EntityRef& entity, const World& world, NetworkSession::PeerId myPeerId)
+	static void disableSendUpdateForChildren(const EntityRef& entity, NetworkSession::PeerId myPeerId)
 	{
+		// By default, child entities are updated as part of their parent, even if they have
+		// their own NetworkComponent. But another peer may lock & grab authority, then wants
+		// to update them separately.
+
 		for (auto c: entity.getChildren()) {
-			if (!c.isSerializable()) {
-				continue;
+			if (auto* network = c.tryGetComponent<NetworkComponent>()) [[unlikely]] {
+				// Only an active authority may want to keep updating.
+				network->sendUpdates &= network->authorityId.value_or(0xff) == myPeerId;
 			}
 
-			// By default, child entities are updated as part of their parent, even if they have
-			// their own NetworkComponent. But another peer may lock & grab authority, then wants
-			// to update them separately.
-			if (auto* network = c.tryGetComponent<NetworkComponent>()) {
-				if (!network->sendUpdates) {
-					continue;
-				}
-
-				if (network->authorityId.has_value()) {
-					// Only the authority may want to keep updating.
-					network->sendUpdates = network->authorityId == myPeerId;
-				} else {
-					network->sendUpdates = false;
-				}
-			}
-
-			disableSendUpdateForChildren(c, world, myPeerId);
+			disableSendUpdateForChildren(c, myPeerId);
 		}
 	}
 

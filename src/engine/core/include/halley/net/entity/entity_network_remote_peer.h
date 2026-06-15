@@ -6,6 +6,7 @@
 #include "../session/network_session.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/time/halleytime.h"
+#include "entity_network_serialize.h"
 
 namespace Halley {
 	class EntityClientSharedData;
@@ -105,6 +106,7 @@ namespace Halley {
         Time timeSinceSend = 0;
     	bool log = false;
 
+    	EntityNetworkSerialize fastSerializer;
         static thread_local Bytes fastUpdateOutboundData;
 
         uint16_t assignId();

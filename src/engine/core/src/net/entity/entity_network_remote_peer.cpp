@@ -1,6 +1,5 @@
 #include "halley/net/entity/entity_network_remote_peer.h"
 
-#include "halley/net/entity/entity_network_serialize.h"
 #include "halley/net/entity/entity_network_session.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
@@ -31,6 +30,7 @@ Deserializer& EntityNetworkInstanceInfo::deserialize(Deserializer& s)
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parentSession, NetworkSession::PeerId peerId)
 	: parentSession(&parentSession)
 	, peerId(peerId)
+	, fastSerializer(&parentSession)
 {}
 
 NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
@@ -328,9 +328,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         HalleyAssertDev(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
         HalleyAssertDev(!parentSession->getEntitySerializationOptions().serializeAsStub);
 
-        auto fastSerialize = EntityNetworkSerialize(parentSession, entity);
-
-    	if (fastSerialize.serializeEntityUpdate(parentSession->getByteSerializationOptions())) {
+    	if (fastSerializer.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) {
     		bool modified = false;
     		bool modifiedInStructure = false;
 
@@ -339,13 +337,13 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			// created, its previous journal is still empty.
     			HalleyAssertDev(remote.hasAuthorityOnly);
     			// Just process and store the journal, but keep marked as "not modified" ...
-		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal, false);
+		        fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
     			// ... but set flag to force an update next tick, so we don't miss any changes.
     			remote.forceNextFastUpdate = true;
     			//Logger::logDev("populating outbound entity journal, authority-only, for " + entity.getName());
     		} else {
-    			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal, remote.forceNextFastUpdate);
-    			modifiedInStructure = fastSerialize.hasEntityChanges(wantToLog);
+    			modified = fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, remote.forceNextFastUpdate);
+    			modifiedInStructure = fastSerializer.hasEntityChanges(entity, wantToLog);
 
     			// If the forceNextFastUpdate flag is set, mark as modified and to be sent, even if
     			// there is no change.
@@ -363,7 +361,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
     		if (modified && !modifiedInStructure) {
     			fastUpdateOutboundData.reserve(EntityNetworkSerialize::getBytesCapacity());
-    			size_t outboundDataSize = fastSerialize.getBytes(fastUpdateOutboundData, parentSession->getByteSerializationOptions(), wantToLog);
+    			size_t outboundDataSize = fastSerializer.getBytes(fastUpdateOutboundData, parentSession->getByteSerializationOptions(), wantToLog);
     			//Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(outboundDataSize) + " B)");
 
     			if (wantToLog) {
@@ -422,9 +420,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
         // Binary serialization to (re-)build the update journal.
-        auto serialize = EntityNetworkSerialize(parentSession, entity);
-        if (serialize.serializeEntityUpdate(parentSession->getByteSerializationOptions())) {
-	        serialize.processEntityUpdateChanges(remote.fastUpdateJournal, false);
+        if (fastSerializer.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) {
+	        fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
         } else {
 	        // If the fast update further above failed, for example because of a full journal,
         	// this one here will probably fail too - so we just drop the changes and retry
@@ -641,17 +638,17 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 			// Instantiate entity from prefab first.
 			EntityData prefabData(entityData->getInstanceUUID());
 			prefabData.setPrefab(prefab->getAssetId());
-			entity = parentSession->getFactory().createEntity(prefabData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
+			entity = parentSession->getFactory().createEntity(prefabData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 
 			// Apply the update.
-			parentSession->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network));
+			parentSession->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 		} else {
 			// No prefab in delta, try instantiating from delta directly.
 			entity = parentSession->getFactory().createEntity(*entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 		}
 	} else {
 		// Apply update on the existing entity.
-		parentSession->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network));
+		parentSession->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 	}
 
 	if (const UUID& parentUUID = entityData->getParentUUID(); parentUUID.isValid()) {
@@ -718,10 +715,8 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
 	if (msg.fastSerialize) {
         //Logger::logDev("Receive Fast Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
 
-        auto serialize = EntityNetworkSerialize(parentSession, entity);
-
         try {
-            auto result = serialize.deserializeEntityUpdate(msg.bytes, parentSession->getByteSerializationOptions());
+            auto result = fastSerializer.deserializeEntityUpdate(entity, msg.bytes, parentSession->getByteSerializationOptions());
         	if (result.position) {
         		updateRemoteEntityPosition(inboundEntity, result.position.value(), timestamp);
         	} else {

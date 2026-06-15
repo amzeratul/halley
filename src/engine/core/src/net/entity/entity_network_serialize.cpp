@@ -1,12 +1,23 @@
 #include "halley/net/entity/entity_network_serialize.h"
 
+#include "halley/net/entity/entity_network_session.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/entity/world.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "halley/net/interpolators/data_interpolator.h"
+#include "halley/net/interpolators/byte_data_interpolator.h"
+#include "components/network_component.h"
 
 using namespace Halley;
 
-#define INJECT_RUNTIME_CHECKS DEV_BUILD
+#ifdef DEV_BUILD
+#define INJECT_RUNTIME_CHECKS 1
+#else
+#define INJECT_RUNTIME_CHECKS 0
+#endif
+
+#if INJECT_RUNTIME_CHECKS
+
 static constexpr uint16_t SERIALIZE_CHECK_PARITY = 0xbaad;
 
 static void injectMagic(Serializer& serializer, uint16_t n)
@@ -43,6 +54,8 @@ static bool checkSimpleStringChecksum(Deserializer& deserializer, const std::str
     }
     return checkMagic(deserializer, m & 0xffff, false);
 }
+
+#endif
 
 thread_local Bytes EntityNetworkSerialize::scratchpad;
 
@@ -135,6 +148,13 @@ void EntityNetworkChanges::digest()
 bool EntityNetworkChanges::isFull() const
 {
     return pp >= pages.size();
+}
+
+void EntityNetworkChanges::reset()
+{
+    pp = 0;
+    contentHash = 0;
+    contentHasher.reset();
 }
 
 void EntityNetworkChanges::serialize(Serializer& s) const
@@ -371,40 +391,47 @@ void EntityNetworkChanges::invalidateHashes()
     }
 }
 
-EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session, EntityRef& entity)
+EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session)
     : session(session)
-    , rootEntity(entity)
     , hasComponentsAddedOrRemoved(false)
 {
     myPeerId = session->getSession().getMyPeerId().value_or(0);
+}
 
+bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
+{
     // Thread-local buffer to serialize/encode changes into.
     // The maximum size depends on some limits: MTU, maximum UDP packet split size in AckUnreliableConnection,
     // and maximum network message split size in EntityNetworkSession.
-    scratchpad.reserve(16 * 32 * 1024);
-    scratchpad.resize_no_init(scratchpad.capacity());
-
-    // We lookup components by ID, need to translate from names.
-    // This is the same list of component types EntityFactory uses to compile deltas.
-    const auto& reflection = entity.getWorld().getReflection();
-    const auto& ignoreComponents = session->getEntityDeltaOptions().ignoreComponents;
-    componentsIgnored.reserve(ignoreComponents.size());
-    for (const auto& componentName : ignoreComponents) {
-        const auto& reflector = reflection.getComponentReflector(componentName);
-        componentsIgnored.emplace(reflector.getIndex());
+    if (scratchpad.empty()) {
+        scratchpad.reserve(16 * 32 * 1024);
+        scratchpad.resize_no_init(scratchpad.capacity());
     }
-}
 
-bool EntityNetworkSerialize::serializeEntityUpdate(const SerializerOptions& options)
-{
+    // We lookup components by ID, need to translate from names. This is the same list of component types
+    // EntityFactory uses to compile deltas.
+    // The session's delta options are immutable, so we should need to initialize the lookup table only once.
+    if (componentsIgnored.empty()) {
+        if (const auto& ignoreComponents = session->getEntityDeltaOptions().ignoreComponents; !ignoreComponents.empty()) {
+            const auto& reflection = entity.getWorld().getReflection();
+            componentsIgnored.reserve(ignoreComponents.size());
+            for (const auto& componentName : ignoreComponents) {
+                const auto& reflector = reflection.getComponentReflector(componentName);
+                componentsIgnored.emplace(reflector.getIndex());
+            }
+        }
+    }
+
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
-    opt.world = &rootEntity.getWorld();
+    opt.world = &entity.getWorld();
 
     Serializer serializer(scratchpad.byte_span(), opt);
-    const SerializationContext context(rootEntity);
+    const SerializationContext context(entity);
 
-    doSerializeEntityUpdate(context, serializer, rootEntity, false, {});
+    journal.reset();
+
+    doSerializeEntityUpdate(context, serializer, entity, false, {});
 
     journal.digest();
 
@@ -487,14 +514,14 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     }
 }
 
-EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(const Bytes& bytes, const SerializerOptions& options)
+EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options)
 {
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
-    opt.world = &rootEntity.getWorld();
+    opt.world = &entity.getWorld();
 
     Deserializer deserializer(bytes, opt);
-    const SerializationContext context(rootEntity, rootEntity.getPrefab());
+    const SerializationContext context(entity, entity.getPrefab());
 
     EntityNetworkChanges::Type type;
     uint32_t size;
@@ -508,7 +535,7 @@ EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityU
     deserializer >> instanceUUID;
 
     InboundResult result = {};
-    type = doDeserializeEntityUpdate(context, deserializer, rootEntity, {}, &result);
+    type = doDeserializeEntityUpdate(context, deserializer, entity, {}, &result);
 
     if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
         Logger::logDev("Not at end of entity network update byte stream, " +
@@ -887,7 +914,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
     return modified;
 }
 
-bool EntityNetworkSerialize::hasEntityChanges(bool log) const
+bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log) const
 {
     bool changes = hasComponentsAddedOrRemoved;
 
@@ -895,7 +922,7 @@ bool EntityNetworkSerialize::hasEntityChanges(bool log) const
         if (log) {
             Logger::logDev("  - " + toString(childrenAdded.size()) + " children added");
             for (const auto& child : childrenAdded) {
-                auto ce = findChildEntity(rootEntity, child);
+                auto ce = findChildEntity(entity, child);
                 Logger::logDev("    + " + child + " - " + (ce ? ce->first.getName() : "unknown"));
             }
         }
@@ -979,4 +1006,13 @@ std::optional<std::pair<EntityRef, EntityRef>> EntityNetworkSerialize::findChild
     }
 
     return {};
+}
+
+EntityNetworkSerialize::SerializationContext::SerializationContext(const EntityRef& root, const std::shared_ptr<const Prefab>& prefab)
+    : entity({})
+    , prefab(prefab)
+{
+    if (const auto networkComponent = root.tryGetComponent<NetworkComponent>()) {
+        interpolators = &networkComponent->byteDataInterpolatorSet;
+    }
 }
