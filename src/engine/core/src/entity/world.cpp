@@ -380,7 +380,7 @@ void World::doDestroyEntity(Entity* e)
 EntityRef World::getEntity(EntityId id)
 {
 	Entity* entity = tryGetRawEntity(id);
-	if (entity == nullptr) {
+	if (entity == nullptr) [[unlikely]] {
 		throw Exception("Entity does not exist: " + toString(id), HalleyExceptions::Entity);
 	}
 	return EntityRef(*entity, *this);
@@ -389,7 +389,7 @@ EntityRef World::getEntity(EntityId id)
 ConstEntityRef World::getEntity(EntityId id) const
 {
 	const Entity* entity = tryGetRawEntity(id);
-	if (entity == nullptr) {
+	if (entity == nullptr) [[unlikely]] {
 		throw Exception("Entity does not exist: " + toString(id), HalleyExceptions::Entity);
 	}
 	return ConstEntityRef(*entity, *this);
@@ -427,7 +427,7 @@ Entity* World::tryGetRawEntity(EntityId id)
 
 const Entity* World::tryGetRawEntity(EntityId id) const
 {
-	if (!id) {
+	if (!id) [[unlikely]] {
 		return nullptr;
 	}
 	const auto* v = entityMap->get(id.value);

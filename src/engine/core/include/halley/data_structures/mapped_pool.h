@@ -118,13 +118,13 @@ namespace Halley {
 
 			const size_t blockN = idx / blockLen;
 			const auto localIdx = idx % blockLen;
-			if (blockN >= nBlocks) { // Reading directly from blocks.size() here is dangerous
+			if (blockN >= nBlocks.load(std::memory_order::relaxed)) [[unlikely]] { // Reading directly from blocks.size() here is dangerous
 				return nullptr;
 			}
 
 			auto& block = blocks[blockN];
 			auto& data = block.data[localIdx];
-			if (data.revision != rev) {
+			if (data.revision != rev) [[unlikely]] {
 				return nullptr;
 			}
 			return reinterpret_cast<T*>(&data.data);
@@ -136,13 +136,13 @@ namespace Halley {
 
 			const size_t blockN = idx / blockLen;
 			const auto localIdx = idx % blockLen;
-			if (blockN >= nBlocks) {
+			if (blockN >= nBlocks.load(std::memory_order::relaxed)) [[unlikely]] {
 				return nullptr;
 			}
 
 			const auto& block = blocks[blockN];
 			const auto& data = block.data[localIdx];
-			if (data.revision != rev) {
+			if (data.revision != rev) [[unlikely]] {
 				return nullptr;
 			}
 			return reinterpret_cast<const T*>(&data.data);
