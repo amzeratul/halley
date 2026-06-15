@@ -88,6 +88,7 @@ void InputKeyboardSDL::setupMapping()
     v[SDLK_BACKSLASH] = KeyCode::Backslash;
     v[SDLK_RIGHTBRACKET] = KeyCode::RightBracket;
     v[SDLK_BACKQUOTE] = KeyCode::Grave;
+    v[SDLK_DELETE] = KeyCode::Delete;
 };
 
 KeyCode InputKeyboardSDL::getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const
