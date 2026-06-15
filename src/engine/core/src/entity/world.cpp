@@ -235,7 +235,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		if (oldEntity->getInstanceUUID() != uuid) {
 			throw Exception("Error creating entity \"" + name + "\" - World::uuidMap is seemingly corrupted", HalleyExceptions::Entity);
 		} else {
-			if (oldEntity->parent || !oldEntity->children.empty() || !oldEntity->components.empty()) {
+			if (oldEntity->parent || !oldEntity->children.empty() || !oldEntity->componentIds.empty()) {
 				String parentInfo;
 				if (parent) {
 					parentInfo = " as child of " + parent->getName() + " [" + parent->getPrefabAssetId() + "]";
@@ -311,8 +311,9 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 		e->mask = FamilyMask::Handle();
 
 		auto entityRef = EntityRef(*e, *this);
-		for (auto& [id, comp]: e->components) {
-			reflection->getComponentReflector(id).rebindComponent(*comp, entityRef);
+		const auto n = e->componentIds.size();
+		for (size_t i = 0; i < n; ++i) {
+			reflection->getComponentReflector(e->componentIds[i]).rebindComponent(*e->componentPtrs[i], entityRef);
 		}
 
 		entitiesPendingCreation.push_back(e);
@@ -509,21 +510,6 @@ void World::setEntityReloaded()
 {
 	entityReloaded = true;
 	entityDirty = true;
-}
-
-const WorldReflection& World::getReflection() const
-{
-	return *reflection;
-}
-
-MaskStorage& World::getMaskStorage() const noexcept
-{
-	return *maskStorage;
-}
-
-ComponentDeleterTable& World::getComponentDeleterTable()
-{
-	return *componentDeleterTable;
 }
 
 size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem, SystemMessageDestination destination)

@@ -81,7 +81,12 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 
 	// Components
 	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type), false);
-	for (auto [componentId, component]: entity) {
+
+	const auto ids = entity.getComponentIds();
+	const auto ptrs = entity.getComponentPtrs();
+	for (size_t i = 0; i < ids.size(); ++i) {
+		const auto& componentId = ids[i];
+		const auto& component = ptrs[i];
 		const auto& reflector = world.getReflection().getComponentReflector(componentId);
 		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getEntitySerializationContext(), *component));
 	}
@@ -514,8 +519,8 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 	} else {
 		// Store the existing ids
 		Vector<int> existingComps;
-		for (auto& c: entity) {
-			existingComps.push_back(c.first);
+		for (const auto& id: entity.getComponentIds()) {
+			existingComps.push_back(id);
 		}
 
 		// Populate
