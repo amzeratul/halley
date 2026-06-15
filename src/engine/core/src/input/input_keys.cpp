@@ -79,7 +79,6 @@ private:
 		add(Semicolon, "Semicolon", ";");
 		add(Apostrophe, "Apostrophe", "'");
 		add(Grave, "Grave", "`");
-		add(Caret, "Caret", "^");
 		add(Comma, "Comma", ",");
 		add(Period, "Period", ".");
 		add(Slash, "Slash", "/");
@@ -132,12 +131,19 @@ private:
 		add(VolumeDown, "VolumeDown");
 		add(LCtrl, "LCtrl");
 		add(LShift, "LShift");
-		add(LAlt, "LAlt");
-		add(LMod, "LMod");
+		if (getPlatform() == GamePlatform::MacOS) {
+			add(LAlt, "Option");
+			add(LGUI, "Command");
+			add(RAlt, "ROption");
+			add(RGUI, "RCommand");
+		} else {
+			add(LAlt, "LAlt");
+			add(LGUI, "LWin");
+			add(RAlt, "RAlt");
+			add(RGUI, "RWin");
+		}
 		add(RCtrl, "RCtrl");
 		add(RShift, "RShift");
-		add(RAlt, "RAlt");
-		add(RMod, "RMod");
 		add(Mode, "Mode");
 		add(AudioNext, "AudioNext");
 		add(AudioPrev, "AudioPrev");

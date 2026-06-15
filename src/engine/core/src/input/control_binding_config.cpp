@@ -258,7 +258,7 @@ std::pair<int, std::optional<int>> ControlBinding::getKeyboardButtonIdx() const
 	} else if (mods == KeyMods::Alt) {
 		chord = static_cast<int>(KeyCode::LAlt);
 	} else if (mods == KeyMods::Mod) {
-		chord = static_cast<int>(KeyCode::LMod);
+		chord = static_cast<int>(KeyCode::LGUI);
 	}
 
 	return { static_cast<int>(button), chord };

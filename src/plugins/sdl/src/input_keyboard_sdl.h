@@ -20,7 +20,7 @@ namespace Halley {
 
 		void processEvent(const SDL_Event &event);
 
-		KeyCode getKeyCode(int sdlKeyCode) const;
+		KeyCode getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const;
 		KeyMods getMods(int sdlMods) const;
 
 		friend class InputSDL;

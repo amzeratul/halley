@@ -42,16 +42,16 @@ void InputKeyboardSDL::processEvent(const SDL_Event& rawEvent)
 		const SDL_KeyboardEvent& event = rawEvent.key;
 		switch (event.type) {
 			case SDL_KEYDOWN:
-				onKeyPressed(getKeyCode(event.keysym.sym), getMods(event.keysym.mod));
+				onKeyPressed(static_cast<KeyCode>(event.keysym.scancode), getMods(event.keysym.mod));
 				break;
 			case SDL_KEYUP:
-				onKeyReleased(getKeyCode(event.keysym.sym), getMods(event.keysym.mod));
+				onKeyReleased(static_cast<KeyCode>(event.keysym.scancode), getMods(event.keysym.mod));
 				break;
 		}
 	}
 }
 
-KeyCode InputKeyboardSDL::getKeyCode(int sdlKeyCode) const
+KeyCode InputKeyboardSDL::getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const
 {
 	// Halley uses uppercase characters
 	if (sdlKeyCode >= 'a' && sdlKeyCode <= 'z') {
@@ -95,7 +95,7 @@ String InputKeyboardSDL::getButtonName(int code) const
 	if (auto name = KeyCodes::tryToName(static_cast<KeyCode>(code))) {
 		return *name;
 	}
-	auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code - 128));
+	auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code));
 	return str;
 }
 

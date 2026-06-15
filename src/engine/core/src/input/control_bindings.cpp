@@ -475,7 +475,7 @@ std::optional<ControlBinding> ControlBindings::scanForPressKeyboard(const InputD
 			code == KeyCode::LCtrl || code == KeyCode::RCtrl
 			|| code == KeyCode::LAlt || code == KeyCode::RAlt
 			|| code == KeyCode::LShift || code == KeyCode::RShift
-			|| code == KeyCode::LMod || code == KeyCode::RMod;
+			|| code == KeyCode::LGUI || code == KeyCode::RGUI;
 		const auto mods = allowChords && !isModButton ? keyboard.getKeyMods() : KeyMods::None;
 		return ControlBinding(code, mods);
 	}

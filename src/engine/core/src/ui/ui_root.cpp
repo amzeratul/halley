@@ -150,7 +150,7 @@ KeyMods UIRootGroup::getKeyMods()
 		if (keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt)) {
 			result |= int(KeyMods::Alt);
 		}
-		if (keyboard->isButtonDown(KeyCode::LMod) || keyboard->isButtonDown(KeyCode::RMod)) {
+		if (keyboard->isButtonDown(KeyCode::LGUI) || keyboard->isButtonDown(KeyCode::RGUI)) {
 			result |= int(KeyMods::Mod);
 		}
 	}

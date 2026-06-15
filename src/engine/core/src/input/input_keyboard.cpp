@@ -67,7 +67,7 @@ KeyMods InputKeyboard::getKeyMods() const
 	if (isButtonDown(KeyCode::LShift) || isButtonDown(KeyCode::RShift)) {
 		result |= static_cast<uint8_t>(KeyMods::Shift);
 	}
-	if (isButtonDown(KeyCode::LMod) || isButtonDown(KeyCode::RMod)) {
+	if (isButtonDown(KeyCode::LGUI) || isButtonDown(KeyCode::RGUI)) {
 		result |= static_cast<uint8_t>(KeyMods::Mod);
 	}
 
