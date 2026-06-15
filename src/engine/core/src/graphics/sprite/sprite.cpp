@@ -336,7 +336,7 @@ Sprite& Sprite::setMaterial(const std::shared_ptr<const Material>& m)
 
 		const bool hadMaterial = static_cast<bool>(material);
 		material = m;
-		rotateable = !material->getDefinition().hasTag("no_rotate");
+		rotateable = !material->getDefinition().hasTagIdx(MaterialTags::NoRotate);
 
 		if (!hadMaterial && material->getNumTextureUnits() > 0) {
 			if (const auto& tex0 = material->getRawTexture(0)) {
@@ -355,7 +355,7 @@ Sprite& Sprite::setMaterial(std::shared_ptr<const Material>&& m)
 
 		const bool hadMaterial = static_cast<bool>(material);
 		material = std::move(m);
-		rotateable = !material->getDefinition().hasTag("no_rotate");
+		rotateable = !material->getDefinition().hasTagIdx(MaterialTags::NoRotate);
 
 		if (!hadMaterial && material->getNumTextureUnits() > 0) {
 			if (const auto& tex0 = material->getRawTexture(0)) {

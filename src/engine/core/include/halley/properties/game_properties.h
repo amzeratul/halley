@@ -23,8 +23,11 @@ namespace Halley {
 		const AudioProperties& getAudioProperties() const;
 		AudioProperties& getAudioProperties();
 
+		const Vector<String>& getMaterialTags() const;
+
     private:
 		AudioProperties audioProperties;
+		Vector<String> materialTags;
 		Path path;
     };
 }

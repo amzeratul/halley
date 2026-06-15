@@ -9,6 +9,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/file_formats/binary_file.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/properties/game_properties.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -263,6 +264,21 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	for (auto& tex: textures) {
 		if (!tex.defaultTextureName.isEmpty() && !tex.defaultTextureName.startsWith("$")) {
 			tex.defaultTexture = resources.get<Texture>(tex.defaultTextureName);
+		}
+	}
+
+	tagMask = 0;
+	gsl::span<const String> customGameTags;
+	if (auto gameProperties = resources.tryGet<GameProperties>("game_properties")) {
+		customGameTags = gameProperties->getMaterialTags();
+	}
+	for (const auto& tag: tags) {
+		if (auto idx = tryFromString<MaterialTags>(tag)) {
+			tagMask |= (1 << static_cast<int>(*idx));
+		} else if (auto idx2 = std_ex::find_index(customGameTags, tag)) {
+			tagMask |= (1 << (static_cast<int>(*idx2) + 8));
+		} else {
+			Logger::logError("Unknown material tag \"" + tag + "\" in material \"" + name + "\"");
 		}
 	}
 }

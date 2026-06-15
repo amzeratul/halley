@@ -20,7 +20,14 @@ ConfigNode GameProperties::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["audioProperties"] = audioProperties.toConfigNode();
+	result["materialTags"] = materialTags;
 	return result;
+}
+
+void GameProperties::load(const ConfigNode& node)
+{
+	audioProperties = AudioProperties(node["audioProperties"]);
+	materialTags = node["materialTags"].asVector<String>({});
 }
 
 void GameProperties::save() const
@@ -38,19 +45,16 @@ void GameProperties::load()
 	}
 }
 
-void GameProperties::load(const ConfigNode& node)
-{
-	audioProperties = AudioProperties(node["audioProperties"]);
-}
-
 void GameProperties::serialize(Serializer& s) const
 {
 	s << audioProperties;
+	s << materialTags;
 }
 
 void GameProperties::deserialize(Deserializer& s)
 {
 	s >> audioProperties;
+	s >> materialTags;
 }
 
 std::unique_ptr<GameProperties> GameProperties::loadResource(ResourceLoader& loader)
@@ -73,4 +77,9 @@ const AudioProperties& GameProperties::getAudioProperties() const
 AudioProperties& GameProperties::getAudioProperties()
 {
 	return audioProperties;
+}
+
+const Vector<String>& GameProperties::getMaterialTags() const
+{
+	return materialTags;
 }

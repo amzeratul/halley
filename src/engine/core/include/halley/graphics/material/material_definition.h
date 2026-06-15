@@ -7,6 +7,8 @@
 
 #include <shared_mutex>
 
+#include "halley/utils/convertible_to.h"
+
 namespace Halley
 {
 	class ConfigNode;
@@ -256,6 +258,35 @@ namespace Halley
 		Vector<int> addresses;
 	};
 
+	enum class MaterialTags {
+		NoRotate,
+		Reserved1,
+		Reserved2,
+		Reserved3,
+		Reserved4,
+		Reserved5,
+		Reserved6,
+		Reserved7,
+		LastMaterialTag
+	};
+
+	template <>
+	struct EnumNames<MaterialTags> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"no_rotate",
+				"reserved_1",
+				"reserved_2",
+				"reserved_3",
+				"reserved_4",
+				"reserved_5",
+				"reserved_6",
+				"reserved_7",
+				"_LastMaterialTag"
+			});
+		}
+	};
+
 	class MaterialDefinition : public AsyncResource, public std::enable_shared_from_this<MaterialDefinition>
 	{
 		friend class Material;
@@ -308,6 +339,10 @@ namespace Halley
 		void setTags(Vector<String> tags);
 		const Vector<String>& getTags() const { return tags; }
 		bool hasTag(std::string_view tag) const;
+		bool hasTagIdx(ConvertibleTo<int> idx) const
+		{
+			return tagMask & (1 << idx.value);
+		}
 		
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -319,17 +354,19 @@ namespace Halley
 		virtual std::unique_ptr<Material> createMaterialUnique(bool forceLocalBlocks = false) const; // forceLocalBlocks is for engine use only
 
 	private:
-		String name;
+		int vertexSize = 0;
+		int vertexPosOffset = 0;
+		int defaultMask = 1;
+		int tagMask = 0;
+		bool columnMajor = false;
+		bool autoVariables = false;
+
 		Vector<MaterialPass> passes;
 		Vector<MaterialTexture> textures;
 		Vector<MaterialStructuredBufferDefinition> structuredBuffers;
 		Vector<MaterialUniformBlock> uniformBlocks;
 		Vector<MaterialAttribute> attributes;
-		int vertexSize = 0;
-		int vertexPosOffset = 0;
-		int defaultMask = 1;
-		bool columnMajor = false;
-		bool autoVariables = false;
+		String name;
 
 		std::shared_ptr<const Texture> fallbackTexture;
 		Vector<String> tags;
