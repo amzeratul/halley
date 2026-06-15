@@ -119,7 +119,8 @@ KeyMods InputKeyboardSDL::getMods(int sdlMods) const
 
 String InputKeyboardSDL::getButtonName(int code) const
 {
-	return String(SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code)));
+	auto keycode = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(code));
+	return String(SDL_GetKeyName(keycode));
 }
 
 void InputKeyboardSDL::update()
