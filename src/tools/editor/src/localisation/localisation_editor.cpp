@@ -1012,7 +1012,7 @@ void LocalisationEditor::doImportLanguage(const I18NLanguage& language, const St
 		Logger::logError("Unknown extension for localisation import: \"" + extension + "\"");
 	}
 	onLocalStringsModified();
-	uploadLanguage(language);
+	//uploadLanguage(language);
 }
 
 void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, const Bytes& data)
@@ -1064,19 +1064,23 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 	const auto nRows = csv.getNumRows();
 	for (size_t i = 0; i < nRows; ++i) {
 		const auto& key = csv.getCell(i, keyIdx);
-		const auto* versionCell = csv.tryGetCell(i, versionIdx);
-		const auto& translatedValue = csv.getCell(i, translationIdx);
+		if (!key.isEmpty()) {
+			const auto* versionCell = csv.tryGetCell(i, versionIdx);
+			const auto& translatedValue = csv.getCell(i, translationIdx);
 
-		int version = -1;
-		if (versionCell && versionCell->isInteger()) {
-			version = versionCell->toInteger();
-		} else {
-			version = localStrings->originalLanguage->tryGetEntry(key)->getVersion();
-		}
+			int version = -1;
+			if (versionCell && versionCell->isInteger()) {
+				version = versionCell->toInteger();
+			} else {
+				if (auto* e = localStrings->originalLanguage->tryGetEntry(key)) {
+					version = e->getVersion();
+				}
+			}
 
-		if (!translatedValue.isEmpty()) {
-			if (translation.setValue(key, version, translatedValue)) {
-				++n;
+			if (!translatedValue.isEmpty()) {
+				if (translation.setValue(key, version, translatedValue)) {
+					++n;
+				}
 			}
 		}
 	}
