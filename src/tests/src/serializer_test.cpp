@@ -26,14 +26,33 @@ namespace {
 			}
 		}
 	}
+
+	template <typename T>
+	static void testInt()
+	{
+		static_assert(sizeof(T) >= 2);
+
+		auto rng = Random(Random::getSharedGlobal().getRawInt64());
+
+		if constexpr (std::is_signed_v<T>) {
+			testRange<T>(static_cast<T>(-1000), static_cast<T>(1000));
+		} else {
+			testRange<T>(static_cast<T>(0), static_cast<T>(2000));
+		}
+
+		testRange<T>(std::numeric_limits<T>::min(), std::numeric_limits<T>::min() + static_cast<T>(1000));
+		testRange<T>(std::numeric_limits<T>::max() - static_cast<T>(1000), std::numeric_limits<T>::max());
+
+		for (int i = 0; i < 1000; ++i) {
+			const auto n = static_cast<T>(rng.getInt(std::numeric_limits<T>::min(), std::numeric_limits<T>::max()));
+			EXPECT_EQ(n, convertBackAndForth<T>(n));
+		}
+	}
 }
 
 TEST(Serializer, UInt8Conversion)
 {
-	EXPECT_EQ(127, convertBackAndForth<uint8_t>(127));
-	EXPECT_EQ(128, convertBackAndForth<uint8_t>(128));
-
-	//testRange(static_cast<uint8_t>(0), static_cast<uint8_t>(255));
+	testRange(static_cast<uint8_t>(0), static_cast<uint8_t>(255));
 }
 
 TEST(Serializer, Int8Conversion)
@@ -41,22 +60,24 @@ TEST(Serializer, Int8Conversion)
 	testRange(static_cast<int8_t>(-128), static_cast<int8_t>(127));
 }
 
-TEST(Serializer, IntConversion)
+TEST(Serializer, UInt16Conversion)
 {
-	testRange(static_cast<int>(-1000), static_cast<int>(1000));
+	testInt<uint16_t>();
 }
 
-TEST(Serializer, Int64Conversion)
+TEST(Serializer, Int16Conversion)
 {
-	testRange(static_cast<int64_t>(-1000), static_cast<int64_t>(1000));
-	testRange(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::min() + 1000);
-	testRange(std::numeric_limits<int64_t>::max() - 1000, std::numeric_limits<int64_t>::max());
+	testInt<int16_t>();
+}
 
-	auto& rng = Random::getGlobal();
-	for (int i = 0; i < 1000; ++i) {
-		const auto n = static_cast<int64_t>(rng.getSizeT(0, std::numeric_limits<size_t>::max()));
-		EXPECT_EQ(n, convertBackAndForth(n));
-	}
+TEST(Serializer, UInt32Conversion)
+{
+	testInt<uint32_t>();
+}
+
+TEST(Serializer, Int32Conversion)
+{
+	testInt<int32_t>();
 }
 
 TEST(Serializer, UInt64Conversion)
@@ -72,12 +93,10 @@ TEST(Serializer, UInt64Conversion)
 	EXPECT_EQ(static_cast<uint64_t>(56294995342131200), convertBackAndForth(static_cast<uint64_t>(56294995342131200))); // 56
 	EXPECT_EQ(static_cast<uint64_t>(7205759403792793600), convertBackAndForth(static_cast<uint64_t>(7205759403792793600))); // 64
 
-	testRange(static_cast<uint64_t>(0), static_cast<uint64_t>(1000));
-	testRange(std::numeric_limits<uint64_t>::max() - 1000, std::numeric_limits<uint64_t>::max());
+	testInt<uint64_t>();
+}
 
-	auto& rng = Random::getGlobal();
-	for (int i = 0; i < 1000; ++i) {
-		const auto n = static_cast<uint64_t>(rng.getSizeT(0, std::numeric_limits<size_t>::max()));
-		EXPECT_EQ(n, convertBackAndForth(n));
-	}
+TEST(Serializer, Int64Conversion)
+{
+	testInt<int64_t>();
 }
