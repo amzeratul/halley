@@ -22,6 +22,12 @@ component:
       canSave: false
       canEdit: false
       defaultValue: false
+  - alwaysSend:
+      type: bool
+      defaultValue: false
+      canEdit: true
+      canSave: true
+      canNetwork: false
   - dataInterpolatorSet:
       type: 'Halley::DataInterpolatorSet'
       canSave: false
@@ -35,12 +41,6 @@ component:
       canSave: false
       canEdit: false
       canNetwork: true
-  - alwaysSend:
-      type: bool
-      defaultValue: false
-      canEdit: true
-      canSave: true
-      canNetwork: false
 
 ---
 
