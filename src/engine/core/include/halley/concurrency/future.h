@@ -503,25 +503,25 @@ namespace Halley
 	class TaskQueueHelper
 	{
 	public:
-		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, std::string_view name, const NonOwningAliveFlag* aliveFlag = nullptr)
+		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, String name, const NonOwningAliveFlag* aliveFlag = nullptr)
 		{
 			Promise<T> promise;
-			enqueueOn(e, std::move(payload), promise, name, aliveFlag);
+			enqueueOn(e, std::move(payload), promise, std::move(name), aliveFlag);
 			return promise.getFuture();
 		}
 		
-		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise, std::string_view name, const NonOwningAliveFlag* aliveFlag = nullptr)
+		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise, String name, const NonOwningAliveFlag* aliveFlag = nullptr)
 		{
 			if (aliveFlag) {
 				e.addToQueue([payload(std::move(payload)), promise(promise), flag=*aliveFlag]() mutable {
 					if (flag) {
 						TaskHelper<T>::setPromise(promise, payload);
 					}
-				}, name);
+				}, std::move(name));
 			} else {
-				e.addToQueue([payload(std::move(payload)), promise(promise)]() mutable {
+				e.addToQueue([payload(std::move(payload)), promise(std::move(promise))]() mutable {
 					TaskHelper<T>::setPromise(promise, payload);
-				}, name);
+				}, std::move(name));
 			}
 		}
 	};

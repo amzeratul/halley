@@ -57,14 +57,14 @@ Vector<ExecutionQueue::Entry> ExecutionQueue::getAll()
 	return tasks;
 }
 
-void ExecutionQueue::addToQueue(TaskBase task, std::string_view name)
+void ExecutionQueue::addToQueue(TaskBase task, String name)
 {
 	if (immediate) {
 		task();
 	} else {
 		{
 			UniqueLock lock(mutex);
-			queue.emplace_back(task, name);
+			queue.emplace_back(std::move(task), std::move(name));
 			// NB: Unlocking before notifying
 		}
 
