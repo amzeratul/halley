@@ -907,6 +907,15 @@ void ScriptEnvironment::assignTypes(const ScriptGraph& graph)
 	graph.assignTypes(*nodeTypeCollection);
 }
 
+const String& ScriptEnvironment::getCurrentScriptName() const
+{
+	if (auto* graph = getCurrentGraph()) {
+		return graph->getAssetId();
+	} else {
+		return String::emptyString();
+	}
+}
+
 ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	const auto& pins = node.getPins();

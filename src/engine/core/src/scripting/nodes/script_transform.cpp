@@ -219,9 +219,9 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 		}
 	} else {
 		if (auto e = environment.getWorld().tryGetEntity(entityId); e.isValid()) {
-			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " (\"" + toString(e.getName()) + "\") has no Transform2DComponent", true);
+			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " (\"" + toString(e.getName()) + "\") has no Transform2DComponent. Script: " + environment.getCurrentScriptName(), true);
 		} else {
-			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " does not exist", true);
+			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " does not exist. Script: " + environment.getCurrentScriptName(), true);
 		}
 	}
 	return ConfigNode();
