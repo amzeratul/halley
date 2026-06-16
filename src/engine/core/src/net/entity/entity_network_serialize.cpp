@@ -174,6 +174,8 @@ void EntityNetworkChanges::serialize(Serializer& s) const
             s << page.componentId;
         }
     }
+
+    s << contentHash;
 }
 
 void EntityNetworkChanges::deserialize(Deserializer& s)
@@ -183,8 +185,6 @@ void EntityNetworkChanges::deserialize(Deserializer& s)
     pp = count;
 
     memset(&pages[0], 0, pp * sizeof(Page));
-
-    contentHasher.reset();
 
     for (int p = 0; p < pp; p++) {
         auto& page = pages[p];
@@ -198,11 +198,9 @@ void EntityNetworkChanges::deserialize(Deserializer& s)
         } else if (page.type == Type::Component) {
             s >> page.componentId;
         }
-
-        contentHasher.feed(page.hash);
     }
 
-    contentHash = contentHasher.digest();
+    s >> contentHash;
 }
 
 size_t EntityNetworkChanges::getRequiredSerializeSize() const
