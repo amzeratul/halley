@@ -106,16 +106,28 @@ void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t my
 		}
 	}
 
-	// Update entities
-    Vector<Future<void>> tasks;
+	if (!peers.empty()) {
+		// Update entities
+	    Vector<Future<void>> tasks;
+		tasks.reserve(peers.size() - 1);
 
-    for (auto& peer : peers) {
-        tasks += Concurrent::execute([&]() {
-            peer.sendEntities(t, myPeerId, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
-        });
-    }
+	    for (auto& peer : peers) {
+			const bool isLastPeer = &peer == &peers.back();
+			auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peer.getPeerId());
+			if (isLastPeer) {
+				// Run last peer on this thread
+				peer.sendEntities(t, myPeerId, entityIds, clientSharedData);
+			} else {
+		        tasks += Concurrent::execute([&]() {
+		            peer.sendEntities(t, myPeerId, entityIds, clientSharedData);
+		        });
+			}
+	    }
 
-    Concurrent::whenAll(tasks.begin(), tasks.end()).wait();
+	    for (const auto& t: tasks) {
+		    t.wait();
+	    }
+	}
 }
 
 void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
