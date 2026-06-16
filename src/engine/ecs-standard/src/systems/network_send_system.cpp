@@ -27,16 +27,23 @@ public:
 			const auto myPeerId = maybePeerId.value();
 			const bool isHost = mpSession.isHost();
 
-			// First, enable updates for *all* network components.
 			for (const auto& e: networkFamily) {
-				e.network.sendUpdates = true;
-			}
+				// By default, consider sending updates for all entities in the family,
+				// *except* the ones we do not have authority for right now.
+				e.network.sendUpdates = e.network.authorityId.value_or(myPeerId) == myPeerId;
 
-			// Now disable updates for nested entities.
-			for (const auto& e: networkFamily) {
-				// Entity could have been processed already, earlier in this loop, as child of another entity.
-				if (e.network.sendUpdates) [[likely]] {
-					disableSendUpdateForChildren(getWorld().getEntity(e.entityId), myPeerId);
+				// Now disable updates for entities that are children of other entities with a
+				// network component. This doesn't require recursion, and should be faster than
+				// walking down the child hierarchy.
+				if (e.network.sendUpdates) {
+					auto parent = getWorld().getEntity(e.entityId).getParent();
+					while (parent.isValid() && parent.isSerializable()) {
+						if (const auto pe = parent.tryGetComponent<NetworkComponent>()) {
+							e.network.sendUpdates = false;
+							break;
+						}
+						parent = parent.getParent();
+					}
 				}
 			}
 
@@ -87,22 +94,6 @@ public:
 private:
 	Vector<EntityNetworkUpdateInfo> entities;
 	ListenerSetToken sessionChangeToken;
-
-	static void disableSendUpdateForChildren(const EntityRef& entity, NetworkSession::PeerId myPeerId)
-	{
-		// By default, child entities are updated as part of their parent, even if they have
-		// their own NetworkComponent. But another peer may lock & grab authority, then wants
-		// to update them separately.
-
-		for (auto c: entity.getChildren()) {
-			if (auto* network = c.tryGetComponent<NetworkComponent>()) [[unlikely]] {
-				// Only an active authority may want to keep updating.
-				network->sendUpdates &= network->authorityId.value_or(0xff) == myPeerId;
-			}
-
-			disableSendUpdateForChildren(c, myPeerId);
-		}
-	}
 
 	void setupSession()
 	{
