@@ -28,6 +28,14 @@ namespace {
 	}
 }
 
+TEST(Serializer, UInt8Conversion)
+{
+	EXPECT_EQ(127, convertBackAndForth<uint8_t>(127));
+	EXPECT_EQ(128, convertBackAndForth<uint8_t>(128));
+
+	//testRange(static_cast<uint8_t>(0), static_cast<uint8_t>(255));
+}
+
 TEST(Serializer, Int8Conversion)
 {
 	testRange(static_cast<int8_t>(-128), static_cast<int8_t>(127));

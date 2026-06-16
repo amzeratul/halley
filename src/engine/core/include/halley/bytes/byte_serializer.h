@@ -321,14 +321,58 @@ namespace Halley {
 		}
 
 		template <typename T>
+		void serialize1ByteInteger(T val)
+		{
+			// 7  0sxxxxxx
+			uint8_t v;
+			if constexpr (std::is_signed_v<T>) {
+				v = static_cast<uint8_t>(val >= 0 ? static_cast<int8_t>(val) : -(static_cast<int8_t>(val) + 1));
+				v |= val < 0 ? 0x40 : 0;
+			} else {
+				v = static_cast<uint8_t>(val);
+			}
+			copyBytes(&v, 1);
+		}
+
+		template <typename T>
+		void serialize2ByteInteger(T val)
+		{
+			// 14 10sxxxxx xxxxxxxx
+			// Bytes are stored little-endian: byte 0 holds the header and the low 6 bits, byte 1 holds the next 8 bits.
+			uint8_t b[2];
+			if constexpr (std::is_signed_v<T>) {
+				const uint16_t mag = static_cast<uint16_t>(val >= 0 ? static_cast<int16_t>(val) : -(static_cast<int16_t>(val) + 1));
+				b[0] = static_cast<uint8_t>(0x80 | (mag & 0x3F));
+				b[1] = static_cast<uint8_t>(((mag >> 6) & 0x7F) | (val < 0 ? 0x80 : 0));
+			} else {
+				const uint16_t v = static_cast<uint16_t>(val);
+				b[0] = static_cast<uint8_t>(0x80 | (v & 0x3F));
+				b[1] = static_cast<uint8_t>(v >> 6);
+			}
+			copyBytes(b, 2);
+		}
+
+		template <typename T>
 		Serializer& serializeInteger(T val)
 		{
-			if (options.version >= 1) {
+			if (options.version >= 1) [[likely]] {
 				// Variable-length
 				if constexpr (std::is_signed_v<T>) {
-					serializeVariableInteger(static_cast<uint64_t>(val >= 0 ? val : -(val + 1)), val < 0);
+					if (val < 64 && val > -64) {
+						serialize1ByteInteger(val);
+					} else if (sizeof(T) <= 2 || val < 8192 && val > -8192) {
+						serialize2ByteInteger(val);
+					} else {
+						serializeVariableInteger(static_cast<uint64_t>(val >= 0 ? val : -(val + 1)), val < 0);
+					}
 				} else {
-					serializeVariableInteger(val, {});
+					if (val < 128) {
+						serialize1ByteInteger(val);
+					} else if (sizeof(T) <= 2 || val < 16384) {
+						serialize2ByteInteger(val);
+					} else {
+						serializeVariableInteger(val, {});
+					}
 				}
 				return *this;
 			} else {
