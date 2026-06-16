@@ -479,3 +479,8 @@ void EntityRef::setReloaded()
 
 	world->setEntityReloaded();
 }
+
+void EntityRef::setModifiedThisFrame()
+{
+	setLastFrameModified(world->getFrameNumber());
+}

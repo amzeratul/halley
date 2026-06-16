@@ -28,6 +28,12 @@ component:
       canEdit: true
       canSave: true
       canNetwork: false
+  - requiresEntityFrameModified:
+      type: bool
+      defaultValue: false
+      canEdit: true
+      canSave: false
+      canNetwork: false
   - dataInterpolatorSet:
       type: 'Halley::DataInterpolatorSet'
       canSave: false

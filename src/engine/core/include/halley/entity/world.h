@@ -246,12 +246,11 @@ namespace Halley {
 		void generateMemoryReport() const;
 
 		uint32_t getFamilyRevision() const;
+		uint32_t getFrameNumber() const;
 
 	private:
-		const HalleyAPI& api;
-		Resources& resources;
-		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
-		std::shared_ptr<WorldReflection> reflection;
+		std::shared_ptr<MappedPool<Entity*>> entityMap;
+		std::shared_ptr<MaskStorage> maskStorage;
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;
@@ -259,26 +258,28 @@ namespace Halley {
 		bool terminating = false;
 		bool headless = false;
 		bool canDeleteEntities = true;
+		uint32_t frameNumber = 0;
+		float transform2DAnisotropy = 1.0f;
+		IWorldNetworkInterface* networkInterface = nullptr;
+
+		const HalleyAPI& api;
+		Resources& resources;
+		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
+		std::shared_ptr<WorldReflection> reflection;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;
-		std::shared_ptr<MappedPool<Entity*>> entityMap;
 		HashMap<UUID, Entity*> uuidMap;
 
 		Vector<std::unique_ptr<Family>> families;
-
 		HashMap<FamilyMaskType, Vector<Family*>> familyCache;
 
-		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
 		std::shared_ptr<TypedPool<Entity>> entityPool;
 		Vector<int> alwaysEnabledComponents;
 
 		std::array<std::list<SystemMessageContext>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> pendingSystemMessages;
 		
-		IWorldNetworkInterface* networkInterface = nullptr;
-		float transform2DAnisotropy = 1.0f;
-
 		HashMap<std::type_index, std::shared_ptr<Service>> services;
     	HashMap<std::type_index, ISystemInterface*> systemInterfaces;
 

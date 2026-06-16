@@ -21,6 +21,7 @@ public:
 	std::optional<uint8_t> creatorId{};
 	bool sendUpdates{ false };
 	bool alwaysSend{ false };
+	bool requiresEntityFrameModified{ false };
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
@@ -28,8 +29,9 @@ public:
 	NetworkComponent() {
 	}
 
-	NetworkComponent(bool alwaysSend)
+	NetworkComponent(bool alwaysSend, bool requiresEntityFrameModified)
 		: alwaysSend(std::move(alwaysSend))
+		, requiresEntityFrameModified(std::move(requiresEntityFrameModified))
 	{
 	}
 
@@ -38,6 +40,7 @@ public:
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::serialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::serialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::serialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		return _node;
 	}
@@ -46,6 +49,7 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::deserialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::deserialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::deserialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 	}
 
@@ -53,6 +57,7 @@ public:
 		using namespace Halley::EntitySerialization;
 		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("authorityId");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)) == 0) _node.removeKey("alwaysSend");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("requiresEntityFrameModified");
 		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("locks");
 	}
 
