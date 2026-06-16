@@ -79,4 +79,21 @@ namespace Halley
 		HashSet<uint64_t> logOnce;
 		bool interruptContext = false;
 	};
+
+	class IScreenLogger {
+	public:
+	    virtual ~IScreenLogger() = default;
+	    virtual void onLog(std::string_view key, String value) = 0;
+	};
+
+	class ScreenLogger {
+	public:
+	    static void logScreen(std::string_view key, String value);
+	    static void logScreen(std::string_view key, int value);
+	    static void setTarget(IScreenLogger* target);
+
+	private:
+	    static IScreenLogger* target;
+	};
+
 }

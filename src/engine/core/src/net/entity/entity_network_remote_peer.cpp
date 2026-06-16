@@ -38,16 +38,18 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 	return peerId;
 }
 
-void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData)
+SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData)
 {
 	HalleyAssertDev(isAlive());
 	HalleyAssertDev(myPeerId != peerId);
+
+	SendEntitiesStats stats;
 
 	if (!isRemoteReady()) {
 		if (timeSinceSend > maxSendInterval) {
 			sendKeepAlive();
 		}
-		return;
+		return stats;
 	}
 
 	timeSinceSend += t;
@@ -84,6 +86,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 				HalleyAssertDev(iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				toUpdate.emplace_back(entity, &iter->second);
+				++stats.nCheckedAcquiredAuthority;
 			} else {
 				Logger::logWarning("No temporary outbound entity found for " + entity.getName() + ", " +
 					entity.getInstanceUUID(), true);
@@ -102,6 +105,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 				iter->second.alive = true;
 				if (entry.authorityId != peerId) {
 					toUpdate.emplace_back(entity, &iter->second);
+					++stats.nCheckedRelinquishedAuthority;
 				}
 				continue;
 			} else {
@@ -115,6 +119,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 		}
 
 		if (entry.alwaysSend || parentSession->isEntityInView(entity, clientData, peerId)) {
+			++stats.nCheckedRegular;
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parentSession->setupOutboundInterpolators(entity);
 				toCreate.push_back(entity);
@@ -144,11 +149,17 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 		}
 
 		sendDestroyEntity(e.second, e.first);
+		++stats.nDestroyed;
 	}
 
 	// Update existing entities
 	for (auto& [e, oe] : toUpdate) {
-		sendUpdateEntity(t, sessionTimestamp, *oe, e);
+		const bool sent = sendUpdateEntity(t, sessionTimestamp, *oe, e);
+		++stats.nUpdateChecked;
+		//Logger::logDev("Sending " + e.getName(), true);
+		if (sent) {
+			++stats.nUpdated;
+		}
 	}
 
 	// Create new entities
@@ -171,6 +182,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 			}
 		}
 		sendCreateEntity(e);
+		++stats.nCreated;
 	}
 
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
@@ -183,6 +195,8 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 		hasSentData = true;
 		onFirstDataBatchSent();
 	}
+
+	return stats;
 }
 
 void EntityNetworkRemotePeer::receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)
@@ -308,11 +322,13 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	outboundEntities[entity.getEntityId()] = std::move(result);
 }
 
-void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity)
+bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity)
 {
+	bool sent = false;
+
 	remote.timeSinceSend += t;
 	if (remote.timeSinceSend < parentSession->getMinSendInterval()) {
-		return;
+		return sent;
 	}
 
 	remote.timeSinceSend = 0;
@@ -372,6 +388,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			memcpy(bytes.data(), fastUpdateOutboundData.data(), outboundDataSize);
 
     			send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true, remote.hasAuthorityOnly, sessionTimestamp));
+				sent = true;
     		}
 
     		if (modifiedInStructure) {
@@ -394,7 +411,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     if (!canFastUpdate) {
     	if (remote.hasAuthorityOnly) {
             Logger::logError("Full network updates unsupported for entities with changed authority");
-    		return;
+    		return sent;
     	}
 
         // Encode delta using interpolators
@@ -416,6 +433,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         	}
 
             send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), false, remote.hasAuthorityOnly, sessionTimestamp));
+			sent = true;
         }
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
@@ -430,6 +448,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         }
 #endif
     }
+
+	return sent;
 }
 
 void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId entityId)

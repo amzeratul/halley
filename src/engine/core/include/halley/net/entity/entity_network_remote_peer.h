@@ -13,6 +13,41 @@ namespace Halley {
 	class EntityNetworkSession;
 	struct EntityId;
     class EntityData;
+    
+    struct SendEntitiesStats {
+        int nCheckedAcquiredAuthority = 0;
+        int nCheckedRelinquishedAuthority = 0;
+        int nCheckedRegular = 0;
+        int nUpdateChecked = 0;
+        int nCreated = 0;
+        int nUpdated = 0;
+        int nDestroyed = 0;
+
+		SendEntitiesStats& operator+=(const SendEntitiesStats& other)
+		{
+			nCheckedAcquiredAuthority += other.nCheckedAcquiredAuthority;
+			nCheckedRelinquishedAuthority += other.nCheckedRelinquishedAuthority;
+			nCheckedRegular += other.nCheckedRegular;
+			nUpdateChecked += other.nUpdateChecked;
+			nCreated += other.nCreated;
+			nUpdated += other.nUpdated;
+			nDestroyed += other.nDestroyed;
+			return *this;
+		}
+		
+		SendEntitiesStats operator+(const SendEntitiesStats& other) const
+		{
+			SendEntitiesStats result;
+			result.nCheckedAcquiredAuthority = nCheckedAcquiredAuthority + other.nCheckedAcquiredAuthority;
+			result.nCheckedRelinquishedAuthority = nCheckedRelinquishedAuthority + other.nCheckedRelinquishedAuthority;
+			result.nCheckedRegular = nCheckedRegular + other.nCheckedRegular;
+			result.nUpdateChecked = nUpdateChecked + other.nUpdateChecked;
+			result.nCreated = nCreated + other.nCreated;
+			result.nUpdated = nUpdated + other.nUpdated;
+			result.nDestroyed = nDestroyed + other.nDestroyed;
+			return result;
+		}
+    };
 
     struct EntityNetworkUpdateInfo {
 		EntityId entityId;
@@ -47,7 +82,7 @@ namespace Halley {
         void sendLobbyInfo(ConfigNode data);
         void setLobbyInfo(ConfigNode info);
 
-    	void sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
+    	SendEntitiesStats sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
         void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 
     	[[nodiscard]] EntityId findInboundEntity(EntityNetworkId networkId) const;
@@ -112,7 +147,7 @@ namespace Halley {
 
         uint16_t assignId();
         void sendCreateEntity(const EntityRef& entity);
-        void sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity);
+        bool sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote, EntityId entityId);
         void sendKeepAlive();
         void send(EntityNetworkMessage message);

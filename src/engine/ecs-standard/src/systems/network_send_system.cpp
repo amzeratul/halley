@@ -15,80 +15,89 @@ public:
 
 	void update(Time t)
 	{
-		if (getSessionService().isMultiplayer()) {
-			auto& mpSession = getSessionService().getMultiplayerSession();
-			auto& entityNetworkSession = *mpSession.getEntityNetworkSession();
-			const auto maybePeerId = mpSession.getNetworkSession()->getMyPeerId();
-			if (!maybePeerId) {
-				// Not ready
-				return;
-			}
-			
-			const auto myPeerId = maybePeerId.value();
-			const bool isHost = mpSession.isHost();
+		if (!getSessionService().isMultiplayer()) {
+			return;
+		}
 
-			for (const auto& e: networkFamily) {
-				// By default, consider sending updates for all entities in the family,
-				// *except* the ones we do not have authority for right now.
-				e.network.sendUpdates = e.network.authorityId.value_or(myPeerId) == myPeerId;
+		resetCounters();
 
-				// Now disable updates for entities that are children of other entities with a
-				// network component. This doesn't require recursion, and should be faster than
-				// walking down the child hierarchy.
-				if (e.network.sendUpdates) {
-					auto parent = getWorld().getEntity(e.entityId).getParent();
-					while (parent.isValid() && parent.isSerializable()) {
-						if (const auto pe = parent.tryGetComponent<NetworkComponent>()) {
-							e.network.sendUpdates = false;
-							break;
-						}
-						parent = parent.getParent();
+		auto& mpSession = getSessionService().getMultiplayerSession();
+		auto& entityNetworkSession = *mpSession.getEntityNetworkSession();
+		const auto maybePeerId = mpSession.getNetworkSession()->getMyPeerId();
+		if (!maybePeerId) {
+			// Not ready
+			return;
+		}
+		
+		const auto myPeerId = maybePeerId.value();
+		const bool isHost = mpSession.isHost();
+
+		for (const auto& e: networkFamily) {
+			++networkEntities;
+
+			// By default, consider sending updates for all entities in the family,
+			// *except* the ones we do not have authority for right now.
+			e.network.sendUpdates = e.network.authorityId.value_or(myPeerId) == myPeerId;
+
+			// Now disable updates for entities that are children of other entities with a
+			// network component. This doesn't require recursion, and should be faster than
+			// walking down the child hierarchy.
+			if (e.network.sendUpdates) {
+				auto parent = getWorld().getEntity(e.entityId).getParent();
+				while (parent.isValid() && parent.isSerializable()) {
+					if (const auto pe = parent.tryGetComponent<NetworkComponent>()) {
+						e.network.sendUpdates = false;
+						break;
 					}
+					parent = parent.getParent();
 				}
 			}
+		}
 
-			entities.clear();
-			for (auto& e: networkFamily) {
-				// Try to automatically assign a peerId to any NetworkComponent that hasn't been bound yet.
-				// This is done for entities created locally; remote entities will be pre-populated.
-				if (!e.network.ownerId) [[unlikely]] {
-					auto entity = getWorld().getEntity(e.entityId);
+		entities.clear();
+		for (auto& e: networkFamily) {
+			// Try to automatically assign a peerId to any NetworkComponent that hasn't been bound yet.
+			// This is done for entities created locally; remote entities will be pre-populated.
+			if (!e.network.ownerId) [[unlikely]] {
+				auto entity = getWorld().getEntity(e.entityId);
 
-					if (isHost) {
-						// The host always claims ownership.
-						HalleyAssertDev(myPeerId == 0);
+				if (isHost) {
+					// The host always claims ownership.
+					HalleyAssertDev(myPeerId == 0);
+					e.network.ownerId = myPeerId;
+				} else {
+					// Entities created locally belong to this peer. Entities loaded from world chunks are
+					// supposed to be claimed by the host.
+					HalleyAssertDev(myPeerId != 0);
+					if (entity.getWorldPartition() == 0) {
+						//Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
 						e.network.ownerId = myPeerId;
 					} else {
-						// Entities created locally belong to this peer. Entities loaded from world chunks are
-						// supposed to be claimed by the host.
-						HalleyAssertDev(myPeerId != 0);
-						if (entity.getWorldPartition() == 0) {
-							//Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
-							e.network.ownerId = myPeerId;
-						} else {
-							//Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
-							e.network.ownerId = 0;
-						}
-					}
-
-					e.network.creatorId = myPeerId;
-				}
-
-				if (e.network.sendUpdates && e.network.ownerId) {
-					uint8_t ownerId = e.network.ownerId.value();
-					uint8_t authorityId = e.network.authorityId.value_or(ownerId);
-					if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
-						entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, ownerId, authorityId, e.network.alwaysSend });
+						//Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
+						e.network.ownerId = 0;
 					}
 				}
+
+				e.network.creatorId = myPeerId;
 			}
 
-			const auto viewPort = Rect4i(getScreenService().getCameraViewPort());
-			
-			entityNetworkSession.sendEntityUpdates(t, viewPort, myPeerId, entities);
-			entityNetworkSession.sendUpdates();
-			entityNetworkSession.update(0.0);
+			if (e.network.sendUpdates && e.network.ownerId) {
+				uint8_t ownerId = e.network.ownerId.value();
+				uint8_t authorityId = e.network.authorityId.value_or(ownerId);
+				if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
+					++networkEntitiesSending;
+					entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, ownerId, authorityId, e.network.alwaysSend });
+				}
+			}
 		}
+
+		const auto viewPort = Rect4i(getScreenService().getCameraViewPort());
+		
+		const auto stats = entityNetworkSession.sendEntityUpdates(t, viewPort, myPeerId, entities);
+		entityNetworkSession.sendUpdates();
+		entityNetworkSession.update(0.0);
+
+		//logCounters(stats);
 	}
 
 private:
@@ -197,6 +206,28 @@ private:
 		consoleCommands.removeCommand("networkLag");
 		consoleCommands.removeCommand("networkQuality");
 		consoleCommands.removeCommand("disconnect");
+	}
+
+	int networkEntities = 0;
+	int networkEntitiesSending = 0;
+
+	void resetCounters()
+	{
+		networkEntities = 0;
+		networkEntitiesSending = 0;
+	}
+
+	void logCounters(SendEntitiesStats stats)
+	{
+		ScreenLogger::logScreen("networkEntities", networkEntities);
+		ScreenLogger::logScreen("networkEntitiesSending", networkEntitiesSending);
+		ScreenLogger::logScreen("stats.nCreated", stats.nCreated);
+		ScreenLogger::logScreen("stats.nUpdated", stats.nUpdated);
+		ScreenLogger::logScreen("stats.nDestroyed", stats.nDestroyed);
+		ScreenLogger::logScreen("stats.nUpdateChecked", stats.nUpdateChecked);
+		ScreenLogger::logScreen("stats.nCheckedAcquiredAuthority", stats.nCheckedAcquiredAuthority);
+		ScreenLogger::logScreen("stats.nCheckedRelinquishedAuthority", stats.nCheckedRelinquishedAuthority);
+		ScreenLogger::logScreen("stats.nCheckedRegular", stats.nCheckedRegular);
 	}
 };
 
