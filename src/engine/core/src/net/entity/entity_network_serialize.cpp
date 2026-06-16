@@ -420,7 +420,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
         }
     }
 
-    SerializerOptions opt(SerializerOptions::maxVersion);
+    SerializerOptions opt(options.version);
     opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
@@ -514,7 +514,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
 
 EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options)
 {
-    SerializerOptions opt(SerializerOptions::maxVersion);
+    SerializerOptions opt(options.version);
     opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
@@ -941,7 +941,7 @@ size_t EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& op
 {
     data.resize_no_init(data.capacity());
 
-    SerializerOptions opt(SerializerOptions::maxVersion);
+    SerializerOptions opt(options.version);
     opt.dictionary = options.dictionary;
 
     Serializer s(data.byte_span(), opt);
