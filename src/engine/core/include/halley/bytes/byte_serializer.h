@@ -360,7 +360,7 @@ namespace Halley {
 				if constexpr (std::is_signed_v<T>) {
 					if (val < 64 && val > -64) {
 						serialize1ByteInteger(val);
-					} else if (sizeof(T) == 1 || val < 8192 && val > -8192) {
+					} else if (sizeof(T) == 1 || (val < 8192 && val > -8192)) {
 						serialize2ByteInteger(val);
 					} else {
 						serializeVariableInteger(static_cast<uint64_t>(val >= 0 ? val : -(val + 1)), val < 0);
