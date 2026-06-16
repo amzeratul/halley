@@ -109,6 +109,58 @@ int32_t Random::getInt(Range<int32_t> range)
 	return getInt(range.start, range.end);
 }
 
+int8_t Random::getInt(int8_t min, int8_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint8_t base = getRawInt();
+	if (min == std::numeric_limits<int8_t>::min() && max == std::numeric_limits<int8_t>::max()) {
+		return int8_t(base);
+	}
+	const uint8_t range = uint8_t(max - min + 1);
+	return int8_t(base % range) + min;
+}
+
+uint8_t Random::getInt(uint8_t min, uint8_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint8_t base = getRawInt();
+	const uint8_t range = max - min + 1;
+	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+		return base;
+	}
+	return base % range + min;
+}
+
+int16_t Random::getInt(int16_t min, int16_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint16_t base = getRawInt();
+	if (min == std::numeric_limits<int16_t>::min() && max == std::numeric_limits<int16_t>::max()) {
+		return int16_t(base);
+	}
+	const uint16_t range = uint16_t(max - min + 1);
+	return int16_t(base % range) + min;
+}
+
+uint16_t Random::getInt(uint16_t min, uint16_t max)
+{
+	if (min > max) {
+		std::swap(min, max);
+	}
+	const uint16_t base = getRawInt();
+	const uint16_t range = max - min + 1;
+	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+		return base;
+	}
+	return base % range + min;
+}
+
 int32_t Random::getInt(int32_t min, int32_t max)
 {
 	if (min > max) {
