@@ -118,6 +118,11 @@ namespace Halley {
 		Serializer& operator<<(uint32_t val) { return serializeInteger(val); }
 		Serializer& operator<<(int64_t val) { return serializeInteger(val); }
 		Serializer& operator<<(uint64_t val) { return serializeInteger(val); }
+#if defined(__APPLE__)
+		// On Apple LP64, int64_t/uint64_t are long long, leaving long/unsigned long (e.g. size_t) unmatched
+		Serializer& operator<<(long val) { return serializeInteger(static_cast<int64_t>(val)); }
+		Serializer& operator<<(unsigned long val) { return serializeInteger(static_cast<uint64_t>(val)); }
+#endif
 		Serializer& operator<<(float val) { return serializePod(val); }
 		Serializer& operator<<(double val) { return serializePod(val); }
 
@@ -387,6 +392,11 @@ namespace Halley {
 		Deserializer& operator>>(uint32_t& val) { return deserializeInteger(val); }
 		Deserializer& operator>>(int64_t& val) { return deserializeInteger(val); }
 		Deserializer& operator>>(uint64_t& val) { return deserializeInteger(val); }
+#if defined(__APPLE__)
+		// On Apple LP64, int64_t/uint64_t are long long, leaving long/unsigned long (e.g. size_t) unmatched
+		Deserializer& operator>>(long& val) { int64_t v; deserializeInteger(v); val = static_cast<long>(v); return *this; }
+		Deserializer& operator>>(unsigned long& val) { uint64_t v; deserializeInteger(v); val = static_cast<unsigned long>(v); return *this; }
+#endif
 		Deserializer& operator>>(float& val) { return deserializePod(val); }
 		Deserializer& operator>>(double& val) { return deserializePod(val); }
 
