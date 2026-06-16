@@ -114,7 +114,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 			}
 		}
 
-		if (parentSession->isEntityInView(entity, clientData, peerId)) {
+		if (entry.alwaysSend || parentSession->isEntityInView(entity, clientData, peerId)) {
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parentSession->setupOutboundInterpolators(entity);
 				toCreate.push_back(entity);

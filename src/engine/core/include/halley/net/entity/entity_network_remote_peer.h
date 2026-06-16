@@ -18,6 +18,7 @@ namespace Halley {
 		EntityId entityId;
 		uint8_t ownerId;
     	uint8_t authorityId;
+    	bool alwaysSend;
 	};
 
 	struct EntityNetworkInstanceInfo {

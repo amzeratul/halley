@@ -71,7 +71,7 @@ public:
 					uint8_t ownerId = e.network.ownerId.value();
 					uint8_t authorityId = e.network.authorityId.value_or(ownerId);
 					if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
-						entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, ownerId, authorityId });
+						entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, ownerId, authorityId, e.network.alwaysSend });
 					}
 				}
 			}
