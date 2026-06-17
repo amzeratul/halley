@@ -7,17 +7,43 @@
 
 namespace Halley {
     namespace Hash {
+		namespace Detail {
+			uint64_t hash1Byte(const void* bytes);
+			uint64_t hash2Bytes(const void* bytes);
+			uint64_t hash4Bytes(const void* bytes);
+			uint64_t hash8Bytes(const void* bytes);
+			uint64_t hash16Bytes(const void* bytes);
+			uint64_t hash32Bytes(const void* bytes);
+			uint64_t hash64Bytes(const void* bytes);
+		}
+
         uint64_t hash(const Bytes& bytes);
         uint64_t hash(gsl::span<const std::byte> bytes);
+        uint64_t hash(const void* bytes, size_t len);
 		
-    	template <typename T>
-    	uint64_t hashValue(const T& v)
+    	template <typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
+    	uint64_t hash(const T& v)
     	{
-    		return hash(gsl::as_bytes(gsl::span<const T>(&v, 1)));
+			if constexpr (sizeof(T) == 1) {
+				return Detail::hash1Byte(&v);
+			} else if constexpr (sizeof(T) == 2) {
+				return Detail::hash2Bytes(&v);
+			} else if constexpr (sizeof(T) == 4) {
+				return Detail::hash4Bytes(&v);
+			} else if constexpr (sizeof(T) == 8) {
+				return Detail::hash8Bytes(&v);
+			} else if constexpr (sizeof(T) == 16) {
+				return Detail::hash16Bytes(&v);
+			} else if constexpr (sizeof(T) == 32) {
+				return Detail::hash32Bytes(&v);
+			} else if constexpr (sizeof(T) == 64) {
+				return Detail::hash64Bytes(&v);
+			} else {
+				return hash(gsl::as_bytes(gsl::span<const T>(&v, 1)));
+			}
     	}
 
 		uint32_t compressTo32(uint64_t value);
-
 
 		class Hasher
 		{

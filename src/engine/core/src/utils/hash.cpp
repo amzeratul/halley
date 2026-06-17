@@ -5,14 +5,54 @@
 
 using namespace Halley;
 
+uint64_t Hash::Detail::hash1Byte(const void* bytes)
+{
+	return XXH3_64bits(bytes, 1);
+}
+
+uint64_t Hash::Detail::hash2Bytes(const void* bytes)
+{
+	return XXH3_64bits(bytes, 2);
+}
+
+uint64_t Hash::Detail::hash4Bytes(const void* bytes)
+{
+	return XXH3_64bits(bytes, 4);
+}
+
+uint64_t Hash::Detail::hash8Bytes(const void* bytes)
+{
+	return XXH3_64bits(bytes, 8);
+}
+
+uint64_t Hash::Detail::hash16Bytes(const void* bytes)
+{
+	return XXH3_64bits(bytes, 16);
+}
+
+uint64_t Hash::Detail::hash32Bytes(const void* bytes)
+{
+	return XXH3_64bits(bytes, 32);
+}
+
+uint64_t Hash::Detail::hash64Bytes(const void* bytes)
+{
+	return XXH3_64bits(bytes, 64);
+}
+
 uint64_t Hash::hash(const Bytes& bytes)
 {
-	return hash(gsl::as_bytes(gsl::span<const Byte>(bytes)));
+	return XXH3_64bits(bytes.data(), bytes.size());
 }
 
 uint64_t Hash::hash(gsl::span<const std::byte> bytes)
 {
-	return XXH64(bytes.data(), size_t(bytes.size_bytes()), 0);
+	return XXH3_64bits(bytes.data(), bytes.size_bytes());
+}
+
+uint64_t Hash::hash(const void* bytes, size_t len)
+{
+	return XXH3_64bits(bytes, len);
 }
 
 uint32_t Hash::compressTo32(uint64_t value)
