@@ -20,6 +20,7 @@
 #include "iserialization_dictionary.h"
 #include "byte_serializer_base.h"
 #include "halley/data_structures/bit_vector.h"
+#include "halley/utils/hash.h"
 
 namespace Halley {
 	class World;
@@ -31,6 +32,7 @@ namespace Halley {
 		
 		int version = 0;
 		bool exhaustiveDictionary = false;
+		bool toHash = false;
 		ISerializationDictionary* dictionary = nullptr;
 		World* world = nullptr;
 
@@ -327,9 +329,18 @@ namespace Halley {
 			return *this;
 		}
 
+		uint64_t getHashDigest() const
+		{
+			if (hasher) {
+				return hasher->digest();
+			}
+			return 0;
+		}
+
 	private:
 		size_t size = 0;
 		gsl::span<std::byte> dst;
+		std::unique_ptr<Hash::Hasher> hasher;
 		bool dryRun;
 
 		template <typename T>
@@ -404,7 +415,10 @@ namespace Halley {
 		void copyPOD(const T& src)
 		{
 			constexpr auto srcSize = sizeof(T);
-			if (!dryRun) [[likely]] {
+
+			if (hasher) {
+				hasher->feed(src);
+			} else if (!dryRun) {
 				if (dst.size() - size < srcSize) [[unlikely]] {
 					throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
 				}

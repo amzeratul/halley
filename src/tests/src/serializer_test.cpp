@@ -144,3 +144,24 @@ TEST(Serializer, StringConversion)
 	testSerialization(String());
 	testSerialization(String("Hello world"));
 }
+
+TEST(Serializer, HashTest)
+{
+	auto options = SerializerOptions(SerializerOptions::maxVersion);
+	options.toHash = true;
+
+	uint64_t hash;
+	{
+		auto s = Serializer(options);
+		s << String("Hello world");
+		s << 1;
+		hash = s.getHashDigest();
+	}
+
+	{
+		auto s = Serializer(options);
+		s << String("Hello world");
+		s << 1;
+		EXPECT_EQ(hash, s.getHashDigest());
+	}
+}

@@ -13,16 +13,24 @@ SerializerState* ByteSerializationBase::setState(SerializerState* s)
 	return oldState;
 }
 
-Serializer::Serializer(SerializerOptions options)
-	: ByteSerializationBase(std::move(options))
+Serializer::Serializer(SerializerOptions _options)
+	: ByteSerializationBase(std::move(_options))
 	, dryRun(true)
-{}
+{
+	if (options.toHash) {
+		hasher = std::make_unique<Hash::Hasher>();
+	}
+}
 
-Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions options)
-	: ByteSerializationBase(std::move(options))
+Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions _options)
+	: ByteSerializationBase(std::move(_options))
 	, dst(dst)
 	, dryRun(false)
-{}
+{
+	if (options.toHash) {
+		hasher = std::make_unique<Hash::Hasher>();
+	}
+}
 
 void Serializer::rewind(size_t position)
 {
@@ -167,7 +175,9 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 
 void Serializer::copyBytes(const void* src, size_t srcSize)
 {
-	if (!dryRun) [[likely]] {
+	if (hasher) {
+		hasher->feedBytes(gsl::span<const std::byte>(static_cast<const std::byte*>(src), srcSize));
+	} else if (!dryRun) {
 		if (dst.size() - size < srcSize) [[unlikely]] {
 			throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
 		}
