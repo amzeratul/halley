@@ -32,6 +32,6 @@
         <DisplayString>{((natvis::x8*)this)[0]}{((natvis::x8*)this)[1]}{((natvis::x8*)this)[2]}{((natvis::x8*)this)[3]}{((natvis::x8*)this)[4]}{((natvis::x8*)this)[5]}</DisplayString>
     </Type>
     <Type Name="Halley::UUID">
-        <DisplayString>{*(natvis::x32*)&amp;bytes[0]}-{*(natvis::x16*)&amp;bytes[4]}-{*(natvis::x16*)&amp;bytes[6]}-{*(natvis::x16*)&amp;bytes[8]}-{*(natvis::x48*)&amp;bytes[10]}</DisplayString>
+        <DisplayString>{*(natvis::x32*)((char*)&amp;qwords[0]+0)}-{*(natvis::x16*)((char*)&amp;qwords[0]+4)}-{*(natvis::x16*)((char*)&amp;qwords[0]+6)}-{*(natvis::x16*)((char*)&amp;qwords[0]+8)}-{*(natvis::x48*)((char*)&amp;qwords[0]+10)}</DisplayString>
     </Type>
 </AutoVisualizer>

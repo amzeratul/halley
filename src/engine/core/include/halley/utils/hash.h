@@ -5,9 +5,6 @@
 #include "utils.h"
 #include "halley/text/halleystring.h"
 
-struct XXH64_state_s;
-typedef struct XXH64_state_s XXH64_state_t;
-
 namespace Halley {
     namespace Hash {
         uint64_t hash(const Bytes& bytes);
@@ -41,7 +38,23 @@ namespace Halley {
 			template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
 			void feed(const T& data)
 			{
-				feedBytes(gsl::as_bytes(gsl::span<const T>(&data, 1)));
+				if constexpr (sizeof(T) == 1) {
+					feed1Byte(&data);
+				} else if constexpr (sizeof(T) == 2) {
+					feed2Bytes(&data);
+				} else if constexpr (sizeof(T) == 4) {
+					feed4Bytes(&data);
+				} else if constexpr (sizeof(T) == 8) {
+					feed8Bytes(&data);
+				} else if constexpr (sizeof(T) == 16) {
+					feed16Bytes(&data);
+				} else if constexpr (sizeof(T) == 32) {
+					feed32Bytes(&data);
+				} else if constexpr (sizeof(T) == 64) {
+					feed64Bytes(&data);
+				} else {
+					feedBytes(gsl::as_bytes(gsl::span<const T>(&data, 1)));
+				}
 			}
 
 			void feedBytes(gsl::span<const std::byte> bytes);
@@ -50,8 +63,15 @@ namespace Halley {
 			void reset();
 
 		private:
-			bool ready;
-			XXH64_state_t* data;
+			void* state;
+
+			void feed1Byte(const void* bytes);
+			void feed2Bytes(const void* bytes);
+			void feed4Bytes(const void* bytes);
+			void feed8Bytes(const void* bytes);
+			void feed16Bytes(const void* bytes);
+			void feed32Bytes(const void* bytes);
+			void feed64Bytes(const void* bytes);
 		};
     };
 }

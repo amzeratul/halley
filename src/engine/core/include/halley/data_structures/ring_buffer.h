@@ -15,6 +15,8 @@ namespace Halley {
     class RingBuffer {
     public:
     	explicit RingBuffer(size_t capacity)
+    		: readPos(0)
+			, writePos(0)
     	{
             entries.resize(capacity);
     	}
@@ -87,6 +89,9 @@ namespace Halley {
     	void write(gsl::span<const T> es)
     	{
             const size_t numToWrite = es.size();
+            if (numToWrite == 0) [[unlikely]] {
+				return;
+            }
             HalleyAssertDebug(canWrite(numToWrite));
 
             const auto startPos = writePos.load(std::memory_order_relaxed);
@@ -106,6 +111,9 @@ namespace Halley {
     	void write(gsl::span<T> es)
     	{
             const size_t numToWrite = es.size();
+            if (numToWrite == 0) [[unlikely]] {
+				return;
+            }
             HalleyAssertDebug(canWrite(numToWrite));
 
             const auto startPos = writePos.load(std::memory_order_relaxed);
@@ -125,6 +133,9 @@ namespace Halley {
     	void read(gsl::span<T> es)
     	{
             const size_t numToRead = es.size();
+            if (numToRead == 0) [[unlikely]] {
+				return;
+            }
             HalleyAssertDebug(canRead(numToRead));
 
             const auto startPos = readPos.load(std::memory_order_relaxed);

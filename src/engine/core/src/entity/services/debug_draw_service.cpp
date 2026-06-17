@@ -70,16 +70,21 @@ void DebugDrawService::addDebugEllipse(Vector2f point, Vector2f radius, Colour4f
 	BaseFrameData::getCurrent().debugEllipses.emplace_back(point, radius, thickness, colour, params);
 }
 
-const TreeMap<String, DebugText>& DebugDrawService::getDebugTexts()
+const Vector<std::pair<String, DebugText>>& DebugDrawService::getDebugTexts()
 {
 	return BaseFrameData::getCurrent().debugTexts;
 }
 
 void DebugDrawService::addDebugText(std::string_view key, String value)
 {
-	auto& dt = BaseFrameData::getCurrent().debugTexts[key];
-	dt.text = std::move(value);
-	dt.time = 0.0;
+	auto& debugTexts = BaseFrameData::getCurrent().debugTexts;
+	const auto iter = std_ex::find_if(debugTexts, [&] (const auto& e) { return e.first == key; });
+	if (iter != debugTexts.end()) {
+		iter->second.text = std::move(value);
+		iter->second.time = 0;
+	} else {
+		debugTexts.emplace_back(key, DebugText(std::move(value)));
+	}
 }
 
 void DebugDrawService::addDebugText(String value, Vector2f position)

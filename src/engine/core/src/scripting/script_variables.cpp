@@ -2,6 +2,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/entity/entity_id.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -64,6 +65,53 @@ ConfigNode ScriptVariables::toConfigNode(const EntitySerializationContext& conte
 	return result;
 }
 
+void ScriptVariables::serialize(Serializer& s, const EntitySerializationContext& context) const
+{
+	for (const auto& [k, v]: variables) {
+		if (v.getType() == ConfigNodeType::EntityId) {
+			// Has entity id, so we need the slow path
+			s << true;
+			s << toConfigNode(context);
+			return;
+		}
+	}
+
+	// No entity id found, just write variables
+	s << false;
+	s << variables;
+}
+
+void ScriptVariables::deserialize(Deserializer& s, const EntitySerializationContext& context)
+{
+	bool slowPath;
+	s >> slowPath;
+	if (slowPath) {
+		ConfigNode n;
+		s >> n;
+		load(n, context);
+		return;
+	}
+
+	s >> variables;
+	Vector<std::pair<String, EntityId>> toAdd;
+	for (const auto& [k, v]: variables) {
+		if (k.startsWith("entity!")) {
+			auto key = std::string_view(k).substr(7);
+			EntityId id = ConfigNodeSerializer<EntityId>().deserialize(context, v);
+			toAdd += { key, id };
+		}
+	}
+
+	if (!toAdd.empty()) {
+		std_ex::erase_if_key(variables, [&] (const String& key) {
+			return key.startsWith("entity!");
+		});
+		for (auto& [k, v]: toAdd) {
+			variables[k] = v;
+		}
+	}
+}
+
 const ConfigNode& ScriptVariables::getVariable(const String& name) const
 {
 	const auto iter = variables.find(name);
@@ -110,13 +158,10 @@ void ConfigNodeSerializer<ScriptVariables>::deserialize(const EntitySerializatio
 
 void ByteSerializationHelper<ScriptVariables>::serialize(const ScriptVariables& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
 {
-    auto node = ConfigNodeSerializer<ScriptVariables>().serialize(value, *context.entitySerializationContext);
-    serializer << node;
+	value.serialize(serializer, *context.entitySerializationContext);
 }
 
 void ByteSerializationHelper<ScriptVariables>::deserialize(ScriptVariables& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
 {
-    ConfigNode node;
-    deserializer >> node;
-    ConfigNodeSerializer<ScriptVariables>().deserialize(*context.entitySerializationContext, node, dst);
+	dst.deserialize(deserializer, *context.entitySerializationContext);
 }

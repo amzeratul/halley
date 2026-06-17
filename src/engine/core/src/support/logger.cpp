@@ -148,3 +148,24 @@ void Logger::setInterruptContext()
 }
 
 Logger* Logger::instance = nullptr;
+
+void ScreenLogger::logScreen(std::string_view key, String value)
+{
+	if (target) {
+		target->onLog(key, std::move(value));
+	}
+}
+
+void ScreenLogger::logScreen(std::string_view key, int value)
+{
+	if (target) {
+		logScreen(key, toString(value));
+	}
+}
+
+void ScreenLogger::setTarget(IScreenLogger* t)
+{
+	target = t;
+}
+
+IScreenLogger* ScreenLogger::target = nullptr;

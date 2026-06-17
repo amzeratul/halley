@@ -95,6 +95,28 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 	return result;
 }
 
+void ScriptStateSet::serialize(Serializer& s, const EntitySerializationContext& context) const
+{
+	if (s.getOptions().toHash) {
+		const bool isNetwork = context.matchType(makeMask(EntitySerialization::Type::Network));
+		for (auto& state: states) {
+			if (!isNetwork || state.state->getScriptGraphPtr()->isNetwork()) {
+				state.state->serialize(s, context);
+			}
+		}
+		s << curId;
+	} else {
+		s << toConfigNode(context);
+	}
+}
+
+void ScriptStateSet::deserialize(Deserializer& s, const EntitySerializationContext& context)
+{
+	ConfigNode node;
+	s >> node;
+	load(node, context);
+}
+
 void ScriptStateSet::addState(std::shared_ptr<ScriptState> state)
 {
 	HalleyAssertDev(!!state);
@@ -214,13 +236,10 @@ void ConfigNodeSerializer<ScriptStateSet>::deserialize(const EntitySerialization
 
 void ByteSerializationHelper<ScriptStateSet>::serialize(const ScriptStateSet& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
 {
-    auto node = ConfigNodeSerializer<ScriptStateSet>().serialize(value, *context.entitySerializationContext);
-    serializer << node;
+    value.serialize(serializer, *context.entitySerializationContext);
 }
 
 void ByteSerializationHelper<ScriptStateSet>::deserialize(ScriptStateSet& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
 {
-    ConfigNode node;
-    deserializer >> node;
-    ConfigNodeSerializer<ScriptStateSet>().deserialize(*context.entitySerializationContext, node, dst);
+	dst.deserialize(deserializer, *context.entitySerializationContext);
 }

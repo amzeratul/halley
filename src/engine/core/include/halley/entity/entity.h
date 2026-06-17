@@ -14,6 +14,8 @@
 #include "halley/maths/uuid.h"
 #include <gsl/span>
 
+#include "halley/utils/algorithm.h"
+
 namespace Halley {
 	class DataInterpolatorSet;
 	class World;
@@ -56,8 +58,10 @@ namespace Halley {
 		{
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-				for (uint8_t i = 0; i < liveComponents; i++) {
-					if (componentIds[i] == id) {
+				const auto& span = componentIds.span();
+				const size_t n = liveComponents;
+				for (size_t i = 0; i < n; ++i) {
+					if (span[i] == id) {
 						return static_cast<T*>(componentPtrs[i]);
 					}
 				}
@@ -70,8 +74,10 @@ namespace Halley {
 		{
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-				for (uint8_t i = 0; i < liveComponents; i++) {
-					if (componentIds[i] == id) {
+				const auto& span = componentIds.span();
+				const size_t n = liveComponents;
+				for (size_t i = 0; i < n; ++i) {
+					if (span[i] == id) {
 						return static_cast<const T*>(componentPtrs[i]);
 					}
 				}
@@ -197,9 +203,10 @@ namespace Halley {
 		bool fromNetwork : 1;
 		
 		uint8_t childrenRevision = 0;
-		WorldPartitionId worldPartition = 0;
 		uint8_t hierarchyRevision = 0;
 		uint8_t componentRevision = 0;
+		WorldPartitionId worldPartition = 0;
+		uint32_t lastFrameModified = 0;
 
 		FamilyMaskType mask;
 		Entity* parent = nullptr;
@@ -210,6 +217,8 @@ namespace Halley {
 		UUID instanceUUID;
 		UUID prefabUUID;
 		std::shared_ptr<const Prefab> prefab;
+
+		// Cacheline 2
 		std::unique_ptr<String> name;
 		std::unique_ptr<String> enableRules;
 
@@ -917,44 +926,58 @@ namespace Halley {
 
 		DataInterpolatorSet& setupNetwork(uint8_t peerId)
 		{
-			HalleyAssertDev(entity);
+			validate();
 			return entity->setupNetwork(*this, peerId);
 		}
 
 		std::optional<uint8_t> getOwnerPeerId() const
 		{
-			HalleyAssertDev(entity);
+			validate();
 			return entity->getOwnerPeerId();
 		}
 
         std::optional<uint8_t> getAuthorityPeerId() const
         {
-            HalleyAssertDev(entity);
+            validate();
             return entity->getAuthorityPeerId();
         }
 
 		bool isLocal() const
 		{
-			HalleyAssertDev(entity);
+			validate();
 			return entity->isNetworkOwner(*world);
 		}
 
 		bool isNetworkOwner() const
 		{
-			HalleyAssertDev(entity);
+			validate();
 			return entity->isNetworkOwner(*world);
 		}
 
 		bool isNetworkAuthority() const
 		{
-			HalleyAssertDev(entity);
+			validate();
 			return entity->isNetworkAuthority(*world);
 		}
 
 		void setFromNetwork(bool fromNetwork)
 		{
-			HalleyAssertDev(entity);
+			validate();
 			entity->setFromNetwork(fromNetwork);
+		}
+
+		uint32_t getLastFrameModified() const
+		{
+			validate();
+			return entity->lastFrameModified;
+		}
+
+		void setModifiedThisFrame();
+
+		void setLastFrameModified(uint32_t frame)
+		{
+			validate();
+			entity->lastFrameModified = frame;
 		}
 
 		bool isEmpty() const
@@ -1175,6 +1198,11 @@ namespace Halley {
 		WorldPartitionId getWorldPartition() const
 		{
 			return entity->worldPartition;
+		}
+
+		uint32_t getLastFrameModified() const
+		{
+			return entity->lastFrameModified;
 		}
 
 		gsl::span<const int16_t> getComponentIds() const

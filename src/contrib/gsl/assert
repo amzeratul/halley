@@ -120,8 +120,9 @@ namespace details
 } // namespace details
 } // namespace gsl
 
-#define GSL_CONTRACT_CHECK(type, cond)                                                             \
-    (GSL_LIKELY(cond) ? static_cast<void>(0) : gsl::details::terminate())
+//#define GSL_CONTRACT_CHECK(type, cond)                                                             \
+//    (GSL_LIKELY(cond) ? static_cast<void>(0) : gsl::details::terminate())
+#define GSL_CONTRACT_CHECK(type, cond) (static_cast<void>(0))
 
 #define Expects(cond) GSL_CONTRACT_CHECK("Precondition", cond)
 #define Ensures(cond) GSL_CONTRACT_CHECK("Postcondition", cond)

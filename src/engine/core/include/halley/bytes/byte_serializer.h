@@ -20,6 +20,7 @@
 #include "iserialization_dictionary.h"
 #include "byte_serializer_base.h"
 #include "halley/data_structures/bit_vector.h"
+#include "halley/utils/hash.h"
 
 namespace Halley {
 	class World;
@@ -31,6 +32,7 @@ namespace Halley {
 		
 		int version = 0;
 		bool exhaustiveDictionary = false;
+		bool toHash = false;
 		ISerializationDictionary* dictionary = nullptr;
 		World* world = nullptr;
 
@@ -126,6 +128,8 @@ namespace Halley {
 		Serializer& operator<<(float val) { return serializePod(val); }
 		Serializer& operator<<(double val) { return serializePod(val); }
 
+		Serializer& operator<<(std::string_view str);
+		Serializer& operator<<(const char* str);
 		Serializer& operator<<(const std::string& str);
 		Serializer& operator<<(const String& str);
 		Serializer& operator<<(const StringUTF32& str);
@@ -182,10 +186,27 @@ namespace Halley {
 		template <typename T, typename U>
 		Serializer& operator<<(const HashMap<T, U>& val)
 		{
-			std::set<T> keys;
-			for (auto& kv: val) {
-				keys.insert(kv.first);
+			using K = std::conditional_t<std::is_same_v<T, Halley::String>, std::string_view, T>;
+
+			// Store keys; try to do this without allocating if possible
+			const auto nKeys = val.size();
+			gsl::span<K> keys;
+
+			std::array<K, 64> keysArray;
+			Vector<K> keysVec;
+			if (nKeys <= keysArray.size()) {
+				keys = gsl::span(keysArray).subspan(0, nKeys);
+			} else {
+				keysVec.resize(nKeys);
+				keys = keysVec;
 			}
+
+			size_t i = 0;
+			for (const auto& kv: val) {
+				keys[i++] = K(kv.first);
+			}
+			std::sort(keys.begin(), keys.end());
+
 			*this << static_cast<uint32_t>(keys.size());
 			for (const auto& k: keys) {
 				*this << k << val.at(k);
@@ -313,27 +334,80 @@ namespace Halley {
 			return *this;
 		}
 
+		uint64_t getHashDigest() const
+		{
+			if (hasher) {
+				return hasher->digest();
+			}
+			return 0;
+		}
+
 	private:
 		size_t size = 0;
 		gsl::span<std::byte> dst;
+		std::unique_ptr<Hash::Hasher> hasher;
 		bool dryRun;
 
 		template <typename T>
 		Serializer& serializePod(T val)
 		{
-			copyBytes(&val, sizeof(T));
+			copyPOD(val);
 			return *this;
+		}
+
+		template <typename T>
+		void serialize1ByteInteger(T val)
+		{
+			// 7  0sxxxxxx
+			uint8_t v;
+			if constexpr (std::is_signed_v<T>) {
+				v = static_cast<uint8_t>(val >= 0 ? static_cast<int8_t>(val) : -(static_cast<int8_t>(val) + 1));
+				v |= val < 0 ? 0x40 : 0;
+			} else {
+				v = static_cast<uint8_t>(val);
+			}
+			copyPOD(v);
+		}
+
+		template <typename T>
+		void serialize2ByteInteger(T val)
+		{
+			// 14 10sxxxxx xxxxxxxx
+			// Bytes are stored little-endian: byte 0 holds the header and the low 6 bits, byte 1 holds the next 8 bits.
+			uint8_t b[2];
+			if constexpr (std::is_signed_v<T>) {
+				const uint16_t mag = static_cast<uint16_t>(val >= 0 ? static_cast<int16_t>(val) : -(static_cast<int16_t>(val) + 1));
+				b[0] = static_cast<uint8_t>(0x80 | (mag & 0x3F));
+				b[1] = static_cast<uint8_t>(((mag >> 6) & 0x7F) | (val < 0 ? 0x80 : 0));
+			} else {
+				const uint16_t v = static_cast<uint16_t>(val);
+				b[0] = static_cast<uint8_t>(0x80 | (v & 0x3F));
+				b[1] = static_cast<uint8_t>(v >> 6);
+			}
+			copyPOD(b);
 		}
 
 		template <typename T>
 		Serializer& serializeInteger(T val)
 		{
-			if (options.version >= 1) {
+			if (options.version >= 1) [[likely]] {
 				// Variable-length
 				if constexpr (std::is_signed_v<T>) {
-					serializeVariableInteger(static_cast<uint64_t>(val >= 0 ? val : -(val + 1)), val < 0);
+					if (val < 64 && val > -64) {
+						serialize1ByteInteger(val);
+					} else if (sizeof(T) == 1 || (val < 8192 && val > -8192)) {
+						serialize2ByteInteger(val);
+					} else {
+						serializeVariableInteger(static_cast<uint64_t>(val >= 0 ? val : -(val + 1)), val < 0);
+					}
 				} else {
-					serializeVariableInteger(val, {});
+					if (val < 128) {
+						serialize1ByteInteger(val);
+					} else if (sizeof(T) == 1 || val < 16384) {
+						serialize2ByteInteger(val);
+					} else {
+						serializeVariableInteger(val, {});
+					}
 				}
 				return *this;
 			} else {
@@ -342,8 +416,25 @@ namespace Halley {
 			}
 		}
 
-		void serializeVariableInteger(uint64_t val, std::optional<bool> sign);
+		template <typename T>
+		void copyPOD(const T& src)
+		{
+			constexpr auto srcSize = sizeof(T);
+
+			if (hasher) {
+				hasher->feed(src);
+			} else if (!dryRun) {
+				if (dst.size() - size < srcSize) [[unlikely]] {
+					throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
+				}
+				memcpy(dst.data() + size, &src, srcSize);
+			}
+			size += srcSize;
+		}
+
 		void copyBytes(const void* src, size_t size);
+
+		void serializeVariableInteger(uint64_t val, std::optional<bool> sign);
 	};
 
 	class Deserializer : public ByteSerializationBase {

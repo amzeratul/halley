@@ -70,6 +70,9 @@ namespace Halley {
         void load(const ConfigNode& node, const EntitySerializationContext& context);
         ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
+        void serialize(Serializer& s, const EntitySerializationContext& context) const;
+        void deserialize(Deserializer& s, const EntitySerializationContext& context);
+
     	void addState(std::shared_ptr<ScriptState> state);
         void clear();
         bool empty() const;

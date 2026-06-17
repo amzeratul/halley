@@ -26,7 +26,7 @@ namespace Halley
 		};
 
 		ExecutionQueue();
-		void addToQueue(TaskBase task, std::string_view name);
+		void addToQueue(TaskBase task, String name);
 
 		Entry getNext();
 		Vector<Entry> getUpTo(size_t n);

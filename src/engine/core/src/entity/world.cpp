@@ -670,6 +670,10 @@ void World::step(TimeLine timeline, Time elapsed)
 {
 	//ProfilerEvent event(timeline == TimeLine::FixedUpdate ? ProfilerEventType::WorldFixedUpdate : ProfilerEventType::WorldVariableUpdate);
 
+	if (timeline == TimeLine::VariableUpdate) {
+		++frameNumber;
+	}
+
 	spawnPending();
 
 	initSystems(std::to_array({ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render }));
@@ -1120,5 +1124,10 @@ void World::generateMemoryReport() const
 uint32_t World::getFamilyRevision() const
 {
 	return familyRevision;
+}
+
+uint32_t World::getFrameNumber() const
+{
+	return frameNumber;
 }
 

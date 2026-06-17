@@ -620,7 +620,7 @@ void ConfigNode::serialize(Serializer& s) const
 
 	switch (type) {
 		case ConfigNodeType::String:
-			s << asString();
+			s << asStringView();
 			break;
 		case ConfigNodeType::Sequence:
 			s << asSequence();

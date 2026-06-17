@@ -1,6 +1,7 @@
 #include "halley/utils/hash.h"
+
+#define XXH_INLINE_ALL
 #include "../contrib/xxhash/xxhash.h"
-#include "halley/support/exception.h"
 
 using namespace Halley;
 
@@ -23,32 +24,62 @@ uint32_t Hash::compressTo32(uint64_t value)
 
 Hash::Hasher::Hasher()
 {
-	data = XXH64_createState();
-	XXH64_reset(data, 0);
-	ready = true;
+	auto d = XXH3_createState();
+	XXH3_64bits_reset(d);
+	state = d;
 }
 
 Hash::Hasher::~Hasher()
 {
-	XXH64_freeState(data);
-}
-
-void Hash::Hasher::feedBytes(gsl::span<const std::byte> bytes)
-{
-	if (!ready) {
-		XXH64_reset(data, 0);
-		ready = true;
-	}
-	XXH64_update(data, bytes.data(), size_t(bytes.size_bytes()));
+	XXH3_freeState(static_cast<XXH3_state_t*>(state));
 }
 
 uint64_t Hash::Hasher::digest()
 {
-	return XXH64_digest(data);
+	return XXH3_64bits_digest(static_cast<XXH3_state_t*>(state));
 }
 
 void Hash::Hasher::reset()
 {
-	XXH64_reset(data, 0);
-	ready = true;
+	XXH3_64bits_reset(static_cast<XXH3_state_t*>(state));
+}
+
+void Hash::Hasher::feedBytes(gsl::span<const std::byte> bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes.data(), bytes.size_bytes());
+}
+
+void Hash::Hasher::feed1Byte(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 1);
+}
+
+void Hash::Hasher::feed2Bytes(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 2);
+}
+
+void Hash::Hasher::feed4Bytes(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 4);
+}
+
+void Hash::Hasher::feed8Bytes(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 8);
+}
+
+void Hash::Hasher::feed16Bytes(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 16);
+}
+
+void Hash::Hasher::feed32Bytes(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 32);
+}
+
+void Hash::Hasher::feed64Bytes(const void* bytes)
+{
+	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 64);
 }

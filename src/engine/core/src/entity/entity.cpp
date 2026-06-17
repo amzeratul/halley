@@ -389,24 +389,30 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 
 std::optional<uint8_t> Entity::getOwnerPeerId() const
 {
-	if (const auto* networkComponent = tryGetComponent<NetworkComponent>()) {
-		return networkComponent->ownerId;
-	} else if (parent) {
-		return parent->getOwnerPeerId();
-	} else {
-		return {};
+	auto e = this;
+
+	while (e) {
+		if (const auto* networkComponent = e->tryGetComponent<NetworkComponent>()) {
+			return networkComponent->ownerId;
+		}
+		e = e->parent;
 	}
+
+	return {};
 }
 
 std::optional<uint8_t> Entity::getAuthorityPeerId() const
 {
-    if (const auto* networkComponent = tryGetComponent<NetworkComponent>()) {
-        return networkComponent->authorityId;
-    } else if (parent) {
-        return parent->getAuthorityPeerId();
-    } else {
-        return {};
-    }
+	auto e = this;
+
+	while (e) {
+		if (const auto* networkComponent = e->tryGetComponent<NetworkComponent>()) {
+			return networkComponent->authorityId;
+		}
+		e = e->parent;
+	}
+
+	return {};
 }
 
 void Entity::setFromNetwork(bool fromNetwork)
@@ -478,4 +484,9 @@ void EntityRef::setReloaded()
 	entity->reloaded = true;
 
 	world->setEntityReloaded();
+}
+
+void EntityRef::setModifiedThisFrame()
+{
+	setLastFrameModified(world->getFrameNumber());
 }

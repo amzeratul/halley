@@ -10,7 +10,8 @@ using namespace Halley;
 
 UUID::UUID()
 {
-	qwords.fill(0);
+	qwords[0] = 0;
+	qwords[1] = 0;
 }
 
 UUID::UUID(std::array<Byte, 16> b)
@@ -20,18 +21,24 @@ UUID::UUID(std::array<Byte, 16> b)
 
 UUID::UUID(gsl::span<const std::byte> b)
 {
-	if (b.size_bytes() < 16) {
-		qwords.fill(0);
+	if (b.size_bytes() < 16) [[unlikely]] {
+		qwords[0] = 0;
+		qwords[1] = 0;
+		memcpy(qwords.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
+	} else {
+		memcpy(qwords.data(), b.data(), 16);
 	}
-	memcpy(qwords.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
 }
 
 UUID::UUID(const Bytes& b)
 {
-	if (b.size() < 16) {
-		qwords.fill(0);
+	if (b.size() < 16) [[unlikely]] {
+		qwords[0] = 0;
+		qwords[1] = 0;
+		memcpy(qwords.data(), b.data(), std::min(b.size(), size_t(16)));
+	} else {
+		memcpy(qwords.data(), b.data(), 16);
 	}
-	memcpy(qwords.data(), b.data(), std::min(b.size(), size_t(16)));
 }
 
 UUID::UUID(std::string_view strView)
@@ -134,8 +141,8 @@ UUID UUID::generate()
 UUID UUID::xorUUIDs(const UUID& one, const UUID& two)
 {
 	UUID result;
-	for (size_t i = 0; i < result.bytes.size(); i++) {
-		result.bytes[i] = static_cast<uint8_t>(one.bytes[i] ^ two.bytes[i]);
+	for (size_t i = 0; i < result.qwords.size(); i++) {
+		result.qwords[i] = one.qwords[i] ^ two.qwords[i];
 	}
 	result.setVersionBits();
 	return result;
@@ -178,17 +185,19 @@ void UUID::deserialize(Deserializer& s)
 
 void UUID::setVersionBits()
 {
-	bytes[6] = (bytes[6] & 0b00001111) | (4 << 4); // Version 4
-	bytes[8] = (bytes[8] & 0b00111111) | (0b10 << 6); // Variant 1
+	auto* bs = reinterpret_cast<unsigned char*>(qwords.data());
+
+	bs[6] = (bs[6] & 0b00001111) | (4 << 4); // Version 4
+	bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
 }
 
 ConfigNode ConfigNodeSerializer<UUID>::serialize(UUID id, const EntitySerializationContext& context)
 {
 	auto bytes = id.getBytes();
 	Bytes result;
-	result.resize(bytes.size());
-	memcpy(result.data(), bytes.data(), bytes.size());
-	return ConfigNode(result);
+	result.resize(16);
+	memcpy(result.data(), bytes.data(), 16);
+	return ConfigNode(std::move(result));
 }
 
 UUID ConfigNodeSerializer<UUID>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)

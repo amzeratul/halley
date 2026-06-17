@@ -385,6 +385,20 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	return node;
 }
 
+void ScriptState::serialize(Serializer& s, const EntitySerializationContext& context) const
+{
+	s << getScriptId();
+	sharedVars.serialize(s, context);
+	s << persistAfterDone;
+	s << tags;
+	s << startParams;
+}
+
+void ScriptState::deserialize(Deserializer& s, const EntitySerializationContext& context)
+{
+	throw Exception("Not implemented", HalleyExceptions::Scripting);
+}
+
 String ScriptState::getScriptId() const
 {
 	const auto* script = getScriptGraphPtr();

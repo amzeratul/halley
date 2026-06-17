@@ -15,7 +15,7 @@ namespace Halley {
         SerializationDictionary();
         SerializationDictionary(const ConfigNode& config);
         
-        std::optional<size_t> stringToIndex(const String& string) override;
+        std::optional<size_t> stringToIndex(std::string_view string) override;
         const String& indexToString(size_t index) override;
 
         void addEntry(String str);
@@ -23,7 +23,7 @@ namespace Halley {
         void addEntries(gsl::span<const String> strings);
 
         void setLogMissingStrings(bool enabled);
-        void notifyMissingString(const String& string) override;
+        void notifyMissingString(std::string_view string) override;
         void printMissingStrings();
     
     private:

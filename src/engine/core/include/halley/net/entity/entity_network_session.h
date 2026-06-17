@@ -59,7 +59,7 @@ namespace Halley {
 
 		void update(Time t);
 		void sendUpdates();
-		void sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds);
+		SendEntitiesStats sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds);
 		void receiveUpdates();
 
 		World& getWorld() const;

@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-#ifdef DEV_BUILD
+#ifdef _DEBUG
 #define INJECT_RUNTIME_CHECKS 1
 #else
 #define INJECT_RUNTIME_CHECKS 0
@@ -174,6 +174,8 @@ void EntityNetworkChanges::serialize(Serializer& s) const
             s << page.componentId;
         }
     }
+
+    s << contentHash;
 }
 
 void EntityNetworkChanges::deserialize(Deserializer& s)
@@ -183,8 +185,6 @@ void EntityNetworkChanges::deserialize(Deserializer& s)
     pp = count;
 
     memset(&pages[0], 0, pp * sizeof(Page));
-
-    contentHasher.reset();
 
     for (int p = 0; p < pp; p++) {
         auto& page = pages[p];
@@ -198,11 +198,9 @@ void EntityNetworkChanges::deserialize(Deserializer& s)
         } else if (page.type == Type::Component) {
             s >> page.componentId;
         }
-
-        contentHasher.feed(page.hash);
     }
 
-    contentHash = contentHasher.digest();
+    s >> contentHash;
 }
 
 size_t EntityNetworkChanges::getRequiredSerializeSize() const
@@ -391,10 +389,10 @@ void EntityNetworkChanges::invalidateHashes()
     }
 }
 
-EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session)
-    : session(session)
-    , hasComponentsAddedOrRemoved(false)
+void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetworkSession)
 {
+    session = entityNetworkSession;
+    hasComponentsAddedOrRemoved = false;
     myPeerId = session->getSession().getMyPeerId().value_or(0);
 }
 
@@ -422,7 +420,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
         }
     }
 
-    SerializerOptions opt(SerializerOptions::maxVersion);
+    SerializerOptions opt(options.version);
     opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
@@ -516,7 +514,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
 
 EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options)
 {
-    SerializerOptions opt(SerializerOptions::maxVersion);
+    SerializerOptions opt(options.version);
     opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
@@ -943,7 +941,7 @@ size_t EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& op
 {
     data.resize_no_init(data.capacity());
 
-    SerializerOptions opt(SerializerOptions::maxVersion);
+    SerializerOptions opt(options.version);
     opt.dictionary = options.dictionary;
 
     Serializer s(data.byte_span(), opt);

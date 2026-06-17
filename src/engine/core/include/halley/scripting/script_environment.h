@@ -84,6 +84,8 @@ namespace Halley {
         IScriptStateData* getNodeData(GraphNodeId nodeId);
         void assignTypes(const ScriptGraph& graph);
 
+    	const String& getCurrentScriptName() const;
+
     	ConfigNode readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN);
         ConfigNode readOutputDataPin(const ScriptGraphNode& node, GraphPinId pinN);
         EntityId readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN, bool disconnectedIsSelf);

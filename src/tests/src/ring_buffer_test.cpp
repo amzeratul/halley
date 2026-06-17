@@ -23,7 +23,7 @@ TEST(HalleyRingBuffer, WriteOneReadOneBatchST)
 {
 	auto buffer = RingBuffer<int>(256);
 
-	auto rng = Random(Random::getGlobal().getRawInt());
+	auto rng = Random(Random::getSharedGlobal().getRawInt());
 	int nRounds = 20000;
 
 	int nWritten = 0;
@@ -52,18 +52,19 @@ TEST(HalleyRingBuffer, WriteOneReadOneBatchST)
 
 TEST(HalleyRingBuffer, WriteReadBatchST)
 {
-	auto buffer = RingBuffer<int>(256);
+	constexpr int bufferSize = 256;
+	auto buffer = RingBuffer<int>(bufferSize);
 
-	auto rng = Random(Random::getGlobal().getRawInt());
-	int nRounds = 20000;
+	auto rng = Random(Random::getSharedGlobal().getRawInt());
+	int nRounds = 200000;
 
 	int nWritten = 0;
 	int nRead = 0;
 
-	int writeBufMem[128];
-	int readBufMem[128];
-	auto writeBuf = gsl::span(std::begin(writeBufMem), std::end(writeBufMem));
-	auto readBuf = gsl::span(std::begin(readBufMem), std::end(readBufMem));
+	std::array<int, bufferSize> writeBufMem;
+	std::array<int, bufferSize> readBufMem;
+	auto writeBuf = gsl::span(writeBufMem);
+	auto readBuf = gsl::span(readBufMem);
 
 	for (int i = 0; i < nRounds; ++i) {
 		const int toWrite = std::min(rng.getInt(10, 100), static_cast<int>(buffer.availableToWrite()));

@@ -13,16 +13,24 @@ SerializerState* ByteSerializationBase::setState(SerializerState* s)
 	return oldState;
 }
 
-Serializer::Serializer(SerializerOptions options)
-	: ByteSerializationBase(std::move(options))
+Serializer::Serializer(SerializerOptions _options)
+	: ByteSerializationBase(std::move(_options))
 	, dryRun(true)
-{}
+{
+	if (options.toHash) {
+		hasher = std::make_unique<Hash::Hasher>();
+	}
+}
 
-Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions options)
-	: ByteSerializationBase(std::move(options))
+Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions _options)
+	: ByteSerializationBase(std::move(_options))
 	, dst(dst)
 	, dryRun(false)
-{}
+{
+	if (options.toHash) {
+		hasher = std::make_unique<Hash::Hasher>();
+	}
+}
 
 void Serializer::rewind(size_t position)
 {
@@ -32,44 +40,53 @@ void Serializer::rewind(size_t position)
     size = position;
 }
 
-Serializer& Serializer::operator<<(const std::string& str)
+Serializer& Serializer::operator<<(std::string_view str)
 {
-	return *this << String(str);
-}
-
-Serializer& Serializer::operator<<(const String& str)
-{
-	if (options.version == 0) {
+	if (options.version == 0) [[unlikely]] {
 		const uint32_t sz = static_cast<uint32_t>(str.size());
 		*this << sz;
-		*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+		*this << gsl::as_bytes(gsl::span<const char>(str));
 	} else {
 		if (options.dictionary) {
-			auto idx = options.dictionary->stringToIndex(str);
-			if (idx) {
+			if (auto idx = options.dictionary->stringToIndex(str)) {
 				// Found, store index with bit 0 set to 1
-				const uint64_t value = uint64_t(options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1)));
+				const uint64_t value = static_cast<uint64_t>(options.exhaustiveDictionary ? idx.value() : (static_cast<size_t>(1) | (idx.value() << 1)));
 				*this << value;
 			} else {
 				if (options.exhaustiveDictionary) {
-					throw Exception("String \"" + str + "\" not found in serialization dictionary, but it's marked as exhaustive.", HalleyExceptions::Utils);
+					throw Exception("String \"" + String(str) + "\" not found in serialization dictionary, but it's marked as exhaustive.", HalleyExceptions::Utils);
 				}
 
 				options.dictionary->notifyMissingString(str);
 
 				// Not found, store it with bit 0 set to 0
-				const uint64_t sz = uint64_t(str.size());
+				const uint64_t sz = static_cast<uint64_t>(str.size());
 				*this << (sz << 1);
-				*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+				*this << gsl::as_bytes(gsl::span<const char>(str));
 			}
 		} else {
 			// No dictionary, just store it old style
 			const uint64_t sz = str.size();
 			*this << sz;
-			*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
+			*this << gsl::as_bytes(gsl::span<const char>(str));
 		}
 	}
-	return *this;
+	return *this;	
+}
+
+Serializer& Serializer::operator<<(const char* str)
+{
+	return *this << std::string_view(str);
+}
+
+Serializer& Serializer::operator<<(const std::string& str)
+{
+	return *this << std::string_view(str);
+}
+
+Serializer& Serializer::operator<<(const String& str)
+{
+	return *this << std::string_view(str);
 }
 
 Serializer& Serializer::operator<<(const StringUTF32& str)
@@ -158,7 +175,9 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 
 void Serializer::copyBytes(const void* src, size_t srcSize)
 {
-	if (!dryRun) [[likely]] {
+	if (hasher) {
+		hasher->feedBytes(gsl::span<const std::byte>(static_cast<const std::byte*>(src), srcSize));
+	} else if (!dryRun) {
 		if (dst.size() - size < srcSize) [[unlikely]] {
 			throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
 		}

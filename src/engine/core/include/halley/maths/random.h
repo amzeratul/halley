@@ -51,6 +51,10 @@ namespace Halley {
 
 		// NOTE THAT THIS IS INCLUSIVE ON MAX FOR INTEGER TYPES ONLY
 		int32_t getInt(Range<int32_t> range); // [min, max]
+		int8_t getInt(int8_t min, int8_t max); // [min, max]
+		uint8_t getInt(uint8_t min, uint8_t max); // [min, max]
+		int16_t getInt(int16_t min, int16_t max); // [min, max]
+		uint16_t getInt(uint16_t min, uint16_t max); // [min, max]
 		int32_t getInt(int32_t min, int32_t max); // [min, max]
 		uint32_t getInt(uint32_t min, uint32_t max); // [min, max]
 		int64_t getInt(int64_t min, int64_t max); // [min, max]

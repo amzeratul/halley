@@ -96,7 +96,9 @@ namespace Halley {
             std::optional<Vector2f> position;
         };
 
-        explicit EntityNetworkSerialize(const EntityNetworkSession* session);
+        EntityNetworkSerialize() = default;
+
+        void setSession(const EntityNetworkSession* entityNetworkSession);
 
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
         InboundResult deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options);

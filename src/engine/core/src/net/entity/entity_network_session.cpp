@@ -94,7 +94,7 @@ void EntityNetworkSession::sendUpdates()
 	sendMessages();
 }
 
-void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds)
+SendEntitiesStats EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds)
 {
 	// Update viewport
 	auto& data = session->getMySharedData<EntityClientSharedData>();
@@ -106,16 +106,30 @@ void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t my
 		}
 	}
 
-	// Update entities
-    Vector<Future<void>> tasks;
+	SendEntitiesStats stats;
+	if (!peers.empty()) {
+		// Update entities
+	    Vector<Future<SendEntitiesStats>> tasks;
+		tasks.reserve(peers.size() - 1);
 
-    for (auto& peer : peers) {
-        tasks += Concurrent::execute([&]() {
-            peer.sendEntities(t, myPeerId, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
-        });
-    }
+	    for (auto& peer : peers) {
+			const bool isLastPeer = &peer == &peers.back();
+			auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peer.getPeerId());
+			if (isLastPeer) {
+				// Run last peer on this thread
+				stats = peer.sendEntities(t, myPeerId, entityIds, clientSharedData);
+			} else {
+		        tasks += Concurrent::execute([&]() -> SendEntitiesStats {
+		            return peer.sendEntities(t, myPeerId, entityIds, clientSharedData);
+		        });
+			}
+	    }
 
-    Concurrent::whenAll(tasks.begin(), tasks.end()).wait();
+	    for (const auto& t: tasks) {
+		    stats += t.get();
+	    }
+	}
+	return stats;
 }
 
 void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
