@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-#ifdef DEV_BUILD
+#ifdef _DEBUG
 #define INJECT_RUNTIME_CHECKS 1
 #else
 #define INJECT_RUNTIME_CHECKS 0
