@@ -23,7 +23,7 @@ namespace Halley {
         void addEntries(gsl::span<const String> strings);
 
         void setLogMissingStrings(bool enabled);
-        void notifyMissingString(const String& string) override;
+        void notifyMissingString(std::string_view string) override;
         void printMissingStrings();
     
     private:

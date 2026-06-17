@@ -73,7 +73,7 @@ void SerializationDictionary::setLogMissingStrings(bool enabled)
 	}
 }
 
-void SerializationDictionary::notifyMissingString(const String& string)
+void SerializationDictionary::notifyMissingString(std::string_view string)
 {
 	if (logMissingStrings) {
 		++missing[string];
