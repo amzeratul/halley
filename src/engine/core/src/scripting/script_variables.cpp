@@ -70,17 +70,28 @@ void ScriptVariables::serialize(Serializer& s, const EntitySerializationContext&
 	for (const auto& [k, v]: variables) {
 		if (v.getType() == ConfigNodeType::EntityId) {
 			// Has entity id, so we need the slow path
+			s << true;
 			s << toConfigNode(context);
 			return;
 		}
 	}
 
 	// No entity id found, just write variables
+	s << false;
 	s << variables;
 }
 
 void ScriptVariables::deserialize(Deserializer& s, const EntitySerializationContext& context)
 {
+	bool slowPath;
+	s >> slowPath;
+	if (slowPath) {
+		ConfigNode n;
+		s >> n;
+		load(n, context);
+		return;
+	}
+
 	s >> variables;
 	Vector<std::pair<String, EntityId>> toAdd;
 	for (const auto& [k, v]: variables) {
