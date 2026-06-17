@@ -11,6 +11,7 @@
 
 using namespace Halley;
 
+thread_local EntityNetworkSerialize EntityNetworkRemotePeer::fastSerializer;
 thread_local Bytes EntityNetworkRemotePeer::fastUpdateOutboundData;
 
 Serializer& EntityNetworkInstanceInfo::serialize(Serializer& s) const
@@ -30,7 +31,6 @@ Deserializer& EntityNetworkInstanceInfo::deserialize(Deserializer& s)
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parentSession, NetworkSession::PeerId peerId)
 	: parentSession(&parentSession)
 	, peerId(peerId)
-	, fastSerializer(&parentSession)
 {}
 
 NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
@@ -339,6 +339,7 @@ bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     // Fast updates are possible only if a previous journal is available to compare to,
     // or if it's an outbound entity marked as "for changed authority".
     bool canFastUpdate = !remote.fastUpdateJournal.empty() || remote.hasAuthorityOnly;
+	fastSerializer.setSession(parentSession);
 
     if (canFastUpdate) {
         HalleyAssertDev(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
@@ -736,6 +737,7 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
         //Logger::logDev("Receive Fast Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
 
         try {
+	    	fastSerializer.setSession(parentSession);
             auto result = fastSerializer.deserializeEntityUpdate(entity, msg.bytes, parentSession->getByteSerializationOptions());
         	if (result.position) {
         		updateRemoteEntityPosition(inboundEntity, result.position.value(), timestamp);

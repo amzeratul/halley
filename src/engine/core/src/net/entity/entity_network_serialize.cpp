@@ -389,10 +389,10 @@ void EntityNetworkChanges::invalidateHashes()
     }
 }
 
-EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session)
-    : session(session)
-    , hasComponentsAddedOrRemoved(false)
+void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetworkSession)
 {
+    session = entityNetworkSession;
+    hasComponentsAddedOrRemoved = false;
     myPeerId = session->getSession().getMyPeerId().value_or(0);
 }
 

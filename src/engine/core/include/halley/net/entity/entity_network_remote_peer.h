@@ -142,7 +142,7 @@ namespace Halley {
         Time timeSinceSend = 0;
     	bool log = false;
 
-    	EntityNetworkSerialize fastSerializer;
+    	static thread_local EntityNetworkSerialize fastSerializer;
         static thread_local Bytes fastUpdateOutboundData;
 
         uint16_t assignId();
