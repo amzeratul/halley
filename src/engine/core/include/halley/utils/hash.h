@@ -5,9 +5,6 @@
 #include "utils.h"
 #include "halley/text/halleystring.h"
 
-struct XXH64_state_s;
-typedef struct XXH64_state_s XXH64_state_t;
-
 namespace Halley {
     namespace Hash {
         uint64_t hash(const Bytes& bytes);
@@ -50,8 +47,7 @@ namespace Halley {
 			void reset();
 
 		private:
-			bool ready;
-			XXH64_state_t* data;
+			void* data;
 		};
     };
 }
