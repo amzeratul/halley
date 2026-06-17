@@ -24,7 +24,7 @@ namespace Halley {
 		const Vector<DebugPolygon>& getDebugPolygons();
 		const Vector<DebugEllipse>& getDebugEllipses();
 		const Vector<DebugWorldText>& getDebugWorldTexts();
-		const TreeMap<String, DebugText>& getDebugTexts();
+		const Vector<std::pair<String, DebugText>>& getDebugTexts();
 
 		void addDebugLine(Vector<Vector2f> line, Colour4f colour, float thickness = 1.0f, bool loop = false, Painter::LineParameters params = {});
 		void addDebugArrow(Vector2f from, Vector2f to, Colour4f colour, float headSize = 10.0f, float thickness = 1.0f, float sideShift = 0.0f);
