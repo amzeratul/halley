@@ -11,16 +11,22 @@ namespace {
 		s << v;
 		
 		Deserializer ds(gsl::span<std::byte>(bytes, s.getPosition()), SerializerOptions(SerializerOptions::maxVersion));
-		T result = 0;
+		T result = {};
 		ds >> result;
 		return result;
+	}
+
+	template <typename T>
+	static void testSerialization(const T& v)
+	{
+		EXPECT_EQ(v, convertBackAndForth(v));
 	}
 
 	template <typename T>
 	static void testRange(T minV, T maxV)
 	{
 		for (T i = minV; ; ++i) {
-			EXPECT_EQ(i, convertBackAndForth(i));
+			testSerialization(i);
 			if (i == maxV) {
 				return;
 			}
@@ -45,7 +51,7 @@ namespace {
 
 		for (int i = 0; i < 1000; ++i) {
 			const auto n = static_cast<T>(rng.getInt(std::numeric_limits<T>::min(), std::numeric_limits<T>::max()));
-			EXPECT_EQ(n, convertBackAndForth<T>(n));
+			testSerialization(n);
 		}
 	}
 }
@@ -83,15 +89,15 @@ TEST(Serializer, Int32Conversion)
 TEST(Serializer, UInt64Conversion)
 {
 	// Try individual byte ranges
-	EXPECT_EQ(static_cast<uint64_t>(100), convertBackAndForth(static_cast<uint64_t>(100))); // 7
-	EXPECT_EQ(static_cast<uint64_t>(12800), convertBackAndForth(static_cast<uint64_t>(12800))); // 14
-	EXPECT_EQ(static_cast<uint64_t>(1638400), convertBackAndForth(static_cast<uint64_t>(1638400))); // 21
-	EXPECT_EQ(static_cast<uint64_t>(209715200), convertBackAndForth(static_cast<uint64_t>(209715200))); // 28
-	EXPECT_EQ(static_cast<uint64_t>(26843545600), convertBackAndForth(static_cast<uint64_t>(26843545600))); // 35
-	EXPECT_EQ(static_cast<uint64_t>(3435973836800), convertBackAndForth(static_cast<uint64_t>(3435973836800))); // 42
-	EXPECT_EQ(static_cast<uint64_t>(439804651110400), convertBackAndForth(static_cast<uint64_t>(439804651110400))); // 49
-	EXPECT_EQ(static_cast<uint64_t>(56294995342131200), convertBackAndForth(static_cast<uint64_t>(56294995342131200))); // 56
-	EXPECT_EQ(static_cast<uint64_t>(7205759403792793600), convertBackAndForth(static_cast<uint64_t>(7205759403792793600))); // 64
+	testSerialization(static_cast<uint64_t>(100)); // 7
+	testSerialization(static_cast<uint64_t>(12800)); // 14
+	testSerialization(static_cast<uint64_t>(1638400)); // 21
+	testSerialization(static_cast<uint64_t>(209715200)); // 28
+	testSerialization(static_cast<uint64_t>(26843545600)); // 35
+	testSerialization(static_cast<uint64_t>(3435973836800)); // 42
+	testSerialization(static_cast<uint64_t>(439804651110400)); // 49
+	testSerialization(static_cast<uint64_t>(56294995342131200)); // 56
+	testSerialization(static_cast<uint64_t>(7205759403792793600)); // 64
 
 	testInt<uint64_t>();
 }
@@ -99,4 +105,42 @@ TEST(Serializer, UInt64Conversion)
 TEST(Serializer, Int64Conversion)
 {
 	testInt<int64_t>();
+}
+
+TEST(Serializer, FloatConversion)
+{
+	testSerialization(0.0f);
+	testSerialization(1.0f);
+	testSerialization(-1.0f);
+	testSerialization(1000000.0f);
+	testSerialization(-1000000.0f);
+	testSerialization(0.5f);
+	testSerialization(-0.5f);
+	testSerialization(0.125f);
+	testSerialization(-0.125f);
+}
+
+TEST(Serializer, DoubleConversion)
+{
+	testSerialization(0.0);
+	testSerialization(1.0);
+	testSerialization(-1.0);
+	testSerialization(1000000.0);
+	testSerialization(-1000000.0);
+	testSerialization(0.5);
+	testSerialization(-0.5);
+	testSerialization(0.125);
+	testSerialization(-0.125);
+}
+
+TEST(Serializer, BoolConversion)
+{
+	testSerialization(true);
+	testSerialization(false);
+}
+
+TEST(Serializer, StringConversion)
+{
+	testSerialization(String());
+	testSerialization(String("Hello world"));
 }

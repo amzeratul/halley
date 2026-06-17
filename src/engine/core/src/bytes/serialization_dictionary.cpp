@@ -24,10 +24,9 @@ SerializationDictionary::SerializationDictionary(const ConfigNode& config)
 	}
 }
 
-std::optional<size_t> SerializationDictionary::stringToIndex(const String& string)
+std::optional<size_t> SerializationDictionary::stringToIndex(std::string_view string)
 {
-	auto iter = indices.find(string);
-	if (iter == indices.end()) {
+	if (auto iter = indices.find(string); iter == indices.end()) {
 		return {};
 	} else {
 		return iter->second;

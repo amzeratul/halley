@@ -121,6 +121,8 @@ namespace Halley {
 		Serializer& operator<<(float val) { return serializePod(val); }
 		Serializer& operator<<(double val) { return serializePod(val); }
 
+		Serializer& operator<<(std::string_view str);
+		Serializer& operator<<(const char* str);
 		Serializer& operator<<(const std::string& str);
 		Serializer& operator<<(const String& str);
 		Serializer& operator<<(const StringUTF32& str);
@@ -177,10 +179,27 @@ namespace Halley {
 		template <typename T, typename U>
 		Serializer& operator<<(const HashMap<T, U>& val)
 		{
-			std::set<T> keys;
-			for (auto& kv: val) {
-				keys.insert(kv.first);
+			using K = std::conditional_t<std::is_same_v<T, Halley::String>, std::string_view, T>;
+
+			// Store keys; try to do this without allocating if possible
+			const auto nKeys = val.size();
+			gsl::span<K> keys;
+
+			std::array<K, 64> keysArray;
+			Vector<K> keysVec;
+			if (nKeys <= keysArray.size()) {
+				keys = gsl::span(keysArray).subspan(0, nKeys);
+			} else {
+				keysVec.resize(nKeys);
+				keys = keysVec;
 			}
+
+			size_t i = 0;
+			for (const auto& kv: val) {
+				keys[i++] = K(kv.first);
+			}
+			std::sort(keys.begin(), keys.end());
+
 			*this << static_cast<uint32_t>(keys.size());
 			for (const auto& k: keys) {
 				*this << k << val.at(k);
@@ -316,7 +335,7 @@ namespace Halley {
 		template <typename T>
 		Serializer& serializePod(T val)
 		{
-			copyBytes(&val, sizeof(T));
+			copyPOD(val);
 			return *this;
 		}
 
@@ -331,7 +350,7 @@ namespace Halley {
 			} else {
 				v = static_cast<uint8_t>(val);
 			}
-			copyBytes(&v, 1);
+			copyPOD(v);
 		}
 
 		template <typename T>
@@ -349,7 +368,7 @@ namespace Halley {
 				b[0] = static_cast<uint8_t>(0x80 | (v & 0x3F));
 				b[1] = static_cast<uint8_t>(v >> 6);
 			}
-			copyBytes(b, 2);
+			copyPOD(b);
 		}
 
 		template <typename T>
@@ -381,8 +400,22 @@ namespace Halley {
 			}
 		}
 
-		void serializeVariableInteger(uint64_t val, std::optional<bool> sign);
+		template <typename T>
+		void copyPOD(const T& src)
+		{
+			constexpr auto srcSize = sizeof(T);
+			if (!dryRun) [[likely]] {
+				if (dst.size() - size < srcSize) [[unlikely]] {
+					throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
+				}
+				memcpy(dst.data() + size, &src, srcSize);
+			}
+			size += srcSize;
+		}
+
 		void copyBytes(const void* src, size_t size);
+
+		void serializeVariableInteger(uint64_t val, std::optional<bool> sign);
 	};
 
 	class Deserializer : public ByteSerializationBase {
