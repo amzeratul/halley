@@ -254,18 +254,10 @@ Character* String::getCharPointer(size_t pos)
 	return &operator[](pos);
 }
 
-
-bool String::isEmpty() const
-{
-	return size()==0;
-}
-
-
 void String::setSize(size_t size)
 {
 	str.resize(size);
 }
-
 
 void String::truncate(size_t size)
 {
@@ -293,11 +285,6 @@ String& String::trimBoth()
 	}
 
 	return *this;
-}
-
-size_t String::length() const
-{
-	return size();
 }
 
 bool String::contains(Character chr) const

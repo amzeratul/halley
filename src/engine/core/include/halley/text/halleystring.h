@@ -126,8 +126,8 @@ namespace Halley {
 
 		operator std::string() const;
 		
-		[[nodiscard]] bool isEmpty() const;
-		[[nodiscard]] size_t length() const;
+		[[nodiscard]] constexpr bool isEmpty() const { return str.empty(); }
+		[[nodiscard]] constexpr size_t length() const { return str.length(); }
 		
 		void setSize(size_t size);
 		void truncate(size_t size);
