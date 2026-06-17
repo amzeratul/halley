@@ -14,6 +14,9 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
+		void serialize(Serializer& s, const EntitySerializationContext& context) const;
+		void deserialize(Deserializer& s, const EntitySerializationContext& context);
+
 		const ConfigNode& getVariable(const String& name) const;
     	void setVariable(const String& name, ConfigNode value);
 		bool hasVariable(const String& name) const;
