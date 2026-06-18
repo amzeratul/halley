@@ -19,6 +19,8 @@ namespace Halley {
         int nCheckedRelinquishedAuthority = 0;
         int nCheckedRegular = 0;
         int nUpdateChecked = 0;
+    	int nUpdateIdle = 0;
+    	int nUpdateSameHash = 0;
         int nCreated = 0;
         int nUpdated = 0;
         int nDestroyed = 0;
@@ -29,6 +31,8 @@ namespace Halley {
 			nCheckedRelinquishedAuthority += other.nCheckedRelinquishedAuthority;
 			nCheckedRegular += other.nCheckedRegular;
 			nUpdateChecked += other.nUpdateChecked;
+			nUpdateIdle += other.nUpdateIdle;
+			nUpdateSameHash += other.nUpdateSameHash;
 			nCreated += other.nCreated;
 			nUpdated += other.nUpdated;
 			nDestroyed += other.nDestroyed;
@@ -42,10 +46,26 @@ namespace Halley {
 			result.nCheckedRelinquishedAuthority = nCheckedRelinquishedAuthority + other.nCheckedRelinquishedAuthority;
 			result.nCheckedRegular = nCheckedRegular + other.nCheckedRegular;
 			result.nUpdateChecked = nUpdateChecked + other.nUpdateChecked;
+			result.nUpdateIdle = nUpdateIdle + other.nUpdateIdle;
+			result.nUpdateSameHash = nUpdateSameHash + other.nUpdateSameHash;
 			result.nCreated = nCreated + other.nCreated;
 			result.nUpdated = nUpdated + other.nUpdated;
 			result.nDestroyed = nDestroyed + other.nDestroyed;
 			return result;
+		}
+
+    	SendEntitiesStats& avg(const SendEntitiesStats& other, int count)
+		{
+			nCheckedAcquiredAuthority = other.nCheckedAcquiredAuthority / count;
+			nCheckedRelinquishedAuthority = other.nCheckedRelinquishedAuthority / count;
+			nCheckedRegular = other.nCheckedRegular / count;
+			nUpdateChecked = other.nUpdateChecked / count;
+			nUpdateIdle = other.nUpdateIdle / count;
+			nUpdateSameHash = other.nUpdateSameHash / count;
+			nCreated = other.nCreated / count;
+			nUpdated = other.nUpdated / count;
+			nDestroyed = other.nDestroyed / count;
+			return *this;
 		}
     };
 
@@ -54,6 +74,7 @@ namespace Halley {
 		uint8_t ownerId;
     	uint8_t authorityId;
     	bool alwaysSend;
+    	bool requiresEntityFrameModified;
 	};
 
 	struct EntityNetworkInstanceInfo {
@@ -63,7 +84,8 @@ namespace Halley {
 		Deserializer& deserialize(Deserializer& s);
 	};
 
-    class EntityNetworkRemotePeer {
+    class EntityNetworkRemotePeer
+	{
         constexpr static Time maxSendInterval = 1.0;
     	
     public:
@@ -96,14 +118,25 @@ namespace Halley {
     private:
         class OutboundEntity {
         public:
+        	OutboundEntity() = default;
+
+            EntityNetworkId networkId = 0;
+
             bool alive = true;
         	bool hasAuthorityOnly = false;
         	bool forChildEntityTemporaryOnly = false;
         	bool forceNextFastUpdate = false;
-            EntityNetworkId networkId = 0;
-            Time timeSinceSend = 0;
-            EntityData data;
+        	bool requiresEntityFrameModified = false;
+
+        	Time timeSinceSend = 0;
+
+        	uint64_t lastSerializerHash = 0;
+
+        	Time waitAfterFrameModified = 0;
+        	uint32_t frameModifiedIdx = 0; // for 'requiresEntityFrameModified'
+
             Bytes fastUpdateJournal;
+            EntityData data;
         };
 
         class InboundEntity {
@@ -142,12 +175,12 @@ namespace Halley {
         Time timeSinceSend = 0;
     	bool log = false;
 
-    	static thread_local EntityNetworkSerialize fastSerializer;
-        static thread_local Bytes fastUpdateOutboundData;
+    	EntityNetworkSerialize fastSerializer;
+        Bytes fastUpdateOutboundData;
 
         uint16_t assignId();
         void sendCreateEntity(const EntityRef& entity);
-        bool sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity);
+        void sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, const EntityRef& entity, SendEntitiesStats& stats);
         void sendDestroyEntity(OutboundEntity& remote, EntityId entityId);
         void sendKeepAlive();
         void send(EntityNetworkMessage message);

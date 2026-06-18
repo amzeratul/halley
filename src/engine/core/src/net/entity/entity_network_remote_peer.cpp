@@ -8,11 +8,9 @@
 #include "halley/entity/components/transform_2d_component.h"
 
 #define USE_FAST_NETWORK_COMPONENT_UPDATES 1
+#define WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED 2.0
 
 using namespace Halley;
-
-thread_local EntityNetworkSerialize EntityNetworkRemotePeer::fastSerializer;
-thread_local Bytes EntityNetworkRemotePeer::fastUpdateOutboundData;
 
 Serializer& EntityNetworkInstanceInfo::serialize(Serializer& s) const
 {
@@ -85,6 +83,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 				// Has an outbound entity assigned. Keep it alive and updating.
 				HalleyAssertDev(iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
+				iter->second.requiresEntityFrameModified = entry.requiresEntityFrameModified;
 				toUpdate.emplace_back(entity, &iter->second);
 				++stats.nCheckedAcquiredAuthority;
 			} else {
@@ -104,6 +103,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				if (entry.authorityId != peerId) {
+					iter->second.requiresEntityFrameModified = entry.requiresEntityFrameModified;
 					toUpdate.emplace_back(entity, &iter->second);
 					++stats.nCheckedRelinquishedAuthority;
 				}
@@ -126,6 +126,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			} else {
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
+				iter->second.requiresEntityFrameModified = entry.requiresEntityFrameModified;
 				toUpdate.emplace_back(entity, &iter->second);
 			}
 		}
@@ -154,12 +155,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 
 	// Update existing entities
 	for (auto& [e, oe] : toUpdate) {
-		const bool sent = sendUpdateEntity(t, sessionTimestamp, *oe, e);
-		++stats.nUpdateChecked;
-		//Logger::logDev("Sending " + e.getName(), true);
-		if (sent) {
-			++stats.nUpdated;
-		}
+		sendUpdateEntity(t, sessionTimestamp, *oe, e, stats);
 	}
 
 	// Create new entities
@@ -322,24 +318,84 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	outboundEntities[entity.getEntityId()] = std::move(result);
 }
 
-bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity)
+void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, const EntityRef& entity, SendEntitiesStats& stats)
 {
-	bool sent = false;
+	const Time minSendInterval = parentSession->getMinSendInterval();
 
 	remote.timeSinceSend += t;
-	if (remote.timeSinceSend < parentSession->getMinSendInterval()) {
-		return sent;
+	if (remote.timeSinceSend < minSendInterval) {
+		// These updates are just to keep the stats counters from oscillating too much.
+		if (remote.requiresEntityFrameModified) {
+			++stats.nUpdateIdle;
+		} else {
+			++stats.nUpdateSameHash;
+		}
+		return;
 	}
 
 	remote.timeSinceSend = 0;
 
+	// For entities marked as such, check the "last frame modified" counter. If they match, skip
+	// updates (to avoid costly operations to serialize and compare entity/component changes).
+#if defined(DEV_BUILD) && defined(_WIN32)
+	static constexpr bool checkExpectNoUpdate = true;
+#else
+	static constexpr bool checkExpectNoUpdate = false;
+#endif
+
+	bool expectNoUpdate = false;
+
+	if (remote.requiresEntityFrameModified) {
+		uint32_t frameIdx = entity.getLastFrameModified();
+		if (remote.frameModifiedIdx != frameIdx) {
+			// Counter has been changed.
+			remote.frameModifiedIdx = frameIdx;
+			remote.waitAfterFrameModified = WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED;
+		} else {
+			if (remote.waitAfterFrameModified > 0) {
+				// Wait for a little while until we stop checking.
+				remote.waitAfterFrameModified -= minSendInterval;
+			} else {
+				++stats.nUpdateIdle;
+				if (checkExpectNoUpdate) {
+					expectNoUpdate = true;
+				} else {
+					return;
+				}
+			}
+		}
+#if defined(DEV_BUILD) && defined(_WIN32)
+	} else {
+		// Dev build only: check if requiresEntityFrameModified is not set, but someone called
+		// setLastFrameModified().
+		uint32_t frameIdx = entity.getLastFrameModified();
+		if (remote.frameModifiedIdx != frameIdx) {
+			remote.frameModifiedIdx = frameIdx;
+			Logger::logWarning("Manual network update notify for " + entity.getEntityId().toDetailedString() + ", " + entity.getName() + ", " +
+				entity.getPrefabAssetId().value_or("(no prefab)") + ", but 'requiresEntityFrameModified' not set", true);
+		}
+#endif
+	}
+
 	bool wantToLog = USE_FAST_NETWORK_COMPONENT_UPDATES && log;
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
-    // Fast updates are possible only if a previous journal is available to compare to,
+	fastSerializer.setSession(parentSession);
+
+	// Serialize entity, using fast path, to compute a content hash. Early-out if the hash did not change.
+	const uint64_t contentHash = fastSerializer.serializeEntityHash(entity, parentSession->getByteSerializationOptions());
+	if (contentHash == remote.lastSerializerHash) {
+		++stats.nUpdateSameHash;
+		return;
+	}
+	remote.lastSerializerHash = contentHash;
+
+	// Fast updates are possible only if a previous journal is available to compare to,
     // or if it's an outbound entity marked as "for changed authority".
     bool canFastUpdate = !remote.fastUpdateJournal.empty() || remote.hasAuthorityOnly;
-	fastSerializer.setSession(parentSession);
+
+	++stats.nUpdateChecked;
+	//Logger::logDev("Checking " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
 
     if (canFastUpdate) {
         HalleyAssertDev(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
@@ -377,7 +433,7 @@ bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     		}
 
     		if (modified && !modifiedInStructure) {
-    			fastUpdateOutboundData.reserve(EntityNetworkSerialize::getBytesCapacity());
+    			fastUpdateOutboundData.reserve(fastSerializer.getBytesCapacity());
     			size_t outboundDataSize = fastSerializer.getBytes(fastUpdateOutboundData, parentSession->getByteSerializationOptions(), wantToLog);
     			//Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(outboundDataSize) + " B)");
 
@@ -389,7 +445,23 @@ bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			memcpy(bytes.data(), fastUpdateOutboundData.data(), outboundDataSize);
 
     			send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true, remote.hasAuthorityOnly, sessionTimestamp));
-				sent = true;
+
+    			// Entity is (still) changing, refresh wait timer.
+    			if (remote.waitAfterFrameModified > 0) {
+    				remote.waitAfterFrameModified = WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED;
+    			}
+
+    			++stats.nUpdated;
+//				Logger::logDev("Sending " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
+
+#if defined(DEV_BUILD) && defined(_WIN32)
+    			// Dev build only: similar to above, but the other way around:
+    			// requiresEntityFrameModified is set, nobody called setLastFrameModified(), but the entity has been
+    			// modified. Peers would miss changes in release builds.
+    			if (checkExpectNoUpdate && expectNoUpdate) {
+    				Logger::logError("Network entity " + entity.getName() + " has been modified, and requiresEntityFrameModified is set, but no update was signaled", true);
+    			}
+#endif
     		}
 
     		if (modifiedInStructure) {
@@ -412,7 +484,7 @@ bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     if (!canFastUpdate) {
     	if (remote.hasAuthorityOnly) {
             Logger::logError("Full network updates unsupported for entities with changed authority");
-    		return sent;
+    		return;
     	}
 
         // Encode delta using interpolators
@@ -434,7 +506,13 @@ bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         	}
 
             send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), false, remote.hasAuthorityOnly, sessionTimestamp));
-			sent = true;
+
+        	// Entity is (still) changing, refresh wait timer.
+        	if (remote.waitAfterFrameModified > 0) {
+        		remote.waitAfterFrameModified = WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED;
+        	}
+
+			++stats.nUpdated;
         }
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
@@ -449,8 +527,6 @@ bool EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         }
 #endif
     }
-
-	return sent;
 }
 
 void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId entityId)

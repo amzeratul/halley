@@ -765,17 +765,19 @@ namespace Halley {
     public:
         static void serialize(const T& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
-        	if (context.entityInterpolators) {
-        		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
-        			interpolator->serialize(&value, sizeof(T), serializer);
-        			return;
+        	if (!serializer.getOptions().toHash) {
+        		if (context.entityInterpolators) {
+        			if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
+        				interpolator->serialize(&value, sizeof(T), serializer);
+        				return;
+        			}
         		}
-        	}
 
-        	if (context.interpolators) {
-        		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
-        			interpolator->serialize(&value, sizeof(T), serializer);
-        			return;
+        		if (context.interpolators) {
+        			if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
+        				interpolator->serialize(&value, sizeof(T), serializer);
+        				return;
+        			}
         		}
         	}
 

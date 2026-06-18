@@ -100,6 +100,7 @@ namespace Halley {
 
         void setSession(const EntityNetworkSession* entityNetworkSession);
 
+        uint64_t serializeEntityHash(const EntityRef& entity, const SerializerOptions& options);
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
         InboundResult deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options);
 
@@ -107,7 +108,7 @@ namespace Halley {
         bool hasEntityChanges(const EntityRef& entity, bool log) const;
 
         [[nodiscard]] size_t getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
-        static size_t getBytesCapacity();
+        size_t getBytesCapacity() const;
 
     private:
         class SerializationContext : public IEntityFactoryContext
@@ -157,6 +158,9 @@ namespace Halley {
             const IByteDataInterpolatorSet* interpolators = nullptr;
         };
 
+        void doSerializeEntityHash(
+            const SerializationContext& context, Serializer& serializer, const EntityRef& entity);
+
         void doSerializeEntityUpdate(
             const SerializationContext& context, Serializer& serializer,
             const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent);
@@ -176,7 +180,7 @@ namespace Halley {
         bool hasComponentsAddedOrRemoved;
         HashSet<uint16_t> componentsIgnored;
 
-        static thread_local Bytes scratchpad;
+        Bytes scratchpad;
 
         HashSet<UUID> childrenAdded;
         HashSet<UUID> childrenChanged;

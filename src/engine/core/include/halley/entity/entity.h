@@ -112,8 +112,10 @@ namespace Halley {
 		{
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-				for (uint8_t i = 0; i < liveComponents; i++) {
-					if (componentIds[i] == id) {
+				const auto& span = componentIds.span();
+				const size_t n = liveComponents;
+				for (size_t i = 0; i < n; ++i) {
+					if (span[i] == id) {
 						return true;
 					}
 				}
