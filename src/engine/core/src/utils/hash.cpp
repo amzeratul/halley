@@ -24,62 +24,62 @@ uint32_t Hash::compressTo32(uint64_t value)
 
 Hash::Hasher::Hasher()
 {
-	auto d = XXH3_createState();
-	XXH3_64bits_reset(d);
-	state = d;
+	static_assert(alignof(Hasher) == 64);
+	static_assert(sizeof(state) == sizeof(XXH3_state_t));
+	XXH3_64bits_reset(reinterpret_cast<XXH3_state_t*>(state));
 }
 
 Hash::Hasher::~Hasher()
 {
-	XXH3_freeState(static_cast<XXH3_state_t*>(state));
+
 }
 
 uint64_t Hash::Hasher::digest()
 {
-	return XXH3_64bits_digest(static_cast<XXH3_state_t*>(state));
+	return XXH3_64bits_digest(reinterpret_cast<XXH3_state_t*>(state));
 }
 
 void Hash::Hasher::reset()
 {
-	XXH3_64bits_reset(static_cast<XXH3_state_t*>(state));
+	XXH3_64bits_reset(reinterpret_cast<XXH3_state_t*>(state));
 }
 
 void Hash::Hasher::feedBytes(gsl::span<const std::byte> bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes.data(), bytes.size_bytes());
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes.data(), bytes.size_bytes());
 }
 
 void Hash::Hasher::feed1Byte(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 1);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 1);
 }
 
 void Hash::Hasher::feed2Bytes(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 2);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 2);
 }
 
 void Hash::Hasher::feed4Bytes(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 4);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 4);
 }
 
 void Hash::Hasher::feed8Bytes(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 8);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 8);
 }
 
 void Hash::Hasher::feed16Bytes(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 16);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 16);
 }
 
 void Hash::Hasher::feed32Bytes(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 32);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 32);
 }
 
 void Hash::Hasher::feed64Bytes(const void* bytes)
 {
-	XXH3_64bits_update(static_cast<XXH3_state_t*>(state), bytes, 64);
+	XXH3_64bits_update(reinterpret_cast<XXH3_state_t*>(state), bytes, 64);
 }

@@ -19,7 +19,7 @@ namespace Halley {
 		uint32_t compressTo32(uint64_t value);
 
 
-		class Hasher
+		class alignas(64) Hasher
 		{
 		public:
 			Hasher();
@@ -63,7 +63,7 @@ namespace Halley {
 			void reset();
 
 		private:
-			void* state;
+			uint64_t state[576 / 8]; // must match size of XXH3_state_s
 
 			void feed1Byte(const void* bytes);
 			void feed2Bytes(const void* bytes);
