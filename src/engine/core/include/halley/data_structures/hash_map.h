@@ -1,11 +1,121 @@
 #pragma once
 
 #include "../../../../../contrib/skarupke/flat_hash_map.hpp"
+#include "halley/utils/hash.h"
 #include <string_view>
 
 #include "temp_allocator.h"
 
 namespace Halley {
+
+	template <typename T, typename Enable = void>
+	struct hash {
+		constexpr uint64_t operator()(const T& v) const noexcept
+		{
+			return std::hash<T>()(v);
+		}
+	};
+
+	template <typename T>
+	struct hash<T, std::enable_if_t<std::is_trivially_copyable_v<T>>> {
+		constexpr uint64_t operator()(const T& v) const noexcept
+		{
+			return Hash::hash(v);
+		}
+	};
+
+	template <>
+	struct hash<std::string_view> {
+		constexpr uint64_t operator()(const std::string_view& s) const noexcept
+		{
+			return Hash::hash(s.data(), s.length());
+		}
+
+		constexpr uint64_t operator()(const std::string& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const String& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const char* s) const noexcept
+		{
+			return Hash::hash(s, strlen(s));
+		}
+	};
+
+	template <>
+	struct hash<std::string> {
+		constexpr uint64_t operator()(const std::string_view& s) const noexcept
+		{
+			return Hash::hash(s.data(), s.length());
+		}
+
+		constexpr uint64_t operator()(const std::string& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const String& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const char* s) const noexcept
+		{
+			return Hash::hash(s, strlen(s));
+		}
+	};
+	
+	template <>
+	struct hash<const char*> {
+		constexpr uint64_t operator()(const std::string_view& s) const noexcept
+		{
+			return Hash::hash(s.data(), s.length());
+		}
+
+		constexpr uint64_t operator()(const std::string& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const String& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const char* s) const noexcept
+		{
+			return Hash::hash(s, strlen(s));
+		}
+	};
+
+	template <>
+	struct hash<String> {
+		constexpr uint64_t operator()(const std::string_view& s) const noexcept
+		{
+			return Hash::hash(s.data(), s.length());
+		}
+
+		constexpr uint64_t operator()(const std::string& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const String& s) const noexcept
+		{
+			return Hash::hash(s.c_str(), s.length());
+		}
+
+		constexpr uint64_t operator()(const char* s) const noexcept
+		{
+			return Hash::hash(s, strlen(s));
+		}
+	};
+
 
 	class String;
 
@@ -19,38 +129,21 @@ namespace Halley {
 		using type = std::equal_to<std::string_view>;
 	};
 
-	template<typename Key, typename Value, typename Hash = std::hash<Key>, typename Allocator = std::allocator<std::pair<Key, Value>>>
+	template <typename T>
+	using DefaultHash = std::hash<T>;
+
+	template<typename Key, typename Value, typename Hash = DefaultHash<Key>, typename Allocator = std::allocator<std::pair<Key, Value>>>
 	using HashMap = ska::flat_hash_map<Key, Value, Hash, typename EqualToPicker<Key>::type, Allocator>;
 
-	template<typename Key, typename Hash = std::hash<Key>, typename Allocator = std::allocator<Key>>
+	template<typename Key, typename Hash = DefaultHash<Key>, typename Allocator = std::allocator<Key>>
 	using HashSet = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type, Allocator>;
 	
-	template<typename Key, typename Value, typename Hash = std::hash<Key>>
+	template<typename Key, typename Value, typename Hash = DefaultHash<Key>>
 	using HashMapTemp = ska::flat_hash_map<Key, Value, Hash, typename EqualToPicker<Key>::type, TempPoolAllocator<std::pair<Key, Value>>>;
 
-	template<typename Key, typename Hash = std::hash<Key>>
+	template<typename Key, typename Hash = DefaultHash<Key>>
 	using HashSetTemp = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type, TempPoolAllocator<Key>>;
 
-	static inline uint32_t combineHash32(uint32_t a, uint32_t b)
-	{
-		// From https://stackoverflow.com/a/27952689
-		return a ^ (b + 0x9e3779b9u + (a << 6) + (a >> 2));
-	}
-
-	static inline uint64_t combineHash64(uint64_t a, uint64_t b)
-	{
-		// From https://stackoverflow.com/a/27952689
-		return a ^ (b + 0x517cc1b727220a95ull + (a << 6) + (a >> 2));
-	}
-
-	static inline size_t combineHash(size_t a, size_t b)
-	{
-		if constexpr (sizeof(size_t) == 8) {
-			return static_cast<size_t>(combineHash64(static_cast<uint64_t>(a), static_cast<uint64_t>(b)));
-		} else {
-			return static_cast<size_t>(combineHash32(static_cast<uint32_t>(a), static_cast<uint32_t>(b)));
-		}
-	}
 }
 
 namespace std {
@@ -58,7 +151,7 @@ namespace std {
 	struct hash<std::pair<A, B>> {
         std::size_t operator()(const std::pair<A, B>& v) const noexcept
         {
-			return Halley::combineHash(std::hash<A>()(v.first), std::hash<B>()(v.second));
+			return Halley::Hash::combineHash(Halley::DefaultHash<A>()(v.first),Halley:: DefaultHash<B>()(v.second));
         }
     };
 
@@ -66,7 +159,7 @@ namespace std {
 	struct hash<std::tuple<A, B, C>> {
         std::size_t operator()(const std::tuple<A, B, C>& v) const noexcept
         {
-			return Halley::combineHash(Halley::combineHash(std::hash<A>()(std::get<0>(v)), std::hash<B>()(std::get<1>(v))), std::hash<C>()(std::get<2>(v)));
+			return Halley::Hash::combineHash(Halley::Hash::combineHash(Halley::DefaultHash<A>()(std::get<0>(v)),Halley:: DefaultHash<B>()(std::get<1>(v))), Halley::DefaultHash<C>()(std::get<2>(v)));
         }
     };
 }

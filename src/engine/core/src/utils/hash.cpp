@@ -40,26 +40,9 @@ uint64_t Hash::Detail::hash64Bytes(const void* bytes)
 	return XXH3_64bits(bytes, 64);
 }
 
-uint64_t Hash::hash(const Bytes& bytes)
-{
-	return XXH3_64bits(bytes.data(), bytes.size());
-}
-
-uint64_t Hash::hash(gsl::span<const std::byte> bytes)
-{
-	return XXH3_64bits(bytes.data(), bytes.size_bytes());
-}
-
-uint64_t Hash::hash(const void* bytes, size_t len)
+uint64_t Hash::Detail::hashNBytes(const void* bytes, size_t len)
 {
 	return XXH3_64bits(bytes, len);
-}
-
-uint32_t Hash::compressTo32(uint64_t value)
-{
-	const auto high = value >> 32;
-	const auto low = value & 0xFFFFFFFFull;
-	return uint32_t(high) ^ uint32_t(low);
 }
 
 Hash::Hasher::Hasher()

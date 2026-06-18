@@ -29,7 +29,7 @@ namespace std {
 	{
 		std::size_t operator()(MaskEntry const& s) const noexcept
 		{
-			return std::hash<RealType>()(s.mask);
+			return Halley::DefaultHash<RealType>()(s.mask);
 		}
 	};
 }
@@ -65,7 +65,7 @@ public:
 		}
 	}
 
-	RealType& retrieve(int handle)
+	const RealType& retrieve(int handle) const
 	{
 		if (handle == -1) [[unlikely]] {
 			return dummy;

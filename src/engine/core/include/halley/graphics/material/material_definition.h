@@ -485,9 +485,9 @@ namespace std
         {
         	const auto result = v.getHash();
 			if constexpr (sizeof(result) == sizeof(std::size_t)) {
-				return static_cast<std::size_t>(result);
+				return result;
 			} else {
-				return Halley::combineHash(static_cast<size_t>(result >> 32), static_cast<size_t>(result));
+				return Halley::Hash::compressTo32(result);
 			}
         }
     };

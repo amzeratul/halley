@@ -158,19 +158,9 @@ bool UUID::isValid() const
 	return false;
 }
 
-gsl::span<const std::byte> UUID::getBytes() const
-{
-	return gsl::as_bytes(gsl::span<const uint64_t>(qwords));
-}
-
 gsl::span<std::byte> UUID::getWriteableBytes()
 {
 	return gsl::as_writable_bytes(gsl::span<uint64_t>(qwords));
-}
-
-gsl::span<const uint64_t> UUID::getUint64Bytes() const
-{
-	return qwords;
 }
 
 void UUID::serialize(Serializer& s) const

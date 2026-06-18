@@ -39,9 +39,9 @@ namespace Halley {
         [[nodiscard]] static UUID xorUUIDs(const UUID& one, const UUID& two);
     	[[nodiscard]] bool isValid() const;
 
-        gsl::span<const std::byte> getBytes() const;
+        gsl::span<const std::byte> getBytes() const { return gsl::as_bytes(gsl::span<const uint64_t>(qwords)); }
 		gsl::span<std::byte> getWriteableBytes();
-        gsl::span<const uint64_t> getUint64Bytes() const;
+        gsl::span<const uint64_t> getUint64Bytes() const { return qwords; }
 
     	void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -63,10 +63,9 @@ namespace Halley {
 template<>
 struct std::hash<Halley::UUID>
 {
-    std::size_t operator() (const Halley::UUID& uuid) const noexcept
+    constexpr std::size_t operator() (const Halley::UUID& uuid) const noexcept
     {
-        const auto& bytes = uuid.getUint64Bytes();
-        return std::hash<uint64_t>()(Halley::combineHash64(bytes[0], bytes[1]));
+        return Halley::Hash::hash(gsl::as_bytes(uuid.getUint64Bytes()));
     }
 };
 

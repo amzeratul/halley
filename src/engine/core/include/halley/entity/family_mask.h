@@ -210,7 +210,7 @@ namespace std {
 	{
 		std::size_t operator()(const Halley::FamilyMask::Handle& h) const noexcept
 		{
-			return std::hash<int>()(h.getRawValue());
+			return Halley::DefaultHash<int>()(h.getRawValue());
 		}
 	};
 }

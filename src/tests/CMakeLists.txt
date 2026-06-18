@@ -16,6 +16,7 @@ include_directories(
 set(SOURCES
         "src/config_node_test.cpp"
         "src/fuzzy_text_matcher_test.cpp"
+        "src/hash_test.cpp"
         "src/path_test.cpp"
         "src/polygon_test.cpp"
         "src/ring_buffer_test.cpp"

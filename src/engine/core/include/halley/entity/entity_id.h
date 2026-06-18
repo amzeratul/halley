@@ -48,7 +48,7 @@ namespace std {
 	{
 		size_t operator()(const Halley::EntityId& v) const noexcept
 		{
-			return std::hash<int64_t>()(v.value);
+			return Halley::DefaultHash<int64_t>()(v.value);
 		}
 	};
 }

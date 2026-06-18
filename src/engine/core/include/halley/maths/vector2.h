@@ -287,18 +287,18 @@ namespace std {
 	template<>
 	struct hash<Halley::Vector2i>
 	{
-		size_t operator()(const Halley::Vector2i& v) const noexcept
+		constexpr size_t operator()(const Halley::Vector2i& v) const noexcept
 		{
-			return std::hash<long long>()(*reinterpret_cast<const long long*>(&v));
+			return Halley::Hash::hash(&v.x, 2);
 		}
 	};
 
 	template<>
 	struct hash<Halley::Vector2f>
 	{
-		size_t operator()(const Halley::Vector2f& v) const noexcept
+		constexpr size_t operator()(const Halley::Vector2f& v) const noexcept
 		{
-			return std::hash<long long>()(*reinterpret_cast<const long long*>(&v));
+			return Halley::Hash::hash(&v.x, 2);
 		}
 	};
 }
