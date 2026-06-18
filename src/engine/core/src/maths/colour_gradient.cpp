@@ -109,9 +109,7 @@ Colour4f ColourGradient::evaluateSource(float val) const
 		const float nextX = positions[i];
 
 		if (val >= prevX && val <= nextX) {
-			const float t = (val - prevX) / (nextX - prevX);
-			HalleyAssertDev(t >= 0.0f);
-			HalleyAssertDev(t <= 1.0f);
+			const float t = floatEquals(prevX, nextX) ? 0.5f : invLerp(val, prevX, nextX);
 			constexpr bool useGamma = true;
 			if (useGamma) {
 				return lerp(colours[i - 1].applyGammaAlpha(1.0f / 2.2f), colours[i].applyGammaAlpha(1.0f / 2.2f), t).applyGammaAlpha(2.2f);
