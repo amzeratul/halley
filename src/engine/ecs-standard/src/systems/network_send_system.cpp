@@ -45,7 +45,7 @@ public:
 			if (e.network.sendUpdates) {
 				auto parent = getWorld().getEntity(e.entityId).getParent();
 				while (parent.isValid() && parent.isSerializable()) {
-					if (const auto pe = parent.tryGetComponent<NetworkComponent>()) {
+					if (parent.hasComponent<NetworkComponent>()) {
 						e.network.sendUpdates = false;
 						break;
 					}
@@ -86,7 +86,8 @@ public:
 				uint8_t authorityId = e.network.authorityId.value_or(ownerId);
 				if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
 					++networkEntitiesSending;
-					entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, ownerId, authorityId, e.network.alwaysSend });
+					entities.emplace_back(EntityNetworkUpdateInfo{e.entityId, ownerId, authorityId,
+						e.network.alwaysSend, e.network.requiresEntityFrameModified });
 				}
 			}
 		}
@@ -97,7 +98,7 @@ public:
 		entityNetworkSession.sendUpdates();
 		entityNetworkSession.update(0.0);
 
-		//logCounters(stats);
+		logCounters(t, stats);
 	}
 
 private:
@@ -174,6 +175,12 @@ private:
 			return "Ok.";
 		}, UIDebugConsoleSyntax());
 
+		consoleCommands.addCommand("networkLogStats", [this](Vector<String> args) -> String
+		{
+			logStats = !logStats;
+			return "Ok.";
+		}, UIDebugConsoleSyntax());
+
 		consoleCommands.addCommand("networkQuality", [this](Vector<String> args) -> String
 		{
 			if (args.size() != 2 || !args[0].isNumber() || !args[1].isNumber()) {
@@ -204,12 +211,18 @@ private:
 		consoleCommands.removeCommand("findNetworkEntityOutbound");
 		consoleCommands.removeCommand("logNetworkEntityUpdates");
 		consoleCommands.removeCommand("networkLag");
+		consoleCommands.removeCommand("networkLogStats");
 		consoleCommands.removeCommand("networkQuality");
 		consoleCommands.removeCommand("disconnect");
 	}
 
 	int networkEntities = 0;
 	int networkEntitiesSending = 0;
+	SendEntitiesStats displayStats;
+	SendEntitiesStats accumStats;
+	Time accumTime = 0;
+	int accumCount = 0;
+	mutable bool logStats = false;
 
 	void resetCounters()
 	{
@@ -217,17 +230,36 @@ private:
 		networkEntitiesSending = 0;
 	}
 
-	void logCounters(SendEntitiesStats stats)
+	void logCounters(Time t, const SendEntitiesStats& stats)
 	{
+		if (!logStats) {
+			return;
+		}
+
+		accumStats += stats;
+		accumTime += t;
+		++accumCount;
+
+		if (accumTime >= 1.0) {
+			displayStats = accumStats;
+			displayStats.avg(accumStats, accumCount);
+
+			accumStats = {};
+			accumTime = 0;
+			accumCount = 0;
+		}
+
 		ScreenLogger::logScreen("networkEntities", networkEntities);
 		ScreenLogger::logScreen("networkEntitiesSending", networkEntitiesSending);
-		ScreenLogger::logScreen("stats.nCreated", stats.nCreated);
-		ScreenLogger::logScreen("stats.nUpdated", stats.nUpdated);
-		ScreenLogger::logScreen("stats.nDestroyed", stats.nDestroyed);
-		ScreenLogger::logScreen("stats.nUpdateChecked", stats.nUpdateChecked);
-		ScreenLogger::logScreen("stats.nCheckedAcquiredAuthority", stats.nCheckedAcquiredAuthority);
-		ScreenLogger::logScreen("stats.nCheckedRelinquishedAuthority", stats.nCheckedRelinquishedAuthority);
-		ScreenLogger::logScreen("stats.nCheckedRegular", stats.nCheckedRegular);
+		ScreenLogger::logScreen(" send: created", displayStats.nCreated);
+		ScreenLogger::logScreen(" send: updated", displayStats.nUpdated);
+		ScreenLogger::logScreen(" send: destroyed", displayStats.nDestroyed);
+		ScreenLogger::logScreen(" update check: dormant", displayStats.nUpdateIdle);
+		ScreenLogger::logScreen(" update check: fast", displayStats.nUpdateSameHash);
+		ScreenLogger::logScreen(" update check: full", displayStats.nUpdateChecked);
+		ScreenLogger::logScreen("stats.nCheckedAcquiredAuthority", displayStats.nCheckedAcquiredAuthority);
+		ScreenLogger::logScreen("stats.nCheckedRelinquishedAuthority", displayStats.nCheckedRelinquishedAuthority);
+		ScreenLogger::logScreen("stats.nCheckedRegular", displayStats.nCheckedRegular);
 	}
 };
 

@@ -57,8 +57,6 @@ static bool checkSimpleStringChecksum(Deserializer& deserializer, const std::str
 
 #endif
 
-thread_local Bytes EntityNetworkSerialize::scratchpad;
-
 void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
 {
     memset(&curPage, 0, sizeof(curPage));
@@ -396,19 +394,13 @@ void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetwor
     myPeerId = session->getSession().getMyPeerId().value_or(0);
 }
 
-bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
+uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, const SerializerOptions& options)
 {
-    // Thread-local buffer to serialize/encode changes into.
-    // The maximum size depends on some limits: MTU, maximum UDP packet split size in AckUnreliableConnection,
-    // and maximum network message split size in EntityNetworkSession.
-    if (scratchpad.empty()) {
-        scratchpad.reserve(16 * 32 * 1024);
-        scratchpad.resize_no_init(scratchpad.capacity());
-    }
-
     // We lookup components by ID, need to translate from names. This is the same list of component types
     // EntityFactory uses to compile deltas.
+    //
     // The session's delta options are immutable, so we should need to initialize the lookup table only once.
+    // This is done here because this function is called before serializeEntityUpdate().
     if (componentsIgnored.empty()) {
         if (const auto& ignoreComponents = session->getEntityDeltaOptions().ignoreComponents; !ignoreComponents.empty()) {
             const auto& reflection = entity.getWorld().getReflection();
@@ -418,6 +410,70 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
                 componentsIgnored.emplace(reflector.getIndex());
             }
         }
+    }
+
+    // Use hashing serializer, no dictionary.
+    SerializerOptions opt(options.version);
+    opt.toHash = true;
+    opt.world = &entity.getWorld();
+
+    Serializer serializer(opt);
+    const SerializationContext context(entity);
+
+    doSerializeEntityHash(context, serializer, entity);
+
+    return serializer.getHashDigest();
+}
+
+void EntityNetworkSerialize::doSerializeEntityHash(
+    const SerializationContext& context, Serializer& serializer, const EntityRef& entity)
+{
+    context.setCurrentEntity(entity);
+
+    EntitySerializationContext serializationContext = {};
+    serializationContext.resources = &session->getResources();
+    serializationContext.entityContext = &context;
+    serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
+
+    ByteSerializationContext byteSerializationContext = {};
+    byteSerializationContext.resources = &session->getResources();
+    byteSerializationContext.entityId = context.getCurrentEntityId();
+    byteSerializationContext.entitySerializationContext = &serializationContext;
+
+    auto& reflection = serializer.getOptions().world->getReflection();
+
+    const auto ids = entity.getComponentIds();
+    const auto ptrs = entity.getComponentPtrs();
+
+    for (size_t i = 0; i < ids.size(); ++i) {
+        const auto& componentId = ids[i];
+        const auto& component = ptrs[i];
+
+        if (componentsIgnored.contains(componentId)) {
+            continue;
+        }
+
+        const auto& reflector = reflection.getComponentReflector(componentId);
+        reflector.serializeNetwork(byteSerializationContext, serializer, *component);
+    }
+
+    // Children
+    for (const auto& child : entity.getChildren()) {
+        if (!child.isSerializable()) {
+            continue;
+        }
+        doSerializeEntityHash(context, serializer, child);
+    }
+}
+
+bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
+{
+    // Buffer to serialize/encode changes into.
+    // The maximum size depends on some limits: MTU, maximum UDP packet split size in AckUnreliableConnection,
+    // and maximum network message split size in EntityNetworkSession.
+    if (scratchpad.empty()) {
+        scratchpad.reserve(16 * 32 * 1024);
+        scratchpad.resize_no_init(scratchpad.capacity());
     }
 
     SerializerOptions opt(options.version);
@@ -950,7 +1006,7 @@ size_t EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& op
     return s.getSize();
 }
 
-size_t EntityNetworkSerialize::getBytesCapacity()
+size_t EntityNetworkSerialize::getBytesCapacity() const
 {
     return scratchpad.capacity();
 }
