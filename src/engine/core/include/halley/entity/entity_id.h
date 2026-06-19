@@ -11,6 +11,9 @@ namespace Halley {
 	class Deserializer;
 	class String;
 
+	template <typename T>
+	using DefaultHash = std::hash<T>;
+
 	struct alignas(8) EntityId {
 		int64_t value;
 

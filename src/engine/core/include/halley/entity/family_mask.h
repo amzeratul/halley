@@ -10,6 +10,9 @@ class MaskStorage;
 namespace Halley {
 	class HalleyStatics;
 
+	template <typename T>
+	using DefaultHash = std::hash<T>;
+
 	constexpr static int maxComponents = 512; // Increasing this number has performance consequences
 
 	namespace FamilyMask {

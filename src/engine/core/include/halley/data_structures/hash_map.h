@@ -41,9 +41,10 @@ namespace Halley {
 			return Hash::hash(s.c_str(), s.length());
 		}
 
-		constexpr uint64_t operator()(const char* s) const noexcept
+		template<int N>
+		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, strlen(s));
+			return Hash::hash(s, N);
 		}
 	};
 
@@ -64,9 +65,10 @@ namespace Halley {
 			return Hash::hash(s.c_str(), s.length());
 		}
 
-		constexpr uint64_t operator()(const char* s) const noexcept
+		template<int N>
+		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, strlen(s));
+			return Hash::hash(s, N);
 		}
 	};
 	
@@ -87,9 +89,10 @@ namespace Halley {
 			return Hash::hash(s.c_str(), s.length());
 		}
 
-		constexpr uint64_t operator()(const char* s) const noexcept
+		template<int N>
+		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, strlen(s));
+			return Hash::hash(s, N);
 		}
 	};
 
@@ -110,9 +113,10 @@ namespace Halley {
 			return Hash::hash(s.c_str(), s.length());
 		}
 
-		constexpr uint64_t operator()(const char* s) const noexcept
+		template<int N>
+		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, strlen(s));
+			return Hash::hash(s, N);
 		}
 	};
 
