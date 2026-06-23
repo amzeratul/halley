@@ -467,8 +467,9 @@ String InputVirtual::getButtonName(int code) const
 {
 	const auto& binds = buttons.at(code);
 	if (!binds.empty()) {
+		auto* last = getLastDevice();
 		for (const auto& bind: binds) {
-			if (bind.device == lastDevice.lock()) {
+			if (bind.device.get() == last) {
 				return bind.device->getButtonName(bind.a);
 			}
 		}
@@ -519,7 +520,19 @@ void InputVirtual::update(Time t)
 
 InputDevice* InputVirtual::getLastDevice() const
 {
-	return lastDevice.lock().get();
+	if (auto last = lastDevice.lock()) {
+		return last.get();
+	} else {
+		// No last device, get the first thing we can find
+		for (auto& binds: buttons) {
+			for (auto& bind: binds) {
+				if (bind.device) {
+					return bind.device.get();
+				}
+			}
+		}
+		return nullptr;
+	}
 }
 
 void InputVirtual::setLastDeviceToType(InputType type)
@@ -806,7 +819,7 @@ Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels
 	refreshExclusives();
 
 	if (!preferredDevice) {
-		preferredDevice = lastDevice.lock().get();
+		preferredDevice = getLastDevice();
 	}
 
 	Vector<ExclusiveButtonInfo> result;
@@ -828,7 +841,7 @@ Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels
 std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(ConvertibleTo<int> button, InputDevice* device) const
 {
 	if (!device) {
-		device = lastDevice.lock().get();
+		device = getLastDevice();
 	}
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
@@ -861,7 +874,7 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(ConvertibleTo<int> 
 std::pair<InputDevice*, int> InputVirtual::getPhysicalAxis(ConvertibleTo<int> axis, InputDevice* device) const
 {
 	if (!device) {
-		device = lastDevice.lock().get();
+		device = getLastDevice();
 	}
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
@@ -894,7 +907,7 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalAxis(ConvertibleTo<int> ax
 std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiveButton& button, InputDevice* device) const
 {
 	if (!device) {
-		device = lastDevice.lock().get();
+		device = getLastDevice();
 	}
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
@@ -929,7 +942,7 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiv
 std::pair<InputDevice*, int> InputVirtual::getPhysicalAxis(const InputExclusiveAxis& axis, InputDevice* device) const
 {
 	if (!device) {
-		device = lastDevice.lock().get();
+		device = getLastDevice();
 	}
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
