@@ -251,12 +251,12 @@ private:
 
 		ScreenLogger::logScreen("networkEntities", networkEntities);
 		ScreenLogger::logScreen("networkEntitiesSending", networkEntitiesSending);
-		ScreenLogger::logScreen(" send: created", displayStats.nCreated);
-		ScreenLogger::logScreen(" send: updated", displayStats.nUpdated);
-		ScreenLogger::logScreen(" send: destroyed", displayStats.nDestroyed);
-		ScreenLogger::logScreen(" update check: dormant", displayStats.nUpdateIdle);
-		ScreenLogger::logScreen(" update check: fast", displayStats.nUpdateSameHash);
-		ScreenLogger::logScreen(" update check: full", displayStats.nUpdateChecked);
+		ScreenLogger::logScreen(" send created", displayStats.nCreated);
+		ScreenLogger::logScreen(" send updated", displayStats.nUpdated);
+		ScreenLogger::logScreen(" send destroyed", displayStats.nDestroyed);
+		ScreenLogger::logScreen(" update check, dormant", displayStats.nUpdateIdle);
+		ScreenLogger::logScreen(" update check, fast", displayStats.nUpdateSameHash);
+		ScreenLogger::logScreen(" update check, full", displayStats.nUpdateChecked);
 		ScreenLogger::logScreen("stats.nCheckedAcquiredAuthority", displayStats.nCheckedAcquiredAuthority);
 		ScreenLogger::logScreen("stats.nCheckedRelinquishedAuthority", displayStats.nCheckedRelinquishedAuthority);
 		ScreenLogger::logScreen("stats.nCheckedRegular", displayStats.nCheckedRegular);

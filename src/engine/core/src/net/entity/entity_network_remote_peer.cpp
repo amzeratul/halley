@@ -385,7 +385,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 	// Serialize entity, using fast path, to compute a content hash. Early-out if the hash did not change.
 	const uint64_t contentHash = fastSerializer.serializeEntityHash(entity, parentSession->getByteSerializationOptions());
 	if (contentHash == remote.lastSerializerHash) {
-		++stats.nUpdateSameHash;
+		if (!expectNoUpdate) {
+			++stats.nUpdateSameHash;
+		}
 		return;
 	}
 	remote.lastSerializerHash = contentHash;
@@ -394,8 +396,10 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     // or if it's an outbound entity marked as "for changed authority".
     bool canFastUpdate = !remote.fastUpdateJournal.empty() || remote.hasAuthorityOnly;
 
-	++stats.nUpdateChecked;
-	//Logger::logDev("Checking " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
+	if (!expectNoUpdate) {
+		++stats.nUpdateChecked;
+		//Logger::logDev("Checking " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
+	}
 
     if (canFastUpdate) {
         HalleyAssertDev(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
