@@ -1012,7 +1012,7 @@ void LocalisationEditor::doImportLanguage(const I18NLanguage& language, const St
 		Logger::logError("Unknown extension for localisation import: \"" + extension + "\"");
 	}
 	onLocalStringsModified();
-	//uploadLanguage(language);
+	uploadLanguage(language);
 }
 
 void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, const Bytes& data)
@@ -1074,10 +1074,14 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 			} else {
 				if (auto* e = localStrings->originalLanguage->tryGetEntry(key)) {
 					version = e->getVersion();
+				} else if (!key.isEmpty()) {
+					Logger::logError("Unknown key: " + key);
 				}
 			}
 
-			if (!translatedValue.isEmpty()) {
+			if (version < 0) {
+				Logger::logError("Row " + toString(i) + " does not have a valid version number");
+			} else if (!translatedValue.isEmpty()) {
 				if (translation.setValue(key, version, translatedValue)) {
 					++n;
 				}
