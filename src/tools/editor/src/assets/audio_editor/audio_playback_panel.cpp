@@ -112,7 +112,7 @@ void AudioPlaybackPanel::play()
 	if (object) {
 		audioHandle = api.audio->play(playbackObject, emitter);
 	} else if (event) {
-		audioHandle = api.audio->postEvent(*playbackEvent, emitter);
+		audioHandle = api.audio->postEvent(playbackEvent, emitter);
 	}
 }
 

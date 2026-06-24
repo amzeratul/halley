@@ -178,7 +178,7 @@ private:
 		AudioAPI& audio = *getAPI().audio;
 		e.audioSource.emitter = getAPI().audio->createEmitter(getAudioPosition(e, {}));
 		if (e.audioSource.event) {
-			audio.postEvent(*e.audioSource.event, e.audioSource.emitter);
+			audio.postEvent(e.audioSource.event.get(), e.audioSource.emitter);
 		}
 	}
 

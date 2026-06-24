@@ -299,8 +299,8 @@ namespace Halley
 		virtual AudioHandle postEvent(const String& name) = 0;
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;
 		virtual AudioHandle postEvent(const String& name, AudioPosition position) = 0;
-		virtual AudioHandle postEvent(const AudioEvent& event) = 0;
-		virtual AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) = 0;
+		virtual AudioHandle postEvent(std::shared_ptr<const AudioEvent> event) = 0;
+		virtual AudioHandle postEvent(std::shared_ptr<const AudioEvent> event, AudioEmitterHandle emitter) = 0;
 		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float gain = 1.0f, bool loop = false, String busId = "", AudioFade fade = {}) = 0;
 		virtual AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float gain = 1.0f, AudioFade fade = {}) = 0;
 

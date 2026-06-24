@@ -47,8 +47,8 @@ namespace Halley {
 
 		AudioHandle postEvent(const String& name) override;
 	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
-		AudioHandle postEvent(const AudioEvent& event) override;
-		AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) override;
+		AudioHandle postEvent(std::shared_ptr<const AudioEvent> event) override;
+		AudioHandle postEvent(std::shared_ptr<const AudioEvent> event, AudioEmitterHandle emitter) override;
 		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop, String busId, AudioFade fade) override;
 		AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume, AudioFade fade) override;
 
@@ -123,7 +123,7 @@ namespace Halley {
 
 		HashMap<AudioRegionId, String> regionNames;
 
-		AudioHandle doPostEvent(const AudioEvent& event, AudioEmitterId emitterId);
+		AudioHandle doPostEvent(std::shared_ptr<const AudioEvent> event, AudioEmitterId emitterId);
 		AudioHandle doPostEvent(const String& name, AudioEmitterId emitterId);
 
     	void doStartPlayback(int deviceNumber, bool createEngine);

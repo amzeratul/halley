@@ -233,17 +233,10 @@ Future<void> AudioFacade::runOnAudioThread(std::function<void()> f)
 	Promise<void> promise;
 	auto future = promise.getFuture();
 
-	auto action = [f = std::move(f), promise = std::move(promise)]() mutable {
+	enqueue([f = std::move(f), promise = std::move(promise)]() mutable {
 		f();
 		promise.set();
-	};
-
-	Vector<std::function<void()>> as;
-	as += std::move(action);
-	commandQueue.writeOne(std::move(as));
-
-	//enqueue(std::move(action));
-	//pump();
+	});
 
 	return future;
 }
@@ -300,26 +293,26 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitte
 	return doPostEvent(name, emitter->getId());
 }
 
-AudioHandle AudioFacade::postEvent(const AudioEvent& event)
+AudioHandle AudioFacade::postEvent(std::shared_ptr<const AudioEvent> event)
 {
-	return doPostEvent(event, 0);
+	return doPostEvent(std::move(event), 0);
 }
 
-AudioHandle AudioFacade::postEvent(const AudioEvent& event, AudioEmitterHandle emitter)
+AudioHandle AudioFacade::postEvent(std::shared_ptr<const AudioEvent> event, AudioEmitterHandle emitter)
 {
 	if (!emitter) {
-		Logger::logError("Cannot post event \"" + event.getAssetId() + "\" to invalid emitter.");
+		Logger::logError("Cannot post event \"" + event->getAssetId() + "\" to invalid emitter.");
 		return std::make_shared<AudioHandleImpl>(*this, curEventId++, 0);
 	}
-	return doPostEvent(event, emitter->getId());
+	return doPostEvent(std::move(event), emitter->getId());
 }
 
-AudioHandle AudioFacade::doPostEvent(const AudioEvent& event, AudioEmitterId emitterId)
+AudioHandle AudioFacade::doPostEvent(std::shared_ptr<const AudioEvent> event, AudioEmitterId emitterId)
 {
 	const auto id = curEventId++;
 
-	enqueue([=, this, &event]() {
-		engine->postEvent(id, event, emitterId);
+	enqueue([this, event = std::move(event), id, emitterId] {
+		engine->postEvent(id, *event, emitterId);
 	});
 	playingSounds.push_back(id);
 
@@ -328,9 +321,8 @@ AudioHandle AudioFacade::doPostEvent(const AudioEvent& event, AudioEmitterId emi
 
 AudioHandle AudioFacade::doPostEvent(const String& name, AudioEmitterId emitterId)
 {
-	if (resources->exists<AudioEvent>(name)) {
-		const auto event = resources->get<AudioEvent>(name);
-		return doPostEvent(*event, emitterId);
+	if (auto event = resources->tryGet<AudioEvent>(name)) {
+		return doPostEvent(std::move(event), emitterId);
 	} else {
 		Logger::logError("Unknown audio event: \"" + name + "\"");
 		const auto id = curEventId++;
