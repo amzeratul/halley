@@ -653,7 +653,7 @@ void EntityEditor::pasteComponent(const String& name, ConfigNode data)
 
 void EntityEditor::setName(const String& name, bool markModified)
 {
-	if (!isPrefab && getName() != name) {
+	if (!isPrefab && getName() != name && currentEntityData) {
 		getEntityData().setName(name);
 		if (markModified) {
 			onEntityUpdated();
@@ -663,7 +663,7 @@ void EntityEditor::setName(const String& name, bool markModified)
 
 void EntityEditor::setEnableRules(const String& enableRules, bool markModified)
 {
-	if (getEntityData().getEnableRules() != enableRules) {
+	if (getEntityData().getEnableRules() != enableRules && currentEntityData) {
 		getEntityData().setEnableRules(enableRules);
 		if (markModified) {
 			onEntityUpdated();
