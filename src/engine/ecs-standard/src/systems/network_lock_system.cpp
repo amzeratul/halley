@@ -394,6 +394,7 @@ private:
 				// No existing lock
 				if (lock) {
 					// New lock
+					notifyEntityModified(e);
                     if (withAuthority) {
                     	// Try changing authority first. If this fails, don't bother creating a lock.
                     	result = doChangeAuthority(e, peerId, {});
@@ -409,6 +410,7 @@ private:
 				}
 			} else if (iter->second == peerId) {
 				// Lock exists, locked by this peer
+				notifyEntityModified(e);
 				if (!lock) {
 					// Release lock
                     if (withAuthority) {
@@ -540,6 +542,19 @@ private:
 
 		return {};
 	}
+
+	void notifyEntityModified(const NetworkFamily* e) const {
+		// NB: On the host, this "wakes up" a dormant network entity if its locks are modified.
+		// Scripts tend to lock entities as a first step, or very early in the process, so this
+		// kind of auto-enables support of this feature, without requiring much more attention
+		// in source code (like, in more complex entity systems, to attend all cases where we
+		// need to call this to signal a modifications).
+		if (e->network.requiresEntityFrameModified) {
+			auto entity = getWorld().getEntity(e->entityId);
+			entity.setModifiedThisFrame();
+		}
+	}
+
 };
 
 REGISTER_SYSTEM(NetworkLockSystem)
