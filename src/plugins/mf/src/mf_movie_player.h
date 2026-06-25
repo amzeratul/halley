@@ -43,7 +43,7 @@ namespace Halley
 
 		HRESULT onReadSample(HRESULT hrStatus, DWORD dwStreamIndex, DWORD dwStreamFlags, LONGLONG llTimestamp, IMFSample* pSample);
 
-		void readVideoSample(Time time, const std::byte* data, int stride);
+		void readVideoSample(Time time, gsl::span<const std::byte> data, int stride);
 		void readAudioSample(Time time, gsl::span<const std::byte> data);
 	};
 }

@@ -325,7 +325,9 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 					BYTE* src;
 					LONG pitch;
 					buffer2d->Lock2D(&src, &pitch);
-					readVideoSample(sampleTime, reinterpret_cast<std::byte*>(src), pitch);
+					DWORD contiguousLen = 0;
+					buffer2d->GetContiguousLength(&contiguousLen);
+					readVideoSample(sampleTime, gsl::span(reinterpret_cast<std::byte*>(src), contiguousLen), pitch);
 					buffer2d->Unlock2D();
 					buffer2d->Release();
 				} else if (hr == E_NOINTERFACE) {
@@ -333,7 +335,9 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 					DWORD maxLen;
 					DWORD curLen;
 					buffer->Lock(&src, &maxLen, &curLen);
-					readVideoSample(sampleTime, reinterpret_cast<std::byte*>(src), minStride);
+					DWORD contiguousLen = 0;
+					buffer2d->GetContiguousLength(&contiguousLen);
+					readVideoSample(sampleTime, gsl::span(reinterpret_cast<std::byte*>(src), contiguousLen), minStride);
 					buffer->Unlock();
 				} else {
 					throw Exception("Error while querying for 2D buffer: " + toString(hr), HalleyExceptions::MoviePlugin);
@@ -358,9 +362,9 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 	return S_OK;
 }
 
-void MFMoviePlayer::readVideoSample(Time time, const std::byte* data, int stride)
+void MFMoviePlayer::readVideoSample(Time time, gsl::span<const std::byte> data, int stride)
 {
-	if (!data) {
+	if (!data.data()) {
 		throw Exception("Null pointer provided to MFMoviePlayer::readVideoSample.", HalleyExceptions::MoviePlugin);
 	}
 	if (stride <= 0) {
@@ -373,9 +377,9 @@ void MFMoviePlayer::readVideoSample(Time time, const std::byte* data, int stride
 	const int width = alignUp(videoSize.x, 16);
 	const int height = yPlaneHeight + uvPlaneHeight;
 
-	auto srcData = gsl::span<const std::byte>(data, stride * height);
-	Bytes myData(srcData.size_bytes());
-	memcpy(myData.data(), data, myData.size());
+	//auto srcData = gsl::span<const std::byte>(data, stride * height);
+	Bytes myData(std::max<size_t>(data.size_bytes(), stride * height));
+	memcpy(myData.data(), data.data(), data.size());
 
 	TextureDescriptor descriptor;
 	descriptor.format = TextureFormat::Red;
