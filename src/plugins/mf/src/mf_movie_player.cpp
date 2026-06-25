@@ -372,20 +372,19 @@ void MFMoviePlayer::readVideoSample(Time time, gsl::span<const std::byte> data, 
 	}
 
 	const auto videoSize = getSize();
-	const int yPlaneHeight = alignUp(videoSize.y, 16);
-	const int uvPlaneHeight = alignUp(videoSize.y / 2, 16);
-	const int width = alignUp(videoSize.x, 16);
-	const int height = yPlaneHeight + uvPlaneHeight;
+	const int pitch = stride;
+	const int totalRows = int(data.size_bytes()) / pitch;
+	const int height = totalRows;
+	const int width = videoSize.x;
 
-	//auto srcData = gsl::span<const std::byte>(data, stride * height);
-	Bytes myData(std::max<size_t>(data.size_bytes(), stride * height));
-	memcpy(myData.data(), data.data(), data.size());
+	Bytes myData(size_t(pitch) * height);
+	memcpy(myData.data(), data.data(), std::min(myData.size(), data.size_bytes()));
 
 	TextureDescriptor descriptor;
 	descriptor.format = TextureFormat::Red;
 	descriptor.pixelFormat = PixelDataFormat::Image;
 	descriptor.size = Vector2i(width, height);
-	descriptor.pixelData = TextureDescriptorImageData(std::move(myData), stride);
+	descriptor.pixelData = TextureDescriptorImageData(std::move(myData), pitch);
 
 	onVideoFrameAvailable(time, std::move(descriptor));
 }

@@ -182,7 +182,12 @@ void MoviePlayer::render(Resources& resources, RenderContext& rc)
 		c.bind([&] (Painter& painter)
 		{
 			auto matDef = resources.get<MaterialDefinition>("Halley/NV12Video");
-			Sprite().setImage(currentTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize)).draw(painter);
+			Sprite()
+				.setImage(currentTexture, matDef)
+				.setTexRect(Rect4f(0, 0, 1, 1))
+				.setSize(Vector2f(videoSize))
+				.setCustom0(Vector4f(Vector2f(videoSize), Vector2f(currentTexture->getSize())))
+				.draw(painter);
 			framesRendered++;
 		});
 
