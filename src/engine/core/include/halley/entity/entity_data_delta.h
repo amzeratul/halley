@@ -78,6 +78,7 @@ namespace Halley {
 		bool operator!=(const EntityDataDelta& other) const;
 
 		void sanitize(const WorldReflection& worldReflection, int mask);
+		void stripComponentChanges(std::string_view componentName);
 
 	private:
     	std::optional<String> name;

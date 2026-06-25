@@ -517,6 +517,16 @@ void EntityDataDelta::sanitize(const WorldReflection& worldReflection, int mask)
 	}
 }
 
+void EntityDataDelta::stripComponentChanges(std::string_view componentName)
+{
+	std_ex::erase_if_key(componentsChanged, [&] (const auto& k) { return k == componentName; });
+	std_ex::erase(componentsRemoved, componentName);
+
+	for (auto& child: childrenChanged) {
+		child.second.stripComponentChanges(componentName);
+	}
+}
+
 static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
