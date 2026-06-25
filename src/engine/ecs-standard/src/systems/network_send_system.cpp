@@ -35,14 +35,15 @@ public:
 		for (const auto& e: networkFamily) {
 			++networkEntities;
 
-			// By default, consider sending updates for all entities in the family,
-			// *except* the ones we do not have authority for right now.
-			e.network.sendUpdates = e.network.authorityId.value_or(myPeerId) == myPeerId;
+			// By default, consider sending updates for all entities.
+			e.network.sendUpdates = true;
 
-			// Now disable updates for entities that are children of other entities with a
-			// network component. This doesn't require recursion, and should be faster than
-			// walking down the child hierarchy.
-			if (e.network.sendUpdates) {
+			if (e.network.authorityId) [[unlikely]] {
+				// The check below must be skipped if someone grabbed authority.
+			} else {
+				// Disable updates for entities that are children of other entities with a
+				// network component. This doesn't require recursion, and should be faster than
+				// walking down the child hierarchy.
 				auto parent = getWorld().getEntity(e.entityId).getParent();
 				while (parent.isValid() && parent.isSerializable()) {
 					if (parent.hasComponent<NetworkComponent>()) {
