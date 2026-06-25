@@ -387,6 +387,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 	if (contentHash == remote.lastSerializerHash) {
 		if (!expectNoUpdate) {
 			++stats.nUpdateSameHash;
+			//Logger::logDev("Checking fast: " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
 		}
 		return;
 	}
@@ -398,7 +399,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
 	if (!expectNoUpdate) {
 		++stats.nUpdateChecked;
-		//Logger::logDev("Checking " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
+		//Logger::logDev("Checking full: " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
 	}
 
     if (canFastUpdate) {
@@ -472,7 +473,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			canFastUpdate = false;
     			// Wipe the existing journal
     			remote.fastUpdateJournal.clear();
-	    		Logger::logWarning("Network entity " + entity.getName() + " has been modified in structure, fall back using slow path");
+	    		//Logger::logDev("Network entity " + entity.getName() + " has been modified in structure, fall back using slow path");
     		}
     	} else {
     		// Something went wrong, fall back to the slow path.
