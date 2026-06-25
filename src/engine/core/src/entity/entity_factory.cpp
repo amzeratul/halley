@@ -403,7 +403,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int
 {
 	const auto trace = StackDebugTrace("entityName", entity.getName());
 	HalleyAssertDev(entity.isValid());
-	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, fallbackVariant);
+	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, std::move(fallbackVariant));
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 	for (auto& c : context->getToDeleteEntities()) {
 		destroyEntity(c);
@@ -783,7 +783,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 {
 	std::optional<UUID> parentUUID;
 	
-	const UUID& uuid = uuidSrc.value_or(delta.getInstanceUUID().value_or(UUID::generate()));
+	const UUID& uuid = uuidSrc ? *uuidSrc : (delta.getInstanceUUID() ? *delta.getInstanceUUID() : UUID::generate());
 	EntityRef entity = uuidSrc ? getWorld().findEntity(uuid).value_or(EntityRef()) : EntityRef();
 
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
