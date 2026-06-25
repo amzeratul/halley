@@ -23,6 +23,7 @@ namespace Halley {
 		LocalisationFiltersController filterController;
 
 		bool acceptChunkUpdates = true;
+		bool includeBOM = false;
 
 		void populateChunkList();
 		void setAllChunks(bool enabled);

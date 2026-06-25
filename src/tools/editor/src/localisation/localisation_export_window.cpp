@@ -43,6 +43,10 @@ void LocalisationExportWindow::onMakeUI()
 		}
 	});
 
+	bindData("includeBOM", includeBOM, [this] (bool value) {
+		includeBOM = value;
+	});
+
 	filterController.setup();
 
 	populateChunkList();
@@ -98,6 +102,7 @@ void LocalisationExportWindow::onExport()
 	options.chunksToInclude = std::move(chunksToExport);
 	options.allChunks = false;
 	options.filters = filters;
+	options.includeBOM = includeBOM;
 	callback(true, options);
 
 	destroy();

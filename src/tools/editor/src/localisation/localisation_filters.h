@@ -61,6 +61,7 @@ namespace Halley {
     struct LocalisationExportOptions {
 		LocalisationFilters filters;
         bool allChunks = true;
+		bool includeBOM = false;
         HashSet<String> chunksToInclude;
     };
 }

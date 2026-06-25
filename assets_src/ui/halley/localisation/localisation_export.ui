@@ -252,6 +252,13 @@ children:
                           text: Up to date
                         - id: outOfDate
                           text: Out of date
+              - uuid: 7d1880ad-a09e-4390-af71-8e6fd0b3b88c
+                border: [0, 5, 0, 0]
+                widget:
+                  class: checkbox
+                  id: includeBOM
+                  label: Generate UTF-8 Byte Order Mark (BOM) (Only use if needed)
+                  size: [200, 0]
       - uuid: 3001c7bb-b5c9-4da9-ace2-2f6a4c87352a
         border: [0, 10, 2, 2]
         sizer:

@@ -25,7 +25,7 @@ namespace Halley {
 
         void load(gsl::span<const std::byte> bytes);
         void load(std::string_view origStr);
-        String save() const;
+        String save(bool withBOM = false) const;
 
     private:
         Vector<String> columns;

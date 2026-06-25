@@ -192,7 +192,7 @@ void CSVFile::load(std::string_view origStr)
 	}
 }
 
-String CSVFile::save() const
+String CSVFile::save(bool withBOM) const
 {
 	auto toCSVFormat = [](const String& str) -> String
 	{
@@ -204,6 +204,12 @@ String CSVFile::save() const
 	};
 
 	std::stringstream str;
+
+	if (withBOM) {
+		str << static_cast<char>(0xEF);
+		str << static_cast<char>(0xBB);
+		str	<< static_cast<char>(0xBF);
+	}
 
 	// Header
 	bool first = true;

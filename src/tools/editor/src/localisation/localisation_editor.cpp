@@ -973,7 +973,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Lo
 		}
 	}
 
-	Path::writeFile(path, csv.save());
+	Path::writeFile(path, csv.save(options.includeBOM));
 }
 
 void LocalisationEditor::importLanguage(const I18NLanguage& language)
