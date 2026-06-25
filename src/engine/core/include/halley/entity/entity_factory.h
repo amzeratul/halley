@@ -80,6 +80,7 @@ namespace Halley {
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
 
+		EntityRef tryGetMatchingEntity(const EntityDataDelta& delta, const std::optional<UUID>& uuid);
 		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo = {}); // Returns entity and parent UUID
 		std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, const DebugInfo& debugInfo = {}) const;
 		static std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, const DebugInfo& debugInfo = {});

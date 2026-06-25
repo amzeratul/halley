@@ -764,6 +764,21 @@ void EntityFactory::destroyEntity(EntityRef entity)
 	world.destroyEntity(entity);
 }
 
+EntityRef EntityFactory::tryGetMatchingEntity(const EntityDataDelta& delta, const std::optional<UUID>& uuid)
+{
+	if (!uuid) {
+		return {};
+	}
+
+	EntityRef entity = getWorld().findEntity(*uuid).value_or(EntityRef());
+
+	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
+		return entity;
+	} else {
+		return {};
+	}
+}
+
 std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo)
 {
 	std::optional<UUID> parentUUID;
@@ -773,6 +788,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
 		// Apply delta to existing entity
+		HalleyAssertDebug(tryGetMatchingEntity(delta, uuidSrc) == entity); // NB: this is ONLY TRUE IN THIS BRANCH
 		updateEntity(entity, delta, mask);
 	} else {
 		// Generate full EntityData from prefab first
