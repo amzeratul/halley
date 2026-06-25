@@ -496,7 +496,9 @@ private:
 			result = entityNetworkSession->prepareChangeEntityAuthority(
 				networkFamily->entityId, networkFamily->network, authorityId, assignNetworkId);
 
-			if (!result.first) {
+			if (result.first) {
+				notifyEntityModified(networkFamily);
+			} else {
 				if (authorityId.has_value()) {
 		            Logger::logWarning("Failed to assign authority of entity " +
 		            	toString(networkFamily->entityId.value & 0xffffffff) + " to " +
