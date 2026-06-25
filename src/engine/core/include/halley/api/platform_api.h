@@ -159,6 +159,8 @@ namespace Halley
 
 		virtual String getId() = 0; // Platform id
 		virtual void update() = 0;
+
+		virtual String getSubPlatformName() const { return ""; } // Implementation-specific, e.g. "desktop", "bigpicture", "steamdeck"
 		
 		
 		//////////////////////////
