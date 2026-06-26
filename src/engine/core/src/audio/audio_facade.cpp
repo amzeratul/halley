@@ -233,10 +233,17 @@ Future<void> AudioFacade::runOnAudioThread(std::function<void()> f)
 	Promise<void> promise;
 	auto future = promise.getFuture();
 
-	enqueue([f = std::move(f), promise = std::move(promise)]() mutable {
-		f();
+	if (commandQueue.canWrite(1)) {
+		auto action = [f = std::move(f), promise = std::move(promise)]() mutable {
+			f();
+			promise.set();
+		};
+		Vector<std::function<void()>> as;
+		as += std::move(action);
+		commandQueue.writeOne(std::move(as));
+	} else {
 		promise.set();
-	});
+	}
 
 	return future;
 }
