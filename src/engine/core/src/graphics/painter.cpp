@@ -385,19 +385,24 @@ static size_t getSegmentsForArc(float radius, float arcLen)
 	return clamp(size_t(arcLen / float(pi() * 2) * 50.0f), size_t(4), size_t(256));
 }
 
-void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
+void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params, std::optional<Colour4f> fillColour)
 {
 	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
 	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
 	}
+
+	if (fillColour) {
+		drawPolygon(Polygon(points), *fillColour);
+	}
+
 	drawLine(points, width, colour, true, std::move(material), params);
 }
 
-void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
+void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params, std::optional<Colour4f> fillColour)
 {
-	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material), params);
+	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material), params, fillColour);
 }
 
 void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
@@ -416,13 +421,18 @@ void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to
 	drawCircleArc(circle.getCentre(), circle.getRadius(), width, from, to, colour, std::move(material), params);
 }
 
-void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
+void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params, std::optional<Colour4f> fillColour)
 {
 	const size_t n = getSegmentsForArc(std::max(radius.x, radius.y), 2 * float(pi()));
 	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(1.0f, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)) * radius);
 	}
+
+	if (fillColour) {
+		drawPolygon(Polygon(points), *fillColour);
+	}
+
 	drawLine(points, width, colour, true, std::move(material), params);
 }
 
