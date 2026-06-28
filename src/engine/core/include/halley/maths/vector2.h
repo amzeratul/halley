@@ -177,6 +177,14 @@ namespace Halley {
 			return this->dot(param.unit());
 		}
 
+		// Decompose into normal and tangent vectors
+		[[nodiscard]] constexpr std::pair<Vector2D, Vector2D> decompose(Vector2D normal) const
+		{
+			const auto n = this->dot(normal) * normal;
+			const auto t = *this - n;
+			return { n, t };
+		}
+
 		// Rounding
 		[[nodiscard]] constexpr Vector2D floor() const { return Vector2D(static_cast<T>(std::floor(x)), static_cast<T>(std::floor(y))); }
 		[[nodiscard]] constexpr Vector2D ceil() const { return Vector2D(static_cast<T>(std::ceil(x)), static_cast<T>(std::ceil(y))); }
