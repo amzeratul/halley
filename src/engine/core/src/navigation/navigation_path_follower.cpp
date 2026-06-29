@@ -41,6 +41,13 @@ void NavigationPathFollower::setComputingPath()
 	computingPath = true;
 }
 
+void NavigationPathFollower::clear()
+{
+	computingPath = false;
+	doSetPath({});
+	params = ConfigNode();
+}
+
 void NavigationPathFollower::setPath(std::optional<NavigationPath> p, ConfigNode params)
 {
 	computingPath = false;

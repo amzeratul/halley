@@ -14,6 +14,7 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 
 		void setComputingPath();
+		void clear();
 		void setPath(std::optional<NavigationPath> p, ConfigNode params = {});
 		const std::optional<NavigationPath>& getPath() const;
 		gsl::span<const NavigationPath::Point> getNextPathPoints() const;
