@@ -28,6 +28,8 @@ namespace Halley
 		void requestAudioFrame() override;
 		void onReset() override;
 
+		bool hasError() const override;
+
 	private:
 		std::shared_ptr<ResourceDataStream> data;
 		
@@ -37,6 +39,7 @@ namespace Halley
 		IMFSourceReaderCallback* sampleReceiver = nullptr;
 		int minStride = -1;
 		bool supportIMF2DBuffer = true;
+		bool error = false;
 
 		void init();
 		void deInit();

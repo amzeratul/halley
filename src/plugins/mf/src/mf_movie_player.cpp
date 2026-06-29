@@ -218,6 +218,12 @@ void MFMoviePlayer::init()
 
 					hr = reader->SetCurrentMediaType(streamIndex, nullptr, targetType);
 					if (!SUCCEEDED(hr)) {
+						if (hr == MF_E_TOPO_CODEC_NOT_FOUND) {
+							Logger::logError(String("Codec not found for ") + (curStream.type == MoviePlayerStreamType::Video ? "video stream" : "audio stream"));
+							reset();
+							error = true;
+							return;
+						}
 						throw Exception("Unable to set current media type", HalleyExceptions::MoviePlugin);
 					}
 				} catch (...) {
@@ -289,6 +295,11 @@ void MFMoviePlayer::onReset()
 	pos.vt = VT_I8;
 	pos.hVal.QuadPart = 0;
 	reader->SetCurrentPosition(GUID_NULL, pos);
+}
+
+bool MFMoviePlayer::hasError() const
+{
+	return error;
 }
 
 HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamFlags, LONGLONG timestamp, IMFSample* sample)
