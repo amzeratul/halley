@@ -134,6 +134,12 @@ namespace Halley {
 			assign(std::move(first), std::move(last));
 		}
 
+		VectorStd(gsl::span<const T> span, const Allocator& alloc = Allocator())
+			: Allocator(alloc)
+		{
+			assign(span.begin(), span.end());
+		}
+
 		VectorStd(const VectorStd& other)
 		{
 			if constexpr (std::is_trivially_copyable_v<T>) {
