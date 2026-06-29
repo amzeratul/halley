@@ -55,6 +55,8 @@ namespace Halley
 		virtual void setMouseCursorMode(std::optional<MouseCursorMode> mode) {}
 		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
 
+		virtual void onInputLost() {}
+
 		virtual Future<bool> requestControllerSetup(int minControllers, int maxControllers, std::optional<Vector<InputControllerData>> controllerData = {})
 		{
 			Promise<bool> promise;

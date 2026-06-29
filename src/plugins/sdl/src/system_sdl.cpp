@@ -179,6 +179,16 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 	return true;
 }
 
+void SystemSDL::onGameOverlayActivated(bool active)
+{
+	gameOverlayActivated = active;
+}
+
+bool SystemSDL::isGameOverlayActivated() const
+{
+	return gameOverlayActivated;
+}
+
 void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 {
 	for (auto& w : windows) {
@@ -436,12 +446,18 @@ std::unique_ptr<GLContext> SystemSDL::createGLContext()
 	return std::make_unique<SDLGLContext>(windows[0]->getSDLWindow());
 }
 
-std::shared_ptr<Halley::SDLWindow> SystemSDL::getWindow(int index)
+std::shared_ptr<SDLWindow> SystemSDL::getWindow(int index) const
 {
-	if (index >= windows.size())
-		return nullptr;
+	if (index < windows.size()) {
+		return windows[index];
+	} else {
+		return {};
+	}
+}
 
-	return windows[index];
+const Vector<std::shared_ptr<SDLWindow>>& SystemSDL::getWindows() const
+{
+	return windows;
 }
 
 void SystemSDL::showCursor(bool show)

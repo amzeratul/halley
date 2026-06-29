@@ -19,6 +19,7 @@ namespace Halley {
 		InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard);
 
 		void processEvent(const SDL_Event &event);
+		void onFocusLost();
 
 		void setupMapping();
 		KeyCode getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const;

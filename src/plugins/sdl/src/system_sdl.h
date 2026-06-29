@@ -14,8 +14,12 @@ namespace Halley
 	public:
 		explicit SystemSDL(std::optional<String> saveCryptKey);
 
-		std::shared_ptr<SDLWindow> getWindow(int index);
+		std::shared_ptr<SDLWindow> getWindow(int index) const;
+		const Vector<std::shared_ptr<SDLWindow>>& getWindows() const;
 		std::shared_ptr<IClipboard> getClipboard() const override;
+
+		void onGameOverlayActivated(bool active) override;
+		bool isGameOverlayActivated() const;
 
 	protected:
 		void init() override;
@@ -72,6 +76,7 @@ namespace Halley
 		
 		Vector<std::shared_ptr<SDLWindow>> windows;
 		mutable bool videoInit = false;
+		bool gameOverlayActivated = false;
 		std::map<SaveDataType, Path> saveDir;
 		std::shared_ptr<IClipboard> clipboard;
 		std::optional<String> saveCryptKey;

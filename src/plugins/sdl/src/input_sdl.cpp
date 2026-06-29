@@ -142,6 +142,20 @@ size_t InputSDL::getNumberOfMice() const
 
 void InputSDL::beginEvents(Time t)
 {
+	// Checks for window focus/Steam overlay on every frame
+	bool hasFocus = false;
+	for (const auto& w: system.getWindows()) {
+		const auto sdlWindow = w->getSDLWindow();
+		hasFocus = hasFocus || (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) != 0;
+	}
+	hasFocus = hasFocus && !system.isGameOverlayActivated();
+	if (hadFocus != hasFocus) {
+		hadFocus = hasFocus;
+		if (!hasFocus) {
+			onInputLost();
+		}
+	}
+
 	// Keyboards
 	for (auto& keyboard: keyboards) {
 		keyboard->update();
@@ -175,6 +189,13 @@ void InputSDL::beginEvents(Time t)
 		}
 
 		i = next;
+	}
+}
+
+void InputSDL::onInputLost()
+{
+	for (auto& keyboard: keyboards) {
+		keyboard->onFocusLost();
 	}
 }
 

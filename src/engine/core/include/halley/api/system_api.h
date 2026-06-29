@@ -55,6 +55,7 @@ namespace Halley
 
 		virtual void showCursor(bool show) = 0;
 		virtual bool hasBeenDisconnectedFromTheInternet() { return false; }
+		virtual void onGameOverlayActivated(bool active) {}
 
 		virtual std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName = "") = 0;
 

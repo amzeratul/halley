@@ -56,6 +56,15 @@ void InputKeyboardSDL::processEvent(const SDL_Event& rawEvent)
 	}
 }
 
+void InputKeyboardSDL::onFocusLost()
+{
+	for (int i = 0; i < static_cast<int>(getNumberButtons()); ++i) {
+		if (isButtonDown(i)) {
+			onButtonReleased(i);
+		}
+	}
+}
+
 void InputKeyboardSDL::setupMapping()
 {
 	auto& v = virtualKeyCodeToHalley;

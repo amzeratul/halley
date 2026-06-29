@@ -58,6 +58,8 @@ namespace Halley {
 		void setMouseCursorPos(Vector2i pos) override;
 		void setMouseCursorMode(std::optional<MouseCursorMode> mode) override;
 
+		void onInputLost() override;
+
 		void processEvent(SDL_Event& event);
 
 		void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) override;
@@ -77,6 +79,7 @@ namespace Halley {
 
 		SystemSDL& system;
 		bool useXInput = false;
+		bool hadFocus = false;
 		
 		Vector<std::shared_ptr<InputKeyboardSDL>> keyboards;
 		Vector<std::shared_ptr<InputJoystick>> joysticks;
