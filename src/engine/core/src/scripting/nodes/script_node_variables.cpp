@@ -313,7 +313,13 @@ ConfigNode ScriptVariableTable::doGetData(ScriptEnvironment& environment, const 
 	return {};
 }
 
+ScriptECSVariableData::ScriptECSVariableData(const ConfigNode& node)
+{}
 
+ConfigNode ScriptECSVariableData::toConfigNode(const EntitySerializationContext& context)
+{
+	return {};
+}
 
 Vector<IGraphNodeType::SettingType> ScriptECSVariable::getSettingTypes() const
 {
@@ -357,7 +363,11 @@ std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(
 	return str.moveResults();
 }
 
-ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+void ScriptECSVariable::doInitData(ScriptECSVariableData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+}
+
+ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptECSVariableData& nodeData) const
 {
 	EntityRef entityRef{};
 	if (node.getPin(0).hasConnection()) {
@@ -366,48 +376,54 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
 	}
 
-	if (entityRef.isValid()) [[likely]] {
-		std::string_view component;
-		std::string_view field;
-		ScriptComponentFieldType::parse(node.getSettings()["field"], component, field);
+	initReflector(environment, node, nodeData);
 
-		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(component);
+	if (entityRef.isValid()) [[likely]] {
 		EntitySerializationContext context;
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
 		context.shallow = true;
-		return reflector.serializeField(context, entityRef, field);
+		return nodeData.reflector->serializeField(context, entityRef, nodeData.field);
 	}
 	return {};
 }
 
-void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
+void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptECSVariableData& nodeData) const
 {
 	EntityRef entityRef{};
 	if (node.getPin(0).hasConnection()) {
 		entityRef = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
-	}
-	else {
+	} else {
 		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
 	}
 
-	if (entityRef.isValid()) {
-		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+	initReflector(environment, node, nodeData);
 
+	if (entityRef.isValid()) [[likely]] {
 		if (!environment.hasNetworkAuthorityOver(entityRef)) {
 			if (environment.isNetworkConnected()) {
-				Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + type.getName() + "\", not owned by this client");
+				Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + node.getSettings()["field"].asString() + "\", not owned by this client");
 			}
 			return;
 		}
 
-		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
 		EntitySerializationContext context;
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
-		reflector.deserializeField(context, entityRef, type.field, data);
+		nodeData.reflector->deserializeField(context, entityRef, nodeData.field, data);
+	}
+}
+
+void ScriptECSVariable::initReflector(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptECSVariableData& nodeData) const
+{
+	if (!nodeData.reflector) [[unlikely]] {
+		std::string_view component;
+		std::string_view field;
+		ScriptComponentFieldType::parse(node.getSettings()["field"], component, field);
+		nodeData.reflector = &environment.getWorld().getReflection().getComponentReflector(component);
+		nodeData.field = field;
 	}
 }
 

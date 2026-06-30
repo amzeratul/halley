@@ -77,8 +77,18 @@ namespace Halley {
 
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 	};
+
+	class ScriptECSVariableData : public ScriptStateData<ScriptECSVariableData> {
+	public:
+		ComponentReflector* reflector = nullptr;
+		String field;
+
+		ScriptECSVariableData() = default;
+		ScriptECSVariableData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
 	
-	class ScriptECSVariable final : public ScriptNodeTypeBase<void> {
+	class ScriptECSVariable final : public ScriptNodeTypeBase<ScriptECSVariableData> {
 	public:
 		String getId() const override { return "ecsVariable"; }
 		String getName() const override { return "ECS Variable"; }
@@ -91,8 +101,12 @@ namespace Halley {
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 
-		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
-		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const override;
+		void doInitData(ScriptECSVariableData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptECSVariableData& nodeData) const override;
+		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptECSVariableData& nodeData) const override;
+
+	private:
+		void initReflector(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptECSVariableData& nodeData) const;
 	};
 
 
