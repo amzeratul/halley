@@ -366,7 +366,7 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
 	}
 
-	if (entityRef.isValid()) {
+	if (entityRef.isValid()) [[likely]] {
 		std::string_view component;
 		std::string_view field;
 		ScriptComponentFieldType::parse(node.getSettings()["field"], component, field);
@@ -377,11 +377,7 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
 		context.shallow = true;
-		if (reflector.tryGetComponent(entityRef, false) != nullptr) {
-			return reflector.serializeField(context, entityRef, field);
-		} else {
-			return {};
-		}
+		return reflector.serializeField(context, entityRef, field);
 	}
 	return {};
 }

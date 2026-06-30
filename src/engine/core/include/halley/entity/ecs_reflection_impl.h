@@ -34,22 +34,26 @@ namespace Halley {
 			return static_cast<const T&>(component).serializeField(context, fieldName);
 		}
 
-		ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName) const override
+		ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool logError = true) const override
 		{
 			if (const auto* component = tryGetComponent(entity, false)) {
 				return serializeField(context, *component, fieldName);
 			} else {
-				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
+				if (logError) {
+					Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
+				}
 				return {};
 			}
 		}
 		
-		ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName) const override
+		ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName, bool logError = true) const override
 		{
 			if (const auto* component = tryGetComponent(entity, false)) {
 				return serializeField(context, *component, fieldName);
 			} else {
-				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
+				if (logError) {
+					Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
+				}
 				return {};
 			}
 		}
