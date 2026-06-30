@@ -216,10 +216,6 @@ namespace Halley
 		virtual ResourceMemoryUsage getMemoryUsage() const;          /// How much memory it's using right now
 		virtual ResourceMemoryUsage getEstimatedMemoryUsage() const; /// How much memory it'd use if it was loaded
 
-		void increaseAge(float time);
-		void resetAge();
-		float getAge() const;
-
 		virtual void startFrame(float dt, uint32_t frameIdx) const;
 
 		void setUnloaded();
@@ -232,11 +228,10 @@ namespace Halley
 	private:
 		bool metaSet = false;
 		bool unloaded = false;
-		Metadata meta;
-		String assetId;
+		int16_t assetVersion = 0;
 		uint32_t assetIdx = 0;
-		int assetVersion = 0;
-		float age = 0;
+		String assetId;
+		Metadata meta;
 	};
 
 	class ResourceObserver

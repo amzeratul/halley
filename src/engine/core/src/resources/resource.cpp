@@ -52,21 +52,6 @@ ResourceMemoryUsage Resource::getEstimatedMemoryUsage() const
 	return getMemoryUsage();
 }
 
-void Resource::increaseAge(float time)
-{
-	age += time;
-}
-
-void Resource::resetAge()
-{
-	age = 0;
-}
-
-float Resource::getAge() const
-{
-	return age;
-}
-
 void Resource::startFrame(float dt, uint32_t frameIdx) const
 {
 }
