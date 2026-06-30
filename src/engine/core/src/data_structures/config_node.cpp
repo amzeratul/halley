@@ -17,6 +17,12 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 	operator=(other);
 }
 
+ConfigNode::ConfigNode(const ConfigNode& other, ReferenceTag)
+{
+	type = ConfigNodeType::Reference;
+	rawPtrData = &other;
+}
+
 ConfigNode::ConfigNode(ConfigNode&& other) noexcept
 {
 	*this = std::move(other);
@@ -224,6 +230,10 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 		case ConfigNodeType::RawString:
 			reset();
 			rawStrData = other.rawStrData;
+			break;
+		case ConfigNodeType::Reference:
+			reset();
+			rawPtrData = other.rawPtrData;
 			break;
 		case ConfigNodeType::Undefined:
 		case ConfigNodeType::Noop:
@@ -532,9 +542,10 @@ bool ConfigNode::compareTo(MathRelOp op, const ConfigNode& other) const
 
 bool ConfigNode::operator==(std::string_view str) const
 {
-	if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
+	const auto t = getType();
+	if (t == ConfigNodeType::String || t == ConfigNodeType::RawString) {
 		return asStringView() == str;
-	} else if (type == ConfigNodeType::Undefined) {
+	} else if (t == ConfigNodeType::Undefined) {
 		return false;
 	} else {
 		return asString() == str;
@@ -543,9 +554,10 @@ bool ConfigNode::operator==(std::string_view str) const
 
 bool ConfigNode::operator!=(std::string_view str) const
 {
-	if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
+	const auto t = getType();
+	if (t == ConfigNodeType::String || t == ConfigNodeType::RawString) {
 		return asStringView() != str;
-	} else if (type == ConfigNodeType::Undefined) {
+	} else if (t == ConfigNodeType::Undefined) {
 		return true;
 	} else {
 		return asString() != str;
@@ -624,14 +636,25 @@ ConfigNode& ConfigNode::operator=(IdxType value)
 	return *this;
 }
 
+const ConfigNode& ConfigNode::dereference() const
+{
+	if (type == ConfigNodeType::Reference) {
+		return *static_cast<const ConfigNode*>(rawPtrData);
+	}
+	throw Exception("Cannot dereference a non-reference ConfigNode", HalleyExceptions::Utils);
+}
+
 ConfigNodeType ConfigNode::getType() const
 {
+	if (type == ConfigNodeType::Reference) [[unlikely]] {
+		return dereference().getType();
+	}
 	return type;
 }
 
 void ConfigNode::serialize(Serializer& s) const
 {
-	auto t = type;
+	auto t = getType();
 	if (t == ConfigNodeType::RawString) [[unlikely]] {
 		t = ConfigNodeType::String;
 	}
@@ -819,6 +842,8 @@ int ConfigNode::asInt() const
 		return -1;
 	} else if (type == ConfigNodeType::Bool) {
 		return intData;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asInt();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
@@ -836,6 +861,8 @@ int64_t ConfigNode::asInt64() const
 		return intData;
 	} else if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
 		return String::toInteger64(asStringView());
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asInt64();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
@@ -849,6 +876,8 @@ EntityId ConfigNode::asEntityId() const
 		return EntityId{};
 	} else if (type == ConfigNodeType::Float && std::abs(floatData + 1.0f) < 0.0001f) {
 		return EntityId{};
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asEntityId();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to EntityId.", HalleyExceptions::Resources);
 	}
@@ -868,6 +897,8 @@ float ConfigNode::asFloat() const
 		return String::toFloat(asStringView());
 	} else if (type == ConfigNodeType::EntityId && int64Data == -1) {
 		return -1.0f;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asFloat();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to float.", HalleyExceptions::Resources);
 	}
@@ -891,6 +922,8 @@ bool ConfigNode::asBool() const
 		return !str.empty();
 	} else if (type == ConfigNodeType::EntityId) {
 		return int64Data != -1;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asBool();
 	}
 	return type != ConfigNodeType::Undefined;
 }
@@ -909,8 +942,10 @@ Vector2i ConfigNode::doAsVector2i(bool expandScalar) const
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
 		return Vector2i(asInt(), expandScalar ? asInt() : 0);
 	} else if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Vector2i(seq.at(0).asInt(), seq.at(1).asInt());
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().doAsVector2i(expandScalar);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector2 type", HalleyExceptions::Resources);
 	}
@@ -930,8 +965,10 @@ Vector2f ConfigNode::doAsVector2f(bool expandScalar) const
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
 		return Vector2f(asFloat(), expandScalar ? asFloat() : 0);
 	} else if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().doAsVector2f(expandScalar);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector2 type", HalleyExceptions::Resources);
 	}
@@ -945,14 +982,16 @@ Vector3i ConfigNode::asVector3i() const
 Vector3i ConfigNode::doAsVector3i(bool expandScalar) const
 {
 	if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Vector3i(seq.at(0).asInt(), seq.size() >= 2 ? seq.at(1).asInt() : 0, seq.size() >= 3 ? seq.at(2).asInt() : 0);
 	} else if (type == ConfigNodeType::Float2 || type == ConfigNodeType::Int2) {
 		return Vector3i(asVector2i(), 0);
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		auto v0 = asInt();
-		auto v1 = expandScalar ? v0 : 0;
+		const auto v0 = asInt();
+		const auto v1 = expandScalar ? v0 : 0;
 		return Vector3i(v0, v1, v1);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().doAsVector3i(expandScalar);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
 	}
@@ -966,14 +1005,16 @@ Vector3f ConfigNode::asVector3f() const
 Vector3f ConfigNode::doAsVector3f(bool expandScalar) const
 {
 	if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Vector3f(seq.at(0).asFloat(), seq.size() >= 2 ? seq.at(1).asFloat() : 0.0f, seq.size() >= 3 ? seq.at(2).asFloat() : 0.0f);
 	} else if (type == ConfigNodeType::Float2 || type == ConfigNodeType::Int2) {
 		return Vector3f(asVector2f(), 0);
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		auto v0 = asFloat();
-		auto v1 = expandScalar ? v0 : 0;
+		const auto v0 = asFloat();
+		const auto v1 = expandScalar ? v0 : 0;
 		return Vector3f(v0, v1, v1);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().doAsVector3f(expandScalar);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
 	}
@@ -987,12 +1028,14 @@ Vector4i ConfigNode::asVector4i() const
 Vector4i ConfigNode::doAsVector4i(bool expandScalar) const
 {
 	if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Vector4i(seq.at(0).asInt(), seq.at(1).asInt(), seq.at(2).asInt(), seq.at(3).asInt());
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		auto v0 = asInt();
-		auto v1 = expandScalar ? v0 : 0;
+		const auto v0 = asInt();
+		const auto v1 = expandScalar ? v0 : 0;
 		return Vector4i(v0, v1, v1, v1);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().doAsVector4i(expandScalar);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
@@ -1006,12 +1049,14 @@ Vector4f ConfigNode::asVector4f() const
 Vector4f ConfigNode::doAsVector4f(bool expandScalar) const
 {
 	if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Vector4f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat(), seq.at(3).asFloat());
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		auto v0 = asFloat();
-		auto v1 = expandScalar ? v0 : 0;
+		const auto v0 = asFloat();
+		const auto v1 = expandScalar ? v0 : 0;
 		return Vector4f(v0, v1, v1, v1);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().doAsVector4f(expandScalar);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
@@ -1020,8 +1065,10 @@ Vector4f ConfigNode::doAsVector4f(bool expandScalar) const
 Rect4i ConfigNode::asRect4i() const
 {
 	if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Rect4i(Vector2i(seq.at(0).asInt(), seq.at(1).asInt()), Vector2i(seq.at(2).asInt(), seq.at(3).asInt()));
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asRect4i();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a rect4 type", HalleyExceptions::Resources);
 	}
@@ -1030,8 +1077,10 @@ Rect4i ConfigNode::asRect4i() const
 Rect4f ConfigNode::asRect4f() const
 {
 	if (type == ConfigNodeType::Sequence) {
-		auto& seq = asSequence();
+		const auto& seq = asSequence();
 		return Rect4f(Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat()), Vector2f(seq.at(2).asFloat(), seq.at(3).asFloat()));
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asRect4f();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a rect4 type", HalleyExceptions::Resources);
 	}
@@ -1049,6 +1098,8 @@ Range<int> ConfigNode::asIntRange() const
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
 		const auto v = asInt();
 		return Range<int>(v, v);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asIntRange();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a range type", HalleyExceptions::Resources);
 	}
@@ -1066,6 +1117,8 @@ Range<float> ConfigNode::asFloatRange() const
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
 		const auto v = asFloat();
 		return Range<float>(v, v);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asFloatRange();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a range type", HalleyExceptions::Resources);
 	}
@@ -1075,6 +1128,8 @@ const Bytes& ConfigNode::asBytes() const
 {
 	if (type == ConfigNodeType::Bytes) {
 		return *bytesData;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asBytes();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a byte sequence type", HalleyExceptions::Resources);
 	}
@@ -1216,6 +1271,8 @@ String ConfigNode::asString() const
 		}
 		result += "}";
 		return result;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asString();
 	} else if (false && type == ConfigNodeType::Undefined) {
 		// Warning: this is a dangerous branch
 		// This makes undefined values in YAML load as "null", which is typically not checked against.
@@ -1246,6 +1303,8 @@ std::string_view ConfigNode::asStringView(String* buffer) const
 		return *strData;
 	} else if (type == ConfigNodeType::RawString) {
 		return std::string_view(rawStrData);
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asStringView(buffer);
 	} else {
 		if (buffer) {
 			*buffer = asString();
@@ -1322,6 +1381,8 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 {
 	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		return *sequenceData;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asSequence();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
 	}
@@ -1331,6 +1392,8 @@ const ConfigNode::MapType& ConfigNode::asMap() const
 {
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
 		return *mapData;
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().asMap();
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
 	}
@@ -1364,6 +1427,8 @@ size_t ConfigNode::getSequenceSize(size_t defaultValue) const
 {
 	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		return asSequence().size();
+	} else if (type == ConfigNodeType::Reference) {
+		return dereference().getSequenceSize(defaultValue);
 	} else {
 		return defaultValue;
 	}
@@ -1643,6 +1708,9 @@ String ConfigNode::getNodeDebugId() const
 		case ConfigNodeType::Undefined:
 			value = "null";
 			break;
+		case ConfigNodeType::Reference:
+			value = dereference().getNodeDebugId();
+			break;
 		default:
 			value = toString(type);
 	}
@@ -1798,6 +1866,8 @@ bool ConfigNode::isNullOrEmpty() const
 	case ConfigNodeType::Sequence:
 	case ConfigNodeType::DeltaSequence:
 		return asSequence().empty();
+	case ConfigNodeType::Reference:
+		return dereference().isNullOrEmpty();
 	default:
 		return false;
 	}
@@ -2201,6 +2271,9 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 	case ConfigNodeType::RawString:
 		hasher.feed(rawStrData);
 		break;
+	case ConfigNodeType::Reference:
+		dereference().feedToHash(hasher);
+		break;
 	case ConfigNodeType::Undefined:
 		break;
 	default:
@@ -2290,6 +2363,9 @@ size_t ConfigNode::getSizeBytes() const
 		result += sizeof(String);
 		result += strData->getSizeBytes();
 		break;
+	case ConfigNodeType::Reference:
+		result += dereference().getSizeBytes();
+		break;
 	default:
 		break;
 	}
@@ -2298,6 +2374,11 @@ size_t ConfigNode::getSizeBytes() const
 }
 
 ConfigNode ConfigNode::makeReference() const
+{
+	return ConfigNode(*this, ReferenceTag{});
+}
+
+ConfigNode ConfigNode::makeMapReference() const
 {
 	ConfigNode result;
 

@@ -468,7 +468,7 @@ ConfigNode ScriptCache::doGetData(ScriptEnvironment& environment, const ScriptGr
 		data.cooldown = Random::getGlobal().getFloat(node.getSettings()["expiration"].asFloatRange({}));
 	}
 
-	return ConfigNode(data.value);
+	return ConfigNode(data.value, ConfigNode::ReferenceTag{});
 }
 
 ScriptCacheValueData::ScriptCacheValueData(const ConfigNode& node)

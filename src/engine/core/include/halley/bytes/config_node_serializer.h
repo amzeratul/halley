@@ -893,7 +893,7 @@ namespace Halley {
 		ConfigNode serialize(const ConfigNode& item, const EntitySerializationContext& context)
 		{
 			if (context.shallow && item.getType() == ConfigNodeType::Map) {
-				return item.makeReference();
+				return item.makeMapReference();
 			}
 			return ConfigNode(item);
 		}

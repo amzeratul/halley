@@ -75,6 +75,7 @@ namespace Halley {
 		Bool,
 		MapRef, // Reference to a map node
 		RawString, // const char* ptr, non-owning
+		Reference, // Reference to another ConfigNode
 	};
 
 	template <>
@@ -99,7 +100,8 @@ namespace Halley {
 				"entityId",
 				"bool",
 				"mapRef",
-				"rawStr"
+				"rawStr",
+				"reference"
 			});
 		}
 	};
@@ -115,6 +117,7 @@ namespace Halley {
 		class Tag {};
 
 		class RawStringTag {};
+		class ReferenceTag {};
 
 		using MapType = HashMap<String, ConfigNode>;
 		using SequenceType = Vector<ConfigNode>;
@@ -130,6 +133,7 @@ namespace Halley {
 		
 		ConfigNode();
 		explicit ConfigNode(const ConfigNode& other);
+		ConfigNode(const ConfigNode& other, ReferenceTag);
 		ConfigNode(ConfigNode&& other) noexcept;
 		ConfigNode(MapType entryMap);
 		ConfigNode(SequenceType entryList);
@@ -233,6 +237,8 @@ namespace Halley {
 		ConfigNode& operator=(NoopType value);
 		ConfigNode& operator=(DelType value);
 		ConfigNode& operator=(IdxType value);
+
+		const ConfigNode& dereference() const;
 
 		template <typename T>
 		ConfigNode& operator=(const Vector<T>& sequence)
@@ -649,6 +655,7 @@ namespace Halley {
 		static const ConfigNode& getUndefined();
 
 		ConfigNode makeReference() const;
+		ConfigNode makeMapReference() const;
 
 	private:
 		union {
@@ -656,7 +663,7 @@ namespace Halley {
 			MapType* mapData;
 			SequenceType* sequenceData;
 			Bytes* bytesData;
-			void* rawPtrData;
+			const void* rawPtrData;
 			int intData;
 			float floatData;
 			Vector2i vec2iData;
