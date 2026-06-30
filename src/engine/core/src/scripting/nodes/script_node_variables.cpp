@@ -50,7 +50,7 @@ std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(con
 ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto& vars = environment.getVariables(getScope(node));
-	return vars.getVariable(node.getSettings()["variable"].asString("")).makeReference();
+	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));//.makeReference();
 }
 
 EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
