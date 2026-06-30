@@ -126,7 +126,7 @@ namespace Halley {
 
 	class ScriptCacheData final : public ScriptStateData<ScriptCacheData> {
 	public:
-		Time timeElapsed = 0;
+		Time cooldown = 0;
 		int lastFrame = 0;
 		bool hasValue = false;
 		ConfigNode value;

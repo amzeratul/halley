@@ -14,6 +14,7 @@
 #include "halley/support/logger.h"
 #include <charconv>
 #include <cstring>
+#include "halley/maths/range.h"
 
 #include "halley/game/game_platform.h"
 
@@ -395,6 +396,15 @@ namespace Halley
 			} else {
 				return "{}";
 			}
+		}
+	};
+
+	template<typename T>
+	struct ToStringConverter<Range<T>>
+	{
+		String operator()(const Range<T>& v) const
+		{
+			return "(" + toString(v.start) + ", " + toString(v.end) + ")";
 		}
 	};
 

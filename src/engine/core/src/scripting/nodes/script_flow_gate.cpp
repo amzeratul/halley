@@ -1,5 +1,6 @@
 #include "script_flow_gate.h"
 
+#include "halley/maths/random.h"
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
@@ -382,7 +383,7 @@ ScriptCacheData::ScriptCacheData(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		value = node["value"];
-		timeElapsed = node["timeElapsed"].asFloat(0);
+		cooldown = node["cooldown"].asFloat(0);
 		lastFrame = node["lastFrame"].asInt(0);
 		hasValue = node["hasValue"].asBool(false);
 	}
@@ -392,7 +393,7 @@ ConfigNode ScriptCacheData::toConfigNode(const EntitySerializationContext& conte
 {
 	ConfigNode::MapType result;
 	result["value"] = value;
-	result["timeElapsed"] = static_cast<float>(timeElapsed);
+	result["cooldown"] = static_cast<float>(cooldown);
 	result["lastFrame"] = lastFrame;
 	result["hasValue"] = hasValue;
 	return result;
@@ -402,13 +403,13 @@ ConfigNode ScriptCacheData::toConfigNode(const EntitySerializationContext& conte
 Vector<IGraphNodeType::SettingType> ScriptCache::getSettingTypes() const
 {
 	return {
-		SettingType{ "expiration", "Halley::Time", Vector<String>{"0"} },
+		SettingType{ "expiration", "Halley::Range<float>", Vector<String>{""} }
 	};
 }
 
 String ScriptCache::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "cache(" + getConnectedNodeName(node, graph, 0) + ")";
+	return "cache(" + getConnectedNodeName(node, graph, 0) + ", " + node.getSettings()["expiration"].asFloatRange({}) + ")";
 }
 
 gsl::span<const IGraphNodeType::PinType> ScriptCache::getPinConfiguration(const BaseGraphNode& node) const
@@ -427,7 +428,9 @@ std::pair<String, Vector<ColourOverride>> ScriptCache::getNodeDescription(const 
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
 	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
-	str.append(", or cached value");
+	str.append(", or cached value (up to ");
+	str.append(toString(node.getSettings()["expiration"].asFloatRange({})), settingColour);
+	str.append(" s)");
 	return str.moveResults();
 }
 
@@ -447,10 +450,10 @@ ConfigNode ScriptCache::doGetData(ScriptEnvironment& environment, const ScriptGr
 
 	if (data.hasValue) {
 		if (data.lastFrame != curFrame) {
-			data.timeElapsed += environment.getDeltaTime();
+			data.cooldown -= environment.getDeltaTime();
 			data.lastFrame = curFrame;
 
-			if (data.timeElapsed > node.getSettings()["expiration"].asFloat(0)) {
+			if (data.cooldown <= 0) {
 				data.hasValue = false;
 				data.value = ConfigNode();
 			}
@@ -461,7 +464,7 @@ ConfigNode ScriptCache::doGetData(ScriptEnvironment& environment, const ScriptGr
 		data.value = readDataPin(environment, node, 0);
 		data.hasValue = true;
 		data.lastFrame = curFrame;
-		data.timeElapsed = 0;
+		data.cooldown = Random::getGlobal().getFloat(node.getSettings()["expiration"].asFloatRange({}));
 	}
 
 	return ConfigNode(data.value);
