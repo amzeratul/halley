@@ -828,7 +828,7 @@ namespace Halley {
 		if (bitMask) {
 			return ConfigNode(static_cast<int>(value));
 		} else {
-			return ConfigNode(toString(value));
+			return ConfigNode(EnumNames<T>()().at(static_cast<int>(value)), ConfigNode::RawStringTag{});
 		}
 	}
 
