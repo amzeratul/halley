@@ -542,8 +542,9 @@ void ScriptState::prepareStates(const EntitySerializationContext& context, Time 
 		needsStateLoading = false;
 	}
 
+	const float dt = static_cast<float>(t);
 	for (auto& n: nodeState) {
-		n.timeSinceStart += static_cast<float>(t);
+		n.timeSinceStart += dt;
 	}
 }
 

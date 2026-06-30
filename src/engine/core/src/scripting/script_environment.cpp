@@ -919,12 +919,12 @@ const String& ScriptEnvironment::getCurrentScriptName() const
 ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	const auto& pins = node.getPins();
-	if (pinN >= pins.size()) {
+	if (pinN >= pins.size()) [[unlikely]] {
 		return {};
 	}
 
 	const auto& pin = pins[pinN];
-	if (pin.connections.empty() || !pin.connections[0].dstNode) {
+	if (pin.connections.empty() || !pin.connections[0].dstNode) [[unlikely]] {
 		return {};
 	}
 	HalleyAssertDev(pin.connections.size() == 1);
