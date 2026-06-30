@@ -94,13 +94,19 @@ namespace Halley
 		}
 	}
 
+	template<typename T, std::enable_if_t<std::is_enum_v<T>, int> = 0>
+	const char* enumToString(const T& v)
+	{
+		return EnumNames<T>()().at(static_cast<int>(v));
+	}
+
 	struct UserConverter
 	{
 		template<typename T>
 		static String toString(const T& v)
 		{
-			if constexpr (std::is_enum<T>::value) {
-				return EnumNames<T>()().at(int(v));
+			if constexpr (std::is_enum_v<T>) {
+				return String(enumToString(v));
 			} else if constexpr (std::is_same_v<T, String>) {
 				return v;
 			} else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
