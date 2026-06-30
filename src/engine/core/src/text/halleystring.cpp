@@ -427,10 +427,9 @@ bool String::asciiCompareNoCase(const Character *src) const
 	return true;
 }
 
-
-bool String::isNumber() const
+bool String::isNumber(std::string_view str)
 {
-	auto trimmed = trimSpaces(std::string_view(*this));
+	auto trimmed = trimSpaces(str);
 
 	bool foundSeparator = false;
 	bool foundDigit = false;
@@ -464,10 +463,14 @@ bool String::isNumber() const
 	return foundDigit;
 }
 
-
-bool String::isInteger() const
+bool String::isNumber() const
 {
-	auto trimmed = trimSpaces(std::string_view(*this));
+	return isNumber(std::string_view(*this));
+}
+
+bool String::isInteger(std::string_view str)
+{
+	auto trimmed = trimSpaces(str);
 	bool hasDigit = false;
 	int i = 0;
 	for (const auto& cur: trimmed) {
@@ -483,6 +486,11 @@ bool String::isInteger() const
 		i++;
 	}
 	return hasDigit;
+}
+
+bool String::isInteger() const
+{
+	return isInteger(std::string_view(*this));
 }
 
 bool String::isAlphanumeric(uint32_t character)
@@ -1058,17 +1066,17 @@ Vector<String> String::split(char delimiter, size_t limit) const
 		}
 	}
 
-	HalleyAssertDev(result.size() > 0);
+	HalleyAssertDev(!result.empty());
 	return result;
 }
 
-Vector<String> String::split(String delimiter, size_t limit) const
+Vector<String> String::split(std::string_view delimiter, size_t limit) const
 {
 	Vector<String> result;
 	
 	size_t size = delimiter.size();
 	size_t startPos = 0;
-	const char* cStr = delimiter.c_str();
+	const char* cStr = delimiter.data();
 	while (true) {
 		size_t endPos = result.size() + 1 != limit ? find(cStr, startPos) : npos;
 		if (endPos == npos) {
@@ -1081,7 +1089,7 @@ Vector<String> String::split(String delimiter, size_t limit) const
 		}
 	}
 
-	HalleyAssertDev(result.size() > 0);
+	HalleyAssertDev(!result.empty());
 	return result;
 }
 

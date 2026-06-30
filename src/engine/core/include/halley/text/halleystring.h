@@ -161,6 +161,8 @@ namespace Halley {
 		void writeChar(const Character &src, size_t &pos);
 		void writeNumber(Character *temp, int number, int pad, size_t &pos);
 
+		[[nodiscard]] static bool isNumber(std::string_view str);
+		[[nodiscard]] static bool isInteger(std::string_view str);
 		[[nodiscard]] bool isNumber() const;
 		[[nodiscard]] bool isInteger() const;
 		[[nodiscard]] static bool isAlphanumeric(uint32_t character);
@@ -234,7 +236,7 @@ namespace Halley {
 		[[nodiscard]] inline const std::string& cppStr() const { return str; }
 
 		[[nodiscard]] Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
-		[[nodiscard]] Vector<String> split(String delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
+		[[nodiscard]] Vector<String> split(std::string_view delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 
 		[[nodiscard]] static std::pair<std::string_view, std::string_view> split(std::string_view src, char delimeter);
 		[[nodiscard]] static std::string_view splitAndAdvance(std::string_view& src, char delimeter);
