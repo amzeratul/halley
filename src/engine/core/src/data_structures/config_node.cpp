@@ -654,11 +654,16 @@ ConfigNodeType ConfigNode::getType() const
 
 void ConfigNode::serialize(Serializer& s) const
 {
-	auto t = getType();
-	if (t == ConfigNodeType::RawString) [[unlikely]] {
-		t = ConfigNodeType::String;
+	if (type == ConfigNodeType::Reference) [[unlikely]] {
+		dereference().serialize(s);
+		return;
 	}
-	s << t;
+
+	if (type == ConfigNodeType::RawString) [[unlikely]] {
+		s << ConfigNodeType::String;
+	} else {
+		s << type;
+	}
 
 	switch (type) {
 		case ConfigNodeType::String:
@@ -723,7 +728,7 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		}
 		default:
-			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
+			throw Exception("Unknown configuration node type: " + toString(type), HalleyExceptions::Resources);
 	}
 
 	const auto* state = s.getState<ConfigFileSerializationState>();
