@@ -1,5 +1,7 @@
 #include "script_flow_gate.h"
 
+#include <algorithm>
+
 #include "halley/maths/random.h"
 #include "halley/utils/algorithm.h"
 using namespace Halley;
@@ -144,11 +146,9 @@ void ScriptSwitchGate::doInitData(ScriptSwitchGateData& data, const ScriptGraphN
 
 IScriptNodeType::Result ScriptSwitchGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSwitchGateData& data) const
 {
-	const auto curValue = readDataPin(environment, node, 1).asString("");
-	auto cases = node.getSettings()["cases"].asVector<String>({});
-	if (cases.size() > 7) {
-		cases.resize(7);
-	}
+	String buffer;
+	const auto curValue = readDataPin(environment, node, 1).asStringView("", &buffer);
+	const auto& cases = node.getSettings()["cases"].asSequence();
 
 	int idx = 0;
 	if (const auto iter = std_ex::find(cases, curValue); iter != cases.end()) {
@@ -156,6 +156,7 @@ IScriptNodeType::Result ScriptSwitchGate::doUpdate(ScriptEnvironment& environmen
 	} else {
 		idx = static_cast<int>(cases.size());
 	}
+	idx = std::min(idx, 6);
 
 	if (idx != data.flowing) {
 		data.flowing = idx;
