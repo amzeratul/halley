@@ -50,7 +50,7 @@ std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(con
 ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto& vars = environment.getVariables(getScope(node));
-	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
+	return vars.getVariable(node.getSettings()["variable"].asString("")).makeReference();
 }
 
 EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
@@ -236,13 +236,18 @@ ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
 		return ConfigNode(origValue);
 	}
 
-	const auto& value = origValue.asString("");
+	String buffer;
+	const auto& value = origValue.asStringView("", &buffer);
 	if (value == "null") {
 		return ConfigNode();
 	}
+	
+	if (value == "true" || value == "false") {
+		return ConfigNode(value == "true");
+	}
 
-	if (value.startsWith("(") && value.endsWith(")")) { // well this is hacky
-		const auto string = value.mid(1, value.length() - 2);
+	if (value.starts_with("(") && value.ends_with(")")) { // well this is hacky
+		const auto string = String(value.substr(1, value.length() - 2));
 		auto strings = string.split(",");
 		for (auto& s: strings) {
 			s.trimBoth();
@@ -254,14 +259,11 @@ ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
 		}
 	}
 
-	if (value == "true" || value == "false") {
-		return ConfigNode(value == "true");
+	if (String::isNumber(value)) {
+		return String::isInteger(value) ? ConfigNode(String::toInteger(value)) : ConfigNode(String::toFloat(value));
 	}
 
-	if (value.isNumber()) {
-		return value.isInteger() ? ConfigNode(value.toInteger()) : ConfigNode(value.toFloat());
-	}
-	return ConfigNode(value);
+	return origValue.makeReference();
 }
 
 
