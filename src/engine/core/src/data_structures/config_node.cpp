@@ -47,6 +47,13 @@ ConfigNode::ConfigNode(const char* value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(const char* value, RawStringTag)
+{
+	reset();
+	type = ConfigNodeType::RawString;
+	rawStrData = value;
+}
+
 ConfigNode::ConfigNode(bool value)
 {
 	operator=(value);
@@ -210,6 +217,14 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 		case ConfigNodeType::Bytes:
 			*this = other.asBytes();
 			break;
+		case ConfigNodeType::MapRef:
+			reset();
+			mapData = other.mapData;
+			break;
+		case ConfigNodeType::RawString:
+			reset();
+			rawStrData = other.rawStrData;
+			break;
 		case ConfigNodeType::Undefined:
 		case ConfigNodeType::Noop:
 		case ConfigNodeType::Del:
@@ -230,10 +245,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 
 	type = other.type;
 	rawPtrData = other.rawPtrData;
-	intData = other.intData;
-	floatData = other.floatData;
-	vec2iData = other.vec2iData;
-	vec2fData = other.vec2fData;
+
 #if defined(STORE_CONFIG_NODE_PARENTING)
 	parent = std::move(other.parent);
 #endif
@@ -420,6 +432,9 @@ namespace {
 		if ((aType == ConfigNodeType::Float || aType == ConfigNodeType::Int) && (bType == ConfigNodeType::Float2 || bType == ConfigNodeType::Int2)) {
 			return cmp.compare(a.asFloat(), b.asVector2f().length());
 		}
+		if (aType == ConfigNodeType::String && bType == ConfigNodeType::RawString) {
+			return cmp.compare(a.asStringView(), b.asStringView());
+		}
 
 		return cmp.compare(0, 1);
 	}
@@ -517,9 +532,9 @@ bool ConfigNode::compareTo(MathRelOp op, const ConfigNode& other) const
 
 bool ConfigNode::operator==(std::string_view str) const
 {
-	if (getType() == ConfigNodeType::String) {
+	if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
 		return asStringView() == str;
-	} else if (getType() == ConfigNodeType::Undefined) {
+	} else if (type == ConfigNodeType::Undefined) {
 		return false;
 	} else {
 		return asString() == str;
@@ -528,9 +543,9 @@ bool ConfigNode::operator==(std::string_view str) const
 
 bool ConfigNode::operator!=(std::string_view str) const
 {
-	if (getType() == ConfigNodeType::String) {
+	if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
 		return asStringView() != str;
-	} else if (getType() == ConfigNodeType::Undefined) {
+	} else if (type == ConfigNodeType::Undefined) {
 		return true;
 	} else {
 		return asString() != str;
@@ -616,10 +631,15 @@ ConfigNodeType ConfigNode::getType() const
 
 void ConfigNode::serialize(Serializer& s) const
 {
-	s << type;
+	auto t = type;
+	if (t == ConfigNodeType::RawString) [[unlikely]] {
+		t = ConfigNodeType::String;
+	}
+	s << t;
 
 	switch (type) {
 		case ConfigNodeType::String:
+		case ConfigNodeType::RawString:
 			s << asStringView();
 			break;
 		case ConfigNodeType::Sequence:
@@ -791,8 +811,8 @@ int ConfigNode::asInt() const
 		return intData;
 	} else if (type == ConfigNodeType::Float) {
 		return int(floatData);
-	} else if (type == ConfigNodeType::String) {
-		return asString().toInteger();
+	} else if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
+		return String::toInteger(asStringView());
 	} else if (type == ConfigNodeType::Int64) {
 		return int(int64Data);
 	} else if (type == ConfigNodeType::EntityId && int64Data == -1) {
@@ -814,8 +834,8 @@ int64_t ConfigNode::asInt64() const
 		return int(floatData);
 	} else if (type == ConfigNodeType::Bool) {
 		return intData;
-	} else if (type == ConfigNodeType::String) {
-		return asString().toInteger64();
+	} else if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
+		return String::toInteger64(asStringView());
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
@@ -844,8 +864,8 @@ float ConfigNode::asFloat() const
 		return float(int64Data);
 	} else if (type == ConfigNodeType::Bool) {
 		return float(intData);
-	} else if (type == ConfigNodeType::String) {
-		return asString().toFloat();
+	} else if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
+		return String::toFloat(asStringView());
 	} else if (type == ConfigNodeType::EntityId && int64Data == -1) {
 		return -1.0f;
 	} else {
@@ -861,7 +881,7 @@ bool ConfigNode::asBool() const
 		return floatData != 0;
 	} else if (type == ConfigNodeType::Int64) {
 		return int64Data != 0;
-	} else if (type == ConfigNodeType::String) {
+	} else if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
 		const auto& str = asStringView();
 		if (str == "true") {
 			return true;
@@ -1154,6 +1174,8 @@ String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {
 		return *strData;
+	} else if (type == ConfigNodeType::RawString) {
+		return String(*rawStrData);
 	} else if (type == ConfigNodeType::Int) {
 		return toString(asInt());
 	} else if (type == ConfigNodeType::Int64) {
@@ -1218,11 +1240,17 @@ String ConfigNode::asStringNoUndefined() const
 	}
 }
 
-std::string_view ConfigNode::asStringView() const
+std::string_view ConfigNode::asStringView(String* buffer) const
 {
 	if (type == ConfigNodeType::String) {
 		return *strData;
+	} else if (type == ConfigNodeType::RawString) {
+		return std::string_view(rawStrData);
 	} else {
+		if (buffer) {
+			*buffer = asString();
+			return *buffer;
+		}
 		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to StringView.", HalleyExceptions::Resources);
 	}
 }
@@ -1281,12 +1309,12 @@ String ConfigNode::asString(const std::string_view& defaultValue) const
 	}
 }
 
-std::string_view ConfigNode::asStringView(const std::string_view& defaultValue) const
+std::string_view ConfigNode::asStringView(const std::string_view& defaultValue, String* buffer) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asStringView();
+		return asStringView(buffer);
 	}
 }
 
@@ -1579,6 +1607,7 @@ String ConfigNode::getNodeDebugId() const
 	String value;
 	switch (type) {
 		case ConfigNodeType::String:
+		case ConfigNodeType::RawString:
 			value = "\"" + asString() + "\"";
 			break;
 		case ConfigNodeType::Sequence:
@@ -2168,6 +2197,9 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		break;
 	case ConfigNodeType::String:
 		hasher.feed(*strData);
+		break;
+	case ConfigNodeType::RawString:
+		hasher.feed(rawStrData);
 		break;
 	case ConfigNodeType::Undefined:
 		break;

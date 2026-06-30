@@ -74,6 +74,7 @@ namespace Halley {
 		EntityId,
 		Bool,
 		MapRef, // Reference to a map node
+		RawString, // const char* ptr, non-owning
 	};
 
 	template <>
@@ -97,7 +98,8 @@ namespace Halley {
 				"int64",
 				"entityId",
 				"bool",
-				"mapRef"
+				"mapRef",
+				"rawStr"
 			});
 		}
 	};
@@ -111,6 +113,8 @@ namespace Halley {
 	public:
 		template <typename T>
 		class Tag {};
+
+		class RawStringTag {};
 
 		using MapType = HashMap<String, ConfigNode>;
 		using SequenceType = Vector<ConfigNode>;
@@ -132,6 +136,7 @@ namespace Halley {
 		explicit ConfigNode(String value);
 		explicit ConfigNode(const std::string_view& value);
 		explicit ConfigNode(const char* value);
+		explicit ConfigNode(const char* value, RawStringTag);
 		explicit ConfigNode(bool value);
 		explicit ConfigNode(int value);
 		explicit ConfigNode(uint32_t value);
@@ -370,7 +375,7 @@ namespace Halley {
 		Range<float> asFloatRange() const;
 		String asString() const;
 		String asStringNoUndefined() const;
-		std::string_view asStringView() const;
+		std::string_view asStringView(String* buffer = nullptr) const;
 		const Bytes& asBytes() const;
 
 		int asInt(int defaultValue) const;
@@ -379,7 +384,7 @@ namespace Halley {
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
 		String asString(const std::string_view& defaultValue) const;
-		std::string_view asStringView(const std::string_view& defaultValue) const;
+		std::string_view asStringView(const std::string_view& defaultValue, String* buffer = nullptr) const;
 		Vector2i asVector2i(Vector2i defaultValue, bool expandScalar = false) const;
 		Vector2f asVector2f(Vector2f defaultValue, bool expandScalar = false) const;
 		Vector3i asVector3i(Vector3i defaultValue, bool expandScalar = false) const;
@@ -657,6 +662,7 @@ namespace Halley {
 			Vector2i vec2iData;
 			Vector2f vec2fData;
 			int64_t int64Data;
+			const char* rawStrData;
 		};
 		ConfigNodeType type = ConfigNodeType::Undefined;
 		int auxData = 0; // Used by delta coding
