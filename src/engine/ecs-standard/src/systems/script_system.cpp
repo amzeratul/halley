@@ -285,11 +285,11 @@ private:
 		for (auto& e: scriptableFamily) {
 			const bool isLocalEntity = getWorld().isEntityNetworkOwner(e.entityId);
 			for (const auto& script : e.scriptable.scripts) {
-                if (!script.hasValue()) {
+                if (!script.hasValue()) [[unlikely]] {
                     Logger::logWarning("Found scriptable component with empty script resource reference", true);
                     continue;
                 }
-				if (!isLocalEntity && script->isNetwork()) {
+				if (!isLocalEntity && script->isNetwork()) [[unlikely]] {
 					continue;
 				}
 				if (!std_ex::contains(e.scriptable.scriptsStarted, script.getAssetId())) {
