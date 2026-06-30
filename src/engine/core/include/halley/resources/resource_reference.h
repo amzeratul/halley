@@ -20,7 +20,7 @@ namespace Halley {
 		std::shared_ptr<const T>& get() { return resource; }
 		const std::shared_ptr<const T>& get() const { return resource; }
 
-		String getAssetId() const { return resource ? resource->getAssetId() : String(); }
+		const String& getAssetId() const { return resource ? resource->getAssetId() : String::emptyString(); }
 
 	private:
 		std::shared_ptr<const T> resource;
