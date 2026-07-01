@@ -86,14 +86,14 @@ private:
 	{
 		auto& player = e.spriteAnimation.player;
 		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
-			const auto nextBounds = Rect4f(player.getAnimation().getBounds());
-			const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
-
-			const auto curBounds = e.sprite.sprite.getAABB();
-			const auto mergedBounds = curBounds.merge(worldBounds);
-			
-			if (ignoreBounds || mergedBounds.overlaps(viewPort)) {
+			if (ignoreBounds || e.sprite.sprite.getAABB().overlaps(viewPort)) {
 				player.updateSprite(e.sprite.sprite);
+			} else {
+				const auto nextBounds = Rect4f(player.getAnimation().getBounds());
+				const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
+				if (worldBounds.overlaps(viewPort)) [[unlikely]] {
+					player.updateSprite(e.sprite.sprite);
+				}
 			}
 		}
 	}

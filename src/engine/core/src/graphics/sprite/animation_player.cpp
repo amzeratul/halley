@@ -395,8 +395,12 @@ void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideI
 
 void AnimationPlayer::setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized)
 {
-	setSequence(sequenceName);
-	setDirection(directionName);
+	if (getCurrentSequenceName() != sequenceName) {
+		setSequence(sequenceName);
+	}
+	if (getCurrentDirectionName() != directionName) {
+		setDirection(directionName);
+	}
 
 	const auto oldVisibleOverride = visibleSyncOverride;
 	const auto oldCurFrame = curFrameN;
