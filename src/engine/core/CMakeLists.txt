@@ -831,6 +831,7 @@ set(HEADERS
         "include/halley/data_structures/temp_allocator.h"
         "include/halley/data_structures/time_cache.h"
         "include/halley/data_structures/tree_map.h"
+        "include/halley/data_structures/value_ptr.h"
         "include/halley/data_structures/vector.h"
         "include/halley/data_structures/vector_size32.h"
         "include/halley/data_structures/vector_size32.natvis"
