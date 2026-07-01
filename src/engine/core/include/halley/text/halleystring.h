@@ -257,6 +257,37 @@ namespace Halley {
 			return concatList(text, separator);
 		}
 
+		static gsl::span<char> appendToBuffer(gsl::span<char> buffer, const char* str)
+		{
+			const size_t n = std::min(strlen(str), buffer.size());
+			memcpy(buffer.data(), str, n);
+			return buffer.subspan(n);
+		}
+
+		static gsl::span<char> appendToBuffer(gsl::span<char> buffer, std::string_view str)
+		{
+			const size_t n = std::min(str.size(), buffer.size());
+			memcpy(buffer.data(), str.data(), n);
+			return buffer.subspan(n);
+		}
+
+		static gsl::span<char> appendToBuffer(gsl::span<char> buffer, const String& str)
+		{
+			const size_t n = std::min(str.length(), buffer.size());
+			memcpy(buffer.data(), str.c_str(), n);
+			return buffer.subspan(n);
+		}
+
+		template <typename ... Ts>
+		[[nodiscard]] static std::string_view concatInBuffer(gsl::span<char> buffer, Ts... params)
+		{
+			auto b = buffer;
+			([&] {
+		        b = appendToBuffer(b, params);
+		    } (), ...);
+			return std::string_view(buffer.data(), buffer.size() - b.size());
+		}
+
 		//////////
 
 		String& operator += (const String &p);
