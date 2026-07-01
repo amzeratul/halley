@@ -237,12 +237,15 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 
 void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states)
 {
-	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
+	//Logger::logDev("Updating " + toString(collection.enumerate().size()) + " resources.");
+	auto resources = collection.getAllResources();
+
+	for (auto& resource: resources) {
 		LoadStateInfo state;
 		if (collection.getAssetType() == AssetType::Texture) {
-			state = getStateInfo<Texture>(resource, t);
+			state = getStateInfo<Texture>(std::static_pointer_cast<Texture>(std::move(resource)), t);
 		} else {
-			state = getStateInfo<AsyncResource>(resource, t);
+			state = getStateInfo<AsyncResource>(std::static_pointer_cast<AsyncResource>(std::move(resource)), t);
 		}
 
 		auto& stateCollection = states[state.desiredState];
@@ -250,7 +253,7 @@ void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollecti
 			stateCollection.curMemoryUsage += state.memoryUsage;
 		}
 		stateCollection.states += std::move(state);
-	});
+	};
 }
 
 float ResourceUnloader::getTimeSince(uint32_t idx) const
@@ -273,10 +276,8 @@ uint32_t ResourceUnloader::getFramesSince(uint32_t idx) const
 }
 
 template <typename T>
-ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(const std::shared_ptr<Resource>& resource, float t) const
+ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T> res, float t) const
 {
-	auto res = std::static_pointer_cast<T>(resource);
-
 	const AsyncResource::UsagePattern usagePattern = res->getUsagePattern();
 	const auto loaded = res->isLoaded();
 	const ResourceMemoryUsage memoryUsage = loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();

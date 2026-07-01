@@ -223,6 +223,19 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std
 	return std::make_pair(newRes, true);
 }
 
+Vector<std::shared_ptr<Resource>> ResourceCollectionBase::getAllResources() const
+{
+	Vector<std::shared_ptr<Resource>> result;
+	SharedLock lock(mutex);
+	result.reserve(resources.size());
+	for (auto& r: resources) {
+		if (r.res) {
+			result += r.res;
+		}
+	}
+	return result;
+}
+
 #ifdef VIRTUAL_RESOURCE_GET
 std::shared_ptr<Resource> ResourceCollectionBase::get(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {

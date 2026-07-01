@@ -62,7 +62,7 @@ namespace Halley {
         void updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);
 
         template<typename T>
-        LoadStateInfo getStateInfo(const std::shared_ptr<Resource>& resource, float t) const;
+        LoadStateInfo getStateInfo(std::shared_ptr<T> resource, float t) const;
 
         float getTimeSince(uint32_t idx) const;
         uint32_t getFramesSince(uint32_t idx) const;
