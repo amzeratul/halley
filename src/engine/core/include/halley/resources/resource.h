@@ -8,6 +8,7 @@
 #include "halley/concurrency/future.h"
 #include "halley/text/enum_names.h"
 #include "halley/time/halleytime.h"
+#include "halley/data_structures/value_ptr.h"
 
 #if defined(DEV_BUILD) && !defined(NN_NINTENDO_SDK)
 #define ENABLE_HOT_RELOAD
@@ -199,12 +200,12 @@ namespace Halley
 		virtual ~Resource();
 
 		void setMeta(Metadata meta);
-		const Metadata& getMeta() const { return meta; }
+		const Metadata& getMeta() const { return info->meta; }
 		bool isMetaSet() const { return metaSet; }
 		
 		virtual void setAssetId(String name);
 		virtual void setAssetIdx(uint32_t idx);
-		const String& getAssetId() const { return assetId; }
+		const String& getAssetId() const { return info->assetId; }
 		uint32_t getAssetIdx() const { return assetIdx; }
 
 		virtual void onLoaded(Resources& resources);
@@ -226,12 +227,16 @@ namespace Halley
 		virtual void reload(Resource&& resource);
 
 	private:
+		struct Info {
+			Metadata meta;
+			String assetId;
+		};
+
 		bool metaSet = false;
 		bool unloaded = false;
 		int16_t assetVersion = 0;
 		uint32_t assetIdx = 0;
-		String assetId;
-		Metadata meta;
+		ValuePtr<Info> info;
 	};
 
 	class ResourceObserver
@@ -327,16 +332,19 @@ namespace Halley
 		virtual bool doRequestUnloading();
 
 	private:
+		struct LoadData {
+			ConditionVariable loadWait;
+			Mutex loadMutex;
+			Vector<Promise<void>> pendingPromises;
+		};
+
 		std::atomic<bool> failed;
 		std::atomic<State> loadState;
 		mutable ResourceDesiredLoadState desiredLoadState = ResourceDesiredLoadState::Undefined;
 
 		mutable uint32_t curFrame = 0;
+		mutable ValuePtr<LoadData> loadData;
 		mutable UsagePattern usageData;
-
-		mutable ConditionVariable loadWait;
-		mutable Mutex loadMutex;
-		mutable Vector<Promise<void>> pendingPromises;
 	};
 
 	struct ResourceOptions {

@@ -11,14 +11,14 @@ void Resource::setMeta(Metadata m)
 	// Only allow setting meta once to avoid a race condition
 	// For example, resource_collection.cpp would try to set a meta on a Texture while texture.cpp is trying to load it and referencing its data
 	if (!metaSet) {
-		meta = std::move(m);
+		info->meta = std::move(m);
 		metaSet = true;
 	}
 }
 
 void Resource::setAssetId(String id)
 {
-	assetId = std::move(id);
+	info->assetId = std::move(id);
 }
 
 void Resource::setAssetIdx(uint32_t idx)
@@ -168,11 +168,11 @@ void AsyncResource::doneLoading()
 	if (loadState != State::Loaded) {
 		Vector<Promise<void>> promises;
 		{
-			UniqueLock lock(loadMutex);
+			UniqueLock lock(loadData->loadMutex);
 			loadState = State::Loaded;
-			promises = std::move(pendingPromises);
+			promises = std::move(loadData->pendingPromises);
 		}
-		loadWait.notifyAll();
+		loadData->loadWait.notifyAll();
 		for (auto& p: promises) {
 			p.set();
 		}
@@ -199,12 +199,12 @@ void AsyncResource::waitForLoad(bool acceptFailed, std::optional<int> notifyIfMo
 	markActivelyInUse();
 
 	if (loadState == State::Loading) {
-		UniqueLock lock(loadMutex);
+		UniqueLock lock(loadData->loadMutex);
 		auto timer = Stopwatch(notifyIfMoreThanUs.has_value());
 
 		while (loadState != State::Loaded) {
 			//Logger::logDev("Waiting for asset load: " + getAssetId());
-			loadWait.wait(lock);
+			loadData->loadWait.wait(lock);
 		}
 
 		if (notifyIfMoreThanUs) {
@@ -222,10 +222,10 @@ void AsyncResource::waitForLoad(bool acceptFailed, std::optional<int> notifyIfMo
 
 Future<void> AsyncResource::onLoad() const
 {
-	UniqueLock lock(loadMutex);
+	UniqueLock lock(loadData->loadMutex);
 	if (loadState != State::Loaded) {
-		pendingPromises.push_back({});
-		return pendingPromises.back().getFuture();
+		loadData->pendingPromises.push_back({});
+		return loadData->pendingPromises.back().getFuture();
 	} else {
 		return Future<void>::makeImmediate({});
 	}
@@ -275,7 +275,7 @@ ResourceDesiredLoadState AsyncResource::getDesiredLoadState() const
 bool AsyncResource::requestLoading() const
 {
 	if (loadState.load(std::memory_order::relaxed) == State::Unloaded) {
-		UniqueLock lock(loadMutex);
+		UniqueLock lock(loadData->loadMutex);
 		usageData.lastFrameInUse = curFrame;
 		if (loadState == State::Unloaded) {
 			return const_cast<AsyncResource*>(this)->doRequestLoading();
@@ -287,7 +287,7 @@ bool AsyncResource::requestLoading() const
 bool AsyncResource::requestUnloading() const
 {
 	if (loadState.load(std::memory_order::relaxed) == State::Loaded) {
-		UniqueLock lock(loadMutex);
+		UniqueLock lock(loadData->loadMutex);
 		if (loadState == State::Loaded && usageData.lastFrameInUse != curFrame) {
 			return const_cast<AsyncResource*>(this)->doRequestUnloading();
 		}

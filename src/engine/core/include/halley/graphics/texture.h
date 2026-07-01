@@ -53,12 +53,13 @@ namespace Halley
 
 	protected:
 		Vector2i size;
-		TextureDescriptor descriptor;
-		ImageMask mask;
-
 		bool retainPixelData = false;
 		bool unloadable = false;
 		std::optional<TextureFormat> expectedTextureFormat;
+
+		TextureDescriptor descriptor;
+		ImageMask mask;
+
 		ResourceLoader::LoaderFunc loaderFunc;
 
 		virtual void doLoad(TextureDescriptor& descriptor) = 0;
