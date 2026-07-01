@@ -221,7 +221,8 @@ String ScriptSwitch::getPinDescription(const BaseGraphNode& node, PinType elemen
 
 IScriptNodeType::Result ScriptSwitch::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const auto curValue = readDataPin(environment, node, 1).asString("");
+	String buffer;
+	const auto curValue = readDataPin(environment, node, 1).asStringView("", &buffer);
 	auto cases = node.getSettings()["cases"].asVector<String>({});
 	if (cases.size() > 7) {
 		cases.resize(7);
