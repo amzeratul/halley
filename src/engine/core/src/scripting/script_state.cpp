@@ -297,6 +297,7 @@ ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
 ScriptState::ScriptState(std::shared_ptr<const ScriptGraph> script)
 	: scriptGraph(std::move(script))
 {
+	scriptGraphRef = scriptGraph.get();
 }
 
 ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContext& context)
@@ -310,6 +311,7 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 		const auto scriptGraphName = node["script"].asString();
 		if (!scriptGraphName.isEmpty()) {
 			scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
+			scriptGraphRef = scriptGraph.get();
 		}
 		needsStateLoading = true;
 	}
@@ -368,7 +370,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	if (!sharedVars.empty()) {
 		node["sharedVars"] = ConfigNodeSerializer<decltype(sharedVars)>().serialize(sharedVars, context);
 	}
-	auto scriptName = scriptGraph ? scriptGraph->getAssetId() : "";
+	auto scriptName = getScriptGraphPtr() ? getScriptGraphPtr()->getAssetId() : "";
 	if (!scriptName.isEmpty()) {
 		node["script"] = std::move(scriptName);
 	}
@@ -407,7 +409,7 @@ String ScriptState::getScriptId() const
 
 const ScriptGraph* ScriptState::getScriptGraphPtr() const
 {
-	return scriptGraph ? scriptGraph.get() : scriptGraphRef;
+	return scriptGraphRef;
 }
 
 void ScriptState::setScriptGraphPtr(const ScriptGraph* script)
@@ -455,16 +457,6 @@ void ScriptState::markTerminated()
 {
 	terminated = true;
 	started = true;
-}
-
-void ScriptState::setFrameFlag(bool flag)
-{
-	frameFlag = flag;
-}
-
-bool ScriptState::getFrameFlag() const
-{
-	return frameFlag;
 }
 
 bool ScriptState::hasThreadAt(GraphNodeId node) const

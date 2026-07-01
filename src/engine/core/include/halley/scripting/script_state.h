@@ -184,8 +184,8 @@ namespace Halley {
 		bool isTerminated() const;
 		void markTerminated();
 
-		void setFrameFlag(bool flag);
-		bool getFrameFlag() const;
+		void setFrameFlag(bool flag) { frameFlag = flag; }
+		bool getFrameFlag() const { return frameFlag; }
 
     	void start(uint64_t graphHash);
 		void reset();
@@ -229,7 +229,13 @@ namespace Halley {
 		std::optional<Future<ConfigNode>> getFutureNodeValue(GraphNodeId id);
 
 	private:
-		std::shared_ptr<const ScriptGraph> scriptGraph;
+    	bool started : 1 = false;
+		bool persistAfterDone : 1= false;
+		bool needsStateLoading : 1 = false;
+		bool frameFlag : 1 = false;
+		bool terminated : 1 = false;
+		int frameNumber = 0;
+
 		const ScriptGraph* scriptGraphRef = nullptr;
 
     	Vector<ScriptStateThread> threads;
@@ -239,12 +245,6 @@ namespace Halley {
 		ScriptVariables sharedVars;
 
     	uint64_t graphHash = 0;
-		int frameNumber = 0;
-    	bool started = false;
-		bool persistAfterDone = false;
-		bool needsStateLoading = false;
-		bool frameFlag = false;
-		bool terminated = false;
 
 		Vector2f displayOffset;
 
@@ -254,6 +254,7 @@ namespace Halley {
 		Vector<ConfigNode> startParams;
 
 		HashMap<GraphNodeId, std::optional<Future<ConfigNode>>> futureNodeValues;
+    	std::shared_ptr<const ScriptGraph> scriptGraph;
 
     	void onNodeStartedIntrospection(GraphNodeId nodeId);
     	void onNodeEndedIntrospection(GraphNodeId nodeId);
