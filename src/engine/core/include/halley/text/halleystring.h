@@ -279,10 +279,11 @@ namespace Halley {
 		}
 
 		template <typename ... Ts>
-		[[nodiscard]] static std::string_view concatInBuffer(gsl::span<char> buffer, Ts... params)
+		[[nodiscard]] static std::string_view concatInBuffer(gsl::span<char> buffer, const Ts&... params)
 		{
 			auto b = buffer;
 			([&] {
+				static_assert(!std::is_same_v<String, decltype(params)>); // No pass by copy
 		        b = appendToBuffer(b, params);
 		    } (), ...);
 			return std::string_view(buffer.data(), buffer.size() - b.size());
