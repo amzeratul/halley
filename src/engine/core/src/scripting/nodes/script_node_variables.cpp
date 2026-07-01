@@ -50,15 +50,13 @@ std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(con
 ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto& vars = environment.getVariables(getScope(node));
-	String buffer;
-	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asStringView("", &buffer)));//.makeReference();
+	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));//.makeReference();
 }
 
 EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto& vars = environment.getVariables(getScope(node));
-	String buffer;
-	const auto& data = vars.getVariable(node.getSettings()["variable"].asStringView("", &buffer));
+	const auto& data = vars.getVariable(node.getSettings()["variable"].asString(""));
 	if (data.getType() == ConfigNodeType::EntityId || data.getType() == ConfigNodeType::Int || data.getType() == ConfigNodeType::Float) {
 		return data.asEntityId();
 	} else {
@@ -69,8 +67,7 @@ EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const Scr
 void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
 {
 	const auto scope = getScope(node);
-	String buffer;
-	const auto variable = node.getSettings()["variable"].asStringView("", &buffer);
+	const auto variable = node.getSettings()["variable"].asString("");
 
 	if (scope != ScriptVariableScope::Local && !environment.hasNetworkAuthorityOver(environment.getCurrentEntityId())) {
 		if (environment.isNetworkConnected()) {
@@ -90,8 +87,7 @@ ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const
 
 ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 {
-	String buffer;
-	return fromString<ScriptVariableScope>(node.getSettings()["scope"].asStringView("local", &buffer));
+	return fromString<ScriptVariableScope>(node.getSettings()["scope"].asString("local"));
 }
 
 
@@ -139,15 +135,13 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescripti
 ConfigNode ScriptEntityVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto& vars = environment.getEntityVariables(readEntityId(environment, node, 0));
-	String buffer;
-	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asStringView("", &buffer)));
+	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
 }
 
 EntityId ScriptEntityVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto& vars = environment.getEntityVariables(readEntityId(environment, node, 0));
-	String buffer;
-	return vars.getVariable(node.getSettings()["variable"].asStringView("", &buffer)).asEntityId({});
+	return vars.getVariable(node.getSettings()["variable"].asString("")).asEntityId({});
 }
 
 ConfigNode ScriptEntityVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
@@ -515,8 +509,7 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 {
 	const auto a = readDataPin(environment, node, 0);
 	const auto b = readDataPin(environment, node, 1);
-	String buffer;
-	const auto op = fromString<MathRelOp>(node.getSettings()["operator"].asStringView("==", &buffer));
+	const auto op = fromString<MathRelOp>(node.getSettings()["operator"].asString("=="));
 	return ConfigNode(a.compareTo(op, b));
 }
 

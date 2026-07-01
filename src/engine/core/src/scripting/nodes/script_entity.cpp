@@ -328,14 +328,11 @@ String ScriptEntityReference::getPinDescription(const BaseGraphNode& node, PinTy
 
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	String buffer;
-	std::string_view key;
+	auto key = node.getSettings()["key"].asString("");
 	if (node.getPin(2).hasConnection()) {
-		key = readDataPin(environment, node, 2).asStringView(&buffer);
-	} else {
-		node.getSettings()["key"].asStringView("", &buffer);
+		key = readDataPin(environment, node, 2).asString();
 	}
-	if (key.empty()) {
+	if (key.isEmpty()) {
 		return {};
 	}
 
@@ -471,11 +468,9 @@ String ScriptEntityTargetReference::getLargeLabel(const BaseGraphNode& node) con
 
 EntityId ScriptEntityTargetReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	String buffer;
-	String buffer2;
-	auto targetId = readDataPin(environment, node, 2).asStringView("", &buffer);
+	auto targetId = readDataPin(environment, node, 2).asString("");
 	const bool warnIfMissing = node.getSettings()["warnIfMissing"].asBool(true);
-	return environment.getScriptTarget(targetId.empty() ? node.getSettings()["scriptTargetId"].asStringView("", &buffer2) : targetId, warnIfMissing);
+	return environment.getScriptTarget(targetId.isEmpty() ? node.getSettings()["scriptTargetId"].asString("") : targetId, warnIfMissing);
 }
 
 ConfigNode ScriptEntityTargetReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
