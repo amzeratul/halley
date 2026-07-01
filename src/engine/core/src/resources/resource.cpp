@@ -102,7 +102,12 @@ void ResourceObserver::stopObserving()
 
 bool ResourceObserver::needsUpdate() const
 {
-	return res && res->getAssetVersion() != assetVersion;
+	if (res) [[likely]] {
+		if (res->getAssetVersion() != assetVersion) [[unlikely]] {
+			return true;
+		}
+	}
+	return false;
 }
 
 void ResourceObserver::update()

@@ -210,7 +210,7 @@ namespace Halley
 
 		virtual void onLoaded(Resources& resources);
 		
-		int getAssetVersion() const { return assetVersion; }
+		int16_t getAssetVersion() const { return assetVersion; }
 		void increaseAssetVersion();
 		void reloadResource(Resource&& resource);
 
@@ -255,7 +255,7 @@ namespace Halley
 
 	private:
 		const Resource* res = nullptr;
-		int assetVersion = 0;
+		int16_t assetVersion = 0;
 	};
 
 	enum class ResourceDesiredLoadState : uint8_t {
