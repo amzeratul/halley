@@ -660,7 +660,7 @@ void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, R
 	}
 
 	const float threadSpacing = 20.0f;
-	const float threadHeight = std::min(50.0f, std::floor((rect.getHeight() - (threads.size() - 1) * threadSpacing) / static_cast<float>(totalThreadDepth)));
+	const float threadHeight = std::min(25.0f, std::floor((rect.getHeight() - (threads.size() - 1) * threadSpacing) / static_cast<float>(totalThreadDepth)));
 	float heightSoFar = 0;
 	for (const auto& threadInfo: threads) {
 		const int depth = threadInfo.maxDepth + 1;
