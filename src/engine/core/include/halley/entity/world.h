@@ -80,12 +80,12 @@ namespace Halley {
 
 			if (iter == services.end()) {
 				if constexpr (std::is_default_constructible_v<T>) {
-					return dynamic_cast<T*>(&addService(std::make_shared<T>()));
+					return static_cast<T*>(&addService(std::make_shared<T>()));
 				} else {
 					return nullptr;
 				}
 			}
-			return dynamic_cast<T*>(iter->second.get());
+			return static_cast<T*>(iter->second.get());
 		}
 		
 		template <typename T>
@@ -182,7 +182,7 @@ namespace Halley {
 		T* tryGetInterface()
 		{
 			const auto iter = systemInterfaces.find(std::type_index(typeid(T)));
-			return iter == systemInterfaces.end() ? nullptr : dynamic_cast<T*>(iter->second);
+			return iter == systemInterfaces.end() ? nullptr : static_cast<T*>(iter->second);
 		}
 
 		template <typename T>
@@ -199,7 +199,7 @@ namespace Halley {
 		const T* tryGetInterface() const
 		{
 			const auto iter = systemInterfaces.find(std::type_index(typeid(T)));
-			return iter == systemInterfaces.end() ? nullptr : dynamic_cast<T*>(iter->second);
+			return iter == systemInterfaces.end() ? nullptr : static_cast<T*>(iter->second);
 		}
 
 		template <typename T>
