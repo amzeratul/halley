@@ -208,7 +208,9 @@ ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType typ
 		if (id < endId) {
 			const auto pos = id % events.size();
 			const auto threadId = type == ProfilerEventType::GPU ? std::thread::id() : std::this_thread::get_id();
-			events[pos] = ProfilerData::Event{ name, type, 0, id, sourceId, time.time_since_epoch().count(), {}, threadId };
+			events[pos] = ProfilerData::Event{ .id = id, .sourceId = sourceId, .startTime = time.time_since_epoch().count(), .endTime = {}, .threadId = threadId, .depth = 0, .type = type, .name = {}, };
+			memset(events[pos].name, 0, sizeof(events[pos].name));
+			memcpy(events[pos].name, name.data(), std::min(name.size(), sizeof(events[pos].name) - 1));
 			return id;
 		} else {
 			--curId;
@@ -345,7 +347,11 @@ void ProfilerData::Event::serialize(Serializer& s) const
 
 void ProfilerData::Event::deserialize(Deserializer& s)
 {
-	s >> name;
+	String n;
+	s >> n;
+
+	memset(name, 0, sizeof(name));
+	memcpy(name, n.c_str(), std::min(n.length(), sizeof(name) - 1));
 	s >> type;
 	s >> depth;
 	s >> id;

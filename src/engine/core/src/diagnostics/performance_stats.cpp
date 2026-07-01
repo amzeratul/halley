@@ -179,7 +179,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 			} else if (e.type == ProfilerEventType::ScriptUpdate) {
 				scriptHistory[e.name].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::WorldSystemMessages) {
-				systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime), e.sourceId);
+				systemHistory[String(e.name) + "/Messages"].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::AudioRenderVoice) {
 				audioHistory[e.name].update(e.type, (e.endTime - e.startTime), e.sourceId);
 				pendingVoiceRenderTime += e.endTime - e.startTime;
@@ -702,7 +702,7 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 
 		if (curMousePos && eventRect.contains(*curMousePos)) {
 			auto timeUs = (e.endTime - e.startTime) / 1000;
-			setToolTip(eventRect.getTopCenter(), e.name + " [" + e.type + "] (" + timeUs + u8" µs)");
+			setToolTip(eventRect.getTopCenter(), String(e.name) + " [" + e.type + "] (" + timeUs + u8" µs)");
 		}
 	}
 }

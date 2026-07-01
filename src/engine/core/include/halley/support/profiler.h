@@ -116,16 +116,14 @@ namespace Halley {
 
 		class Event {
         public:
-	        String name;
-			ProfilerEventType type;
-			int16_t depth;
         	uint64_t id;
 			uint64_t sourceId;
         	TimePoint startTime;
         	TimePoint endTime;
-
-            // Non-serializable
-			std::thread::id threadId;
+			std::thread::id threadId; // Non-serializable
+			int16_t depth;
+			ProfilerEventType type;
+	        char name[57];
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
