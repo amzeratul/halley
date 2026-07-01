@@ -67,7 +67,7 @@ namespace Halley {
             ReturnToOwner
         };
 
-        using ScriptTargetRetriever = std::function<EntityId(const String&)>;
+        using ScriptTargetRetriever = std::function<EntityId(std::string_view)>;
 
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost = true);
     	virtual ~ScriptEnvironment() = default;
@@ -154,7 +154,7 @@ namespace Halley {
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId, ConfigNode data);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
 
-        EntityId getScriptTarget(const String& id, bool warnIfMissing) const;
+        EntityId getScriptTarget(std::string_view id, bool warnIfMissing) const;
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
 
         gsl::span<const ConfigNode> getStartParams() const;

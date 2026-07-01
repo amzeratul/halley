@@ -259,7 +259,7 @@ private:
 
 	void initializeEnvironment()
 	{
-		getScriptingService().getEnvironment().setScriptTargetRetriever([this] (const String& id) -> EntityId
+		getScriptingService().getEnvironment().setScriptTargetRetriever([this] (std::string_view id) -> EntityId
 		{
 			const auto* result = targetFamily.tryMatch([&] (const TargetFamily& e) { return e.scriptTarget.id == id; });
 			return result ? result->entityId : EntityId();
