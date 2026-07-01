@@ -132,10 +132,14 @@ struct KeyOrValueEquality : functor_storage<bool, key_equal>
     template<typename L, typename R>
     bool operator()(const L & lhs, const R & rhs)
     {
+        /*
         return static_cast<equality_storage &>(*this)(
             FirstOfPairOrValue<L, std::conditional_t<std::is_same_v<key_type, L>, std::false_type, std::true_type>>()(lhs),
             FirstOfPairOrValue<R, std::conditional_t<std::is_same_v<key_type, R>, std::false_type, std::true_type>>()(rhs)
         );
+		*/
+        return FirstOfPairOrValue<L, std::conditional_t<std::is_same_v<key_type, L>, std::false_type, std::true_type>>()(lhs) ==
+            FirstOfPairOrValue<R, std::conditional_t<std::is_same_v<key_type, R>, std::false_type, std::true_type>>()(rhs);
     }
 };
 static constexpr int8_t min_lookups = 4;
@@ -540,11 +544,14 @@ public:
         return const_cast<sherwood_v3_table *>(this)->find<U>(key);
     }
 
-    size_t count(const FindKey & key) const
+    template<typename U>
+    size_t count(const U & key) const
     {
         return find(key) == end() ? 0 : 1;
     }
-    std::pair<iterator, iterator> equal_range(const FindKey & key)
+
+    template<typename U>
+    std::pair<iterator, iterator> equal_range(const U & key)
     {
         iterator found = find(key);
         if (found == end())
@@ -552,7 +559,9 @@ public:
         else
             return { found, std::next(found) };
     }
-    std::pair<const_iterator, const_iterator> equal_range(const FindKey & key) const
+
+    template<typename U>
+	std::pair<const_iterator, const_iterator> equal_range(const U & key) const
     {
         const_iterator found = find(key);
         if (found == end())
@@ -697,7 +706,8 @@ public:
         return { to_return };
     }
 
-    size_t erase(const FindKey & key)
+    template<typename U, std::enable_if_t<!std::is_same_v<U, const_iterator> && !std::is_same_v<U, iterator>, int> = 0>
+    size_t erase(const U & key)
     {
         auto found = find(key);
         if (found == end())
@@ -780,7 +790,8 @@ public:
         return num_elements == 0;
     }
 
-	bool contains(const FindKey& key) const
+    template<typename U>
+	bool contains(const U & key) const
     {
 	    return find(key) != end();
     }
@@ -1339,14 +1350,16 @@ public:
     {
         return emplace(std::move(key), convertible_to_value()).first->second;
     }
-    V & at(const K & key)
+    template<typename U>
+    V & at(const U & key)
     {
         auto found = this->find(key);
         if (found == this->end())
             throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
         return found->second;
     }
-    const V & at(const K & key) const
+    template<typename U>
+    const V & at(const U & key) const
     {
         auto found = this->find(key);
         if (found == this->end())
@@ -1354,7 +1367,8 @@ public:
         return found->second;
     }
 
-    const V & value_or(const K& key, const V& defaultValue) const
+    template<typename U>
+    const V & value_or(const U& key, const V& defaultValue) const
     {
         auto found = this->find(key);
         if (found == this->end())
