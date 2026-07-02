@@ -74,12 +74,9 @@ void AudioEmitterHandleImpl::setVariable(String variableId, float value)
 
 void AudioEmitterHandleImpl::setPosition(AudioPosition position)
 {
-	AudioEngine* engine = facade.engine.get();
-	const auto emId = id;
-
 	this->position = position;
 
-	facade.enqueue([=] ()
+	facade.enqueue([engine = facade.engine.get(), emId = id, position = std::move(position)]()
 	{
 		auto* em = engine->getEmitter(emId);
 		if (em) {

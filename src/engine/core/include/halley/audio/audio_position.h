@@ -39,7 +39,8 @@ namespace Halley
 		static AudioPosition makePositional(Vector2f pos, AudioAttenuation attenuation = {}, Vector2f velocity = {});
 		static AudioPosition makePositional(Vector2f pos, Polygon polygon, AudioAttenuation attenuation = {}, Vector2f velocity = {});
 		static AudioPosition makePositional(Vector3f pos, AudioAttenuation attenuation = {}, Vector3f velocity = {});
-		static AudioPosition makePositional(Vector<SpatialSource> sources);
+		static AudioPosition makePositional(SpatialSource source);
+		static AudioPosition makePositional(gsl::span<const SpatialSource> sources);
 		static AudioPosition makeFixed();
 
 		// Returns distance

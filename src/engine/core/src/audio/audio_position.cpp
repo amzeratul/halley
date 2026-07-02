@@ -68,39 +68,47 @@ AudioPosition AudioPosition::makePositional(Vector2f pos, float referenceDistanc
 
 AudioPosition AudioPosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance, Vector3f velocity)
 {
-	Vector<SpatialSource> sources;
-	sources.emplace_back(pos, velocity, AudioAttenuation(referenceDistance, maxDistance));
-	return makePositional(std::move(sources));
+	return makePositional(SpatialSource(pos, velocity, AudioAttenuation(referenceDistance, maxDistance)));
 }
 
 AudioPosition AudioPosition::makePositional(Vector2f pos, AudioAttenuation attenuation, Vector2f velocity)
 {
-	Vector<SpatialSource> sources;
-	sources.emplace_back(pos, velocity, attenuation);
-	return makePositional(std::move(sources));
+	return makePositional(SpatialSource(pos, velocity, attenuation));
 }
 
 AudioPosition AudioPosition::makePositional(Vector2f pos, Polygon polygon, AudioAttenuation attenuation, Vector2f velocity)
 {
-	Vector<SpatialSource> sources;
-	sources.emplace_back(pos, std::move(polygon), velocity, attenuation);
-	return makePositional(std::move(sources));
+	return makePositional(SpatialSource(pos, std::move(polygon), velocity, attenuation));
 }
 
 AudioPosition AudioPosition::makePositional(Vector3f pos, AudioAttenuation attenuation, Vector3f velocity)
 {
-	Vector<SpatialSource> sources;
-	sources.emplace_back(pos, velocity, attenuation);
-	return makePositional(std::move(sources));
+	return makePositional(SpatialSource(pos, velocity, attenuation));
 }
 
-AudioPosition AudioPosition::makePositional(Vector<SpatialSource> sources)
+AudioPosition AudioPosition::makePositional(SpatialSource source)
 {
 	auto result = AudioPosition();
 
 	result.isUI = false;
 	result.isPannable = true;
-	result.sources = std::move(sources);
+	result.sources.push_back(std::move(source));
+
+	for (auto& s: result.sources) {
+		s.attenuation.referenceDistance = std::max(0.1f, s.attenuation.referenceDistance);
+		s.attenuation.maximumDistance = std::max(s.attenuation.referenceDistance + 0.1f, s.attenuation.maximumDistance);
+	}
+
+	return result;
+}
+
+AudioPosition AudioPosition::makePositional(gsl::span<const SpatialSource> sources)
+{
+	auto result = AudioPosition();
+
+	result.isUI = false;
+	result.isPannable = true;
+	result.sources.assign(sources.begin(), sources.end());
 
 	for (auto& s: result.sources) {
 		s.attenuation.referenceDistance = std::max(0.1f, s.attenuation.referenceDistance);
