@@ -16,8 +16,8 @@ namespace Halley {
 
 namespace Halley
 {
-	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0, bool EnableSBO = true>
-	using Vector = VectorSize32<T, Allocator, Padding, EnableSBO>;
+	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0, bool EnableSBO = true, size_t Align = 0>
+	using Vector = VectorSize32<T, Allocator, Padding, EnableSBO, Align>;
 
 	template<typename T>
 	using VectorTemp = VectorSize32<T, TempPoolAllocator<T>, 0, false>;

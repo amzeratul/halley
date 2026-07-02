@@ -89,8 +89,8 @@ namespace Halley {
 		}
 	}
 
-	template <typename T, typename SizeType = uint32_t, bool EnableSBO = false, size_t SBOPadding = 0, class Allocator = std::allocator<T>>
-	class alignas(typename std::allocator_traits<Allocator>::pointer) VectorStd : Allocator
+	template <typename T, typename SizeType = uint32_t, bool EnableSBO = false, size_t SBOPadding = 0, class Allocator = std::allocator<T>, size_t Align = 0>
+	class alignas(std::max(Align, alignof(typename std::allocator_traits<Allocator>::pointer))) VectorStd : Allocator
 	{
 	public:
 		using value_type = T;
@@ -161,8 +161,8 @@ namespace Halley {
 			}
 		}
 
-		template <typename U, typename US, bool UES, size_t UPad, typename UA>
-		VectorStd(const VectorStd<U, US, UES, UPad, UA>& other)
+		template <typename U, typename US, bool UES, size_t UPad, typename UA, size_t UAlign>
+		VectorStd(const VectorStd<U, US, UES, UPad, UA, UAlign>& other)
 		{
 			if constexpr (std::is_same_v<T, U> && std::is_trivially_copyable_v<T>) {
 				if (other.sbo_active() && (sbo_active() || empty())) {
@@ -241,8 +241,8 @@ namespace Halley {
 			return *this;
 		}
 
-		template<typename U, typename A, typename S, bool SBO, size_t SBOP>
-		VectorStd& operator=(const VectorStd<U, S, SBO, SBOP, A>& other)
+		template<typename U, typename A, typename S, bool SBO, size_t SBOP, size_t Align>
+		VectorStd& operator=(const VectorStd<U, S, SBO, SBOP, A, Align>& other)
 		{
 			if constexpr (std::is_same_v<decltype(this), decltype(&other)>) {
 				if (this == &other) {
@@ -1107,53 +1107,53 @@ namespace Halley {
 		}
 	};
 
-	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
-	bool operator==(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
+	bool operator==(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
         if (a.size() != b.size()) return false;
 		return std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
-	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
-	bool operator!=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
+	bool operator!=(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
         if (a.size() != b.size()) return true;
 		return !std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
-	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
-	bool operator<(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
+	bool operator<(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a < b; });
 	}
 
-	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
-	bool operator>(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
+	bool operator>(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a > b; });
 	}
 
-	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
-	bool operator<=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
+	bool operator<=(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a <= b; });
 	}
 
-	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
-	bool operator>=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
+	bool operator>=(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a >= b; });
 	}
 
 
-	template<typename T, typename SizeType, bool EnableSBO, size_t SBOPadding, class Allocator>
-	void swap(VectorStd<T, SizeType, EnableSBO, SBOPadding, Allocator>& a, VectorStd<T, SizeType, EnableSBO, SBOPadding, Allocator>& b) noexcept
+	template<typename T, typename SizeType, bool EnableSBO, size_t SBOPadding, class Allocator, size_t Align>
+	void swap(VectorStd<T, SizeType, EnableSBO, SBOPadding, Allocator, Align>& a, VectorStd<T, SizeType, EnableSBO, SBOPadding, Allocator, Align>& b) noexcept
 	{
 		a.swap(b);
 	}
 
 
 	// Default versions
-	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0, bool EnableSBO = true>
-	using VectorSize32 = VectorStd<T, uint32_t, EnableSBO, Padding, Allocator>;
+	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0, bool EnableSBO = true, size_t Align = 0>
+	using VectorSize32 = VectorStd<T, uint32_t, EnableSBO, Padding, Allocator, Align>;
 }
