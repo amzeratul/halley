@@ -11,6 +11,10 @@ namespace Halley {
             : data(std::make_unique<T>())
         {}
 
+        ValuePtr(std::nullopt_t)
+            : data()
+        {}
+
         ValuePtr(const T& v)
             : data(std::make_unique<T>(v))
         {}
@@ -47,6 +51,32 @@ namespace Halley {
             return *this;
         }
 
+        ValuePtr& operator=(std::nullopt_t)
+        {
+            data = {};
+            return *this;
+        }
+
+        ValuePtr& operator=(const T& other)
+        {
+            if (!data) {
+	            data = std::make_unique<T>(other);
+            } else {
+	            *data = other;
+            }
+            return *this;
+        }
+
+        ValuePtr& operator=(T&& other)
+        {
+            if (!data) {
+	            data = std::make_unique<T>(std::move(other));
+            } else {
+	            *data = std::move(other);
+            }
+            return *this;
+        }
+
         const T* operator->() const
         {
             return data.get();
@@ -55,6 +85,11 @@ namespace Halley {
         const T& operator*() const
         {
             return *data;
+        }
+
+        operator bool() const
+        {
+	        return !!data;
         }
 
         T* operator->()
@@ -69,17 +104,17 @@ namespace Halley {
 
     	bool operator==(const ValuePtr& other) const
         {
-            return *data == *other.data;
+            return data == other.data && (!data || *data == *other.data);
         }
 
         bool operator!=(const ValuePtr& other) const
         {
-            return *data != *other.data;
+            return data != other.data || (data && *data != *other.data);
         }
 
-        bool operator<=>(const ValuePtr& other) const
+        const T* get() const
         {
-            return *data <=> *other.data;
+	        return data.get();
         }
 
     private:
