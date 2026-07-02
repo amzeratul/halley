@@ -399,8 +399,9 @@ String ScriptEntityParameter::getLargeLabel(const BaseGraphNode& node) const
 
 ConfigNode ScriptEntityParameter::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto key = node.getSettings()["key"].asString("");
-	if (key.isEmpty()) {
+	String buffer;
+	const auto key = node.getSettings()["key"].asStringView("", &buffer);
+	if (key.empty()) {
 		return {};
 	}
 
