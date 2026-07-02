@@ -76,9 +76,30 @@ private:
 	{
 		const auto viewPort = getViewPort();
 		for (auto& e : mainFamily) {
-			e.spriteAnimation.player.update(time);
-			updateSprite(e, viewPort, false);
+			if (!isCulledByFixedBounds(e, viewPort)) {
+				e.spriteAnimation.player.update(time);
+				updateSprite(e, viewPort, false);
+			}
 			updateEvents(e);
+		}
+	}
+
+	bool isCulledByFixedBounds(const MainFamily& e, const Rect4f& viewPort) const
+	{
+		if (e.spriteAnimation.cullBounds) {
+			return !viewPort.overlaps(e.transform2D.getGlobalPositionWithHeight() + *e.spriteAnimation.cullBounds);
+		}
+		return false;
+	}
+
+	Rect4f getAnimationBounds(const MainFamily& e) const
+	{
+		auto& player = e.spriteAnimation.player;
+		const auto nextBounds = Rect4f(player.getAnimation().getBounds());
+		if (player.getAnimation().getMaterial()->getDefinition().hasTagIdx(MaterialTags::NoRotate)) {
+			return Rect4f(e.transform2D.transformPointWithHeightNoRotate(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeightNoRotate(nextBounds.getBottomRight()));
+		} else {
+			return Rect4f(e.transform2D.transformPointWithHeight(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
 		}
 	}
 
@@ -86,14 +107,8 @@ private:
 	{
 		auto& player = e.spriteAnimation.player;
 		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
-			if (ignoreBounds || e.sprite.sprite.getAABB().overlaps(viewPort)) {
+			if (ignoreBounds || e.sprite.sprite.getAABB().overlaps(viewPort) || getAnimationBounds(e).overlaps(viewPort)) {
 				player.updateSprite(e.sprite.sprite);
-			} else {
-				const auto nextBounds = Rect4f(player.getAnimation().getBounds());
-				const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
-				if (worldBounds.overlaps(viewPort)) [[unlikely]] {
-					player.updateSprite(e.sprite.sprite);
-				}
 			}
 		}
 	}

@@ -18,13 +18,15 @@ public:
 
 	Halley::AnimationPlayer player{};
 	bool updateSprite{ true };
+	std::optional<Halley::Rect4f> cullBounds{};
 
 	SpriteAnimationComponent() {
 	}
 
-	SpriteAnimationComponent(Halley::AnimationPlayer player, bool updateSprite)
+	SpriteAnimationComponent(Halley::AnimationPlayer player, bool updateSprite, std::optional<Halley::Rect4f> cullBounds)
 		: player(std::move(player))
 		, updateSprite(std::move(updateSprite))
+		, cullBounds(std::move(cullBounds))
 	{
 	}
 
@@ -33,6 +35,7 @@ public:
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(player)>::serialize(player, Halley::AnimationPlayer{}, _context, _node, componentName, "player", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(updateSprite)>::serialize(updateSprite, bool{ true }, _context, _node, componentName, "updateSprite", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(cullBounds)>::serialize(cullBounds, std::optional<Halley::Rect4f>{}, _context, _node, componentName, "cullBounds", makeMask(Type::Prefab));
 		return _node;
 	}
 
@@ -40,12 +43,14 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(player)>::deserialize(player, Halley::AnimationPlayer{}, _context, _node, componentName, "player", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(updateSprite)>::deserialize(updateSprite, bool{ true }, _context, _node, componentName, "updateSprite", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(cullBounds)>::deserialize(cullBounds, std::optional<Halley::Rect4f>{}, _context, _node, componentName, "cullBounds", makeMask(Type::Prefab));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)) == 0) _node.removeKey("player");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("updateSprite");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("cullBounds");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

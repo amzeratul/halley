@@ -219,9 +219,21 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 	return pos;
 }
 
+Vector2f Transform2DComponent::transformPointNoRotate(const Vector2f& p) const
+{
+	Vector2f pos = getGlobalPosition() + p * getGlobalScale();
+	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
+	return pos;
+}
+
 Vector2f Transform2DComponent::transformPointWithHeight(const Vector2f& p) const
 {
 	return transformPoint(p) + Vector2f(0, -getGlobalHeight());
+}
+
+Vector2f Transform2DComponent::transformPointWithHeightNoRotate(const Vector2f& p) const
+{
+	return transformPointNoRotate(p) + Vector2f(0, -getGlobalHeight());
 }
 
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const

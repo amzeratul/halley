@@ -60,7 +60,9 @@ public:
 	bool isTranslationOnly() const;
 
 	Halley::Vector2f transformPoint(const Halley::Vector2f& p) const;
+	Halley::Vector2f transformPointNoRotate(const Halley::Vector2f& p) const;
 	Halley::Vector2f transformPointWithHeight(const Halley::Vector2f& p) const;
+	Halley::Vector2f transformPointWithHeightNoRotate(const Halley::Vector2f& p) const;
 	Halley::Vector2f inverseTransformPoint(const Halley::Vector2f& p) const;
 
 	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;

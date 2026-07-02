@@ -79,6 +79,9 @@ component:
       type: bool
       defaultValue: true
       canSave: false
+  - cullBounds:
+      type: std::optional<Halley::Rect4f>
+      canSave: false
 
 ---
 
