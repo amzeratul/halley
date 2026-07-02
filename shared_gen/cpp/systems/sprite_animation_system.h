@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #include <halley.hpp>
@@ -49,20 +49,23 @@ public:
 		SpriteComponent& sprite;
 		SpriteAnimationComponent& spriteAnimation;
 		const SpriteAnimationReplicatorComponent& spriteAnimationReplicator;
+		const Transform2DComponent& transform2D;
 	
-		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, SpriteAnimationReplicatorComponent>;
+		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, SpriteAnimationReplicatorComponent, Transform2DComponent>;
 	
 		void prefetch() const {
 			prefetchL2(&sprite);
 			prefetchL2(&spriteAnimation);
 			prefetchL2(&spriteAnimationReplicator);
+			prefetchL2(&transform2D);
 		}
 	
 	protected:
-		ReplicatorFamily(SpriteComponent& sprite, SpriteAnimationComponent& spriteAnimation, const SpriteAnimationReplicatorComponent& spriteAnimationReplicator)
+		ReplicatorFamily(SpriteComponent& sprite, SpriteAnimationComponent& spriteAnimation, const SpriteAnimationReplicatorComponent& spriteAnimationReplicator, const Transform2DComponent& transform2D)
 			: sprite(sprite)
 			, spriteAnimation(spriteAnimation)
 			, spriteAnimationReplicator(spriteAnimationReplicator)
+			, transform2D(transform2D)
 		{
 		}
 	};

@@ -157,6 +157,7 @@ namespace Halley
 		const AnimationSequence& getSequence(size_t idx) const;
 		size_t getSequenceIdx(std::string_view name) const;
 		const AnimationDirection& getDirection(const String& name) const;
+		int getDirectionIdx(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
 		Vector<String> getSequenceNames() const;
 		Vector<String> getDirectionNames() const;

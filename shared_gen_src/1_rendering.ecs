@@ -223,6 +223,7 @@ system:
     - SpriteAnimation: write
     - SpriteAnimationEvents: optional write
   - replicator:
+    - Transform2D: read
     - Sprite: write
     - SpriteAnimationReplicator: read
     - SpriteAnimation: write

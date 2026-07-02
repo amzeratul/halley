@@ -76,6 +76,8 @@ public:
 	uint16_t getSubWorldRevision() const { return subWorldRevision; }
 	Halley::WorldPartitionId getWorldPartition() const { return worldPartition; }
 
+	uint16_t getDepth() const { return depth; }
+
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
 	void deserializeNetwork(const Halley::ByteSerializationContext& context, Halley::Deserializer& deserializer);
 
@@ -90,8 +92,9 @@ private:
 	mutable int16_t cachedSubWorld = 0;
 	mutable float cachedGlobalHeight;
 	mutable Halley::Vector2f cachedGlobalPos;
-	mutable Halley::Angle1f cachedGlobalRotation;
 	mutable Halley::Vector2f cachedGlobalScale;
+	mutable Halley::Angle1f cachedGlobalRotation;
+	mutable uint16_t depth = 0;
 
 	mutable Halley::EntityRef entity;
 
@@ -111,7 +114,7 @@ private:
 
 	void updateParentTransform();
 	void markDirty(CachedIndices index);
-	void markDirty(DirtyPropagationMode mode, int depth = 0, uint8_t changeMask = (uint8_t)0xFF) const;
+	void markDirty(DirtyPropagationMode mode, int dirtyDepth = 0, uint8_t changeMask = (uint8_t)0xFF) const;
 	void markDirtyShallow(uint8_t changeMask) const;
 	bool isCached(CachedIndices index) const;
 	void setCached(CachedIndices index) const;

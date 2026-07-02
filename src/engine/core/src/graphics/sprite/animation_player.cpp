@@ -106,10 +106,11 @@ void AnimationPlayer::setDirection(int direction)
 {
 	updateResourceIfNeeded();
 
-	if (animation && dirId != direction) {
+	if (animation && (!curDir || curDir->getId() != direction)) {
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
 			curDir = newDir;
+			curDirName = newDir->getName();
 			dirFlip = curDir->shouldFlip();
 			dirId = curDir->getId();
 			dirty = true;
@@ -339,10 +340,15 @@ int AnimationPlayer::getCurrentSequenceLength() const
 	return static_cast<int>(seqLen);
 }
 
-String AnimationPlayer::getCurrentDirectionName() const
+const String& AnimationPlayer::getCurrentDirectionName() const
 {
 	updateResourceIfNeeded();
-	return curDir ? curDir->getName() : "default";
+	if (curDir) {
+		return curDir->getName();
+	} else {
+		static String defStr = "default";
+		return defStr;		
+	}
 }
 
 int AnimationPlayer::getCurrentDirectionId() const

@@ -10,8 +10,9 @@ public:
 	}
 
 	void update(Time time) {
-		updateAnimators(time);
-		updateReplicators();
+		const auto viewPort = getViewPort();
+		updateAnimators(time, viewPort);
+		updateReplicators(viewPort);
 	}
 
 	void onMessageReceived(const PlayAnimationMessage& msg, MainFamily& e) override
@@ -72,11 +73,10 @@ private:
 		return getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
 	}
 
-	void updateAnimators(Time time)
+	void updateAnimators(Time time, Rect4f viewPort)
 	{
-		const auto viewPort = getViewPort();
 		for (auto& e : mainFamily) {
-			if (!isCulledByFixedBounds(e, viewPort)) {
+			if (!isCulledByFixedBounds(e.transform2D, e.spriteAnimation, viewPort)) {
 				e.spriteAnimation.player.update(time);
 				updateSprite(e, viewPort, false);
 			}
@@ -84,30 +84,40 @@ private:
 		}
 	}
 
-	bool isCulledByFixedBounds(const MainFamily& e, const Rect4f& viewPort) const
+	bool isCulledByFixedBounds(const Transform2DComponent& transform2D, const SpriteAnimationComponent& spriteAnimation, const Rect4f& viewPort) const
 	{
-		if (e.spriteAnimation.cullBounds) {
-			return !viewPort.overlaps(e.transform2D.getGlobalPositionWithHeight() + *e.spriteAnimation.cullBounds);
+		if (spriteAnimation.cullBounds) {
+			return !viewPort.overlaps(transform2D.getGlobalPositionWithHeight() + *spriteAnimation.cullBounds);
 		}
 		return false;
 	}
 
-	Rect4f getAnimationBounds(const MainFamily& e) const
+	Rect4f getAnimationBounds(const Transform2DComponent& transform2D, const SpriteAnimationComponent& spriteAnimation) const
 	{
-		auto& player = e.spriteAnimation.player;
+		auto& player = spriteAnimation.player;
 		const auto nextBounds = Rect4f(player.getAnimation().getBounds());
 		if (player.getAnimation().getMaterial()->getDefinition().hasTagIdx(MaterialTags::NoRotate)) {
-			return Rect4f(e.transform2D.transformPointWithHeightNoRotate(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeightNoRotate(nextBounds.getBottomRight()));
+			return Rect4f(transform2D.transformPointWithHeightNoRotate(nextBounds.getTopLeft()), transform2D.transformPointWithHeightNoRotate(nextBounds.getBottomRight()));
 		} else {
-			return Rect4f(e.transform2D.transformPointWithHeight(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
+			return Rect4f(transform2D.transformPointWithHeight(nextBounds.getTopLeft()), transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
 		}
+	}
+
+	bool isInBounds(const Transform2DComponent& transform2D, const SpriteComponent& sprite, const SpriteAnimationComponent& spriteAnimation, const Rect4f& viewPort) const
+	{
+		return sprite.sprite.getAABB().overlaps(viewPort) || getAnimationBounds(transform2D, spriteAnimation).overlaps(viewPort);
+	}
+
+	bool isInBoundsWithCull(const Transform2DComponent& transform2D, const SpriteComponent& sprite, const SpriteAnimationComponent& spriteAnimation, const Rect4f& viewPort) const
+	{
+		return !isCulledByFixedBounds(transform2D, spriteAnimation, viewPort) && isInBounds(transform2D, sprite, spriteAnimation, viewPort);
 	}
 
 	void updateSprite(MainFamily& e, Rect4f viewPort, bool ignoreBounds)
 	{
 		auto& player = e.spriteAnimation.player;
 		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
-			if (ignoreBounds || e.sprite.sprite.getAABB().overlaps(viewPort) || getAnimationBounds(e).overlaps(viewPort)) {
+			if (ignoreBounds || isInBounds(e.transform2D, e.sprite, e.spriteAnimation, viewPort)) {
 				player.updateSprite(e.sprite.sprite);
 			}
 		}
@@ -158,60 +168,38 @@ private:
 		}
 	}
 
-	void updateReplicators()
+	Vector<Vector<ReplicatorFamily*>> replicatorsPerLevel;
+
+	void updateReplicators(Rect4f viewPort)
 	{
-		// Because replicators can be nested, this needs to be a multi-step algorithm
-		// This ensures that a parent's replicator is always updated before the child's, avoiding introducing frame delays
+		replicatorsPerLevel.resize(std::max<size_t>(replicatorsPerLevel.size(), 8));
+		for (auto& l: replicatorsPerLevel) {
+			l.clear();
+		}
 
-		HashSet<EntityId> replicatorsUpdated;
-		HashSet<EntityId> availableReplicators;
-		HashMap<EntityId, Vector<EntityId>> dependencies;
-		std::deque<EntityId> toReplicate;
+		for (auto& e : replicatorFamily) {
+			if (true || isInBoundsWithCull(e.transform2D, e.sprite, e.spriteAnimation, viewPort)) { // can't cull as sprite replicating might be in view when this isn't
+				auto depth = e.transform2D.getDepth();
+				if (replicatorsPerLevel.size() <= depth) {
+					replicatorsPerLevel.resize(nextPowerOf2(depth + 1));
+				}
+				replicatorsPerLevel[depth].push_back(&e);
+			}
+		}
 
-		auto tryReplicating = [&] (EntityId id)
-		{
-			auto entity = getWorld().getEntity(id);
-			if (const auto parent = entity.tryGetParent(); parent.has_value()) {
-				if (const auto* parentAnimation = parent->tryGetComponent<SpriteAnimationComponent>()) {
-					const bool parentHasReplicator = availableReplicators.contains(parent->getEntityId());
-					if (parentHasReplicator && !replicatorsUpdated.contains(parent->getEntityId())) {
-						// We'll do this one later
-						dependencies[parent->getEntityId()].push_back(id);
-						return;
-					}
+		for (const auto& level: replicatorsPerLevel) {
+			for (const auto& replicator: level) {
+				auto e = getWorld().getEntity(replicator->entityId);
+				if (auto parent = e.tryGetParent()) {
+					if (const auto* parentAnimation = parent->tryGetComponent<SpriteAnimationComponent>()) {
+						replicator->spriteAnimation.player.syncWith(parentAnimation->player, false);
 
-					// These two are guaranteed to be here by the family
-					auto& spriteAnimation = entity.getComponent<SpriteAnimationComponent>();
-					auto& sprite = entity.getComponent<SpriteComponent>();
-
-					spriteAnimation.player.syncWith(parentAnimation->player, false);
-					if (spriteAnimation.updateSprite && spriteAnimation.player.hasAnimation()) {
-						spriteAnimation.player.updateSprite(sprite.sprite);
-					}
-					replicatorsUpdated.emplace(id);
-
-					if (dependencies.contains(id)) {
-						for (const auto child: dependencies.at(id)) {
-							toReplicate.push_back(child);
+						if (replicator->spriteAnimation.updateSprite && replicator->spriteAnimation.player.hasAnimation() && isInBoundsWithCull(replicator->transform2D, replicator->sprite, replicator->spriteAnimation, viewPort)) {
+							replicator->spriteAnimation.player.updateSprite(replicator->sprite.sprite);
 						}
 					}
 				}
 			}
-		};
-
-		// Try the originals...
-		for (auto& e : replicatorFamily) {
-			availableReplicators.emplace(e.entityId);
-		}
-		for (auto& e : replicatorFamily) {
-			tryReplicating(e.entityId);
-		}
-
-		// Anything that needed to wait on parent is waiting here, keep going until this is empty
-		while (!toReplicate.empty()) {
-			const auto e = toReplicate.front();
-			toReplicate.pop_front();
-			tryReplicating(e);
 		}
 	}
 };

@@ -51,7 +51,7 @@ namespace Halley
 		int getCurrentSequenceLoopCount() const;
 		int getCurrentSequenceLength() const;
 
-		String getCurrentDirectionName() const;
+		const String& getCurrentDirectionName() const;
 		int getCurrentDirectionId() const;
 		bool isFlipped() const;
 

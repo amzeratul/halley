@@ -55,6 +55,7 @@ void Transform2DComponent::onWorldPartitionChanged()
 void Transform2DComponent::updateParentTransform()
 {
 	parentTransform = entity.hasParent() ? entity.getParent().tryGetComponent<Transform2DComponent>() : nullptr;
+	depth = parentTransform ? parentTransform->getDepth() + 1 : 0;
 }
 
 void Transform2DComponent::setLocalPosition(Vector2f v)
@@ -291,7 +292,7 @@ void Transform2DComponent::markDirty(uint8_t changeMask)
 	markDirty(DirtyPropagationMode::Changed, 0, changeMask);
 }
 
-void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8_t changeMask) const
+void Transform2DComponent::markDirty(DirtyPropagationMode mode, int dirtyDepth, uint8_t changeMask) const
 {
 	// For "Changed" mode only:
 	// If cachedValues is zero, it means that nobody has read this (any read MUST set cachedValues to non-zero)
@@ -309,17 +310,19 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8
 			for (auto& c: entity.getRawChildren()) {
 				if (const auto childTransform = c->tryGetComponent<Transform2DComponent>()) {
 					// Propagate change on all bits of the flag, since they all potentially affect others
-					childTransform->markDirty(mode, depth + 1, childChangeMask);
+					childTransform->markDirty(mode, dirtyDepth + 1, childChangeMask);
 				}
 			}
 		}
 
 		// For the level immediately below the forced updated, the entity should also re-get parent transform as it might be new or gone
-		if (depth == 1) {
+		if (dirtyDepth == 1) {
 			if (mode == DirtyPropagationMode::Added) {
 				parentTransform = entity.getParent().tryGetComponent<Transform2DComponent>();
+				depth = parentTransform ? parentTransform->getDepth() + 1 : 0;
 			} else if (mode == DirtyPropagationMode::Removed) {
 				parentTransform = nullptr;
+				depth = 0;
 			}
 		}
 	}

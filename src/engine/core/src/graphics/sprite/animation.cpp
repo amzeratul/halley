@@ -356,6 +356,16 @@ const AnimationDirection& Animation::getDirection(const String& dirName) const
 	return directions[0];
 }
 
+int Animation::getDirectionIdx(const String& name) const
+{
+	for (int i = 0; i < static_cast<int>(directions.size()); ++i) {
+		if (directions[i].getName() == name) {
+			return i;
+		}
+	}
+	return 0;
+}
+
 const AnimationDirection& Animation::getDirection(int id) const
 {
 	HalleyAssertDev(id >= 0);
