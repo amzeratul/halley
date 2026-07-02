@@ -269,7 +269,7 @@ ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
 		return String::isInteger(value) ? ConfigNode(String::toInteger(value)) : ConfigNode(String::toFloat(value));
 	}
 
-	return ConfigNode(origValue);
+	return origValue.makeReference();
 }
 
 
