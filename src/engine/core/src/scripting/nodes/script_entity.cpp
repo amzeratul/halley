@@ -328,22 +328,20 @@ String ScriptEntityReference::getPinDescription(const BaseGraphNode& node, PinTy
 
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	auto key = node.getSettings()["key"].asString("");
+	const auto* scriptable = environment.tryGetComponent<ScriptableComponent>(readEntityId(environment, node, 3));
+	if (!scriptable) {
+		return {};
+	}
+	const auto& refs = scriptable->entityReferences;
+
+	// Note: both asStringView() below need to happen in the same sequence point as the node retrieval to avoid lifetime invalidation
+
+	String buffer;
 	if (node.getPin(2).hasConnection()) {
-		key = readDataPin(environment, node, 2).asString();
+		return refs.value_or(readDataPin(environment, node, 2).asStringView(&buffer), {});
+	} else {
+		return refs.value_or(node.getSettings()["key"].asStringView("", &buffer), {});
 	}
-	if (key.isEmpty()) {
-		return {};
-	}
-
-	const auto entityRef = environment.tryGetEntity(readEntityId(environment, node, 3));
-	const auto& references = entityRef.getComponent<ScriptableComponent>().entityReferences;
-	const auto find = references.find(key);
-	if (find == references.end()) {
-		return {};
-	}
-
-	return find->second;
 }
 
 ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -468,9 +466,14 @@ String ScriptEntityTargetReference::getLargeLabel(const BaseGraphNode& node) con
 
 EntityId ScriptEntityTargetReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	auto targetId = readDataPin(environment, node, 2).asString("");
+	const auto& targetNode = readDataPin(environment, node, 2);
+
+	String buffer;
+	String buffer2;
+	auto targetId = targetNode.asStringView("", &buffer);
+
 	const bool warnIfMissing = node.getSettings()["warnIfMissing"].asBool(true);
-	return environment.getScriptTarget(targetId.isEmpty() ? node.getSettings()["scriptTargetId"].asString("") : targetId, warnIfMissing);
+	return environment.getScriptTarget(targetId.empty() ? node.getSettings()["scriptTargetId"].asStringView("", &buffer2) : targetId, warnIfMissing);
 }
 
 ConfigNode ScriptEntityTargetReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
