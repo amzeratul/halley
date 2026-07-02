@@ -28,7 +28,7 @@ namespace Halley
 			Vector3f pos;
 			Vector3f velocity;
 			AudioAttenuation attenuation;
-			Polygon polygon;
+			ValuePtr<Polygon> polygon;
 		};
 
 		AudioPosition();
@@ -52,7 +52,7 @@ namespace Halley
 		float getDopplerShift(const AudioListenerData& listener) const;
 
 	private:
-		Vector<SpatialSource> sources;
+		Vector<SpatialSource, std::allocator<SpatialSource>, 64, true, 16> sources;
 		float uiPan = 0;
 		bool isUI = false;
 		bool isPannable = false;

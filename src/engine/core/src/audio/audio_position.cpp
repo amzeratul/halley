@@ -9,6 +9,7 @@ AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Vector2f vel, float re
 	: pos(pos)
 	, velocity(vel)
 	, attenuation(AudioAttenuation(referenceDistance, maxDistance))
+	, polygon(std::nullopt)
 {
 }
 
@@ -16,6 +17,7 @@ AudioPosition::SpatialSource::SpatialSource(Vector3f pos, Vector3f vel, float re
 	: pos(pos)
 	, velocity(vel)
 	, attenuation(AudioAttenuation(referenceDistance, maxDistance))
+	, polygon(std::nullopt)
 {
 }
 
@@ -23,6 +25,7 @@ AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Vector2f vel, AudioAtt
 	: pos(pos)
 	, velocity(vel)
 	, attenuation(attenuation)
+	, polygon(std::nullopt)
 {
 }
 
@@ -38,6 +41,7 @@ AudioPosition::SpatialSource::SpatialSource(Vector3f pos, Vector3f vel, AudioAtt
 	: pos(pos)
 	, velocity(vel)
 	, attenuation(attenuation)
+	, polygon(std::nullopt)
 {
 }
 
@@ -45,6 +49,7 @@ AudioPosition::AudioPosition()
 	: isUI(true)
 	, isPannable(false)
 {
+	static_assert(sources.sbo_max_objects() == 1);
 }
 
 AudioPosition AudioPosition::makeUI(float pan)
@@ -176,9 +181,9 @@ namespace {
 		}
 	}
 
-	void getPanAndDistance(Vector3f pos, const Polygon& polygon, const AudioListenerData& listener, float& pan, float& distance, float maxDist)
+	void getPanAndDistance(Vector3f pos, const Polygon* polygon, const AudioListenerData& listener, float& pan, float& distance, float maxDist)
 	{
-		const auto effectivePos = getSourcePosition(pos, polygon, listener, maxDist);
+		const auto effectivePos = polygon ? getSourcePosition(pos, *polygon, listener, maxDist) : pos;
 		return getPanAndDistance(effectivePos, listener, pan, distance);
 	}
 }
@@ -252,7 +257,7 @@ AudioPosition::AttenuationResult AudioPosition::getAttenuationAndPanPositional(c
 
 	if (sources.size() == 1) {
 		// One source, do the simple algorithm
-		getPanAndDistance(sources[0].pos, sources[0].polygon, listener, resultPan, distance, sources[0].attenuation.maximumDistance);
+		getPanAndDistance(sources[0].pos, sources[0].polygon.get(), listener, resultPan, distance, sources[0].attenuation.maximumDistance);
 		attenuation = attenuationOverride.value_or(sources[0].attenuation).getProximity(distance);
 	} else {
 		// Multiple sources, average them
@@ -262,7 +267,7 @@ AudioPosition::AttenuationResult AudioPosition::getAttenuationAndPanPositional(c
 		for (auto& s: sources) {
 			float localPan;
 			float len;
-			getPanAndDistance(s.pos, s.polygon, listener, localPan, len, s.attenuation.maximumDistance);
+			getPanAndDistance(s.pos, s.polygon.get(), listener, localPan, len, s.attenuation.maximumDistance);
 			const float localProximity = attenuationOverride.value_or(s.attenuation).getProximity(len);
 
 			panAccum += localProximity * localPan;

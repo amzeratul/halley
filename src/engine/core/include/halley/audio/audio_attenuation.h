@@ -5,7 +5,7 @@
 
 namespace Halley {
 
-	enum class AudioAttenuationCurve {
+	enum class AudioAttenuationCurve : uint8_t {
 		None,
 		Linear,
 		InvDistance,
