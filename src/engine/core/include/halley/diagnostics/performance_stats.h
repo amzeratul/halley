@@ -72,6 +72,7 @@ namespace Halley
 			int64_t getMedian() const;
 			int64_t getThirdQuartile() const;
 			int64_t getMaximum() const;
+			int64_t getLatest() const;
 
 			int64_t getHistoricalMinimum() const;
 			int64_t getHistoricalMaximum() const;

@@ -264,7 +264,7 @@ void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int6
 	highestEver = std::max(highestEver, value);
 	lowestEver = std::min(lowestEver, value);
 
-	size_t sampleRange = 120;
+	size_t sampleRange = 240;
 	if (framesSinceLastVisit == 0 && !samples.empty()) {
 		++instanceCounter;
 		if (samples.size() < sampleRange) {
@@ -318,6 +318,17 @@ int64_t PerformanceStatsView::EventHistoryData::getMaximum() const
 {
 	sortIfNeeded();
 	return sortedSamples.back();
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getLatest() const
+{
+	if (samples.empty()) {
+		return 0;
+	} else if (samplePos == 0) {
+		return samples.back();
+	} else {
+		return samples[samplePos - 1];
+	}
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getHistoricalMaximum() const
@@ -790,6 +801,7 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 		int64_t median;
 		int64_t thirdQuartile;
 		int64_t maximum;
+		int64_t latest;
 		Colour4f colour;
 		int instances;
 
@@ -801,13 +813,14 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 
 	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
 
-	const auto drawBoxPlot = [&] (const CurEventData& system, Rect4f rect, float scale, Colour4f colour)
+	const auto drawBoxPlot = [&] (const CurEventData& eventData, Rect4f rect, float scale, Colour4f colour)
 	{
-		const float minimum = system.minimum * scale;
-		const float firstQuartile = system.firstQuartile * scale;
-		const float median = system.median * scale;
-		const float thirdQuartile = system.thirdQuartile * scale;
-		const float maximum = system.maximum * scale;
+		const float minimum = eventData.minimum * scale;
+		const float firstQuartile = eventData.firstQuartile * scale;
+		const float median = eventData.median * scale;
+		const float thirdQuartile = eventData.thirdQuartile * scale;
+		const float maximum = eventData.maximum * scale;
+		const float latest = eventData.latest * scale;
 
 		const float everMargin = (rect.getHeight() - 1) / 2;
 
@@ -848,6 +861,12 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 			.scaleTo(Vector2f(2, rect.getHeight()))
 			.setColour(colour.inverseMultiplyLuma(0.2f))
 			.draw(painter);
+
+		whitebox.clone()
+			.setPos(rect.getCenterLeft() + Vector2f(std::floor(latest) - 2.0f, -2.0f))
+			.scaleTo(Vector2f(3, 3))
+			.setColour(Colour4f(1, 1, 1))
+			.draw(painter);
 	};
 
 	const std::array<float, 3> xPos = { 0, 410, 460 };
@@ -859,7 +878,7 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 	curEvents.reserve(eventHistory.size());
 	for (const auto& [k, v]: eventHistory) {
 		const auto col = getEventColour(v.getType());
-		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), col, v.getNumInstances() });
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), v.getLatest(), col, v.getNumInstances() });
 		maxTime = std::max(maxTime, curEvents.back().maximum);
 	}
 	std::sort(curEvents.begin(), curEvents.end());
