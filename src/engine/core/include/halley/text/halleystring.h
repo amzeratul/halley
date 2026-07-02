@@ -185,11 +185,14 @@ namespace Halley {
 		[[nodiscard]] int subToInteger(size_t start,size_t end) const;
 
 		[[nodiscard]] static int32_t toInteger(std::string_view str);
+		[[nodiscard]] static std::optional<int32_t> tryToInteger(std::string_view str);
 		[[nodiscard]] static int64_t toInteger64(std::string_view str);
 		[[nodiscard]] static uint32_t toUInteger(std::string_view str);
 		[[nodiscard]] static uint64_t toUInteger64(std::string_view str);
 		[[nodiscard]] static float toFloat(std::string_view str);
+		[[nodiscard]] static std::optional<float> tryToFloat(std::string_view str);
 		[[nodiscard]] static double toDouble(std::string_view str);
+		[[nodiscard]] static std::optional<double> tryToDouble(std::string_view str);
 
 		// std::string methods
 		[[nodiscard]] const char* c_str() const;

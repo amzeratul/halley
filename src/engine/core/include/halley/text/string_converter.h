@@ -117,28 +117,28 @@ namespace Halley
 		}
 
 		template<typename T>
-		static T fromString(const String& str)
+		static T fromString(std::string_view str)
 		{
 			if constexpr (std::is_enum_v<T>) {
 				EnumNames<T> n;
 				auto names = n();
 				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
 				if (res == std::end(names)) {
-					Logger::logError("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".");
+					Logger::logError("String \"" + String(str) + "\" does not exist in enum \"" + typeid(T).name() + "\".");
 					return {};
 				}
 				return T(res - std::begin(names));
 			} else if constexpr (std::is_integral_v<T>) {
-				return str.toInteger();
+				return String::toInteger(str);
 			} else if constexpr (std::is_floating_point_v<T>) {
-				return str.toFloat();
+				return String::toFloat(str);
 			} else {
 				return T(str);
 			}
 		}
 
 		template<typename T>
-		static std::optional<T> tryFromString(const String& str)
+		static std::optional<T> tryFromString(std::string_view str)
 		{
 			if constexpr (std::is_enum_v<T>) {
 				EnumNames<T> n;
@@ -149,9 +149,9 @@ namespace Halley
 				}
 				return T(res - std::begin(names));
 			} else if constexpr (std::is_integral_v<T>) {
-				return str.isInteger() ? std::make_optional(str.toInteger()) : std::nullopt;
+				return String::isInteger(str) ? std::make_optional(String::toInteger(str)) : std::nullopt;
 			} else if constexpr (std::is_floating_point_v<T>) {
-				return str.isNumber() ? std::make_optional(str.toFloat()) : std::nullopt;
+				return String::isNumber(str) ? std::make_optional(String::toFloat(str)) : std::nullopt;
 			} else {
 				return T(str);
 			}
@@ -169,7 +169,7 @@ namespace Halley
 
 	template <typename T>
 	struct FromStringConverter {
-		T operator()(const String& s) const
+		T operator()(std::string_view s) const
 		{
 			return UserConverter::fromString<T>(s);
 		}
@@ -177,7 +177,7 @@ namespace Halley
 
 	template <typename T>
 	struct TryFromStringConverter {
-		std::optional<T> operator()(const String& s) const
+		std::optional<T> operator()(std::string_view s) const
 		{
 			return UserConverter::tryFromString<T>(s);
 		}
@@ -269,7 +269,7 @@ namespace Halley
 	template<>
 	struct ToStringConverter<std::string>
 	{
-		String operator()(const std::string& s) const
+		String operator()(std::string_view s) const
 		{
 			return String(s);
 		}
@@ -287,7 +287,7 @@ namespace Halley
 	template<>
 	struct FromStringConverter<bool>
 	{
-		bool operator()(const String& s) const
+		bool operator()(std::string_view s) const
 		{
 			return s == "true";
 		}
@@ -302,13 +302,13 @@ namespace Halley
 
 
 	template <typename T>
-	T fromString(const String& value)
+	T fromString(std::string_view value)
 	{
 		return FromStringConverter<T>()(value);
 	}
 
 	template <typename T>
-	std::optional<T> tryFromString(const String& value)
+	std::optional<T> tryFromString(std::string_view value)
 	{
 		return TryFromStringConverter<T>()(value);
 	}
@@ -442,32 +442,6 @@ namespace Halley
 			}
 		}
 	};
-
-	inline std::optional<int> stringViewToInt(const std::string_view& input)
-	{
-	    int out;
-	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
-	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
-	        return std::nullopt;
-	    }
-	    return out;
-	}
-
-	inline std::optional<float> stringViewToFloat(const std::string_view& input)
-	{
-		std::array<char, 16> buffer;
-		buffer.fill(0);
-		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
-		return static_cast<float>(std::atof(buffer.data()));
-	}
-
-	inline std::optional<double> stringViewToDouble(const std::string_view& input)
-	{
-		std::array<char, 16> buffer;
-		buffer.fill(0);
-		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
-		return std::atof(buffer.data());
-	}
 
 	template <typename T>
 	String String::concat(gsl::span<const T> list, std::string_view separator)

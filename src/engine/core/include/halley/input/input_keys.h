@@ -310,9 +310,9 @@ namespace Halley {
 		static String toName(KeyCode code);
 		static String toName(KeyMods mods);
 		static std::optional<String> tryToName(KeyCode code);
-		static KeyCode fromString(const String& str);
-		static std::optional<KeyCode> tryFromString(const String& str);
-		static std::pair<KeyCode, KeyMods> fromStringWithMods(const String& str);
+		static KeyCode fromString(std::string_view str);
+		static std::optional<KeyCode> tryFromString(std::string_view str);
+		static std::pair<KeyCode, KeyMods> fromStringWithMods(std::string_view str);
 	};
 	
 	template<>
@@ -327,7 +327,7 @@ namespace Halley {
 	template<>
 	struct FromStringConverter<KeyCode>
 	{
-		KeyCode operator()(const String& s) const
+		KeyCode operator()(std::string_view s) const
 		{
 			return KeyCodes::fromString(s);
 		}
@@ -335,7 +335,7 @@ namespace Halley {
 
 	template <>
 	struct TryFromStringConverter<KeyCode> {
-		std::optional<KeyCode> operator()(const String& s) const
+		std::optional<KeyCode> operator()(std::string_view s) const
 		{
 			return KeyCodes::tryFromString(s);
 		}

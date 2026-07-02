@@ -1240,6 +1240,15 @@ int32_t String::toInteger(std::string_view str)
 	return stringToInteger<int32_t>(str);
 }
 
+std::optional<int32_t> String::tryToInteger(std::string_view str)
+{
+	if (isInteger(str)) {
+		return toInteger(str);
+	} else {
+		return std::nullopt;
+	}
+}
+
 int64_t String::toInteger64(std::string_view str)
 {
 	return stringToInteger<int64_t>(str);
@@ -1260,9 +1269,27 @@ float String::toFloat(std::string_view str)
 	return stringToFloat<float>(str);
 }
 
+std::optional<float> String::tryToFloat(std::string_view str)
+{
+	if (isNumber(str)) {
+		return toFloat(str);
+	} else {
+		return std::nullopt;
+	}
+}
+
 double String::toDouble(std::string_view str)
 {
 	return stringToFloat<double>(str);
+}
+
+std::optional<double> String::tryToDouble(std::string_view str)
+{
+	if (isNumber(str)) {
+		return toDouble(str);
+	} else {
+		return std::nullopt;
+	}
 }
 
 String String::replaceAll(std::string_view before, std::string_view after) const

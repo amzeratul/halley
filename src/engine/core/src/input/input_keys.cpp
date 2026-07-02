@@ -201,17 +201,17 @@ std::optional<String> KeyCodes::tryToName(KeyCode code)
 	return toName[idx];
 }
 
-KeyCode KeyCodes::fromString(const String& str)
+KeyCode KeyCodes::fromString(std::string_view str)
 {
 	if (auto result = tryFromString(str)) {
 		return *result;
 	} else {
-		Logger::logError("Unable to convert \"" + str + "\" to keycode.");
+		Logger::logError("Unable to convert \"" + String(str) + "\" to keycode.");
 		return KeyCode::Unknown;
 	}
 }
 
-std::optional<KeyCode> KeyCodes::tryFromString(const String& str)
+std::optional<KeyCode> KeyCodes::tryFromString(std::string_view str)
 {
 	const auto& toKeyCode = getMapping().toKeyCode;
 	if (const auto iter = toKeyCode.find(str); iter != toKeyCode.end()) {
@@ -220,7 +220,7 @@ std::optional<KeyCode> KeyCodes::tryFromString(const String& str)
 	return std::nullopt;
 }
 
-std::pair<KeyCode, KeyMods> KeyCodes::fromStringWithMods(const String& str)
+std::pair<KeyCode, KeyMods> KeyCodes::fromStringWithMods(std::string_view str)
 {
 	KeyMods mods = KeyMods::None;
 	KeyCode code = KeyCode::Unknown;

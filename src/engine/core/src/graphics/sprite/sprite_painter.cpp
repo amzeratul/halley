@@ -169,7 +169,7 @@ SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 {
 	setHandle("halley.texSize", [] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		if (const auto idx = stringViewToInt(autoVarArgs)) {
+		if (const auto idx = String::tryToInteger(autoVarArgs)) {
 			const auto tex = material.getTexture(*idx);
 			material.set(uniformName, tex ? Vector2f(tex->getSize()) : Vector2f());
 		}
@@ -177,14 +177,14 @@ SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 	
 	setHandle("halley.texRect", [] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		if (const auto idx = stringViewToInt(autoVarArgs)) {
+		if (const auto idx = String::tryToInteger(autoVarArgs)) {
 			material.set(uniformName, (idx == 0 ? sprite.getTexRect0() : (idx == 1 ? sprite.getTexRect1() : Rect4f())).toVector4());
 		}
 	});
 
 	setHandle("halley.texBPP", [] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		if (const auto idx = stringViewToInt(autoVarArgs)) {
+		if (const auto idx = String::tryToInteger(autoVarArgs)) {
 			const auto tex = material.getTexture(*idx);
 			material.set(uniformName, tex ? TextureDescriptor::getBytesPerPixel(tex->getDescriptor().format) : 1);
 		}
@@ -192,7 +192,7 @@ SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 
 	setHandle("halley.timeLoop", [this] (const Sprite& sprite, MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		if (const auto cycleLen = stringViewToDouble(autoVarArgs)) {
+		if (const auto cycleLen = String::tryToDouble(autoVarArgs)) {
 			const auto value = std::fmod(curTime / *cycleLen, 1.0);
 			material.set(uniformName, static_cast<float>(value));
 		}
