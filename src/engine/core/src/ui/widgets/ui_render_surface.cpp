@@ -15,6 +15,7 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 	, scale(1, 1)
 {
 	material = resources.get<MaterialDefinition>(materialName)->createMaterial();
+	spritePainters.resize(2);
 }
 
 // Update thread
@@ -39,13 +40,18 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 		return;
 	}
 
+	if (!spritePainters[curPainter]) {
+		spritePainters[curPainter] = std::make_shared<SpritePainter>();
+	}
+
 	RenderParams params;
-	params.spritePainter = std::make_unique<SpritePainter>();
+	params.spritePainter = spritePainters[curPainter];
 	params.pos = getPosition();
 	params.size = innerSize + innerSize % Vector2f(2, 2);
 	params.colour = colour;
 	params.scale = scale;
 	params.mask = origPainter.getMask();
+	curPainter = (curPainter + 1) % spritePainters.size();
 
 	auto clip = origPainter.getClip();
 	if (clip) {

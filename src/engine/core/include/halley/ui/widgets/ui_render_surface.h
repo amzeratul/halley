@@ -67,7 +67,7 @@ namespace Halley {
             Vector2f scale;
             Vector4f border;
 		    Colour4f colour;
-			std::unique_ptr<SpritePainter> spritePainter;
+			std::shared_ptr<SpritePainter> spritePainter;
             Camera camera;
         };
 
@@ -83,6 +83,9 @@ namespace Halley {
         mutable FrameDataSync<RenderParams> paramsSync;
         mutable std::optional<RenderParams> renderParams;
         mutable Vector2f origScale;
+
+        mutable Vector<std::shared_ptr<SpritePainter>> spritePainters;
+        mutable size_t curPainter = 0;
 
         void drawOnPainter(Painter& painter) const;
     };
