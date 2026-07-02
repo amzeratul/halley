@@ -24,12 +24,12 @@ namespace Halley {
         {}
 
         ValuePtr(const ValuePtr& other)
-            : data(std::make_unique<T>(*other.data))
+            : data(other.data ? std::make_unique<T>(*other.data) : std::unique_ptr<T>())
         {
         }
 
-        ValuePtr(ValuePtr&& other)
-            : data(std::move(other.data))
+        ValuePtr(ValuePtr&& other) noexcept
+	        : data(std::move(other.data))
         {
         }
 
@@ -38,12 +38,16 @@ namespace Halley {
         ValuePtr& operator=(const ValuePtr& other)
         {
             if (this != &other) [[likely]] {
-	            *data = *other.data;
+                if (other.data) {
+		            *data = *other.data;
+                } else {
+	                data = {};
+                }
             }
             return *this;
         }
 
-        ValuePtr& operator=(ValuePtr&& other)
+        ValuePtr& operator=(ValuePtr&& other) noexcept
         {
             if (this != &other) [[likely]] {
 	            data = std::move(other.data);
