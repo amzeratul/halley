@@ -272,13 +272,7 @@ void Texture::setAlphaMask(ImageMask mask)
 bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
 {
 	if (mask.getSize() != Vector2i()) {
-		const auto rect = pixelBounds.grow(0, 0, 1, 1).intersection(mask.getRect());
-
-		for (const auto pos: rect) {
-			if (mask.isSet(pos)) {
-				return true;
-			}
-		}
+		return mask.isAnyPointSet(pixelBounds.grow(0, 0, 1, 1));
 	}
 
 	return false;

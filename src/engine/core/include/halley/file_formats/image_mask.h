@@ -17,6 +17,8 @@ namespace Halley {
         bool isSet(Vector2i pos) const;
         void set(Vector2i pos, bool value);
 
+        bool isAnyPointSet(Rect4i rect) const;
+
         Vector2i getSize() const;
         Rect4i getRect() const;
         size_t getSizeBytes() const;

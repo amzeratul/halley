@@ -82,6 +82,26 @@ void ImageMask::set(Vector2i pos, bool value)
 	}
 }
 
+bool ImageMask::isAnyPointSet(Rect4i rect) const
+{
+	rect = rect.intersection(getRect());
+
+	const int y0 = rect.getTop();
+	const int y1 = rect.getBottom();
+	const int x0 = rect.getLeft();
+	const int x1 = rect.getRight();
+
+	for (int y = y0; y < y1; ++y) {
+		for (int x = x0; x < x1; ++x) {
+			if (isSet(Vector2i(x, y))) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 Vector2i ImageMask::getSize() const
 {
 	return size;
