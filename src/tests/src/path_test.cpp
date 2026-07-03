@@ -5,7 +5,7 @@ using namespace Halley;
 TEST(HalleyPath, Equality)
 {
 	EXPECT_EQ(Path(""), Path(""));
-	EXPECT_EQ(Path(""), Path(""));
+	EXPECT_EQ(Path("foo"), Path("foo"));
 	EXPECT_NE(Path("foo"), Path("bar"));
 	EXPECT_NE(Path("foo"), Path(""));
 }
@@ -65,7 +65,7 @@ TEST(HalleyPath, IsAbsolute)
 
 TEST(HalleyPath, GetFilename)
 {
-	EXPECT_EQ(Path("/foo").getFilename(), "");
+	EXPECT_EQ(Path("/foo").getFilename(), "foo");
 	EXPECT_EQ(Path("/foo/.").getFilename(), "");
 	EXPECT_EQ(Path(".png").getFilename(), ".png");
 	EXPECT_EQ(Path("bar.png").getFilename(), "bar.png");
@@ -91,8 +91,8 @@ TEST(HalleyPath, ReplaceExtension)
 {
 	EXPECT_EQ(Path(".png").replaceExtension(".txt"), ".txt");
 	EXPECT_EQ(Path("bar.png").replaceExtension(".txt"), "bar.txt");
-	EXPECT_EQ(Path("/foo/bar.png").replaceExtension(".txt"), "bar.txt");
-	EXPECT_EQ(Path("/foo/.png").replaceExtension(".txt"), ".txt");
-	EXPECT_EQ(Path("/foo/.foo.png").replaceExtension(".txt"), ".foo.txt");
-	EXPECT_EQ(Path("/foo/.foo...png").replaceExtension(".txt"), ".foo...txt");
+	EXPECT_EQ(Path("/foo/bar.png").replaceExtension(".txt"), "/foo/bar.txt");
+	EXPECT_EQ(Path("/foo/.png").replaceExtension(".txt"), "/foo/.txt");
+	EXPECT_EQ(Path("/foo/.foo.png").replaceExtension(".txt"), "/foo/.foo.txt");
+	EXPECT_EQ(Path("/foo/.foo...png").replaceExtension(".txt"), "/foo/.foo...txt");
 }

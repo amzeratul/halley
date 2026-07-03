@@ -100,7 +100,11 @@ Path& Path::operator=(String other)
 
 std::string_view Path::getFilename() const
 {
-	return getLastPart();
+	auto part = getLastPart();
+	if (part == ".") {
+		return {};
+	}
+	return part;
 }
 
 String Path::getFilenameStr() const
@@ -143,7 +147,10 @@ std::string_view Path::getExtension() const
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
-	size_t dotPos = filename.find_last_of('.');
+	const size_t dotPos = filename.find_last_of('.');
+	if (dotPos == std::string_view::npos) {
+		return {};
+	}
 	return filename.substr(dotPos);
 }
 
@@ -168,7 +175,7 @@ std::string_view Path::getPart(size_t idx) const
 	if (endPos == std::string_view::npos) {
 		return s.substr(startPos);
 	} else {
-		return s.substr(startPos, endPos - startPos - 1);
+		return s.substr(startPos, endPos - startPos);
 	}
 }
 
@@ -288,7 +295,7 @@ Path Path::parentPath() const
 Path Path::replaceExtension(std::string_view newExtension) const
 {
 	auto filenamePos = getLastPartPos();
-	const size_t dotPos = std::string_view(str).find_last_of('.', filenamePos);
+	const size_t dotPos = std::string_view(str).substr(filenamePos).find_last_of('.') + filenamePos;
 	if (dotPos == std::string_view::npos) {
 		return Path(str + newExtension);
 	} else {
