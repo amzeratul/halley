@@ -47,7 +47,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 			needsResampling = true;
 		}
 	} else {
-		throw Exception("Unsupported audio format: " + mainFile.getExtension(), HalleyExceptions::Tools);
+		throw Exception("Unsupported audio format: " + mainFile.getExtensionStr(), HalleyExceptions::Tools);
 	}
 
 	// Resample

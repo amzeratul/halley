@@ -2,6 +2,14 @@
 #include <halley.hpp>
 using namespace Halley;
 
+TEST(HalleyPath, Equality)
+{
+	EXPECT_EQ(Path(""), Path(""));
+	EXPECT_EQ(Path(""), Path(""));
+	EXPECT_NE(Path("foo"), Path("bar"));
+	EXPECT_NE(Path("foo"), Path(""));
+}
+
 TEST(HalleyPath, Normalization)
 {
 	EXPECT_NE(Path(""), Path("."));

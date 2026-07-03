@@ -665,7 +665,7 @@ public:
 
 	static String filterName(const String& name)
 	{
-		auto filename = Path(name).getFilename().toString();
+		auto filename = Path(name).getFilenameStr();
 		if (filename.contains(':')) {
 			const auto pos = filename.find_last_of(':');
 			return filename.mid(pos + 1);

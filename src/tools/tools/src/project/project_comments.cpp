@@ -269,7 +269,7 @@ Path ProjectComments::getPath(const UUID& id) const
 
 UUID ProjectComments::getUUID(const Path& path) const
 {
-	const auto filename = path.getFilename().replaceExtension("").toString();
+	const auto filename = path.replaceExtension("").getFilenameStr();
 	if (filename.startsWith("comment_") && filename.length() == 44) {
 		return UUID(filename.substr(8));
 	}

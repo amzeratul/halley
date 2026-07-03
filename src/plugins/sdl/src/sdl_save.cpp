@@ -125,7 +125,7 @@ Bytes SDLSaveData::getData(const String& filename)
 		return *data;
 	} else {
 		// Fallback to backup
-		data = doGetData(path.replaceExtension(path.getExtension() + ".bak"), filename);
+		data = doGetData(path.replaceExtension(path.getExtensionStr() + ".bak"), filename);
 		if (data) {
 			return *data;
 		} else {
@@ -139,7 +139,7 @@ void SDLSaveData::removeData(const String& path)
 	HalleyAssertDev(!path.isEmpty());
 	Path::removeFile(dir / path);
 	auto backupFile = dir / path;
-	backupFile = backupFile.replaceExtension(backupFile.getExtension() + ".bak");
+	backupFile = backupFile.replaceExtension(backupFile.getExtensionStr() + ".bak");
 	Path::removeFile(backupFile);
 }
 
@@ -190,7 +190,7 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit,
 		// We've read from this file safely before, so back it up!
 		// But don't do it for downloads, those don't count as highly sensitive data
 		if (type != SaveDataType::Downloads) {
-			backupPath = dstPath.replaceExtension(dstPath.getExtension() + ".bak");
+			backupPath = dstPath.replaceExtension(dstPath.getExtensionStr() + ".bak");
 		}
 	}
 
@@ -263,7 +263,7 @@ std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& file
 	// Final validation
 	if (header.v0.version >= 1 && header.v1.dataHash != Hash::hash(finalData)) {
 		Logger::logError("Corrupted save file: " + filename);
-		if (!path.getExtension().endsWith(".bak")) {
+		if (!path.getExtension().ends_with(".bak")) {
 			corruptedFiles.insert(path.getString());
 		}
 ;		return {};

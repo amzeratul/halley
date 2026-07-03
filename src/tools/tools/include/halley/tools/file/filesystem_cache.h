@@ -70,7 +70,6 @@ namespace Halley {
         DirEntry* tryGetDirectory(const Path& path);
         void readDirFromFilesystem(const Path& rootDir);
 
-        static bool isCaseSensitive();
         static Path getCaseCorrectedPath(Path p);
     };
 }

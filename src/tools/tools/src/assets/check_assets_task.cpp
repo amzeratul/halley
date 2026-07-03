@@ -205,7 +205,7 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		hasPrivateMeta = times->privateMeta.has_value();
 	} else {
 		timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
-		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
 		if (auto t = fileSystemCache.tryGetLastWriteTime(metaPath)) {
 			timestamps[2] = *t;
 			privateMetaPath = std::move(metaPath);
@@ -226,7 +226,7 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	const Metadata* metadata = db.markInputPresentIfUpToDate(pathKey, timestamps);
 	if (!metadata) {
 		if (hasPrivateMeta && !privateMetaPath) {
-			privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+			privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
 		}
 		Metadata meta = MetadataImporter::getMetaData(filePath, dirMeta->path, privateMetaPath);
 		if (skipGen) {
@@ -469,9 +469,9 @@ std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas
 {
 	std::optional<Path> longestPath;
 	for (const auto& m: metas) {
-		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
-			const auto n = m.getNumberPaths() - 1;
-			if (m.getParts().subspan(0, n) == parentDir.getParts().subspan(0, std::min(n, parentDir.getNumberPaths()))) {
+		if (!longestPath || longestPath->getNumberOfParts() < m.getNumberOfParts()) {
+			const auto n = m.getNumberOfParts() - 1;
+			if (m.getFront(n) == parentDir.getFront(std::min(n, parentDir.getNumberOfParts()))) {
 				longestPath = m;
 			}
 		}

@@ -209,7 +209,7 @@ void AssetBrowserTabs::populateTab(UIWidget& tab, std::optional<AssetType> asset
 		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
 		icon = factory.makeImportAssetTypeIcon(type);
 	}
-	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
+	auto label = LocalisedString::fromUserString(Path(name).getFilenameStr());
 	tab.getWidgetAs<UIImage>("icon")->setSprite(icon);
 	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
 	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
@@ -220,7 +220,7 @@ void AssetBrowserTabs::populateTab(UIWidget& tab, std::optional<AssetType> asset
 
 void AssetBrowserTabs::updateTab(UIWidget& tab, const String& name, const String& key)
 {
-	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
+	auto label = LocalisedString::fromUserString(Path(name).getFilenameStr());
 	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
 	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
 	{

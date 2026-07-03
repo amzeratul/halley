@@ -145,7 +145,7 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 			}
 		}
 		if (name.isEmpty()) {
-			name = Path(prefab->getAssetId()).getFilename().toString();
+			name = Path(prefab->getAssetId()).getFilename();
 		}
 
 		// Compute bounds

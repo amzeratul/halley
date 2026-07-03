@@ -58,11 +58,13 @@ void Path::normalise()
 
 std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
 {
+	return str;
+
 	HalleyAssertDev(buffer.size() >= str.size() + 1);
 
-#ifdef _WIN32
-	// TODO: on Windows, replace backslashes with forward slashes
-#endif
+	if (getPlatform() == GamePlatform::Windows) {
+		// TODO: on Windows, replace backslashes with forward slashes
+	}
 
 	// Normalises the path:
 	// Remove ".." plus whatever directory comes before: foo/bar/../baz -> foo/baz
@@ -73,12 +75,12 @@ std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
 	// TODO: do operations on buffer, and shrink it to the range it's using
 
 
-#ifdef _WIN32
-	// On Windows, make sure the drive name is uppercase
-	if (buffer.size() >= 2 && buffer[1] == ':' && buffer[0] >= 'a' && buffer[0] <= 'z') {
-		buffer[0] -= 32; // Make uppercase
+	if (getPlatform() == GamePlatform::Windows) {
+		// On Windows, make sure the drive name is uppercase
+		if (buffer.size() >= 2 && buffer[1] == ':' && buffer[0] >= 'a' && buffer[0] <= 'z') {
+			buffer[0] -= 32; // Make uppercase
+		}
 	}
-#endif
 
 	// Convert buffer to string_view
 	return std::string_view(buffer.data(), buffer.size());
@@ -101,6 +103,11 @@ std::string_view Path::getFilename() const
 	return getLastPart();
 }
 
+String Path::getFilenameStr() const
+{
+	return String(getFilename());
+}
+
 std::string_view Path::getDirName() const
 {
 	const auto [prev, cur] = getLastTwoParts();
@@ -108,6 +115,11 @@ std::string_view Path::getDirName() const
 		return prev;
 	}
 	return "";
+}
+
+String Path::getDirNameStr() const
+{
+	return getDirName();
 }
 
 std::string_view Path::getStem() const
@@ -120,6 +132,11 @@ std::string_view Path::getStem() const
 	return filename.substr(0, dotPos);
 }
 
+String Path::getStemStr() const
+{
+	return getStem();
+}
+
 std::string_view Path::getExtension() const
 {
 	const auto filename = getFilename();
@@ -128,6 +145,11 @@ std::string_view Path::getExtension() const
 	}
 	size_t dotPos = filename.find_last_of('.');
 	return filename.substr(dotPos);
+}
+
+String Path::getExtensionStr() const
+{
+	return getExtension();
 }
 
 std::string_view Path::getPart(size_t idx) const
@@ -213,10 +235,10 @@ size_t Path::getNumberOfParts() const
 
 std::string Path::string() const
 {
-	return std::string(getString(true));
+	return std::string(getStringView(true));
 }
 
-std::string_view Path::getString(bool includeDot) const
+std::string_view Path::getStringView(bool includeDot) const
 {
 	auto result = std::string_view(str);
 	if (!includeDot && result.ends_with("/.")) {
@@ -225,13 +247,14 @@ std::string_view Path::getString(bool includeDot) const
 	return result;
 }
 
+String Path::getString(bool includeDot) const
+{
+	return String(getStringView(includeDot));
+}
+
 String Path::getNativeString(bool includeDot) const
 {
-#ifdef _WIN32
-	constexpr char separator = '\\';
-#else
-	constexpr char separator = '/';
-#endif
+	constexpr char separator = getPlatform() == GamePlatform::Windows ? '\\' : '/';
 
 	String str = getString(includeDot);
 	if (separator != '/') {
@@ -246,7 +269,7 @@ String Path::getNativeString(bool includeDot) const
 
 String Path::toString() const
 {
-	return String(getString(true));
+	return getString(true);
 }
 
 Path Path::dropFront(int numberFolders) const
@@ -292,12 +315,12 @@ Path Path::operator/(std::string_view other) const
 {
 	std::array<char, 2048> buffer1;
 	std::array<char, 2048> buffer2;
-	return Path(normalise(buffer2, String::concatInBuffer(buffer1, getString(false), "/", other)));
+	return Path(normalise(buffer2, String::concatInBuffer(buffer1, getStringView(false), "/", other)));
 }
 
 Path Path::operator/(const Path& other) const 
 {
-	return operator/(other.getString(true));
+	return operator/(other.getStringView(true));
 }
 
 bool Path::operator==(const char* other) const
@@ -469,7 +492,7 @@ void Path::removeFile(const Path& path)
 
 bool Path::isPrefixOf(const Path& other) const
 {
-	auto name = getString(false);
+	auto name = getStringView(false);
 	return other.str.startsWith(name);
 }
 
@@ -596,6 +619,16 @@ Vector<Path> Path::enumerateDirectory(bool makeRelative) const
 		}
 	}
 	return result;
+}
+
+void Path::makeLowerCase()
+{
+	str.asciiMakeLower();
+}
+
+bool Path::isCaseSensitive()
+{
+	return getPlatform() != GamePlatform::Windows && getPlatform() != GamePlatform::MacOS;
 }
 
 #else

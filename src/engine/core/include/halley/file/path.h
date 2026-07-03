@@ -25,14 +25,20 @@ namespace Halley
 		std::string_view getRoot() const;
 		Path getFront(size_t n) const;
 		std::string_view getFilename() const;
+		String getFilenameStr() const;
 		std::string_view getDirName() const;
+		String getDirNameStr() const;
 		std::string_view getStem() const;
+		String getStemStr() const;
 		std::string_view getExtension() const;
-		std::string_view getString(bool includeDot = true) const;
+		String getExtensionStr() const;
+		std::string_view getStringView(bool includeDot = true) const;
+		String getString(bool includeDot = true) const;
 		String getNativeString(bool includeDot = true) const;
 		String toString() const;
 
 		size_t getNumberOfParts() const;
+		std::string_view getPart(size_t idx) const;
 
 		Path dropFront(int numberFolders) const;
 
@@ -79,6 +85,9 @@ namespace Halley
 
 		Vector<Path> enumerateDirectory(bool makeRelative) const;
 
+		void makeLowerCase();
+		static bool isCaseSensitive();
+
 	private:
 		String str;
 
@@ -86,7 +95,6 @@ namespace Halley
 		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
 		void setPath(String value);
 
-		std::string_view getPart(size_t idx) const;
 		std::string_view getFrontParts(size_t n) const;
 		std::string_view getLastPart() const;
 		size_t getLastPartPos() const;

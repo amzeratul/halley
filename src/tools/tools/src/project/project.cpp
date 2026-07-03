@@ -433,7 +433,7 @@ GameProperties& Project::getGameProperties() const
 Metadata Project::readMetadataFromDisk(const Path& filePath) const
 {
 	Metadata metadata;
-	const Path metaPath = filePath.replaceExtension(filePath.getExtension() + ".meta");
+	const Path metaPath = filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
 	MetadataImporter::loadMetaData(metadata, metaPath, false, filePath);
 	return metadata;
 }
@@ -445,7 +445,7 @@ void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata
 	auto data = Bytes(str.size());
 	memcpy(data.data(), str.c_str(), str.size());
 
-	const Path metaPath = filePath.replaceExtension(filePath.getExtension() + ".meta");
+	const Path metaPath = filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
 	fileSystemCache->writeFile(metaPath, data);
 	notifyAssetFilesModified(gsl::span<const Path>(&filePath, 1));
 }
@@ -555,7 +555,7 @@ Vector<String> Project::getAssetSrcList(bool includeDirs, const Path& relPath, b
 	const auto dir = srcRoot / relPath;
 	fileSystemCache->trackDirectory(srcRoot);
 	for (const auto& p: fileSystemCache->enumerateDirectory(dir, includeDirs, recursive)) {
-		if (!p.getExtension().endsWith(".meta")) {
+		if (!p.getExtension().ends_with(".meta")) {
 			result.push_back((relPath / p).toString());
 		}
 	}

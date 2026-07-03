@@ -240,7 +240,7 @@ void AssetsBrowser::setListContents()
 				continue;
 			}
 			auto relPath = Path("./" + a).makeRelativeTo(curSrcPath);
-			if (relPath.getNumberPaths() == 1) {
+			if (relPath.getNumberOfParts() == 1) {
 				files.emplace_back(a);
 			} else {
 				auto start = relPath.getFront(1);
@@ -292,7 +292,7 @@ void AssetsBrowser::addFileToList(const Path& path)
 	
 	auto sizer = std::make_shared<UISizer>();
 	sizer->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(type)), 0, Vector4f(0, 0, 4, 0));
-	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilename().toString())));
+	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilenameStr())));
 	assetList->addItem(path.toString(), std::move(sizer));
 }
 
@@ -378,7 +378,7 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 
 void AssetsBrowser::onContextMenuAction(const String& assetId, const String& action)
 {
-	const auto filename = Path(assetId).getFilename().replaceExtension("").getString(false);
+	const auto filename = Path(assetId).replaceExtension("").getFilenameStr();
 	if (action == "add") {
 		addAsset();
 	} else if (action == "rename") {
