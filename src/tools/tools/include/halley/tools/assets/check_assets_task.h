@@ -59,7 +59,11 @@ namespace Halley
 
 		using AssetTable = HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>;
 
-		bool hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
+		struct DirMetaInfo {
+			std::optional<Path> path; // Absolute (i.e. includes srcPath)
+			int64_t timestamp = 0;
+		};
+
 		Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
 
 		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange);
@@ -67,9 +71,10 @@ namespace Halley
 		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange);
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);
-		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& path) const;
-		bool doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport);
-		bool importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath);
+		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& parentDir) const;
+		DirMetaInfo resolveDirMeta(const Vector<Path>& metas, const Path& srcPath, const Path& parentDir);
+		bool doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport);
+		bool importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const DirMetaInfo& dirMeta, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath);
 		void sleep(int ms);
 	};
 }

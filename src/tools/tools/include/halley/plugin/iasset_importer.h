@@ -106,7 +106,7 @@ namespace Halley
 		virtual void import(const ImportingAsset&, IAssetCollector&) {}
 		virtual int dropFrontCount() const { return importByExtension ? 0 : 1; }
 
-		virtual String getAssetId(const Path& file, const std::optional<Metadata>& metadata) const
+		virtual String getAssetId(const Path& file, const Metadata* metadata) const
 		{
 			return file.dropFront(dropFrontCount()).string();
 		}

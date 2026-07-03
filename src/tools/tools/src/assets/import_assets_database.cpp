@@ -2,6 +2,7 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
+#include "halley/time/stopwatch.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/file/filesystem_cache.h"
 #include "halley/utils/algorithm.h"
@@ -171,42 +172,35 @@ void ImportAssetsDatabase::clear()
 	assetIndex.clear();
 }
 
-bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const
+const Metadata* ImportAssetsDatabase::markInputPresentIfUpToDate(const String& path, const std::array<int64_t, 3>& timestamps)
 {
 	UniqueLock lock(mutex);
 
 	// Is it an unknown file?
-	const auto iter = inputFiles.find(path.toString());
+	const auto iter = inputFiles.find(path);
 	if (iter == inputFiles.end()) {
-		return true;
+		return nullptr;
 	}
 
 	// Any of the timestamps changed?
-	for (size_t i = 0; i < timestamps.size(); ++i) {
-		if (iter->second.timestamp[i] != timestamps[i]) {
-			return true;
-		}
+	if (iter->second.timestamp != timestamps) {
+		return nullptr;
 	}
 
-	return false;
+	iter->second.missing = false;
+	return &iter->second.metadata;
 }
 
-void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath)
+const Metadata& ImportAssetsDatabase::setInputFileMetadata(const String& path, const std::array<int64_t, 3>& timestamps, Metadata data, Path basePath)
 {
 	UniqueLock lock(mutex);
 
-	auto& input = inputFiles[path.toString()];
+	auto& input = inputFiles[path];
 	input.timestamp = timestamps;
-	input.metadata = data;
+	input.metadata = std::move(data);
 	input.basePath = std::move(basePath);
 	input.missing = false;
-}
-
-void ImportAssetsDatabase::markInputPresent(const Path& path)
-{
-	UniqueLock lock(mutex);
-	auto& input = inputFiles[path.toString()];
-	input.missing = false;
+	return input.metadata;
 }
 
 void ImportAssetsDatabase::markInputMissing(const Path& path)
@@ -309,23 +303,20 @@ int64_t ImportAssetsDatabase::getAssetTimestamp(AssetType type, const String& as
 	return 0;
 }
 
-bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache, bool includeFailed) const
+ImportAssetsDatabase::ImportAction ImportAssetsDatabase::checkNeedsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache) const
 {
 	UniqueLock lock(mutex);
-	
+
 	// Check if it failed loading last time
 	auto iter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
 	const bool failed = iter != assetsFailed.end();
-	if (failed && includeFailed) {
-		return true;
-	}
-	
+
 	// Check if this was imported before
 	if (!failed) {
 		iter = assetsImported.find(std::pair{ asset.assetType, asset.assetId });
 		if (iter == assetsImported.end()) {
 			// Asset didn't even exist before
-			return true;
+			return ImportAction::Import;
 		}
 	}
 
@@ -334,24 +325,40 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 
 	// Input directory changed?
 	if (asset.srcDir != oldAsset.srcDir) {
-		return true;
+		return ImportAction::Import;
 	}
 
 	// Total count of input files changed?
 	if (asset.inputFiles.size() != oldAsset.inputFiles.size()) {
-		return true;
+		return ImportAction::Import;
 	}
 
 	// Any of the input files changed?
 	// Note: We don't have to check old files on new input, because the size matches and all entries matched.
-	for (const auto& i: asset.inputFiles) {
-		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const AssetPath& entry) { return entry.getDataPath() == i.getDataPath(); });
-		if (result == oldAsset.inputFiles.end()) {
-			// File wasn't there before
-			return true;
-		} else if (result->getTimestamp() != i.getTimestamp()) {
-			// Timestamp changed
-			return true;
+	constexpr size_t linearSearchLimit = 8;
+	if (asset.inputFiles.size() <= linearSearchLimit) {
+		for (const auto& i: asset.inputFiles) {
+			auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const AssetPath& entry) { return entry.getDataPath() == i.getDataPath(); });
+			if (result == oldAsset.inputFiles.end()) {
+				// File wasn't there before
+				return ImportAction::Import;
+			} else if (result->getTimestamp() != i.getTimestamp()) {
+				// Timestamp changed
+				return ImportAction::Import;
+			}
+		}
+	} else {
+		// Too many input files for a quadratic scan (e.g. big atlases), compare via a map
+		HashMap<String, int64_t> oldInputFiles;
+		oldInputFiles.reserve(oldAsset.inputFiles.size());
+		for (const auto& entry: oldAsset.inputFiles) {
+			oldInputFiles[entry.getDataPath().toString()] = entry.getTimestamp();
+		}
+		for (const auto& i: asset.inputFiles) {
+			const auto result = oldInputFiles.find(i.getDataPath().toString());
+			if (result == oldInputFiles.end() || result->second != i.getTimestamp()) {
+				return ImportAction::Import;
+			}
 		}
 	}
 
@@ -359,11 +366,11 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	for (const auto& i: oldAsset.additionalInputFiles) {
 		if (!fsCache.exists(i.first)) {
 			// File removed
-			return true;
+			return ImportAction::Import;
 		} else if (fsCache.getLastWriteTime(i.first) != i.second) {
 			// Timestamp changed
-			return true;
-		}		
+			return ImportAction::Import;
+		}
 	}
 
 	// Have any of the output files gone missing?
@@ -371,13 +378,13 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 		for (const auto& o: oldAsset.outputFiles) {
 			for (const auto& version: o.platformVersions) {
 				if (!fsCache.exists(directory / version.second.filepath)) {
-					return true;
+					return ImportAction::Import;
 				}
 			}
 		}
 	}
 
-	return false;
+	return failed ? ImportAction::RetryFailed : ImportAction::None;
 }
 
 void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset)
@@ -572,11 +579,15 @@ void ImportAssetsDatabase::updateAdditionalFileCache()
 	}
 }
 
-Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& inputFile)
+Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& srcPath, const Path& inputFile)
 {
 	UniqueLock lock(mutex);
 
-	const auto iter = assetsWithAdditionalFile.find(inputFile.getString());
+	if (assetsWithAdditionalFile.empty()) {
+		return {};
+	}
+
+	const auto iter = assetsWithAdditionalFile.find((srcPath / inputFile).getString());
 	if (iter != assetsWithAdditionalFile.end()) {
 		Vector<std::pair<Path, Path>> result;
 		for (const auto& assetKey: iter->second) {

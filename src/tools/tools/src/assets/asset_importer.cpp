@@ -133,7 +133,16 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 
 IAssetImporter& AssetImporter::getRootImporter(const Path& path) const
 {
-	return getImporters(getImportAssetType(path, true)).at(0);
+	return getImporter(getImportAssetType(path, true));
+}
+
+IAssetImporter& AssetImporter::getImporter(ImportAssetType type) const
+{
+	const auto i = importers.find(type);
+	if (i == importers.end() || i->second.empty()) {
+		throw Exception("Unknown asset type: " + toString(int(type)), HalleyExceptions::Tools);
+	}
+	return *i->second.front();
 }
 
 Vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(ImportAssetType type) const

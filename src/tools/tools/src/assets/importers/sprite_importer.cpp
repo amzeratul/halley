@@ -183,7 +183,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	}
 }
 
-String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata>& metadata) const
+String SpriteImporter::getAssetId(const Path& file, const Metadata* metadata) const
 {
 	if (metadata) {
 		String atlas = metadata->getString("atlas", "");

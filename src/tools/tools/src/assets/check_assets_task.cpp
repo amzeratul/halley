@@ -162,7 +162,7 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
 }
 
-bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
+bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const DirMetaInfo& dirMeta, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
 {
 	if (filePath.getExtension() == ".meta") {
 		return false;
@@ -178,14 +178,14 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 
 	bool dbChanged = false;
 	Vector<std::pair<Path, Path>> additionalFilesToImport;
-	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath, &additionalFilesToImport) || dbChanged;
+	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, basePath, newPath, &additionalFilesToImport) || dbChanged;
 	for (const auto& additional: additionalFilesToImport) {
-		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, additional.first, additional.second, nullptr) || dbChanged;
+		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, nullptr, additional.first, additional.second, nullptr) || dbChanged;
 	}
 	return dbChanged;
 }
 
-bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -193,13 +193,12 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
 
 	// Collect data on directory meta file
-	auto dirMetaPath = findDirectoryMeta(directoryMetas, filePath);
-	if (dirMetaPath && fileSystemCache.exists(srcPath / dirMetaPath.value())) {
-		dirMetaPath = srcPath / dirMetaPath.value();
-		timestamps[1] = fileSystemCache.getLastWriteTime(dirMetaPath.value());
-	} else {
-		dirMetaPath = {};
+	DirMetaInfo localDirMeta;
+	if (!dirMeta) {
+		localDirMeta = resolveDirMeta(directoryMetas, srcPath, filePath.parentPath());
+		dirMeta = &localDirMeta;
 	}
+	timestamps[1] = dirMeta->timestamp;
 
 	// Collect data on private meta file
 	std::optional<Path> privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
@@ -210,20 +209,20 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	}
 
 	// Load metadata if needed
-	if (db.needToLoadInputMetadata(filePath, timestamps)) {
-		Metadata meta = MetadataImporter::getMetaData(filePath, dirMetaPath, privateMetaPath);
+	const auto pathKey = filePath.toString();
+	const Metadata* metadata = db.markInputPresentIfUpToDate(pathKey, timestamps);
+	if (!metadata) {
+		Metadata meta = MetadataImporter::getMetaData(filePath, dirMeta->path, privateMetaPath);
 		if (skipGen) {
 			meta.set("skipGen", true);
 		}
-		db.setInputFileMetadata(filePath, timestamps, meta, srcPath);
+		metadata = &db.setInputFileMetadata(pathKey, timestamps, std::move(meta), srcPath);
 		dbChanged = true;
-	} else {
-		db.markInputPresent(filePath);
 	}
 
 	// If this file was already imported, check any previous dependencies it had too
 	if (additionalFilesToImport) {
-		for (const auto& [inputSrc, inputFile]: db.getFilesForAssetsThatHasAdditionalFile(srcPath / filePath)) {
+		for (const auto& [inputSrc, inputFile]: db.getFilesForAssetsThatHasAdditionalFile(srcPath, filePath)) {
 			if (fileSystemCache.exists(inputSrc / inputFile)) {
 				additionalFilesToImport->emplace_back(inputSrc, inputFile);
 			}
@@ -231,11 +230,11 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	}
 
 	// Figure out the right importer and assetId for this file
-	auto& assetImporter = isCodegen ? projectAssetImporter->getImporters(ImportAssetType::Codegen).at(0).get() : projectAssetImporter->getRootImporter(filePath);
+	auto& assetImporter = isCodegen ? projectAssetImporter->getImporter(ImportAssetType::Codegen) : projectAssetImporter->getRootImporter(filePath);
 	if (assetImporter.getType() == ImportAssetType::Skip) {
 		return false;
 	}
-	String assetId = assetImporter.getAssetId(filePath, db.getMetadata(filePath));
+	String assetId = assetImporter.getAssetId(filePath, metadata);
 	const auto assetKey = std::pair{ assetImporter.getType(), assetId };
 
 	// Build timestamped path
@@ -292,6 +291,8 @@ void CheckAssetsTask::sleep(int timeMs)
 
 CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange)
 {
+	Stopwatch sw;
+	sw.start();
 	AssetTable assets;
 
 	bool dbChanged = false;
@@ -323,21 +324,25 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 		}
 
 		// Next, go through normal files
-		Path curPath;
+		std::optional<Path> curPath;
+		DirMetaInfo curDirMeta;
 		size_t j = 0;
 		for (const auto& filePath: allFiles) {
 			auto parentPath = filePath.parentPath();
 			if (parentPath != curPath) {
-				curPath = parentPath;
+				curPath = std::move(parentPath);
+				if (collectDirMeta) {
+					curDirMeta = resolveDirMeta(directoryMetas, srcPath, *curPath);
+				}
 				const float prog = lerp(curRange.start, curRange.end, j / static_cast<float>(allFiles.size()));
-				setProgress(prog, "Checking " + curPath.getNativeString(false));
+				setProgress(prog, "Checking " + curPath->getNativeString(false));
 			}
 
 			if (isCancelled()) {
 				return {};
 			}
 
-			dbChanged = importFile(db, assets, collectDirMeta, srcPath, srcPaths, filePath) || dbChanged;
+			dbChanged = importFile(db, assets, collectDirMeta, curDirMeta, srcPath, srcPaths, filePath) || dbChanged;
 			j++;
 		}
 
@@ -351,6 +356,8 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	}
 	db.markAssetsAsStillPresent(assets);
 
+	sw.pause();
+	//Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
 	return assets;
 }
 
@@ -370,9 +377,8 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, AssetTable assets,
 	}
 
 	// Import assets
-	const bool hasImport = hasAssetsToImport(db, assets);
-	if (hasImport || !deletedAssets.empty()) {
-		auto toImport = hasImport ? getAssetsToImport(db, assets) : Vector<ImportAssetsDatabaseEntry>();
+	auto toImport = getAssetsToImport(db, assets);
+	if (!toImport.empty() || !deletedAssets.empty()) {
 		addPendingTask(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter));
 		return true;
 	}
@@ -390,40 +396,61 @@ void CheckAssetsTask::requestReimport(ReimportType type)
 	pendingReimport = type;
 }
 
-bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets)
-{
-	for (const auto& a: assets) {
-		if (db.needsImporting(a.second, fileSystemCache, false)) {
-			return true;
-		}
-	}
-	return false;
-}
-
 Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets)
 {
+	Stopwatch sw;
+	sw.start();
 	Vector<ImportAssetsDatabaseEntry> toImport;
+	bool hasNonFailed = false;
 
 	for (const auto& a: assets) {
-		if (db.needsImporting(a.second, fileSystemCache, true)) {
+		switch (db.checkNeedsImporting(a.second, fileSystemCache)) {
+		case ImportAssetsDatabase::ImportAction::Import:
+			hasNonFailed = true;
 			toImport.push_back(a.second);
+			break;
+		case ImportAssetsDatabase::ImportAction::RetryFailed:
+			toImport.push_back(a.second);
+			break;
+		case ImportAssetsDatabase::ImportAction::None:
+			break;
 		}
 	}
+
+	// Only retry failed assets if something else changed, otherwise they'd be retried on every check
+	if (!hasNonFailed) {
+		toImport.clear();
+	}
+
+	sw.pause();
+	//Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
 
 	return toImport;
 }
 
-std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas, const Path& path) const
+std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas, const Path& parentDir) const
 {
-	const auto parent = path.parentPath();
 	std::optional<Path> longestPath;
 	for (const auto& m: metas) {
 		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
 			const auto n = m.getNumberPaths() - 1;
-			if (m.getParts().subspan(0, n) == parent.getParts().subspan(0, std::min(n, parent.getNumberPaths()))) {
+			if (m.getParts().subspan(0, n) == parentDir.getParts().subspan(0, std::min(n, parentDir.getNumberPaths()))) {
 				longestPath = m;
 			}
 		}
 	}
 	return longestPath;
+}
+
+CheckAssetsTask::DirMetaInfo CheckAssetsTask::resolveDirMeta(const Vector<Path>& metas, const Path& srcPath, const Path& parentDir)
+{
+	DirMetaInfo result;
+	if (auto dirMetaPath = findDirectoryMeta(metas, parentDir)) {
+		auto absPath = srcPath / *dirMetaPath;
+		if (fileSystemCache.exists(absPath)) {
+			result.timestamp = fileSystemCache.getLastWriteTime(absPath);
+			result.path = std::move(absPath);
+		}
+	}
+	return result;
 }

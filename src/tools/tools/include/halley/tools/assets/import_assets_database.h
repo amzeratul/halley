@@ -101,12 +101,11 @@ namespace Halley
 		void clear();
 		std::unique_ptr<AssetDatabase> makeAssetDatabase(const String& platform) const;
 
-		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;
-		void setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath);
+		const Metadata* markInputPresentIfUpToDate(const String& path, const std::array<int64_t, 3>& timestamps);
+		const Metadata& setInputFileMetadata(const String& path, const std::array<int64_t, 3>& timestamps, Metadata data, Path basePath);
 		std::optional<Metadata> getMetadata(const Path& path) const;
 		std::optional<Metadata> getMetadata(AssetType type, const String& assetId) const;
 
-		void markInputPresent(const Path& path);
 		void markInputMissing(const Path& path);
 		void markAllInputFilesAsMissing();
 		bool purgeMissingInputs();
@@ -114,7 +113,12 @@ namespace Halley
 		Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolutePath = false) const;
 		int64_t getAssetTimestamp(AssetType type, const String& assetId) const;
 
-		bool needsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache, bool includeFailed) const;
+		enum class ImportAction {
+			None,       // Up to date
+			Import,     // New, changed, or has missing outputs
+			RetryFailed // Unchanged, but failed to import last time
+		};
+		ImportAction checkNeedsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
@@ -130,7 +134,7 @@ namespace Halley
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
 
 		void updateAdditionalFileCache();
-		Vector<std::pair<Path, Path>> getFilesForAssetsThatHasAdditionalFile(const Path& additionalFile);
+		Vector<std::pair<Path, Path>> getFilesForAssetsThatHasAdditionalFile(const Path& srcPath, const Path& additionalFile);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
