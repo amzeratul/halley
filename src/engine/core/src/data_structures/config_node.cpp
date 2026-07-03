@@ -456,6 +456,7 @@ namespace {
 			Cmp<op> cmp;
 			switch (a.getType()) {
 				case ConfigNodeType::String:
+				case ConfigNodeType::RawString:
 					return cmp.compare(a.asStringView(), b.asStringView());
 				case ConfigNodeType::Sequence:
 				case ConfigNodeType::DeltaSequence:
