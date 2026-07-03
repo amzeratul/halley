@@ -155,7 +155,12 @@ namespace Halley
 
 		mutable std::map<std::pair<AssetType, String>, const AssetEntry*> assetIndex;
 		mutable bool indexDirty = true;
-	
+
+		// dbDirty tracks changes to the serialized state (assetsImported/inputFiles); assetsDbDirty tracks changes that affect the generated AssetDatabase (assetsImported only).
+		// assetsDbDirty starts true so the AssetDatabase is regenerated at least once per session, in case the two files diverged (e.g. crash between the two writes).
+		mutable bool dbDirty = false;
+		mutable bool assetsDbDirty = true;
+
 		mutable Mutex mutex;
 
 		const AssetEntry* findEntry(AssetType type, const String& id) const;

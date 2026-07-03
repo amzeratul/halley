@@ -15,13 +15,23 @@ namespace Halley {
 		Bytes readFileCopy(const Path& path) override;
         bool remove(const Path& path);
         bool hasCached(const Path& path) const;
+        bool hasCached(std::string_view path) const;
 
     	Vector<Path> enumerateDirectory(const Path& path, bool includeDirs = false, bool recursive = true);
 		bool exists(const Path& path);
 		int64_t getLastWriteTime(const Path& path);
+		std::optional<int64_t> tryGetLastWriteTime(const Path& path);
+
+		struct DirectoryListing {
+			Path dir; // Relative to the enumerated root
+			Vector<std::pair<String, int64_t>> files; // Filename -> last write time, in directory order
+		};
+		Vector<DirectoryListing> enumerateDirectoryListings(const Path& path);
 
         void trackDirectory(const Path& path);
 		void notifyChanges(gsl::span<const DirectoryMonitor::Event> events);
+
+        static String getCaseCorrectedPath(String p);
 
     private:
         struct FileEntry {
@@ -54,6 +64,7 @@ namespace Halley {
         bool matchesCache(const String& key, gsl::span<const std::byte> data) const;
 
         void doEnumerate(const Path& root, const Path& path, Vector<Path>& dst, bool includeDirs, bool recursive);
+        void doEnumerateListings(const Path& root, const Path& path, Vector<DirectoryListing>& dst);
 
         DirEntry& getDirectory(const Path& path);
         DirEntry* tryGetDirectory(const Path& path);
@@ -61,6 +72,5 @@ namespace Halley {
 
         static bool isCaseSensitive();
         static Path getCaseCorrectedPath(Path p);
-        static String getCaseCorrectedPath(String p);
     };
 }

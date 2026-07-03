@@ -152,15 +152,22 @@ void ImportAssetsDatabase::load()
 		auto s = Deserializer(data);
 		deserialize(s);
 	}
+	dbDirty = false;
 }
 
 void ImportAssetsDatabase::save() const
 {
 	UniqueLock lock(mutex);
-	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
+	if (dbDirty) {
+		FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
+		dbDirty = false;
+	}
 
-	const auto pcAssetDatabase = doMakeAssetDatabase("pc");
-	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*pcAssetDatabase));
+	if (assetsDbDirty) {
+		const auto pcAssetDatabase = doMakeAssetDatabase("pc");
+		FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*pcAssetDatabase));
+		assetsDbDirty = false;
+	}
 }
 
 void ImportAssetsDatabase::clear()
@@ -170,6 +177,8 @@ void ImportAssetsDatabase::clear()
 	assetsImported.clear();
 	assetsFailed.clear();
 	assetIndex.clear();
+	dbDirty = true;
+	assetsDbDirty = true;
 }
 
 const Metadata* ImportAssetsDatabase::markInputPresentIfUpToDate(const String& path, const std::array<int64_t, 3>& timestamps)
@@ -200,6 +209,7 @@ const Metadata& ImportAssetsDatabase::setInputFileMetadata(const String& path, c
 	input.metadata = std::move(data);
 	input.basePath = std::move(basePath);
 	input.missing = false;
+	dbDirty = true;
 	return input.metadata;
 }
 
@@ -232,7 +242,8 @@ bool ImportAssetsDatabase::purgeMissingInputs()
 			++iter;
 		}
 	}
-	
+
+	dbDirty = dbDirty || modified;
 	return modified;
 }
 
@@ -396,7 +407,9 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 	UniqueLock lock(mutex);
 	assetsImported[std::pair{ asset.assetType, asset.assetId }] = entry;
 	indexDirty = true;
-	
+	dbDirty = true;
+	assetsDbDirty = true;
+
 	auto failIter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
 	if (failIter != assetsFailed.end()) {
 		assetsFailed.erase(failIter);
@@ -407,7 +420,10 @@ void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	UniqueLock lock(mutex);
 	const auto key = std::pair{ asset.assetType, asset.assetId };
-	assetsImported.erase(key);
+	if (assetsImported.erase(key) > 0) {
+		dbDirty = true;
+		assetsDbDirty = true;
+	}
 	assetsFailed.erase(key);
 	indexDirty = true;
 }

@@ -159,10 +159,17 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 	if (isCancelled()) {
 		return false;
 	}
-	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
+	const bool importing = requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
+
+	// If an import task was queued it saves the db when it finishes; otherwise persist any changes from the check now.
+	// save() only writes if the db actually changed.
+	if (!importing) {
+		db.save();
+	}
+	return importing;
 }
 
-bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const DirMetaInfo& dirMeta, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
+bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const DirMetaInfo& dirMeta, const FileTimes& times, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
 {
 	if (filePath.getExtension() == ".meta") {
 		return false;
@@ -178,19 +185,33 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 
 	bool dbChanged = false;
 	Vector<std::pair<Path, Path>> additionalFilesToImport;
-	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, basePath, newPath, &additionalFilesToImport) || dbChanged;
+	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, &times, basePath, newPath, &additionalFilesToImport) || dbChanged;
 	for (const auto& additional: additionalFilesToImport) {
-		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, nullptr, additional.first, additional.second, nullptr) || dbChanged;
+		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, nullptr, nullptr, additional.first, additional.second, nullptr) || dbChanged;
 	}
 	return dbChanged;
 }
 
-bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const FileTimes* times, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
-	// Collect data on main file
-	timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
+	// Collect data on main file and private meta file
+	std::optional<Path> privateMetaPath;
+	bool hasPrivateMeta = false;
+	if (times) {
+		timestamps[0] = times->file;
+		timestamps[2] = times->privateMeta.value_or(0);
+		hasPrivateMeta = times->privateMeta.has_value();
+	} else {
+		timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
+		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+		if (auto t = fileSystemCache.tryGetLastWriteTime(metaPath)) {
+			timestamps[2] = *t;
+			privateMetaPath = std::move(metaPath);
+			hasPrivateMeta = true;
+		}
+	}
 
 	// Collect data on directory meta file
 	DirMetaInfo localDirMeta;
@@ -200,18 +221,13 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	}
 	timestamps[1] = dirMeta->timestamp;
 
-	// Collect data on private meta file
-	std::optional<Path> privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
-	if (fileSystemCache.exists(privateMetaPath.value())) {
-		timestamps[2] = fileSystemCache.getLastWriteTime(privateMetaPath.value());
-	} else {
-		privateMetaPath = {};
-	}
-
 	// Load metadata if needed
 	const auto pathKey = filePath.toString();
 	const Metadata* metadata = db.markInputPresentIfUpToDate(pathKey, timestamps);
 	if (!metadata) {
+		if (hasPrivateMeta && !privateMetaPath) {
+			privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+		}
 		Metadata meta = MetadataImporter::getMetaData(filePath, dirMeta->path, privateMetaPath);
 		if (skipGen) {
 			meta.set("skipGen", true);
@@ -295,8 +311,6 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	sw.start();
 	AssetTable assets;
 
-	bool dbChanged = false;
-
 	if (collectDirMeta) {
 		directoryMetas.clear();
 	}
@@ -312,48 +326,71 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 
 		setProgress(curRange.start, "Enumerating " + srcPath.getNativeString());
 
-		auto allFiles = fileSystemCache.enumerateDirectory(srcPath);
+		const auto listings = fileSystemCache.enumerateDirectoryListings(srcPath);
+
+		size_t nFiles = 0;
+		for (const auto& listing: listings) {
+			nFiles += listing.files.size();
+		}
 
 		// First, collect all directory metas
 		if (collectDirMeta) {
-			for (auto& filePath : allFiles) {
-				if (filePath.getFilename() == "_dir.meta") {
-					directoryMetas.push_back(filePath);
+			for (const auto& listing: listings) {
+				for (const auto& [fileName, time]: listing.files) {
+					if (fileName == "_dir.meta") {
+						directoryMetas.push_back(listing.dir / fileName);
+					}
 				}
 			}
 		}
 
-		// Next, go through normal files
-		std::optional<Path> curPath;
-		DirMetaInfo curDirMeta;
+		// Next, go through normal files, one directory at a time
+		HashMap<String, int64_t> metaFiles;
 		size_t j = 0;
-		for (const auto& filePath: allFiles) {
-			auto parentPath = filePath.parentPath();
-			if (parentPath != curPath) {
-				curPath = std::move(parentPath);
-				if (collectDirMeta) {
-					curDirMeta = resolveDirMeta(directoryMetas, srcPath, *curPath);
-				}
-				const float prog = lerp(curRange.start, curRange.end, j / static_cast<float>(allFiles.size()));
-				setProgress(prog, "Checking " + curPath->getNativeString(false));
-			}
-
+		for (const auto& listing: listings) {
 			if (isCancelled()) {
 				return {};
 			}
 
-			dbChanged = importFile(db, assets, collectDirMeta, curDirMeta, srcPath, srcPaths, filePath) || dbChanged;
-			j++;
+			const float prog = lerp(curRange.start, curRange.end, j / static_cast<float>(std::max(nFiles, size_t(1))));
+			setProgress(prog, "Checking " + listing.dir.getNativeString(false));
+
+			DirMetaInfo dirMeta;
+			if (collectDirMeta) {
+				dirMeta = resolveDirMeta(directoryMetas, srcPath, listing.dir);
+			}
+
+			// Collect private meta files ("file.ext.meta") so they can be paired with their files below
+			metaFiles.clear();
+			for (const auto& [fileName, time]: listing.files) {
+				if (fileName.endsWith(".meta")) {
+					metaFiles[FileSystemCache::getCaseCorrectedPath(fileName)] = time;
+				}
+			}
+
+			for (const auto& [fileName, time]: listing.files) {
+				++j;
+				if (fileName.endsWith(".meta")) {
+					continue;
+				}
+
+				FileTimes times;
+				times.file = time;
+				if (!metaFiles.empty()) {
+					const auto metaIter = metaFiles.find(FileSystemCache::getCaseCorrectedPath(fileName + ".meta"));
+					if (metaIter != metaFiles.end()) {
+						times.privateMeta = metaIter->second;
+					}
+				}
+
+				importFile(db, assets, collectDirMeta, dirMeta, times, srcPath, srcPaths, listing.dir / fileName);
+			}
 		}
 
 		i++;
 	}
 
-	dbChanged = db.purgeMissingInputs() || dbChanged;
-	
-	if (dbChanged) {
-		db.save();
-	}
+	db.purgeMissingInputs();
 	db.markAssetsAsStillPresent(assets);
 
 	sw.pause();
@@ -447,8 +484,8 @@ CheckAssetsTask::DirMetaInfo CheckAssetsTask::resolveDirMeta(const Vector<Path>&
 	DirMetaInfo result;
 	if (auto dirMetaPath = findDirectoryMeta(metas, parentDir)) {
 		auto absPath = srcPath / *dirMetaPath;
-		if (fileSystemCache.exists(absPath)) {
-			result.timestamp = fileSystemCache.getLastWriteTime(absPath);
+		if (auto t = fileSystemCache.tryGetLastWriteTime(absPath)) {
+			result.timestamp = *t;
 			result.path = std::move(absPath);
 		}
 	}

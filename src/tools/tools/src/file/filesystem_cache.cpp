@@ -123,6 +123,12 @@ bool FileSystemCache::hasCached(const Path& path) const
 	return fileDataCache.contains(key);
 }
 
+bool FileSystemCache::hasCached(std::string_view path) const
+{
+	auto lock = SharedLock(fileDataMutex);
+	return fileDataCache.contains(path);
+}
+
 bool FileSystemCache::shouldCache(const Path& path, size_t size) const
 {
 	return size < 2048;
@@ -166,6 +172,33 @@ void FileSystemCache::doEnumerate(const Path& root, const Path& path, Vector<Pat
 	}
 }
 
+Vector<FileSystemCache::DirectoryListing> FileSystemCache::enumerateDirectoryListings(const Path& path)
+{
+	auto lock = UniqueLock(fileTreeMutex);
+	Vector<DirectoryListing> result;
+	const auto root = path.isDirectory() ? path : path / ".";
+	doEnumerateListings(root, root, result);
+	return result;
+}
+
+void FileSystemCache::doEnumerateListings(const Path& root, const Path& path, Vector<DirectoryListing>& dst)
+{
+	const auto& dir = getDirectory(path);
+
+	DirectoryListing listing;
+	listing.dir = path.makeRelativeTo(root);
+	listing.files.reserve(dir.filenames.size());
+	for (const auto& fileName: dir.filenames) {
+		const auto iter = dir.files.find(getCaseCorrectedPath(fileName));
+		listing.files.emplace_back(fileName, iter != dir.files.end() ? iter->second.lastWriteTime : 0);
+	}
+	dst.push_back(std::move(listing));
+
+	for (const auto& dirName: dir.dirs) {
+		doEnumerateListings(root, path / dirName / ".", dst);
+	}
+}
+
 bool FileSystemCache::exists(const Path& path)
 {
 	auto lock = UniqueLock(fileTreeMutex);
@@ -176,6 +209,11 @@ bool FileSystemCache::exists(const Path& path)
 
 int64_t FileSystemCache::getLastWriteTime(const Path& path)
 {
+	return tryGetLastWriteTime(path).value_or(0);
+}
+
+std::optional<int64_t> FileSystemCache::tryGetLastWriteTime(const Path& path)
+{
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
 	const auto key = path.getFilenameStr();
@@ -183,7 +221,7 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 	if (iter != dir.files.end()) {
 		return iter->second.lastWriteTime;
 	}
-	return 0;
+	return std::nullopt;
 }
 
 void FileSystemCache::trackDirectory(const Path& path)
