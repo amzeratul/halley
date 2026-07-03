@@ -54,3 +54,37 @@ TEST(HalleyPath, IsAbsolute)
 	EXPECT_EQ(Path("foo").isAbsolute(), false);
 	EXPECT_EQ(Path("foo/bar").isAbsolute(), false);
 }
+
+TEST(HalleyPath, GetFilename)
+{
+	EXPECT_EQ(Path("/foo").getFilename(), "");
+	EXPECT_EQ(Path("/foo/.").getFilename(), "");
+	EXPECT_EQ(Path(".png").getFilename(), ".png");
+	EXPECT_EQ(Path("bar.png").getFilename(), "bar.png");
+	EXPECT_EQ(Path("/foo/bar.png").getFilename(), "bar.png");
+	EXPECT_EQ(Path("/foo/.png").getFilename(), ".png");
+	EXPECT_EQ(Path("/foo/.foo.png").getFilename(), ".foo.png");
+	EXPECT_EQ(Path("/foo/.foo...png").getFilename(), ".foo...png");
+}
+
+TEST(HalleyPath, GetExtension)
+{
+	EXPECT_EQ(Path("/foo").getExtension(), "");
+	EXPECT_EQ(Path("/foo/.").getExtension(), "");
+	EXPECT_EQ(Path(".png").getExtension(), ".png");
+	EXPECT_EQ(Path("bar.png").getExtension(), ".png");
+	EXPECT_EQ(Path("/foo/bar.png").getExtension(), ".png");
+	EXPECT_EQ(Path("/foo/.png").getExtension(), ".png");
+	EXPECT_EQ(Path("/foo/.foo.png").getExtension(), ".png");
+	EXPECT_EQ(Path("/foo/.foo...png").getExtension(), ".png");
+}
+
+TEST(HalleyPath, ReplaceExtension)
+{
+	EXPECT_EQ(Path(".png").replaceExtension(".txt"), ".txt");
+	EXPECT_EQ(Path("bar.png").replaceExtension(".txt"), "bar.txt");
+	EXPECT_EQ(Path("/foo/bar.png").replaceExtension(".txt"), "bar.txt");
+	EXPECT_EQ(Path("/foo/.png").replaceExtension(".txt"), ".txt");
+	EXPECT_EQ(Path("/foo/.foo.png").replaceExtension(".txt"), ".foo.txt");
+	EXPECT_EQ(Path("/foo/.foo...png").replaceExtension(".txt"), ".foo...txt");
+}

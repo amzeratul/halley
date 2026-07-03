@@ -11,8 +11,8 @@ namespace Halley
 	public:
 		Path();
 		Path(const char* name);
-		Path(const std::string& name);
-		Path(const String& name);
+		Path(std::string name);
+		Path(String name);
 
 		Path(const Path& other) = default;
 		Path(Path&& other) noexcept = default;
@@ -20,28 +20,24 @@ namespace Halley
 		Path& operator=(Path&& other) noexcept = default;
 
 		Path& operator=(const std::string& other);
-		Path& operator=(const String& other);
+		Path& operator=(String other);
 
-		Path getRoot() const;
+		std::string_view getRoot() const;
 		Path getFront(size_t n) const;
-		Path getFilename() const;
-		const String& getFilenameStr() const;
-		Path getDirName() const;
-		const String& getDirNameStr() const;
-		Path getStem() const;
-		String getExtension() const;
-		String getString(bool includeDot = true) const;
+		std::string_view getFilename() const;
+		std::string_view getDirName() const;
+		std::string_view getStem() const;
+		std::string_view getExtension() const;
+		std::string_view getString(bool includeDot = true) const;
 		String getNativeString(bool includeDot = true) const;
 		String toString() const;
 
-		gsl::span<const String> getParts() const;
-		gsl::span<String> getParts();
-		size_t getNumberPaths() const;
+		size_t getNumberOfParts() const;
 
 		Path dropFront(int numberFolders) const;
 
 		Path parentPath() const;
-		Path replaceExtension(String newExtension) const;
+		Path replaceExtension(std::string_view newExtension) const;
 
 		Path operator/(std::string_view other) const;
 		Path operator/(const char* other) const;
@@ -52,8 +48,6 @@ namespace Halley
 		bool operator==(const char* other) const;
 		bool operator==(const String& other) const;
 		bool operator==(const Path& other) const;
-		bool operator==(gsl::span<const String> other) const;
-
 		bool operator!=(const Path& other) const;
 		bool operator<(const Path& other) const;
 
@@ -86,12 +80,17 @@ namespace Halley
 		Vector<Path> enumerateDirectory(bool makeRelative) const;
 
 	private:
-		Vector<String> pathParts;
-		void normalise();
-		void setPath(const String& value);
-		std::string makeString(bool includeDot, char dirSeparator) const;
+		String str;
 
-		explicit Path(Vector<String> parts, bool normaliseAfter);
+		void normalise();
+		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
+		void setPath(String value);
+
+		std::string_view getPart(size_t idx) const;
+		std::string_view getFrontParts(size_t n) const;
+		std::string_view getLastPart() const;
+		size_t getLastPartPos() const;
+		std::pair<std::string_view, std::string_view> getLastTwoParts() const;
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;

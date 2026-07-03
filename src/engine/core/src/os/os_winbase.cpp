@@ -12,7 +12,7 @@ static bool hasDirectory(const String& directory)
 
 void OSWinBase::createDirectories(const Path& path)
 {
-    const size_t n = path.getNumberPaths();
+    const size_t n = path.getNumberOfParts();
     for (size_t i = 1; i < n; ++i) {
         Path curPath = path.getFront(i);
         String nativePath = curPath.getNativeString(false);
