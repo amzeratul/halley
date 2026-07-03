@@ -5,6 +5,7 @@
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
+#include <optional>
 #include <thread>
 
 using namespace Halley;
@@ -58,7 +59,7 @@ namespace Halley {
 					processEvents(output, any);
 				} else if (result == WAIT_TIMEOUT) {
 					break;
-				} else if (result == WAIT_FAILED || WAIT_ABANDONED) {
+				} else if (result == WAIT_FAILED || result == WAIT_ABANDONED) {
 					throw Exception("Failed to wait for object.", HalleyExceptions::Utils);
 				}
 			}
@@ -75,12 +76,33 @@ namespace Halley {
 		OVERLAPPED overlapped;
 		Vector<uint8_t> buffer;
 		bool validHandle = false;
+		bool useExtended = true;
 
 		void queueEvent()
 		{
-			validHandle = ReadDirectoryChangesExW(dirHandle, buffer.data(), static_cast<DWORD>(buffer.size()), true,
-						FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, nullptr,
-						&overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
+			validHandle = tryQueueEvent();
+		}
+
+		bool tryQueueEvent()
+		{
+			constexpr DWORD notifyFilter = FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE;
+
+			if (useExtended) {
+				if (ReadDirectoryChangesExW(dirHandle, buffer.data(), static_cast<DWORD>(buffer.size()), true, notifyFilter, nullptr, &overlapped, nullptr, ReadDirectoryNotifyExtendedInformation)) {
+					return true;
+				}
+
+				// ReFS doesn't support ReadDirectoryChangesExW with extended information
+				Logger::logWarning("ReadDirectoryChangesExW failed for " + path.toString() + " (error " + toString(static_cast<int>(GetLastError())) + "); falling back to non-extended directory monitoring.");
+				useExtended = false;
+			}
+
+			if (ReadDirectoryChangesW(dirHandle, buffer.data(), static_cast<DWORD>(buffer.size()), true, notifyFilter, nullptr, &overlapped, nullptr)) {
+				return true;
+			}
+
+			Logger::logError("ReadDirectoryChangesW failed for " + path.toString() + " (error " + toString(static_cast<int>(GetLastError())) + ").");
+			return false;
 		}
 
 		void processEvents(Vector<DirectoryMonitor::Event>& output, bool any)
@@ -90,13 +112,28 @@ namespace Halley {
 			if (bytes > 0) {
 				if (any) {
 					output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::Unknown, {}, {} });
-				} else {
+				} else if (useExtended) {
 					size_t pos = 0;
 
 					while (true) {
 						const auto* event = reinterpret_cast<FILE_NOTIFY_EXTENDED_INFORMATION*>(buffer.data() + pos);
 
-						processEvent(*event, output);
+						const bool isDir = (event->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+						processEvent(event->Action, event->FileName, event->FileNameLength, isDir, output);
+
+						if (event->NextEntryOffset) {
+							pos += event->NextEntryOffset;
+						} else {
+							break;
+						}
+					}
+				} else {
+					size_t pos = 0;
+
+					while (true) {
+						const auto* event = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer.data() + pos);
+
+						processEvent(event->Action, event->FileName, event->FileNameLength, std::nullopt, output);
 
 						if (event->NextEntryOffset) {
 							pos += event->NextEntryOffset;
@@ -110,17 +147,24 @@ namespace Halley {
 			queueEvent();
 		}
 
-		void processEvent(const FILE_NOTIFY_EXTENDED_INFORMATION& event, Vector<DirectoryMonitor::Event>& output)
+		void processEvent(DWORD action, const wchar_t* fileName, DWORD fileNameLength, std::optional<bool> isDirHint, Vector<DirectoryMonitor::Event>& output)
 		{
-			const auto srcStr = std::wstring(event.FileName, event.FileNameLength / sizeof(wchar_t));
+			const auto srcStr = std::wstring(fileName, fileNameLength / sizeof(wchar_t));
 			const auto curPath = (path / Path(String(srcStr.c_str())));
-			const auto nativePath = curPath.getNativeString().getUTF16();
-			const bool isDir = event.FileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 			auto curPathStr = curPath.getString();
+
+			bool isDir;
+			if (isDirHint) {
+				isDir = *isDirHint;
+			} else {
+				// Non-extended notifications don't carry attributes; query the filesystem
+				const auto attribs = GetFileAttributesW(curPath.getNativeString().getUTF16().c_str());
+				isDir = attribs != INVALID_FILE_ATTRIBUTES && (attribs & FILE_ATTRIBUTE_DIRECTORY) != 0;
+			}
 
 			using CT = DirectoryMonitor::ChangeType;
 
-			switch (event.Action) {
+			switch (action) {
 			case FILE_ACTION_ADDED:
 				output.emplace_back(DirectoryMonitor::Event{ CT::FileAdded, isDir, std::move(curPathStr), {} });
 				break;
