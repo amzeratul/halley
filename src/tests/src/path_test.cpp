@@ -21,6 +21,7 @@ TEST(HalleyPath, Normalization)
 
 	EXPECT_EQ(Path("foo/bar"), Path("foo///bar"));
 
+	EXPECT_EQ(Path("foo/"), Path("foo/."));
 	EXPECT_NE(Path("foo"), Path("foo/."));
 }
 
@@ -95,4 +96,20 @@ TEST(HalleyPath, ReplaceExtension)
 	EXPECT_EQ(Path("/foo/.png").replaceExtension(".txt"), "/foo/.txt");
 	EXPECT_EQ(Path("/foo/.foo.png").replaceExtension(".txt"), "/foo/.foo.txt");
 	EXPECT_EQ(Path("/foo/.foo...png").replaceExtension(".txt"), "/foo/.foo...txt");
+}
+
+TEST(HalleyPath, SubParts)
+{
+	auto p = Path("foo/bar/baz/file.ext");
+
+	EXPECT_EQ(p.getNumberOfParts(), 4);
+	EXPECT_EQ(p.getPart(0), "foo");
+	EXPECT_EQ(p.getPart(1), "bar");
+	EXPECT_EQ(p.getPart(2), "baz");
+	EXPECT_EQ(p.getPart(3), "file.ext");
+	EXPECT_EQ(p.getFront(0), "");
+	EXPECT_EQ(p.getFront(1), "foo/.");
+	EXPECT_EQ(p.getFront(2), "foo/bar/.");
+	EXPECT_EQ(p.getFront(3), "foo/bar/baz/.");
+	EXPECT_EQ(p.getFront(4), "foo/bar/baz/file.ext");
 }

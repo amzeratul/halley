@@ -582,7 +582,14 @@ std::string_view Path::getRoot() const
 
 Path Path::getFront(size_t n) const
 {
-	return Path(getFrontParts(n));
+	auto s = getFrontParts(n);
+	if (s.empty()) {
+		return {};
+	} else if (s != str) {
+		return Path(String(s) + ".");
+	} else {
+		return *this;
+	}
 }
 
 
