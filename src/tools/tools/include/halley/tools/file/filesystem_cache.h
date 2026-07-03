@@ -50,7 +50,7 @@ namespace Halley {
             void removeDir(const String& name);
         };
 
-        mutable Mutex fileDataMutex;
+        mutable SharedMutex fileDataMutex;
         mutable Mutex fileTreeMutex;
 
         HashMap<String, Bytes> fileDataCache;

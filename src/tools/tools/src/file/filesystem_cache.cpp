@@ -55,7 +55,7 @@ gsl::span<const std::byte> FileSystemCache::readFile(const Path& path)
 {
 	const auto key = path.getString();
 	{
-		auto lock = UniqueLock(fileDataMutex);
+		auto lock = SharedLock(fileDataMutex);
 		const auto iter = fileDataCache.find(key);
 		if (iter != fileDataCache.end()) {
 			return iter->second.const_byte_span();
@@ -80,7 +80,7 @@ Bytes FileSystemCache::readFileCopy(const Path& path)
 {
 	const auto key = path.getString();
 	{
-		auto lock = UniqueLock(fileDataMutex);
+		auto lock = SharedLock(fileDataMutex);
 		const auto iter = fileDataCache.find(key);
 		if (iter != fileDataCache.end()) {
 			return iter->second;
@@ -118,7 +118,7 @@ bool FileSystemCache::remove(const Path& path)
 
 bool FileSystemCache::hasCached(const Path& path) const
 {
-	auto lock = UniqueLock(fileDataMutex);
+	auto lock = SharedLock(fileDataMutex);
 	const auto key = path.getString();
 	return fileDataCache.contains(key);
 }
