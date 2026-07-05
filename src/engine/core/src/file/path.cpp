@@ -260,35 +260,49 @@ std::string_view Path::getPart(size_t idx) const
 
 std::string_view Path::getFrontParts(size_t n) const
 {
-	if (n == 0) {
+	if (n == 0 || str.isEmpty()) [[unlikely]] {
 		return {};
 	}
 
-	const size_t len = str.length();
-	size_t nSlashes = 0;
-	for (size_t i = 0; i < len; ++i) {
-		if (str[i] == '/') {
-			++nSlashes;
-			if (nSlashes == n) {
-				return std::string_view(str).substr(0, i + 1);
+	if (n >= partIdx.size()) [[unlikely]] {
+		const size_t len = str.length();
+		size_t nSlashes = 0;
+		for (size_t i = 0; i < len; ++i) {
+			if (str[i] == '/') {
+				++nSlashes;
+				if (nSlashes == n) {
+					return std::string_view(str).substr(0, i + 1);
+				}
 			}
 		}
+		return std::string_view(str);
+	} else {
+		return std::string_view(str).substr(0, partIdx[n]);
 	}
-	return std::string_view(str);
 }
 
 std::string_view Path::getLastPart() const
 {
+	if (str.isEmpty()) [[unlikely]] {
+		return {};
+	}
 	return std::string_view(str).substr(getLastPartPos());
 }
 
 size_t Path::getLastPartPos() const
 {
-	const auto p = str.find_last_of('/');
-	if (p == String::npos) {
+	if (numberOfParts == 0) [[unlikely]] {
 		return 0;
+	}
+	if (numberOfParts <= partIdx.size()) [[likely]] {
+		return partIdx[numberOfParts - 1];
 	} else {
-		return p + 1;
+		const auto p = str.find_last_of('/');
+		if (p == String::npos) {
+			return 0;
+		} else {
+			return p + 1;
+		}
 	}
 }
 
@@ -316,15 +330,24 @@ void Path::computeProperties()
 		return;
 	}
 
-	size_t n = 1;
-	for (auto c: std::string_view(str)) {
-		if (c == '/') {
-			++n;
+	size_t nParts = 1;
+	const auto s = std::string_view(str);
+	const size_t n = s.length();
+	partIdx.fill(0);
+	for (size_t i = 0; i < n; ++i) {
+		if (s[i] == '/') {
+			if (nParts < partIdx.size()) {
+				partIdx[nParts] = static_cast<uint16_t>(i + 1);
+			}
+			++nParts;
 		}
 	}
-	numberOfParts = n;
+	numberOfParts = static_cast<uint16_t>(nParts);
+	if (nParts < partIdx.size()) {
+		partIdx[nParts] = static_cast<uint16_t>(n);
+	}
 
-	isDir = str.endsWith("/") || str.endsWith("/.") || str.endsWith("/..") || str == "." || str == "..";
+	isDir = s.ends_with("/") || s.ends_with("/.") || s.ends_with("/..") || s == "." || s == "..";
 }
 
 size_t Path::getNumberOfParts() const
@@ -424,12 +447,17 @@ Path Path::operator/(const Path& other) const
 
 bool Path::operator==(const char* other) const
 {
-	return operator==(Path(other));
+	return str == other;
+}
+
+bool Path::operator==(std::string_view other) const
+{
+	return str == other;
 }
 
 bool Path::operator==(const String& other) const 
 {
-	return operator==(Path(other));
+	return str == other;
 }
 
 bool Path::operator==(const Path& other) const 
@@ -439,7 +467,7 @@ bool Path::operator==(const Path& other) const
 
 bool Path::operator!=(const Path& other) const 
 {
-	return !(*this == other);
+	return str != other.str;
 }
 
 bool Path::operator<(const Path& other) const

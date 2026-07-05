@@ -215,7 +215,8 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 
 std::optional<int64_t> FileSystemCache::tryGetLastWriteTime(const Path& path)
 {
-	const auto key = getCaseCorrectedPath(path.getFilename());
+	String buffer;
+	const auto key = getCaseCorrectedPath(path.getFilenameStrView(), buffer);
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
 	const auto iter = dir.files.find(key);
@@ -248,7 +249,6 @@ FileSystemCache::DirEntry& FileSystemCache::getDirectory(const Path& path)
 FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 {
 	const auto& dirPath = path.isDirectory() ? path : path.parentPath();
-	HalleyAssertDev(dirPath.isDirectory());
 	if (dirPath == lastDirCache.first) {
 		return lastDirCache.second;
 	}

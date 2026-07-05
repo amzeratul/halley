@@ -55,6 +55,7 @@ namespace Halley
 		Path operator/(const Path& other) const;
 
 		bool operator==(const char* other) const;
+		bool operator==(std::string_view other) const;
 		bool operator==(const String& other) const;
 		bool operator==(const Path& other) const;
 		bool operator!=(const Path& other) const;
@@ -93,8 +94,9 @@ namespace Halley
 
 	private:
 		String str;
-		size_t numberOfParts;
 		bool isDir;
+		uint16_t numberOfParts = 0;
+		std::array<uint16_t, 14> partIdx;
 
 		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
 		void setPath(std::string_view value, bool normalise = true);
