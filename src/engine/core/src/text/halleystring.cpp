@@ -1144,7 +1144,7 @@ gsl::span<std::string_view> String::splitToBuffer(std::string_view src, char del
 		}
 		src = remainder;
 	}
-	throw Exception("Buffer not big enough to split string: \"" + String(src) + "\"", HalleyExceptions::Utils);
+	throw Exception("Buffer not big enough to split string", HalleyExceptions::Utils);
 }
 
 String String::concatList(gsl::span<const String> list, std::string_view separator)

@@ -10,19 +10,22 @@ namespace Halley
 	{
 	public:
 		Path();
-		Path(const char* name);
-		Path(std::string name);
-		Path(const String& name);
+		Path(const char* name, bool normalise = true);
+		Path(std::string_view name, bool normalise = true);
+		Path(std::string name, bool normalise = true);
+		Path(String name, bool normalise = true);
 
 		Path(const Path& other) = default;
 		Path(Path&& other) noexcept = default;
 		Path& operator=(const Path& other) = default;
 		Path& operator=(Path&& other) noexcept = default;
 
-		Path& operator=(const std::string& other);
+		Path& operator=(std::string_view other);
+		Path& operator=(std::string other);
 		Path& operator=(String other);
 
 		std::string_view getRoot() const;
+		std::string_view getFrontStrView(size_t n) const;
 		Path getFront(size_t n) const;
 		std::string_view getFilenameStrView() const;
 		String getFilename() const;
@@ -90,14 +93,17 @@ namespace Halley
 
 	private:
 		String str;
+		size_t numberOfParts;
 
 		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
-		void setPath(std::string_view value);
+		void setPath(std::string_view value, bool normalise = true);
+		void setPath(String value, bool normalise = true);
 
 		std::string_view getFrontParts(size_t n) const;
 		std::string_view getLastPart() const;
 		size_t getLastPartPos() const;
 		std::pair<std::string_view, std::string_view> getLastTwoParts() const;
+		void computeNumberOfParts();
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;

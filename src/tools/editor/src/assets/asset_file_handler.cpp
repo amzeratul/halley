@@ -11,9 +11,9 @@ AssetFileHandler::AssetFileHandler()
 	populate();
 }
 
-const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const String& assetType) const
+const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(std::string_view assetType) const
 {
-	if (assetType.isEmpty()) {
+	if (assetType.empty()) {
 		return nullptr;
 	}
 	const auto iter = handlers.find(assetType);

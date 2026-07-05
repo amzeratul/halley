@@ -33,7 +33,7 @@ namespace Halley {
 	public:
 		AssetFileHandler();
 
-		const IAssetFileHandler* tryGetHandlerFor(const String& assetType) const;
+		const IAssetFileHandler* tryGetHandlerFor(std::string_view assetType) const;
 		const IAssetFileHandler* tryGetHandlerFor(const Path& path) const;
 
 	private:

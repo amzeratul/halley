@@ -26,25 +26,48 @@ using namespace Halley;
 Path::Path()
 {}
 
-Path::Path(const char* name)
+Path::Path(const char* name, bool normalise)
 {
-	setPath(name);
+	setPath(std::string_view(name), normalise);
 }
 
-Path::Path(std::string name)
+Path::Path(std::string_view name, bool normalise)
 {
-	setPath(name);
+	setPath(name, normalise);
 }
 
-Path::Path(const String& name)
+Path::Path(std::string name, bool normalise)
 {
-	setPath(name);
+	setPath(String(std::move(name)), normalise);
 }
 
-void Path::setPath(std::string_view value)
+Path::Path(String name, bool shouldNormalise)
 {
-	std::array<char, 2048> buffer;
-	str = String(normalise(buffer, std::string_view(value)));
+	setPath(std::move(name), shouldNormalise);
+}
+
+void Path::setPath(std::string_view value, bool shouldNormalise)
+{
+	if (shouldNormalise) {
+		std::array<char, 2048> buffer;
+		str = String(normalise(buffer, std::string_view(value)));
+	} else {
+		str = String(value);
+	}
+	computeNumberOfParts();
+}
+
+void Path::setPath(String value, bool shouldNormalise)
+{
+	str = std::move(value);
+	if (shouldNormalise) {
+		std::array<char, 2048> buffer;
+		auto n = normalise(buffer, str);
+		if (n != str) {
+			str = String(n);
+		}
+	}
+	computeNumberOfParts();
 }
 
 std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
@@ -129,7 +152,13 @@ std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
 	return String::concatStringViewsInBuffer(buffer, gsl::span(resultParts).subspan(0, nResultParts), "/");
 }
 
-Path& Path::operator=(const std::string& other)
+Path& Path::operator=(std::string other)
+{
+	setPath(String(std::move(other)));
+	return *this;
+}
+
+Path& Path::operator=(std::string_view other)
 {
 	setPath(other);
 	return *this;
@@ -206,6 +235,13 @@ std::string_view Path::getPart(size_t idx) const
 {
 	auto s = std::string_view(str);
 	size_t startPos = 0;
+	size_t nFound = 0;
+	for (size_t i = 0; nFound < idx && i < s.length(); ++i) {
+		if (s[i] == '/') {
+			++nFound;
+		}
+	}
+
 	for (size_t i = 0; i < idx; ++i) {
 		startPos = s.find('/', startPos);
 		if (startPos == std::string_view::npos) {
@@ -268,10 +304,11 @@ std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 	}
 }
 
-size_t Path::getNumberOfParts() const
+void Path::computeNumberOfParts()
 {
 	if (str.isEmpty()) {
-		return 0;
+		numberOfParts = 0;
+		return;
 	}
 
 	size_t n = 1;
@@ -280,7 +317,12 @@ size_t Path::getNumberOfParts() const
 			++n;
 		}
 	}
-	return n;
+	numberOfParts = n;
+}
+
+size_t Path::getNumberOfParts() const
+{
+	return numberOfParts;
 }
 
 std::string Path::string() const
@@ -625,13 +667,19 @@ std::string_view Path::getRoot() const
 	return getPart(0);
 }
 
+std::string_view Path::getFrontStrView(size_t n) const
+{
+	// This doesn't return the EXACT same as getFront(), as it won't return a trailing . for dir paths
+	return getFrontParts(n);
+}
+
 Path Path::getFront(size_t n) const
 {
 	auto s = getFrontParts(n);
 	if (s.empty()) {
 		return {};
 	} else if (s != str) {
-		return Path(String(s) + ".");
+		return Path(String(s) + ".", false);
 	} else {
 		return *this;
 	}
