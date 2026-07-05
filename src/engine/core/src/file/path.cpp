@@ -171,7 +171,7 @@ String Path::getDirName() const
 
 std::string_view Path::getStemStrView() const
 {
-	const auto filename = getFilename();
+	const auto filename = getFilenameStrView();
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
@@ -186,7 +186,7 @@ String Path::getStem() const
 
 std::string_view Path::getExtensionStrView() const
 {
-	const auto filename = getFilename();
+	const auto filename = getFilenameStrView();
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
