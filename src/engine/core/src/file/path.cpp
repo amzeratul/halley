@@ -152,7 +152,7 @@ std::string_view Path::getFilenameStrView() const
 
 String Path::getFilename() const
 {
-	return String(getFilename());
+	return getFilenameStrView();
 }
 
 std::string_view Path::getDirNameStrView() const
@@ -166,7 +166,7 @@ std::string_view Path::getDirNameStrView() const
 
 String Path::getDirName() const
 {
-	return getDirName();
+	return getDirNameStrView();
 }
 
 std::string_view Path::getStemStrView() const
@@ -181,7 +181,7 @@ std::string_view Path::getStemStrView() const
 
 String Path::getStem() const
 {
-	return getStem();
+	return getStemStrView();
 }
 
 std::string_view Path::getExtensionStrView() const
@@ -199,7 +199,7 @@ std::string_view Path::getExtensionStrView() const
 
 String Path::getExtension() const
 {
-	return getExtension();
+	return getExtensionStrView();
 }
 
 std::string_view Path::getPart(size_t idx) const
@@ -332,7 +332,7 @@ Path Path::parentPath() const
 {
 	size_t toDrop = isDirectory() ? 2 : 1;
 	const auto n = getNumberOfParts();
-	return getFront(std::max<size_t>(n, toDrop) - toDrop) + "/.";
+	return getFront(std::max<size_t>(n, toDrop) - toDrop);
 }
 
 Path Path::replaceExtension(std::string_view newExtension) const
@@ -589,12 +589,12 @@ Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) 
 
 bool Path::isDirectory() const
 {
-	return getFilename() == ".";
+	return getLastPart() == ".";
 }
 
 bool Path::isFile() const
 {
-	const auto filename = getFilename();
+	const auto filename = getFilenameStrView();
 	return !filename.empty() && filename != ".";
 }
 

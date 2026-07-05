@@ -555,7 +555,7 @@ Vector<String> Project::getAssetSrcList(bool includeDirs, const Path& relPath, b
 	const auto dir = srcRoot / relPath;
 	fileSystemCache->trackDirectory(srcRoot);
 	for (const auto& p: fileSystemCache->enumerateDirectory(dir, includeDirs, recursive)) {
-		if (!p.getExtension().ends_with(".meta")) {
+		if (!p.getExtensionStrView().ends_with(".meta")) {
 			result.push_back((relPath / p).toString());
 		}
 	}

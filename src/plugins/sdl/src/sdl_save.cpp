@@ -263,7 +263,7 @@ std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& file
 	// Final validation
 	if (header.v0.version >= 1 && header.v1.dataHash != Hash::hash(finalData)) {
 		Logger::logError("Corrupted save file: " + filename);
-		if (!path.getExtension().ends_with(".bak")) {
+		if (!path.getExtensionStrView().ends_with(".bak")) {
 			corruptedFiles.insert(path.getString());
 		}
 ;		return {};
