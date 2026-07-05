@@ -293,6 +293,8 @@ namespace Halley {
 			return std::string_view(buffer.data(), buffer.size() - b.size());
 		}
 
+		static std::string_view concatStringViewsInBuffer(gsl::span<char> buffer, gsl::span<const std::string_view> views, std::string_view separator);
+
 		//////////
 
 		String& operator += (const String &p);

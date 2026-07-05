@@ -541,6 +541,30 @@ void String::asciiMakeLower()
 
 ///////////////
 
+std::string_view String::concatStringViewsInBuffer(gsl::span<char> buffer, gsl::span<const std::string_view> views, std::string_view separator)
+{
+	size_t writePos = 0;
+	const size_t n = views.size();
+
+	const auto& concat = [&](std::string_view s)
+	{
+		if (buffer.size() < writePos + s.length()) {
+			throw Exception("Buffer not large enough for string concatenation", HalleyExceptions::Utils);
+		}
+		memcpy(&buffer[writePos], s.data(), s.length());
+		writePos += s.length();
+	};
+
+	for (size_t i = 0; i < n; ++i) {
+		concat(views[i]);
+		if (i + 1 != n) {
+			concat(separator);
+		}
+	}
+
+	return std::string_view(buffer.data(), writePos);
+}
+
 String& String::operator += (const String &p)
 {
 	str.append(std::string_view(p));

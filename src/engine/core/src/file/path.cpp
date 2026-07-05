@@ -126,16 +126,7 @@ std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
 	}
 
 	// Make buffer
-	size_t writePos = 0;
-	for (size_t i = 0; i < nResultParts; ++i) {
-		memcpy(&buffer[writePos], resultParts[i].data(), resultParts[i].length());
-		writePos += resultParts[i].length();
-		if (i + 1 != nResultParts) {
-			buffer[writePos] = '/';
-			++writePos;
-		}
-	}
-	return std::string_view(buffer.data(), writePos);
+	return String::concatStringViewsInBuffer(buffer, gsl::span(resultParts).subspan(0, nResultParts), "/");
 }
 
 Path& Path::operator=(const std::string& other)
@@ -557,35 +548,37 @@ bool Path::isPrefixOf(const Path& other) const
 
 Path Path::makeRelativeTo(const Path& path) const
 {
-	/*
-	const Path& me = *this;
-	size_t sharedRoot = 0;
-	size_t maxLen = std::min(me.pathParts.size(), path.pathParts.size());
+	std::array<std::string_view, 64> myPartsBuffer;
+	const auto myParts = String::splitToBuffer(str, '/', myPartsBuffer);
+	std::array<std::string_view, 64> theirPartsBuffer;
+	const auto theirParts = String::splitToBuffer(path.str, '/', theirPartsBuffer);
 
-	Vector<String> result;
+	size_t sharedRoot = 0;
+	size_t maxLen = std::min(myParts.size(), theirParts.size());
+
 	for (size_t i = 0; i < maxLen; ++i) {
-		if (me.pathParts[i] == path.pathParts[i]) {
+		if (myParts[i] == theirParts[i]) {
 			sharedRoot = i + 1;
 		} else {
 			break;
 		}
 	}
 
+	std::array<std::string_view, 64> resultBuffer;
+	size_t pos = 0;
+
 	const bool relToDir = path.isDirectory();
-	//const int foldersAbove = int(path.getNumberPaths()) - int(sharedRoot) - (isAbsolute() ? 0 : 1) - (relToDir ? 1 : 0);
-	const int foldersAbove = int(path.getNumberPaths()) - int(sharedRoot) - (relToDir ? 1 : 0);
+	const int foldersAbove = int(theirParts.size()) - int(sharedRoot) - (relToDir ? 1 : 0);
 	for (int i = 0; i < foldersAbove; ++i) {
-		result.emplace_back("..");
+		resultBuffer.at(pos++) = "..";
 	}
 
-	for (size_t i = sharedRoot; i < me.pathParts.size(); ++i) {
-		result.emplace_back(me.pathParts[i]);
+	for (size_t i = sharedRoot; i < myParts.size(); ++i) {
+		resultBuffer.at(pos++) = myParts[i];
 	}
 
-	return Path(result, true);
-	*/
-	// TODO
-	return {};
+	std::array<char, 2048> buffer;
+	return Path(String::concatStringViewsInBuffer(buffer, gsl::span(resultBuffer).subspan(0, pos), "/"));
 }
 
 Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) const
