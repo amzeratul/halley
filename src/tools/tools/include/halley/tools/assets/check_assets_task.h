@@ -76,7 +76,7 @@ namespace Halley
 		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange);
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);
-		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& parentDir) const;
+		const Path* findDirectoryMeta(const Vector<Path>& metas, const Path& parentDir) const;
 		DirMetaInfo resolveDirMeta(const Vector<Path>& metas, const Path& srcPath, const Path& parentDir);
 		bool doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const FileTimes* times, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport);
 		bool importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const DirMetaInfo& dirMeta, const FileTimes& times, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath);

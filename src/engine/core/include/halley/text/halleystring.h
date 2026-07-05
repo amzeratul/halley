@@ -172,6 +172,8 @@ namespace Halley {
 		void asciiMakeUpper();
 		void asciiMakeLower();
 		bool asciiCompareNoCase(const Character *src) const;
+		[[nodiscard]] static bool isLowerCase(std::string_view str);
+		[[nodiscard]] static bool isUpperCase(std::string_view str);
 
 		void appendCharacter(int unicode);
 

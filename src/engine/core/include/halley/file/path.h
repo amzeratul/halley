@@ -94,16 +94,17 @@ namespace Halley
 	private:
 		String str;
 		size_t numberOfParts;
+		bool isDir;
 
 		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
 		void setPath(std::string_view value, bool normalise = true);
 		void setPath(String value, bool normalise = true);
+		void computeProperties();
 
 		std::string_view getFrontParts(size_t n) const;
 		std::string_view getLastPart() const;
 		size_t getLastPartPos() const;
 		std::pair<std::string_view, std::string_view> getLastTwoParts() const;
-		void computeNumberOfParts();
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;

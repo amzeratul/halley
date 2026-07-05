@@ -201,10 +201,11 @@ void FileSystemCache::doEnumerateListings(const Path& root, const Path& path, Ve
 
 bool FileSystemCache::exists(const Path& path)
 {
+	String buffer;
+	const auto& name = getCaseCorrectedPath(path.getFilenameStrView(), buffer);
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	const auto& name = path.getFilename();
-	return dir.files.contains(getCaseCorrectedPath(name));
+	return dir.files.contains(name);
 }
 
 int64_t FileSystemCache::getLastWriteTime(const Path& path)
@@ -214,10 +215,10 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 
 std::optional<int64_t> FileSystemCache::tryGetLastWriteTime(const Path& path)
 {
+	const auto key = getCaseCorrectedPath(path.getFilename());
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	const auto key = path.getFilename();
-	const auto iter = dir.files.find(getCaseCorrectedPath(key));
+	const auto iter = dir.files.find(key);
 	if (iter != dir.files.end()) {
 		return iter->second.lastWriteTime;
 	}
@@ -318,6 +319,16 @@ String FileSystemCache::getCaseCorrectedPath(String p)
 {
 	if (!Path::isCaseSensitive()) {
 		p.asciiMakeLower();
+	}
+	return p;
+}
+
+std::string_view FileSystemCache::getCaseCorrectedPath(std::string_view p, String& buffer)
+{
+	if (!Path::isCaseSensitive() && !String::isLowerCase(p)) {
+		buffer = p;
+		buffer.asciiMakeLower();
+		return buffer;
 	}
 	return p;
 }

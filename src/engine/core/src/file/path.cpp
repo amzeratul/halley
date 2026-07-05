@@ -54,7 +54,7 @@ void Path::setPath(std::string_view value, bool shouldNormalise)
 	} else {
 		str = String(value);
 	}
-	computeNumberOfParts();
+	computeProperties();
 }
 
 void Path::setPath(String value, bool shouldNormalise)
@@ -67,7 +67,7 @@ void Path::setPath(String value, bool shouldNormalise)
 			str = String(n);
 		}
 	}
-	computeNumberOfParts();
+	computeProperties();
 }
 
 std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
@@ -260,17 +260,21 @@ std::string_view Path::getPart(size_t idx) const
 
 std::string_view Path::getFrontParts(size_t n) const
 {
-	auto s = std::string_view(str);
-	size_t endPos = 0;
-	for (size_t i = 0; i < n; ++i) {
-		endPos = s.find('/', endPos);
-		if (endPos == std::string_view::npos) {
-			return s.substr(0, endPos);
-		}
-		endPos += 1; // include slash
+	if (n == 0) {
+		return {};
 	}
 
-	return s.substr(0, endPos);
+	const size_t len = str.length();
+	size_t nSlashes = 0;
+	for (size_t i = 0; i < len; ++i) {
+		if (str[i] == '/') {
+			++nSlashes;
+			if (nSlashes == n) {
+				return std::string_view(str).substr(0, i + 1);
+			}
+		}
+	}
+	return std::string_view(str);
 }
 
 std::string_view Path::getLastPart() const
@@ -304,10 +308,11 @@ std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 	}
 }
 
-void Path::computeNumberOfParts()
+void Path::computeProperties()
 {
 	if (str.isEmpty()) {
 		numberOfParts = 0;
+		isDir = false;
 		return;
 	}
 
@@ -318,6 +323,8 @@ void Path::computeNumberOfParts()
 		}
 	}
 	numberOfParts = n;
+
+	isDir = str.endsWith("/") || str.endsWith("/.") || str.endsWith("/..") || str == "." || str == "..";
 }
 
 size_t Path::getNumberOfParts() const
@@ -406,8 +413,8 @@ Path Path::operator/(const std::string& other) const
 Path Path::operator/(std::string_view other) const
 {
 	std::array<char, 2048> buffer1;
-	std::array<char, 2048> buffer2;
-	return Path(normalise(buffer2, String::concatInBuffer(buffer1, getStringView(false), "/", other)));
+	auto result = String::concatInBuffer(buffer1, getStringView(false), "/", other);
+	return Path(result, other.starts_with(".") || other.starts_with(".."));
 }
 
 Path Path::operator/(const Path& other) const 
@@ -631,7 +638,7 @@ Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) 
 
 bool Path::isDirectory() const
 {
-	return getLastPart() == ".";
+	return isDir;
 }
 
 bool Path::isFile() const
@@ -678,8 +685,9 @@ Path Path::getFront(size_t n) const
 	auto s = getFrontParts(n);
 	if (s.empty()) {
 		return {};
-	} else if (s != str) {
-		return Path(String(s) + ".", false);
+	} else if (s.length() != str.length()) {
+		std::array<char, 2048> buffer;
+		return Path(String::concatInBuffer(buffer, s, "."), false);
 	} else {
 		return *this;
 	}

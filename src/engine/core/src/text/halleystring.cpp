@@ -427,6 +427,26 @@ bool String::asciiCompareNoCase(const Character *src) const
 	return true;
 }
 
+bool String::isLowerCase(std::string_view str)
+{
+	for (auto c: str) {
+		if (c >= 'A' && c <= 'Z') {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool String::isUpperCase(std::string_view str)
+{
+	for (auto c: str) {
+		if (c >= 'a' && c <= 'z') {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool String::isNumber(std::string_view str)
 {
 	auto trimmed = trimSpaces(str);
