@@ -1109,6 +1109,20 @@ std::string_view String::splitAndAdvance(std::string_view& src, char delimeter)
 	return res;
 }
 
+gsl::span<std::string_view> String::splitToBuffer(std::string_view src, char delimeter, gsl::span<std::string_view> buffer)
+{
+	size_t i;
+	for (i = 0; i < buffer.size(); ++i) {
+		auto [str, remainder] = split(src, delimeter);
+		buffer[i] = str;
+		if (remainder.empty()) {
+			return buffer.subspan(0, i + 1);
+		}
+		src = remainder;
+	}
+	throw Exception("Buffer not big enough to split string: \"" + String(src) + "\"", HalleyExceptions::Utils);
+}
+
 String String::concatList(gsl::span<const String> list, std::string_view separator)
 {
 	std::stringstream ss;

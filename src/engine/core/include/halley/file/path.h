@@ -12,7 +12,7 @@ namespace Halley
 		Path();
 		Path(const char* name);
 		Path(std::string name);
-		Path(String name);
+		Path(const String& name);
 
 		Path(const Path& other) = default;
 		Path(Path&& other) noexcept = default;
@@ -91,9 +91,8 @@ namespace Halley
 	private:
 		String str;
 
-		void normalise();
 		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
-		void setPath(String value);
+		void setPath(std::string_view value);
 
 		std::string_view getFrontParts(size_t n) const;
 		std::string_view getLastPart() const;

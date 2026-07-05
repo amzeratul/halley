@@ -33,57 +33,109 @@ Path::Path(const char* name)
 
 Path::Path(std::string name)
 {
-	setPath(String(std::move(name)));
+	setPath(name);
 }
 
-Path::Path(String name)
+Path::Path(const String& name)
 {
-	setPath(std::move(name));
+	setPath(name);
 }
 
-void Path::setPath(String value)
-{
-	str = std::move(value);
-	normalise();
-}
-
-void Path::normalise()
+void Path::setPath(std::string_view value)
 {
 	std::array<char, 2048> buffer;
-	auto normalised = normalise(buffer, str);
-	if (normalised != str) {
-		str = normalised;
-	}
+	str = String(normalise(buffer, std::string_view(value)));
 }
 
 std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
 {
-	return str;
-
-	HalleyAssertDev(buffer.size() >= str.size() + 1);
-
-	if (getPlatform() == GamePlatform::Windows) {
-		// TODO: on Windows, replace backslashes with forward slashes
-	}
-
 	// Normalises the path:
 	// Remove ".." plus whatever directory comes before: foo/bar/../baz -> foo/baz
+	// ...but keep any at the front: ../../foo
 	// Remove ".": foo/bar/./baz -> foo/bar/baz
+	// ...but keep it at the end: /foo/.
 	// Ensure directories end in a ".": foo/bar/ -> foo/bar/.
 	// Collapse double "/": foo//bar -> foo/bar
 
-	// TODO: do operations on buffer, and shrink it to the range it's using
+	HalleyAssertDev(buffer.size() >= str.size() + 1);
+	std::array<char, 2048> winBuf;
 
-
+	// Some preprocessing on Windows
 	if (getPlatform() == GamePlatform::Windows) {
-		// On Windows, make sure the drive name is uppercase
-		if (buffer.size() >= 2 && buffer[1] == ':' && buffer[0] >= 'a' && buffer[0] <= 'z') {
-			buffer[0] -= 32; // Make uppercase
+		HalleyAssertDev(winBuf.size() >= str.size());
+		// Convert backslashes
+		for (size_t i = 0; i < str.length(); ++i) {
+			const auto c = str[i];
+			winBuf[i] = c == '\\' ? '/' : c;
+		}
+
+		// Also make sure the drive name is uppercase
+		if (str.length() >= 2 && winBuf[1] == ':' && winBuf[0] >= 'a' && winBuf[0] <= 'z') {
+			winBuf[0] -= 32; // Make uppercase
+		}
+
+		str = std::string_view(winBuf.data(), str.length());
+	}
+
+	const bool isDir = str.ends_with("/") || str.ends_with("/.") || str.ends_with("/..");
+
+	// Split string
+	std::array<std::string_view, 64> partsBuffer;
+	const auto parts = String::splitToBuffer(str, '/', partsBuffer);
+
+	std::array<std::string_view, 64> resultParts;
+	size_t nResultParts = 0;
+	auto addPart = [&] (std::string_view p)
+	{
+		resultParts.at(nResultParts++) = p;
+	};
+	auto removeLastPart = [&] () -> bool
+	{
+		if (nResultParts >= 1 && resultParts[nResultParts - 1] != "..") {
+			--nResultParts;
+			return true;
+		} else {
+			return false;
+		}
+	};
+
+	// Generate result parts
+	for (size_t i = 0; i < parts.size(); ++i) {
+		const auto& part = parts[i];
+		const bool isLast = i + 1 == parts.size();
+
+		if (part.empty() && i == 0) {
+			addPart(part);
+		} else if (part.empty() || part == ".") {
+			if (isLast) {
+				addPart(".");
+			}
+		} else {
+			if (part == "..") {
+				if (!removeLastPart()) {
+					addPart(part);
+				}
+			} else {
+				addPart(part);
+			}
 		}
 	}
 
-	// Convert buffer to string_view
-	return std::string_view(buffer.data(), buffer.size());
+	if (isDir && (nResultParts == 0 || (resultParts[nResultParts - 1] != "." && resultParts[nResultParts - 1] != ".."))) {
+		addPart(".");
+	}
+
+	// Make buffer
+	size_t writePos = 0;
+	for (size_t i = 0; i < nResultParts; ++i) {
+		memcpy(&buffer[writePos], resultParts[i].data(), resultParts[i].length());
+		writePos += resultParts[i].length();
+		if (i + 1 != nResultParts) {
+			buffer[writePos] = '/';
+			++writePos;
+		}
+	}
+	return std::string_view(buffer.data(), writePos);
 }
 
 Path& Path::operator=(const std::string& other)

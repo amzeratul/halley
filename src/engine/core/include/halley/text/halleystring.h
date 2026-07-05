@@ -243,6 +243,7 @@ namespace Halley {
 
 		[[nodiscard]] static std::pair<std::string_view, std::string_view> split(std::string_view src, char delimeter);
 		[[nodiscard]] static std::string_view splitAndAdvance(std::string_view& src, char delimeter);
+		[[nodiscard]] static gsl::span<std::string_view> splitToBuffer(std::string_view src, char delimeter, gsl::span<std::string_view> buffer);
 
 		[[nodiscard]] static String concatList(gsl::span<const String> list, std::string_view separator);
 
