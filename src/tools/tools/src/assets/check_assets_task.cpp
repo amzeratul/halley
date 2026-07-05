@@ -205,7 +205,7 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		hasPrivateMeta = times->privateMeta.has_value();
 	} else {
 		timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
-		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
+		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
 		if (auto t = fileSystemCache.tryGetLastWriteTime(metaPath)) {
 			timestamps[2] = *t;
 			privateMetaPath = std::move(metaPath);
@@ -226,7 +226,7 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	const Metadata* metadata = db.markInputPresentIfUpToDate(pathKey, timestamps);
 	if (!metadata) {
 		if (hasPrivateMeta && !privateMetaPath) {
-			privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
+			privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
 		}
 		Metadata meta = MetadataImporter::getMetaData(filePath, dirMeta->path, privateMetaPath);
 		if (skipGen) {

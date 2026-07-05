@@ -125,7 +125,7 @@ Bytes SDLSaveData::getData(const String& filename)
 		return *data;
 	} else {
 		// Fallback to backup
-		data = doGetData(path.replaceExtension(path.getExtensionStr() + ".bak"), filename);
+		data = doGetData(path.replaceExtension(path.getExtension() + ".bak"), filename);
 		if (data) {
 			return *data;
 		} else {
@@ -139,7 +139,7 @@ void SDLSaveData::removeData(const String& path)
 	HalleyAssertDev(!path.isEmpty());
 	Path::removeFile(dir / path);
 	auto backupFile = dir / path;
-	backupFile = backupFile.replaceExtension(backupFile.getExtensionStr() + ".bak");
+	backupFile = backupFile.replaceExtension(backupFile.getExtension() + ".bak");
 	Path::removeFile(backupFile);
 }
 
@@ -190,7 +190,7 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit,
 		// We've read from this file safely before, so back it up!
 		// But don't do it for downloads, those don't count as highly sensitive data
 		if (type != SaveDataType::Downloads) {
-			backupPath = dstPath.replaceExtension(dstPath.getExtensionStr() + ".bak");
+			backupPath = dstPath.replaceExtension(dstPath.getExtension() + ".bak");
 		}
 	}
 

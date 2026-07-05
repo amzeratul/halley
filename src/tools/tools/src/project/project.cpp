@@ -433,7 +433,7 @@ GameProperties& Project::getGameProperties() const
 Metadata Project::readMetadataFromDisk(const Path& filePath) const
 {
 	Metadata metadata;
-	const Path metaPath = filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
+	const Path metaPath = filePath.replaceExtension(filePath.getExtension() + ".meta");
 	MetadataImporter::loadMetaData(metadata, metaPath, false, filePath);
 	return metadata;
 }
@@ -445,7 +445,7 @@ void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata
 	auto data = Bytes(str.size());
 	memcpy(data.data(), str.c_str(), str.size());
 
-	const Path metaPath = filePath.replaceExtension(filePath.getExtensionStr() + ".meta");
+	const Path metaPath = filePath.replaceExtension(filePath.getExtension() + ".meta");
 	fileSystemCache->writeFile(metaPath, data);
 	notifyAssetFilesModified(gsl::span<const Path>(&filePath, 1));
 }

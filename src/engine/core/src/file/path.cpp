@@ -141,7 +141,7 @@ Path& Path::operator=(String other)
 	return *this;
 }
 
-std::string_view Path::getFilename() const
+std::string_view Path::getFilenameStrView() const
 {
 	auto part = getLastPart();
 	if (part == ".") {
@@ -150,12 +150,12 @@ std::string_view Path::getFilename() const
 	return part;
 }
 
-String Path::getFilenameStr() const
+String Path::getFilename() const
 {
 	return String(getFilename());
 }
 
-std::string_view Path::getDirName() const
+std::string_view Path::getDirNameStrView() const
 {
 	const auto [prev, cur] = getLastTwoParts();
 	if (cur == ".") {
@@ -164,12 +164,12 @@ std::string_view Path::getDirName() const
 	return "";
 }
 
-String Path::getDirNameStr() const
+String Path::getDirName() const
 {
 	return getDirName();
 }
 
-std::string_view Path::getStem() const
+std::string_view Path::getStemStrView() const
 {
 	const auto filename = getFilename();
 	if (filename == "." || filename == "..") {
@@ -179,12 +179,12 @@ std::string_view Path::getStem() const
 	return filename.substr(0, dotPos);
 }
 
-String Path::getStemStr() const
+String Path::getStem() const
 {
 	return getStem();
 }
 
-std::string_view Path::getExtension() const
+std::string_view Path::getExtensionStrView() const
 {
 	const auto filename = getFilename();
 	if (filename == "." || filename == "..") {
@@ -197,7 +197,7 @@ std::string_view Path::getExtension() const
 	return filename.substr(dotPos);
 }
 
-String Path::getExtensionStr() const
+String Path::getExtension() const
 {
 	return getExtension();
 }

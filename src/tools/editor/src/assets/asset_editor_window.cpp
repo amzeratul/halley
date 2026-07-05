@@ -147,7 +147,7 @@ void AssetEditorWindow::save()
 
 String AssetEditorWindow::getName() const
 {
-	return Path(loadedAsset).getFilenameStr();
+	return Path(loadedAsset).getFilename();
 }
 
 void AssetEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
@@ -185,7 +185,7 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
 
-		const auto shortName = Path(name).getFilenameStr();
+		const auto shortName = Path(name).getFilename();
 		const auto image = std::make_shared<UIImage>(factory.makeAssetTypeIcon(type));
 		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle(), LocalisedString::fromUserString(shortName));
 		

@@ -292,7 +292,7 @@ void AssetsBrowser::addFileToList(const Path& path)
 	
 	auto sizer = std::make_shared<UISizer>();
 	sizer->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(type)), 0, Vector4f(0, 0, 4, 0));
-	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilenameStr())));
+	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilename())));
 	assetList->addItem(path.toString(), std::move(sizer));
 }
 
@@ -378,7 +378,7 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 
 void AssetsBrowser::onContextMenuAction(const String& assetId, const String& action)
 {
-	const auto filename = Path(assetId).replaceExtension("").getFilenameStr();
+	const auto filename = Path(assetId).replaceExtension("").getFilename();
 	if (action == "add") {
 		addAsset();
 	} else if (action == "rename") {
@@ -410,7 +410,7 @@ void AssetsBrowser::onContextMenuAction(const String& assetId, const String& act
 	} else if (action == "addFolder") {
 		addFolder();
 	} else if (action == "renameFolder") {
-		const auto dirName = Path(assetId).getDirNameStr();
+		const auto dirName = Path(assetId).getDirName();
 		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Rename folder to"), dirName, "", [=](std::optional<String> newName)
 		{
 			if (newName) {

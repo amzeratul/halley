@@ -24,14 +24,14 @@ namespace Halley
 
 		std::string_view getRoot() const;
 		Path getFront(size_t n) const;
-		std::string_view getFilename() const;
-		String getFilenameStr() const;
-		std::string_view getDirName() const;
-		String getDirNameStr() const;
-		std::string_view getStem() const;
-		String getStemStr() const;
-		std::string_view getExtension() const;
-		String getExtensionStr() const;
+		std::string_view getFilenameStrView() const;
+		String getFilename() const;
+		std::string_view getDirNameStrView() const;
+		String getDirName() const;
+		std::string_view getStemStrView() const;
+		String getStem() const;
+		std::string_view getExtensionStrView() const;
+		String getExtension() const;
 		std::string_view getStringView(bool includeDot = true) const;
 		String getString(bool includeDot = true) const;
 		String getNativeString(bool includeDot = true) const;
