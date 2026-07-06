@@ -298,7 +298,7 @@ void Core::initResources()
 	api->audioInternal->setResources(*resources);
 	api->inputInternal->setResources(*resources);
 
-	resourceUnloader = std::make_unique<ResourceUnloader>(*resources);
+	resourceUnloader = std::make_unique<ResourceUnloader>(*resources, *api->system);
 }
 
 void Core::setOutRedirect(bool appendToExisting)

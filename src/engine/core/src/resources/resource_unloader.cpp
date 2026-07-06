@@ -1,5 +1,6 @@
 #include "halley/resources/resource_unloader.h"
 
+#include "halley/api/system_api.h"
 #include "halley/graphics/texture.h"
 
 using namespace Halley;
@@ -31,8 +32,12 @@ void ResourceUnloader::StateCollection::sort()
 	std::sort(states.begin(), states.end());
 }
 
-ResourceUnloader::ResourceUnloader(Resources& resources)
+ResourceUnloader::ResourceUnloader(Resources& resources, SystemAPI& systemAPI)
 	: resources(resources)
+	, systemAPI(systemAPI)
+	, executor(SingleThreadExecutor("resourceUnloader", [&systemAPI] (String name, std::function<void()> f) {
+		return systemAPI.createThread(name, ThreadPriority::Low, std::move(f));
+	}))
 {
 }
 
@@ -48,7 +53,7 @@ void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 		prepareCollection(dt, resources.ofType(type));
 	}
 
-	pendingUpdate = Concurrent::execute(Executors::getCPUAux(), [this, dt, rules = rules] {
+	pendingUpdate = Concurrent::execute(executor.getQueue(), [this, dt, rules = rules] {
 		for (auto& t: frameTimes) {
 			t += dt;
 		}

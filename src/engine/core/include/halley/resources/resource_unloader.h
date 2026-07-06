@@ -4,7 +4,9 @@
 #include "halley/data_structures/hash_map.h"
 
 namespace Halley {
-    class ResourceUnloaderAssetTypeRules {
+	class SystemAPI;
+
+	class ResourceUnloaderAssetTypeRules {
     public:
         size_t budget = 1024 * 1024 * 1024;     /// Total byte budget for this asset type; can preload to that amount, and tries to keep all resources below it
         size_t staleBudget = 768 * 1024 * 1024; /// Unload stale objects when this usage is exceeded
@@ -40,12 +42,15 @@ namespace Halley {
         };
 
     public:
-        ResourceUnloader(Resources& resources);
+        ResourceUnloader(Resources& resources, SystemAPI& systemAPI);
 
         void update(Time t, const ResourceUnloaderRules& rules);
 
     private:
         Resources& resources;
+        SystemAPI& systemAPI;
+        SingleThreadExecutor executor;
+
         Time budgetMessageTimeout = 0;
         Time unloadPreloadMessageTimeout = 0;
         uint32_t frameIdx = 1000;
