@@ -435,6 +435,10 @@ Path Path::operator/(const std::string& other) const
 
 Path Path::operator/(std::string_view other) const
 {
+	if (str == ".") {
+		return Path(other, false);
+	}
+
 	std::array<char, 2048> buffer1;
 	auto result = String::concatInBuffer(buffer1, getStringView(false), "/", other);
 	return Path(result, other.starts_with(".") || other.starts_with(".."));
