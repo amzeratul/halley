@@ -96,6 +96,7 @@ TEST(HalleyPath, ReplaceExtension)
 	EXPECT_EQ(Path("/foo/.png").replaceExtension(".txt"), "/foo/.txt");
 	EXPECT_EQ(Path("/foo/.foo.png").replaceExtension(".txt"), "/foo/.foo.txt");
 	EXPECT_EQ(Path("/foo/.foo...png").replaceExtension(".txt"), "/foo/.foo...txt");
+	EXPECT_EQ(Path("/foo/bar").replaceExtension(".txt"), "/foo/bar.txt");
 }
 
 TEST(HalleyPath, SubParts)

@@ -410,11 +410,11 @@ Path Path::parentPath() const
 Path Path::replaceExtension(std::string_view newExtension) const
 {
 	auto filenamePos = getLastPartPos();
-	const size_t dotPos = std::string_view(str).substr(filenamePos).find_last_of('.') + filenamePos;
+	const size_t dotPos = std::string_view(str).substr(filenamePos).find_last_of('.');
 	if (dotPos == std::string_view::npos) {
 		return Path(str + newExtension);
 	} else {
-		return Path(str.substr(0, dotPos) + newExtension);
+		return Path(str.substr(0, dotPos + filenamePos) + newExtension);
 	}
 }
 

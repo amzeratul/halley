@@ -197,6 +197,7 @@ Path FileSystem::getTemporaryPath()
 	for (size_t i = 0; i < name.size(); ++i) {
 		name[i] = digits[rng.getInt(0, 15)];
 	}
+	
 	return Path(temp_directory_path().string()) / Path(String(name.data(), name.size()));
 }
 
