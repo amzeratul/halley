@@ -21,6 +21,8 @@ set(SOURCES
 
         "stb_image/stb_image.c"
 
+        "sqlite/sqlite3.c"
+
         "tiny-aes/aes.c"
 
         "tinyxml/ticpp.cpp"
@@ -128,6 +130,9 @@ set(HEADERS
         "speex/fixed_generic.h"
         "speex/speex_resampler.h"
         "speex/stack_alloc.h"
+
+        "sqlite/sqlite3.h"
+        "sqlite/sqlite3ext.h"
         
         "xxhash/xxhash.h"
 
