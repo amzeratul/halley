@@ -877,6 +877,15 @@ const ScriptNodeTypeCollection& ScriptEnvironment::getNodeTypeCollection() const
 	return *nodeTypeCollection;
 }
 
+std::optional<WorldPosition> ScriptEnvironment::tryGetEntityPosition(EntityId id) const
+{
+	if (auto* transform = tryGetComponent<Transform2DComponent>(id)) {
+		return transform->getWorldPosition();
+	} else {
+		return {};
+	}
+}
+
 void ScriptEnvironment::setFutureNodeValue(const ScriptGraphNode& node, std::optional<Future<ConfigNode>> future)
 {
 	if (getState().state) {

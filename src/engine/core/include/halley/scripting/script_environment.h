@@ -113,8 +113,8 @@ namespace Halley {
         virtual int getInputButtonByName(const String& name) const;
         bool hasInputLabel(EntityId entityId) const;
 
-        template <typename T>
-        T* tryGetComponent(EntityId id)
+    	template <typename T>
+        T* tryGetComponent(EntityId id) const
         {
 	        auto entity = tryGetEntity(id);
             return entity.isValid() ? entity.tryGetComponent<T>() : nullptr;
@@ -160,6 +160,8 @@ namespace Halley {
         gsl::span<const ConfigNode> getStartParams() const;
 
         const ScriptNodeTypeCollection& getNodeTypeCollection() const;
+
+        virtual std::optional<WorldPosition> tryGetEntityPosition(EntityId id) const;
         
 		template <typename T>
 		T& getInterface()

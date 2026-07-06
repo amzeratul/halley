@@ -201,25 +201,28 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 	const auto offset = readDataPin(environment, node, 2).asVector2f({});
 
 	const auto entityId = readEntityId(environment, node, 0);
-	const auto* transform = environment.tryGetComponent<Transform2DComponent>(entityId);
 
 	if (pinN == 6) {
-		return ConfigNode(transform != nullptr);
+		return ConfigNode(environment.tryGetComponent<Transform2DComponent>(entityId) != nullptr);
 	}
 
-	if (transform) {
+	if (const auto pos = environment.tryGetEntityPosition(entityId)) {
 		if (pinN == 1) {
-			return (WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()) + offset).toConfigNode();
+			return (*pos + offset).toConfigNode();
 		} else if (pinN == 3) {
-			return ConfigNode(transform->getGlobalPosition() + offset);
+			return ConfigNode(pos->pos + offset);
 		} else if (pinN == 4) {
-			return ConfigNode(transform->getSubWorld());
+			return ConfigNode(pos->subWorld);
 		} else if (pinN == 5) {
-			return ConfigNode(transform->getGlobalHeight());
+			if (auto* transform = environment.tryGetComponent<Transform2DComponent>(entityId)) {
+				return ConfigNode(transform->getGlobalHeight());
+			} else {
+				return ConfigNode(0);
+			}
 		}
 	} else {
 		if (auto e = environment.getWorld().tryGetEntity(entityId); e.isValid()) {
-			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " (\"" + toString(e.getName()) + "\") has no Transform2DComponent. Script: " + environment.getCurrentScriptName(), true);
+			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " (\"" + toString(e.getName()) + "\") has no components that can provide position. Script: " + environment.getCurrentScriptName(), true);
 		} else {
 			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " does not exist. Script: " + environment.getCurrentScriptName(), true);
 		}
