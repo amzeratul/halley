@@ -176,12 +176,12 @@ Future<std::optional<LocStringSet>> LocalisationClient::getStrings(std::optional
 	url += "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 
-	return sendWithAuthorization(HTTPMethod::GET, url).then([origLanguage = origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
+	return sendWithAuthorization(HTTPMethod::GET, url).then([origLanguage = origLanguage, url] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
 	{
 		if (response->getResponseCode() == 200) {
 			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));
 		} else {
-			Logger::logError("Server returned error " + toString(response->getResponseCode()) + ": " + response->getBody());
+			Logger::logError(url + " returned error " + toString(response->getResponseCode()) + ": " + response->getBody());
 		}
 		return std::nullopt;
 	});
@@ -191,13 +191,13 @@ Future<int> LocalisationClient::getStringsVersion()
 {
 	const auto url = "/strings-version/" + Encode::encodeURL(project);
 
-	return sendWithAuthorization(HTTPMethod::GET, url).then([] (std::unique_ptr<HTTPResponse> response) -> int
+	return sendWithAuthorization(HTTPMethod::GET, url).then([url] (std::unique_ptr<HTTPResponse> response) -> int
 	{
 		if (response->getResponseCode() == 200) {
 			auto body = JSONConvert::parseConfig(response->getBody());
 			return body["version"].asInt(-1);
 		} else {
-			Logger::logError("Server returned error " + toString(response->getResponseCode()) + ": " + response->getBody());
+			Logger::logError(url + " returned error " + toString(response->getResponseCode()) + ": " + response->getBody());
 			return -2;
 		}
 	});
@@ -460,13 +460,13 @@ Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(
 	return sendWithAuthorization(makeRequest(method, url, payload));
 }
 
-Future<bool> LocalisationClient::sendWithAuthorizationSimple(std::unique_ptr<HTTPRequest> request)
+Future<bool> LocalisationClient::sendWithAuthorizationSimple(const String& url, std::unique_ptr<HTTPRequest> request)
 {
 	return sendWithAuthorization(std::move(request)).then([=] (std::unique_ptr<HTTPResponse> response) {
 		if (response->getResponseCode() == 200) {
 			return true;
 		} else {
-			Logger::logError("Request returned " + toString(response->getResponseCode()));
+			Logger::logError(url + " returned error " + toString(response->getResponseCode()));
 			return false;
 		}
 	});
@@ -474,7 +474,7 @@ Future<bool> LocalisationClient::sendWithAuthorizationSimple(std::unique_ptr<HTT
 
 Future<bool> LocalisationClient::sendWithAuthorizationSimple(HTTPMethod method, const String& path, const ConfigNode& payload)
 {
-	return sendWithAuthorizationSimple(makeRequest(method, path, payload));
+	return sendWithAuthorizationSimple(baseURL + path, makeRequest(method, path, payload));
 }
 
 void LocalisationClient::sendPending()

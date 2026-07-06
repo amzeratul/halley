@@ -102,7 +102,7 @@ namespace Halley {
 		std::unique_ptr<HTTPRequest> makeRequest(HTTPMethod method, const String& path, const ConfigNode& payload = {}) const;
 		Future<std::unique_ptr<HTTPResponse>> sendWithAuthorization(std::unique_ptr<HTTPRequest> request);
 		Future<std::unique_ptr<HTTPResponse>> sendWithAuthorization(HTTPMethod method, const String& path, const ConfigNode& payload = {});
-		Future<bool> sendWithAuthorizationSimple(std::unique_ptr<HTTPRequest> request);
+		Future<bool> sendWithAuthorizationSimple(const String& url, std::unique_ptr<HTTPRequest> request);
 		Future<bool> sendWithAuthorizationSimple(HTTPMethod method, const String& path, const ConfigNode& payload = {});
 
 		void sendPending();
