@@ -105,7 +105,7 @@ LoggerLevel BuildProjectTask::parseMSBuildMessage(LoggerLevel level, const Strin
 		auto split = msg.split("->");
 		if (split.size() >= 2) {
 			split.back().trimBoth();
-			setProgress(0, Path(split.back()).getFilename().toString());
+			setProgress(0, Path(split.back()).getFilename());
 		}
 	}
 
@@ -130,7 +130,7 @@ LoggerLevel BuildProjectTask::parseNinjaMessage(LoggerLevel level, const String&
 			const int total = String(baseMatch[2]).toInteger();
 
 			const auto split = rawMsg.split(' ');
-			auto fileName = Path(split.back()).getFilename().toString();
+			auto fileName = Path(split.back()).getFilename();
 			if (fileName.endsWith(".obj")) {
 				fileName = fileName.left(fileName.size() - 4);
 			}

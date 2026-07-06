@@ -10,7 +10,7 @@ using namespace Halley;
 
 String BitmapFontImporter::getAssetId(const Path& file, const Metadata* metadata) const
 {
-	return file.getStem().getString();
+	return file.getStem();
 }
 
 void BitmapFontImporter::import(const ImportingAsset& asset, IAssetCollector& collector)

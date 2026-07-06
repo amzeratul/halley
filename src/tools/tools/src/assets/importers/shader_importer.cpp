@@ -32,7 +32,7 @@ void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	ShaderFile shader;
 	for (auto& input: asset.inputFiles) {
-		const auto shaderType = fromString<ShaderType>(input.name.getExtension().mid(1));
+		const auto shaderType = fromString<ShaderType>(input.name.getExtension().substr(1));
 
 		Bytes data = input.data;
 		if (language == "hlsl") {

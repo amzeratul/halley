@@ -221,7 +221,7 @@ Sprite SelectAssetWidget::makeIcon()
 String SelectAssetWidget::doGetDisplayName(const String& name) const
 {
 	if (type == AssetType::Sprite || type == AssetType::Animation || type == AssetType::MaterialDefinition) {
-		return Path(name).getFilename().toString();
+		return Path(name).getFilename();
 	} else {
 		return name;
 	}

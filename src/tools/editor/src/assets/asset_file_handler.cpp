@@ -11,9 +11,9 @@ AssetFileHandler::AssetFileHandler()
 	populate();
 }
 
-const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const String& assetType) const
+const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(std::string_view assetType) const
 {
-	if (assetType.isEmpty()) {
+	if (assetType.empty()) {
 		return nullptr;
 	}
 	const auto iter = handlers.find(assetType);
@@ -25,11 +25,11 @@ const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const String& assetT
 
 const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const Path& path) const
 {
-	const auto& pathParts = path.getParts();
-	if (pathParts.size() >= 2 && pathParts[0] == ".." && pathParts[1] == "halley") {
-		return pathParts.size() >= 4 ? tryGetHandlerFor(pathParts[3]) : nullptr;
+	const auto n = path.getNumberOfParts();
+	if (n >= 2 && path.getPart(0) == ".." && path.getPart(1) == "halley") {
+		return n >= 4 ? tryGetHandlerFor(path.getPart(3)) : nullptr;
 	} else {
-		return !pathParts.empty() ? tryGetHandlerFor(pathParts[0]) : nullptr;
+		return n > 0 ? tryGetHandlerFor(path.getPart(0)) : nullptr;
 	}
 }
 

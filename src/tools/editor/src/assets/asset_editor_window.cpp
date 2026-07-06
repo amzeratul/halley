@@ -147,7 +147,7 @@ void AssetEditorWindow::save()
 
 String AssetEditorWindow::getName() const
 {
-	return Path(loadedAsset).getFilename().getString();
+	return Path(loadedAsset).getFilename();
 }
 
 void AssetEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
@@ -185,7 +185,7 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
 
-		const auto shortName = Path(name).getFilename().string();
+		const auto shortName = Path(name).getFilename();
 		const auto image = std::make_shared<UIImage>(factory.makeAssetTypeIcon(type));
 		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle(), LocalisedString::fromUserString(shortName));
 		
@@ -207,7 +207,7 @@ Vector<std::pair<AssetType, String>> AssetEditorWindow::getAssetsFromFile(const 
 	if (assets.empty()) {
 		if (auto* handler = projectWindow.getAssetFileHandler().tryGetHandlerFor(path)) {
 			auto assetId = path.replaceExtension(handler->getFileExtension());
-			if (assetId.getNumberPaths() >= 3 && assetId.getParts()[0] == ".." && assetId.getParts()[1] == "halley") {
+			if (assetId.getNumberOfParts() >= 3 && assetId.getPart(0) == ".." && assetId.getPart(1) == "halley") {
 				assetId = assetId.dropFront(3);
 			}
 			return { std::pair<AssetType, String>(handler->getAssetType(), assetId.toString() )};

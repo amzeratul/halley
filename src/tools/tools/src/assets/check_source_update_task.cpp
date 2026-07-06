@@ -92,7 +92,7 @@ void CheckSourceUpdateTask::generateSourceListing()
 		for (auto& file: files) {
 			const auto ext = file.getExtension();
 			if (ext == ".cpp" || (acceptHeaders && (ext == ".h" || ext == ".hpp"))) {
-				if (file.getFilenameStr() != "build_version.h") {
+				if (file.getFilename() != "build_version.h") {
 					auto path = (root / file).makeRelativeTo(makeRelTo);
 					result.push_back(path.getString(false));
 				}

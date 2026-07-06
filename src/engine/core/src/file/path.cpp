@@ -26,139 +26,181 @@ using namespace Halley;
 Path::Path()
 {}
 
-Path::Path(const char* name)
+Path::Path(const char* name, bool normalise)
 {
-	setPath(name);
+	setPath(std::string_view(name), normalise);
 }
 
-Path::Path(const std::string& name)
+Path::Path(std::string_view name, bool normalise)
 {
-	setPath(name);
+	setPath(name, normalise);
 }
 
-Path::Path(const String& name)
+Path::Path(std::string name, bool normalise)
 {
-	setPath(name);
+	setPath(String(std::move(name)), normalise);
 }
 
-void Path::setPath(const String& value)
+Path::Path(String name, bool shouldNormalise)
 {
-	String rawPath = value;
-#ifdef _WIN32
-	rawPath = rawPath.replaceAll("\\", "/");
-#endif
-
-	pathParts = rawPath.split('/');
-	normalise();
+	setPath(std::move(name), shouldNormalise);
 }
 
-Path::Path(Vector<String> parts, bool normaliseAfter)
-	: pathParts(std::move(parts))
+void Path::setPath(std::string_view value, bool shouldNormalise)
 {
-	if (normaliseAfter) {
-		normalise();
+	if (shouldNormalise) {
+		std::array<char, 2048> buffer;
+		str = String(normalise(buffer, std::string_view(value)));
+	} else {
+		str = String(value);
 	}
+	computeProperties();
 }
 
-void Path::normalise()
+void Path::setPath(String value, bool shouldNormalise)
 {
-	size_t writePos = 0;
-	bool lastIsBack = false;
+	str = std::move(value);
+	if (shouldNormalise) {
+		std::array<char, 2048> buffer;
+		auto n = normalise(buffer, str);
+		if (n != str) {
+			str = String(n);
+		}
+	}
+	computeProperties();
+}
 
-	auto write = [&] (const String& p)
+std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
+{
+	// Normalises the path:
+	// Remove ".." plus whatever directory comes before: foo/bar/../baz -> foo/baz
+	// ...but keep any at the front: ../../foo
+	// Remove ".": foo/bar/./baz -> foo/bar/baz
+	// ...but keep it at the end: /foo/.
+	// Ensure directories end in a ".": foo/bar/ -> foo/bar/.
+	// Collapse double "/": foo//bar -> foo/bar
+
+	HalleyAssertDev(buffer.size() >= str.size() + 1);
+	std::array<char, 2048> winBuf;
+
+	// Some preprocessing on Windows
+	if (getPlatform() == GamePlatform::Windows) {
+		HalleyAssertDev(winBuf.size() >= str.size());
+		// Convert backslashes
+		for (size_t i = 0; i < str.length(); ++i) {
+			const auto c = str[i];
+			winBuf[i] = c == '\\' ? '/' : c;
+		}
+
+		// Also make sure the drive name is uppercase
+		if (str.length() >= 2 && winBuf[1] == ':' && winBuf[0] >= 'a' && winBuf[0] <= 'z') {
+			winBuf[0] -= 32; // Make uppercase
+		}
+
+		str = std::string_view(winBuf.data(), str.length());
+	}
+
+	const bool isDir = str.ends_with("/") || str.ends_with("/.") || str.ends_with("/..");
+
+	// Split string
+	std::array<std::string_view, 64> partsBuffer;
+	const auto parts = String::splitToBuffer(str, '/', partsBuffer);
+
+	std::array<std::string_view, 64> resultParts;
+	size_t nResultParts = 0;
+	auto addPart = [&] (std::string_view p)
 	{
-		pathParts.at(writePos++) = p;
-		lastIsBack = false;
+		resultParts.at(nResultParts++) = p;
+	};
+	auto removeLastPart = [&] () -> bool
+	{
+		if (nResultParts >= 1 && resultParts[nResultParts - 1] != "..") {
+			--nResultParts;
+			return true;
+		} else {
+			return false;
+		}
 	};
 
-	auto canInsertDot = [&] () -> bool
-	{
-		return writePos == 0 || (pathParts[writePos - 1] != "." && pathParts[writePos - 1] != "..");
-	};
+	// Generate result parts
+	for (size_t i = 0; i < parts.size(); ++i) {
+		const auto& part = parts[i];
+		const bool isLast = i + 1 == parts.size();
 
-	int n = int(pathParts.size());
-	for (int i = 0; i < n; ++i) {
-		bool first = i == 0;
-		bool last = i == n - 1;
-
-		String current = pathParts[i]; // Important: don't make this a reference
-		if (current == "") {
-			if (first) {
-				write(current);
-			} else if (last) {
-				write(".");
-			}
-		} else if (current == ".") {
-			if (last && canInsertDot()) {
-				write(current);
-			}
-		} else if (current == "..") {
-			if (writePos > 0 && pathParts[writePos - 1] != ".." && pathParts[writePos - 1] != ".") {
-				--writePos;
-				lastIsBack = true;
-			} else {
-				write(current);
+		if (part.empty() && i == 0) {
+			addPart(part);
+		} else if (part.empty() || part == ".") {
+			if (isLast) {
+				addPart(".");
 			}
 		} else {
-			write(current);
+			if (part == "..") {
+				if (!removeLastPart()) {
+					addPart(part);
+				}
+			} else {
+				addPart(part);
+			}
 		}
 	}
-	if (lastIsBack && canInsertDot()) {
-		write(".");
+
+	if (isDir && (nResultParts == 0 || (resultParts[nResultParts - 1] != "." && resultParts[nResultParts - 1] != ".."))) {
+		addPart(".");
 	}
 
-	pathParts.resize(writePos);
-
-#ifdef _WIN32
-	if (!pathParts.empty()) {
-		if (pathParts[0].size() == 2 && pathParts[0][1] == ':') {
-			pathParts[0] = pathParts[0].asciiUpper();
-		}
-	}
-#endif
+	// Make buffer
+	return String::concatStringViewsInBuffer(buffer, gsl::span(resultParts).subspan(0, nResultParts), "/");
 }
 
-Path& Path::operator=(const std::string& other)
+Path& Path::operator=(std::string other)
+{
+	setPath(String(std::move(other)));
+	return *this;
+}
+
+Path& Path::operator=(std::string_view other)
 {
 	setPath(other);
 	return *this;
 }
 
-Path& Path::operator=(const String& other)
+Path& Path::operator=(String other)
 {
-	setPath(other);
+	setPath(std::move(other));
 	return *this;
 }
 
-Path Path::getFilename() const
+std::string_view Path::getFilenameStrView() const
 {
-	return pathParts.back();
+	auto part = getLastPart();
+	if (part == ".") {
+		return {};
+	}
+	return part;
 }
 
-const String& Path::getFilenameStr() const
+String Path::getFilename() const
 {
-	return pathParts.back();
+	return getFilenameStrView();
 }
 
-Path Path::getDirName() const
+std::string_view Path::getDirNameStrView() const
 {
-	if (pathParts.back() == ".") {
-		return pathParts[pathParts.size() - 2];
+	const auto [prev, cur] = getLastTwoParts();
+	if (cur == ".") {
+		return prev;
 	}
 	return "";
 }
 
-const String& Path::getDirNameStr() const
+String Path::getDirName() const
 {
-	if (pathParts.back() == ".") {
-		return pathParts[pathParts.size() - 2];
-	}
-	return String::emptyString();
+	return getDirNameStrView();
 }
 
-Path Path::getStem() const
+std::string_view Path::getStemStrView() const
 {
-	String filename = pathParts.back();
+	const auto filename = getFilenameStrView();
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
@@ -166,137 +208,214 @@ Path Path::getStem() const
 	return filename.substr(0, dotPos);
 }
 
-String Path::getExtension() const
+String Path::getStem() const
 {
-	if (pathParts.empty()) {
-		return "";
-	}
-	String filename = pathParts.back();
+	return getStemStrView();
+}
+
+std::string_view Path::getExtensionStrView() const
+{
+	const auto filename = getFilenameStrView();
 	if (filename == "." || filename == "..") {
 		return filename;
 	}
-	size_t dotPos = filename.find_last_of('.');
+	const size_t dotPos = filename.find_last_of('.');
+	if (dotPos == std::string_view::npos) {
+		return {};
+	}
 	return filename.substr(dotPos);
 }
 
-std::string Path::makeString(bool includeDot, char dirSeparator) const
+String Path::getExtension() const
 {
-	std::string result;
+	return getExtensionStrView();
+}
 
-	// Measure size needed
-	bool first = true;
-	size_t size = 0;
-	for (const auto& p: pathParts) {
-		if (&p == &pathParts.back() && p == "." && !includeDot) {
-			break;
+std::string_view Path::getPart(size_t idx) const
+{
+	auto s = std::string_view(str);
+	size_t startPos = 0;
+	size_t nFound = 0;
+	for (size_t i = 0; nFound < idx && i < s.length(); ++i) {
+		if (s[i] == '/') {
+			++nFound;
 		}
-		if (first) {
-			first = false;
-		} else {
-			// Separator
-			size += 1;
-		}
-		size += p.size();
 	}
-	result.reserve(size);
 
-	// Write string
-	first = true;
-	for (auto& p : pathParts) {
-		if (&p == &pathParts.back() && p == "." && !includeDot) {
-			break;
+	for (size_t i = 0; i < idx; ++i) {
+		startPos = s.find('/', startPos);
+		if (startPos == std::string_view::npos) {
+			return {};
 		}
-		if (first) {
-			first = false;
-		} else {
-			result += dirSeparator;
-		}
-		result += (std::string_view)p;
+		startPos += 1; // Skip slash
 	}
-	return result;
+
+	size_t endPos = s.find('/', startPos);
+	if (endPos == std::string_view::npos) {
+		return s.substr(startPos);
+	} else {
+		return s.substr(startPos, endPos - startPos);
+	}
+}
+
+std::string_view Path::getFrontParts(size_t n) const
+{
+	if (n == 0 || str.isEmpty()) [[unlikely]] {
+		return {};
+	}
+
+	if (n >= partIdx.size()) [[unlikely]] {
+		const size_t len = str.length();
+		size_t nSlashes = 0;
+		for (size_t i = 0; i < len; ++i) {
+			if (str[i] == '/') {
+				++nSlashes;
+				if (nSlashes == n) {
+					return std::string_view(str).substr(0, i + 1);
+				}
+			}
+		}
+		return std::string_view(str);
+	} else {
+		return std::string_view(str).substr(0, partIdx[n]);
+	}
+}
+
+std::string_view Path::getLastPart() const
+{
+	if (str.isEmpty()) [[unlikely]] {
+		return {};
+	}
+	return std::string_view(str).substr(getLastPartPos());
+}
+
+size_t Path::getLastPartPos() const
+{
+	if (numberOfParts == 0) [[unlikely]] {
+		return 0;
+	}
+	if (numberOfParts <= partIdx.size()) [[likely]] {
+		return partIdx[numberOfParts - 1];
+	} else {
+		const auto p = str.find_last_of('/');
+		if (p == String::npos) {
+			return 0;
+		} else {
+			return p + 1;
+		}
+	}
+}
+
+std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
+{
+	auto s = std::string_view(str);
+	size_t startPos = 0;
+	std::string_view prev;
+	while (true) {
+		startPos = s.find('/', startPos);
+		auto cur = s.substr(startPos);
+		if (startPos == std::string_view::npos) {
+			return { prev, cur };
+		}
+		startPos += 1; // Skip slash
+		prev = cur;
+	}
+}
+
+void Path::computeProperties()
+{
+	if (str.isEmpty()) {
+		numberOfParts = 0;
+		isDir = false;
+		return;
+	}
+
+	size_t nParts = 1;
+	const auto s = std::string_view(str);
+	const size_t n = s.length();
+	partIdx.fill(0);
+	for (size_t i = 0; i < n; ++i) {
+		if (s[i] == '/') {
+			if (nParts < partIdx.size()) {
+				partIdx[nParts] = static_cast<uint16_t>(i + 1);
+			}
+			++nParts;
+		}
+	}
+	numberOfParts = static_cast<uint16_t>(nParts);
+	if (nParts < partIdx.size()) {
+		partIdx[nParts] = static_cast<uint16_t>(n);
+	}
+
+	isDir = s.ends_with("/") || s.ends_with("/.") || s.ends_with("/..") || s == "." || s == "..";
+}
+
+size_t Path::getNumberOfParts() const
+{
+	return numberOfParts;
 }
 
 std::string Path::string() const
 {
-	return makeString(true, '/');
+	return std::string(getStringView(true));
 }
 
-String Path::getString(bool includeDot) const
+std::string_view Path::getStringView(bool includeDot) const
 {
-	return makeString(includeDot, '/');
-}
-
-String Path::getNativeString(bool includeDot) const
-{
-#ifdef _WIN32
-	constexpr char separator = '\\';
-#else
-	constexpr char separator = '/';
-#endif
-
-	return makeString(includeDot, separator);
-}
-
-String Path::toString() const
-{
-	return makeString(true, '/');
-}
-
-gsl::span<const String> Path::getParts() const
-{
-	return pathParts;
-}
-
-gsl::span<String> Path::getParts()
-{
-	return pathParts;
-}
-
-size_t Path::getNumberPaths() const
-{
-	return pathParts.size();
-}
-
-Path Path::dropFront(int numberFolders) const
-{
-	return Path(Vector<String>(pathParts.begin() + numberFolders, pathParts.end()), true);
-}
-
-Path Path::parentPath() const
-{
-	Path result = *this;
-	if (isDirectory()) {
-		result.pathParts.pop_back();
-		if (!result.pathParts.empty()) {
-			result.pathParts.pop_back();
-		}
-		result.pathParts.push_back(".");
-	} else {
-		if (!result.pathParts.empty()) {
-			result.pathParts.back() = ".";
-		}
+	auto result = std::string_view(str);
+	if (!includeDot && result.ends_with("/.")) {
+		result = result.substr(0, result.length() - 2);
 	}
 	return result;
 }
 
-Path Path::replaceExtension(String newExtension) const
+String Path::getString(bool includeDot) const
 {
-	auto parts = pathParts;
-	parts.back() = getStem().getString() + newExtension;
-	return Path(parts, true);
+	return String(getStringView(includeDot));
 }
 
-Path Path::operator/(std::string_view other) const
+String Path::getNativeString(bool includeDot) const
 {
-	if (other != ".." && other.find('/') == std::string_view::npos && other.find('\\') == std::string_view::npos) {
-		Path p = *this;
-		if (!p.pathParts.empty() && p.pathParts.back() == ".") {
-			p.pathParts.pop_back();
+	constexpr char separator = getPlatform() == GamePlatform::Windows ? '\\' : '/';
+
+	String str = getString(includeDot);
+	if (separator != '/') {
+		for (auto& c: str.cppStr()) {
+			if (c == '/') {
+				c = separator;
+			}
 		}
-		p.pathParts.push_back(other);
-		return p;
 	}
-	return operator/(Path(other));
+	return str;
+}
+
+String Path::toString() const
+{
+	return getString(true);
+}
+
+Path Path::dropFront(int numberFolders) const
+{
+	auto toDrop = getFrontParts(numberFolders);
+	return Path(str.substr(toDrop.length()));
+}
+
+Path Path::parentPath() const
+{
+	size_t toDrop = isDirectory() ? 2 : 1;
+	const auto n = getNumberOfParts();
+	return getFront(std::max<size_t>(n, toDrop) - toDrop);
+}
+
+Path Path::replaceExtension(std::string_view newExtension) const
+{
+	auto filenamePos = getLastPartPos();
+	const size_t dotPos = std::string_view(str).substr(filenamePos).find_last_of('.') + filenamePos;
+	if (dotPos == std::string_view::npos) {
+		return Path(str + newExtension);
+	} else {
+		return Path(str.substr(0, dotPos) + newExtension);
+	}
 }
 
 Path Path::operator/(const char* other) const
@@ -314,78 +433,52 @@ Path Path::operator/(const std::string& other) const
 	return operator/(std::string_view(other));
 }
 
+Path Path::operator/(std::string_view other) const
+{
+	std::array<char, 2048> buffer1;
+	auto result = String::concatInBuffer(buffer1, getStringView(false), "/", other);
+	return Path(result, other.starts_with(".") || other.starts_with(".."));
+}
+
 Path Path::operator/(const Path& other) const 
 {
-	bool needsNormalise = false;
-
-	Vector<String> parts;
-	parts.reserve(pathParts.size() + other.pathParts.size());
-	for (const auto& p: pathParts) {
-		if (p != ".") {
-			parts.push_back(p);
-		}
-	}
-	for (const auto& p : other.pathParts) {
-		parts.push_back(p);
-		if (p == "..") {
-			needsNormalise = true;
-		}
-	}
-	return Path(std::move(parts), needsNormalise);
+	return operator/(other.getStringView(true));
 }
 
 bool Path::operator==(const char* other) const
 {
-	return operator==(Path(other));
+	return str == other;
+}
+
+bool Path::operator==(std::string_view other) const
+{
+	return str == other;
 }
 
 bool Path::operator==(const String& other) const 
 {
-	return operator==(Path(other));
+	return str == other;
 }
 
 bool Path::operator==(const Path& other) const 
 {
-	return *this == other.getParts();
-}
-
-bool Path::operator==(gsl::span<const String> other) const
-{
-	if (pathParts.size() != other.size()) {
-		return false;
-	}
-
-	const size_t n = pathParts.size();
-	for (size_t i = 0; i < n; ++i) {
-		// Scan backwards as the end of the path is much more likely to be different
-		auto& a = pathParts[n - i - 1];
-		auto& b = other[n - i - 1];
-
-#if defined(_WIN32) || defined(__APPLE__)
-		if (a.size() != b.size() || !a.asciiCompareNoCase(b.c_str())) {
-#else
-		if (a == b) {
-#endif
-			return false;
-		}
-	}
-	return true;
+	return str == other.str;
 }
 
 bool Path::operator!=(const Path& other) const 
 {
-	return !(*this == other);
+	return str != other.str;
 }
 
 bool Path::operator<(const Path& other) const
 {
-	return pathParts < other.pathParts;
+	return str < other.str;
 }
 
 bool Path::writeFile(const Path& path, gsl::span<const std::byte> data)
 {
 #ifdef _WIN32
-	std::ofstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::out);
+	std::ofstream fp(path.str.getUTF16().c_str(), std::ios::binary | std::ios::out);
 #else
 	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
 #endif
@@ -453,7 +546,7 @@ Bytes Path::readFile(const Path& path)
 	Bytes result;
 
 #ifdef _WIN32
-	std::ifstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::in);
+	std::ifstream fp(path.str.getUTF16().c_str(), std::ios::binary | std::ios::in);
 #else
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
 #endif
@@ -477,7 +570,7 @@ String Path::readFileString(const Path& path)
 	String result;
 
 #ifdef _WIN32
-	std::ifstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::in);
+	std::ifstream fp(path.str.getUTF16().c_str(), std::ios::binary | std::ios::in);
 #else
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
 #endif
@@ -526,42 +619,43 @@ void Path::removeFile(const Path& path)
 
 bool Path::isPrefixOf(const Path& other) const
 {
-	size_t n = std::min(pathParts.size(), other.pathParts.size());
-	for (size_t i = 0; i < n; ++i) {
-		if (pathParts[i] != other.pathParts[i] && pathParts[i] != ".") {
-			return false;
-		}
-	}
-	return true;
+	auto name = getStringView(false);
+	return other.str.startsWith(name);
 }
 
 Path Path::makeRelativeTo(const Path& path) const
 {
-	const Path& me = *this;
-	size_t sharedRoot = 0;
-	size_t maxLen = std::min(me.pathParts.size(), path.pathParts.size());
+	std::array<std::string_view, 64> myPartsBuffer;
+	const auto myParts = String::splitToBuffer(str, '/', myPartsBuffer);
+	std::array<std::string_view, 64> theirPartsBuffer;
+	const auto theirParts = String::splitToBuffer(path.str, '/', theirPartsBuffer);
 
-	Vector<String> result;
+	size_t sharedRoot = 0;
+	size_t maxLen = std::min(myParts.size(), theirParts.size());
+
 	for (size_t i = 0; i < maxLen; ++i) {
-		if (me.pathParts[i] == path.pathParts[i]) {
+		if (myParts[i] == theirParts[i]) {
 			sharedRoot = i + 1;
 		} else {
 			break;
 		}
 	}
 
+	std::array<std::string_view, 64> resultBuffer;
+	size_t pos = 0;
+
 	const bool relToDir = path.isDirectory();
-	//const int foldersAbove = int(path.getNumberPaths()) - int(sharedRoot) - (isAbsolute() ? 0 : 1) - (relToDir ? 1 : 0);
-	const int foldersAbove = int(path.getNumberPaths()) - int(sharedRoot) - (relToDir ? 1 : 0);
+	const int foldersAbove = int(theirParts.size()) - int(sharedRoot) - (relToDir ? 1 : 0);
 	for (int i = 0; i < foldersAbove; ++i) {
-		result.emplace_back("..");
+		resultBuffer.at(pos++) = "..";
 	}
 
-	for (size_t i = sharedRoot; i < me.pathParts.size(); ++i) {
-		result.emplace_back(me.pathParts[i]);
+	for (size_t i = sharedRoot; i < myParts.size(); ++i) {
+		resultBuffer.at(pos++) = myParts[i];
 	}
 
-	return Path(result, true);
+	std::array<char, 2048> buffer;
+	return Path(String::concatStringViewsInBuffer(buffer, gsl::span(resultBuffer).subspan(0, pos), "/"));
 }
 
 Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) const
@@ -572,48 +666,59 @@ Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) 
 
 bool Path::isDirectory() const
 {
-	return !pathParts.empty() && pathParts.back() == ".";
+	return isDir;
 }
 
 bool Path::isFile() const
 {
-	return !pathParts.empty() && pathParts.back() != ".";
+	const auto filename = getFilenameStrView();
+	return !filename.empty() && filename != ".";
 }
 
 bool Path::isAbsolute() const
 {
-	if (pathParts.empty()) {
+	if (isEmpty()) {
 		return false;
 	} else {
-		return pathParts[0].endsWith(":") || pathParts[0].isEmpty();
+		const auto& root = getPart(0);
+		return root.ends_with(":") || root.empty();
 	}
 }
 
 bool Path::isEmpty() const
 {
-	return pathParts.empty() || pathParts[0].isEmpty();
+	return str.isEmpty();
 }
 
 size_t Path::getHash() const
 {
 	Hash::Hasher hasher;
-	for (const auto& p: pathParts) {
-		hasher.feed(p);
-	}
+	hasher.feed(str);
 	return hasher.digest();
 }
 
-Path Path::getRoot() const
+std::string_view Path::getRoot() const
 {
-	return pathParts.front();
+	return getPart(0);
+}
+
+std::string_view Path::getFrontStrView(size_t n) const
+{
+	// This doesn't return the EXACT same as getFront(), as it won't return a trailing . for dir paths
+	return getFrontParts(n);
 }
 
 Path Path::getFront(size_t n) const
 {
-	if (n >= pathParts.size()) {
+	auto s = getFrontParts(n);
+	if (s.empty()) {
+		return {};
+	} else if (s.length() != str.length()) {
+		std::array<char, 2048> buffer;
+		return Path(String::concatInBuffer(buffer, s, "."), false);
+	} else {
 		return *this;
 	}
-	return Path(Vector<String>(pathParts.begin(), pathParts.begin() + n), true);
 }
 
 
@@ -657,6 +762,16 @@ Vector<Path> Path::enumerateDirectory(bool makeRelative) const
 		}
 	}
 	return result;
+}
+
+void Path::makeLowerCase()
+{
+	str.asciiMakeLower();
+}
+
+bool Path::isCaseSensitive()
+{
+	return getPlatform() != GamePlatform::Windows && getPlatform() != GamePlatform::MacOS;
 }
 
 #else

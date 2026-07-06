@@ -51,7 +51,7 @@ void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector
 	int len = 5 + nSprites;
 
 	strs.resize(len);
-	strs[nSprites + 0] = Path(getChunk(idx).chunkId).getFilenameStr();
+	strs[nSprites + 0] = Path(getChunk(idx).chunkId).getFilename();
 	strs[nSprites + 1] = getTypeDesc(e.type, e.minorRevision);
 	strs[nSprites + 2] = (e.oldKey ? "*" : "") + e.key;
 	strs[nSprites + 3] = e.remoteValue.value_or("");

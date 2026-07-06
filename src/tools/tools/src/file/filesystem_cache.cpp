@@ -201,10 +201,11 @@ void FileSystemCache::doEnumerateListings(const Path& root, const Path& path, Ve
 
 bool FileSystemCache::exists(const Path& path)
 {
+	String buffer;
+	const auto& name = getCaseCorrectedPath(path.getFilenameStrView(), buffer);
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	const auto& name = path.getFilenameStr();
-	return dir.files.contains(getCaseCorrectedPath(name));
+	return dir.files.contains(name);
 }
 
 int64_t FileSystemCache::getLastWriteTime(const Path& path)
@@ -214,10 +215,11 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 
 std::optional<int64_t> FileSystemCache::tryGetLastWriteTime(const Path& path)
 {
+	String buffer;
+	const auto key = getCaseCorrectedPath(path.getFilenameStrView(), buffer);
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	const auto key = path.getFilenameStr();
-	const auto iter = dir.files.find(getCaseCorrectedPath(key));
+	const auto iter = dir.files.find(key);
 	if (iter != dir.files.end()) {
 		return iter->second.lastWriteTime;
 	}
@@ -247,7 +249,6 @@ FileSystemCache::DirEntry& FileSystemCache::getDirectory(const Path& path)
 FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 {
 	const auto& dirPath = path.isDirectory() ? path : path.parentPath();
-	HalleyAssertDev(dirPath.isDirectory());
 	if (dirPath == lastDirCache.first) {
 		return lastDirCache.second;
 	}
@@ -263,7 +264,7 @@ FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 		if (dir.isPrefixOf(path)) {
 			if (dir != path) {
 				if (auto* parent = tryGetDirectory(dirPath.parentPath())) {
-					parent->addDir(dirPath.getDirNameStr());
+					parent->addDir(dirPath.getDirName());
 				}
 			}
 			lastDirCache = {};
@@ -306,33 +307,35 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 	}
 }
 
-bool FileSystemCache::isCaseSensitive()
-{
-	constexpr auto platform = getPlatform();
-	return platform != GamePlatform::Windows && platform != GamePlatform::MacOS;
-}
-
 Path FileSystemCache::getCaseCorrectedPath(Path p)
 {
-	if (!isCaseSensitive()) {
-		for (auto& part: p.getParts()) {
-			part.asciiMakeLower();
-		}
+	if (!Path::isCaseSensitive()) {
+		p.makeLowerCase();
 	}
 	return p;
 }
 
 String FileSystemCache::getCaseCorrectedPath(String p)
 {
-	if (!isCaseSensitive()) {
+	if (!Path::isCaseSensitive()) {
 		p.asciiMakeLower();
+	}
+	return p;
+}
+
+std::string_view FileSystemCache::getCaseCorrectedPath(std::string_view p, String& buffer)
+{
+	if (!Path::isCaseSensitive() && !String::isLowerCase(p)) {
+		buffer = p;
+		buffer.asciiMakeLower();
+		return buffer;
 	}
 	return p;
 }
 
 void FileSystemCache::DirEntry::addFile(const Path& fullPath)
 {
-	const auto name = fullPath.getFilenameStr();
+	const auto name = fullPath.getFilename();
 	const auto iter = files.find(getCaseCorrectedPath(name));
 	if (iter != files.end()) {
 		iter->second.lastWriteTime = FileSystem::getLastWriteTime(fullPath);
@@ -344,12 +347,12 @@ void FileSystemCache::DirEntry::addFile(const Path& fullPath)
 
 void FileSystemCache::DirEntry::updateFile(const Path& fullPath)
 {
-	files[getCaseCorrectedPath(fullPath.getFilenameStr())] = (FileEntry{ FileSystem::getLastWriteTime(fullPath) });
+	files[getCaseCorrectedPath(fullPath.getFilename())] = (FileEntry{ FileSystem::getLastWriteTime(fullPath) });
 }
 
 void FileSystemCache::DirEntry::removeFile(const Path& fullPath)
 {
-	const auto name = fullPath.getFilenameStr();
+	const auto name = fullPath.getFilename();
 	files.erase(getCaseCorrectedPath(name));
 	std_ex::erase(filenames, name);
 }
@@ -373,7 +376,7 @@ void FileSystemCache::notifyChanges(gsl::span<const DirectoryMonitor::Event> eve
 	for (const auto& event: events) {
 		const auto filePath = Path(event.name);
 		if (event.isDir) {
-			const auto& name = filePath.getFilename().getString(false);
+			const auto& name = filePath.getFilename();
 			auto parentDir = filePath.parentPath();
 			if (event.type == DirectoryMonitor::ChangeType::FileAdded) {
 				getDirectory(parentDir).addDir(name);
@@ -386,7 +389,7 @@ void FileSystemCache::notifyChanges(gsl::span<const DirectoryMonitor::Event> eve
 			} else if (event.type == DirectoryMonitor::ChangeType::FileRenamed) {
 				const auto oldFilePath = Path(event.oldName);
 				getDirectory(parentDir).addDir(name);
-				getDirectory(Path(event.oldName).parentPath()).removeDir(oldFilePath.getFilename().getString(false));
+				getDirectory(Path(event.oldName).parentPath()).removeDir(oldFilePath.getFilename());
 				dirs.erase(Path(event.oldName));
 				readDirFromFilesystem(filePath);
 			}

@@ -427,6 +427,26 @@ bool String::asciiCompareNoCase(const Character *src) const
 	return true;
 }
 
+bool String::isLowerCase(std::string_view str)
+{
+	for (auto c: str) {
+		if (c >= 'A' && c <= 'Z') {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool String::isUpperCase(std::string_view str)
+{
+	for (auto c: str) {
+		if (c >= 'a' && c <= 'z') {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool String::isNumber(std::string_view str)
 {
 	auto trimmed = trimSpaces(str);
@@ -540,6 +560,30 @@ void String::asciiMakeLower()
 
 
 ///////////////
+
+std::string_view String::concatStringViewsInBuffer(gsl::span<char> buffer, gsl::span<const std::string_view> views, std::string_view separator)
+{
+	size_t writePos = 0;
+	const size_t n = views.size();
+
+	const auto& concat = [&](std::string_view s)
+	{
+		if (buffer.size() < writePos + s.length()) {
+			throw Exception("Buffer not large enough for string concatenation", HalleyExceptions::Utils);
+		}
+		memcpy(&buffer[writePos], s.data(), s.length());
+		writePos += s.length();
+	};
+
+	for (size_t i = 0; i < n; ++i) {
+		concat(views[i]);
+		if (i + 1 != n) {
+			concat(separator);
+		}
+	}
+
+	return std::string_view(buffer.data(), writePos);
+}
 
 String& String::operator += (const String &p)
 {
@@ -1107,6 +1151,20 @@ std::string_view String::splitAndAdvance(std::string_view& src, char delimeter)
 	auto [res, next] = split(src, delimeter);
 	src = next;
 	return res;
+}
+
+gsl::span<std::string_view> String::splitToBuffer(std::string_view src, char delimeter, gsl::span<std::string_view> buffer)
+{
+	size_t i;
+	for (i = 0; i < buffer.size(); ++i) {
+		auto [str, remainder] = split(src, delimeter);
+		buffer[i] = str;
+		if (remainder.empty()) {
+			return buffer.subspan(0, i + 1);
+		}
+		src = remainder;
+	}
+	throw Exception("Buffer not big enough to split string", HalleyExceptions::Utils);
 }
 
 String String::concatList(gsl::span<const String> list, std::string_view separator)

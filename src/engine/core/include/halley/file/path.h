@@ -10,38 +10,43 @@ namespace Halley
 	{
 	public:
 		Path();
-		Path(const char* name);
-		Path(const std::string& name);
-		Path(const String& name);
+		Path(const char* name, bool normalise = true);
+		Path(std::string_view name, bool normalise = true);
+		Path(std::string name, bool normalise = true);
+		Path(String name, bool normalise = true);
 
 		Path(const Path& other) = default;
 		Path(Path&& other) noexcept = default;
 		Path& operator=(const Path& other) = default;
 		Path& operator=(Path&& other) noexcept = default;
 
-		Path& operator=(const std::string& other);
-		Path& operator=(const String& other);
+		Path& operator=(std::string_view other);
+		Path& operator=(std::string other);
+		Path& operator=(String other);
 
-		Path getRoot() const;
+		std::string_view getRoot() const;
+		std::string_view getFrontStrView(size_t n) const;
 		Path getFront(size_t n) const;
-		Path getFilename() const;
-		const String& getFilenameStr() const;
-		Path getDirName() const;
-		const String& getDirNameStr() const;
-		Path getStem() const;
+		std::string_view getFilenameStrView() const;
+		String getFilename() const;
+		std::string_view getDirNameStrView() const;
+		String getDirName() const;
+		std::string_view getStemStrView() const;
+		String getStem() const;
+		std::string_view getExtensionStrView() const;
 		String getExtension() const;
+		std::string_view getStringView(bool includeDot = true) const;
 		String getString(bool includeDot = true) const;
 		String getNativeString(bool includeDot = true) const;
 		String toString() const;
 
-		gsl::span<const String> getParts() const;
-		gsl::span<String> getParts();
-		size_t getNumberPaths() const;
+		size_t getNumberOfParts() const;
+		std::string_view getPart(size_t idx) const;
 
 		Path dropFront(int numberFolders) const;
 
 		Path parentPath() const;
-		Path replaceExtension(String newExtension) const;
+		Path replaceExtension(std::string_view newExtension) const;
 
 		Path operator/(std::string_view other) const;
 		Path operator/(const char* other) const;
@@ -50,10 +55,9 @@ namespace Halley
 		Path operator/(const Path& other) const;
 
 		bool operator==(const char* other) const;
+		bool operator==(std::string_view other) const;
 		bool operator==(const String& other) const;
 		bool operator==(const Path& other) const;
-		bool operator==(gsl::span<const String> other) const;
-
 		bool operator!=(const Path& other) const;
 		bool operator<(const Path& other) const;
 
@@ -85,13 +89,24 @@ namespace Halley
 
 		Vector<Path> enumerateDirectory(bool makeRelative) const;
 
-	private:
-		Vector<String> pathParts;
-		void normalise();
-		void setPath(const String& value);
-		std::string makeString(bool includeDot, char dirSeparator) const;
+		void makeLowerCase();
+		static bool isCaseSensitive();
 
-		explicit Path(Vector<String> parts, bool normaliseAfter);
+	private:
+		String str;
+		bool isDir;
+		uint16_t numberOfParts = 0;
+		std::array<uint16_t, 14> partIdx;
+
+		static std::string_view normalise(gsl::span<char> buffer, std::string_view str);
+		void setPath(std::string_view value, bool normalise = true);
+		void setPath(String value, bool normalise = true);
+		void computeProperties();
+
+		std::string_view getFrontParts(size_t n) const;
+		std::string_view getLastPart() const;
+		size_t getLastPartPos() const;
+		std::pair<std::string_view, std::string_view> getLastTwoParts() const;
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;

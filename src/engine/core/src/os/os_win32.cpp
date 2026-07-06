@@ -427,7 +427,7 @@ bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const std::byte> data,
 {
 	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
 	if (PathFileExistsW(dstPath.c_str())) {
-		auto temp = path.replaceExtension(path.getExtension() + ".tmp");
+		auto temp = path.replaceExtension(String(path.getExtension()) + ".tmp");
 		auto tempPath = temp.getString().replaceAll("/", "\\").getUTF16();
 		auto backupPath = backupOldVersionPath ? backupOldVersionPath->getString().replaceAll("/", "\\").getUTF16() : StringUTF16();
 		bool ok = writeFile(tempPath.c_str(), data);

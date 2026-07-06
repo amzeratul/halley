@@ -172,6 +172,8 @@ namespace Halley {
 		void asciiMakeUpper();
 		void asciiMakeLower();
 		bool asciiCompareNoCase(const Character *src) const;
+		[[nodiscard]] static bool isLowerCase(std::string_view str);
+		[[nodiscard]] static bool isUpperCase(std::string_view str);
 
 		void appendCharacter(int unicode);
 
@@ -243,6 +245,7 @@ namespace Halley {
 
 		[[nodiscard]] static std::pair<std::string_view, std::string_view> split(std::string_view src, char delimeter);
 		[[nodiscard]] static std::string_view splitAndAdvance(std::string_view& src, char delimeter);
+		[[nodiscard]] static gsl::span<std::string_view> splitToBuffer(std::string_view src, char delimeter, gsl::span<std::string_view> buffer);
 
 		[[nodiscard]] static String concatList(gsl::span<const String> list, std::string_view separator);
 
@@ -291,6 +294,8 @@ namespace Halley {
 		    } (), ...);
 			return std::string_view(buffer.data(), buffer.size() - b.size());
 		}
+
+		static std::string_view concatStringViewsInBuffer(gsl::span<char> buffer, gsl::span<const std::string_view> views, std::string_view separator);
 
 		//////////
 

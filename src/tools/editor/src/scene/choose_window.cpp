@@ -157,7 +157,7 @@ LocalisedString ChooseAssetTypeWindow::getPreviewItemLabel(const String& id, con
 	if (hasSearch) {
 		return LocalisedString::fromUserString(id);
 	} else {
-		return LocalisedString::fromUserString(Path(id).getFilename().toString());
+		return LocalisedString::fromUserString(Path(id).getFilename());
 	}
 }
 

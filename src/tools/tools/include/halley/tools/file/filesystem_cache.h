@@ -32,6 +32,7 @@ namespace Halley {
 		void notifyChanges(gsl::span<const DirectoryMonitor::Event> events);
 
         static String getCaseCorrectedPath(String p);
+        static std::string_view getCaseCorrectedPath(std::string_view p, String& buffer);
 
     private:
         struct FileEntry {
@@ -70,7 +71,6 @@ namespace Halley {
         DirEntry* tryGetDirectory(const Path& path);
         void readDirFromFilesystem(const Path& rootDir);
 
-        static bool isCaseSensitive();
         static Path getCaseCorrectedPath(Path p);
     };
 }

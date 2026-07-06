@@ -558,8 +558,7 @@ Vector<String> ImportAssetsDatabase::getAllInputFiles() const
 
 Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(const Path& inputFile)
 {
-	const auto& pathParts = inputFile.getParts();
-	if (pathParts.size() >= 3 && pathParts[0] == ".." && pathParts[1] == "halley") {
+	if (inputFile.getNumberOfParts() >= 3 && inputFile.getPart(0) == ".." && inputFile.getPart(1) == "halley") {
 		return getAssetsFromFile(inputFile.dropFront(3)); // e.g. ../halley/assets_src
 	}
 

@@ -171,7 +171,7 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 
 bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const DirMetaInfo& dirMeta, const FileTimes& times, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
 {
-	if (filePath.getExtension() == ".meta") {
+	if (filePath.getExtensionStrView() == ".meta") {
 		return false;
 	}
 
@@ -394,7 +394,7 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	db.markAssetsAsStillPresent(assets);
 
 	sw.pause();
-	//Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
+	Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
 	return assets;
 }
 
@@ -460,19 +460,19 @@ Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAsset
 	}
 
 	sw.pause();
-	//Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
+	Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
 
 	return toImport;
 }
 
-std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas, const Path& parentDir) const
+const Path* CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas, const Path& parentDir) const
 {
-	std::optional<Path> longestPath;
+	const Path* longestPath = nullptr;
 	for (const auto& m: metas) {
-		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
-			const auto n = m.getNumberPaths() - 1;
-			if (m.getParts().subspan(0, n) == parentDir.getParts().subspan(0, std::min(n, parentDir.getNumberPaths()))) {
-				longestPath = m;
+		if (!longestPath || longestPath->getNumberOfParts() < m.getNumberOfParts()) {
+			const auto n = m.getNumberOfParts() - 1;
+			if (m.getFrontStrView(n) == parentDir.getFrontStrView(std::min(n, parentDir.getNumberOfParts()))) {
+				longestPath = &m;
 			}
 		}
 	}
@@ -482,7 +482,7 @@ std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas
 CheckAssetsTask::DirMetaInfo CheckAssetsTask::resolveDirMeta(const Vector<Path>& metas, const Path& srcPath, const Path& parentDir)
 {
 	DirMetaInfo result;
-	if (auto dirMetaPath = findDirectoryMeta(metas, parentDir)) {
+	if (const auto* dirMetaPath = findDirectoryMeta(metas, parentDir)) {
 		auto absPath = srcPath / *dirMetaPath;
 		if (auto t = fileSystemCache.tryGetLastWriteTime(absPath)) {
 			result.timestamp = *t;
