@@ -244,7 +244,7 @@ void AssetsBrowser::setListContents()
 				files.emplace_back(a);
 			} else {
 				auto start = relPath.getFront(1);
-				dirs.insert(start.toString());
+				dirs.insert(start.getString(false));
 			}
 		}
 	}
