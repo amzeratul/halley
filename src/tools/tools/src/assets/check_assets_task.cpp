@@ -394,7 +394,7 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	db.markAssetsAsStillPresent(assets);
 
 	sw.pause();
-	Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
+	//Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
 	return assets;
 }
 
@@ -460,7 +460,7 @@ Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAsset
 	}
 
 	sw.pause();
-	Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
+	//Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
 
 	return toImport;
 }
