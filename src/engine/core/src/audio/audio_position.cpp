@@ -49,7 +49,7 @@ AudioPosition::AudioPosition()
 	: isUI(true)
 	, isPannable(false)
 {
-	static_assert(sources.sbo_max_objects() == 1);
+	static_assert(SpatialSourceVector::sbo_max_objects() == 1);
 }
 
 AudioPosition AudioPosition::makeUI(float pan)

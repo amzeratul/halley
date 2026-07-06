@@ -53,7 +53,8 @@ namespace Halley
 		float getDopplerShift(const AudioListenerData& listener) const;
 
 	private:
-		Vector<SpatialSource, std::allocator<SpatialSource>, 64, true, 16> sources;
+		using SpatialSourceVector = Vector<SpatialSource, std::allocator<SpatialSource>, 64, true, 16>;
+		SpatialSourceVector sources;
 		float uiPan = 0;
 		bool isUI = false;
 		bool isPannable = false;

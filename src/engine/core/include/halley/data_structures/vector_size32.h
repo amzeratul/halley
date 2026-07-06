@@ -241,8 +241,8 @@ namespace Halley {
 			return *this;
 		}
 
-		template<typename U, typename A, typename S, bool SBO, size_t SBOP, size_t Align>
-		VectorStd& operator=(const VectorStd<U, S, SBO, SBOP, A, Align>& other)
+		template<typename U, typename A, typename S, bool SBO, size_t SBOP, size_t ALIGN>
+		VectorStd& operator=(const VectorStd<U, S, SBO, SBOP, A, ALIGN>& other)
 		{
 			if constexpr (std::is_same_v<decltype(this), decltype(&other)>) {
 				if (this == &other) {
