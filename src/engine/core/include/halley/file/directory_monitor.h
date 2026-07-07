@@ -39,11 +39,21 @@ namespace Halley
 			}
 		};
 
+		struct DelayRule {
+			String suffix;
+			int msDelay = 100;
+		};
+
+		struct DelayRules {
+			Vector<DelayRule> rules;
+			int baseDelay = 0;
+		};
+
 		explicit DirectoryMonitor(const Path& p);
 		~DirectoryMonitor();
 
-		void poll(Vector<Event>& output, bool waitForNoChange = false);
-		Vector<Event> poll(bool waitForNoChange = false);
+		void poll(Vector<Event>& output, const DelayRules& rules = {});
+		Vector<Event> poll(const DelayRules& rules = {});
 		bool pollAny();
 
 		bool hasRealImplementation() const;

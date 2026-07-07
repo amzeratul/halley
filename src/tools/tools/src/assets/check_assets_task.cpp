@@ -69,17 +69,22 @@ void CheckAssetsTask::run()
 		}
 
 		// Check if any files changed
+		DirectoryMonitor::DelayRules delayRules;
+		delayRules.baseDelay = 50;
+		delayRules.rules += DirectoryMonitor::DelayRule{ ".ase", 500 };
+		delayRules.rules += DirectoryMonitor::DelayRule{ ".aseprite", 500 };
+
 		Vector<DirectoryMonitor::Event> assetsSrcChanged;
 		Vector<DirectoryMonitor::Event> genSrcChanged;
 		Vector<DirectoryMonitor::Event> assetsChanged;
 		Vector<DirectoryMonitor::Event> genChanged;
-		monitorAssetsSrc.poll(assetsSrcChanged, true);
-		monitorSharedAssetsSrc.poll(assetsSrcChanged, true);
-		monitorAssets.poll(assetsChanged, true);
-		monitorSharedGenSrc.poll(genSrcChanged, true);
-		monitorGenSrc.poll(genSrcChanged, true);
-		monitorSharedGen.poll(genChanged, true);
-		monitorGen.poll(genChanged, true);
+		monitorAssetsSrc.poll(assetsSrcChanged, delayRules);
+		monitorSharedAssetsSrc.poll(assetsSrcChanged, delayRules);
+		monitorAssets.poll(assetsChanged, delayRules);
+		monitorSharedGenSrc.poll(genSrcChanged, delayRules);
+		monitorGenSrc.poll(genSrcChanged, delayRules);
+		monitorSharedGen.poll(genChanged, delayRules);
+		monitorGen.poll(genChanged, delayRules);
 		fileSystemCache.notifyChanges(assetsSrcChanged);
 		fileSystemCache.notifyChanges(genSrcChanged);
 		fileSystemCache.notifyChanges(assetsChanged);

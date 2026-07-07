@@ -215,16 +215,35 @@ DirectoryMonitor::DirectoryMonitor(const Path& p)
 
 DirectoryMonitor::~DirectoryMonitor() = default;
 
-void DirectoryMonitor::poll(Vector<Event>& output, bool waitForNoChange)
+void DirectoryMonitor::poll(Vector<Event>& output, const DelayRules& rules)
 {
-	auto result = poll(waitForNoChange);
+	auto result = poll(rules);
 	output.reserve(output.size() + result.size());
 	for (auto& e: result) {
 		output.push_back(std::move(e));
 	}
 }
 
-Vector<DirectoryMonitor::Event> DirectoryMonitor::poll(bool waitForNoChange)
+namespace {
+	int getDelayMs(const DirectoryMonitor::DelayRules& rules, const Vector<DirectoryMonitor::Event>& events)
+	{
+		int delay = rules.baseDelay;
+		for (const auto& r: rules.rules) {
+			if (r.msDelay > delay) {
+				for (const auto& e: events) {
+					if ((e.type == DirectoryMonitor::ChangeType::FileAdded || e.type == DirectoryMonitor::ChangeType::FileModified)
+						&& e.name.endsWith(r.suffix)) {
+						delay = r.msDelay;
+						break;
+					}
+				}
+			}
+		}
+		return delay;
+	}
+}
+
+Vector<DirectoryMonitor::Event> DirectoryMonitor::poll(const DelayRules& rules)
 {
 	Vector<Event> result;
 
@@ -238,11 +257,12 @@ Vector<DirectoryMonitor::Event> DirectoryMonitor::poll(bool waitForNoChange)
 				result.clear();
 				return result;
 			}
-			if (waitForNoChange) {
+			
+			if (auto delay = getDelayMs(rules, result); delay > 0) {
 				// Something got added, wait and try again
 				nBefore = nNow;
 				using namespace std::chrono_literals;
-				std::this_thread::sleep_for(100ms);
+				std::this_thread::sleep_for(delay * 1ms);
 				continue;
 			}
 		}
