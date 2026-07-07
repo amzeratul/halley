@@ -111,9 +111,7 @@ void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandl
 			buffer.resize(numChannels);
 		}
 		for (auto& b: buffer) {
-			if (b.size() <= len) {
-				b.resize(len);
-			}
+			b.resize(len);
 		}
 
 		auto& handle = *dynamic_cast<AudioClipStreamHandle*>(streamHandle);
