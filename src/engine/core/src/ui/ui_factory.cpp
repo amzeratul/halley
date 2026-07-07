@@ -204,7 +204,7 @@ std::shared_ptr<UIWidget> UIFactory::makeUIWithHotReload(const String& configNam
 {
 	auto uiDefinition = resources.get<UIDefinition>(configName);
 	auto ui = makeUI(*uiDefinition);
-	if (api.core->isDevMode()) {
+	if (api.core && api.core->isDevMode()) {
 		if constexpr (isPCPlatform()) {
 			ui->addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(*uiDefinition), observer));
 		}

@@ -726,7 +726,7 @@ const Environment& Core::getEnvironment()
 
 bool Core::isDevMode()
 {
-	return game->isDevMode();
+	return game && game->isDevMode();
 }
 
 void Core::initStage(Stage& stage)
