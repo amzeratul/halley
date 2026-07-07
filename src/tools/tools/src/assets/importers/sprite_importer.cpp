@@ -261,7 +261,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 		if (static_cast<int>(seq.numFrameDefinitions()) == frame.frameNumber) {
 			auto filename = frame.filenames.at(0);
 			if (!directionsPerSequence.at(sequence).empty() && !frame.direction.isEmpty()) {
-				filename = filename.replaceAll("_" + frame.direction, "_%dir%");
+				filename = filename.replaceOne("_" + frame.direction, "_%dir%");
 			}
 			seq.addFrame(AnimationFrameDefinition(frame.frameNumber, frame.duration, filename));
 		}
