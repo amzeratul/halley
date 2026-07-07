@@ -25,7 +25,7 @@ AnimationFrame::AnimationFrame(int frameNumber, int duration, const String& imag
 		sprites[i] = sheet.tryGetSprite(name);
 		if (!sprites[i]) {
 			sprites[i] = &sheet.getDummySprite();
-			Logger::logWarning("Missing animation frame: " + name);
+			Logger::logWarning("Missing animation frame: \"" + name + "\"\n\tfor imageName: " + imageName + "\n\tframeNumber: " + frameNumber + ", direction: " + directions[i].getName() + ", direction to read: " + directions[i].getFileName());
 		}
 	}
 }
