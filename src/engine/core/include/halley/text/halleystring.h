@@ -140,6 +140,7 @@ namespace Halley {
 		[[nodiscard]] bool contains(std::u8string_view string, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 		[[nodiscard]] size_t find(std::string_view str, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 		[[nodiscard]] size_t find(std::u8string_view str, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] size_t count(std::string_view string) const;
 
 		[[nodiscard]] String replaceAll(std::string_view before, std::string_view after) const;
 		[[nodiscard]] String replaceAll(std::u8string_view before, std::u8string_view after) const;

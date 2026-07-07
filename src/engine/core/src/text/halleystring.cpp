@@ -1410,6 +1410,20 @@ size_t String::find(std::u8string_view s, bool caseSensitive, bool paramIsPreLow
 	return find(toStringView(s), caseSensitive, paramIsPreLowercased);
 }
 
+size_t String::count(std::string_view string) const
+{
+	auto s = std::string_view(str);
+	const size_t len = string.length();
+	size_t result = 0;
+	for (size_t pos = 0; true; pos += len) {
+		pos = s.find(string, pos);
+		if (pos == std::string_view::npos) {
+			return result;
+		}
+		++result;
+	}
+}
+
 std::ostream& Halley::operator<< (std::ostream& os, const String& rhp)
 {
 	os << rhp.cppStr();
