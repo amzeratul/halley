@@ -43,7 +43,7 @@ void MoveFilesTool::onMakeUI()
 
 void MoveFilesTool::update(Time t, bool moved)
 {
-	const auto curChanges = monitor.poll();
+	const auto curChanges = monitor.poll({});
 
 	if (curStage == Stage::Monitoring) {
 		for (const auto& change: curChanges) {

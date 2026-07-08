@@ -52,8 +52,8 @@ namespace Halley
 		explicit DirectoryMonitor(const Path& p);
 		~DirectoryMonitor();
 
-		void poll(Vector<Event>& output, const DelayRules& rules = {});
-		Vector<Event> poll(const DelayRules& rules = {});
+		void poll(Vector<Event>& output, const DelayRules& rules);
+		Vector<Event> poll(const DelayRules& rules);
 		bool pollAny();
 
 		bool hasRealImplementation() const;
