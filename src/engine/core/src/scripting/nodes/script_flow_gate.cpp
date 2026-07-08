@@ -147,7 +147,8 @@ void ScriptSwitchGate::doInitData(ScriptSwitchGateData& data, const ScriptGraphN
 IScriptNodeType::Result ScriptSwitchGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSwitchGateData& data) const
 {
 	String buffer;
-	const auto curValue = readDataPin(environment, node, 1).asStringView("", &buffer);
+	const auto& value = readDataPin(environment, node, 1);
+	const auto curValue = value.asStringView("", &buffer);
 	const auto& cases = node.getSettings()["cases"].asSequence();
 
 	int idx = 0;
