@@ -789,6 +789,7 @@ void ScriptLineReset::doInitData(ScriptLineResetData& data, const ScriptGraphNod
 {
 	data.active = false;
 	data.signaled = false;
+	data.monitorVariable = ConfigNode();
 }
 
 void ScriptLineReset::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptLineResetData& curData) const
