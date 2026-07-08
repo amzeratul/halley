@@ -1415,13 +1415,14 @@ size_t String::count(std::string_view string) const
 	auto s = std::string_view(str);
 	const size_t len = string.length();
 	size_t result = 0;
-	for (size_t pos = 0; true; pos += len) {
+	for (size_t pos = 0; len != 0; pos += len) {
 		pos = s.find(string, pos);
 		if (pos == std::string_view::npos) {
-			return result;
+			break;
 		}
 		++result;
 	}
+	return result;
 }
 
 std::ostream& Halley::operator<< (std::ostream& os, const String& rhp)
