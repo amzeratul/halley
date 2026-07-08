@@ -42,7 +42,7 @@ namespace Halley
         {
         public:
 			virtual ~IPacketListener() = default;
-            virtual void onSend(gsl::span<const std::byte> packet) = 0;
+			// NB: This may be called from a different thread on some platforms.
             virtual void onReceive(gsl::span<const std::byte> packet) = 0;
         };
 
