@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iconnection.h"
+#include "halley/concurrency/mutex.h"
 #include "halley/data_structures/vector.h"
 #include <chrono>
 
@@ -34,7 +35,6 @@ namespace Halley
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
 
-        void onSend(gsl::span<const std::byte> packet) override;
         void onReceive(gsl::span<const std::byte> packet) override;
 
         [[nodiscard]] float getLatency() const;
@@ -103,6 +103,10 @@ namespace Halley
         size_t maxPacketSize;
         static constexpr size_t headerSize = 16;
         static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
+
+    	// Some platforms may (opt to) call onReceive() from a separate thread.
+    	// Need to ensure to not write to the buffers/queues below concurrently.
+    	Mutex mutex;
 
         Bytes inboundCache;
         InOutQueue inbound;

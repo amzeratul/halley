@@ -59,6 +59,8 @@ ConnectionStatus AckUnreliableConnection::getStatus() const
 void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
 	HalleyAssertDev(type == TransmissionType::Unreliable);
 
+	UniqueLock lock(mutex);
+
 	auto status = parent->getStatus();
 	if (status != ConnectionStatus::Connected) {
 		return;
@@ -213,6 +215,8 @@ void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> 
 
 void AckUnreliableConnection::flushOutboundQueue()
 {
+	UniqueLock lock(mutex);
+
 	doFlushSmallPackets();
 }
 
@@ -231,6 +235,8 @@ void AckUnreliableConnection::doFlushSmallPackets()
 
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 {
+	UniqueLock lock(mutex);
+
     auto status = parent->getStatus();
     if (status != ConnectionStatus::Connected) {
         return false;
@@ -377,12 +383,10 @@ size_t AckUnreliableConnection::getMaxUnreliablePacketSize() const
 	return maxPacketSize - headerSize;
 }
 
-void AckUnreliableConnection::onSend(gsl::span<const std::byte> packet)
-{
-}
-
 void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)
 {
+	UniqueLock lock(mutex);
+
     size_t packetSize = packet.size();
     auto* header = reinterpret_cast<const uint8_t*>(packet.data());
 

@@ -90,10 +90,6 @@ void AsioUDPConnection::sendUnreliablePacket(gsl::span<const std::byte> packet)
         Logger::logError("Error sending packet, size mismatch");
         close();
     }
-
-    if (status == ConnectionStatus::Connected && packetListener != nullptr) {
-        packetListener->onSend(packet);
-    }
 }
 
 void AsioUDPConnection::setUnreliablePacketListener(IPacketListener* listener)

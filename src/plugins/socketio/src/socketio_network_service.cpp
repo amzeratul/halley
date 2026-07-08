@@ -529,10 +529,6 @@ void SocketIOConnection::sendUnreliablePacket(gsl::span<const std::byte> packet)
 		disconnect("Error sending data on UDP socket: " + toString(err));
 		return;
 	}
-
-	if (packetListener != nullptr) {
-		packetListener->onSend(packet);
-	}
 }
 
 void SocketIOConnection::receiveUnreliablePacket(gsl::span<const std::byte> packet) const
