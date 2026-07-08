@@ -6,8 +6,9 @@ namespace Halley {
     template <typename T>
     class RollingDataSet {
     public:
-        RollingDataSet(size_t maxSize)
+        RollingDataSet(size_t maxSize, bool keepOrder = true)
             : maxSize(maxSize)
+			, keepOrder(keepOrder)
         {
             data.reserve(maxSize);
         }
@@ -46,8 +47,38 @@ namespace Halley {
             }
         }
 
+    	T getMedian()
+        {
+            if (data.empty()) {
+                return {};
+            }
+
+            if (keepOrder) {
+                auto data2 = data;
+                std::sort(data2.begin(), data2.end());
+                return getMedianOf(data2);
+            } else {
+                std::sort(data.begin(), data.end());
+                return getMedianOf(data);
+            }
+        }
+
+    	T getMedian() const
+        {
+            if (data.empty()) {
+                return {};
+            }
+
+            auto data2 = data;
+            std::sort(data2.begin(), data2.end());
+            return getMedianOf(data2);
+        }
+
         T getOldest() const
         {
+            if (!keepOrder) {
+                throw Exception("Invalid operation: sorted RollingDataSet doesn't keep order", HalleyExceptions::Utils);
+            }
             if (data.size() < maxSize) {
                 return data.front();
             } else {
@@ -57,6 +88,9 @@ namespace Halley {
 
         T getLatest() const
         {
+            if (!keepOrder) {
+                throw Exception("Invalid operation: sorted RollingDataSet doesn't keep order", HalleyExceptions::Utils);
+            }
             if (data.size() < maxSize) {
                 return data.back();
             } else {
@@ -83,5 +117,15 @@ namespace Halley {
         Vector<T> data;
         size_t maxSize = 0;
         size_t pos = 0;
+        bool keepOrder = false;
+
+        static T getMedianOf(const Vector<T>& d)
+        {
+	        if (d.size() % 2 == 0) {
+                return (d[d.size() / 2] + d[d.size() / 2 + 1]) / T(2);
+            } else {
+                return d[d.size() / 2];
+            }
+        }
     };
 }
