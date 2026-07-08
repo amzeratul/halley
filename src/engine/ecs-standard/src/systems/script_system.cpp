@@ -286,7 +286,8 @@ private:
 			const bool isLocalEntity = getWorld().isEntityNetworkOwner(e.entityId);
 			for (const auto& script : e.scriptable.scripts) {
                 if (!script.hasValue()) [[unlikely]] {
-                    Logger::logWarning("Found scriptable component with empty script resource reference", true);
+					auto entity = getWorld().getEntity(e.entityId);
+                    Logger::logWarning("Found scriptable component with empty script resource reference on " + entity.getName() + " [" + entity.getPrefabAssetId() + "]", true);
                     continue;
                 }
 				if (!isLocalEntity && script->isNetwork()) [[unlikely]] {
