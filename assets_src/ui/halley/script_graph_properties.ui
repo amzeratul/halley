@@ -29,6 +29,11 @@ children:
       - uuid: ad454a97-3ad6-4a3f-80ab-65f742c7ea29
         widget:
           class: checkbox
+          id: serializableToSaveFile
+          label: Serializable to Save File
+      - uuid: fc96ee51-b264-42a9-a78b-2f8829aecba4
+        widget:
+          class: checkbox
           id: persistent
           label: Persist state on entity despawn
       - uuid: ef003d81-f534-4f98-81d0-7798645becc2

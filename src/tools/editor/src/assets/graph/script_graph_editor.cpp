@@ -412,6 +412,11 @@ void ScriptGraphProperties::onMakeUI()
 		destroy();
 	});
 
+	bindData("serializableToSaveFile", scriptGraph.isSerializableToSaveFile(), [=] (bool value)
+	{
+		properties["serializableToSaveFile"] = value;
+	});
+
 	bindData("persistent", scriptGraph.isPersistent(), [=] (bool value)
 	{
 		properties["persistent"] = value;

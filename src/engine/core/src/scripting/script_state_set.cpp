@@ -47,6 +47,12 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 				continue;
 			}
 
+			const auto graph = context.resources->tryGet<ScriptGraph>(stateNode["script"].asString(""));
+			const bool canLoad = graph && (isNetwork ? graph->isNetwork() : graph->isSerializableToSaveFile());
+			if (!canLoad) {
+				continue;
+			}
+
 			/*if (isNetwork && stateNode.getType() == ConfigNodeType::Noop) {
 				if (auto* stateData = tryGetStateData(id)) {
 					stateData->present = true;
@@ -82,7 +88,8 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 
 	ConfigNode::MapType statesNode;
 	for (auto& state: states) {
-		if (!isNetwork || state.state->getScriptGraphPtr()->isNetwork()) {
+		const auto& script = state.state->getScriptGraphPtr();
+		if (isNetwork ? script->isNetwork() : script->isSerializableToSaveFile()) {
 			statesNode[toString(state.id)] = state.state->toConfigNode(context);
 		}
 	}

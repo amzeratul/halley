@@ -7,7 +7,7 @@ component:
   - activeStates:
       type: 'Halley::ScriptStateSet'
       canEdit: false
-      canSave: false # TODO
+      canSave: true
       canNetwork: true
   - tags:
       type: 'Halley::Vector<Halley::String>'

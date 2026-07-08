@@ -256,6 +256,11 @@ bool ScriptGraph::isNetwork() const
 	return needsNetwork || properties["network"].asBool(false);
 }
 
+bool ScriptGraph::isSerializableToSaveFile() const
+{
+	return properties["serializableToSaveFile"].asBool(false);
+}
+
 bool ScriptGraph::isNetworkRequired() const
 {
 	return needsNetwork;

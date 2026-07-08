@@ -91,6 +91,7 @@ namespace Halley {
 		bool isMultiCopy() const;
 		bool isSupressDuplicateWarning() const;
 		bool isNetwork() const;
+		bool isSerializableToSaveFile() const;
 		bool isNetworkRequired() const;
 		bool needsTransform() const;
 
