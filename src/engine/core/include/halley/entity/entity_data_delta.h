@@ -79,6 +79,7 @@ namespace Halley {
 
 		void sanitize(const WorldReflection& worldReflection, int mask);
 		void stripComponentChanges(std::string_view componentName);
+		void stripAllComponentRemove();
 
 	private:
     	std::optional<String> name;

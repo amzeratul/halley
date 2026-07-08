@@ -527,6 +527,15 @@ void EntityDataDelta::stripComponentChanges(std::string_view componentName)
 	}
 }
 
+void EntityDataDelta::stripAllComponentRemove()
+{
+	componentsRemoved.clear();
+
+	for (auto& child: childrenChanged) {
+		child.second.stripAllComponentRemove();
+	}
+}
+
 static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
