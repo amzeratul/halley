@@ -289,8 +289,8 @@ ScriptState::ScriptState()
 }
 
 ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
-	: scriptGraphRef(script)
-	, persistAfterDone(persistAfterDone)
+	: persistAfterDone(persistAfterDone)
+	, scriptGraphRef(script)
 {
 }
 

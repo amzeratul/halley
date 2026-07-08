@@ -23,12 +23,12 @@
 using namespace Halley;
 
 World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldReflection> reflection)
-	: api(api)
+	: entityMap(std::make_shared<MappedPool<Entity*>>(api.core->isDevMode() ? 128 : 64))
+	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
+	, devMode(api.core->isDevMode())
+	, api(api)
 	, resources(resources)
 	, reflection(std::move(reflection))
-	, devMode(api.core->isDevMode())
-	, entityMap(std::make_shared<MappedPool<Entity*>>(api.core->isDevMode() ? 128 : 64))
-	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<TypedPool<Entity>>())
 	, alwaysEnabledComponents(this->reflection->getAlwaysEnabledComponents()) // Watch out for initialisation order!
@@ -39,16 +39,16 @@ World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldRe
 }
 
 World::World(World& world, StagingWorldTag tag)
-	: api(world.api)
+	: entityMap(world.entityMap)
+	, maskStorage({})
+	, devMode(world.devMode)
+	, transform2DAnisotropy(world.transform2DAnisotropy)
+	, api(world.api)
 	, resources(world.resources)
 	, reflection(world.reflection)
-	, devMode(world.devMode)
-	, entityMap(world.entityMap)
-	, maskStorage({})
 	, componentDeleterTable(world.componentDeleterTable)
 	, entityPool(world.entityPool)
 	, alwaysEnabledComponents(world.alwaysEnabledComponents)
-	, transform2DAnisotropy(world.transform2DAnisotropy)
 	, updateMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
 	, renderMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
 	, uuid(UUID::generate())
