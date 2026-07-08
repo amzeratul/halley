@@ -59,6 +59,7 @@ namespace Halley {
         mutable Vector2f innerSize;
         bool bypass = false;
         bool autoBypass = false;
+        std::shared_ptr<SpritePainter> painter;
 
         struct RenderParams {
             int mask;

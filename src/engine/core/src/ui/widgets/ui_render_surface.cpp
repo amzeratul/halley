@@ -150,7 +150,10 @@ void UIRenderSurface::render(RenderContext& rc) const
 		rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
 		{
 			painter.clear(Colour4f(0, 0, 0, 0));
-			renderParams->spritePainter->draw(renderParams->mask, painter);
+			auto& p = *renderParams->spritePainter;
+			p.draw(renderParams->mask, painter);
+			p.endRender();
+			p.clear();
 		});
 	}
 }
