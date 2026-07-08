@@ -50,8 +50,9 @@ void MainLoop::runLoop()
 	using namespace std::chrono_literals;
 
 	Clock::time_point lastFrameStartTime = Clock::now();
-	auto frameTimes = RollingDataSet<Clock::time_point>(13);
+	auto frameTimes = RollingDataSet<Time>(30, false);
 	double lastSpareTime = 0;
+	double leftOverTime = 0;
 
 	while (isRunning()) {
 		if (target.transitionStage()) {
@@ -60,14 +61,15 @@ void MainLoop::runLoop()
 		}
 
 		Clock::time_point curFrameStartTime = Clock::now();
-		frameTimes.add(curFrameStartTime);
+		const auto measuredElapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
+		frameTimes.add(measuredElapsed);
 
 		// Compute the real elapsed time and the tick length
 		// The latter will be fudged to account for timing jitter, as it leads to smoother gameplay
 		const double fps = target.getTargetFPS();
 		const std::optional<Time> elapsedTarget = fps > 0 ? 1.0 / fps : std::optional<Time>();
-		const Time measuredElapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
-		const Time tickLength = std::min(snapElapsedTime(measuredElapsed, elapsedTarget, frameTimes), 0.100);
+		const Time tickLength = clamp(snapElapsedTime(measuredElapsed + leftOverTime, elapsedTarget, frameTimes), 0.0005, 0.100);
+		leftOverTime = measuredElapsed - tickLength;
 
 		target.onTick(tickLength);
 
@@ -101,12 +103,11 @@ void MainLoop::runLoop()
 	std::cout << ConsoleColour(Console::GREEN) << "Main loop terminated." << ConsoleColour() << std::endl;
 }
 
-Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, RollingDataSet<Clock::time_point>& frameTimes)
+Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, const RollingDataSet<Time>& frameTimes)
 {
 	Time elapsed = measuredElapsed;
 
-	const auto frameTimesTotal = std::chrono::duration<double>(frameTimes.getLatest() - frameTimes.getOldest()).count();
-	const auto avgFrameLen = frameTimesTotal / (frameTimes.size() - 1);
+	const auto avgFrameLen = frameTimes.size() > 1 ? frameTimes.getMedian() : measuredElapsed;
 	if (desired) {
 		if (std::abs(avgFrameLen - *desired) <= 0.001) {
 			// Snap frame time if average has been within 1ms
@@ -114,7 +115,7 @@ Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired
 		}
 	} else {
 		const auto avgFps = 1.0f / avgFrameLen;
-		const auto knownFPS = std::to_array({ 30.0f, 40.0f, 60.0f, 75.0f, 100.0f, 120.0f, 144.0f, 165.0f, 180.0f, 240.0f, 300.0f, 360.0f, 500.0f });
+		const auto knownFPS = std::to_array({ 30.0f, 40.0f, 50.0f, 60.0f, 75.0f, 85.0f, 90.0f, 100.0f, 120.0f, 144.0f, 165.0f, 180.0f, 240.0f, 300.0f, 360.0f, 500.0f });
 		for (const auto fps: knownFPS) {
 			if (std::abs(avgFps - fps) <= 2) {
 				elapsed = 1.0 / fps;

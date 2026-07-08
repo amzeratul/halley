@@ -47,7 +47,7 @@ namespace Halley
 		using Clock = std::chrono::high_resolution_clock;
 		std::optional<Clock::time_point> lastFrameStartTime;
 
-		Time snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, RollingDataSet<Clock::time_point>& frameTimes);
+		Time snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, const RollingDataSet<Time>& frameTimes);
 		bool isRunning() const;
 		bool tryReload() const;
 
