@@ -259,7 +259,7 @@ namespace Halley
 		template <typename F>
 		auto then(F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
 		{
-			return then(ExecutionQueue::getDefault(), f);
+			return then(ExecutionQueue::getContinuationDefault(), f);
 		}
 
 		template <typename E, typename F>

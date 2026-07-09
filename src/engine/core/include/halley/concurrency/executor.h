@@ -40,6 +40,7 @@ namespace Halley
 		void setImmediate(bool immediate);
 
 		static ExecutionQueue& getDefault();
+		static ExecutionQueue& getContinuationDefault();
 
 	private:
 		std::deque<Entry> queue;

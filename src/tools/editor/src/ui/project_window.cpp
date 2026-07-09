@@ -696,7 +696,7 @@ Future<AssetPreviewData> ProjectWindow::getAssetPreviewData(AssetType assetType,
 		return Future<AssetPreviewData>::makeImmediate(std::move(data));
 	}
 
-	return getAssetPreviewGenerator().getAssetPreviewData(assetType, id, size).then([=] (AssetPreviewData data) -> AssetPreviewData
+	return getAssetPreviewGenerator().getAssetPreviewData(assetType, id, size).then(Executors::getMainUpdateThread(), [=] (AssetPreviewData data) -> AssetPreviewData
 	{
 		// Store in cache
 		project.setCachedAssetPreview(assetType, id, data);

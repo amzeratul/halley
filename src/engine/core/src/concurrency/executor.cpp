@@ -127,6 +127,11 @@ ExecutionQueue& ExecutionQueue::getDefault()
 	return Executors::get().getCPU();
 }
 
+ExecutionQueue& ExecutionQueue::getContinuationDefault()
+{
+	return Executors::get().getImmediate();
+}
+
 Executor::Executor(ExecutionQueue& queue)
 	: queue(queue)
 	, running(true)

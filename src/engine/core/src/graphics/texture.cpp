@@ -179,7 +179,7 @@ void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool re
 	auto texture = shared_from_this();
 
 	Concurrent::execute(Executors::getDiskIO(), loaderFunc)
-		.then([texture] (std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
+		.then(Executors::getCPU(), [texture] (std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
 	{
 		const auto& meta = texture->getMeta();
 		const auto& compression = meta.getString("compression");
