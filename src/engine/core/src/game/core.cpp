@@ -528,6 +528,9 @@ void Core::preUpdate(Time time)
 		devConClient->update(time);
 	}
 	updateResources(time);
+	if (api->audioInternal) {
+		api->audioInternal->onStartFrame();
+	}
 }
 
 void Core::postUpdate(Time time)

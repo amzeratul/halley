@@ -53,6 +53,7 @@ namespace Halley
 	public:
 		virtual ~AudioAPIInternal() {}
 
+		virtual void onStartFrame() = 0;
 		virtual void pump() = 0;
 	};
 

@@ -31,6 +31,7 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 
+		void onStartFrame() override;
 		void pump() override;
 
 		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;
@@ -122,6 +123,9 @@ namespace Halley {
 		std::optional<String> eventLoggingPrefix;
 
 		HashMap<AudioRegionId, String> regionNames;
+
+		//std::optional<std::thread::id> producerThreadId;
+		Mutex outboxMutex;
 
 		AudioHandle doPostEvent(std::shared_ptr<const AudioEvent> event, AudioEmitterId emitterId);
 		AudioHandle doPostEvent(const String& name, AudioEmitterId emitterId);

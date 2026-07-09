@@ -561,8 +561,16 @@ void AudioFacade::enqueue(std::function<void()> action)
 		if (!action) {
 			throw Exception("Attempted to enqueue empty action on AudioFacade", HalleyExceptions::AudioEngine);
 		}
+
+		//HalleyAssertDev(!producerThreadId || std::this_thread::get_id() == producerThreadId);
+		auto lock = UniqueLock(outboxMutex);
 		outbox.push_back(std::move(action));
 	}
+}
+
+void AudioFacade::onStartFrame()
+{
+	//producerThreadId = std::this_thread::get_id();
 }
 
 void AudioFacade::pump()
@@ -578,10 +586,16 @@ void AudioFacade::pump()
 	}
 
 	if (running) {
-		if (!outbox.empty()) {
+		Vector<std::function<void()>> outboxLocal;
+		{
+			auto lock = UniqueLock(outboxMutex);
+			outboxLocal = std::move(outbox);
+			outbox.clear();
+		}
+
+		if (!outboxLocal.empty()) {
 			if (commandQueue.canWrite(1)) {
-				commandQueue.writeOne(std::move(outbox));
-				outbox.clear();
+				commandQueue.writeOne(std::move(outboxLocal));
 			} else {
 				Logger::logError("Out of space on audio command queue.", true);
 			}
