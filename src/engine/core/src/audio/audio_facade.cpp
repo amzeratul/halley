@@ -122,6 +122,9 @@ void AudioFacade::stopPlayback()
 		musicTracks.clear();
 		engine.reset();
 		output.closeAudioDevice();
+		commandQueue.clear();
+		outbox.clear();
+		inbox.clear();
 		started = false;
 	}
 }

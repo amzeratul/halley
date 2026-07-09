@@ -36,6 +36,15 @@ namespace Halley {
             return *this;
     	}
 
+        void clear()
+    	{
+            readPos = 0;
+            writePos = 0;
+            for (auto& e: entries) {
+	            e = {};
+            }
+    	}
+
         [[nodiscard]] constexpr size_t capacity() const
     	{
             return entries.size();
