@@ -208,8 +208,9 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		timestamps[2] = times->privateMeta.value_or(0);
 		hasPrivateMeta = times->privateMeta.has_value();
 	} else {
-		timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
-		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+		const auto fullPath = srcPath / filePath;
+		timestamps[0] = fileSystemCache.getLastWriteTime(fullPath);
+		auto metaPath = fullPath.replaceExtension(fullPath.getExtension() + ".meta");
 		if (auto t = fileSystemCache.tryGetLastWriteTime(metaPath)) {
 			timestamps[2] = *t;
 			privateMetaPath = std::move(metaPath);
