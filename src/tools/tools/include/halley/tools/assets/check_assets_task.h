@@ -57,6 +57,8 @@ namespace Halley
 
 		std::optional<ReimportType> pendingReimport;
 
+		uint32_t doImportFileCounter = 0;
+
 		using AssetTable = HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>;
 
 		struct DirMetaInfo {

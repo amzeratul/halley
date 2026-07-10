@@ -11,6 +11,10 @@
 #include "halley/support/logger.h"
 #include "halley/tools/file/filesystem_cache.h"
 
+namespace {
+	constexpr static bool measurePerf = false;
+}
+
 using namespace Halley;
 using namespace std::chrono_literals;
 
@@ -156,6 +160,8 @@ void CheckAssetsTask::run()
 
 bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange)
 {
+	doImportFileCounter = 0;
+
 	if (isCancelled()) {
 		return false;
 	}
@@ -165,6 +171,10 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 		return false;
 	}
 	const bool importing = requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
+
+	if (measurePerf && doImportFileCounter > 0) {
+		Logger::logDev("doImportFileCounter = " + toString(doImportFileCounter));
+	}
 
 	// If an import task was queued it saves the db when it finishes; otherwise persist any changes from the check now.
 	// save() only writes if the db actually changed.
@@ -198,6 +208,8 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 }
 
 bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const FileTimes* times, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
+	++doImportFileCounter;
+
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -337,6 +349,9 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 		for (const auto& listing: listings) {
 			nFiles += listing.files.size();
 		}
+		if (measurePerf) {
+			Logger::logDev("Listed " + toString(nFiles) + " files");
+		}
 
 		// First, collect all directory metas
 		if (collectDirMeta) {
@@ -399,7 +414,9 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	db.markAssetsAsStillPresent(assets);
 
 	sw.pause();
-	//Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
+	if (measurePerf) {
+		Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
+	}
 	return assets;
 }
 
@@ -465,7 +482,9 @@ Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAsset
 	}
 
 	sw.pause();
-	//Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
+	if (measurePerf) {
+		Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
+	}
 
 	return toImport;
 }
