@@ -14,9 +14,13 @@ AssetPackManifestEntry::AssetPackManifestEntry(const ConfigNode& node)
 {
 	name = node["name"].asString();
 	encryptionKey = Encode::decodeBase64(node["encryptionKey"].asString(""));
-	if (node.hasKey("matches")) {
-		for (auto& m: node["matches"].asSequence()) {
-			matches.push_back(m.asString());
+	matches = node["matches"].asVector<String>({});
+	prefixes = node["prefixes"].asVector<String>({});
+
+	for (auto& m: matches) {
+		if (m.startsWith("~:")) {
+			Logger::logError("Asset manifest matching on ~: is deprecated, use prefixes instead");
+			m = m.substr(2);
 		}
 	}
 }
@@ -28,6 +32,11 @@ const String& AssetPackManifestEntry::getName() const
 
 bool AssetPackManifestEntry::checkMatch(std::string_view asset) const
 {
+	for (auto& p: prefixes) {
+		if (asset.starts_with(p)) {
+			return true;
+		}
+	}
 	for (auto& m: matches) {
 		if (asset.find(m) != std::string_view::npos) {
 			return true;

@@ -21,6 +21,7 @@ namespace Halley {
 		String name;
 		Vector<uint8_t> encryptionKey;
 		Vector<String> matches;
+		Vector<String> prefixes;
 	};
 
 	class AssetPackManifest {

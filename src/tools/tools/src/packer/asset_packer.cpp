@@ -84,27 +84,26 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	const auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
-	auto packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
+	auto packs = sortIntoPacks(manifest, *db, std::move(assetsToPack), deletedAssets);
 
 	// Generate packs
 	generatePacks(project, std::move(packs), src, dst, std::move(progress), packed);
 }
 
-std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
+HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
 {
 	std::array<char, 2048> buffer;
 
-	std::map<String, AssetPackListing> packs;
+	HashMap<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {
 		const auto type = fromString<AssetType>(typeName);
 		auto& db = srcAssetDb.getDatabase(type);
 		for (auto& assetEntry: db.getAssets()) {
-			const auto assetNameWithPrefix = String::concatInBuffer(buffer, "~:", typeName, ":", assetEntry.first);
-			const auto assetName = assetNameWithPrefix.substr(2);
+			const auto assetName = String::concatInBuffer(buffer, typeName, ":", assetEntry.first);
 
 			// Find which pack this asset goes into
-			auto packEntry = manifest.getPack(assetNameWithPrefix);
-			String packName;
+			auto packEntry = manifest.getPack(assetName);
+			std::string_view packName;
 			Vector<uint8_t> encryptionKey;
 			if (packEntry) {
 				packName = packEntry->get().getName();
@@ -158,7 +157,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 	return packs;
 }
 
-void AssetPacker::generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed)
+void AssetPacker::generatePacks(Project& project, HashMap<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed)
 {
 	struct Entry {
 		String name;
