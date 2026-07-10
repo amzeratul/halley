@@ -84,23 +84,26 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	const auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
 
 	// Sort into packs
-	const std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
+	auto packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
-	generatePacks(project, packs, src, dst, std::move(progress), packed);
+	generatePacks(project, std::move(packs), src, dst, std::move(progress), packed);
 }
 
 std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
 {
+	std::array<char, 2048> buffer;
+
 	std::map<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {
 		const auto type = fromString<AssetType>(typeName);
 		auto& db = srcAssetDb.getDatabase(type);
 		for (auto& assetEntry: db.getAssets()) {
-			const String assetName = String(typeName) + ":" + assetEntry.first;
+			const auto assetNameWithPrefix = String::concatInBuffer(buffer, "~:", typeName, ":", assetEntry.first);
+			const auto assetName = assetNameWithPrefix.substr(2);
 
 			// Find which pack this asset goes into
-			auto packEntry = manifest.getPack("~:" + assetName);
+			auto packEntry = manifest.getPack(assetNameWithPrefix);
 			String packName;
 			Vector<uint8_t> encryptionKey;
 			if (packEntry) {
@@ -135,11 +138,6 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 			// Add file to pack
 			iter->second.addFile(type, assetEntry.first, assetEntry.second, fileModified);
 		}
-	}
-
-	// Sort all packs
-	for (auto& p: packs) {
-		p.second.sort();
 	}
 
 	// Activate any packs that contain deleted assets
@@ -180,6 +178,7 @@ void AssetPacker::generatePacks(Project& project, std::map<String, AssetPackList
 			// Only pack if this pack listing is active or if it doesn't exist
 			auto dstPack = dst / packListing.first + ".dat";
 			if (packListing.second.isActive() || !FileSystem::exists(dstPack)) {
+				packListing.second.sort();
 				toPack.push_back(Entry{ packListing.first, &packListing.second, dstPack });
 			}
 		}

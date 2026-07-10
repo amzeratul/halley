@@ -13,7 +13,7 @@ namespace Halley {
 		AssetPackManifestEntry(const ConfigNode& node);
 
 		const String& getName() const;
-		bool checkMatch(const String& asset) const;
+		bool checkMatch(std::string_view asset) const;
 		bool isEncrypted() const;
 		const Vector<uint8_t>& getEncryptionKey() const;
 
@@ -30,7 +30,7 @@ namespace Halley {
 
 		void load(const ConfigFile& file);
 
-		std::optional<std::reference_wrapper<const AssetPackManifestEntry>> getPack(const String& asset) const;
+		std::optional<std::reference_wrapper<const AssetPackManifestEntry>> getPack(std::string_view asset) const;
 
 	private:
 		Vector<String> exclude;

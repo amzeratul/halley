@@ -26,10 +26,10 @@ const String& AssetPackManifestEntry::getName() const
 	return name;
 }
 
-bool AssetPackManifestEntry::checkMatch(const String& asset) const
+bool AssetPackManifestEntry::checkMatch(std::string_view asset) const
 {
 	for (auto& m: matches) {
-		if (asset.contains(m)) {
+		if (asset.find(m) != std::string_view::npos) {
 			return true;
 		}
 	}
@@ -73,10 +73,10 @@ void AssetPackManifest::load(const ConfigFile& file)
 	}
 }
 
-std::optional<std::reference_wrapper<const AssetPackManifestEntry>> AssetPackManifest::getPack(const String& asset) const
+std::optional<std::reference_wrapper<const AssetPackManifestEntry>> AssetPackManifest::getPack(std::string_view asset) const
 {
 	for (auto& e: exclude) {
-		if (asset.contains(e)) {
+		if (asset.find(e) != std::string_view::npos) {
 			return {};
 		}
 	}

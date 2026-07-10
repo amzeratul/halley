@@ -96,7 +96,7 @@ Serializer& Serializer::operator<<(const StringUTF32& str)
 
 Serializer& Serializer::operator<<(const Path& path)
 {
-	return (*this << path.string());
+	return (*this << path.getStringView());
 }
 
 Serializer& Serializer::operator<<(gsl::span<const std::byte> span)
