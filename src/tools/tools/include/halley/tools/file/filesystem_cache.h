@@ -55,11 +55,11 @@ namespace Halley {
         mutable Mutex fileTreeMutex;
 
         HashMap<String, Bytes> fileDataCache;
-        HashMap<Path, DirEntry> dirs;
+        HashMap<String, DirEntry> dirs;
         DirEntry emptyDir;
-        Vector<Path> trackedDirs;
+        Vector<String> trackedDirs;
 
-        mutable std::pair<Path, DirEntry*> lastDirCache;
+        mutable std::pair<String, DirEntry*> lastDirCache;
 
         bool shouldCache(const Path& path, size_t size) const;
         bool matchesCache(const String& key, gsl::span<const std::byte> data) const;
@@ -69,8 +69,10 @@ namespace Halley {
 
         DirEntry& getDirectory(const Path& path);
         DirEntry* tryGetDirectory(const Path& path);
+        DirEntry* tryGetDirectory(std::string_view path);
         void readDirFromFilesystem(const Path& rootDir);
 
+        static std::string_view getDirKey(const Path& dirPath);
         static Path getCaseCorrectedPath(Path p);
     };
 }

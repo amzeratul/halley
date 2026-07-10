@@ -230,8 +230,9 @@ void FileSystemCache::trackDirectory(const Path& path)
 {
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto dirPath = path.isDirectory() ? path : path / ".";
-	if (!std_ex::contains(trackedDirs, dirPath)) {
-		trackedDirs.push_back(dirPath);
+	const auto key = getDirKey(dirPath);
+	if (!std_ex::contains(trackedDirs, key)) {
+		trackedDirs.push_back(String(key));
 		readDirFromFilesystem(dirPath);
 	}
 }
@@ -248,23 +249,32 @@ FileSystemCache::DirEntry& FileSystemCache::getDirectory(const Path& path)
 
 FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 {
-	const auto& dirPath = path.isDirectory() ? path : path.parentPath();
-	if (dirPath == lastDirCache.first) {
+	if (path.isDirectory()) {
+		return tryGetDirectory(getDirKey(path));
+	} else {
+		return tryGetDirectory(path.parentPathStrView());
+	}
+}
+
+FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(std::string_view dirPath)
+{
+	if (dirPath == std::string_view(lastDirCache.first) && lastDirCache.second) {
 		return lastDirCache.second;
 	}
 
 	const auto iter = dirs.find(dirPath);
 	if (iter != dirs.end()) {
-		lastDirCache = std::pair(dirPath, &iter->second);
+		lastDirCache = std::pair(String(dirPath), &iter->second);
 		return &iter->second;
 	}
 
 	// Not found, create if it's in a tracked dir
 	for (const auto& dir: trackedDirs) {
-		if (dir.isPrefixOf(path)) {
-			if (dir != path) {
-				if (auto* parent = tryGetDirectory(dirPath.parentPath())) {
-					parent->addDir(dirPath.getDirName());
+		if (dirPath.starts_with(dir)) {
+			if (dir != dirPath) {
+				auto path = Path(dirPath);
+				if (auto* parent = tryGetDirectory(path.parentPath())) {
+					parent->addDir(path.getDirName());
 				}
 			}
 			lastDirCache = {};
@@ -282,7 +292,7 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 	}
 
 	lastDirCache = {};
-	auto& dir = dirs[rootDir.isDirectory() ? rootDir : (rootDir / ".")];
+	auto& dir = dirs[String(getDirKey(rootDir.isDirectory() ? rootDir : (rootDir / ".")))];
 	const auto nativeRootDir = std::filesystem::path(rootDir.getNativeString().cppStr());
 
 	Vector<Path> toRecurse;
@@ -305,6 +315,12 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 	for (const auto& p: toRecurse) {
 		readDirFromFilesystem(p);
 	}
+}
+
+std::string_view FileSystemCache::getDirKey(const Path& dirPath)
+{
+	// Turns "c:/foo/bar/." into "c:/foo/bar/", matching Path::parentPathStrView()
+	return dirPath.getFrontStrView(dirPath.getNumberOfParts() - 1);
 }
 
 Path FileSystemCache::getCaseCorrectedPath(Path p)
@@ -385,12 +401,12 @@ void FileSystemCache::notifyChanges(gsl::span<const DirectoryMonitor::Event> eve
 				// Nothing to do here
 			} else if (event.type == DirectoryMonitor::ChangeType::FileRemoved) {
 				getDirectory(parentDir).removeDir(name);
-				dirs.erase(filePath);
+				dirs.erase(String(getDirKey(filePath / ".")));
 			} else if (event.type == DirectoryMonitor::ChangeType::FileRenamed) {
 				const auto oldFilePath = Path(event.oldName);
 				getDirectory(parentDir).addDir(name);
-				getDirectory(Path(event.oldName).parentPath()).removeDir(oldFilePath.getFilename());
-				dirs.erase(Path(event.oldName));
+				getDirectory(oldFilePath.parentPath()).removeDir(oldFilePath.getFilename());
+				dirs.erase(String(getDirKey(oldFilePath / ".")));
 				readDirFromFilesystem(filePath);
 			}
 		} else {
