@@ -187,7 +187,7 @@ String Path::getFilename() const
 std::string_view Path::getDirNameStrView() const
 {
 	const auto [prev, cur] = getLastTwoParts();
-	if (cur == ".") {
+	if (cur == "." || cur.empty()) {
 		return prev;
 	}
 	return "";
@@ -308,17 +308,15 @@ size_t Path::getLastPartPos() const
 
 std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 {
-	auto s = std::string_view(str);
-	size_t startPos = 0;
-	std::string_view prev;
-	while (true) {
-		startPos = s.find('/', startPos);
-		auto cur = s.substr(startPos);
-		if (startPos == std::string_view::npos) {
-			return { prev, cur };
-		}
-		startPos += 1; // Skip slash
-		prev = cur;
+	std::array<std::string_view, 64> buffer;
+	const auto result = String::splitToBuffer(str, '/', buffer);
+	const auto n = result.size();
+	if (n >= 2) {
+		return { result[n - 2], result[n - 1] };
+	} else if (n == 1) {
+		return { {}, result[0] };
+	} else {
+		return {};
 	}
 }
 
@@ -407,6 +405,13 @@ Path Path::parentPath() const
 	return getFront(std::max<size_t>(n, toDrop) - toDrop);
 }
 
+std::string_view Path::parentPathStrView() const
+{
+	size_t toDrop = isDirectory() ? 2 : 1;
+	const auto n = getNumberOfParts();
+	return getFrontStrView(std::max<size_t>(n, toDrop) - toDrop);
+}
+
 Path Path::replaceExtension(std::string_view newExtension) const
 {
 	auto filenamePos = getLastPartPos();
@@ -436,7 +441,7 @@ Path Path::operator/(const std::string& other) const
 Path Path::operator/(std::string_view other) const
 {
 	if (str == ".") {
-		return Path(other, false);
+		return Path(other);
 	}
 
 	std::array<char, 2048> buffer1;
@@ -446,7 +451,22 @@ Path Path::operator/(std::string_view other) const
 
 Path Path::operator/(const Path& other) const 
 {
-	return operator/(other.getStringView(true));
+	if (str == ".") {
+		return other;
+	}
+
+	std::array<char, 2048> buffer1;
+
+	auto otherSrc = other.getStringView();
+	if (otherSrc.starts_with("./")) {
+		return Path(String::concatInBuffer(buffer1, getStringView(false), otherSrc.substr(1)), false);
+	} else if (otherSrc.starts_with("/")) {
+		return Path(String::concatInBuffer(buffer1, getStringView(false), otherSrc), true);
+	} else if (otherSrc.starts_with("..")) {
+		return Path(String::concatInBuffer(buffer1, getStringView(false), "/", otherSrc), true);
+	} else {
+		return Path(String::concatInBuffer(buffer1, getStringView(false), "/", otherSrc), false);
+	}
 }
 
 bool Path::operator==(const char* other) const
@@ -625,6 +645,12 @@ bool Path::isPrefixOf(const Path& other) const
 {
 	auto name = getStringView(false);
 	return other.str.startsWith(name);
+}
+
+bool Path::isPrefixOf(std::string_view other) const
+{
+	auto name = getStringView(false);
+	return other.starts_with(name);
 }
 
 Path Path::makeRelativeTo(const Path& path) const

@@ -46,6 +46,7 @@ namespace Halley
 		Path dropFront(int numberFolders) const;
 
 		Path parentPath() const;
+		std::string_view parentPathStrView() const;
 		Path replaceExtension(std::string_view newExtension) const;
 
 		Path operator/(std::string_view other) const;
@@ -77,6 +78,7 @@ namespace Halley
 		static void removeFile(const Path& path);
 
 		bool isPrefixOf(const Path& other) const;
+		bool isPrefixOf(std::string_view other) const;
 		Path makeRelativeTo(const Path& path) const;
 		Path changeRelativeRoot(const Path& currentParent, const Path& newParent) const;
 
