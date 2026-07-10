@@ -25,6 +25,7 @@
 #include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
 #include "../steam/steam_utils.h"
+#include "halley/tools/assets/check_assets_task.h"
 
 using namespace Halley;
 

@@ -10,18 +10,18 @@
 #include "halley/game/scene_editor_interface.h"
 #include "halley/editor_extensions/asset_preview_generator.h"
 #include "halley/time/halleytime.h"
-#include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/dll/project_dll.h"
 
 namespace Halley
 {
+	enum class ReimportType;
 	class FileSystemCache;
 	class ProjectComments;
 	class GameProperties;
 	class IHalleyEntryPoint;
 	class ProjectLoader;
 	class ImportAssetsDatabase;
-
+	class CheckAssetsTask;
 	class HalleyStatics;
 	class IHalleyPlugin;
 	class DevConServer;

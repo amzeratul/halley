@@ -13,6 +13,7 @@
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/assets/check_source_update_task.h"
 #include "halley/tools/dll/load_dll_task.h"
 #include "halley/tools/project/build_project_task.h"

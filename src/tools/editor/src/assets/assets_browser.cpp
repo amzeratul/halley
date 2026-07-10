@@ -5,6 +5,7 @@
 #include "asset_file_handler.h"
 #include "new_asset_window.h"
 #include "prefab_editor.h"
+#include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/file/filesystem.h"
 #include "src/preferences.h"
 #include "src/ui/editor_ui_factory.h"
