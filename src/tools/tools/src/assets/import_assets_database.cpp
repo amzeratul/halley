@@ -216,7 +216,7 @@ const Metadata& ImportAssetsDatabase::setInputFileMetadata(const String& path, c
 void ImportAssetsDatabase::markInputMissing(const Path& path)
 {
 	UniqueLock lock(mutex);
-	auto& input = inputFiles[path.toString()];
+	auto& input = inputFiles[path.getStringView()];
 	input.missing = true;
 }
 
@@ -233,15 +233,10 @@ bool ImportAssetsDatabase::purgeMissingInputs()
 {
 	UniqueLock lock(mutex);
 
-	bool modified = false;
-	for (auto iter = inputFiles.begin(); iter != inputFiles.end();) {
-		if (iter->second.missing) {
-			modified = true;
-			iter = inputFiles.erase(iter);
-		} else {
-			++iter;
-		}
-	}
+	const bool modified = std_ex::erase_if_value(inputFiles, [&](const InputFileEntry& e)
+	{
+		return e.missing;
+	});
 
 	dbDirty = dbDirty || modified;
 	return modified;
@@ -251,8 +246,7 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) cons
 {
 	UniqueLock lock(mutex);
 
-	const auto pathStr = path.toString();
-	const auto iter = inputFiles.find(pathStr);
+	const auto iter = inputFiles.find(path.getStringView());
 	if (iter == inputFiles.end()) {
 		return {};
 	} else {
@@ -270,7 +264,7 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 			if (o.type == type && o.name == assetId) {
 				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 
-				const auto iter = inputFiles.find(inputFile.toString());
+				const auto iter = inputFiles.find(inputFile.getStringView());
 				if (iter == inputFiles.end()) {
 					return {};
 				}
@@ -319,20 +313,24 @@ ImportAssetsDatabase::ImportAction ImportAssetsDatabase::checkNeedsImporting(con
 	UniqueLock lock(mutex);
 
 	// Check if it failed loading last time
-	auto iter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
+	const auto iter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
 	const bool failed = iter != assetsFailed.end();
+	const AssetEntry* oldAssetPtr = nullptr;
 
 	// Check if this was imported before
-	if (!failed) {
-		iter = assetsImported.find(std::pair{ asset.assetType, asset.assetId });
-		if (iter == assetsImported.end()) {
+	if (failed) {
+		oldAssetPtr = &iter->second;
+	} else {
+		const auto iter2 = assetsImported.find(std::pair{ asset.assetType, asset.assetId });
+		if (iter2 == assetsImported.end()) {
 			// Asset didn't even exist before
 			return ImportAction::Import;
 		}
+		oldAssetPtr = &iter2->second;
 	}
 
-	// At this point, iter points to the failed one if it failed, or to the old successful one if it didn't.
-	const auto& oldAsset = iter->second.asset;
+	// At this point, oldAssetPtr points to the failed one if it failed, or to the old successful one if it didn't.
+	const auto& oldAsset = oldAssetPtr->asset;
 
 	// Input directory changed?
 	if (asset.srcDir != oldAsset.srcDir) {
@@ -363,10 +361,10 @@ ImportAssetsDatabase::ImportAction ImportAssetsDatabase::checkNeedsImporting(con
 		HashMap<String, int64_t> oldInputFiles;
 		oldInputFiles.reserve(oldAsset.inputFiles.size());
 		for (const auto& entry: oldAsset.inputFiles) {
-			oldInputFiles[entry.getDataPath().toString()] = entry.getTimestamp();
+			oldInputFiles[entry.getDataPath().getStringView()] = entry.getTimestamp();
 		}
 		for (const auto& i: asset.inputFiles) {
-			const auto result = oldInputFiles.find(i.getDataPath().toString());
+			const auto result = oldInputFiles.find(i.getDataPath().getStringView());
 			if (result == oldInputFiles.end() || result->second != i.getTimestamp()) {
 				return ImportAction::Import;
 			}
@@ -446,48 +444,6 @@ void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<std::pair<Impo
 	}
 }
 
-Vector<Path> ImportAssetsDatabase::markMissingAssetsAndGetPartial()
-{
-	UniqueLock lock(mutex);
-	Vector<Path> toImport;
-	HashSet<String> missingInputs;
-
-	for (const auto& i: inputFiles) {
-		if (i.second.missing) {
-			missingInputs.insert((i.second.basePath / i.first).getString());
-		}
-	}
-
-	for (auto& e: assetsImported) {
-		std::optional<Path> firstExistingFile;
-		bool missingAny = false;
-		for (const auto& file: e.second.asset.inputFiles) {
-			auto key = (e.second.asset.srcDir / file.getPath()).toString();
-			if (missingInputs.contains(key)) {
-				missingAny = true;
-			} else if (!firstExistingFile) {
-				firstExistingFile = e.second.asset.srcDir / file.getPath();
-			}
-		}
-		for (const auto& file: e.second.asset.additionalInputFiles) {
-			auto key = (e.second.asset.srcDir / file.first).toString();
-			if (missingInputs.contains(key)) {
-				missingAny = true;
-			}
-		}
-
-		if (missingAny) {
-			if (firstExistingFile) {
-				toImport.push_back(std::move(*firstExistingFile));
-			} else {
-				e.second.present = false;
-			}
-		}
-	}
-
-	return toImport;
-}
-
 Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 {
 	UniqueLock lock(mutex);
@@ -495,19 +451,6 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 	for (auto& e: assetsImported) {
 		if (!e.second.present) {
 			result.push_back(e.second.asset);
-		}
-	}
-	return result;
-}
-
-Vector<Path> ImportAssetsDatabase::getAllFailedFilenames() const
-{
-	UniqueLock lock(mutex);
-	Vector<Path> result;
-	for (const auto& [k, v] : assetsFailed) {
-		for (auto& file: v.asset.inputFiles) {
-			result.push_back(v.asset.srcDir / file.getPath());
-			break; // The first file is enough
 		}
 	}
 	return result;
@@ -553,6 +496,7 @@ Vector<String> ImportAssetsDatabase::getAllInputFiles() const
 	for (auto& i: inputFiles) {
 		result.push_back(i.first);
 	}
+	std::sort(result.begin(), result.end());
 	return result;
 }
 
@@ -577,6 +521,8 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 			}
 		}
 	}
+
+	std::sort(result.begin(), result.end());
 
 	return result;
 }
