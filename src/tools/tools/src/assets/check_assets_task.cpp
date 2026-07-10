@@ -160,10 +160,6 @@ void CheckAssetsTask::run()
 
 bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange)
 {
-	importFileCounter = 0;
-	doImportFileCounter = 0;
-	additionalImportSW.reset();
-
 	if (isCancelled()) {
 		return false;
 	}
@@ -173,12 +169,6 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 		return false;
 	}
 	const bool importing = requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
-
-	if (measurePerf && importFileCounter > 0) {
-		Logger::logDev("importFileCounter = " + toString(importFileCounter));
-		Logger::logDev("doImportFileCounter = " + toString(doImportFileCounter));
-		Logger::logDev("Importing additional files took " + toString(additionalImportSW.elapsedMilliseconds()) + " ms");
-	}
 
 	// If an import task was queued it saves the db when it finishes; otherwise persist any changes from the check now.
 	// save() only writes if the db actually changed.
@@ -194,8 +184,6 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 		return false;
 	}
 
-	++importFileCounter;
-
 	const bool isCodegen = srcPath == project.getGenSrcPath() || srcPath == project.getSharedGenSrcPath();
 	const bool skipGen = srcPath == project.getSharedGenSrcPath() && srcPaths.size() > 1;
 
@@ -204,22 +192,11 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 
 	Vector<Path> dummyDirMetas;
 
-	bool dbChanged = false;
-	Vector<std::pair<Path, Path>> additionalFilesToImport;
-	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, &times, basePath, newPath, &additionalFilesToImport) || dbChanged;
-
-	additionalImportSW.start();
-	for (const auto& additional: additionalFilesToImport) {
-		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, nullptr, nullptr, additional.first, additional.second, nullptr) || dbChanged;
-	}
-	additionalImportSW.pause();
-
-	return dbChanged;
+	// This is a full scan, every input file of every asset is visited
+	return doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, &times, basePath, newPath, nullptr);
 }
 
 bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const FileTimes* times, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
-	++doImportFileCounter;
-
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -313,7 +290,8 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 			throw Exception("AssetId conflict on " + assetId, HalleyExceptions::Tools);
 		}
 		if (asset.srcDir == srcPath) {
-			asset.addInputFile(input);
+			// No need to check for duplicates
+			asset.inputFiles.emplace_back(std::move(input));
 		} else {
 			auto relPath = (srcPath / input.first).makeRelativeTo(asset.srcDir);
 			asset.addInputFile(input, relPath);
@@ -343,7 +321,6 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	}
 
 	db.markAllInputFilesAsMissing();
-	db.updateAdditionalFileCache();
 
 	// Enumerate all potential assets
 	int i = 0;
