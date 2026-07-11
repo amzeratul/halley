@@ -142,7 +142,7 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 	// Activate any packs that contain deleted assets
 	for (auto& assetName: deletedAssets) {
 		String packName;
-		auto packEntry = manifest.getPack("~:" + assetName);
+		auto packEntry = manifest.getPack(assetName);
 		if (packEntry) {
 			packName = packEntry->get().getName();
 		}
