@@ -260,6 +260,7 @@ std::string_view Path::getPart(size_t idx) const
 
 std::string_view Path::getFrontParts(size_t n) const
 {
+	n = std::min<size_t>(n, numberOfParts);
 	if (n == 0 || str.isEmpty()) [[unlikely]] {
 		return {};
 	}
@@ -322,7 +323,7 @@ std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 
 void Path::computeProperties()
 {
-	if (str.isEmpty()) {
+	if (str.isEmpty()) [[unlikely]] {
 		numberOfParts = 0;
 		isDir = false;
 		return;
@@ -331,21 +332,22 @@ void Path::computeProperties()
 	size_t nParts = 1;
 	const auto s = std::string_view(str);
 	const size_t n = s.length();
-	partIdx.fill(0);
+	partIdx[0] = 0;
 	for (size_t i = 0; i < n; ++i) {
-		if (s[i] == '/') {
-			if (nParts < partIdx.size()) {
+		if (s[i] == '/') [[unlikely]] {
+			if (nParts < partIdx.size()) [[likely]] {
 				partIdx[nParts] = static_cast<uint16_t>(i + 1);
 			}
 			++nParts;
 		}
 	}
+	const char lastChar = s[n - 1];
 	numberOfParts = static_cast<uint16_t>(nParts);
-	if (nParts < partIdx.size()) {
+	if (nParts < partIdx.size()) [[likely]] {
 		partIdx[nParts] = static_cast<uint16_t>(n);
 	}
 
-	isDir = s.ends_with("/") || s.ends_with("/.") || s.ends_with("/..") || s == "." || s == "..";
+	isDir = lastChar == '/' || (lastChar == '.' && (s.ends_with("/.") || s.ends_with("/..") || s == "." || s == ".."));
 }
 
 size_t Path::getNumberOfParts() const
@@ -440,7 +442,7 @@ Path Path::operator/(const std::string& other) const
 
 Path Path::operator/(std::string_view other) const
 {
-	if (str == ".") {
+	if (str == ".") [[unlikely]] {
 		return Path(other);
 	}
 
@@ -451,22 +453,49 @@ Path Path::operator/(std::string_view other) const
 
 Path Path::operator/(const Path& other) const 
 {
-	if (str == ".") {
+	if (str == ".") [[unlikely]] {
 		return other;
 	}
 
 	std::array<char, 2048> buffer1;
 
 	auto otherSrc = other.getStringView();
-	if (otherSrc.starts_with("./")) {
+	if (otherSrc.starts_with("./")) [[unlikely]] {
 		return Path(String::concatInBuffer(buffer1, getStringView(false), otherSrc.substr(1)), false);
-	} else if (otherSrc.starts_with("/")) {
+	} else if (otherSrc.starts_with("/")) [[unlikely]] {
 		return Path(String::concatInBuffer(buffer1, getStringView(false), otherSrc), true);
-	} else if (otherSrc.starts_with("..")) {
+	} else if (otherSrc.starts_with("..")) [[unlikely]] {
 		return Path(String::concatInBuffer(buffer1, getStringView(false), "/", otherSrc), true);
 	} else {
 		return Path(String::concatInBuffer(buffer1, getStringView(false), "/", otherSrc), false);
 	}
+}
+
+void Path::makeConcat(const Path& p0, const Path& p1)
+{
+	makeConcat(p0.getStringView(false), p1.getStringView());
+}
+
+void Path::makeConcat(std::string_view p0, std::string_view p1)
+{
+	if (p0 == ".") [[unlikely]] {
+		str = p1;
+	}
+
+	std::array<char, 2048> buffer1;
+
+	if (p1.starts_with("./")) [[unlikely]] {
+		str = String::concatInBuffer(buffer1, p0, p1.substr(1));
+	} else if (p1.starts_with("/")) [[unlikely]] {
+		std::array<char, 2048> buffer2;
+		str = normalise(buffer2, String::concatInBuffer(buffer1, p0, p1));
+	} else if (p1.starts_with("..")) [[unlikely]] {
+		std::array<char, 2048> buffer2;
+		str = normalise(buffer2, String::concatInBuffer(buffer1, p0, "/", p1));
+	} else {
+		str = String::concatInBuffer(buffer1, p0, "/", p1);
+	}
+	computeProperties();
 }
 
 bool Path::operator==(const char* other) const

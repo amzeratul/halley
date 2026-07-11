@@ -55,6 +55,9 @@ namespace Halley
 		Path operator/(const std::string& other) const;
 		Path operator/(const Path& other) const;
 
+		void makeConcat(const Path& p0, const Path& p1);
+		void makeConcat(std::string_view p0, std::string_view p1);
+
 		bool operator==(const char* other) const;
 		bool operator==(std::string_view other) const;
 		bool operator==(const String& other) const;

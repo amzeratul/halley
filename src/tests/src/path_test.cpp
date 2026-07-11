@@ -30,6 +30,10 @@ TEST(HalleyPath, Append)
 	EXPECT_EQ(Path("foo") / Path("bar"), Path("foo/bar"));
 	EXPECT_EQ(Path("foo/bar/baz") / Path("../.."), Path("foo/."));
 	EXPECT_EQ(Path("foo") / Path("../.."), Path(".."));
+
+	Path p;
+	p.makeConcat(Path("foo"), Path("bar"));
+	EXPECT_EQ(p, Path("foo/bar"));
 }
 
 TEST(HalleyPath, MakeRelative)
@@ -103,6 +107,10 @@ TEST(HalleyPath, SubParts)
 {
 	auto p = Path("foo/bar/baz/file.ext");
 
+	EXPECT_EQ(Path("").getNumberOfParts(), 0);
+	EXPECT_EQ(Path("foo").getNumberOfParts(), 1);
+	EXPECT_EQ(Path("foo/bar").getNumberOfParts(), 2);
+	EXPECT_EQ(Path("foo/bar/").getNumberOfParts(), 3);
 	EXPECT_EQ(p.getNumberOfParts(), 4);
 	EXPECT_EQ(p.getPart(0), "foo");
 	EXPECT_EQ(p.getPart(1), "bar");
