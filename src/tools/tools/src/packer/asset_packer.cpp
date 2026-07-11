@@ -30,7 +30,7 @@ AssetPackListing::AssetPackListing(String name, Vector<uint8_t> encryptionKey)
 
 void AssetPackListing::addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry, bool modified)
 {
-	entries.push_back(Entry{ type, name, entry.path, entry.meta, modified });
+	entries.push_back(Entry{ type, name, &entry, modified });
 }
 
 const Vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
@@ -61,7 +61,7 @@ void AssetPackListing::sort()
 	std::sort(entries.begin(), entries.end());
 }
 
-Vector<String> AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress)
+Vector<String> AssetPacker::pack(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress)
 {
 	Vector<String> packed;
 	const auto& platforms = project.getPlatforms();
@@ -74,7 +74,7 @@ Vector<String> AssetPacker::pack(Project& project, std::optional<std::set<String
 	return packed;
 }
 
-void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed)
+void AssetPacker::packPlatform(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed)
 {
 	const auto src = project.getUnpackedAssetsPath();
 	const auto dst = project.getPackedAssetsPath(platform);
@@ -90,11 +90,13 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	generatePacks(project, std::move(packs), src, dst, std::move(progress), packed);
 }
 
-HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
+HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets)
 {
 	std::array<char, 2048> buffer;
 
 	HashMap<String, AssetPackListing> packs;
+
+
 	for (auto typeName: EnumNames<AssetType>()()) {
 		const auto type = fromString<AssetType>(typeName);
 		auto& db = srcAssetDb.getDatabase(type);
@@ -102,20 +104,14 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 			const auto assetName = String::concatInBuffer(buffer, typeName, ":", assetEntry.first);
 
 			// Find which pack this asset goes into
-			auto packEntry = manifest.getPack(assetName);
-			std::string_view packName;
-			Vector<uint8_t> encryptionKey;
-			if (packEntry) {
-				packName = packEntry->get().getName();
-				encryptionKey = packEntry->get().getEncryptionKey();
-			}
-
+			const auto& packEntry = manifest.getPack(assetName);
+	
 			// Retrieve pack
-			auto iter = packs.find(packName);
+			auto iter = packs.find(packEntry.getName());
 			if (iter == packs.end()) {
 				// Pack doesn't exist yet, create it first
-				packs[packName] = AssetPackListing(packName, encryptionKey);
-				iter = packs.find(packName);
+				const auto [iter2, modified] = packs.insert_or_assign(packEntry.getName(), AssetPackListing(packEntry.getName(), packEntry.getEncryptionKey()));
+				iter = iter2;
 
 				// Initialise it to active if there's no asset list to pack
 				if (!assetsToPack) {
@@ -141,14 +137,8 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 
 	// Activate any packs that contain deleted assets
 	for (auto& assetName: deletedAssets) {
-		String packName;
-		auto packEntry = manifest.getPack(assetName);
-		if (packEntry) {
-			packName = packEntry->get().getName();
-		}
-
-		auto iter = packs.find(packName);
-		if (iter != packs.end()) {
+		const auto& packEntry = manifest.getPack(assetName);
+		if (const auto iter = packs.find(packEntry.getName()); iter != packs.end()) {
 			// Pack found, so mark it as needing repacking
 			iter->second.setActive(true);
 		}
@@ -224,9 +214,9 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 		// 2. Old pack
 		// 3. Filesystem (via cache)
 		Bytes fileData;
-		if (entry.modified || fs.hasCached(src / entry.path) || !oldPack) {
+		if (entry.modified || fs.hasCached(src / entry.entryData->path) || !oldPack) {
 			// Read from cache or filesystem
-			fileData = fs.readFileCopy(src / entry.path);
+			fileData = fs.readFileCopy(src / entry.entryData->path);
 		} else {
 			// Read from pack
 			auto oldData = oldPack->getData(entry.name, entry.type, false);
@@ -235,13 +225,13 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 				fileData = Bytes(reinterpret_cast<const Byte*>(data.data()), reinterpret_cast<const Byte*>(data.data()) + data.size());
 			} else {
 				// Read from cache after all...
-				fileData = fs.readFileCopy(src / entry.path);
+				fileData = fs.readFileCopy(src / entry.entryData->path);
 			}
 		}
 
 		const size_t size = fileData.size();
 		if (size == 0) {
-			Logger::logError("Unable to pack: \"" + (src / entry.path) + "\". File not found or empty.");
+			Logger::logError("Unable to pack: \"" + (src / entry.entryData->path) + "\". File not found or empty.");
 			continue;
 		}
 		
@@ -251,7 +241,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 		data.resize(pos + size);
 		memcpy(data.data() + pos, fileData.data(), size);
 
-		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.metadata));
+		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.entryData->meta));
 
 		progress(float(i) / float(n), packId);
 		i++;

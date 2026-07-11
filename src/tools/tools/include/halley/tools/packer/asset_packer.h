@@ -17,9 +17,8 @@ namespace Halley {
 	public:
 		struct Entry {
 			AssetType type;
-			String name;
-			String path;
-			Metadata metadata;
+			std::string_view name;
+			const AssetDatabase::Entry* entryData;
 			bool modified;
 
 			bool operator<(const Entry& other) const;
@@ -49,11 +48,11 @@ namespace Halley {
 	public:
 		using ProgressCallback = std::function<void(float, const String&)>;
 		
-		static Vector<String> pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress);
-		static void packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed);
+		static Vector<String> pack(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress);
+		static void packPlatform(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed);
 
 	private:
-		static HashMap<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets);
+		static HashMap<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets);
 		static void generatePacks(Project& project, HashMap<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed);
 		static void generatePack(Project& project, const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
 	};

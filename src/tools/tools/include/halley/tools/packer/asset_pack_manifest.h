@@ -31,10 +31,11 @@ namespace Halley {
 
 		void load(const ConfigFile& file);
 
-		std::optional<std::reference_wrapper<const AssetPackManifestEntry>> getPack(std::string_view asset) const;
+		const AssetPackManifestEntry& getPack(std::string_view asset) const;
 
 	private:
 		Vector<String> exclude;
 		Vector<AssetPackManifestEntry> packs;
+		AssetPackManifestEntry emptyPack;
 	};
 }

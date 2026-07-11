@@ -82,17 +82,17 @@ void AssetPackManifest::load(const ConfigFile& file)
 	}
 }
 
-std::optional<std::reference_wrapper<const AssetPackManifestEntry>> AssetPackManifest::getPack(std::string_view asset) const
+const AssetPackManifestEntry& AssetPackManifest::getPack(std::string_view asset) const
 {
 	for (auto& e: exclude) {
 		if (asset.find(e) != std::string_view::npos) {
-			return {};
+			return emptyPack;
 		}
 	}
 	for (auto& pack: packs) {
 		if (pack.checkMatch(asset)) {
-			return std::reference_wrapper<const AssetPackManifestEntry>(pack);
+			return pack;
 		}
 	}
-	return {};
+	return emptyPack;
 }

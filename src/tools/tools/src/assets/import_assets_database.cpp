@@ -315,9 +315,9 @@ ImportAssetsDatabase::ImportAction ImportAssetsDatabase::checkNeedsImporting(con
 	// Check if it failed loading last time
 	const auto iter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
 	const bool failed = iter != assetsFailed.end();
-	const AssetEntry* oldAssetPtr = nullptr;
 
 	// Check if this was imported before
+	const AssetEntry* oldAssetPtr = nullptr;
 	if (failed) {
 		oldAssetPtr = &iter->second;
 	} else {
@@ -384,9 +384,11 @@ ImportAssetsDatabase::ImportAction ImportAssetsDatabase::checkNeedsImporting(con
 
 	// Have any of the output files gone missing?
 	if (!failed) {
+		Path path;
 		for (const auto& o: oldAsset.outputFiles) {
 			for (const auto& version: o.platformVersions) {
-				if (!fsCache.exists(directory / version.second.filepath)) {
+				path.makeConcat(directory, version.second.filepath);
+				if (!fsCache.exists(path)) {
 					return ImportAction::Import;
 				}
 			}
