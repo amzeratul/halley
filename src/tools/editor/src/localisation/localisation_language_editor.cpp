@@ -576,6 +576,9 @@ std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
 
 bool LocalisationLanguageEditor::isRowVisible(int idx) const
 {
+	if (idx >= static_cast<int>(srcData->getNumEntries())) {
+		return false;
+	}
 	const auto& original = srcData->getEntry(idx);
 	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.getKey()) : nullptr;
 

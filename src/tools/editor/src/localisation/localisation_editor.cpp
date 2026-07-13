@@ -867,6 +867,7 @@ void LocalisationEditor::downloadTranslations()
 						}
 
 						const auto value = iter->second.getValue()
+							.replaceAll("\\", "\\\\")
 							.replaceAll("\"", "\\\"")
 							.replaceAll("\r\n", "\\n")
 							.replaceAll("\n", "\\n");
