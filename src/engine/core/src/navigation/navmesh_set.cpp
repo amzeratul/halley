@@ -641,7 +641,7 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 	}
 
 	constexpr size_t maxLookAhead = 30;
-	constexpr size_t stride = 3;
+	constexpr size_t stride = 1;
 	constexpr float recencyBias = 1.1f; // Bias towards points that are further away, this avoids duplicated work
 
 	// This algorithm is run in two passes; the first one only accepts paths which are substantially shorter, the second one accepts most simplifications
