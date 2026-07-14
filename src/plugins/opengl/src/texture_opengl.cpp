@@ -61,7 +61,9 @@ void TextureOpenGL::doLoad(TextureDescriptor& d)
 void TextureOpenGL::clearTexture()
 {
 	if (textureId != 0) {
-		glDeleteTextures(1, &textureId);
+		Concurrent::execute(Executors::getVideoAux(), [id = textureId] {
+			glDeleteTextures(1, &id);
+		});
 		textureId = 0;
 	}
 }
