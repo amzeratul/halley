@@ -76,7 +76,7 @@ namespace Halley
 		virtual bool canCollectVideoPerformance();
 
 		virtual String getLocalisationFileCategory(const String& assetName);
-		virtual void getLocalisationStringContextData(ILocStringCollector& dst, const Resources& resources, const IGameEditorData* editorData);
+		virtual void getLocalisationStringContextData(ILocStringCollector& dst, Resources& resources, const IGameEditorData* editorData);
 
 		virtual const ResourceUnloaderRules& getResourceUnloaderRules() const;
 		virtual ResourceUnloaderRules& getResourceUnloaderRules();

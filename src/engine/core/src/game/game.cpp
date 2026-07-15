@@ -142,7 +142,7 @@ String Game::getLocalisationFileCategory(const String& assetName)
 	return "unknown";
 }
 
-void Game::getLocalisationStringContextData(ILocStringCollector& dst, const Resources& resources, const IGameEditorData* editorData)
+void Game::getLocalisationStringContextData(ILocStringCollector& dst, Resources& resources, const IGameEditorData* editorData)
 {
 }
 
