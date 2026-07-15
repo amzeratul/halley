@@ -30,10 +30,15 @@ namespace Halley
 
         [[nodiscard]] bool isSupported(TransmissionType type) const override;
 
+    	UniqueLock<Mutex> lockSend() override;
         void send(TransmissionType type, OutboundNetworkPacket packet) override;
+
+    	UniqueLock<Mutex> lockReceive() override;
         bool receive(InboundNetworkPacket& packet) override;
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
+
+        void flushSendUnreliablePackets() override;
 
         void onReceive(gsl::span<const std::byte> packet) override;
 
@@ -41,7 +46,6 @@ namespace Halley
 
         void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
 
-    	void flushOutboundQueue();
 
     private:
     	using Clock = std::chrono::steady_clock;
@@ -115,7 +119,9 @@ namespace Halley
         std::array<std::pair<uint8_t, uint16_t>, 256> ackPackets = {};
         int numAckPackets = 0;
 
-        float lag = 1.0f;
+    	// The mean time in seconds, interpolated, how long it took for sent packets to be
+    	// acknowledged by the remote peer of this connection.
+        float averagePacketAckTime = 1.0f;
 
         IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
