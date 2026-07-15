@@ -55,9 +55,7 @@ namespace {
 void LocStringCollector::collect(std::string_view key, std::string_view context)
 {
 	if (!key.empty()) {
-		if (results.contains(key)) {
-			Logger::logWarning("LocString \"" + String(key) + "\" has multiple contexts. Previously " + results[key] + ", now " + context);
-		} else {
+		if (!results.contains(key)) {
 			results[key] = context;
 		}
 	}
