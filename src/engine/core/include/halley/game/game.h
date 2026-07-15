@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class ILocStringCollector;
 	class Scene;
 	class UIDebugConsoleCommands;
 	class SceneEditorContext;
@@ -75,7 +76,7 @@ namespace Halley
 		virtual bool canCollectVideoPerformance();
 
 		virtual String getLocalisationFileCategory(const String& assetName);
-		virtual HashMap<String, String> getLocalisationStringContextData(const Resources& resources, const IGameEditorData* editorData);
+		virtual void getLocalisationStringContextData(ILocStringCollector& dst, const Resources& resources, const IGameEditorData* editorData);
 
 		virtual const ResourceUnloaderRules& getResourceUnloaderRules() const;
 		virtual ResourceUnloaderRules& getResourceUnloaderRules();

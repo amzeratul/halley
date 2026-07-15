@@ -52,6 +52,27 @@ namespace {
 	}
 }
 
+void LocStringCollector::collect(std::string_view key, std::string_view context)
+{
+	if (!key.empty()) {
+		if (results.contains(key)) {
+			Logger::logWarning("LocString \"" + String(key) + "\" has multiple contexts. Previously " + results[key] + ", now " + context);
+		} else {
+			results[key] = context;
+		}
+	}
+}
+
+const HashMap<String, String>& LocStringCollector::getResults() const
+{
+	return results;
+}
+
+HashMap<String, String> LocStringCollector::moveResults()
+{
+	return std::move(results);
+}
+
 LocalisationInfoRetriever::LocalisationInfoRetriever(Project& project)
 	: project(project)
 {
@@ -69,7 +90,9 @@ String LocalisationInfoRetriever::getCategory(const String& assetId) const
 HashMap<String, String> LocalisationInfoRetriever::getLocalisationStringContextData() const
 {
 	if (project.getGameInstance()) {
-		return project.getGameInstance()->getLocalisationStringContextData(project.getGameResources(), project.getGameEditorData());
+		LocStringCollector collector;
+		project.getGameInstance()->getLocalisationStringContextData(collector, project.getGameResources(), project.getGameEditorData());
+		return collector.moveResults();
 	} else {
 		return {};
 	}
@@ -116,6 +139,11 @@ void LocalisationEditor::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "validateTags", [this] (const UIEvent& event)
 	{
 		validateTags();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "updateContext", [this] (const UIEvent& event)
+	{
+		updateContext();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "signIn", [this] (const UIEvent& event)
@@ -1233,6 +1261,32 @@ void LocalisationEditor::validateTags()
 
 		}
 	}
+}
+
+void LocalisationEditor::updateContext()
+{
+	auto remoteData = getOriginalDataRemote();
+	if (!remoteData) {
+		Logger::logError("No remote data available");
+		return;
+	}
+
+	const auto info = LocalisationInfoRetriever(project);
+	const auto stringContext = info.getLocalisationStringContextData();
+
+	auto properties = Vector<LocStringProperties>();
+	for (const auto& [key, context]: stringContext) {
+		if (const auto* entry = remoteData->tryGetEntry(key)) {
+			if (entry->getContext() != context) {
+				auto& prop = properties.emplace_back();
+				prop.key = key;
+				prop.context = context;
+			}
+		}
+	}
+
+	Logger::logInfo(toString(properties.size()) + " contexts modified");
+	//client->putStringProperties(properties);
 }
 
 bool LocalisationEditor::CategoryInfo::operator<(const CategoryInfo& other) const

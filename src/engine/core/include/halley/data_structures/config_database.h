@@ -14,6 +14,25 @@ namespace Halley {
     class ConfigObserver;
     class Resources;
 
+    class ILocStringCollector {
+    public:
+        virtual ~ILocStringCollector() = default;
+        virtual void collect(std::string_view key, std::string_view context) = 0;
+    };
+
+	template<typename T>
+	struct HasCollectLocStringContexts
+	{
+	private:
+		typedef std::true_type yes;
+		typedef std::false_type no;
+		template<typename U> static auto test(int) -> decltype(std::declval<U>().collectLocStringContexts(std::declval<ILocStringCollector&>()), yes());
+		template<typename> static no test(...);
+	 
+	public:
+		static constexpr bool value = std::is_same_v<decltype(test<T>(0)),yes>;
+	};
+
     class IConfigDatabaseType {
     public:
         IConfigDatabaseType(String key)
@@ -29,6 +48,7 @@ namespace Halley {
 
         virtual void loadConfigs(const ConfigNode& nodes, bool enforceUnique) = 0;
         virtual size_t getMemoryUsage() const = 0;
+        virtual void collectLocStringContexts(ILocStringCollector& dst) const = 0;
 
     private:
         String key;
@@ -136,6 +156,15 @@ namespace Halley {
             return sizeof(keys) + sizeof(entries) + keys.size() * sizeof(String) + entries.size_bytes();
         }
 
+        void collectLocStringContexts(ILocStringCollector& dst) const override
+        {
+	        if constexpr (HasCollectLocStringContexts<T>::value) {
+		        for (const auto& [k, v]: entries) {
+			        v.collectLocStringContexts(dst);
+		        }
+	        }
+        }
+
     private:
         HashMap<String, T> entries;
         mutable Vector<String> keys;
@@ -221,6 +250,8 @@ namespace Halley {
 
         int getVersion() const;
     	void generateMemoryReport();
+
+        void collectLocStringContexts(ILocStringCollector& dst) const;
 
     private:
         Vector<std::unique_ptr<IConfigDatabaseType>> dbs;
