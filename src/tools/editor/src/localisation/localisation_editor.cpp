@@ -1272,22 +1272,33 @@ void LocalisationEditor::updateContext()
 	const auto info = LocalisationInfoRetriever(project);
 	const auto stringContext = info.getLocalisationStringContextData();
 
-	auto properties = Vector<LocStringProperties>();
+	auto properties = Vector<std::pair<size_t, LocStringProperties>>();
 	for (const auto& [key, context]: stringContext) {
-		if (const auto* entry = remoteData->tryGetEntry(key)) {
-			if (entry->getContext() != context) {
-				auto& prop = properties.emplace_back();
-				prop.key = key;
-				prop.context = context;
+		if (const auto entryIdx = remoteData->tryGetEntryIdx(key)) {
+			auto& entry = remoteData->getEntry(*entryIdx);
+			if (entry.getContext() != context) {
+				auto& prop = properties.emplace_back(*entryIdx, LocStringProperties());
+				prop.second.key = key;
+				prop.second.context = context;
 			}
 		}
 	}
 
-	const auto n = properties.size();
+	std::sort(properties.begin(), properties.end(), [&] (const auto& a, const auto& b) {
+		return a.first < b.first;
+	});
+
+	auto propertiesSorted = Vector<LocStringProperties>();
+	propertiesSorted.reserve(properties.size());
+	for (auto& p: properties) {
+		propertiesSorted.push_back(std::move(p.second));
+	}
+
+	const auto n = propertiesSorted.size();
 
 	const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok, UIConfirmationPopup::ButtonType::Cancel }};
 	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts?", toString(n) + " contexts modified. Upload?", buttons,
-		[this, properties = std::move(properties)](UIConfirmationPopup::ButtonType result) mutable
+		[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType result) mutable
 	{
 		if (result == UIConfirmationPopup::ButtonType::Ok) {
 			client->putStringProperties(properties);

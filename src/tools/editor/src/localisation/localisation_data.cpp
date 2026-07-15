@@ -372,6 +372,15 @@ const LocalisationDataEntry* LocOriginalData::tryGetEntry(const String& key) con
 	return &getEntry(iter->second);
 }
 
+std::optional<std::size_t> LocOriginalData::tryGetEntryIdx(const String& key) const
+{
+	const auto iter = keyMap.find(key);
+	if (iter == keyMap.end()) {
+		return std::nullopt;
+	}
+	return iter->second;
+}
+
 bool LocOriginalData::setValue(const String& key, const String& value)
 {
 	if (auto* entry = tryGetEntry(key)) {

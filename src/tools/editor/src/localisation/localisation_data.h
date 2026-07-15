@@ -161,6 +161,7 @@ namespace Halley {
 		LocalisationDataEntry& getEntry(size_t idx);
 		LocalisationDataEntry* tryGetEntry(const String& key);
 		const LocalisationDataEntry* tryGetEntry(const String& key) const;
+		std::optional<std::size_t> tryGetEntryIdx(const String& key) const;
 
 		bool setValue(const String& key, const String& value);
 
