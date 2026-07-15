@@ -48,6 +48,12 @@ namespace Halley
 		mutable Mutex mutex;
 	};
 
+	class IDevConContextListener {
+	public:
+		virtual ~IDevConContextListener() = default;
+		virtual void onContext(const String& context, bool updateOnly) = 0;
+	};
+
 	class DevConClient : public DevConConnection, private ILoggerSink, private CoreAPI::IProfileCallback
 	{
 		friend class DevConClientonnection;
@@ -63,6 +69,7 @@ namespace Halley
 		DevConInterest& getInterest() const;
 
 		void setI18N(I18N* i18n);
+		void setContextListener(IDevConContextListener* listener);
 
 		uint32_t getPushSaveFileVersion() const;
 
@@ -72,6 +79,7 @@ namespace Halley
 		void onReceiveMessage(DevCon::UpdateInterestMsg& msg) override;
 		void onReceiveMessage(const DevCon::UnregisterInterestMsg& msg) override;
 		void onReceiveMessage(DevCon::UpdateStringsMsg& msg) override;
+		void onReceiveMessage(DevCon::OpenContextMsg& msg) override;
 
 		void notifyInterest(uint32_t handle, ConfigNode data);
 
@@ -88,6 +96,8 @@ namespace Halley
 
 		I18N* i18n = nullptr;
 		Vector<DevCon::UpdateStringsMsg> pendingUpdateStringMessages;
+
+		IDevConContextListener* contextListener = nullptr;
 
 		std::atomic<uint32_t> pushSaveFileVersion;
 

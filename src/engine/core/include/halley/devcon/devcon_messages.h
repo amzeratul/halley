@@ -25,7 +25,8 @@ namespace Halley
 			SetClientData,
 			RPC,
 			RPCReply,
-			UpdateStrings
+			UpdateStrings,
+			OpenContext
 		};
 
 		class DevConMessage : public NetworkMessage
@@ -186,6 +187,19 @@ namespace Halley
 
 			I18NLanguage language;
 			HashMap<String, String> strings;
+		};
+
+		class OpenContextMsg final : public DevConMessageBase<MessageType::OpenContext>
+		{
+		public:
+			OpenContextMsg() = default;
+			OpenContextMsg(String context, bool updateOnly);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+
+			String context;
+			bool updateOnly;
 		};
 	}
 }

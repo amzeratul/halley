@@ -192,6 +192,13 @@ void DevConClient::onReceiveMessage(DevCon::UpdateStringsMsg& msg)
 	}
 }
 
+void DevConClient::onReceiveMessage(DevCon::OpenContextMsg& msg)
+{
+	if (contextListener) {
+		contextListener->onContext(msg.context, msg.updateOnly);
+	}
+}
+
 DevConInterest& DevConClient::getInterest() const
 {
 	return *interest;
@@ -207,6 +214,11 @@ void DevConClient::setI18N(I18N* newI18n)
 			pendingUpdateStringMessages.erase(pendingUpdateStringMessages.begin());
 		}
 	}
+}
+
+void DevConClient::setContextListener(IDevConContextListener* listener)
+{
+	contextListener = listener;
 }
 
 uint32_t DevConClient::getPushSaveFileVersion() const

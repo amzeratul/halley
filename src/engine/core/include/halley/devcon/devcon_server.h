@@ -50,6 +50,7 @@ namespace Halley
 	
 		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
 		void sendI18NStrings(const I18NLanguage& language, HashMap<String, String> strings);
+		void openContext(const String& context, bool updateOnly);
 
 		Vector<DevCon::LogMsg> movePendingLogs();
 
@@ -88,6 +89,8 @@ namespace Halley
 		void updateInterest(InterestHandle handle, ConfigNode params);
 		void unregisterInterest(InterestHandle handle);
 		const ConfigNode& getInterestParams(InterestHandle handle) const;
+
+		void openContext(const String& context, bool updateOnly);
 
 		gsl::span<std::shared_ptr<DevConServerConnection>> getConnections();
 		DevConServerConnection* tryGetConnection(size_t connId);

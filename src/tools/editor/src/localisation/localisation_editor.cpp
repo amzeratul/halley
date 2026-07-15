@@ -1283,8 +1283,16 @@ void LocalisationEditor::updateContext()
 		}
 	}
 
-	Logger::logInfo(toString(properties.size()) + " contexts modified");
-	//client->putStringProperties(properties);
+	const auto n = properties.size();
+
+	const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok, UIConfirmationPopup::ButtonType::Cancel }};
+	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts?", toString(n) + " contexts modified. Upload?", buttons,
+		[this, properties = std::move(properties)](UIConfirmationPopup::ButtonType result) mutable
+	{
+		if (result == UIConfirmationPopup::ButtonType::Ok) {
+			client->putStringProperties(properties);
+		}
+	}));
 }
 
 bool LocalisationEditor::CategoryInfo::operator<(const CategoryInfo& other) const

@@ -4,11 +4,12 @@
 
 using namespace Halley;
 
-LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api, LocalisationFilterRules filterRules)
+LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api, LocalisationFilterRules filterRules, ILocalisationGridListener& listener)
 	: UIGrid("localisation_grid", factory)
 	, factory(factory)
 	, api(api)
-	, filterRules(filterRules)
+	, filterRules(std::move(filterRules))
+	, listener(listener)
 {
 	outdatedCol = factory.getColourScheme()->getColour("ui_logWarningText");
 
@@ -233,4 +234,40 @@ String LocalisationGrid::getCellToolTip(int row, int col, const String& colName)
 		return entry.getContext();
 	}
 	return {};
+}
+
+std::optional<MouseCursorMode> LocalisationGrid::getMouseAtCell(int row, int col) const
+{
+	const auto& entry = origData->getEntry(row);
+	if (columnNames[col] == "Ctx") {
+		if (!entry.getContext().isEmpty()) {
+			return MouseCursorMode::Hand;
+		}
+	}
+	return {};
+}
+
+bool LocalisationGrid::onClickCell(int row, int col, KeyMods mods)
+{
+	const auto& entry = origData->getEntry(row);
+	if (columnNames[col] == "Ctx") {
+		if (!entry.getContext().isEmpty()) {
+			listener.openContext(entry.getContext(), false);
+			lastContextSent = row;
+			return false; // Let the line be selected anyway
+		}
+	}
+	return false;
+}
+
+void LocalisationGrid::onSelectionChanged()
+{
+	const auto sel = getActiveSelectedLine();
+	if (sel >= 0 && sel != lastContextSent) {
+		const auto& entry = origData->getEntry(sel);
+		if (!entry.getContext().isEmpty()) {
+			listener.openContext(entry.getContext(), true);
+		}
+	}
+	lastContextSent = {};
 }
