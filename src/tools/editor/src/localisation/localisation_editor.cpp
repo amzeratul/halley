@@ -66,6 +66,15 @@ String LocalisationInfoRetriever::getCategory(const String& assetId) const
 	}
 }
 
+HashMap<String, String> LocalisationInfoRetriever::getLocalisationStringContextData() const
+{
+	if (project.getGameInstance()) {
+		return project.getGameInstance()->getLocalisationStringContextData(project.getGameResources(), project.getGameEditorData());
+	} else {
+		return {};
+	}
+}
+
 LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWindow& projectWindow, UIFactory& factory)
 	: UIWidget("localisation_editor", {}, UISizer())
 	, root(root)

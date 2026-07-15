@@ -15,6 +15,7 @@ namespace Halley {
 		virtual ~ILocalisationInfoRetriever() = default;
 
 		virtual String getCategory(const String& assetId) const = 0;
+		virtual HashMap<String, String> getLocalisationStringContextData() const = 0;
 	};
 
 	class LocalisationStats {

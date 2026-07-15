@@ -142,6 +142,11 @@ String Game::getLocalisationFileCategory(const String& assetName)
 	return "unknown";
 }
 
+HashMap<String, String> Game::getLocalisationStringContextData(const Resources& resources, const IGameEditorData* editorData)
+{
+	return {};
+}
+
 bool Game::canCollectVideoPerformance()
 {
 	return true;

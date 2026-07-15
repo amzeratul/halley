@@ -16,6 +16,7 @@ namespace Halley {
         LocalisationInfoRetriever(Project& project);
 
         String getCategory(const String& assetId) const override;
+        HashMap<String, String> getLocalisationStringContextData() const override;
         Project& getProject() const { return project; }
 
     private:
