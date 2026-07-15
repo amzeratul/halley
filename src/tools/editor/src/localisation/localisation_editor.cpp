@@ -1296,14 +1296,20 @@ void LocalisationEditor::updateContext()
 
 	const auto n = propertiesSorted.size();
 
-	const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok, UIConfirmationPopup::ButtonType::Cancel }};
-	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts?", toString(n) + " contexts modified. Upload?", buttons,
-		[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType result) mutable
-	{
-		if (result == UIConfirmationPopup::ButtonType::Ok) {
-			client->putStringProperties(properties);
-		}
-	}));
+	if (n > 0) {
+		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok, UIConfirmationPopup::ButtonType::Cancel }};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts", toString(n) + " localisation string contexts modified. Upload?", buttons,
+			[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType result) mutable
+		{
+			if (result == UIConfirmationPopup::ButtonType::Ok) {
+				client->putStringProperties(properties);
+			}
+		}));
+	} else {
+		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok }};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts", "No changes to localisation string contexts.", buttons,
+			[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType) {}));
+	}
 }
 
 bool LocalisationEditor::CategoryInfo::operator<(const CategoryInfo& other) const
