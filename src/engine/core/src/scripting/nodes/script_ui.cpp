@@ -19,7 +19,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType { ET::ReadDataPin, PD::Input }, PinType { ET::ReadDataPin, PD::Output } });
+	const static auto data = std::to_array({
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType { ET::ReadDataPin, PD::Input },
+		PinType { ET::ReadDataPin, PD::Output },
+		PinType { ET::WriteDataPin, PD::Input }
+	});
 	return data;
 }
 
@@ -72,6 +78,13 @@ void ScriptUIModal::doDestructor(ScriptEnvironment& environment, const ScriptGra
 ConfigNode ScriptUIModal::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n, ScriptUIModalData& data) const
 {
 	return ConfigNode(data.result);
+}
+
+void ScriptUIModal::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptUIModalData& curData) const
+{
+	if (curData.ui) {
+		curData.ui->onReceiveMessage(std::move(data));
+	}
 }
 
 

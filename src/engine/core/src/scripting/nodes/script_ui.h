@@ -30,6 +30,7 @@ namespace Halley {
         Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptUIModalData& data) const override;
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptUIModalData& curData) const override;
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptUIModalData& curData) const override;
+		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptUIModalData& curData) const override;
 	};
 
 	class ScriptUIInWorldData final : public ScriptStateData<ScriptUIInWorldData> {
