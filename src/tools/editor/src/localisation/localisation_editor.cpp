@@ -71,6 +71,16 @@ HashMap<String, String> LocStringCollector::moveResults()
 	return std::move(results);
 }
 
+void LocStringCollector::setConfigDatabase(const ConfigDatabase* configDatabase)
+{
+	this->configDatabase = configDatabase;
+}
+
+const ConfigDatabase* LocStringCollector::getConfigDatabase() const
+{
+	return configDatabase;
+}
+
 LocalisationInfoRetriever::LocalisationInfoRetriever(Project& project)
 	: project(project)
 {

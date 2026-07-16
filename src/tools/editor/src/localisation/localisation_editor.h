@@ -16,9 +16,12 @@ namespace Halley {
 		void collect(std::string_view key, std::string_view context) override;
         const HashMap<String, String>& getResults() const;
         HashMap<String, String> moveResults();
+        void setConfigDatabase(const ConfigDatabase* configDatabase) override;
+        const ConfigDatabase* getConfigDatabase() const override;
 
     private:
         HashMap<String, String> results;
+        const ConfigDatabase* configDatabase = nullptr;
     };
 
     class LocalisationInfoRetriever : public ILocalisationInfoRetriever {

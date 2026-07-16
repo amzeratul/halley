@@ -13,11 +13,14 @@ namespace Halley {
     class ConfigFile;
     class ConfigObserver;
     class Resources;
+    class ConfigDatabase;
 
     class ILocStringCollector {
     public:
         virtual ~ILocStringCollector() = default;
         virtual void collect(std::string_view key, std::string_view context) = 0;
+        virtual void setConfigDatabase(const ConfigDatabase* configDatabase) = 0;
+        virtual const ConfigDatabase* getConfigDatabase() const = 0;
     };
 
 	template<typename T>

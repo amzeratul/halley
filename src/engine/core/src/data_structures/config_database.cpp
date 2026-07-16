@@ -84,6 +84,7 @@ void ConfigDatabase::generateMemoryReport()
 
 void ConfigDatabase::collectLocStringContexts(ILocStringCollector& dst) const
 {
+	dst.setConfigDatabase(this);
 	for (auto& db: dbs) {
 		db->collectLocStringContexts(dst);
 	}
