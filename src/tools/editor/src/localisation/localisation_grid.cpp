@@ -238,9 +238,9 @@ String LocalisationGrid::getCellToolTip(int row, int col, const String& colName)
 
 std::optional<MouseCursorMode> LocalisationGrid::getMouseAtCell(int row, int col) const
 {
-	const auto& entry = origData->getEntry(row);
 	if (columnNames[col] == "Ctx") {
-		if (!entry.getContext().isEmpty()) {
+		const auto* entry = origData->tryGetEntry(row);
+		if (entry && !entry->getContext().isEmpty()) {
 			return MouseCursorMode::Hand;
 		}
 	}
@@ -249,10 +249,10 @@ std::optional<MouseCursorMode> LocalisationGrid::getMouseAtCell(int row, int col
 
 bool LocalisationGrid::onClickCell(int row, int col, KeyMods mods)
 {
-	const auto& entry = origData->getEntry(row);
 	if (columnNames[col] == "Ctx") {
-		if (!entry.getContext().isEmpty()) {
-			listener.openContext(entry.getContext(), false);
+		const auto* entry = origData->tryGetEntry(row);
+		if (entry && !entry->getContext().isEmpty()) {
+			listener.openContext(entry->getContext(), false);
 			lastContextSent = row;
 			return false; // Let the line be selected anyway
 		}
