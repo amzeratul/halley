@@ -18,6 +18,8 @@ namespace Halley {
 		void setTranslatedEnabled(bool enabled);
 		void setOutdatedEnabled(bool enabled);
 		void setReadyEnabled(bool enabled);
+		void setCommentEnabled(bool enabled);
+		void setContextEnabled(bool enabled);
 	};
 
 	class LocalisationSetFiltersWindow : public UIWidget {

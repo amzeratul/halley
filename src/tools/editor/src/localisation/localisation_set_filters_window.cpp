@@ -30,6 +30,16 @@ void LocalisationFiltersController::setup()
 		setOutdatedEnabled(value);
 	});
 
+	ui.bindData("commentStatusEnable", filters.commentEnabled, [=] (bool value) {
+		filters.commentEnabled = value;
+		setCommentEnabled(value);
+	});
+
+	ui.bindData("contextStatusEnable", filters.contextEnabled, [=] (bool value) {
+		filters.contextEnabled = value;
+		setContextEnabled(value);
+	});
+
 	ui.bindData("minPriority", toString(filters.minPriority), [=] (String value) {
 		filters.minPriority = fromString<LocPriority>(value);
 	});
@@ -50,10 +60,20 @@ void LocalisationFiltersController::setup()
 		filters.outdated = fromString<LocOutdatedStatus>(value);
 	});
 
+	ui.bindData("commentStatus", toString(filters.comment), [=] (String value) {
+		filters.comment = fromString<LocCommentStatus>(value);
+	});
+
+	ui.bindData("contextStatus", toString(filters.context), [=] (String value) {
+		filters.context = fromString<LocContextStatus>(value);
+	});
+
 	setPriorityEnabled(filters.priorityEnabled);
 	setReadyEnabled(filters.readyEnabled);	
 	setTranslatedEnabled(filters.translatedEnabled);
 	setOutdatedEnabled(filters.outdatedEnabled);	
+	setCommentEnabled(filters.commentEnabled);	
+	setContextEnabled(filters.contextEnabled);	
 }
 
 void LocalisationFiltersController::setPriorityEnabled(bool enabled)
@@ -74,6 +94,16 @@ void LocalisationFiltersController::setOutdatedEnabled(bool enabled)
 void LocalisationFiltersController::setReadyEnabled(bool enabled)
 {
 	ui.getWidget("readyStatus")->setActive(enabled);
+}
+
+void LocalisationFiltersController::setCommentEnabled(bool enabled)
+{
+	ui.getWidget("commentStatus")->setActive(enabled);
+}
+
+void LocalisationFiltersController::setContextEnabled(bool enabled)
+{
+	ui.getWidget("contextStatus")->setActive(enabled);
 }
 
 

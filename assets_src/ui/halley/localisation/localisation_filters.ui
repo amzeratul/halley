@@ -188,6 +188,48 @@ children:
                           text: Up to date
                         - id: outOfDate
                           text: Out of date
+              - uuid: 32b4e374-bebc-4d11-af59-0c7ccdfdf1c0
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 7a6833b3-3ae4-4273-a79a-2f8a29232e00
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: commentStatusEnable
+                      label: Comment status
+                      size: [200, 0]
+                  - uuid: 52af1669-2e08-46c3-87d4-bddb891b9c7c
+                    proportion: 1
+                    widget:
+                      class: dropdown
+                      id: commentStatus
+                      options:
+                        - id: hasComment
+                          text: Has Comment
+                        - id: noComment
+                          text: No Comment
+              - uuid: 7259f0f8-59fa-4143-908c-caf9f4ed0280
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 721b9e3a-b278-4e29-8dd3-37c1a8b7fcb9
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: contextStatusEnable
+                      label: Context status
+                      size: [200, 0]
+                  - uuid: c8a9f7ab-c57b-4c4c-a369-d59ea51df531
+                    proportion: 1
+                    widget:
+                      class: dropdown
+                      id: contextStatus
+                      options:
+                        - id: hasContext
+                          text: Has Context
+                        - id: noContext
+                          text: No Context
       - uuid: 3001c7bb-b5c9-4da9-ace2-2f6a4c87352a
         border: [0, 0, 2, 2]
         sizer:
