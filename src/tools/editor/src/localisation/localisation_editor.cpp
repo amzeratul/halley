@@ -52,23 +52,29 @@ namespace {
 	}
 }
 
-void LocStringCollector::collect(std::string_view key, std::string_view context)
+void LocStringCollector::collect(std::string_view key, std::string_view context, int priority)
 {
 	if (!key.empty()) {
-		if (!results.contains(key)) {
-			results[key] = context;
+		auto iter = results.find(key);
+		if (iter == results.end()) {
+			results[key] = Entry{ context, priority };
+		} else {
+			auto& v = iter->second;
+			if (priority > v.priority) {
+				v.value = context;
+				v.priority = priority;
+			}
 		}
 	}
 }
 
-const HashMap<String, String>& LocStringCollector::getResults() const
-{
-	return results;
-}
-
 HashMap<String, String> LocStringCollector::moveResults()
 {
-	return std::move(results);
+	HashMap<String, String> res;
+	for (auto& [k, v]: results) {
+		res[k] = std::move(v.value);
+	}
+	return res;
 }
 
 void LocStringCollector::setConfigDatabase(const ConfigDatabase* configDatabase)
@@ -1307,6 +1313,10 @@ void LocalisationEditor::updateContext()
 	const auto n = propertiesSorted.size();
 
 	if (n > 0) {
+		for (const auto& p: propertiesSorted) {
+			//Logger::logDev(p.key + " -> " + p.context.value_or(""));
+		}
+
 		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok, UIConfirmationPopup::ButtonType::Cancel }};
 		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts", toString(n) + " localisation string contexts modified. Upload?", buttons,
 			[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType result) mutable

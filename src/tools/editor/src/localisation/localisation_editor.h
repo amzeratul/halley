@@ -13,14 +13,20 @@ namespace Halley {
 
     class LocStringCollector : public ILocStringCollector {
     public:
-		void collect(std::string_view key, std::string_view context) override;
-        const HashMap<String, String>& getResults() const;
+        struct Entry {
+	        String value;
+            int priority;
+        };
+    	
+    	void collect(std::string_view key, std::string_view context, int priority) override;
+
         HashMap<String, String> moveResults();
-        void setConfigDatabase(const ConfigDatabase* configDatabase) override;
+        
+    	void setConfigDatabase(const ConfigDatabase* configDatabase) override;
         const ConfigDatabase* getConfigDatabase() const override;
 
     private:
-        HashMap<String, String> results;
+        HashMap<String, Entry> results;
         const ConfigDatabase* configDatabase = nullptr;
     };
 

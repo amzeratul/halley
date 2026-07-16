@@ -18,7 +18,7 @@ namespace Halley {
     class ILocStringCollector {
     public:
         virtual ~ILocStringCollector() = default;
-        virtual void collect(std::string_view key, std::string_view context) = 0;
+        virtual void collect(std::string_view key, std::string_view context, int priority = 0) = 0;
         virtual void setConfigDatabase(const ConfigDatabase* configDatabase) = 0;
         virtual const ConfigDatabase* getConfigDatabase() const = 0;
     };
