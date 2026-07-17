@@ -90,14 +90,20 @@ namespace Halley {
 		int depsLeft = 0;
 		Vector2i currentSize;
 		bool enabled = true;
+		bool bypass = false;
 		bool ignoreDependencies = false;
 
 		Vector<InputPin> inputPins;
+		Vector<InputPin> bypassInputPins;
 		Vector<OutputPin> outputPins;
 
 		bool ownRenderTarget = false;
 		bool canForwardRenderTarget = false;
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		RenderGraphNode* reuseRenderTarget = nullptr;
+
+		Vector<InputPin>& getInputPins();
+		const Vector<InputPin>& getInputPins() const;
+		void generateBypassInputPins();
 	};
 }

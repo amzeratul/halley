@@ -272,7 +272,7 @@ std::shared_ptr<Texture> RenderGraph::getOutputTexture(const String& id)
 		return nullptr;
 	}
 
-	const auto& pin = targetNode->inputPins[0];
+	const auto& pin = targetNode->getInputPins()[0];
 	return pin.texture;
 }
 
@@ -299,6 +299,20 @@ void RenderGraph::setRenderEnabled(const String& id, bool enabled)
 	}
 
 	targetNode->enabled = enabled;
+}
+
+void RenderGraph::setBypass(const String& id, bool bypass)
+{
+	auto* targetNode = tryGetNode(id);
+	if (!targetNode) {
+		Logger::logWarning("Can't set bypass status for unknown render graph node: \"" + id + "\"", true);
+		return;
+	}
+
+	if (targetNode->bypass != bypass) {
+		targetNode->bypass = bypass;
+		targetNode->renderTarget = {};
+	}
 }
 
 void RenderGraph::setIgnoreDependencies(const String& id, bool ignore)
@@ -358,8 +372,8 @@ void RenderGraph::setRemapOutputNode(std::string_view toNodeName)
 	}
 
 	defaultOutputMapping.clear();
-	for (size_t i = 0; i < toNode->inputPins.size(); ++i) {
-		auto& pin = toNode->inputPins[i];
+	for (size_t i = 0; i < toNode->getInputPins().size(); ++i) {
+		auto& pin = toNode->getInputPins()[i];
 		Vector<std::pair<String, uint8_t>> connections;
 		for (auto& p: pin.others) {
 			connections.emplace_back(p.node->id, p.otherId);
