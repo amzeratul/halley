@@ -23,6 +23,9 @@ bool MaterialParameter::set(Colour colour)
 
 bool MaterialParameter::set(float p)
 {
+	if (type == ShaderParameterType::Int) {
+		return set(static_cast<int>(p));
+	}
 	HalleyAssertDev(type == ShaderParameterType::Float);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Float, &p);
 }
@@ -47,6 +50,9 @@ bool MaterialParameter::set(Vector4f p)
 
 bool MaterialParameter::set(int p)
 {
+	if (type == ShaderParameterType::Float) {
+		return set(static_cast<float>(p));
+	}
 	HalleyAssertDev(type == ShaderParameterType::Int);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Int, &p);
 }

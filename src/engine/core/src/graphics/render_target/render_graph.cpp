@@ -204,8 +204,10 @@ void RenderGraph::applyVariable(Material& material, const String& name, const Co
 		} else {
 			Logger::logWarning("RenderGraph variable not set: \"" + value.asString() + "\"", true);
 		}
-	} else if (value.getType() == ConfigNodeType::Float || value.getType() == ConfigNodeType::Int) {
+	} else if (value.getType() == ConfigNodeType::Float) {
 		material.set(name, value.asFloat());
+	} else if (value.getType() == ConfigNodeType::Int) {
+		material.set(name, value.asInt());
 	}
 }
 
@@ -230,6 +232,26 @@ void RenderGraph::setVariable(std::string_view name, Vector4f value)
 }
 
 void RenderGraph::setVariable(std::string_view name, Colour4f value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, int value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Vector2i value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Vector3i value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Vector4i value)
 {
 	variables[name] = value;
 }
@@ -419,6 +441,18 @@ void RenderGraph::Variable::apply(Material& material, const String& name) const
 	case VariableType::Float4:
 		material.set(name, var);
 		break;
+	case VariableType::Int:
+		material.set(name, intVar.x);
+		break;
+	case VariableType::Int2:
+		material.set(name, intVar.xy());
+		break;
+	case VariableType::Int3:
+		material.set(name, intVar.xyz());
+		break;
+	case VariableType::Int4:
+		material.set(name, intVar);
+		break;
 	default:
 		break;
 	}
@@ -456,5 +490,33 @@ RenderGraph::Variable& RenderGraph::Variable::operator=(Colour4f v)
 {
 	var = Vector4f(v.r, v.g, v.b, v.a);
 	type = VariableType::Float4;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(int v)
+{
+	intVar = Vector4i(v, 0, 0, 0);
+	type = VariableType::Int;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Vector2i v)
+{
+	intVar = Vector4i(v, 0, 0);
+	type = VariableType::Int2;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Vector3i v)
+{
+	intVar = Vector4i(v, 0);
+	type = VariableType::Int;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Vector4i v)
+{
+	intVar = v;
+	type = VariableType::Int4;
 	return *this;
 }
