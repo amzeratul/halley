@@ -1,0 +1,20 @@
+---
+name: Halley/SimulateColourBlindness
+base: sprite_base.material
+defaultMask: 1
+textures:
+  - name: world
+    sampler: sampler2D
+uniforms:
+  - MaterialBlock:
+    - name: u_intensity
+      type: float
+    - name: u_colourBlindType
+      type: int
+passes:
+  - blend: Opaque
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: simulate_colour_blindness.pixel.hlsl
+...
