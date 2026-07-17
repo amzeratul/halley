@@ -101,6 +101,7 @@ namespace Halley {
 		virtual size_t getNumEntries() const = 0;
 		virtual const String& getGroupNameEntry(size_t idx) const = 0;
 		virtual const LocalisationDataEntry& getEntry(size_t idx) const = 0;
+		virtual const LocalisationDataEntry* tryGetEntry(size_t idx) const = 0;
 	};
 
 	class LocOriginalDataChunk : public ILocOriginalData {
@@ -118,6 +119,7 @@ namespace Halley {
 		size_t getNumEntries() const override;
 		const String& getGroupNameEntry(size_t idx) const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
+		const LocalisationDataEntry* tryGetEntry(size_t idx) const override;
 		LocalisationDataEntry& getEntry(size_t idx);
 
 		bool operator<(const LocOriginalDataChunk& other) const;
@@ -160,6 +162,7 @@ namespace Halley {
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
 		LocalisationDataEntry& getEntry(size_t idx);
 		LocalisationDataEntry* tryGetEntry(const String& key);
+		const LocalisationDataEntry* tryGetEntry(size_t idx) const override;
 		const LocalisationDataEntry* tryGetEntry(const String& key) const;
 		std::optional<std::size_t> tryGetEntryIdx(const String& key) const;
 

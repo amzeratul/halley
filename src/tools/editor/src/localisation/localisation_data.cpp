@@ -228,6 +228,11 @@ const LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx) const
 	return entries.at(idx);
 }
 
+const LocalisationDataEntry* LocOriginalDataChunk::tryGetEntry(size_t idx) const
+{
+	return idx < entries.size() ? &entries[idx] : nullptr;
+}
+
 LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx)
 {
 	return entries.at(idx);
@@ -352,6 +357,15 @@ LocalisationDataEntry& LocOriginalData::getEntry(size_t idx)
 {
 	const auto index = keyIndices[idx];
 	return chunks[index.first].getEntry(index.second);
+}
+
+const LocalisationDataEntry* LocOriginalData::tryGetEntry(size_t idx) const
+{
+	if (idx > keyIndices.size()) {
+		return nullptr;
+	}
+	const auto index = keyIndices[idx];
+	return chunks[index.first].tryGetEntry(index.second);
 }
 
 LocalisationDataEntry* LocOriginalData::tryGetEntry(const String& key)
