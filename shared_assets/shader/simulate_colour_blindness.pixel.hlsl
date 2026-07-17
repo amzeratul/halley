@@ -10,6 +10,8 @@ cbuffer Params : register(b1)
 };
 
 
+// Base on https://github.com/DaltonLens/libDaltonLens/blob/master/libDaltonLens.c
+
 
 float sRGBToLinear(float v) {
     return clamp(v < 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4), 0.0, 1.0);
@@ -29,40 +31,46 @@ float3 linearTosRGB(float3 rgb) {
 
 
 // Viénot 1999
-float3 simulateProtan(float3 rgb) {
+float3 simulateProtanVienot99(float3 rgb) {
     float3x3 vienotProtan = {
         { 0.11238, 0.88762, 0.00000 },
         { 0.11238, 0.88762, -0.00000 },
         { 0.00401, -0.00401, 1.00000 }
     };
 
-    return linearTosRGB(mul(vienotProtan, sRGBToLinear(rgb)));
+    float3 lin = sRGBToLinear(rgb);
+    float3 result = mul(vienotProtan, lin);
+    return linearTosRGB(lerp(lin, result, u_intensity));
 }
 
 // Viénot 1999
-float3 simulateDeutan(float3 rgb) {
+float3 simulateDeutanVienot99(float3 rgb) {
     float3x3 vienotDeutan = {
         { 0.29275, 0.70725, 0.00000 },
         { 0.29275, 0.70725, -0.00000 },
         { -0.02234, 0.02234, 1.00000 }
     };
 
-    return linearTosRGB(mul(vienotDeutan, sRGBToLinear(rgb)));
+    float3 lin = sRGBToLinear(rgb);
+    float3 result = mul(vienotDeutan, lin);
+    return linearTosRGB(lerp(lin, result, u_intensity));
 }
 
 // Viénot 1999
-float3 simulateTritanBad(float3 rgb) {
+float3 simulateTritanVienot99(float3 rgb) {
     float3x3 vienotTritan = {
         { 1.00000, 0.14461, -0.14461 },
         { 0.00000, 0.85924, 0.14076 },
         { -0.00000, 0.85924, 0.14076 }
     };
 
-    return linearTosRGB(mul(vienotTritan, sRGBToLinear(rgb)));
+    float3 lin = sRGBToLinear(rgb);
+    float3 result = mul(vienotTritan, lin);
+    return linearTosRGB(lerp(lin, result, u_intensity));
 }
 
 // Brette 1997
-float3 simulateTritan(float3 rgb) {
+float3 simulateTritanBrette97(float3 rgb) {
     float3x3 params1 = {
         { 1.01277, 0.13548, -0.14826 },
         { -0.01243, 0.86812, 0.14431 },
@@ -76,10 +84,19 @@ float3 simulateTritan(float3 rgb) {
     float3 separationPlane = float3(0.03901, -0.02788, -0.01113);
 
     float3 lin = sRGBToLinear(rgb);
-    return linearTosRGB(mul(dot(lin, separationPlane) >= 0 ? params1 : params2, lin));
+    float3 result = mul(dot(lin, separationPlane) >= 0 ? params1 : params2, lin);
+    return linearTosRGB(lerp(lin, result, u_intensity));
 }
 
 float4 main(VOut input) : SV_TARGET {
 	float4 col = tex0.Sample(sampler0, input.texCoord0.xy);
-	return float4(simulateTritan(col.rgb), col.a);
+    if (u_colourBlindType == 1) {
+    	return float4(simulateProtanVienot99(col.rgb), col.a);
+    } else if (u_colourBlindType == 2) {
+    	return float4(simulateDeutanVienot99(col.rgb), col.a);
+    } else if (u_colourBlindType == 3) {
+    	return float4(simulateTritanBrette97(col.rgb), col.a);
+    } else {
+        return col;
+    }
 }
