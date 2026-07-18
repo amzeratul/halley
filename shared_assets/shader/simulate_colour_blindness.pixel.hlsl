@@ -88,6 +88,12 @@ float3 simulateTritanBrette97(float3 rgb) {
     return linearTosRGB(lerp(lin, result, u_intensity));
 }
 
+float3 simulateAchroma(float3 rgb) {
+    float value = dot(rgb, float3(0.114, 0.587, 0.299));
+    float3 result =  float3(value, value, value);
+    return lerp(rgb, result, u_intensity);
+}
+
 float4 main(VOut input) : SV_TARGET {
 	float4 col = tex0.Sample(sampler0, input.texCoord0.xy);
     if (u_colourBlindType == 1) {
@@ -96,6 +102,8 @@ float4 main(VOut input) : SV_TARGET {
     	return float4(simulateDeutanVienot99(col.rgb), col.a);
     } else if (u_colourBlindType == 3) {
     	return float4(simulateTritanBrette97(col.rgb), col.a);
+    } else if (u_colourBlindType == 4) {
+    	return float4(simulateAchroma(col.rgb), col.a);
     } else {
         return col;
     }
