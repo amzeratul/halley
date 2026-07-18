@@ -47,21 +47,24 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		if (pars.hasKey("stencilClear")) {
 			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
-	} else if (method == RenderGraphMethod::Overlay) {
-		overlayMethod = definition.getMaterial()->createMaterial();
-		if (pars.hasKey("colourClear")) {
-			colourClear = Colour4f::fromString(pars["colourClear"].asString());
-		}
-		if (pars.hasKey("depthClear")) {
-			depthClear = pars["depthClear"].asFloat();
-		}
-		if (pars.hasKey("stencilClear")) {
-			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
-		}
+	} else if (method == RenderGraphMethod::Overlay || method == RenderGraphMethod::Filter) {
+		overlayFilterMethod = definition.getMaterial()->createMaterial();
 
 		if (pars.hasKey("variables")) {
 			for (const auto& [key, value] : pars["variables"].asMap()) {
 				variables.emplace_back(Variable{ key, ConfigNode(value) });
+			}
+		}
+
+		if (method == RenderGraphMethod::Overlay) {
+			if (pars.hasKey("colourClear")) {
+				colourClear = Colour4f::fromString(pars["colourClear"].asString());
+			}
+			if (pars.hasKey("depthClear")) {
+				depthClear = pars["depthClear"].asFloat();
+			}
+			if (pars.hasKey("stencilClear")) {
+				stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 			}
 		}
 	} else if (method == RenderGraphMethod::RenderToTexture) {
@@ -319,6 +322,8 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 		renderNodePaintMethod(graph, rc);
 	} else if (method == RenderGraphMethod::Overlay) {
 		renderNodeOverlayMethod(graph, rc);
+	} else if (method == RenderGraphMethod::Filter) {
+		renderNodeFilterMethod(graph, rc);
 	} else if (method == RenderGraphMethod::ImageOutput) {
 		renderNodeImageOutputMethod(graph, rc);
 	}
@@ -354,28 +359,56 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 
 void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto& texs = overlayMethod->getDefinition().getTextures();
+	const auto& texs = overlayFilterMethod->getDefinition().getTextures();
 	size_t idx = 0;
 	for (auto& input: getInputPins()) {
 		if (input.type == RenderGraphElementType::Texture) {
-			overlayMethod->set(texs.at(idx++).name, input.texture);
+			overlayFilterMethod->set(texs.at(idx++).name, input.texture);
 		}
 	}
 
 	for (const auto& variable: variables) {
-		graph.applyVariable(*overlayMethod, variable.name, variable.value);
+		graph.applyVariable(*overlayFilterMethod, variable.name, variable.value);
 	}
 
 	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
-	getTargetRenderContext(rc).with(camera).bind([=, this] (Painter& painter)
+	getTargetRenderContext(rc).with(camera).bind([this] (Painter& painter)
 	{
 		painter.pushDebugGroup(id);
 		if (colourClear || depthClear || stencilClear) {
 			painter.clear(colourClear, depthClear, stencilClear);
 		}
-		const auto& tex = overlayMethod->getTexture(0);
+		const auto& tex = overlayFilterMethod->getTexture(0);
 		Sprite()
-			.setMaterial(overlayMethod)
+			.setMaterial(overlayFilterMethod)
+			.setSize(Vector2f(currentSize))
+			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
+			.draw(painter);
+		painter.popDebugGroup();
+	});
+}
+
+void RenderGraphNode::renderNodeFilterMethod(const RenderGraph& graph, const RenderContext& rc)
+{
+	const auto& texs = overlayFilterMethod->getDefinition().getTextures();
+	size_t idx = 0;
+	for (auto& input: getInputPins()) {
+		if (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::Texture) {
+			overlayFilterMethod->set(texs.at(idx++).name, input.texture);
+		}
+	}
+
+	for (const auto& variable: variables) {
+		graph.applyVariable(*overlayFilterMethod, variable.name, variable.value);
+	}
+
+	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
+	getTargetRenderContext(rc).with(camera).bind([this] (Painter& painter)
+	{
+		painter.pushDebugGroup(id);
+		const auto& tex = overlayFilterMethod->getTexture(0);
+		Sprite()
+			.setMaterial(overlayFilterMethod)
 			.setSize(Vector2f(currentSize))
 			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
 			.draw(painter);

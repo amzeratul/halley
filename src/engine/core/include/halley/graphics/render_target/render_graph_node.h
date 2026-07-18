@@ -65,6 +65,7 @@ namespace Halley {
 		void renderNode(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc);
+		void renderNodeFilterMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeBlitTexture(std::shared_ptr<const Texture> texture, const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
@@ -83,7 +84,7 @@ namespace Halley {
 		std::optional<uint8_t> stencilClear;
 		Vector<SpriteMaskBase> paintMasks;
 
-		std::shared_ptr<Material> overlayMethod;
+		std::shared_ptr<Material> overlayFilterMethod;
 		Vector<Variable> variables;
 		
 		bool activeInCurrentPass = false;

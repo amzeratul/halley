@@ -65,6 +65,7 @@ std::shared_ptr<GraphNodeTypeCollection> RenderGraphNodeTypes::makeRenderGraphTy
 
 		result->addNodeType(std::make_unique<PaintNodeType>());
 		result->addNodeType(std::make_unique<OverlayNodeType>());
+		result->addNodeType(std::make_unique<FilterNodeType>());
 		result->addNodeType(std::make_unique<RenderToTextureNodeType>());
 		result->addNodeType(std::make_unique<OutputNodeType>());
 		result->addNodeType(std::make_unique<ImageOutputNodeType>());
@@ -242,6 +243,79 @@ String RenderGraphNodeTypes::OverlayNodeType::getPinDescription(const BaseGraphN
 	}
 	return renderGraphNode.getMaterial()->getTextureNames()[elementIdx - 4];
 }
+
+
+gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::FilterNodeType::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = RenderGraphElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::to_array({
+		PinType{ ET::ColourBuffer, PD::Input },
+		PinType{ ET::DepthStencilBuffer, PD::Input },
+		PinType{ ET::ColourBuffer, PD::Output },
+		PinType{ ET::DepthStencilBuffer, PD::Output },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input },
+		PinType{ ET::Texture, PD::Input }
+	});
+
+	size_t numTexs = 0;
+	const auto& renderNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
+	if (renderNode.getMaterial()) {
+		numTexs = renderNode.getMaterial()->getTextureNames().size();
+	}
+
+	return gsl::span<const IGraphNodeType::PinType>(data).subspan(0, 3 + numTexs); // First texture is read from colour buffer
+}
+
+Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::FilterNodeType::getSettingTypes() const
+{
+	return {
+		SettingType{ "name", "Halley::String", Vector<String>{""} },
+		SettingType{ "material", "Halley::ResourceReference<Halley::MaterialDefinition>", Vector<String>{""} },
+		SettingType{ "variables", "Halley::HashMap<Halley::String, Halley::String>", Vector<String>{""} },
+	};
+}
+
+std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::FilterNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	const auto& renderGraphNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
+
+	ColourStringBuilder str;
+	str.append("Filter with material ");
+	str.append(renderGraphNode.getMaterial() ? renderGraphNode.getMaterial()->getName() : "<missing>", settingColour);
+
+	return str.moveResults();
+}
+
+String RenderGraphNodeTypes::FilterNodeType::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx < 4) {
+		return RenderGraphNodeType::getPinDescription(node, elementType, elementIdx);
+	}
+
+	const auto& renderGraphNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
+	if (!renderGraphNode.getMaterial()) {
+		return "<invalid>";
+	}
+	return renderGraphNode.getMaterial()->getTextureNames()[elementIdx - 3];
+}
+
+void RenderGraphNodeTypes::FilterNodeType::loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const
+{
+	const auto matId = node.getSettings()["material"].asString("");
+	if (!matId.isEmpty()) {
+		node.setMaterial(resources.get<MaterialDefinition>(matId));
+	} else {
+		node.setMaterial({});
+	}
+}
+
 
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNodeType::getPinConfiguration(const BaseGraphNode& node) const
 {

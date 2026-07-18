@@ -15,6 +15,7 @@ namespace Halley {
 		ImageOutput,
 	    Paint,
     	Overlay,
+        Filter,
 		RenderToTexture
     };
 
@@ -27,6 +28,7 @@ namespace Halley {
 				"imageOutput",
 				"paint",
 				"overlay",
+				"filter",
 				"renderToTexture"
 			});
 		}
