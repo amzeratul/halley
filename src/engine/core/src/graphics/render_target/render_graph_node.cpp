@@ -71,6 +71,10 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 
 void RenderGraphNode::startRender()
 {
+	if (curBypass != bypass) {
+		curBypass = bypass;
+		renderTarget.reset();
+	}
 	activeInCurrentPass = false;
 	ownRenderTarget = false;
 	canForwardRenderTarget = false;
@@ -197,12 +201,12 @@ ResourceMemoryUsage RenderGraphNode::getMemoryUsage() const
 
 Vector<RenderGraphNode::InputPin>& RenderGraphNode::getInputPins()
 {
-	return bypass ? bypassInputPins : inputPins;
+	return curBypass ? bypassInputPins : inputPins;
 }
 
 const Vector<RenderGraphNode::InputPin>& RenderGraphNode::getInputPins() const
 {
-	return bypass ? bypassInputPins : inputPins;
+	return curBypass ? bypassInputPins : inputPins;
 }
 
 void RenderGraphNode::generateBypassInputPins()
@@ -308,7 +312,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
-	if (bypass) {
+	if (curBypass) {
 		return;
 	}
 	if (method == RenderGraphMethod::Paint) {

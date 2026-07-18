@@ -331,10 +331,7 @@ void RenderGraph::setBypass(const String& id, bool bypass)
 		return;
 	}
 
-	if (targetNode->bypass != bypass) {
-		targetNode->bypass = bypass;
-		targetNode->renderTarget = {};
-	}
+	targetNode->bypass = bypass;
 }
 
 void RenderGraph::setIgnoreDependencies(const String& id, bool ignore)
