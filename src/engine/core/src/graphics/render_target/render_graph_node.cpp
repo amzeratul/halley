@@ -174,7 +174,9 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	}
 
 	const bool isOutput = method == RenderGraphMethod::Output;
-	if (colourInput == depthStencilInput && colourInput != nullptr && colourInput->canForwardRenderTarget && !isOutput) {
+	// Filters sample their colour input, so they can't render into the same target
+	const bool samplesColourInput = method == RenderGraphMethod::Filter && !curBypass;
+	if (colourInput == depthStencilInput && colourInput != nullptr && colourInput->canForwardRenderTarget && !isOutput && !samplesColourInput) {
 		reuseRenderTarget = colourInput;
 	}
 
@@ -233,6 +235,7 @@ void RenderGraphNode::generateBypassInputPins()
 void RenderGraphNode::resetTextures()
 {
 	renderTarget.reset();
+	filterColourTexture.reset();
 	for (auto& input: inputPins) {
 		input.texture.reset();
 	}
@@ -280,28 +283,34 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 {
 	getRenderTarget(video);
 
+	// A filter samples its colour input in its material, so it renders into its own colour texture rather than the incoming one
+	const bool ownColourTarget = method == RenderGraphMethod::Filter && !curBypass;
+
 	bool updated = false;
 	if (!reuseRenderTarget) {
 		int colourIdx = 0;
 		for (auto& input: getInputPins()) {
 			if (renderTarget) {
+				const bool useOwnColour = ownColourTarget && input.type == RenderGraphElementType::ColourBuffer;
+				auto& attachment = useOwnColour ? filterColourTexture : input.texture;
+
 				// Create Colour/DepthStencil textures for render target, if needed
-				if (input.others.empty() && (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::DepthStencilBuffer)) {
-					if (!input.texture) {
+				if ((input.others.empty() || useOwnColour) && (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::DepthStencilBuffer)) {
+					if (!attachment) {
 						updated = true;
-						input.texture = makeTexture(video, input.type);
+						attachment = makeTexture(video, input.type);
 					} else {
-						if (input.texture->getSize() != currentSize) {
-							updateTexture(input.texture, input.type);
+						if (attachment->getSize() != currentSize) {
+							updateTexture(attachment, input.type);
 						}
 					}
 				}
 
 				// Assign textures to render target
 				if (input.type == RenderGraphElementType::ColourBuffer && (!renderTarget->hasColourBuffer(colourIdx) || updated)) {
-					renderTarget->setTarget(colourIdx++, input.texture);
+					renderTarget->setTarget(colourIdx++, attachment);
 				} else if (input.type == RenderGraphElementType::DepthStencilBuffer && (!renderTarget->hasDepthBuffer() || updated)) {
-					renderTarget->setDepthTexture(input.texture);
+					renderTarget->setDepthTexture(attachment);
 				}
 			} else {
 				// No render target, copy instead

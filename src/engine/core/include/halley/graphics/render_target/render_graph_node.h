@@ -102,6 +102,7 @@ namespace Halley {
 		bool ownRenderTarget = false;
 		bool canForwardRenderTarget = false;
 		std::shared_ptr<TextureRenderTarget> renderTarget;
+		std::shared_ptr<Texture> filterColourTexture;
 		RenderGraphNode* reuseRenderTarget = nullptr;
 
 		Vector<InputPin>& getInputPins();
