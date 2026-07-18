@@ -510,7 +510,7 @@ RenderGraph::Variable& RenderGraph::Variable::operator=(Vector2i v)
 RenderGraph::Variable& RenderGraph::Variable::operator=(Vector3i v)
 {
 	intVar = Vector4i(v, 0);
-	type = VariableType::Int;
+	type = VariableType::Int3;
 	return *this;
 }
 
