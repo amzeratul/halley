@@ -370,6 +370,7 @@ void InputVirtual::clearBindings()
 	for (auto& axe : axes) {
 		axe.binds.clear();
 	}
+	motionSensors.clear();
 	vibrationOverride = spInputDevice();
 }
 
