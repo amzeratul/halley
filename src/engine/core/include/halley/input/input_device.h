@@ -27,6 +27,7 @@
 
 #include "input_keys.h"
 #include "halley/maths/colour.h"
+#include "halley/maths/quaternion.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley {
@@ -270,6 +271,22 @@ namespace Halley {
 	};
 
 	using InputButton = int;
+
+	class InputMotionSensor {
+	public:
+		Vector3f acceleration;
+		Quaternion rotation;
+
+		Vector3f velocity; // Integrated from acceleration
+
+		Angle1f angleX;
+		Angle1f angleY;
+		Angle1f angleZ;
+		Vector3f angularVelocities;
+
+		Time dt = 0;
+		int64_t sampleNumber = 0;
+	};
 	
 	class InputDevice {
 	public:
@@ -283,6 +300,7 @@ namespace Halley {
 
 		virtual size_t getNumberButtons() const;
 		virtual size_t getNumberAxes() const;
+		virtual size_t getNumberMotionSensors() const;
 
 		virtual String getButtonName(int code) const;
 		virtual String getAxisName(int index) const;
@@ -328,6 +346,8 @@ namespace Halley {
 		virtual void setPosition(Vector2f position);
 		virtual Vector2f getWheelMove() const;
 		virtual Vector2i getWheelMoveDiscrete() const;
+
+		virtual const InputMotionSensor& getMotionSensor(int n) const;
 
 		virtual void setParent(const std::shared_ptr<InputDevice>& parent);
 		virtual std::shared_ptr<InputDevice> getParent() const;
