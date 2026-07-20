@@ -75,15 +75,15 @@ const Vector<std::pair<String, DebugText>>& DebugDrawService::getDebugTexts()
 	return BaseFrameData::getCurrent().debugTexts;
 }
 
-void DebugDrawService::addDebugText(std::string_view key, String value)
+void DebugDrawService::addDebugText(std::string_view key, String value, Time time)
 {
 	auto& debugTexts = BaseFrameData::getCurrent().debugTexts;
 	const auto iter = std_ex::find_if(debugTexts, [&] (const auto& e) { return e.first == key; });
 	if (iter != debugTexts.end()) {
 		iter->second.text = std::move(value);
-		iter->second.time = 0;
+		iter->second.time = time;
 	} else {
-		debugTexts.emplace_back(key, DebugText(std::move(value)));
+		debugTexts.emplace_back(key, DebugText(std::move(value), time));
 	}
 }
 
