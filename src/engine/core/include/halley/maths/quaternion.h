@@ -48,6 +48,9 @@ namespace Halley {
 		Quaternion conjugated() const;
 		Vector3f toVector3f() const;
 
+		std::pair<Vector3f, Angle1f> toAxisAngle() const;
+		std::tuple<Angle1f, Angle1f, Angle1f> toEulerAngles() const;
+
 		static Quaternion lookAt(const Vector3f& dir, const Vector3f& worldUp);
 
 		[[nodiscard]] String toString() const
