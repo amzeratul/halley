@@ -32,6 +32,11 @@ size_t InputDevice::getNumberAxes() const
 	return 0;
 }
 
+size_t InputDevice::getNumberMotionSensors() const
+{
+	return 0;
+}
+
 String InputDevice::getButtonName(int code) const
 {
 	return "";
@@ -296,6 +301,12 @@ Vector2f InputDevice::getWheelMove() const
 Vector2i InputDevice::getWheelMoveDiscrete() const
 {
 	return {};
+}
+
+const InputMotionSensor& InputDevice::getMotionSensor(int n) const
+{
+	static InputMotionSensor dummy;
+	return dummy;
 }
 
 void InputDevice::setParent(const std::shared_ptr<InputDevice>& parent)

@@ -78,6 +78,11 @@ size_t InputVirtual::getNumberAxes() const
 	return axes.size();
 }
 
+size_t InputVirtual::getNumberMotionSensors() const
+{
+	return motionSensors.size();
+}
+
 bool InputVirtual::isAnyButtonPressed() const
 {
 	for (auto& binds : buttons) {
@@ -440,6 +445,14 @@ Vector2i InputVirtual::getWheelMoveDiscrete() const
 	return val;
 }
 
+const InputMotionSensor& InputVirtual::getMotionSensor(int n) const
+{
+	if (n >= 0 && n < motionSensors.size()) {
+		return motionSensors[n].device->getMotionSensor(motionSensors[n].sensorId);
+	}
+	return InputDevice::getMotionSensor(n);
+}
+
 void InputVirtual::bindHat(int leftRight, int upDown, spInputDevice hat)
 {
 	bindAxisButton(leftRight, hat, 3, 1);
@@ -461,6 +474,14 @@ void InputVirtual::bindWheel(spInputDevice device)
 	if (!std_ex::contains(wheels, device)) {
 		wheels.push_back(std::move(device));
 	}
+}
+
+void InputVirtual::bindMotionSensor(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceMotionControls)
+{
+	motionSensors.resize(std::max<size_t>(motionSensors.size(), n.value + 1));
+	auto& s = motionSensors[n.value];
+	s.device = std::move(device);
+	s.sensorId = deviceMotionControls.value;
 }
 
 String InputVirtual::getButtonName(int code) const

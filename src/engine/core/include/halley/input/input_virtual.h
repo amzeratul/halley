@@ -51,6 +51,7 @@ namespace Halley {
 
 		size_t getNumberButtons() const override;
 		size_t getNumberAxes() const override;
+		size_t getNumberMotionSensors() const override;
 
 		bool isAnyButtonPressed() const override;
 		bool isAnyButtonReleased() const override;
@@ -90,6 +91,8 @@ namespace Halley {
 		Vector2f getWheelMove() const override;
 		Vector2i getWheelMoveDiscrete() const override;
 
+		const InputMotionSensor& getMotionSensor(int n) const override;
+
 		void bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton, bool toggle = false);
 		void bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {}, bool toggle = false);
 		void bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1, bool toggle = false);
@@ -101,6 +104,7 @@ namespace Halley {
 		void bindPosition(spInputDevice device);
 		void bindPositionRelative(spInputDevice device, int axisX, int axisY, float speed);
 		void bindWheel(spInputDevice device);
+		void bindMotionSensor(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceMotionControls);
 
 		void unbindButton(int n);
 		void unbindAxis(int n);
@@ -179,6 +183,11 @@ namespace Halley {
 			float getValue() const;
 		};
 
+		struct MotionSensorData {
+			spInputDevice device;
+			int sensorId;
+		};
+
 		struct PositionBindData
 		{
 			spInputDevice device;
@@ -195,6 +204,7 @@ namespace Halley {
 
 		Vector<Vector<Bind>> buttons;
 		Vector<AxisData> axes;
+		Vector<MotionSensorData> motionSensors;
 
 		Vector<PositionBindData> positions;
 		std::optional<Rect4f> positionLimits;

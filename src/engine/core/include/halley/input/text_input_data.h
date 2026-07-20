@@ -3,6 +3,7 @@
 #include "halley/maths/range.h"
 #include "halley/text/halleystring.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/maths/rect.h"
 
 namespace Halley {
 	enum class KeyMods : uint8_t;
@@ -58,6 +59,9 @@ namespace Halley {
 		explicit TextInputData(StringUTF32 str);
 
 		const StringUTF32& getText() const;
+		const StringUTF32& getEditingText() const;
+		const StringUTF32& getFullText() const;
+
 		void setText(const String& text);
 		void setTextFromSoftKeyboard(const String& text, bool accept);
 		void setText(StringUTF32 text);
@@ -75,6 +79,8 @@ namespace Halley {
 
 		void insertText(const String& text);
 		void insertText(const StringUTF32& text);
+		
+		void setEditingText(const StringUTF32& text);
 
 		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard);
 
@@ -100,8 +106,13 @@ namespace Halley {
 		int getPageBoundary(int cursorPos, int dir) const;
 		int getTextBoundary(int dir) const;
 
+		void setRect(std::optional<Rect4f> rect);
+		std::optional<Rect4f> getRect() const;
+
 	private:
 		StringUTF32 text;
+		StringUTF32 editingText;
+		mutable StringUTF32 temp;
 		Selection selection;
 
 		int minLength = 0;
@@ -113,6 +124,9 @@ namespace Halley {
 		bool capturePageUpDown = true;
 		bool multiline = false;
 		bool password = false;
+		mutable bool tempDirty = false;
+
+		std::optional<Rect4f> rect;
 
 		enum class ChangeSelectionMode {
 			Character,
