@@ -276,12 +276,6 @@ namespace Halley {
 	public:
 		Vector3f acceleration;
 		Quaternion rotation;
-
-		Vector3f velocity; // Integrated from acceleration
-
-		Angle1f angleX;
-		Angle1f angleY;
-		Angle1f angleZ;
 		Vector3f angularVelocities;
 
 		Time dt = 0;
