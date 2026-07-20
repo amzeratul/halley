@@ -671,7 +671,9 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgPingReply& 
 
 	// If the returned ("remote") timestamp doesn't match, disregard - we may have sent a new one in the meantime.
 	if (msg.remoteTimestamp != peer.lastPing.timestamp) {
-		Logger::logWarning("Received Pong!, but remote timestamp doesn't match");
+		Logger::logWarning("Received Pong! for " + toString(static_cast<int>(peerId)) +
+			", but bounced timestamp " + toString(msg.remoteTimestamp) +
+			" does not match last sent ping timestamp " + toString(peer.lastPing.timestamp));
 		return;
 	}
 
@@ -984,7 +986,7 @@ void NetworkSession::sendPing(Time t, Peer& peer)
 		return;
 	}
 
-	peer.delayNextPingMsg -= DELAY;
+	peer.delayNextPingMsg = 0.0f;
 
 	// Send Ping! with local timestamp
 	peer.lastPing.timestamp = getLocalSessionTimeMs();
