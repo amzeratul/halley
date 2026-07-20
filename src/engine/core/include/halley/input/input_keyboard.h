@@ -43,10 +43,13 @@ namespace Halley {
 	protected:
 		virtual std::unique_ptr<ITextInputCapture> makeTextInputCapture();
 
-		void onTextEntered(const char* text);
+		void onTextEntered(std::string_view text);
+		void onEditingText(std::string_view text);
 		bool sendKeyPress(KeyboardKeyPress c);
 
 		void onButtonsCleared() override;
+
+		std::optional<Rect4f> getCaptureRect() const;
 		
 	private:
 		std::set<ITextInputCapture*> captures;

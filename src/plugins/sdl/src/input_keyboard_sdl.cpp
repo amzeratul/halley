@@ -38,7 +38,8 @@ void InputKeyboardSDL::processEvent(const SDL_Event& rawEvent)
 		const SDL_TextInputEvent& event = rawEvent.text;
 		onTextEntered(event.text);
 	} else if (rawEvent.type == SDL_TEXTEDITING) {
-		//const SDL_TextEditingEvent& event = rawEvent.edit;
+		const SDL_TextEditingEvent& event = rawEvent.edit;
+		onEditingText(event.text);
 	} else {
 		const SDL_KeyboardEvent& event = rawEvent.key;
 		const auto scanCode = static_cast<KeyCode>(event.keysym.scancode);
@@ -136,4 +137,15 @@ String InputKeyboardSDL::getButtonName(int code) const
 void InputKeyboardSDL::update()
 {
 	clearPresses();
+
+	if (auto rect = getCaptureRect()) {
+		auto iRect = Rect4i(*rect);
+
+		SDL_Rect sdlRect;
+		sdlRect.x = iRect.getX();
+		sdlRect.y = iRect.getY();
+		sdlRect.w = iRect.getWidth();
+		sdlRect.h = iRect.getHeight();
+		SDL_SetTextInputRect(&sdlRect);
+	}
 }

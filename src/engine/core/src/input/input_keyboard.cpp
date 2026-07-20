@@ -93,7 +93,7 @@ gsl::span<const KeyboardKeyPress> InputKeyboard::getPendingKeys() const
 	return { keyPresses };
 }
 
-void InputKeyboard::onTextEntered(const char* text)
+void InputKeyboard::onTextEntered(std::string_view text)
 {
 	const auto str = String(text).getUTF32();
 
@@ -104,6 +104,15 @@ void InputKeyboard::onTextEntered(const char* text)
 
 	for (const auto& c: captures) {
 		c->onTextEntered(str);
+	}
+}
+
+void InputKeyboard::onEditingText(std::string_view text)
+{
+	const auto str = String(text).getUTF32();
+
+	for (const auto& c: captures) {
+		c->onEditingText(str);
 	}
 }
 
@@ -124,6 +133,16 @@ bool InputKeyboard::sendKeyPress(KeyboardKeyPress chr)
 void InputKeyboard::onButtonsCleared()
 {
 	keyPresses.clear();
+}
+
+std::optional<Rect4f> InputKeyboard::getCaptureRect() const
+{
+	for (auto& capture: captures) {
+		if (auto rect = capture->getRect()) {
+			return rect;
+		}
+	}
+	return std::nullopt;
 }
 
 std::unique_ptr<ITextInputCapture> InputKeyboard::makeTextInputCapture()
