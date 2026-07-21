@@ -15,6 +15,7 @@
 #include "scene_editor_game_bridge.h"
 #include "scene_editor_gizmo_collection.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/project/project_properties.h"
 #include "halley/ui/widgets/ui_goto_popup.h"
 #include "src/assets/new_asset_window.h"

@@ -2,6 +2,7 @@
 #include "import_assets_database.h"
 #include "halley/concurrency/task.h"
 #include "halley/file/directory_monitor.h"
+#include "halley/time/stopwatch.h"
 
 namespace Halley
 {

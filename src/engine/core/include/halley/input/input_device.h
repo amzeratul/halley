@@ -275,8 +275,12 @@ namespace Halley {
 	class InputMotionSensor {
 	public:
 		Vector3f acceleration;
-		Quaternion rotation;
 		Vector3f angularVelocities;
+
+		Angle1f angleX;
+		Angle1f angleY;
+		Angle1f angleZ;
+		Quaternion rotation;
 
 		Time dt = 0;
 		int64_t sampleNumber = 0;

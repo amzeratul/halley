@@ -16,7 +16,7 @@ int AssetPackerTool::run(Vector<std::string> args)
 			const auto manifestPath = Path(args[0]);
 			const auto projDir = Path(args[1]);
 			const auto halleyDir = Path(args[2]);
-						
+
 			// Create project
 			ProjectLoader loader(*statics, halleyDir);
 			auto project = loader.loadProject(projDir);

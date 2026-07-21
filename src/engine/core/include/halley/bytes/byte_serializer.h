@@ -182,6 +182,17 @@ namespace Halley {
 		Serializer& operator<<(const HashMap<T, U>& val)
 		{
 			using K = std::conditional_t<std::is_same_v<T, Halley::String>, std::string_view, T>;
+			uint32_t sz = static_cast<uint32_t>(val.size());
+
+			// For a dry run, we'll bypass the whole sort algorithm, as it shouldn't affect total size
+			// Also bypass sorting if there's 0 or 1 keys, as there's nothing to sort
+			if (dryRun || sz <= 1) {
+				*this << sz;
+				for (const auto& [k, v]: val) {
+					*this << k << v;
+				}
+				return *this;
+			}
 
 			// Store keys; try to do this without allocating if possible
 			const auto nKeys = val.size();
@@ -202,7 +213,7 @@ namespace Halley {
 			}
 			std::sort(keys.begin(), keys.end());
 
-			*this << static_cast<uint32_t>(keys.size());
+			*this << sz;
 			for (const auto& k: keys) {
 				*this << k << val.at(k);
 			}

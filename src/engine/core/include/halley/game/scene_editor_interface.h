@@ -456,7 +456,7 @@ namespace Halley {
 		virtual const Path& getHalleyRootPath() const = 0;
 
 		virtual const Path& getRootPath() const = 0;
-		virtual Path getAssetsSrcPath() const = 0;
+		virtual const Path& getAssetsSrcPath() const = 0;
 
 		virtual bool writeAssetToDisk(const Path& filePath, gsl::span<const std::byte> data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, const Bytes& data) = 0;

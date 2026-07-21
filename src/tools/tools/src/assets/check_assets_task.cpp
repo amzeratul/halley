@@ -11,6 +11,10 @@
 #include "halley/support/logger.h"
 #include "halley/tools/file/filesystem_cache.h"
 
+namespace {
+	constexpr static bool measurePerf = false;
+}
+
 using namespace Halley;
 using namespace std::chrono_literals;
 
@@ -188,13 +192,8 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 
 	Vector<Path> dummyDirMetas;
 
-	bool dbChanged = false;
-	Vector<std::pair<Path, Path>> additionalFilesToImport;
-	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, &times, basePath, newPath, &additionalFilesToImport) || dbChanged;
-	for (const auto& additional: additionalFilesToImport) {
-		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, nullptr, nullptr, additional.first, additional.second, nullptr) || dbChanged;
-	}
-	return dbChanged;
+	// This is a full scan, every input file of every asset is visited
+	return doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, &dirMeta, &times, basePath, newPath, nullptr);
 }
 
 bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const DirMetaInfo* dirMeta, const FileTimes* times, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
@@ -209,8 +208,9 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		timestamps[2] = times->privateMeta.value_or(0);
 		hasPrivateMeta = times->privateMeta.has_value();
 	} else {
-		timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
-		auto metaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
+		const auto fullPath = srcPath / filePath;
+		timestamps[0] = fileSystemCache.getLastWriteTime(fullPath);
+		auto metaPath = fullPath.replaceExtension(fullPath.getExtension() + ".meta");
 		if (auto t = fileSystemCache.tryGetLastWriteTime(metaPath)) {
 			timestamps[2] = *t;
 			privateMetaPath = std::move(metaPath);
@@ -291,7 +291,8 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 			throw Exception("AssetId conflict on " + assetId, HalleyExceptions::Tools);
 		}
 		if (asset.srcDir == srcPath) {
-			asset.addInputFile(input);
+			// No need to check for duplicates
+			asset.inputFiles.emplace_back(std::move(input));
 		} else {
 			auto relPath = (srcPath / input.first).makeRelativeTo(asset.srcDir);
 			asset.addInputFile(input, relPath);
@@ -321,7 +322,6 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	}
 
 	db.markAllInputFilesAsMissing();
-	db.updateAdditionalFileCache();
 
 	// Enumerate all potential assets
 	int i = 0;
@@ -336,6 +336,9 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 		size_t nFiles = 0;
 		for (const auto& listing: listings) {
 			nFiles += listing.files.size();
+		}
+		if (measurePerf) {
+			Logger::logDev("Listed " + toString(nFiles) + " files");
 		}
 
 		// First, collect all directory metas
@@ -399,7 +402,9 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	db.markAssetsAsStillPresent(assets);
 
 	sw.pause();
-	//Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
+	if (measurePerf) {
+		Logger::logDev("Check all assets took " + toString(sw.elapsedMilliseconds()) + " ms");
+	}
 	return assets;
 }
 
@@ -465,7 +470,9 @@ Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAsset
 	}
 
 	sw.pause();
-	//Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
+	if (measurePerf) {
+		Logger::logDev("getAssetsToImport took " + toString(sw.elapsedMilliseconds()) + " ms");
+	}
 
 	return toImport;
 }

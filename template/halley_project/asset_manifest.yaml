@@ -1,35 +1,35 @@
 ---
 packs:
   - name: music
-    matches:
-      - ~:audioClip:music
+    prefixes:
+      - audioClip:music
 
   - name: sfx
-    matches:
-      - ~:audioClip:sfx
+    prefixes:
+      - audioClip:sfx
 
   - name: movie
-    matches:
-      - ~:binaryFile:movie
+    prefixes:
+      - binaryFile:movie
 
   - name: config
-    matches:
-      - ~:configFile
-      - ~:textFile
-      - ~:audioEvent
-      - ~:variableTable
-      - ~:binaryFile:lua
+    prefixes:
+      - configFile
+      - textFile
+      - audioEvent
+      - variableTable
+      - binaryFile:lua
 
   - name: images
-    matches:
-      - ~:font
-      - ~:sprite
-      - ~:spriteSheet
-      - ~:animation
-      - ~:texture
+    prefixes:
+      - font
+      - sprite
+      - spriteSheet
+      - animation
+      - texture
 
   - name: shaders
-    matches:
-      - ~:materialDefinition
-      - ~:shader
+    prefixes:
+      - materialDefinition
+      - shader
 ...

@@ -123,9 +123,7 @@ namespace Halley
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
 		void markAssetsAsStillPresent(const HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>& assets);
-		Vector<Path> markMissingAssetsAndGetPartial();
 		Vector<ImportAssetsDatabaseEntry> getAllMissing() const;
-		Vector<Path> getAllFailedFilenames() const;
 		bool hasFailedFiles() const;
 
 		std::pair<Path, Vector<Path>> getInputFiles(ImportAssetType type, const String& assetId) const;
@@ -148,12 +146,12 @@ namespace Halley
 		Path assetsDbFile;
 		const int version;
 
-		std::map<std::pair<ImportAssetType, String>, AssetEntry> assetsImported;
-		std::map<std::pair<ImportAssetType, String>, AssetEntry> assetsFailed; // Ephemeral
-		std::map<String, InputFileEntry> inputFiles;
+		HashMap<std::pair<ImportAssetType, String>, AssetEntry> assetsImported;
+		HashMap<std::pair<ImportAssetType, String>, AssetEntry> assetsFailed; // Ephemeral
+		HashMap<String, InputFileEntry> inputFiles;
 		HashMap<String, Vector<std::pair<ImportAssetType, String>>> assetsWithAdditionalFile;
 
-		mutable std::map<std::pair<AssetType, String>, const AssetEntry*> assetIndex;
+		mutable HashMap<std::pair<AssetType, String>, const AssetEntry*> assetIndex;
 		mutable bool indexDirty = true;
 
 		// dbDirty tracks changes to the serialized state (assetsImported/inputFiles); assetsDbDirty tracks changes that affect the generated AssetDatabase (assetsImported only).
