@@ -15,20 +15,21 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
 {
     this->parent->setUnreliablePacketListener(this);
 
-    maxPacketSize = this->parent->getMaxUnreliablePacketSize();
+    totalMaxPacketSize = this->parent->getMaxUnreliablePacketSize();
+	realMaxPacketSize = 0; // this is only set after the connection has been established
 
-    inboundCache.resize_no_init(16 * maxPacketSize);
+    inboundCache.resize_no_init(16 * totalMaxPacketSize);
 
     for (auto &p: inbound.packets) {
-        p.data.resize(maxPacketSize);
+        p.data.resize(totalMaxPacketSize);
         p.seqIdx = 0xffff;
     }
 
     for (auto &p: outbound.packets) {
-        p.data.resize(maxPacketSize);
+        p.data.resize(totalMaxPacketSize);
         p.seqIdx = 0xffff;
     	memcpy(p.data.data(), headerSignature2, 3);
-    	memset(p.data.data() + 3, 0, maxPacketSize - 3);
+    	memset(p.data.data() + 3, 0, totalMaxPacketSize - 3);
     }
 }
 
@@ -70,6 +71,13 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 		return;
 	}
 
+	if (realMaxPacketSize == 0) {
+		// Ask connection about the actual size we can use.
+		realMaxPacketSize = parent->getRealMaxUnreliablePacketSize();
+		HalleyAssertDebug(realMaxPacketSize <= totalMaxPacketSize);
+		realMaxPacketSize = std::min(realMaxPacketSize, totalMaxPacketSize);
+	}
+
 	if (tryCacheSmallPacket(packet)) {
 		return;
 	}
@@ -81,8 +89,10 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 
 void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet, bool small)
 {
+	HalleyAssertDev(realMaxPacketSize > headerSize);
+
     const size_t size = packet.size();
-    const size_t maxSize = maxPacketSize - headerSize;
+    const size_t maxSize = realMaxPacketSize - headerSize;
 
     if (maxSize >= size) {
     	if (!checkOutboundQueue(1)) {
@@ -177,7 +187,9 @@ bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& p
 		return false; // too many small packets in cache already
 	}
 
-	const size_t maxSize = maxPacketSize - headerSize;
+	HalleyAssertDev(realMaxPacketSize > headerSize);
+
+	const size_t maxSize = realMaxPacketSize - headerSize;
 	if (maxSize < slot.dataSize + size) {
 		return false; // would overflow buffer size
 	}
@@ -387,7 +399,12 @@ bool AckUnreliableConnection::tryReceiveSmallPacket(InboundNetworkPacket& packet
 
 size_t AckUnreliableConnection::getMaxUnreliablePacketSize() const
 {
-	return maxPacketSize - headerSize;
+	return totalMaxPacketSize - headerSize;
+}
+
+size_t AckUnreliableConnection::getRealMaxUnreliablePacketSize() const
+{
+	return realMaxPacketSize - headerSize;
 }
 
 void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)

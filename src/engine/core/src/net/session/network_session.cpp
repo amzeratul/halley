@@ -764,7 +764,23 @@ int32_t NetworkSession::getLatency(size_t idx) const
 
 size_t NetworkSession::getMaxPacketSize() const
 {
-	return peers.empty() ? (16 * 1400) : peers.at(0).connection->getMaxPacketSize();
+	size_t smallestMaxSize = 0;
+
+	for (const auto& peer : peers) {
+		const size_t size = peer.connection->getMaxPacketSize();
+		if (smallestMaxSize == 0) {
+			smallestMaxSize = size;
+		} else {
+			HalleyAssertDebug(smallestMaxSize == size); // sanity check
+			smallestMaxSize = std::min(smallestMaxSize, size);
+		}
+	}
+
+	if (smallestMaxSize == 0) {
+		return 16 * 1024;
+	} else {
+		return smallestMaxSize;
+	}
 }
 
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)

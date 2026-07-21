@@ -50,7 +50,12 @@ namespace Halley
             virtual void onReceive(gsl::span<const std::byte> packet) = 0;
         };
 
+		// Returns a platform-specific, immutable value. This used to size various memory buffers.
         [[nodiscard]] virtual size_t getMaxUnreliablePacketSize() const { return 0; }
+
+		// Returns the maximum packet size that is *actually* usable by an active connection.
+		// Must be less or equal getMaxUnreliablePacketSize().
+		[[nodiscard]] virtual size_t getRealMaxUnreliablePacketSize() const { return getMaxUnreliablePacketSize(); }
 
 		// By default, resend un-ACK'd packets after <latency * 1.5> seconds.
 		[[nodiscard]] virtual float getUnreliablePacketResendTime(float averageAckTime) { return averageAckTime * 1.5f; }

@@ -37,6 +37,7 @@ namespace Halley
         bool receive(InboundNetworkPacket& packet) override;
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
+    	[[nodiscard]] size_t getRealMaxUnreliablePacketSize() const override;
 
         void flushSendUnreliablePackets() override;
 
@@ -104,7 +105,8 @@ namespace Halley
         std::shared_ptr<IConnection> parent;
         INetworkServiceStatsListener& networkStatsListener;
 
-        size_t maxPacketSize;
+        size_t totalMaxPacketSize;
+    	size_t realMaxPacketSize;
         static constexpr size_t headerSize = 16;
         static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
 
