@@ -129,6 +129,7 @@ namespace Halley {
 		bool isOptional() const;
 		bool isCritical() const;
 		bool isToggle() const;
+	    bool isAlwaysBindKeyMod() const;
 	    
 		bool requiresInputType(InputType input) const;
 	    bool hasRelevantBindings(const Vector<InputType>& types) const;
@@ -147,6 +148,7 @@ namespace Halley {
 		bool optional;
 		bool critical;
 		bool toggle;
+		bool alwaysBindKeyMod;
 	};
 
 	class ControlBindingConfigs {

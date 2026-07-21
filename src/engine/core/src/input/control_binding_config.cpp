@@ -334,6 +334,7 @@ ControlBindingConfig::ControlBindingConfig(const ConfigNode& node)
 	optional = node["optional"].asBool(false);
 	critical = node["critical"].asBool(false);
 	toggle = node["toggle"].asBool(false);
+	alwaysBindKeyMod = node["alwaysBindKeyMod"].asBool(false);
 }
 
 const String& ControlBindingConfig::getBindingId() const
@@ -399,6 +400,11 @@ bool ControlBindingConfig::isCritical() const
 bool ControlBindingConfig::isToggle() const
 {
 	return toggle;
+}
+
+bool ControlBindingConfig::isAlwaysBindKeyMod() const
+{
+	return alwaysBindKeyMod;
 }
 
 bool ControlBindingConfig::requiresInputType(InputType input) const

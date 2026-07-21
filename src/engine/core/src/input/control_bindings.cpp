@@ -327,7 +327,8 @@ void ControlBindings::applyButtonBinding(InputVirtual& dst, const IControlBindin
 {
 	if (bindingConfig.getTargetType() == ControlBindingTargetType::Button) {
 		const auto n = mapper.getVirtualButtonId(bindingConfig.getBindingId());
-		dst.bindButton(n, device, keyCode, mods == KeyMods::None ? std::nullopt : std::optional(mods), bindingConfig.isToggle());
+		const auto mod = mods != KeyMods::None || bindingConfig.isAlwaysBindKeyMod() ? std::optional(mods) : std::nullopt;
+		dst.bindButton(n, device, keyCode, mod, bindingConfig.isToggle());
 	} else {
 		applyButtonBinding(dst, mapper, device, static_cast<int>(keyCode), {}, bindingConfig, pendingState);
 	}
