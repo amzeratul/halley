@@ -45,12 +45,28 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 		}
 	}
 
+	if (commentEnabled) {
+		const bool wantsComment = comment == LocCommentStatus::HasComment;
+		const bool hasComment = !entry.getComment().isEmpty();
+		if (wantsComment != hasComment) {
+			return false;
+		}
+	}
+
+	if (contextEnabled) {
+		const bool wantsContext = context == LocContextStatus::HasContext;
+		const bool hasContext = !entry.getContext().isEmpty();
+		if (wantsContext != hasContext) {
+			return false;
+		}
+	}
+
 	return true;
 }
 
 bool LocalisationFilters::hasFiltersActive() const
 {
-	return outdatedEnabled || priorityEnabled || translatedEnabled || readyEnabled;
+	return outdatedEnabled || priorityEnabled || translatedEnabled || readyEnabled || commentEnabled || contextEnabled;
 }
 
 void LocalisationFilters::clearFilters()
@@ -59,6 +75,8 @@ void LocalisationFilters::clearFilters()
 	priorityEnabled = false;
 	translatedEnabled = false;
 	readyEnabled = false;
+	commentEnabled = false;
+	contextEnabled = false;
 }
 
 String LocalisationFilters::toString() const
@@ -87,6 +105,20 @@ String LocalisationFilters::toString() const
 				filterStrings += "Out of Date";
 			} else {
 				filterStrings += "Up to Date";
+			}
+		}
+		if (commentEnabled) {
+			if (comment == LocCommentStatus::HasComment) {
+				filterStrings += "Has Comment";
+			} else {
+				filterStrings += "Doesn't Have Comment";
+			}
+		}
+		if (contextEnabled) {
+			if (context == LocContextStatus::HasContext) {
+				filterStrings += "Has Context";
+			} else {
+				filterStrings += "Doesn't Have Context";
 			}
 		}
 	}

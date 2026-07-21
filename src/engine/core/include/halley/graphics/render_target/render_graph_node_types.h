@@ -54,6 +54,21 @@ namespace Halley {
 			void loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const override;
 		};
 
+		class FilterNodeType : public RenderGraphNodeType {
+		public:
+			String getId() const override { return "filter"; }
+			String getName() const override { return "Filter"; }
+			String getIconName(const BaseGraphNode& node) const override { return "render_graph_icons/filter.png"; }
+			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Filter; }
+
+			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+			Vector<SettingType> getSettingTypes() const override;
+			std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+			String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+			void loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const override;
+		};
+
 		class RenderToTextureNodeType : public RenderGraphNodeType {
 		public:
 			String getId() const override { return "renderToTexture"; }

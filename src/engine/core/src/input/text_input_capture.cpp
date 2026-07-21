@@ -13,6 +13,10 @@ void ITextInputCapture::onTextEntered(const StringUTF32& text)
 {
 }
 
+void ITextInputCapture::onEditingText(const StringUTF32& text)
+{
+}
+
 bool ITextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 {
 	return false;
@@ -25,6 +29,11 @@ bool ITextInputCapture::isActive() const
 
 void ITextInputCapture::setUIRootGroup(UIRootGroup* rootGroup)
 {
+}
+
+std::optional<Rect4f> ITextInputCapture::getRect() const
+{
+	return std::nullopt;
 }
 
 StandardTextInputCapture::StandardTextInputCapture(InputKeyboard& parent)
@@ -63,6 +72,11 @@ void StandardTextInputCapture::onTextEntered(const StringUTF32& text)
 	textInput->insertText(text);
 }
 
+void StandardTextInputCapture::onEditingText(const StringUTF32& text)
+{
+	textInput->setEditingText(text);
+}
+
 bool StandardTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 {
 	return textInput->onKeyPress(c, clipboard);
@@ -79,6 +93,11 @@ bool StandardTextInputCapture::isActive() const
 void StandardTextInputCapture::setUIRootGroup(UIRootGroup* rootGroup)
 {
 	this->rootGroup = rootGroup;
+}
+
+std::optional<Rect4f> StandardTextInputCapture::getRect() const
+{
+	return textInput ? textInput->getRect() : std::nullopt;
 }
 
 size_t HotkeyTextInputCapture::addHotkey(KeyboardKeyPress c)

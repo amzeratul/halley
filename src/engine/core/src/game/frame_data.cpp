@@ -29,7 +29,7 @@ void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, 
 {
 	if (multithreaded && previous) {
 		debugTexts = previous->debugTexts;
-		for (auto dt: debugTexts) {
+		for (auto& dt: debugTexts) {
 			dt.second.time -= deltaTime;
 		}
 		std_ex::erase_if_value(debugTexts, [&](const DebugText& dt)

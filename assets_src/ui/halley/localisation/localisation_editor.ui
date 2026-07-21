@@ -120,6 +120,16 @@ children:
                   size: [220, 0]
                   text: Download Translations
                 fill: [centreHorizontal, centreVertical]
+              - uuid: 4bac06b6-1854-4aa5-a85a-8e07fcf83aec
+                proportion: 1
+                border: [0, 0, 0, 0]
+                widget:
+                  class: button
+                  enabled: true
+                  id: updateContext
+                  size: [150, 0]
+                  text: Update Context...
+                fill: [centreHorizontal, centreVertical]
             fill: [centreHorizontal, centreVertical]
           - uuid: 659bc489-6c03-4a4d-85a3-05512e7a2c9d
             proportion: 0
@@ -389,7 +399,7 @@ children:
                       class: button
                       enabled: true
                       id: editOriginal
-                      size: [200, 0]
+                      size: [150, 0]
                       text: Edit Original...
                     fill: [centreHorizontal, centreVertical]
                   - uuid: 65d308b1-aecf-4a44-ade4-7229af3bd398
@@ -399,7 +409,7 @@ children:
                       class: button
                       enabled: true
                       id: validateTags
-                      size: [200, 0]
+                      size: [150, 0]
                       text: Validate Tags
                     fill: [centreHorizontal, centreVertical]
                 fill: [centreHorizontal, bottom]

@@ -26,6 +26,26 @@ const StringUTF32& TextInputData::getText() const
 	return text;
 }
 
+const StringUTF32& TextInputData::getEditingText() const
+{
+	return editingText;
+}
+
+const StringUTF32& TextInputData::getFullText() const
+{
+	if (editingText.empty()) {
+		return text;
+	} else if (text.empty()) {
+		return editingText;
+	} else {
+		if (tempDirty) {
+			temp = text.substr(0, selection.start) + editingText + text.substr(selection.end);
+			tempDirty = true;
+		}
+		return temp;
+	}
+}
+
 void TextInputData::setText(const String& text)
 {
 	setText(text.getUTF32());
@@ -51,11 +71,15 @@ void TextInputData::setText(StringUTF32 _text)
 			selection.end = textSize;
 		}
 		onTextModified();
+		tempDirty = true;
 	}
 }
 
 TextInputData::Selection TextInputData::getSelection() const
 {
+	if (!editingText.empty()) {
+		return Selection(selection.getCaret(), selection.getCaret() + static_cast<int>(editingText.length()), true);
+	}
 	return selection;
 }
 
@@ -111,6 +135,14 @@ void TextInputData::insertText(const StringUTF32& t)
 		const auto newEnd = int(selection.start + insertSize);
 		setText(text.substr(0, selection.start) + t.substr(0, insertSize) + text.substr(selection.end));
 		setSelection(newEnd);
+	}
+}
+
+void TextInputData::setEditingText(const StringUTF32& text)
+{
+	if (!readOnly) {
+		editingText = text;
+		tempDirty = true;
 	}
 }
 
@@ -374,6 +406,16 @@ int TextInputData::getPageBoundary(int cursorPos, int dir) const
 int TextInputData::getTextBoundary(int dir) const
 {
 	return dir == -1 ? 0 : static_cast<int>(text.size());
+}
+
+void TextInputData::setRect(std::optional<Rect4f> rect)
+{
+	this->rect = rect;
+}
+
+std::optional<Rect4f> TextInputData::getRect() const
+{
+	return rect;
 }
 
 void TextInputData::changeSelection(int dir, bool shiftHeld, ChangeSelectionMode mode)

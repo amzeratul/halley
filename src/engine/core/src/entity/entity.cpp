@@ -327,6 +327,8 @@ void Entity::sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids)
 	for (size_t i = 0; i < nChildren; ++i) {
 		children[i] = pairs[i].first;
 	}
+
+	markHierarchyDirty();
 }
 
 bool Entity::isEmpty() const

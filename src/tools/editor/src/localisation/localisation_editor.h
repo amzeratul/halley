@@ -11,13 +11,33 @@ namespace Halley {
 	class ProjectWindow;
 	class LocalisationEditorRoot;
 
+    class LocStringCollector : public ILocStringCollector {
+    public:
+        struct Entry {
+	        String value;
+            int priority;
+        };
+    	
+    	void collect(std::string_view key, std::string_view context, int priority) override;
+
+        HashMap<String, String> moveResults();
+        
+    	void setConfigDatabase(const ConfigDatabase* configDatabase) override;
+        const ConfigDatabase* getConfigDatabase() const override;
+
+    private:
+        HashMap<String, Entry> results;
+        const ConfigDatabase* configDatabase = nullptr;
+    };
+
     class LocalisationInfoRetriever : public ILocalisationInfoRetriever {
     public:
         LocalisationInfoRetriever(Project& project);
 
         String getCategory(const String& assetId) const override;
+        HashMap<String, String> getLocalisationStringContextData() const override;
         Project& getProject() const { return project; }
-
+        
     private:
         Project& project;
     };
@@ -157,5 +177,6 @@ namespace Halley {
         void setupCurrencyConversion();
 
         void validateTags();
+        void updateContext();
     };
 }

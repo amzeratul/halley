@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class ILocStringCollector;
 	class Scene;
 	class UIDebugConsoleCommands;
 	class SceneEditorContext;
@@ -72,8 +73,10 @@ namespace Halley
 		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomScriptEditorFieldFactories(const Scene& scene, Resources& resources, IGameEditorData* gameEditorData);
 		virtual std::unique_ptr<IGameEditorData> createGameEditorData(const HalleyAPI& api, Resources& resources);
 		virtual Vector<ConfigBreadCrumb> createConfigBreadCrumbs();
-		virtual String getLocalisationFileCategory(const String& assetName);
 		virtual bool canCollectVideoPerformance();
+
+		virtual String getLocalisationFileCategory(const String& assetName);
+		virtual void getLocalisationStringContextData(ILocStringCollector& dst, Resources& resources, const IGameEditorData* editorData);
 
 		virtual const ResourceUnloaderRules& getResourceUnloaderRules() const;
 		virtual ResourceUnloaderRules& getResourceUnloaderRules();

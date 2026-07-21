@@ -216,6 +216,7 @@ namespace Halley {
 
 		virtual void setResultValue(ConfigNode data);
 		virtual ConfigNode getResultValue();
+		virtual void onReceiveMessage(ConfigNode data);
 
 		void fitToRoot();
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/maths/rect.h"
 #include "halley/text/halleystring.h"
 
 namespace Halley {
@@ -26,10 +27,13 @@ namespace Halley {
 		virtual void update() = 0;
 
 		virtual void onTextEntered(const StringUTF32& text);
+		virtual void onEditingText(const StringUTF32& text);
 		virtual bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard);
 
 		virtual bool isActive() const;
 		virtual void setUIRootGroup(UIRootGroup* rootGroup);
+		
+		virtual std::optional<Rect4f> getRect() const;
 	};
 
 	class StandardTextInputCapture final : public ITextInputCapture {
@@ -43,10 +47,13 @@ namespace Halley {
 		void update() override;
 
 		void onTextEntered(const StringUTF32& text) override;
+		void onEditingText(const StringUTF32& text) override;
 		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard) override;
 		bool isActive() const override;
 
 		void setUIRootGroup(UIRootGroup* rootGroup) override;
+		
+		std::optional<Rect4f> getRect() const override;
 
 	private:
 		bool currentlyOpen = false;

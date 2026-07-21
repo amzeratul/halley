@@ -8,7 +8,7 @@ namespace Halley {
 	class LocOriginalData;
 	class LocalisationClient;
 
-	class LocalisationLanguageEditor : public UIWidget, public ILocalisationStringsListener {
+	class LocalisationLanguageEditor : public UIWidget, public ILocalisationStringsListener, public ILocalisationGridListener {
     public:
         LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, const HalleyAPI& api, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
 
@@ -16,7 +16,10 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void onStringsUpdated() override;
 
-	private:
+	protected:
+        void openContext(const String& context, bool updateOnly) override;
+
+    private:
 		LocalisationEditorRoot& root;
 		LocalisationClient& client;
 		Project& project;

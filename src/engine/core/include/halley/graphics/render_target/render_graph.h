@@ -47,6 +47,10 @@ namespace Halley {
 		void setVariable(std::string_view name, Vector3f value);
 		void setVariable(std::string_view name, Vector4f value);
 		void setVariable(std::string_view name, Colour4f value);
+		void setVariable(std::string_view name, int value);
+		void setVariable(std::string_view name, Vector2i value);
+		void setVariable(std::string_view name, Vector3i value);
+		void setVariable(std::string_view name, Vector4i value);
 
 		void setImageOutputCallback(std::string_view name, std::function<void(Image&)> callback);
 		void clearImageOutputCallbacks();
@@ -56,6 +60,7 @@ namespace Halley {
 		std::shared_ptr<Texture> getOutputTexture(const String& id);
 		void setRenderSize(const String& id, const Vector2i& size);
 		void setRenderEnabled(const String& id, bool enabled);
+		void setBypass(const String& id, bool bypass);
 		void setIgnoreDependencies(const String& id, bool ignore);
 
 		void setRemapOutputNode(std::string_view toNodeName);
@@ -73,11 +78,16 @@ namespace Halley {
 			Float,
 			Float2,
 			Float3,
-			Float4
+			Float4,
+			Int,
+			Int2,
+			Int3,
+			Int4
 		};
 		
 		struct Variable {
 			Vector4f var;
+			Vector4i intVar;
 			VariableType type = VariableType::None;
 
 			void apply(Material& material, const String& name) const;
@@ -86,6 +96,10 @@ namespace Halley {
 			Variable& operator=(Vector3f v);
 			Variable& operator=(Vector4f v);
 			Variable& operator=(Colour4f v);
+			Variable& operator=(int v);
+			Variable& operator=(Vector2i v);
+			Variable& operator=(Vector3i v);
+			Variable& operator=(Vector4i v);
 		};
 
 		struct ImageOutputCallback {

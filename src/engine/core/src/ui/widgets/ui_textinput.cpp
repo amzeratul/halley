@@ -231,19 +231,28 @@ void UITextInput::draw(UIPainter& painter) const
 
 void UITextInput::updateCaret(bool force)
 {
-	int pos = clamp(text.getSelection().getCaret(), 0, int(text.getText().size()));
+	int pos = clamp(text.getSelection().getCaret(), 0, int(text.getFullText().size()));
 	if (pos != caretPos || force) {
 		caretTime = 0;
 		caretShowing = true;
 		caretPos = pos;
 		caretPhysicalPos = label.getCharacterPosition(caretPos);
 	}
+	
+	// Position the text input relative to the caret
+	if (isFocused()) {
+		const auto pos = label.getCharacterPosition(text.getSelection().start) + label.getPosition();
+		auto inputRect = getRect();
+		const auto border = getTextInnerBorder();
+		inputRect.set(pos, inputRect.getP2() - border.zw());
+		text.setRect(getRoot()->remapToScreen(inputRect));
+	}
 }
 
 void UITextInput::onMaybeTextModified()
 {
-	if (lastText != text.getText()) {
-		lastText = text.getText();
+	if (lastText != text.getFullText()) {
+		lastText = text.getFullText();
 		onTextModified();
 	}
 }
@@ -321,7 +330,7 @@ void UITextInput::setCapturePageUpDown(bool enable)
 
 void UITextInput::update(Time t, bool moved)
 {
-	const auto& textToDisplay = getTextToDisplay(text.getText());
+	const auto& textToDisplay = getTextToDisplay(text.getFullText());
 
 	// Update auto text
 	const bool showAutoComplete = autoCompleteCurOption.has_value();

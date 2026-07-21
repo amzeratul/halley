@@ -40,7 +40,7 @@ void LocalisationLanguageEditor::onMakeUI()
 		getWidgetAs<UILabel>("dstLanguage")->setText(root.getLanguageName(dstLanguage->language));
 	}
 
-	grid = std::make_shared<LocalisationGrid>(factory, api, filterRules);
+	grid = std::make_shared<LocalisationGrid>(factory, api, filterRules, *this);
 	getWidget("keysContainer")->add(grid, 1);
 
 	Vector<UIDropdown::Entry> chunks;
@@ -163,6 +163,13 @@ void LocalisationLanguageEditor::update(Time t, bool moved)
 void LocalisationLanguageEditor::onStringsUpdated()
 {
 	setChunk(curChunk);
+}
+
+void LocalisationLanguageEditor::openContext(const String& context, bool updateOnly)
+{
+	if (auto* server = project.getDevConServer()) {
+		server->openContext(context, updateOnly);
+	}
 }
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
@@ -576,6 +583,9 @@ std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
 
 bool LocalisationLanguageEditor::isRowVisible(int idx) const
 {
+	if (idx >= static_cast<int>(srcData->getNumEntries())) {
+		return false;
+	}
 	const auto& original = srcData->getEntry(idx);
 	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.getKey()) : nullptr;
 

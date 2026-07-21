@@ -34,6 +34,36 @@ namespace Halley {
 		}
 	};
 
+	enum class LocCommentStatus {
+		HasComment,
+		NoComment
+	};
+
+	template <>
+	struct EnumNames<LocCommentStatus> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"hasComment",
+				"noComment"
+			});
+		}
+	};
+
+	enum class LocContextStatus {
+		HasContext,
+		NoContext
+	};
+
+	template <>
+	struct EnumNames<LocContextStatus> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"hasContext",
+				"noContext"
+			});
+		}
+	};
+
 	class LocalisationFilters {
 	public:
 		String searchString;
@@ -42,12 +72,16 @@ namespace Halley {
 		bool outdatedEnabled = false;
 		bool translatedEnabled = false;
 		bool readyEnabled = false;
+		bool commentEnabled = false;
+		bool contextEnabled = false;
 
 		LocOutdatedStatus outdated = LocOutdatedStatus::OutOfDate;
 		LocTranslatedStatus translated = LocTranslatedStatus::Untranslated;
 		LocReadyStatus ready = LocReadyStatus::Ready;
 		LocPriority minPriority = LocPriority::Lowest;
 		LocPriority maxPriority = LocPriority::Highest;
+		LocCommentStatus comment = LocCommentStatus::HasComment;
+		LocContextStatus context = LocContextStatus::HasContext;
 
 		void initialise(bool translating);
 

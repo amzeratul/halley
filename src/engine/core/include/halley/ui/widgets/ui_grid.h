@@ -59,6 +59,7 @@ namespace Halley {
         virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const;
         virtual String getCellToolTip(int row, int col, const String& columnName) const;
 
+        virtual bool onClickCell(int row, int col, KeyMods mods);
         virtual void onRightClick(std::optional<int> line);
         virtual void copySelection();
 
@@ -67,6 +68,10 @@ namespace Halley {
 
         std::optional<int> getLineAtRow(int rowIdx) const;
         std::optional<int> getRowForLine(int line) const;
+
+        std::optional<MouseCursorMode> getMouseCursorMode() const override;
+        virtual std::optional<MouseCursorMode> getMouseAtCell(int row, int col) const;
+        virtual void onSelectionChanged();
 
     	Colour4f textCol;
 

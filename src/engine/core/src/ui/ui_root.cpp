@@ -229,6 +229,8 @@ UIRoot::UIRoot(const HalleyAPI& api, const I18N& i18n, Rect4f rect, std::shared_
 	, dummyInput(std::make_shared<InputButtonBase>(4))
 	, mouseRemap([](Vector2f p) { return p; })
 	, group(std::move(group))
+	, screenRemapOrigin(Vector2f())
+	, screenRemapScale(Vector2f(1, 1))
 {
 	if (!this->group) {
 		this->group = std::make_shared<UIRootGroup>(api);
@@ -273,6 +275,22 @@ void UIRoot::setRect(Rect4f rect, Vector2f overscan)
 Rect4f UIRoot::getRect() const
 {
 	return uiRect;
+}
+
+void UIRoot::setScreenRemap(Vector2f offset, Vector2f scale)
+{
+	screenRemapOrigin = offset;
+	screenRemapScale = scale;
+}
+
+Vector2f UIRoot::remapToScreen(Vector2f p) const
+{
+	return (p + screenRemapOrigin) * screenRemapScale;
+}
+
+Rect4f UIRoot::remapToScreen(Rect4f p) const
+{
+	return Rect4f(remapToScreen(p.getP1()), remapToScreen(p.getP2()));
 }
 
 void UIRoot::runLayout()

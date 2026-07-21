@@ -82,6 +82,14 @@ void ConfigDatabase::generateMemoryReport()
 	}
 }
 
+void ConfigDatabase::collectLocStringContexts(ILocStringCollector& dst) const
+{
+	dst.setConfigDatabase(this);
+	for (auto& db: dbs) {
+		db->collectLocStringContexts(dst);
+	}
+}
+
 namespace {
 	const ConfigNode& processExtends(const String& type, const ConfigNode& nodes, ConfigNode& result)
 	{

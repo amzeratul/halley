@@ -197,3 +197,21 @@ void UpdateStringsMsg::deserialize(Deserializer& s)
 
 	s >> strings;
 }
+
+
+OpenContextMsg::OpenContextMsg(String context, bool updateOnly)
+	: context(std::move(context))
+	, updateOnly(updateOnly)
+{}
+
+void OpenContextMsg::serialize(Serializer& s) const
+{
+	s << context;
+	s << updateOnly;
+}
+
+void OpenContextMsg::deserialize(Deserializer& s)
+{
+	s >> context;
+	s >> updateOnly;
+}

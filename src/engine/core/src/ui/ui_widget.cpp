@@ -1035,6 +1035,10 @@ ConfigNode UIWidget::getResultValue()
 	return ConfigNode();
 }
 
+void UIWidget::onReceiveMessage(ConfigNode data)
+{
+}
+
 void UIWidget::fitToRoot()
 {
 	if (root) {

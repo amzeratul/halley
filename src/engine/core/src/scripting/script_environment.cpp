@@ -168,7 +168,8 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		auto& nodeState = graphState.getNodeState(nodeId);
 		s.inputPin = thread.getCurInputPin();
 
-		const auto trace = StackDebugTrace("nodeType", node.getType());
+		const auto trace1 = StackDebugTrace("nodeType", node.getType());
+		const auto trace2 = StackDebugTrace("nodeId", static_cast<int64_t>(nodeId));
 
 		// Dead watcher
 		if (nodeState.threadCount == nodeState.watcherCount && thread.isWatcher()) {
@@ -244,6 +245,8 @@ void ScriptEnvironment::terminateStateWith(const ScriptGraph* scriptGraph)
 
 void ScriptEnvironment::stopState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, bool allThreads)
 {
+	const auto trace1 = StackDebugTrace("scriptId", graphState.getScriptId());
+
 	pushState(graphState, curEntity, entityVariables, 0);
 	auto statePop = ScopedGuard([this] { popState(); });
 

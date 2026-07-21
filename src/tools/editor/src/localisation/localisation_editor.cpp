@@ -52,6 +52,41 @@ namespace {
 	}
 }
 
+void LocStringCollector::collect(std::string_view key, std::string_view context, int priority)
+{
+	if (!key.empty()) {
+		auto iter = results.find(key);
+		if (iter == results.end()) {
+			results[key] = Entry{ context, priority };
+		} else {
+			auto& v = iter->second;
+			if (priority > v.priority) {
+				v.value = context;
+				v.priority = priority;
+			}
+		}
+	}
+}
+
+HashMap<String, String> LocStringCollector::moveResults()
+{
+	HashMap<String, String> res;
+	for (auto& [k, v]: results) {
+		res[k] = std::move(v.value);
+	}
+	return res;
+}
+
+void LocStringCollector::setConfigDatabase(const ConfigDatabase* configDatabase)
+{
+	this->configDatabase = configDatabase;
+}
+
+const ConfigDatabase* LocStringCollector::getConfigDatabase() const
+{
+	return configDatabase;
+}
+
 LocalisationInfoRetriever::LocalisationInfoRetriever(Project& project)
 	: project(project)
 {
@@ -63,6 +98,17 @@ String LocalisationInfoRetriever::getCategory(const String& assetId) const
 		return project.getGameInstance()->getLocalisationFileCategory(assetId);
 	} else {
 		return "unknown";
+	}
+}
+
+HashMap<String, String> LocalisationInfoRetriever::getLocalisationStringContextData() const
+{
+	if (project.getGameInstance()) {
+		LocStringCollector collector;
+		project.getGameInstance()->getLocalisationStringContextData(collector, project.getGameResources(), project.getGameEditorData());
+		return collector.moveResults();
+	} else {
+		return {};
 	}
 }
 
@@ -107,6 +153,11 @@ void LocalisationEditor::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "validateTags", [this] (const UIEvent& event)
 	{
 		validateTags();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "updateContext", [this] (const UIEvent& event)
+	{
+		updateContext();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "signIn", [this] (const UIEvent& event)
@@ -867,6 +918,7 @@ void LocalisationEditor::downloadTranslations()
 						}
 
 						const auto value = iter->second.getValue()
+							.replaceAll("\\", "\\\\")
 							.replaceAll("\"", "\\\"")
 							.replaceAll("\r\n", "\\n")
 							.replaceAll("\n", "\\n");
@@ -1222,6 +1274,61 @@ void LocalisationEditor::validateTags()
 			}));
 
 		}
+	}
+}
+
+void LocalisationEditor::updateContext()
+{
+	auto remoteData = getOriginalDataRemote();
+	if (!remoteData) {
+		Logger::logError("No remote data available");
+		return;
+	}
+
+	const auto info = LocalisationInfoRetriever(project);
+	const auto stringContext = info.getLocalisationStringContextData();
+
+	auto properties = Vector<std::pair<size_t, LocStringProperties>>();
+	for (const auto& [key, context]: stringContext) {
+		if (const auto entryIdx = remoteData->tryGetEntryIdx(key)) {
+			auto& entry = remoteData->getEntry(*entryIdx);
+			if (entry.getContext() != context) {
+				auto& prop = properties.emplace_back(*entryIdx, LocStringProperties());
+				prop.second.key = key;
+				prop.second.context = context;
+			}
+		}
+	}
+
+	std::sort(properties.begin(), properties.end(), [&] (const auto& a, const auto& b) {
+		return a.first < b.first;
+	});
+
+	auto propertiesSorted = Vector<LocStringProperties>();
+	propertiesSorted.reserve(properties.size());
+	for (auto& p: properties) {
+		propertiesSorted.push_back(std::move(p.second));
+	}
+
+	const auto n = propertiesSorted.size();
+
+	if (n > 0) {
+		for (const auto& p: propertiesSorted) {
+			//Logger::logDev(p.key + " -> " + p.context.value_or(""));
+		}
+
+		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok, UIConfirmationPopup::ButtonType::Cancel }};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts", toString(n) + " localisation string contexts modified. Upload?", buttons,
+			[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType result) mutable
+		{
+			if (result == UIConfirmationPopup::ButtonType::Ok) {
+				client->putStringProperties(properties);
+			}
+		}));
+	} else {
+		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Ok }};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Upload contexts", "No changes to localisation string contexts.", buttons,
+			[this, properties = std::move(propertiesSorted)](UIConfirmationPopup::ButtonType) {}));
 	}
 }
 

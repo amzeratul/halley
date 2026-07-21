@@ -72,8 +72,9 @@ namespace Halley {
 	};
 
 	struct DebugText {
-		DebugText(String text = {})
+		DebugText(String text = {}, Time time = 0)
 			: text(std::move(text))
+			, time(time)
 		{}
 
 		String text;

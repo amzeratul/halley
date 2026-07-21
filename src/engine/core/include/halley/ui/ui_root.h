@@ -95,6 +95,10 @@ namespace Halley {
 		void setRect(Rect4f rect, Vector2f overscan = Vector2f());
 		Rect4f getRect() const override;
 
+		void setScreenRemap(Vector2f offset, Vector2f scale);
+		Vector2f remapToScreen(Vector2f p) const;
+		Rect4f remapToScreen(Rect4f p) const;
+
 		void update(Time t, UIInputType activeInputType, std::shared_ptr<InputDevice> mouse, std::shared_ptr<InputDevice> manual);
 		void draw(SpritePainter& painter, int mask, int layer);
 		void prepareRender();
@@ -191,6 +195,9 @@ namespace Halley {
 		std::shared_ptr<UIRootGroup> group;
 
 		HashMap<String, std::shared_ptr<IUISharedData>> sharedData;
+
+		Vector2f screenRemapOrigin;
+		Vector2f screenRemapScale;
 
 		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 

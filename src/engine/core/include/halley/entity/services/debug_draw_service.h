@@ -31,7 +31,7 @@ namespace Halley {
 		void addDebugPoint(Vector2f point, Colour4f colour, float radius = 1.0f);
 		void addDebugPolygon(Polygon polygon, Colour4f colour);
 		void addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness = 1.0f, Painter::LineParameters params = {});
-		void addDebugText(std::string_view key, String value);
+		void addDebugText(std::string_view key, String value, Time time = 0);
 		void addDebugText(String value, Vector2f position);
 
 		void initScriptGraphRenderer(Resources& resources, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom);

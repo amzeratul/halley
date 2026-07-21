@@ -27,6 +27,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 			outputPins.emplace_back().type = static_cast<RenderGraphElementType>(pin.type);
 		}
 	}
+	generateBypassInputPins();
 	
 	const auto& pars = definition.getSettings();
 
@@ -46,21 +47,24 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		if (pars.hasKey("stencilClear")) {
 			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
-	} else if (method == RenderGraphMethod::Overlay) {
-		overlayMethod = definition.getMaterial()->createMaterial();
-		if (pars.hasKey("colourClear")) {
-			colourClear = Colour4f::fromString(pars["colourClear"].asString());
-		}
-		if (pars.hasKey("depthClear")) {
-			depthClear = pars["depthClear"].asFloat();
-		}
-		if (pars.hasKey("stencilClear")) {
-			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
-		}
+	} else if (method == RenderGraphMethod::Overlay || method == RenderGraphMethod::Filter) {
+		overlayFilterMethod = definition.getMaterial()->createMaterial();
 
 		if (pars.hasKey("variables")) {
 			for (const auto& [key, value] : pars["variables"].asMap()) {
 				variables.emplace_back(Variable{ key, ConfigNode(value) });
+			}
+		}
+
+		if (method == RenderGraphMethod::Overlay) {
+			if (pars.hasKey("colourClear")) {
+				colourClear = Colour4f::fromString(pars["colourClear"].asString());
+			}
+			if (pars.hasKey("depthClear")) {
+				depthClear = pars["depthClear"].asFloat();
+			}
+			if (pars.hasKey("stencilClear")) {
+				stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 			}
 		}
 	} else if (method == RenderGraphMethod::RenderToTexture) {
@@ -70,6 +74,10 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 
 void RenderGraphNode::startRender()
 {
+	if (curBypass != bypass) {
+		curBypass = bypass;
+		renderTarget.reset();
+	}
 	activeInCurrentPass = false;
 	ownRenderTarget = false;
 	canForwardRenderTarget = false;
@@ -89,7 +97,7 @@ void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vect
 		}
 	}
 
-	for (auto& input: inputPins) {
+	for (auto& input: getInputPins()) {
 		prepareInputPin(input, video, currentSize);
 	}
 }
@@ -153,7 +161,7 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	RenderGraphNode* colourInput = nullptr;
 	RenderGraphNode* depthStencilInput = nullptr;
 
-	for (const auto& inputPin: inputPins) {
+	for (const auto& inputPin: getInputPins()) {
 		for (const auto& other: inputPin.others) {
 			if (auto* inputNode = other.node) {
 				if (inputPin.type == RenderGraphElementType::ColourBuffer) {
@@ -166,7 +174,9 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	}
 
 	const bool isOutput = method == RenderGraphMethod::Output;
-	if (colourInput == depthStencilInput && colourInput != nullptr && colourInput->canForwardRenderTarget && !isOutput) {
+	// Filters sample their colour input, so they can't render into the same target
+	const bool samplesColourInput = method == RenderGraphMethod::Filter && !curBypass;
+	if (colourInput == depthStencilInput && colourInput != nullptr && colourInput->canForwardRenderTarget && !isOutput && !samplesColourInput) {
 		reuseRenderTarget = colourInput;
 	}
 
@@ -194,10 +204,42 @@ ResourceMemoryUsage RenderGraphNode::getMemoryUsage() const
 	return result;
 }
 
+Vector<RenderGraphNode::InputPin>& RenderGraphNode::getInputPins()
+{
+	return curBypass ? bypassInputPins : inputPins;
+}
+
+const Vector<RenderGraphNode::InputPin>& RenderGraphNode::getInputPins() const
+{
+	return curBypass ? bypassInputPins : inputPins;
+}
+
+void RenderGraphNode::generateBypassInputPins()
+{
+	bypassInputPins.resize(2);
+	bypassInputPins[0] = {};
+	bypassInputPins[1] = {};
+
+	for (auto& input: inputPins) {
+		for (auto& other: input.others) {
+			auto& output = other.node->outputPins[other.otherId];
+			if (output.type == RenderGraphElementType::ColourBuffer) {
+				bypassInputPins[0] = InputPin{ RenderGraphElementType::ColourBuffer, Vector<OtherPin>{ other }, {}};
+			} else if (output.type == RenderGraphElementType::DepthStencilBuffer) {
+				bypassInputPins[1] = InputPin{ RenderGraphElementType::DepthStencilBuffer, Vector<OtherPin>{ other }, {}};
+			}
+		}
+	}
+}
+
 void RenderGraphNode::resetTextures()
 {
 	renderTarget.reset();
+	filterColourTexture.reset();
 	for (auto& input: inputPins) {
+		input.texture.reset();
+	}
+	for (auto& input: bypassInputPins) {
 		input.texture.reset();
 	}
 }
@@ -241,28 +283,34 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 {
 	getRenderTarget(video);
 
+	// A filter samples its colour input in its material, so it renders into its own colour texture rather than the incoming one
+	const bool ownColourTarget = method == RenderGraphMethod::Filter && !curBypass;
+
 	bool updated = false;
 	if (!reuseRenderTarget) {
 		int colourIdx = 0;
-		for (auto& input: inputPins) {
+		for (auto& input: getInputPins()) {
 			if (renderTarget) {
+				const bool useOwnColour = ownColourTarget && input.type == RenderGraphElementType::ColourBuffer;
+				auto& attachment = useOwnColour ? filterColourTexture : input.texture;
+
 				// Create Colour/DepthStencil textures for render target, if needed
-				if (input.others.empty() && (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::DepthStencilBuffer)) {
-					if (!input.texture) {
+				if ((input.others.empty() || useOwnColour) && (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::DepthStencilBuffer)) {
+					if (!attachment) {
 						updated = true;
-						input.texture = makeTexture(video, input.type);
+						attachment = makeTexture(video, input.type);
 					} else {
-						if (input.texture->getSize() != currentSize) {
-							updateTexture(input.texture, input.type);
+						if (attachment->getSize() != currentSize) {
+							updateTexture(attachment, input.type);
 						}
 					}
 				}
 
 				// Assign textures to render target
 				if (input.type == RenderGraphElementType::ColourBuffer && (!renderTarget->hasColourBuffer(colourIdx) || updated)) {
-					renderTarget->setTarget(colourIdx++, input.texture);
+					renderTarget->setTarget(colourIdx++, attachment);
 				} else if (input.type == RenderGraphElementType::DepthStencilBuffer && (!renderTarget->hasDepthBuffer() || updated)) {
-					renderTarget->setDepthTexture(input.texture);
+					renderTarget->setDepthTexture(attachment);
 				}
 			} else {
 				// No render target, copy instead
@@ -276,10 +324,15 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
+	if (curBypass) {
+		return;
+	}
 	if (method == RenderGraphMethod::Paint) {
 		renderNodePaintMethod(graph, rc);
 	} else if (method == RenderGraphMethod::Overlay) {
 		renderNodeOverlayMethod(graph, rc);
+	} else if (method == RenderGraphMethod::Filter) {
+		renderNodeFilterMethod(graph, rc);
 	} else if (method == RenderGraphMethod::ImageOutput) {
 		renderNodeImageOutputMethod(graph, rc);
 	}
@@ -315,28 +368,56 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 
 void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto& texs = overlayMethod->getDefinition().getTextures();
+	const auto& texs = overlayFilterMethod->getDefinition().getTextures();
 	size_t idx = 0;
-	for (auto& input: inputPins) {
+	for (auto& input: getInputPins()) {
 		if (input.type == RenderGraphElementType::Texture) {
-			overlayMethod->set(texs.at(idx++).name, input.texture);
+			overlayFilterMethod->set(texs.at(idx++).name, input.texture);
 		}
 	}
 
 	for (const auto& variable: variables) {
-		graph.applyVariable(*overlayMethod, variable.name, variable.value);
+		graph.applyVariable(*overlayFilterMethod, variable.name, variable.value);
 	}
 
 	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
-	getTargetRenderContext(rc).with(camera).bind([=, this] (Painter& painter)
+	getTargetRenderContext(rc).with(camera).bind([this] (Painter& painter)
 	{
 		painter.pushDebugGroup(id);
 		if (colourClear || depthClear || stencilClear) {
 			painter.clear(colourClear, depthClear, stencilClear);
 		}
-		const auto& tex = overlayMethod->getTexture(0);
+		const auto& tex = overlayFilterMethod->getTexture(0);
 		Sprite()
-			.setMaterial(overlayMethod)
+			.setMaterial(overlayFilterMethod)
+			.setSize(Vector2f(currentSize))
+			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
+			.draw(painter);
+		painter.popDebugGroup();
+	});
+}
+
+void RenderGraphNode::renderNodeFilterMethod(const RenderGraph& graph, const RenderContext& rc)
+{
+	const auto& texs = overlayFilterMethod->getDefinition().getTextures();
+	size_t idx = 0;
+	for (auto& input: getInputPins()) {
+		if (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::Texture) {
+			overlayFilterMethod->set(texs.at(idx++).name, input.texture);
+		}
+	}
+
+	for (const auto& variable: variables) {
+		graph.applyVariable(*overlayFilterMethod, variable.name, variable.value);
+	}
+
+	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
+	getTargetRenderContext(rc).with(camera).bind([this] (Painter& painter)
+	{
+		painter.pushDebugGroup(id);
+		const auto& tex = overlayFilterMethod->getTexture(0);
+		Sprite()
+			.setMaterial(overlayFilterMethod)
 			.setSize(Vector2f(currentSize))
 			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
 			.draw(painter);
@@ -346,7 +427,7 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 
 void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto srcTexture = inputPins.at(0).texture;
+	const auto srcTexture = getInputPins().at(0).texture;
 	if (srcTexture) {
 		auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
 		if (img) {
@@ -389,7 +470,7 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 		colour = renderTarget->getTexture(0);
 		depthStencil = renderTarget->getDepthTexture();
 	} else {
-		for (const auto& input: inputPins) {
+		for (const auto& input: getInputPins()) {
 			if (input.type == RenderGraphElementType::ColourBuffer) {
 				colour = input.texture;
 			} else if (input.type == RenderGraphElementType::DepthStencilBuffer) {
@@ -397,7 +478,8 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 			}
 		}
 	}
-	
+
+	uint8_t outputN = 0;
 	for (const auto& output: outputPins) {
 		std::shared_ptr<Texture> texture;
 		if (output.type == RenderGraphElementType::ColourBuffer || output.type == RenderGraphElementType::Texture) {
@@ -412,12 +494,19 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 				if (other.node->inputPins[other.otherId].type != RenderGraphElementType::Dependency) {
 					other.node->inputPins[other.otherId].texture = texture;
 				}
+
+				for (auto& otherInput: other.node->bypassInputPins) {
+					if (!otherInput.others.empty() && otherInput.others[0].node == this && otherInput.others[0].otherId == outputN) {
+						otherInput.texture = texture;
+					}
+				}
 				
 				if (--other.node->depsLeft == 0) {
 					renderQueue.push_back(other.node);
 				}
 			}
 		}
+		++outputN;
 	}
 }
 
@@ -432,6 +521,7 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 
 	input.others.push_back({ &node, outputPin });
 	output.others.push_back({ this, inputPin });
+	generateBypassInputPins();
 }
 
 void RenderGraphNode::disconnectInput(uint8_t inputPin)
@@ -443,4 +533,5 @@ void RenderGraphNode::disconnectInput(uint8_t inputPin)
 		std_ex::erase_if(outputPin.others, [=, this](const OtherPin& o) { return o.node == this; });
 	}
 	pin.others = {};
+	generateBypassInputPins();
 }

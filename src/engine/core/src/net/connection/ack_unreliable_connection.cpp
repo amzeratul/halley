@@ -56,10 +56,14 @@ ConnectionStatus AckUnreliableConnection::getStatus() const
     return parent->getStatus();
 }
 
+UniqueLock<Mutex> AckUnreliableConnection::lockSend()
+{
+	parent->lockSend();
+	return UniqueLock(mutex);
+}
+
 void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
 	HalleyAssertDev(type == TransmissionType::Unreliable);
-
-	UniqueLock lock(mutex);
 
 	auto status = parent->getStatus();
 	if (status != ConnectionStatus::Connected) {
@@ -213,11 +217,10 @@ void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> 
 	parent->sendUnreliablePacket(packet);
 }
 
-void AckUnreliableConnection::flushOutboundQueue()
+void AckUnreliableConnection::flushSendUnreliablePackets()
 {
-	UniqueLock lock(mutex);
-
 	doFlushSmallPackets();
+	parent->flushSendUnreliablePackets();
 }
 
 void AckUnreliableConnection::doFlushSmallPackets()
@@ -233,10 +236,13 @@ void AckUnreliableConnection::doFlushSmallPackets()
 	}
 }
 
+UniqueLock<Mutex> AckUnreliableConnection::lockReceive()
+{
+	return UniqueLock(mutex);
+}
+
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 {
-	UniqueLock lock(mutex);
-
     auto status = parent->getStatus();
     if (status != ConnectionStatus::Connected) {
         return false;
@@ -344,7 +350,8 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         }
     }
 
-	resendUnAckPackets(std::clamp(lag * 1.5f, 0.025f, 1.0f));
+	float resendDelay = parent->getUnreliablePacketResendTime(averagePacketAckTime);
+	resendUnAckPackets(std::clamp(resendDelay, 0.05f, 2.0f));
 
     return false;
 }
@@ -385,6 +392,8 @@ size_t AckUnreliableConnection::getMaxUnreliablePacketSize() const
 
 void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)
 {
+	// This can be called from a platform-specific thread, so we block it from accessing anything
+	// while doing send() or receive() operations.
 	UniqueLock lock(mutex);
 
     size_t packetSize = packet.size();
@@ -539,10 +548,10 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> dat
 	// the "first packet in use" index.
 	forwardOutboundQueue();
 
-	// Update latency
+	// Update average ACK time.
 	if (avgLatencyCount > 0) {
 		avgLatencySum /= static_cast<float>(avgLatencyCount);
-		lag = lerp(lag, avgLatencySum, 0.2f);
+		averagePacketAckTime = lerp(averagePacketAckTime, avgLatencySum, 0.2f);
 	}
 }
 
@@ -596,7 +605,7 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 
 float AckUnreliableConnection::getLatency() const
 {
-    return lag;
+    return averagePacketAckTime;
 }
 
 void AckUnreliableConnection::setStatsListener(IAckUnreliableConnectionStatsListener* listener)

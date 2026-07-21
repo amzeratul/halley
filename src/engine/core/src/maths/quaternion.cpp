@@ -86,6 +86,24 @@ Vector3f Quaternion::toVector3f() const
 	return Vector3f(x, y, z);
 }
 
+std::pair<Vector3f, Angle1f> Quaternion::toAxisAngle() const
+{
+	if (w == 1) {
+		return { Vector3f(1, 0, 0), Angle1f() };
+	}
+	Angle1f angle = Angle1f::fromRadians(2.0f * std::acos(w));
+	const float conv = 1.0f / std::sin(angle.toRadians() / 2.0f);
+	return { Vector3f(x, y, z) * conv, angle };
+}
+
+std::tuple<Angle1f, Angle1f, Angle1f> Quaternion::toEulerAngles() const
+{
+	const float roll = std::atan2(2 * (w*x + y*z), 1 - 2 * (x*x + y*y));
+	const float pitch = std::asin(2 * (w*y - z*x));
+	const float yaw = std::atan2(2 * (w*z + x*y), 1 - 2 * (y*y + z*z));
+	return { Angle1f::fromRadians(roll), Angle1f::fromRadians(pitch), Angle1f::fromRadians(yaw) };
+}
+
 Quaternion Quaternion::lookAt(const Vector3f& dir, const Vector3f& worldUp)
 {
 	// See https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector/52551983#52551983

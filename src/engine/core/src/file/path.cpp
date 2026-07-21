@@ -235,13 +235,6 @@ std::string_view Path::getPart(size_t idx) const
 {
 	auto s = std::string_view(str);
 	size_t startPos = 0;
-	size_t nFound = 0;
-	for (size_t i = 0; nFound < idx && i < s.length(); ++i) {
-		if (s[i] == '/') {
-			++nFound;
-		}
-	}
-
 	for (size_t i = 0; i < idx; ++i) {
 		startPos = s.find('/', startPos);
 		if (startPos == std::string_view::npos) {
@@ -317,7 +310,6 @@ std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 	} else if (n == 1) {
 		return { {}, result[0] };
 	} else {
-		return {};
 	}
 }
 

@@ -35,6 +35,11 @@ void DevConServerConnection::sendI18NStrings(const I18NLanguage& language, HashM
 	}
 }
 
+void DevConServerConnection::openContext(const String& context, bool updateOnly)
+{
+	queue->enqueue(std::make_unique<DevCon::OpenContextMsg>(context, updateOnly), 0);
+}
+
 void DevConServerConnection::registerInterest(const String& id, const ConfigNode& params, uint32_t handle)
 {
 	queue->enqueue(std::make_unique<DevCon::RegisterInterestMsg>(id, ConfigNode(params), handle), 0);
@@ -161,6 +166,13 @@ void DevConServer::unregisterInterest(InterestHandle handle)
 const ConfigNode& DevConServer::getInterestParams(InterestHandle handle) const
 {
 	return interest.at(handle).config;
+}
+
+void DevConServer::openContext(const String& context, bool updateOnly)
+{
+	for (const auto& c: connections) {
+		c->openContext(context, updateOnly);
+	}
 }
 
 gsl::span<std::shared_ptr<DevConServerConnection>> DevConServer::getConnections()

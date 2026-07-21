@@ -340,10 +340,13 @@ void UIGrid::onMouseLeft(Vector2f mousePos)
 void UIGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0) {
-		onClickLine(lineUnderMouse.value_or(-1), keyMods);
-		holdingLine = lineUnderMouse;
-		holdingMoved = false;
-		focus();
+		const bool handled = onClickCell(lineUnderMouse.value_or(-1), columnUnderMouse.value_or(-1), keyMods);
+		if (!handled) {
+			onClickLine(lineUnderMouse.value_or(-1), keyMods);
+			holdingLine = lineUnderMouse;
+			holdingMoved = false;
+			focus();
+		}
 	} else if (button == 2) {
 		onRightClick(lineUnderMouse);
 		focus();
@@ -465,6 +468,7 @@ void UIGrid::notifySelectionChanged()
 	// Note that we want to send this even if activeSelectedLine hasn't changed, because the full selection set might have
 	auto id = activeSelectedLine ? getKeyAt(*activeSelectedLine) : "";
 	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, activeSelectedLine.value_or(-1)));
+	onSelectionChanged();
 }
 
 float UIGrid::getLineHeight() const
@@ -557,6 +561,11 @@ String UIGrid::getCellToolTip(int row, int col, const String& columnName) const
 	return {};
 }
 
+bool UIGrid::onClickCell(int row, int col, KeyMods mods)
+{
+	return false;
+}
+
 void UIGrid::onRightClick(std::optional<int> line)
 {
 }
@@ -602,6 +611,23 @@ std::optional<int> UIGrid::getRowForLine(int line) const
 		return iter->second;
 	}
 	return std::nullopt;
+}
+
+std::optional<MouseCursorMode> UIGrid::getMouseCursorMode() const
+{
+	if (lineUnderMouse && columnUnderMouse) {
+		return getMouseAtCell(*lineUnderMouse, *columnUnderMouse);
+	}
+	return std::nullopt;
+}
+
+std::optional<MouseCursorMode> UIGrid::getMouseAtCell(int row, int col) const
+{
+	return {};
+}
+
+void UIGrid::onSelectionChanged()
+{
 }
 
 const String& UIGrid::getKeyAt(int idx) const
