@@ -42,6 +42,8 @@ namespace Halley
         void flushSendUnreliablePackets() override;
 
         void onReceive(gsl::span<const std::byte> packet) override;
+        void onAck(uint64_t packetId) override;
+        void onLost(uint64_t packetId) override;
 
         [[nodiscard]] float getLatency() const;
 
@@ -84,6 +86,7 @@ namespace Halley
             uint8_t subIdx = 0;
             uint8_t parity = 0;
         	uint8_t resend = 0;
+        	bool lost = false;
 
         	void clear()
         	{
@@ -110,7 +113,7 @@ namespace Halley
         static constexpr size_t headerSize = 16;
         static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
 
-    	// Some platforms may (opt to) call onReceive() from a separate thread.
+    	// Some platforms may (opt to) run IPacketListener callbacks from a separate thread.
     	// Need to ensure to not write to the buffers/queues below concurrently.
     	Mutex mutex;
 
@@ -120,6 +123,9 @@ namespace Halley
 
         std::array<std::pair<uint8_t, uint16_t>, 256> ackPackets = {};
         int numAckPackets = 0;
+
+    	// Platforms may bring their own tracking of packets ack'd/lost.
+    	bool platformSupportsAck = false;
 
     	// The mean time in seconds, interpolated, how long it took for sent packets to be
     	// acknowledged by the remote peer of this connection.
@@ -135,13 +141,14 @@ namespace Halley
 
         void doSend(gsl::span<const std::byte> packet, bool small);
         void doSend(SubPacket& packet, int packetIdx);
-    	void doSendUnreliablePacket(gsl::span<const std::byte> packet);
+    	void doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id);
 
         void doSendAckPackets();
         void onAckPacketsReceive(gsl::span<const std::byte> data, uint8_t parity);
     	void forwardOutboundQueue();
 
     	void resendUnAckPackets(float minResendTimeDiff);
+    	void resendLostPackets();
 
     	void evictInboundQueue(uint16_t seqIdx, uint8_t parity);
     	bool checkOutboundQueue(int numPacketsToSend) const;

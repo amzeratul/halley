@@ -37,7 +37,7 @@ namespace Halley
 
         void onConnect(short connId) override;
 
-        void sendUnreliablePacket(gsl::span<const std::byte> packet) override;
+        void sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) override;
         void setUnreliablePacketListener(IPacketListener* listener) override;
 
         static void receiveAll(

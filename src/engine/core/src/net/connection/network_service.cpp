@@ -39,7 +39,7 @@ void NetworkService::sendHandshake(IConnection& connection)
         std::array<uint8_t, 9> packet = {};
         packet[0] = 0;
         memcpy(&packet[1], &handshakeSnd, 8);
-        connection.sendUnreliablePacket(gsl::span((std::byte*) packet.data(), 9));
+        connection.sendUnreliablePacket(gsl::span((std::byte*) packet.data(), 9), 0);
     }
 }
 
@@ -53,11 +53,11 @@ void NetworkService::sendHandshakeAccept(IConnection& connection, short id)
             packet[0] = 0x80 | (id >> 8);
             packet[1] = id & 0xff;
             memcpy(&packet[2], &handshakeSnd, 8);
-            connection.sendUnreliablePacket(gsl::span((std::byte*) packet.data(), 10));
+            connection.sendUnreliablePacket(gsl::span((std::byte*) packet.data(), 10), 0);
         } else {
             packet[0] = id & 0xff;
             memcpy(&packet[1], &handshakeSnd, 8);
-            connection.sendUnreliablePacket(gsl::span((std::byte*) packet.data(), 9));
+            connection.sendUnreliablePacket(gsl::span((std::byte*) packet.data(), 9), 0);
         }
     }
 }

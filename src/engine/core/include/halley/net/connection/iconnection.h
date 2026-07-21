@@ -46,8 +46,14 @@ namespace Halley
         {
         public:
 			virtual ~IPacketListener() = default;
-			// NB: This may be called from a different thread on some platforms.
+			
+			// These callbacks may be called from a different thread on some platforms.
+
             virtual void onReceive(gsl::span<const std::byte> packet) = 0;
+
+			virtual void onAck(uint64_t packetId) = 0;
+
+			virtual void onLost(uint64_t packetId) = 0;
         };
 
 		// Returns a platform-specific, immutable value. This used to size various memory buffers.
@@ -62,7 +68,7 @@ namespace Halley
 
         virtual void onConnect(short connId) {}
 
-        virtual void sendUnreliablePacket(gsl::span<const std::byte> packet) {}
+        virtual void sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) {}
 		virtual void flushSendUnreliablePackets() {}
 
         virtual void setUnreliablePacketListener(IPacketListener* listener) {}

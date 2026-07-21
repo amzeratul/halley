@@ -4,10 +4,11 @@
 
 using namespace Halley;
 
-InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, TransmissionType type, OutboundNetworkPacket packet)
+InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, TransmissionType type, OutboundNetworkPacket packet, uint64_t id)
 	: when(when)
 	, type(type)
 	, packet(std::move(packet))
+	, id(id)
 {}
 
 bool InstabilitySimulator::DelayedPacket::operator<(const DelayedPacket& other) const
@@ -81,7 +82,7 @@ void InstabilitySimulator::send(TransmissionType type, OutboundNetworkPacket pac
 		float delay = rng.getFloat(avgLag - lagVariance, avgLag + lagVariance);
 		auto now = std::chrono::system_clock::now();
 		auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
-		packets.emplace(scheduledTime, type, packet);
+		packets.emplace(scheduledTime, type, packet, 0);
 	} while (rng.getFloat(0.0f, 1.0f) < duplication);
 
 	sendPendingPackets();
@@ -105,10 +106,10 @@ void InstabilitySimulator::onConnect(short connId)
 	return parent->onConnect(connId);
 }
 
-void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packet)
+void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id)
 {
 	if (!active) {
-		parent->sendUnreliablePacket(packet);
+		parent->sendUnreliablePacket(packet, id);
 		return;
 	}
 
@@ -125,7 +126,7 @@ void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packe
 		float delay = rng.getFloat(avgLag - lagVariance, avgLag + lagVariance);
 		auto now = std::chrono::system_clock::now();
 		auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
-		packets.emplace(scheduledTime, TransmissionType::Unreliable, OutboundNetworkPacket(packet));
+		packets.emplace(scheduledTime, TransmissionType::Unreliable, OutboundNetworkPacket(packet), id);
 	} while (rng.getFloat(0.0f, 1.0f) < duplication);
 
 	sendPendingPackets();
@@ -145,7 +146,7 @@ void InstabilitySimulator::sendPendingPackets()
 		if (head.type != TransmissionType::Unreliable || parent->getMaxUnreliablePacketSize() == 0) {
 			parent->send(head.type, std::move(packet));
 		} else {
-			parent->sendUnreliablePacket(packet.getBytes());
+			parent->sendUnreliablePacket(packet.getBytes(), head.id);
 		}
 
 		packets.pop();

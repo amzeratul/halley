@@ -31,6 +31,8 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
     	memcpy(p.data.data(), headerSignature2, 3);
     	memset(p.data.data() + 3, 0, totalMaxPacketSize - 3);
     }
+
+	platformSupportsAck = !(this->parent->getUnreliablePacketResendTime(1.0f) > 0.0f);
 }
 
 void AckUnreliableConnection::close()
@@ -221,17 +223,25 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 
 	packet.timestamp = Clock::now();
 
-	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize));
+	uint64_t id;
+	memcpy(&id, header, 8);
+
+	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), id);
 }
 
-void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> packet)
+void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id)
 {
-	parent->sendUnreliablePacket(packet);
+	parent->sendUnreliablePacket(packet, id);
 }
 
 void AckUnreliableConnection::flushSendUnreliablePackets()
 {
 	doFlushSmallPackets();
+
+	if (platformSupportsAck) {
+		resendLostPackets();
+	}
+
 	parent->flushSendUnreliablePackets();
 }
 
@@ -362,8 +372,10 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         }
     }
 
-	float resendDelay = parent->getUnreliablePacketResendTime(averagePacketAckTime);
-	resendUnAckPackets(std::clamp(resendDelay, 0.05f, 2.0f));
+	if (!platformSupportsAck) {
+		float resendDelay = parent->getUnreliablePacketResendTime(averagePacketAckTime);
+		resendUnAckPackets(std::clamp(resendDelay, 0.05f, 2.0f));
+	}
 
     return false;
 }
@@ -491,8 +503,70 @@ void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)
 	}
 }
 
+void AckUnreliableConnection::onAck(uint64_t packetId)
+{
+	HalleyAssertDev(platformSupportsAck);
+
+	const auto header = reinterpret_cast<const uint8_t *>(&packetId);
+
+	uint8_t parity = header[3];
+	uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
+	//uint8_t subIdx = header[6];
+	uint8_t packetIdx = header[7];
+
+	UniqueLock lock(mutex);
+
+	auto slot = &outbound.packets[packetIdx];
+
+	if (slot->seqIdx != 0xffff) {
+		if (slot->seqIdx == seqIdx) {
+			if (statsListener) {
+				statsListener->onPacketAcked(slot->seqIdx);
+			}
+
+			slot->clear();
+
+//			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
+//			avgLatencyCount++;
+		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
+			Logger::logDev("rcv mismatch ACK for slot " + toString(static_cast<int>(packetIdx)) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
+		}
+	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
+		Logger::logDev("rcv ACK for empty slot " + toString(static_cast<int>(packetIdx)) + ", remote seqIdx " + toString(seqIdx));
+	}
+}
+
+void AckUnreliableConnection::onLost(uint64_t packetId)
+{
+	HalleyAssertDev(platformSupportsAck);
+
+	const auto header = reinterpret_cast<const uint8_t *>(&packetId);
+
+	const uint8_t parity = header[3];
+	const uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
+	const uint8_t packetIdx = header[7];
+
+	UniqueLock lock(mutex);
+
+	auto slot = &outbound.packets[packetIdx];
+
+	if (slot->seqIdx != 0xffff) {
+		if (slot->seqIdx == seqIdx) {
+			slot->lost = true;
+		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
+			Logger::logDev("rcv mismatch LOST for slot " + toString(static_cast<int>(packetIdx)) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
+		}
+	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
+		Logger::logDev("rcv LOST for empty slot " + toString(static_cast<int>(packetIdx)) + ", remote seqIdx " + toString(seqIdx));
+	}
+}
+
 void AckUnreliableConnection::doSendAckPackets()
 {
+	if (platformSupportsAck) {
+		return;
+	}
+
     if (numAckPackets == 0) {
         return;
     }
@@ -519,13 +593,15 @@ void AckUnreliableConnection::doSendAckPackets()
 
     // NOTE: This isn't sent reliably either. The ACK mechanism on both sides
 	// makes sure that duplicates are caught.
-	doSendUnreliablePacket(gsl::span<const std::byte>(reinterpret_cast<std::byte *>(packet.data()), 6 + 3 * numAckPackets));
+	doSendUnreliablePacket(gsl::span<const std::byte>(reinterpret_cast<std::byte *>(packet.data()), 6 + 3 * numAckPackets), 0);
 
 	numAckPackets = 0;
 }
 
 void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> data, uint8_t parity)
 {
+	HalleyAssertDev(!platformSupportsAck);
+
     auto ackData = reinterpret_cast<const uint8_t *>(data.data());
     size_t size = data.size();
 
@@ -585,6 +661,8 @@ void AckUnreliableConnection::forwardOutboundQueue()
 
 void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 {
+	HalleyAssertDev(!platformSupportsAck);
+
 	const Clock::time_point now = Clock::now();
 
 	// This re-sends packets which are not yet acknowledged.
@@ -607,7 +685,7 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 			break; // stop at first packet queued up too recently
 		}
 
-		doSendUnreliablePacket(slot->data.byte_span().subspan(0, headerSize + slot->dataSize));
+		doSendUnreliablePacket(slot->data.byte_span().subspan(0, headerSize + slot->dataSize), 0);
 
 		if (statsListener) {
 			statsListener->onPacketResent(slot->seqIdx);
@@ -618,6 +696,44 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 
 		idx = (idx + 1) % 256;
 	} while (idx != outbound.curPacketIdx);
+}
+
+void AckUnreliableConnection::resendLostPackets()
+{
+	HalleyAssertDev(platformSupportsAck);
+
+	const Clock::time_point now = Clock::now();
+
+	// This re-sends packets which are marked as "lost".
+	for (int idx = outbound.firstPacketIdx; idx != outbound.curPacketIdx; idx = (idx + 1) % 256) {
+		auto slot = &outbound.packets[idx];
+
+		if (slot->seqIdx == 0xffff) {
+			continue;
+		}
+
+		if (slot->dataSize == 0) {
+			continue;
+		}
+
+		if (!slot->lost) {
+			continue;
+		}
+
+	    const uint8_t* header = slot->data.data();
+
+		uint64_t id;
+		memcpy(&id, header, 8);
+
+		doSendUnreliablePacket(slot->data.byte_span().subspan(0, headerSize + slot->dataSize), id);
+
+		if (statsListener) {
+			statsListener->onPacketResent(slot->seqIdx);
+		}
+
+		slot->lost = false;
+		slot->timestamp = now;
+	}
 }
 
 float AckUnreliableConnection::getLatency() const

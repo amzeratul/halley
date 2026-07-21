@@ -13,13 +13,14 @@ namespace Halley
 		class DelayedPacket
 		{
 		public:
-			DelayedPacket(std::chrono::system_clock::time_point when, TransmissionType type, OutboundNetworkPacket packet);
+			DelayedPacket(std::chrono::system_clock::time_point when, TransmissionType type, OutboundNetworkPacket packet, uint64_t id);
 			bool operator<(const DelayedPacket& other) const;
 			[[nodiscard]] bool isReady() const;
 
 			std::chrono::system_clock::time_point when;
 			TransmissionType type;
 			OutboundNetworkPacket packet;
+			uint64_t id;
 		};
 
 	public:
@@ -38,7 +39,7 @@ namespace Halley
 
 		[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
 		void onConnect(short connId) override;
-		void sendUnreliablePacket(gsl::span<const std::byte> packet) override;
+		void sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) override;
 		void setUnreliablePacketListener(IPacketListener* listener) override;
 
 	private:

@@ -510,7 +510,7 @@ void SocketIOConnection::onConnect(short connId)
 	}
 }
 
-void SocketIOConnection::sendUnreliablePacket(gsl::span<const std::byte> packet)
+void SocketIOConnection::sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id)
 {
 	if (status != ConnectionStatus::Connected && status != ConnectionStatus::Connecting) {
 		Logger::logError("Attempting to send packet, but not in connected state", true);
