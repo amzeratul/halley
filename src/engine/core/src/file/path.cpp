@@ -235,13 +235,6 @@ std::string_view Path::getPart(size_t idx) const
 {
 	auto s = std::string_view(str);
 	size_t startPos = 0;
-	size_t nFound = 0;
-	for (size_t i = 0; nFound < idx && i < s.length(); ++i) {
-		if (s[i] == '/') {
-			++nFound;
-		}
-	}
-
 	for (size_t i = 0; i < idx; ++i) {
 		startPos = s.find('/', startPos);
 		if (startPos == std::string_view::npos) {
@@ -308,18 +301,22 @@ size_t Path::getLastPartPos() const
 
 std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 {
-	auto s = std::string_view(str);
-	size_t startPos = 0;
-	std::string_view prev;
-	while (true) {
-		startPos = s.find('/', startPos);
-		auto cur = s.substr(startPos);
-		if (startPos == std::string_view::npos) {
-			return { prev, cur };
-		}
-		startPos += 1; // Skip slash
-		prev = cur;
+	const auto s = std::string_view(str);
+	if (s.empty()) [[unlikely]] {
+		return {};
 	}
+
+	const size_t lastPos = getLastPartPos();
+	const auto cur = s.substr(lastPos);
+	if (lastPos == 0) {
+		// Only one part
+		return { {}, cur };
+	}
+
+	const size_t prevEnd = lastPos - 1; // Position of the slash before the last part
+	const size_t prevSlash = s.substr(0, prevEnd).find_last_of('/');
+	const size_t prevPos = prevSlash == std::string_view::npos ? 0 : prevSlash + 1;
+	return { s.substr(prevPos, prevEnd - prevPos), cur };
 }
 
 void Path::computeProperties()
