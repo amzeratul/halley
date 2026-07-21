@@ -86,9 +86,10 @@ void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst
 	//updateSync(maxPitchShift, sourceSampleRate);
 }
 
-String AudioClipStreaming::getName() const
+const String& AudioClipStreaming::getName() const
 {
-	return "AudioClipStreaming";
+	static String result = "AudioClipStreaming";
+	return result;
 }
 
 void AudioClipStreaming::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const
