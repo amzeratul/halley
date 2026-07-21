@@ -13,6 +13,19 @@
 using namespace Halley;
 
 
+bool AssetPackListing::Entry::operator==(const Entry& other) const
+{
+	return type == other.type
+		&& name == other.name
+		&& modified == other.modified
+		&& *entryData == *other.entryData;
+}
+
+bool AssetPackListing::Entry::operator!=(const Entry& other) const
+{
+	return !(*this == other);
+}
+
 bool AssetPackListing::Entry::operator<(const Entry& other) const
 {
 	return std::tie(name, type) < std::tie(other.name, other.type);
@@ -63,31 +76,98 @@ void AssetPackListing::sort()
 
 Vector<String> AssetPacker::pack(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress)
 {
-	Vector<String> packed;
+	struct PlatformData {
+		String platformId;
+		std::unique_ptr<AssetDatabase> db;
+		HashMap<String, AssetPackListing> packs;
+	};
+	Vector<PlatformData> platData;
+
+	// Setup platforms
 	const auto& platforms = project.getPlatforms();
-	const size_t n = platforms.size();
-	for (size_t i = 0; i < n; ++i) {
-		packPlatform(project, assetsToPack, deletedAssets, platforms[i], [=] (float p, const String& s) {
-			progress((p + i) * (1.0f / n), s);
-		}, packed);
+	const std::optional<size_t> pcIdx = std_ex::find_index(platforms, "pc");
+	platData.reserve(platforms.size());
+	for (auto& platform: platforms) {
+		auto& d = platData.emplace_back();
+		d.platformId = platform;
 	}
-	return packed;
-}
 
-void AssetPacker::packPlatform(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed)
-{
-	const auto src = project.getUnpackedAssetsPath();
-	const auto dst = project.getPackedAssetsPath(platform);
+	// Generate databases
+	Vector<Future<void>> pending;
+	progress(0, "Generating asset databases");
+	for (auto& p: platData) {
+		pending += Concurrent::execute([&] () {
+			p.db = project.getImportAssetsDatabase().makeAssetDatabase(p.platformId);
+		});
+	}
+	Concurrent::waitAll(pending);
+	pending.clear();
 
-	Logger::logInfo("Packing for platform \"" + platform + "\" at \"" + dst.string() + "\".");
-	const auto db = project.getImportAssetsDatabase().makeAssetDatabase(platform);
+	// Generate pack lists
+	progress(0.2f, "Generating pack lists");
 	const auto manifest = AssetPackManifest(FileSystem::readFile(project.getAssetPackManifestPath()));
+	for (auto& p: platData) {
+		pending += Concurrent::execute([&] () {
+			p.packs = sortIntoPacks(manifest, *p.db, assetsToPack, deletedAssets);
+		});
+	}
+	Concurrent::waitAll(pending);
+	pending.clear();
+	
+	// Remove duplicate packs between console and PC
+	progress(0.4f, "Checking pack status and sorting");
+	if (false && pcIdx) { // TODO: this eliminates unnecessary duplicated packs, but needs handling by the rest of pipeline
+		auto& pcPlatData = platData[*pcIdx];
+		for (auto& curPlatData: platData) {
+			if (curPlatData.platformId != "pc") {
+				std_ex::erase_if_key(curPlatData.packs, [&] (const String& packId) {
+					auto pcPackIter = pcPlatData.packs.find(packId);
+					if (pcPackIter != pcPlatData.packs.end()) {
+						//Logger::logInfo("Skipping pack " + packId + " for " + curPlatData.platformId + " - same as PC");
+						return pcPackIter->second == curPlatData.packs.at(packId);
+					}
+					return false;
+				});
+			}
+		}
+	}
 
-	// Sort into packs
-	auto packs = sortIntoPacks(manifest, *db, std::move(assetsToPack), deletedAssets);
+	// Decide which packs need packing
+	for (auto& p: platData) {
+		std_ex::erase_if_key(p.packs, [&] (const String& packId) {
+			auto& packList = p.packs.at(packId);
+			return !needsPacking(project, p.platformId, packId, packList);
+		});
+		for (auto& [id, packList]: p.packs) {
+			packList.sort();
+		}
+	}
 
-	// Generate packs
-	generatePacks(project, std::move(packs), src, dst, std::move(progress), packed);
+	// Pack
+	progress(0.5f, "Packing");
+	const auto src = project.getUnpackedAssetsPath();
+	for (auto& p: platData) {
+		pending += Concurrent::execute([&] () {
+			const auto dst = project.getPackedAssetsPath(p.platformId);
+			generatePacks(project, p.platformId, p.packs, src, dst, [=] (float progress, const String& str) {
+				
+			});
+		});
+	}
+	Concurrent::waitAll(pending);
+
+	progress(0.99f, "Packed");
+	Vector<String> packed;
+	for (auto& p: platData) {
+		for (const auto& [packId, packData]: p.packs) {
+			if (!packed.contains(packId)) {
+				packed += packId;
+			}
+		}
+	}
+
+	progress(1.0f, "Done");
+	return packed;
 }
 
 HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets)
@@ -95,7 +175,6 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 	std::array<char, 2048> buffer;
 
 	HashMap<String, AssetPackListing> packs;
-
 
 	for (auto typeName: EnumNames<AssetType>()()) {
 		const auto type = fromString<AssetType>(typeName);
@@ -147,45 +226,38 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 	return packs;
 }
 
-void AssetPacker::generatePacks(Project& project, HashMap<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed)
+bool AssetPacker::needsPacking(Project& project, const String& platformId, const String& packId, const AssetPackListing& packList)
 {
-	struct Entry {
-		String name;
-		AssetPackListing* listing = nullptr;
-		Path dstPack;
-	};
-	Vector<Entry> toPack;
-	
-	for (auto& packListing: packs) {
-		if (packListing.first.isEmpty()) {
-			Logger::logWarning("The following assets will not be packed:");
-			for (const auto& entry: packListing.second.getEntries()) {
-				Logger::logWarning("  [" + toString(entry.type) + "] " + entry.name);
-			}
-			Logger::logWarning("-----------------------\n");
-		} else {
-			// Only pack if this pack listing is active or if it doesn't exist
-			auto dstPack = dst / packListing.first + ".dat";
-			if (packListing.second.isActive() || !FileSystem::exists(dstPack)) {
-				packListing.second.sort();
-				toPack.push_back(Entry{ packListing.first, &packListing.second, dstPack });
-			}
+	if (packId.isEmpty()) {
+		Logger::logWarning("The following assets will not be packed:");
+		for (const auto& entry: packList.getEntries()) {
+			Logger::logWarning("  [" + toString(entry.type) + "] " + entry.name);
 		}
-	}
-
-	size_t n = toPack.size();
-	for (size_t i = 0; i < n; ++i) {
-		if (!std_ex::contains(packed, toPack[i].name)) {
-			packed.push_back(toPack[i].name);
-		}
-		generatePack(project, toPack[i].name, *toPack[i].listing, src, toPack[i].dstPack, [=] (float p, const String& s)
-		{
-			progress((p + i) * (1.0f / n), s);
-		});
+		Logger::logWarning("-----------------------\n");
+		return false;
+	} else {
+		// Only pack if this pack listing is active or if it doesn't exist
+		const auto dst = project.getPackedAssetsPath(platformId);
+		const auto dstPack = dst / packId + ".dat";
+		return packList.isActive() || !FileSystem::exists(dstPack);
 	}
 }
 
-void AssetPacker::generatePack(Project& project, const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst, ProgressCallback progress)
+void AssetPacker::generatePacks(Project& project, const String& platformId, HashMap<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress)
+{
+	const size_t n = packs.size();
+	size_t i = 0;
+	for (auto& packListing: packs) {
+		const auto dstPack = dst / packListing.first + ".dat";
+		generatePack(project, platformId, packListing.first, packListing.second, src, dstPack, [=] (float p, const String& s)
+		{
+			progress((p + i) * (1.0f / n), s);
+		});
+		i++;
+	}
+}
+
+void AssetPacker::generatePack(Project& project, const String& platformId, const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst, ProgressCallback progress)
 {
 	AssetPack pack;
 	AssetDatabase& db = pack.getAssetDatabase();
@@ -265,7 +337,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 	}
 
 	if (packed) {
-		Logger::logInfo("- Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
+		Logger::logInfo("- [" + platformId + "] Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
 	} else {
 		throw Exception("Unable to write pack file " + dst.getNativeString(), HalleyExceptions::Tools);
 	}

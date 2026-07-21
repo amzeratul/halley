@@ -21,6 +21,8 @@ namespace Halley {
 			const AssetDatabase::Entry* entryData;
 			bool modified;
 
+			bool operator==(const Entry& other) const;
+			bool operator!=(const Entry& other) const;
 			bool operator<(const Entry& other) const;
 		};
 		
@@ -34,6 +36,9 @@ namespace Halley {
 		void setActive(bool active);
 		bool isActive() const;
 		void sort();
+
+		bool operator==(const AssetPackListing& other) const = default;
+		bool operator!=(const AssetPackListing& other) const = default;
 
 	private:
 		String name;
@@ -49,11 +54,11 @@ namespace Halley {
 		using ProgressCallback = std::function<void(float, const String&)>;
 		
 		static Vector<String> pack(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress);
-		static void packPlatform(Project& project, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed);
 
 	private:
 		static HashMap<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, const std::optional<std::set<String>>& assetsToPack, const Vector<String>& deletedAssets);
-		static void generatePacks(Project& project, HashMap<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed);
-		static void generatePack(Project& project, const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
+		static void generatePacks(Project& project, const String& platformId, HashMap<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress);
+		static void generatePack(Project& project, const String& platformId, const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
+		static bool needsPacking(Project& project, const String& platformId, const String& packId, const AssetPackListing& packList);
 	};
 }
