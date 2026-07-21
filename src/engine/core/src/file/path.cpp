@@ -310,6 +310,7 @@ std::pair<std::string_view, std::string_view> Path::getLastTwoParts() const
 	} else if (n == 1) {
 		return { {}, result[0] };
 	} else {
+		return {};
 	}
 }
 
