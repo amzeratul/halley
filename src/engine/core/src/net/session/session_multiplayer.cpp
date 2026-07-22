@@ -134,6 +134,11 @@ size_t SessionMultiplayer::getNumberOfPlayers() const
 	return session->getClientCount();
 }
 
+size_t SessionMultiplayer::getMaxNumberOfPlayers() const
+{
+	return options.maxPlayers;
+}
+
 uint8_t SessionMultiplayer::getMyClientId() const
 {
 	return session->getMyPeerId().value_or(0);

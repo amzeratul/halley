@@ -78,6 +78,7 @@ namespace Halley {
 		bool hasHostAuthority() const override;
 		Vector<Rect4f> getRemoteViewPorts() const override;
 		size_t getNumberOfPlayers() const override;
+		size_t getMaxNumberOfPlayers() const override;
 		uint8_t getMyClientId() const override;
 		SharedData* tryGetMySharedData() const;
 		SessionState getState() const;
