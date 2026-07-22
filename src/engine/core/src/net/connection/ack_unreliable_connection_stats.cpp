@@ -21,7 +21,7 @@ void AckUnreliableConnectionStats::onPacketSent(uint16_t sequence, size_t size)
 
 void AckUnreliableConnectionStats::onPacketReceived(uint16_t sequence, size_t size, bool resend)
 {
-	addPacket(PacketStats{ sequence, State::Received, false, size });
+	addPacket(PacketStats{ sequence, resend ? State::ReceivedAgain : State::Received, false, size });
 }
 
 void AckUnreliableConnectionStats::onPacketResent(uint16_t sequence)
@@ -43,6 +43,17 @@ void AckUnreliableConnectionStats::onPacketAcked(uint16_t sequence)
 		}
 	}
 }
+
+void AckUnreliableConnectionStats::onPackedLost(uint16_t sequence)
+{
+	for (auto& packet: packetStats) {
+		if (packet.outbound && packet.seq == sequence) {
+			packet.state = State::Lost;
+			return;
+		}
+	}
+}
+
 
 gsl::span<const AckUnreliableConnectionStats::PacketStats> AckUnreliableConnectionStats::getPacketStats() const
 {

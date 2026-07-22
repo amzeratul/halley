@@ -10,7 +10,9 @@ namespace Halley {
         	Sent,
         	Resent,
         	Acked,
-            Received
+            Received,
+            ReceivedAgain,
+            Lost,
         };
 
         struct PacketStats {
@@ -28,6 +30,7 @@ namespace Halley {
 	    void onPacketResent(uint16_t sequence) override;
 	    void onPacketAcked(uint16_t sequence) override;
         void onPacketReceived(uint16_t sequence, size_t size, bool resend) override;
+        void onPackedLost(uint16_t sequence) override;
 
         [[nodiscard]] gsl::span<const PacketStats> getPacketStats() const;
         [[nodiscard]] size_t getLineStart() const;

@@ -772,10 +772,6 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 
 Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionStats::PacketStats& stats) const
 {
-	if (stats.size == 8 && stats.state != AckUnreliableConnectionStats::State::Unsent) {
-		return Colour4f(0.5f, 0.5f, 0.5f);
-	}
-
 	switch (stats.state) {
 	case AckUnreliableConnectionStats::State::Sent:
 		return Colour4f(1, 1, 0, 1);
@@ -785,6 +781,10 @@ Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionS
 		return Colour4f(1, 0, 0, 1);
 	case AckUnreliableConnectionStats::State::Received:
 		return Colour4f(0, 0.2f, 1, 1);
+	case AckUnreliableConnectionStats::State::ReceivedAgain:
+		return Colour4f(0.8f, 0, 1, 1);
+	case AckUnreliableConnectionStats::State::Lost:
+		return Colour4f(0.5f, 0.5f, 0, 1);
 	case AckUnreliableConnectionStats::State::Unsent:
 	default:
 		return Colour4f(0, 0, 0, 0);

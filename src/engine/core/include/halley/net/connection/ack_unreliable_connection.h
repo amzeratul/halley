@@ -16,6 +16,7 @@ namespace Halley
 		virtual void onPacketResent(uint16_t sequence) = 0;
 		virtual void onPacketAcked(uint16_t sequence) = 0;
 		virtual void onPacketReceived(uint16_t sequence, size_t size, bool resend) = 0;
+		virtual void onPackedLost(uint16_t sequence) = 0;
 	};
 
     class INetworkServiceStatsListener;
