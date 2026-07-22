@@ -188,7 +188,9 @@ const Metadata* ResourceLocator::getMetaData(const String& asset, AssetType type
 {
 	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
-		return &result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
+		auto& db = result->second->getAssetDatabase().getDatabase(type);
+		auto* assetEntry = db.tryGet(asset);
+		return assetEntry ? &assetEntry->meta : &dummyMetadata;
 	} else {
 		return &dummyMetadata;
 	}
