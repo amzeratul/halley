@@ -655,13 +655,13 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgGetServerSi
 
 void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgPing& msg)
 {
-	auto& peer = getPeer(peerId);
+	const auto& peer = getPeer(peerId);
 
-	peer.lastPingReply.timestamp = getLocalSessionTimeMs(); // our own local time
-	peer.lastPingReply.remoteTimestamp = msg.timestamp; // time as sent by remote
+	ControlMsgPingReply replyMsg = {};
+	replyMsg.timestamp = getLocalSessionTimeMs(); // our own local time
+	replyMsg.remoteTimestamp = msg.timestamp; // bounce back time as sent by Ping
 
-	// Pong!
-	const auto bytes = Serializer::toBytes(peer.lastPingReply);
+	const auto bytes = Serializer::toBytes(replyMsg);
 	doSendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::PingReply, OutboundNetworkPacket(bytes)));
 }
 
@@ -669,28 +669,27 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgPingReply& 
 {
 	auto& peer = getPeer(peerId);
 
-	// If the returned ("remote") timestamp doesn't match, disregard - we may have sent a new one in the meantime.
-	if (msg.remoteTimestamp != peer.lastPing.timestamp) {
-		Logger::logWarning("Received Pong! for " + toString(static_cast<int>(peerId)) +
-			", but bounced timestamp " + toString(msg.remoteTimestamp) +
-			" does not match last sent ping timestamp " + toString(peer.lastPing.timestamp));
-		return;
-	}
-
 	// Measure how long it took for one round trip.
 	int32_t curTimestamp = getLocalSessionTimeMs();
 
 	if (curTimestamp < msg.remoteTimestamp) {
-		Logger::logWarning("Received Pong!, but remote timestamp is in the future");
+		Logger::logError("Received Pong!, but remote timestamp is in the future");
 		return;
 	}
 
-	// Keep the response:
-	peer.lastPingResponse.timestamp = curTimestamp; // our own current time
-	peer.lastPingResponse.remoteTimestamp = msg.timestamp; // "current" time on remote, ignoring latency
+	// Looks for matching entry in RTT buffer, using returned "remote" timestamp.
+	for (auto& rtt : peer.rtt) {
+		if (rtt[0] == msg.remoteTimestamp) {
+			rtt[1] = curTimestamp; // our own, current time
+			rtt[2] = msg.timestamp; // time on remote when Pong was sent
+			return;
+		}
+	}
 
-	// Average with previous latency, to smooth temporary spikes.
-	peer.latency = ((curTimestamp - msg.remoteTimestamp) + peer.latency) / 2;
+	// No match found, disregard.
+	Logger::logWarning("Received Pong! for " + toString(static_cast<int>(peerId)) +
+		", but bounced timestamp " + toString(msg.remoteTimestamp) +
+		" does not match any timestamp in RTT buffer");
 }
 
 void NetworkSession::setMyPeerId(PeerId id)
@@ -758,8 +757,19 @@ const AckUnreliableConnectionStats& NetworkSession::getConnectionStats(size_t id
 
 int32_t NetworkSession::getLatency(size_t idx) const
 {
-	// NB: the latency stored is the full round-trip time.
-	return peers.at(idx).latency / 2;
+	const auto& peer = peers.at(idx);
+
+	int32_t avgRtt = 0;
+	int32_t num = 0;
+
+	for (const auto& rtt : peer.rtt) {
+		if (rtt[1] != 0) [[likely]] {
+			avgRtt += rtt[1] - rtt[0];
+			++num;
+		}
+	}
+
+	return num > 0 ? (avgRtt / num) / 2 : 0;
 }
 
 size_t NetworkSession::getMaxPacketSize() const
@@ -901,6 +911,12 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	peer.connection = std::move(messageQueue);
 	peer.stats = std::move(stats);
 
+	for (auto& rtt : peer.rtt) {
+		rtt[0] = 0;
+		rtt[1] = 0;
+		rtt[2] = 0;
+	}
+
 #ifdef DEV_BUILD
 	peer.simulator = simulator;
 #endif
@@ -976,19 +992,29 @@ int32_t NetworkSession::getLocalSessionTimeMs() const
 	return static_cast<int32_t>(seconds.count() * 1000.0);
 }
 
-int32_t NetworkSession::getPeerSessionTimeMs(PeerId clientId) const
-{
+int32_t NetworkSession::getPeerSessionTimeMs(PeerId clientId) const {
 	auto& peer = getPeer(clientId);
 
+	// Look for the most recent RTT entry.
+	int32_t mostRecentRtt[3] = {};
+	for (const auto& rtt : peer.rtt) {
+		if (rtt[1] > mostRecentRtt[1]) {
+			mostRecentRtt[0] = rtt[0];
+			mostRecentRtt[1] = rtt[1];
+			mostRecentRtt[2] = rtt[2];
+		}
+	}
+
 	// Estimate *current* local time on the remote peer.
-	int32_t localSessionTime = getLocalSessionTimeMs();
-	int32_t remoteSessionTime = peer.lastPingResponse.remoteTimestamp;
+	int32_t remoteSessionTime = mostRecentRtt[2];
 
-	// Time elapsed since this timestamp has been obtained
-	int32_t elapsed = localSessionTime - peer.lastPingResponse.timestamp;
+	// Time elapsed since this Pong has been received.
+	const int32_t localSessionTime = getLocalSessionTimeMs();
+	remoteSessionTime += localSessionTime - mostRecentRtt[1];
 
-	// Adjust for half the latency.
-	remoteSessionTime += elapsed + peer.latency / 2;
+	// Adjust for half the round-trip time, which should be about the time the remote peer sent
+	// this Pong message.
+	remoteSessionTime += (mostRecentRtt[1] - mostRecentRtt[0]) / 2;
 
 	return remoteSessionTime;
 }
@@ -997,17 +1023,25 @@ void NetworkSession::sendPing(Time t, Peer& peer)
 {
 	constexpr float DELAY = 2.0f;
 
-	peer.delayNextPingMsg += static_cast<float>(t);
-	if (peer.delayNextPingMsg < DELAY) {
+	peer.delayNextPingMsg -= t;
+	if (peer.delayNextPingMsg > 0.0) {
 		return;
 	}
 
-	peer.delayNextPingMsg = 0.0f;
+	peer.delayNextPingMsg = DELAY;
 
 	// Send Ping! with local timestamp
-	peer.lastPing.timestamp = getLocalSessionTimeMs();
+	ControlMsgPing msg = {};
+	msg.timestamp = getLocalSessionTimeMs();
 
-	const auto bytes = Serializer::toBytes(peer.lastPing);
+	auto& rtt = peer.rtt[peer.rttIdx];
+	rtt[0] = msg.timestamp;
+	rtt[1] = 0;
+	rtt[2] = 0;
+
+	peer.rttIdx = (peer.rttIdx + 1) % peer.rtt.size();
+
+	const auto bytes = Serializer::toBytes(msg);
 	doSendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::Ping, OutboundNetworkPacket(bytes)));
 }
 

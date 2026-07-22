@@ -146,18 +146,15 @@ namespace Halley {
 			std::shared_ptr<MessageQueueUDP> connection;
 			std::shared_ptr<AckUnreliableConnectionStats> stats;
 
-			ControlMsgPing lastPing {};
-			ControlMsgPingReply lastPingReply {};
-			float delayNextPingMsg = 0.0f;
-
-			ControlMsgPingReply lastPingResponse {};
-			int32_t latency = 0;
+			std::array<int32_t[3], 16> rtt;
+			int rttIdx = 0;
+			Time delayNextPingMsg = 0;
 
 #ifdef DEV_BUILD
 			std::shared_ptr<InstabilitySimulator> simulator = nullptr;
 #endif
 
-			ConnectionStatus getStatus() const;
+			[[nodiscard]] ConnectionStatus getStatus() const;
 		};
 		
 		NetworkService& service;
