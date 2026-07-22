@@ -31,25 +31,22 @@ namespace Halley
 
         [[nodiscard]] bool isSupported(TransmissionType type) const override;
 
-    	UniqueLock<Mutex> lockSend() override;
         void send(TransmissionType type, OutboundNetworkPacket packet) override;
-
-    	UniqueLock<Mutex> lockReceive() override;
         bool receive(InboundNetworkPacket& packet) override;
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
     	[[nodiscard]] size_t getRealMaxUnreliablePacketSize() const override;
 
+        void beginSendUnreliablePackets() override;
         void flushSendUnreliablePackets() override;
 
-        void onReceive(gsl::span<const std::byte> packet) override;
-        void onAck(uint64_t packetId) override;
-        void onLost(uint64_t packetId) override;
+        void onUnreliablePacketReceived(gsl::span<const std::byte> packet) override;
+        void onUnreliablePacketAck(uint64_t id) override;
+        void onUnreliablePacketLost(uint64_t id) override;
 
         [[nodiscard]] float getLatency() const;
 
         void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
-
 
     private:
     	using Clock = std::chrono::steady_clock;
@@ -113,10 +110,6 @@ namespace Halley
     	size_t realMaxPacketSize;
         static constexpr size_t headerSize = 16;
         static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
-
-    	// Some platforms may (opt to) run IPacketListener callbacks from a separate thread.
-    	// Need to ensure to not write to the buffers/queues below concurrently.
-    	Mutex mutex;
 
         Bytes inboundCache;
         InOutQueue inbound;

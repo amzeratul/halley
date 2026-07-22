@@ -59,12 +59,6 @@ ConnectionStatus AckUnreliableConnection::getStatus() const
     return parent->getStatus();
 }
 
-UniqueLock<Mutex> AckUnreliableConnection::lockSend()
-{
-	parent->lockSend();
-	return UniqueLock(mutex);
-}
-
 void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
 	HalleyAssertDev(type == TransmissionType::Unreliable);
 
@@ -234,6 +228,11 @@ void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> 
 	parent->sendUnreliablePacket(packet, id);
 }
 
+void AckUnreliableConnection::beginSendUnreliablePackets()
+{
+	parent->beginSendUnreliablePackets();
+}
+
 void AckUnreliableConnection::flushSendUnreliablePackets()
 {
 	doFlushSmallPackets();
@@ -256,11 +255,6 @@ void AckUnreliableConnection::doFlushSmallPackets()
 		slot.dataSize = 0;
 		slot.subIdx = 0;
 	}
-}
-
-UniqueLock<Mutex> AckUnreliableConnection::lockReceive()
-{
-	return UniqueLock(mutex);
 }
 
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
@@ -419,12 +413,8 @@ size_t AckUnreliableConnection::getRealMaxUnreliablePacketSize() const
 	return realMaxPacketSize - headerSize;
 }
 
-void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)
+void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::byte> packet)
 {
-	// This can be called from a platform-specific thread, so we block it from accessing anything
-	// while doing send() or receive() operations.
-	UniqueLock lock(mutex);
-
     size_t packetSize = packet.size();
     auto* header = reinterpret_cast<const uint8_t*>(packet.data());
 
@@ -503,18 +493,15 @@ void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)
 	}
 }
 
-void AckUnreliableConnection::onAck(uint64_t packetId)
+void AckUnreliableConnection::onUnreliablePacketAck(uint64_t id)
 {
 	HalleyAssertDev(platformSupportsAck);
 
-	const auto header = reinterpret_cast<const uint8_t *>(&packetId);
+	const auto header = reinterpret_cast<const uint8_t *>(&id);
 
 	uint8_t parity = header[3];
 	uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
-	//uint8_t subIdx = header[6];
 	uint8_t packetIdx = header[7];
-
-	UniqueLock lock(mutex);
 
 	auto slot = &outbound.packets[packetIdx];
 
@@ -525,9 +512,6 @@ void AckUnreliableConnection::onAck(uint64_t packetId)
 			}
 
 			slot->clear();
-
-//			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
-//			avgLatencyCount++;
 		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
 			Logger::logDev("rcv mismatch ACK for slot " + toString(static_cast<int>(packetIdx)) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
 		}
@@ -536,22 +520,24 @@ void AckUnreliableConnection::onAck(uint64_t packetId)
 	}
 }
 
-void AckUnreliableConnection::onLost(uint64_t packetId)
+void AckUnreliableConnection::onUnreliablePacketLost(uint64_t id)
 {
 	HalleyAssertDev(platformSupportsAck);
 
-	const auto header = reinterpret_cast<const uint8_t *>(&packetId);
+	const auto header = reinterpret_cast<const uint8_t *>(&id);
 
 	const uint8_t parity = header[3];
 	const uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
 	const uint8_t packetIdx = header[7];
 
-	UniqueLock lock(mutex);
-
 	auto slot = &outbound.packets[packetIdx];
 
 	if (slot->seqIdx != 0xffff) {
 		if (slot->seqIdx == seqIdx) {
+			if (statsListener) {
+				statsListener->onPackedLost(slot->seqIdx);
+			}
+
 			slot->lost = true;
 		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
 			Logger::logDev("rcv mismatch LOST for slot " + toString(static_cast<int>(packetIdx)) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));

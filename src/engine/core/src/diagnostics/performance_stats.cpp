@@ -991,10 +991,14 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 			continue;
 		}
 
-		const auto& connStats = networkSession->getConnectionStats(i);
-		const auto& stats = connStats.getPacketStats();
-		const auto start = connStats.getLineStart();
-		const auto lineLen = connStats.getLineSize();
+		const auto connStats = networkSession->getConnectionStats(i);
+		if (connStats == nullptr) {
+			continue;
+		}
+
+		const auto& stats = connStats->getPacketStats();
+		const auto start = connStats->getLineStart();
+		const auto lineLen = connStats->getLineSize();
 		const size_t nLines = (stats.size() + lineLen - 1) / lineLen;
 		const float width = area.getWidth() / lineLen;
 		const float height = area.getHeight() / nLines;

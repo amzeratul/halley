@@ -139,7 +139,7 @@ void AsioUDPConnection::receiveAll(
             const auto& conn = pair.second;
             if (conn->matchesEndpoint(from) && conn->getStatus() == ConnectionStatus::Connected) {
                 if (conn->packetListener != nullptr) {
-                    conn->packetListener->onReceive(gsl::span(cache.data(), size));
+                    conn->packetListener->onUnreliablePacketReceived(gsl::span(cache.data(), size));
                 } else {
                     Logger::logError("No packet listener registered, packet will be lost", true);
                 }

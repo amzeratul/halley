@@ -75,7 +75,7 @@ namespace Halley {
 
 		size_t getNumConnections() const;
 		bool isConnected(size_t idx) const;
-		const AckUnreliableConnectionStats& getConnectionStats(size_t idx) const;
+		std::shared_ptr<AckUnreliableConnectionStats> getConnectionStats(size_t idx) const;
 		int32_t getLatency(size_t idx) const;
 		[[nodiscard]] size_t getMaxPacketSize() const;
 
@@ -156,6 +156,15 @@ namespace Halley {
 
 			[[nodiscard]] ConnectionStatus getStatus() const;
 		};
+
+		struct PeerReadCache
+		{
+			PeerId peerId;
+			ConnectionStatus connectionStatus;
+			int32_t sessionTimeMs;
+			int32_t latency;
+			std::shared_ptr<AckUnreliableConnectionStats> stats;
+		};
 		
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
@@ -174,6 +183,9 @@ namespace Halley {
 
 		Vector<Peer> peers;
 		Vector<std::pair<PeerId, InboundNetworkPacket>> inbox;
+
+		Vector<PeerReadCache> peerReadCache;
+		size_t maxPacketSize = 0;
 
 		Vector<IListener*> listeners;
 
@@ -207,6 +219,7 @@ namespace Halley {
 		void setMyPeerId(PeerId id);
 		Peer& getPeer(PeerId id);
 		const Peer& getPeer(PeerId id) const;
+		const PeerReadCache* getPeerReadCache(PeerId id) const;
 
 		void checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(std::optional<PeerId> ownerId);
@@ -225,5 +238,8 @@ namespace Halley {
 		ConfigNode doGetServerSideData(String uniqueKey);
 
 		void sendPing(Time t, Peer& peer);
+		static int32_t doGetLatency(const Peer& peer);
+		size_t doGetMaxPacketSize() const;
+		int32_t doGetPeerSessionTimeMs(const Peer& peer) const;
 	};
 }

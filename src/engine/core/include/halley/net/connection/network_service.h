@@ -66,6 +66,8 @@ namespace Halley
 
 		virtual void setSimulateQualityLevel(Quality quality) {}
 
+		[[nodiscard]] virtual UniqueLock<Mutex> lock() { return UniqueLock<Mutex>(); }
+
     protected:
         static void sendHandshake(IConnection& connection);
         static void sendHandshakeAccept(IConnection& connection, short id);

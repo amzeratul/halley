@@ -21,11 +21,11 @@ void MessageQueueUDP::enqueue(OutboundNetworkPacket packet, uint8_t channel)
 
 void MessageQueueUDP::sendAll()
 {
-    auto lock = connection->lockSend();
-
     if (connection->getStatus() != ConnectionStatus::Connected) {
         return;
     }
+
+    connection->beginSendUnreliablePackets();
 
     for (auto& p : outboundQueued) {
         connection->send(IConnection::TransmissionType::Unreliable, p.packet);
@@ -38,8 +38,6 @@ void MessageQueueUDP::sendAll()
 
 Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()
 {
-    auto lock = connection->lockReceive();
-
     Vector<InboundNetworkPacket> packetsIn;
 
     InboundNetworkPacket packet;
