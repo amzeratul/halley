@@ -161,7 +161,12 @@ void UIWidget::setDynamicValue(std::string_view key, ConfigNode value)
 
 int UIWidget::getRootPriority() const
 {
-	return 0;
+	return rootPriority;
+}
+
+void UIWidget::setRootPriority(int priority)
+{
+	rootPriority = priority;
 }
 
 const String& UIWidget::getDebugId() const

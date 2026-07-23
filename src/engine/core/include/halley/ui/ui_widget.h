@@ -229,6 +229,7 @@ namespace Halley {
 		virtual void setDynamicValue(std::string_view key, ConfigNode value);
 
 		virtual int getRootPriority() const;
+		void setRootPriority(int priority);
 
 		const String& getDebugId() const;
 
@@ -327,6 +328,7 @@ namespace Halley {
 		std::unique_ptr<LocalisedString> toolTip;
 
 		int childLayerAdjustment = 0;
+		int rootPriority = 0;
 
 		bool activeByUser = true;
 		bool activeByInput = true;
