@@ -401,6 +401,7 @@ namespace Halley {
 		Rect4f asRect4f(Rect4f defaultValue) const;
 		Range<float> asFloatRange(Range<float> defaultValue) const;
 		Range<int> asIntRange(Range<int> defaultValue) const;
+		Bytes asBytes(Bytes defaultValue) const;
 
 		template <typename T>
 		Vector<T> asVector() const
