@@ -863,7 +863,7 @@ void LocalisationEditor::uploadOriginalStrings()
 			}
 		}
 
-		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, *client, std::move(uploadData), std::move(localisedIn)));
+		getRoot()->addChild(std::make_shared<LocUploadStringsWindow>(factory, projectWindow, *client, std::move(uploadData), std::move(localisedIn)));
 	}
 }
 

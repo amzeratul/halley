@@ -2,6 +2,7 @@
 #include "localisation_string_upload_data.h"
 
 namespace Halley {
+	class ProjectWindow;
 	class LocalisationClient;
 
     class LocUploadStringsGrid : public UIGrid {
@@ -20,6 +21,7 @@ namespace Halley {
 
         const LocStringUploadChunkData& getChunk(int idx) const;
         LocStringUploadChunkData::Entry& getEntry(int idx) const;
+        size_t getNumEntries() const;
 
     private:
         LocStringUploadData& uploadData;
@@ -36,9 +38,38 @@ namespace Halley {
         std::optional<Colour4f> getRowColour(int row) const;
     };
 
+    class LocUploadStringsState {
+    public:
+        struct Entry {
+            bool send = false;
+	        bool minor = false;
+
+            Entry() = default;
+            Entry(bool send, bool minor);
+            Entry(const ConfigNode& node);
+
+            ConfigNode toConfigNode() const;
+        };
+
+        LocUploadStringsState() = default;
+        LocUploadStringsState(const ConfigNode& node);
+
+        ConfigNode toConfigNode() const;
+
+        HashMap<String, Entry>& getEntries();
+        const HashMap<String, Entry>& getEntries() const;
+        
+    	Entry& get(const String& key);
+    	const Entry* tryGet(const String& key) const;
+        void remove(const String& key);
+
+    private:
+        HashMap<String, Entry> entries;
+    };
+
 	class LocUploadStringsWindow : public UIWidget {
     public:
-        LocUploadStringsWindow(UIFactory& factory, LocalisationClient& client, LocStringUploadData uploadData, HashMap<String, Vector<String>> keysLocalisedIn);
+        LocUploadStringsWindow(UIFactory& factory, ProjectWindow& projectWindow, LocalisationClient& client, LocStringUploadData uploadData, HashMap<String, Vector<String>> keysLocalisedIn);
 
         void onMakeUI() override;
         void onAddedToRoot(UIRoot& root) override;
@@ -46,6 +77,7 @@ namespace Halley {
 
     private:
         UIFactory& factory;
+        ProjectWindow& projectWindow;
         LocalisationClient& client;
         LocStringUploadData uploadData;
         HashMap<String, Vector<String>> keysLocalisedIn;
@@ -66,6 +98,8 @@ namespace Halley {
 		Status curStatus = Status::Idle;
         bool testMode = false;
 
+		LocUploadStringsState state;
+
         void upload();
         void doUpload();
         void setStatus(const String& message, Status status);
@@ -81,5 +115,8 @@ namespace Halley {
 
         void saveReport();
         String generateReport() const;
+
+        void saveState();
+        void loadState();
     };
 }
