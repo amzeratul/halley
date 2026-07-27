@@ -217,10 +217,10 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 
 	packet.timestamp = Clock::now();
 
-	uint64_t id;
-	memcpy(&id, header, 8);
+	// Always set a high bit, so we avoid using id=0.
+	const uint64_t datagramId = 0x100 | packetIdx & 0xff;
 
-	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), id);
+	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), datagramId);
 }
 
 void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id)
@@ -496,54 +496,40 @@ void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::by
 void AckUnreliableConnection::onUnreliablePacketAck(uint64_t id)
 {
 	HalleyAssertDev(platformSupportsAck);
+	HalleyAssertDev((id & ~0x1ff) == 0);
 
-	const auto header = reinterpret_cast<const uint8_t *>(&id);
-
-	uint8_t parity = header[3];
-	uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
-	uint8_t packetIdx = header[7];
+	const int packetIdx = static_cast<int>(id & 0xff);
 
 	auto slot = &outbound.packets[packetIdx];
 
 	if (slot->seqIdx != 0xffff) {
-		if (slot->seqIdx == seqIdx) {
-			if (statsListener) {
-				statsListener->onPacketAcked(slot->seqIdx);
-			}
-
-			slot->clear();
-		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
-			Logger::logDev("rcv mismatch ACK for slot " + toString(static_cast<int>(packetIdx)) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
+		if (statsListener) {
+			statsListener->onPacketAcked(slot->seqIdx);
 		}
-	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
-		Logger::logDev("rcv ACK for empty slot " + toString(static_cast<int>(packetIdx)) + ", remote seqIdx " + toString(seqIdx));
+
+		slot->clear();
+	} else {
+		Logger::logDev("rcv ACK for empty slot " + toString(packetIdx));
 	}
 }
 
 void AckUnreliableConnection::onUnreliablePacketLost(uint64_t id)
 {
 	HalleyAssertDev(platformSupportsAck);
+	HalleyAssertDev((id & ~0x1ff) == 0);
 
-	const auto header = reinterpret_cast<const uint8_t *>(&id);
-
-	const uint8_t parity = header[3];
-	const uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
-	const uint8_t packetIdx = header[7];
+	const int packetIdx = static_cast<int>(id & 0xff);
 
 	auto slot = &outbound.packets[packetIdx];
 
 	if (slot->seqIdx != 0xffff) {
-		if (slot->seqIdx == seqIdx) {
-			if (statsListener) {
-				statsListener->onPackedLost(slot->seqIdx);
-			}
-
-			slot->lost = true;
-		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
-			Logger::logDev("rcv mismatch LOST for slot " + toString(static_cast<int>(packetIdx)) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
+		if (statsListener) {
+			statsListener->onPackedLost(slot->seqIdx);
 		}
-	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
-		Logger::logDev("rcv LOST for empty slot " + toString(static_cast<int>(packetIdx)) + ", remote seqIdx " + toString(seqIdx));
+
+		slot->lost = true;
+	} else {
+		Logger::logDev("rcv LOST for empty slot " + toString(packetIdx));
 	}
 }
 
