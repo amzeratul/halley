@@ -13,7 +13,7 @@ namespace Halley {
         size_t getSrcRowCount() const override;
         
         std::pair<Vector<float>, Vector<String>> getColumns() const override;
-        void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const override;
+        void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites, Vector<Vector<ColourOverride>>& colourOverrides) const override;
         String getCellToolTip(int row, int col, const String& columnName) const override;
 
         void onRightClick(std::optional<int> line) override;
@@ -36,6 +36,8 @@ namespace Halley {
     	void generateMapping();
         String getTypeDesc(LocStringUploadEntryType type, bool minor) const;
         std::optional<Colour4f> getRowColour(int row) const;
+        Vector<ColourOverride> getColourOverrides(const Vector<std::pair<StringDiffType, size_t>>& values) const;
+        Colour4f getColourOverride(StringDiffType diffType) const;
     };
 
     class LocUploadStringsState {

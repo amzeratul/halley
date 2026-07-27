@@ -2,6 +2,26 @@
 
 using namespace Halley;
 
+void LocStringUploadChunkData::Entry::makeDiff()
+{
+	Vector<StringDiffEntry> diff;
+	if (type == LocStringUploadEntryType::Modified) {
+		diff = StringDiff::makeWordDiff(*remoteValue, value);
+	} else if (type == LocStringUploadEntryType::Added) {
+		diff = StringDiff::makeWordDiff("", value);
+	} else if (type == LocStringUploadEntryType::Removed) {
+		diff = StringDiff::makeWordDiff(*remoteValue, "");
+	} else {
+		diff = StringDiff::makeWordDiff(value, value);
+	}
+
+	valueDiff = DiffEntry();
+	for (auto& d: diff) {
+		valueDiff->changeTypes += std::pair(d.type, valueDiff->str.size());
+		valueDiff->str += d.str;
+	}
+}
+
 LocStringUploadChunkData::LocStringUploadChunkData(String chunkId, bool isDelete)
 	: chunkId(std::move(chunkId))
 	, isDelete(isDelete)
@@ -48,7 +68,7 @@ LocStringUploadChunkData::LocStringUploadChunkData(const LocOriginalDataChunk& c
 			}
 		}
 		
-		entries += Entry{ e.getKey(), e.getValue(), std::move(remoteValue), std::nullopt, type, true };
+		entries += Entry{ e.getKey(), e.getValue(), std::move(remoteValue), std::nullopt, std::nullopt, type, true };
 	}
 	
 	if (remote) {
@@ -85,7 +105,7 @@ LocStringUploadChunkData::LocStringUploadChunkData(const LocOriginalDataChunk& c
 		for (size_t i = 0; i < n; ++i) {
 			const auto& e = remote->getEntry(i);
 			if (!myEntries.contains(e.getKey()) && !renamedKeys.contains(e.getKey())) {
-				entries += Entry { e.getKey(), "", e.getValue(), std::nullopt, LocStringUploadEntryType::Removed, true };
+				entries += Entry { e.getKey(), "", e.getValue(), std::nullopt, std::nullopt, LocStringUploadEntryType::Removed, true };
 			}
 		}
 	}
@@ -141,6 +161,13 @@ ConfigNode LocStringUploadChunkData::toConfigNode() const
 	return result;
 }
 
+void LocStringUploadChunkData::makeDiff()
+{
+	for (auto& e: entries) {
+		e.makeDiff();
+	}
+}
+
 LocStringUploadData::LocStringUploadData(const LocOriginalData& origData, const LocOriginalData& curRemoteData)
 {
 	generate(origData, curRemoteData);
@@ -192,4 +219,11 @@ const Vector<LocStringUploadChunkData>& LocStringUploadData::getChunks() const
 Vector<LocStringUploadChunkData>& LocStringUploadData::getChunks()
 {
 	return chunks;
+}
+
+void LocStringUploadData::makeDiff()
+{
+	for (auto& c: chunks) {
+		c.makeDiff();
+	}
 }

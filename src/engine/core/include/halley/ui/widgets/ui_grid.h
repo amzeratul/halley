@@ -56,7 +56,7 @@ namespace Halley {
         bool onKeyPress(KeyboardKeyPress key) override;
 
         virtual std::pair<Vector<float>, Vector<String>> getColumns() const;
-        virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const;
+        virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites, Vector<Vector<ColourOverride>>& colourOverrides) const;
         virtual String getCellToolTip(int row, int col, const String& columnName) const;
 
         virtual bool onClickCell(int row, int col, KeyMods mods);
@@ -108,7 +108,7 @@ namespace Halley {
         HashMap<int, int> reverseLineIndex;
 
         void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
-		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours, gsl::span<const Sprite> sprites) const;
+		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours, gsl::span<const Sprite> sprites, gsl::span<const Vector<ColourOverride>> colourOverrides) const;
 
         void onClickLine(std::optional<int> line, KeyMods mods);
 

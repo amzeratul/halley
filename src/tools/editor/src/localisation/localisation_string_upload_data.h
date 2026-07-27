@@ -26,14 +26,22 @@ namespace Halley {
 
 	class LocStringUploadChunkData {
 	public:
+		struct DiffEntry {
+			String str;
+			Vector<std::pair<StringDiffType, size_t>> changeTypes;
+		};
+
 		struct Entry {
 			String key;
 			String value;
 			std::optional<String> remoteValue;
 			std::optional<String> oldKey;
+			std::optional<DiffEntry> valueDiff;
 			LocStringUploadEntryType type;
 			bool send = true;
 			bool minorRevision = false;
+
+			void makeDiff();
 		};
 
 		String chunkId;
@@ -44,6 +52,8 @@ namespace Halley {
 		LocStringUploadChunkData(const LocOriginalDataChunk& chunk, const LocOriginalDataChunk* remote = nullptr);
 
 		ConfigNode toConfigNode() const;
+
+		void makeDiff();
 	};
 
 	class LocStringUploadData {
@@ -56,6 +66,8 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 		const Vector<LocStringUploadChunkData>& getChunks() const;
 		Vector<LocStringUploadChunkData>& getChunks();
+
+		void makeDiff();
 
 	private:
 		Vector<LocStringUploadChunkData> chunks;

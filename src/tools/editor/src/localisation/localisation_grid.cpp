@@ -74,7 +74,7 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 	return { columns, columnNames };
 }
 
-void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const
+void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites, Vector<Vector<ColourOverride>>& colourOverrides) const
 {
 	if (origData) {
 		const auto& entry = origData->getEntry(idx);

@@ -11,6 +11,8 @@ LocUploadStringsGrid::LocUploadStringsGrid(UIFactory& factory, LocStringUploadDa
 	, uploadData(data)
 	, keysLocalisedIn(keysLocalisedIn)
 {
+	uploadData.makeDiff();
+
 	tickSprite = Sprite().setImage(factory.getResources(), "ui/check.png");
 	locSprite = Sprite().setImage(factory.getResources(), "ui/localised.png");
 	minorRevSprite = Sprite().setImage(factory.getResources(), "ui/spellcheck.png");
@@ -39,12 +41,12 @@ std::pair<Vector<float>, Vector<String>> LocUploadStringsGrid::getColumns() cons
 	const float fixedWidth = 25 + 25 + 25 + 120 + 40;
 	const float remainingWidth = width - fixedWidth;
 
-	Vector<float> sizes = { 25.0f, 25.0f, 25.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.4f, remainingWidth * 0.4f };
-	Vector<String> names { "Send", "Loc", "Min", "Group", "Status", "Key", "Previous Value", "New Value" };
+	Vector<float> sizes = { 25.0f, 25.0f, 25.0f, 120.0f, 40.0f, remainingWidth * 0.20f, remainingWidth * 0.8f };
+	Vector<String> names { "Send", "Loc", "Min", "Group", "Status", "Key", "Diff" };
 	return { sizes, names };
 }
 
-void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const
+void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites, Vector<Vector<ColourOverride>>& colourOverrides) const
 {
 	const auto& e = getEntry(idx);
 
@@ -55,10 +57,14 @@ void LocUploadStringsGrid::getLineDrawData(int idx, Vector<String>& strs, Vector
 	strs[nSprites + 0] = Path(getChunk(idx).chunkId).getFilename();
 	strs[nSprites + 1] = getTypeDesc(e.type, e.minorRevision);
 	strs[nSprites + 2] = (e.oldKey ? "*" : "") + e.key;
-	strs[nSprites + 3] = e.remoteValue.value_or("");
-	strs[nSprites + 4] = e.value;
+	//strs[nSprites + 3] = e.remoteValue.value_or("");
+	//strs[nSprites + 4] = e.value;
+	strs[nSprites + 3] = e.valueDiff ? e.valueDiff->str : "";
 
 	colours.resize(len, textCol);
+	
+	colourOverrides.resize(len, {});
+	colourOverrides[nSprites + 3] = e.valueDiff ? getColourOverrides(e.valueDiff->changeTypes) : Vector<ColourOverride>();
 
 	sprites.resize(len, {});
 	sprites[0] = e.send ? tickSprite : Sprite();
@@ -87,9 +93,7 @@ String LocUploadStringsGrid::getCellToolTip(int row, int col, const String& colu
 			return "Status: " + toString(e.type);
 		} else if (columnName == "Key") {
 			return (e.oldKey ? *e.oldKey + "\n->\n" : "") + e.key;
-		} else if (columnName == "Previous Value") {
-			return e.remoteValue.value_or("");
-		} else if (columnName == "New Value") {
+		} else if (columnName == "Diff") {
 			return e.value;
 		}
 	}
@@ -168,6 +172,31 @@ std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 		return e.minorRevision ? Colour4f(0.2f, 1.0f, 1.0f, alpha) : Colour4f(1.0f, 1.0f, 0.2f, alpha);
 	}
 	return {};
+}
+
+Vector<ColourOverride> LocUploadStringsGrid::getColourOverrides(const Vector<std::pair<StringDiffType, size_t>>& values) const
+{
+	Vector<ColourOverride> result;
+	result.resize(values.size());
+
+	for (size_t i = 0; i < values.size(); ++i) {
+		result[i] = ColourOverride(values[i].second, getColourOverride(values[i].first));
+	}
+
+	return result;
+}
+
+Colour4f LocUploadStringsGrid::getColourOverride(StringDiffType diffType) const
+{
+	switch (diffType) {
+	case StringDiffType::Add:
+		return Colour4f(0.1f, 1, 0.15f, 1);
+	case StringDiffType::Delete:
+		return Colour4f(1.0f, 0, 0, 1);
+	case StringDiffType::Common:
+	default:
+		return Colour4f(1, 1, 1, 1);
+	}
 }
 
 LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, ProjectWindow& projectWindow, LocalisationClient& client, LocStringUploadData uploadData, HashMap<String, Vector<String>> keysLocalisedIn)
