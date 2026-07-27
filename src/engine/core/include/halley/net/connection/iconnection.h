@@ -57,6 +57,7 @@ namespace Halley
 
 		// By default, resend un-ACK'd packets after <latency * 1.5> seconds.
 		[[nodiscard]] virtual float getUnreliablePacketResendTime(float averageAckTime) { return averageAckTime * 1.5f; }
+		[[nodiscard]] virtual bool doesInternalPacketAck() const { return false; }
 
         virtual void onConnect(short connId) {}
 

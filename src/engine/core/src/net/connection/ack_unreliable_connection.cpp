@@ -32,7 +32,7 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
     	memset(p.data.data() + 3, 0, totalMaxPacketSize - 3);
     }
 
-	platformSupportsAck = !(this->parent->getUnreliablePacketResendTime(1.0f) > 0.0f);
+	platformSupportsAck = this->parent->doesInternalPacketAck();
 }
 
 void AckUnreliableConnection::close()
