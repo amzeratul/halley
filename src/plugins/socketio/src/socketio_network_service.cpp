@@ -534,7 +534,7 @@ void SocketIOConnection::sendUnreliablePacket(gsl::span<const std::byte> packet,
 void SocketIOConnection::receiveUnreliablePacket(gsl::span<const std::byte> packet) const
 {
 	if (packetListener != nullptr) {
-		packetListener->onReceive(packet);
+		packetListener->onUnreliablePacketReceived(packet);
 	} else {
 		Logger::logError("No packet listener registered, packet will be lost", true);
 	}
