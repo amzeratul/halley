@@ -24,6 +24,8 @@ namespace Halley
 		void stopListening() override;
 		std::shared_ptr<IConnection> connect(const String& address) override;
 
+		UniqueLock<Mutex> lock() override { return UniqueLock(mutex); }
+
 	private:
 		class UDPAcceptor : public Acceptor {
 		public:
@@ -44,6 +46,8 @@ namespace Halley
 		UDPEndpoint remoteEndpoint;
 		asio::ip::udp::socket socket;
 		HashMap<short, std::shared_ptr<AsioUDPConnection>> activeConnections;
+
+		Mutex mutex;
 
 		void receivePacket(UDPEndpoint& endpoint, gsl::span<std::byte> data, std::string* error);
 

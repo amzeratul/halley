@@ -3,6 +3,7 @@
 #include "halley/net/connection/instability_simulator.h"
 #include "asio_udp_network_service.h"
 #include "asio_udp_connection.h"
+#include "halley/concurrency/concurrent.h"
 #include <iostream>
 
 using namespace Halley;
@@ -54,15 +55,19 @@ void AsioUDPNetworkService::update(Time t)
 		active.erase(i);
 	}
 
-	// Update service
-	service.poll();
+	if (t > 0.0) /* Avoid scheduling this more than once per frame. */ {
+		auto callback = [this](UDPEndpoint& remote, gsl::span<std::byte> packet) {
+			std::string* errorMsgPtr = nullptr;
+			receivePacket(remote, packet, errorMsgPtr);
+		};
 
-    auto callback = [this](UDPEndpoint& remote, gsl::span<std::byte> packet) {
-        std::string* errorMsgPtr = nullptr;
-        receivePacket(remote, packet, errorMsgPtr);
-    };
-
-    AsioUDPConnection::receiveAll(socket, activeConnections, callback);
+		Concurrent::execute(Executors::getCPU(), [this, callback] () {
+			// Update service
+			service.poll();
+			UniqueLock lock(mutex);
+			AsioUDPConnection::receiveAll(socket, activeConnections, callback);
+		});
+	}
 }
 
 std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& address)
