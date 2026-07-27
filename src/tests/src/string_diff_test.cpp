@@ -6,8 +6,8 @@ using namespace Halley;
 
 TEST(HalleyStringDiffTest, Test)
 {
-	std::string_view a = "Hello world, how are all of you?";
-	std::string_view b = "Hello wonderful world, how are you!?";
+	std::string_view a = "Ah, the oscilloscope has detected a sine wave!";
+	std::string_view b = "We have detected a most unusual sine wave!";
 
 	auto diff = StringDiff::makeWordDiff(a, b);
 

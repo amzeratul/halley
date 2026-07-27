@@ -22,6 +22,46 @@ namespace {
 
 	Vector<StringDiffEntry> postProcess(Vector<StringDiffEntry> src)
 	{
+		// Collapse small common strings to preceding ones
+		// e.g. +"Hello" -"Hi" c" " -> +"Hello " -"Hi "
+		size_t n = src.size();
+		for (size_t i = 0; i < n; ++i) {
+			if (i >= 2 && src[i].type == StringDiffType::Common) {
+				const auto t0 = src[i - 2].type;
+				const auto t1 = src[i - 1].type;
+				if ((t0 == StringDiffType::Add && t1 == StringDiffType::Delete) || (t0 == StringDiffType::Delete && t1 == StringDiffType::Add)) {
+					if (String::getUTF32Len(src[i].str) <= 2) {
+						src[i - 2].str += src[i].str;
+						src[i - 1].str += src[i].str;
+						src.erase(src.begin() + i);
+						--i;
+						--n;
+					}
+				}
+			}
+		}
+
+		// Merge adds and deletes as long as they don't go over a "common"
+		std::optional<size_t> lastAdd;
+		std::optional<size_t> lastDel;
+		for (size_t i = 0; i < n; ++i) {
+			if (src[i].type == StringDiffType::Common) {
+				lastAdd = lastDel = std::nullopt;
+				continue;
+			}
+
+			auto& lastIdx = src[i].type == StringDiffType::Add ? lastAdd : lastDel;
+			if (lastIdx) {
+				src[*lastIdx].str += src[i].str;
+				src.erase(src.begin() + i);
+				--i;
+				--n;
+			} else {
+				lastIdx = i;
+			}
+		}
+
+		// Make whitespace only changes visible
 		for (auto& e: src) {
 			if (e.type == StringDiffType::Add || e.type == StringDiffType::Delete) {
 				if (!isVisible(e.str)) {
@@ -109,7 +149,7 @@ Vector<StringDiffEntry> StringDiff::makeDiff(std::string_view a, std::string_vie
 	} else if (a.empty()) {
 		return makeTrivial(b, StringDiffType::Add);
 	} else if (b.empty()) {
-		return makeTrivial(a, StringDiffType::Add);
+		return makeTrivial(a, StringDiffType::Delete);
 	}
 
 	return doMakeDiff<char, std::string_view>(a, b);
@@ -122,7 +162,7 @@ Vector<StringDiffEntry> StringDiff::makeWordDiff(std::string_view a, std::string
 	} else if (a.empty()) {
 		return makeTrivial(b, StringDiffType::Add);
 	} else if (b.empty()) {
-		return makeTrivial(a, StringDiffType::Add);
+		return makeTrivial(a, StringDiffType::Delete);
 	}
 
 	Vector<String> wordsA = splitInWords(a);

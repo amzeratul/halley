@@ -158,7 +158,7 @@ String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type, bool min
 
 std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 {
-	constexpr float alpha = 0.2f;
+	constexpr float alpha = 0.12f;
 
 	const auto& e = getEntry(row);
 	switch (e.type) {
@@ -169,7 +169,7 @@ std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 	case LocStringUploadEntryType::Removed:
 		return Colour4f(1.0f, 0.2f, 0.2f, alpha);
 	case LocStringUploadEntryType::Modified:
-		return e.minorRevision ? Colour4f(0.2f, 1.0f, 1.0f, alpha) : Colour4f(1.0f, 1.0f, 0.2f, alpha);
+		return e.minorRevision ? Colour4f(0.2f, 1.0f, 1.0f, alpha * 1.5f) : Colour4f(1.0f, 1.0f, 0.2f, alpha);
 	}
 	return {};
 }
