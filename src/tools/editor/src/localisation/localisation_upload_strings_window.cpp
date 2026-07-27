@@ -94,7 +94,7 @@ String LocUploadStringsGrid::getCellToolTip(int row, int col, const String& colu
 		} else if (columnName == "Key") {
 			return (e.oldKey ? *e.oldKey + "\n->\n" : "") + e.key;
 		} else if (columnName == "Diff") {
-			return e.value;
+			return (e.remoteValue ? *e.remoteValue + "\n->\n" : "") + e.value;
 		}
 	}
 	return {};

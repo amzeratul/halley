@@ -5,6 +5,34 @@
 using namespace Halley;
 
 namespace {
+	bool isVisible(const String& str)
+	{
+		for (auto c: std::string_view(str)) {
+			if (c != ' ' && c != '\n' && c != '\t') {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	String makeVisible(const String& str)
+	{
+		return str.replaceAll(u8" ", u8"·").replaceAll(u8"\t", u8"\\t").replaceAll(u8"\n", u8"\\n");
+	}
+
+	Vector<StringDiffEntry> postProcess(Vector<StringDiffEntry> src)
+	{
+		for (auto& e: src) {
+			if (e.type == StringDiffType::Add || e.type == StringDiffType::Delete) {
+				if (!isVisible(e.str)) {
+					e.str = makeVisible(e.str);
+				}
+			}
+		}
+
+		return src;
+	}
+
 	template <typename E, typename S>
 	Vector<StringDiffEntry> doMakeDiff(const S& a, const S& b)
 	{
@@ -35,7 +63,7 @@ namespace {
 			result.back().str += e.first;
 		}
 
-		return result;
+		return postProcess(result);
 	}
 
 	bool isSeparator(char c)

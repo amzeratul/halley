@@ -17,7 +17,7 @@ void LocStringUploadChunkData::Entry::makeDiff()
 
 	valueDiff = DiffEntry();
 	for (auto& d: diff) {
-		valueDiff->changeTypes += std::pair(d.type, valueDiff->str.size());
+		valueDiff->changeTypes += std::pair(d.type, String::getUTF32Len(valueDiff->str));
 		valueDiff->str += d.str;
 	}
 }
