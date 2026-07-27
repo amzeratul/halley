@@ -61,15 +61,12 @@ void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> 
 void RenderSnapshot::draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads)
 {
 	getCurDrawCall().emplace_back(CommandType::Draw, static_cast<uint16_t>(drawDatas.size()));
-	drawDatas.push_back(DrawData{ &material, {}, numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
+	drawDatas.push_back(DrawData{ material.clone(), numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
 	finishDrawCall();
 }
 
 void RenderSnapshot::finish()
 {
-	for (auto& drawData: drawDatas) {
-		drawData.material = drawData.materialTemp->clone();
-	}
 }
 
 size_t RenderSnapshot::getNumCommands() const

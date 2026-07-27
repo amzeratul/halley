@@ -130,8 +130,36 @@ KeyMods InputKeyboardSDL::getMods(int sdlMods) const
 
 String InputKeyboardSDL::getButtonName(int code) const
 {
-	auto keycode = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(code));
-	return String(SDL_GetKeyName(keycode));
+	const auto keycode = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(code));
+	auto name = String(SDL_GetKeyName(keycode));
+
+	if (name.startsWith("Keypad")) {
+		name = name.replaceOne("Keypad", "KP");
+	} else if (name == "Left Ctrl") {
+		name = "LCtrl";
+	} else if (name == "Right Ctrl") {
+		name = "RCtrl";
+	} else if (name == "Left Alt") {
+		name = "LAlt";
+	} else if (name == "Right Alt") {
+		name = "RAlt";
+	} else if (name == "PrintScreen") {
+		name = "PrtSc";
+	} else if (name == "ScrollLock") {
+		name = "ScrLk";
+	} else if (name == "PageDown") {
+		name = "PgDn";
+	} else if (name == "PageUp") {
+		name = "PgUp";
+	} else if (name == "Delete") {
+		name = "Del";
+	} else if (name == "Insert") {
+		name = "Ins";
+	} else if (name == "Numlock") {
+		name = "Num";
+	}
+
+	return name;
 }
 
 void InputKeyboardSDL::update()

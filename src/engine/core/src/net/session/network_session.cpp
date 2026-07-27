@@ -465,14 +465,18 @@ void NetworkSession::processReceive()
 	}
 }
 
-void NetworkSession::closeConnection(PeerId peerId, const String& reason)
+bool NetworkSession::closeConnection(PeerId peerId, std::string_view errorMessage)
 {
-	Logger::logError("Closing connection: " + reason);
+	if (!errorMessage.empty()) {
+		Logger::logError("Closing connection: " + String(errorMessage));
+	}
 	for (auto& p: peers) {
 		if (p.peerId == peerId) {
 			disconnectPeer(p);
+			return true;
 		}
 	}
+	return false;
 }
 
 void NetworkSession::retransmitControlMessage(PeerId peerId, gsl::span<const std::byte> bytes)
@@ -839,6 +843,14 @@ size_t NetworkSession::doGetMaxPacketSize() const
 	} else {
 		return smallestMaxSize;
 	}
+}
+
+bool NetworkSession::kickPeer(PeerId id)
+{
+	if (getType() == NetworkSessionType::Host) {
+		return closeConnection(id);
+	}
+	return false;
 }
 
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)

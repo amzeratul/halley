@@ -10,18 +10,18 @@
 #include "halley/game/scene_editor_interface.h"
 #include "halley/editor_extensions/asset_preview_generator.h"
 #include "halley/time/halleytime.h"
-#include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/dll/project_dll.h"
 
 namespace Halley
 {
+	enum class ReimportType;
 	class FileSystemCache;
 	class ProjectComments;
 	class GameProperties;
 	class IHalleyEntryPoint;
 	class ProjectLoader;
 	class ImportAssetsDatabase;
-
+	class CheckAssetsTask;
 	class HalleyStatics;
 	class IHalleyPlugin;
 	class DevConServer;
@@ -77,18 +77,18 @@ namespace Halley
 		const Path& getHalleyRootPath() const override;
 		
 		const Path& getRootPath() const override;		
-		Path getUnpackedAssetsPath() const;
+		const Path& getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath(const String& platform) const;
-		Path getAssetsSrcPath() const override;
-		Path getSharedAssetsSrcPath() const;
-		Path getEditorAssetsSrcPath() const;
+		const Path& getAssetsSrcPath() const override;
+		const Path& getSharedAssetsSrcPath() const;
+		const Path& getEditorAssetsSrcPath() const;
 
-		Path getGenPath() const;
-		Path getGenSrcPath() const;
-		Path getSharedGenPath() const;
-		Path getSharedGenSrcPath() const;
+		const Path& getGenPath() const;
+		const Path& getGenSrcPath() const;
+		const Path& getSharedGenPath() const;
+		const Path& getSharedGenSrcPath() const;
 
-		Path getSrcPath() const;
+		const Path& getSrcPath() const;
 
 		void setAssetPackManifest(const Path& path);
 		Path getAssetPackManifestPath() const;
@@ -253,6 +253,16 @@ namespace Halley
 		DevConServer* devConServer = nullptr;
 		const HalleyAPI* api = nullptr;
 		OptionalLite<size_t> devConCallback;
+
+		Path unpackedAssetsPath;
+		Path assetsSrcPath;
+		Path sharedAssetsSrcPath;
+		Path editorAssetsSrcPath;
+		Path genPath;
+		Path genSrcPath;
+		Path sharedGenPath;
+		Path sharedGenSrcPath;
+		Path srcPath;
 
 		struct AssetPreviewCache {
 			int64_t timestamp;

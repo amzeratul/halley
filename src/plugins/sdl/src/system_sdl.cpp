@@ -50,7 +50,7 @@ void SystemSDL::init()
 		}
 	}
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-	SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+	SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "0");
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 	if (SDL_InitSubSystem(SDL_INIT_TIMER) == -1) {
 		throw Exception(String("Exception initializing timer: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);

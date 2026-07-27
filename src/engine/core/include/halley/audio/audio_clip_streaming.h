@@ -16,7 +16,7 @@ namespace Halley
 		void addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate);
 		void addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift, CoreAPI& core, AudioOutputAPI& audioOut);
 
-		String getName() const override;
+		const String& getName() const override;
 		void prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle = nullptr) const override;
 		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;

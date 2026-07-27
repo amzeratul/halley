@@ -113,7 +113,6 @@ namespace Halley {
         };
 
         struct DrawData {
-            const Material* materialTemp;
             std::shared_ptr<Material> material;
             size_t numVertices;
             Vector<char> vertexData;

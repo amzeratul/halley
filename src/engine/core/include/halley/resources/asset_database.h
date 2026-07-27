@@ -25,6 +25,9 @@ namespace Halley
 			void deserialize(Deserializer& s);
 
 			size_t getMemoryUsage() const;
+
+			bool operator==(const Entry& other) const = default;
+			bool operator!=(const Entry& other) const = default;
 		};
 
 		class TypedDB

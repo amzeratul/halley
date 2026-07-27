@@ -79,6 +79,8 @@ namespace Halley {
 		int32_t getLatency(size_t idx) const;
 		[[nodiscard]] size_t getMaxPacketSize() const;
 
+		bool kickPeer(PeerId id);
+
 		template <typename T>
 		T& getMySharedData()
 		{
@@ -200,7 +202,7 @@ namespace Halley {
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
 		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
 		
-		void closeConnection(PeerId peerId, const String& reason);
+		bool closeConnection(PeerId peerId, std::string_view errorMessage = "");
 		void processReceive();
 
 		void retransmitControlMessage(PeerId peerId, gsl::span<const std::byte> bytes);

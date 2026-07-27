@@ -799,9 +799,14 @@ void InputVirtual::setRepeat(float first, float hold)
 	repeatDelayHold = hold;
 }
 
+void InputVirtual::setJoystickTypeOverride(std::optional<JoystickType> type)
+{
+	joystickTypeOverride = type;
+}
+
 JoystickType InputVirtual::getJoystickType() const
 {
-	return lastJoystickType;
+	return joystickTypeOverride.value_or(lastJoystickType);
 }
 
 InputType InputVirtual::getInputType() const

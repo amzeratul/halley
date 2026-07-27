@@ -25,16 +25,27 @@
 #include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
 #include "../steam/steam_utils.h"
+#include "halley/tools/assets/check_assets_task.h"
 
 using namespace Halley;
 
-constexpr static int currentAssetVersion = 170;
+constexpr static int currentAssetVersion = 171;
 constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
 
-Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms)
+Project::Project(Path projectRootPath, Path _halleyRootPath, Vector<String> disabledPlatforms)
 	: rootPath(std::move(projectRootPath))
-	, halleyRootPath(std::move(halleyRootPath))
+	, halleyRootPath(std::move(_halleyRootPath))
 {
+	unpackedAssetsPath = rootPath / "assets_unpacked";
+	assetsSrcPath = rootPath / "assets_src";
+	sharedAssetsSrcPath = halleyRootPath / "shared_assets";
+	editorAssetsSrcPath = halleyRootPath / "assets_src";
+	genPath = rootPath / "gen";
+	genSrcPath = rootPath / "gen_src";
+	sharedGenPath = halleyRootPath / "shared_gen";
+	sharedGenSrcPath = halleyRootPath / "shared_gen_src";
+	srcPath = rootPath / "src";
+
 	allowPackedAssets = false;
 	fileSystemCache = std::make_unique<FileSystemCache>();
 
@@ -204,9 +215,9 @@ const Path& Project::getRootPath() const
 	return rootPath;
 }
 
-Path Project::getUnpackedAssetsPath() const
+const Path& Project::getUnpackedAssetsPath() const
 {
-	return rootPath / "assets_unpacked";
+	return unpackedAssetsPath;
 }
 
 Path Project::getPackedAssetsPath(const String& platform) const
@@ -215,44 +226,44 @@ Path Project::getPackedAssetsPath(const String& platform) const
 	return rootPath / ("assets" + suffix);
 }
 
-Path Project::getAssetsSrcPath() const
+const Path& Project::getAssetsSrcPath() const
 {
-	return rootPath / "assets_src";
+	return assetsSrcPath;
 }
 
-Path Project::getSharedAssetsSrcPath() const
+const Path& Project::getSharedAssetsSrcPath() const
 {
-	return halleyRootPath / "shared_assets";
+	return sharedAssetsSrcPath;
 }
 
-Path Project::getEditorAssetsSrcPath() const
+const Path& Project::getEditorAssetsSrcPath() const
 {
-	return halleyRootPath / "assets_src";
+	return editorAssetsSrcPath;
 }
 
-Path Project::getGenPath() const
+const Path& Project::getGenPath() const
 {
-	return rootPath / "gen";
+	return genPath;
 }
 
-Path Project::getGenSrcPath() const
+const Path& Project::getGenSrcPath() const
 {
-	return rootPath / "gen_src";
+	return genSrcPath;
 }
 
-Path Project::getSharedGenPath() const
+const Path& Project::getSharedGenPath() const
 {
-	return halleyRootPath / "shared_gen";
+	return sharedGenPath;
 }
 
-Path Project::getSharedGenSrcPath() const
+const Path& Project::getSharedGenSrcPath() const
 {
-	return halleyRootPath / "shared_gen_src";
+	return sharedGenSrcPath;
 }
 
-Path Project::getSrcPath() const
+const Path& Project::getSrcPath() const
 {
-	return rootPath / "src";
+	return srcPath;
 }
 
 Path Project::getAssetPackManifestPath() const

@@ -142,6 +142,14 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 	outbox[peerId].push_back(std::move(msg));
 }
 
+bool EntityNetworkSession::kickPeer(NetworkSession::PeerId id)
+{
+	if (session && isHost()) {
+		return session->kickPeer(id);
+	}
+	return false;
+}
+
 void EntityNetworkSession::requestLobbyInfo()
 {
 	if (isHost()) {

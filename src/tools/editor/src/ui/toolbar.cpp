@@ -7,6 +7,7 @@
 #include "halley/ui/ui_sizer.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/text/string_converter.h"
+#include "halley/tools/assets/check_assets_task.h"
 
 using namespace Halley;
 

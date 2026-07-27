@@ -101,6 +101,8 @@ namespace Halley {
 		void sendToAll(EntityNetworkMessage msg);
 		void sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
+		bool kickPeer(NetworkSession::PeerId id);
+
 		void requestLobbyInfo();
 		void setLobbyInfo(ConfigNode info);
 

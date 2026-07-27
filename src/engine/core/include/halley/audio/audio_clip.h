@@ -23,7 +23,7 @@ namespace Halley
 		virtual ~IAudioClip() = default;
 
 		virtual bool isLoaded() const { return true; }
-		virtual String getName() const { return ""; }
+		virtual const String& getName() const { return String::emptyString(); }
 
 		virtual uint8_t getNumberOfChannels() const = 0;
 		virtual size_t getLength() const = 0; // in samples
@@ -50,7 +50,7 @@ namespace Halley
 		void loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta);
 
 		bool isLoaded() const override;
-		String getName() const override;
+		const String& getName() const override;
 
 		uint8_t getNumberOfChannels() const override;
 		size_t getLength() const override; // in samples

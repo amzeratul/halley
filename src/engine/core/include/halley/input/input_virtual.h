@@ -118,6 +118,7 @@ namespace Halley {
 		void setLastDeviceToType(InputType type);
 		void setLastDeviceFreeze(bool frozen);
 
+		void setJoystickTypeOverride(std::optional<JoystickType> type);
 		JoystickType getJoystickType() const override;
 		InputType getInputType() const override;
 
@@ -215,6 +216,7 @@ namespace Halley {
 		spInputDevice vibrationOverride;
 		std::weak_ptr<InputDevice> lastDevice;
 		JoystickType lastJoystickType = JoystickType::None;
+		std::optional<JoystickType> joystickTypeOverride;
 		bool lastDeviceSet = false;
 		bool lastDeviceFrozen = false;
 		

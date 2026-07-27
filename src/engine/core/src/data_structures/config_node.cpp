@@ -1231,6 +1231,15 @@ Range<int> ConfigNode::asIntRange(Range<int> defaultValue) const
 	}
 }
 
+Bytes ConfigNode::asBytes(Bytes defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return std::move(defaultValue);
+	} else {
+		return asBytes();
+	}
+}
+
 String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {

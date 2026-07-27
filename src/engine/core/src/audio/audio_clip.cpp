@@ -74,7 +74,7 @@ void AudioClip::load(std::shared_ptr<ResourceData> data, Metadata metadata, bool
 	doneLoading();
 }
 
-String AudioClip::getName() const
+const String& AudioClip::getName() const
 {
 	return getAssetId();
 }
