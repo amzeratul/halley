@@ -165,7 +165,7 @@ std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 	case LocStringUploadEntryType::Removed:
 		return Colour4f(1.0f, 0.2f, 0.2f, alpha);
 	case LocStringUploadEntryType::Modified:
-		return e.minorRevision ? Colour4f(0.2f, 1.0f, 1.0f, alpha) : Colour4f(1.0f, 1.0f, 0.2f, alpha * 1.5f);
+		return e.minorRevision ? Colour4f(0.2f, 1.0f, 1.0f, alpha) : Colour4f(1.0f, 1.0f, 0.2f, alpha);
 	}
 	return {};
 }
@@ -193,12 +193,17 @@ void LocUploadStringsWindow::onMakeUI()
 
 	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData, keysLocalisedIn);
 	loadState();
-	grid->setFilter([=] (int row) -> bool {
-		if (onlyShowSend) {
-			return grid->getEntry(row).send;
-		} else {
-			return true;
+	grid->setFilter([this] (int row) -> bool {
+		if (onlyShowSend || onlyShowModified) {
+			const auto& entry = grid->getEntry(row);
+			if (onlyShowSend && !entry.send) {
+				return false;
+			}
+			if (onlyShowModified && entry.type != LocStringUploadEntryType::Modified) {
+				return false;
+			}
 		}
+		return true;
 	});
 	getWidget("gridContainer")->add(grid, 1);
 
@@ -234,8 +239,13 @@ void LocUploadStringsWindow::onMakeUI()
 		saveReport();
 	});
 
-	bindData("onlyShowSend", onlyShowSend, [=] (bool value) {
+	bindData("onlyShowSend", onlyShowSend, [this] (bool value) {
 		onlyShowSend = value;
+		grid->refreshFilter();
+	});
+
+	bindData("onlyShowModified", onlyShowModified, [this] (bool value) {
+		onlyShowModified = value;
 		grid->refreshFilter();
 	});
 

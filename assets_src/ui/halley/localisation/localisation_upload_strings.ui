@@ -72,6 +72,13 @@ children:
                   id: onlyShowSend
                   label: Only show marked
                 fill: [fillHorizontal, centreVertical]
+              - uuid: cd7b1a31-9584-492e-9f95-4c1cb21a79c0
+                border: [0, 0, 10, 0]
+                widget:
+                  class: checkbox
+                  id: onlyShowModified
+                  label: Only show modified
+                fill: [fillHorizontal, centreVertical]
               - uuid: 180e643f-b213-4ebf-bef2-7f42701e27f2
                 proportion: 1
                 widget:

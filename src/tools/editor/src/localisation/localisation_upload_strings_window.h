@@ -86,6 +86,7 @@ namespace Halley {
         std::shared_ptr<LocUploadStringsGrid> grid;
 
         bool onlyShowSend = false;
+        bool onlyShowModified = false;
 
         enum class Status {
 	        Idle,
