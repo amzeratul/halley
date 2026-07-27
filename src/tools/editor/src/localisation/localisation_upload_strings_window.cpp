@@ -2,6 +2,7 @@
 
 #include "localisation_client.h"
 #include "localisation_grid.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -129,6 +130,11 @@ LocStringUploadChunkData::Entry& LocUploadStringsGrid::getEntry(int idx) const
 	return uploadData.getChunks()[i.first].entries[i.second];
 }
 
+size_t LocUploadStringsGrid::getNumEntries() const
+{
+	return mapping.size();
+}
+
 String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type, bool minor) const
 {
 	switch (type) {
@@ -164,9 +170,10 @@ std::optional<Colour4f> LocUploadStringsGrid::getRowColour(int row) const
 	return {};
 }
 
-LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, LocalisationClient& client, LocStringUploadData uploadData, HashMap<String, Vector<String>> keysLocalisedIn)
+LocUploadStringsWindow::LocUploadStringsWindow(UIFactory& factory, ProjectWindow& projectWindow, LocalisationClient& client, LocStringUploadData uploadData, HashMap<String, Vector<String>> keysLocalisedIn)
 	: UIWidget("upload_strings", {}, UISizer())
 	, factory(factory)
+	, projectWindow(projectWindow)
 	, client(client)
 	, uploadData(std::move(uploadData))
 	, keysLocalisedIn(std::move(keysLocalisedIn))
@@ -185,7 +192,7 @@ void LocUploadStringsWindow::onMakeUI()
 	}
 
 	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData, keysLocalisedIn);
-	markAllSend(false);
+	loadState();
 	grid->setFilter([=] (int row) -> bool {
 		if (onlyShowSend) {
 			return grid->getEntry(row).send;
@@ -360,6 +367,7 @@ void LocUploadStringsWindow::markSend(const HashSet<int>& lines, bool toSend)
 	}
 	updateSummary();
 	grid->refreshFilter();
+	saveState();
 }
 
 void LocUploadStringsWindow::markMinor(const HashSet<int>& lines, bool minor)
@@ -371,6 +379,7 @@ void LocUploadStringsWindow::markMinor(const HashSet<int>& lines, bool minor)
 		}
 	}
 	grid->refreshColours();
+	saveState();
 }
 
 void LocUploadStringsWindow::selectGroup()
@@ -437,4 +446,101 @@ String LocUploadStringsWindow::generateReport() const
 	}
 
 	return csv.save();
+}
+
+void LocUploadStringsWindow::saveState()
+{
+	const auto n = static_cast<int>(grid->getNumEntries());
+	for (int i = 0; i < n; ++i) {
+		const auto& e = grid->getEntry(i);
+		if (e.send || e.minorRevision) {
+			state.get(e.key) = LocUploadStringsState::Entry(e.send, e.minorRevision);
+		} else {
+			state.remove(e.key);
+		}
+	}
+
+	projectWindow.setSetting(EditorSettingType::Project, "locUploadState", state.toConfigNode());
+}
+
+void LocUploadStringsWindow::loadState()
+{
+	state = LocUploadStringsState(projectWindow.getSetting(EditorSettingType::Project, "locUploadState"));
+
+	const auto n = static_cast<int>(grid->getNumEntries());
+	for (int i = 0; i < n; ++i) {
+		auto& e = grid->getEntry(i);
+		if (auto* stateEntry = state.tryGet(e.key)) {
+			e.minorRevision = stateEntry->minor;
+			e.send = stateEntry->send;
+		} else {
+			e.minorRevision = false;
+			e.send = false;
+		}
+	}
+
+	updateSummary();
+	grid->refreshFilter();
+	grid->refreshColours();
+}
+
+LocUploadStringsState::Entry::Entry(bool send, bool minor)
+	: send(send)
+	, minor(minor)
+{
+}
+
+LocUploadStringsState::Entry::Entry(const ConfigNode& node)
+{
+	send = node["send"].asBool(false);
+	minor = node["minor"].asBool(false);
+}
+
+ConfigNode LocUploadStringsState::Entry::toConfigNode() const
+{
+	ConfigNode result;
+	result["send"] = send;
+	result["minor"] = minor;
+	return result;
+}
+
+LocUploadStringsState::LocUploadStringsState(const ConfigNode& node)
+{
+	entries = node["entries"].asHashMap<String, Entry>();
+}
+
+ConfigNode LocUploadStringsState::toConfigNode() const
+{
+	ConfigNode result;
+	result["entries"] = entries;
+	return result;
+}
+
+HashMap<String, LocUploadStringsState::Entry>& LocUploadStringsState::getEntries()
+{
+	return entries;
+}
+
+const HashMap<String, LocUploadStringsState::Entry>& LocUploadStringsState::getEntries() const
+{
+	return entries;
+}
+
+LocUploadStringsState::Entry& LocUploadStringsState::get(const String& key)
+{
+	return entries[key];
+}
+
+const LocUploadStringsState::Entry* LocUploadStringsState::tryGet(const String& key) const
+{
+	const auto iter = entries.find(key);
+	if (iter != entries.end()) {
+		return &iter->second;
+	}
+	return nullptr;
+}
+
+void LocUploadStringsState::remove(const String& key)
+{
+	entries.erase(key);
 }
