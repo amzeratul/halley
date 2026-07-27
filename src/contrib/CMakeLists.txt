@@ -189,6 +189,15 @@ set(HEADERS
         "zlib/zconf.h"
         "zlib/zlib.h"
         "zlib/zutil.h"
+
+        "dtl/Diff.hpp"
+        "dtl/Diff3.hpp"
+        "dtl/dtl.hpp"
+        "dtl/functors.hpp"
+        "dtl/Lcs.hpp"
+        "dtl/Sequence.hpp"
+        "dtl/Ses.hpp"
+        "dtl/variables.hpp"
         )
 
 if(NOT BUILD_HALLEY_TOOLS)

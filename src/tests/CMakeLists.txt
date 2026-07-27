@@ -21,6 +21,7 @@ set(SOURCES
         "src/polygon_test.cpp"
         "src/ring_buffer_test.cpp"
         "src/serializer_test.cpp"
+        "src/string_diff_test.cpp"
         "src/vector_test.cpp"
         )
 
