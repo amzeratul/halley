@@ -72,6 +72,7 @@ void UIGrid::draw(UIPainter& painter) const
 	const auto n = static_cast<int>(getActiveRowCount());
 	const auto firstLine = clamp(static_cast<int>(std::floor(relClip.getTop() / lineHeight)) - 1, 0, std::max(0, n - 1));
 	const auto lastLine = clamp(static_cast<int>(std::ceil(relClip.getBottom() / lineHeight)) - 1, 0, n - 1);
+	linesPerPage = lastLine - firstLine + 1;
 
 	// Entries
 	auto p2 = painter.withClip(relClip.grow(0, -lineHeight - 1, 0, 0) + getPosition());
@@ -165,6 +166,16 @@ void UIGrid::draw(UIPainter& painter) const
 	drawLine(painter, relClip.getTopLeft() + getPosition(), columns, columnNames.const_span(), {}, {}, {});
 }
 
+void UIGrid::onAddedToRoot(UIRoot& root)
+{
+	root.registerKeyPressListener(shared_from_this());
+}
+
+void UIGrid::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
 void UIGrid::drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const
 {
 	Vector<String> strs;
@@ -244,6 +255,10 @@ const String& UIGrid::getActiveSelectedKey() const
 void UIGrid::setSelectedLine(int line)
 {
 	onClickLine(line, KeyMods::None);
+
+	const float height = getLineHeight();
+	const float y0 = static_cast<float>(line + 1) * height;
+	sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), Rect4f(0, y0 - height, getSize().x, 2 * height)));
 }
 
 void UIGrid::setSelectedLines(HashSet<int> lines)
@@ -541,6 +556,16 @@ bool UIGrid::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::Down)) {
 		moveSelection(1);
+		return true;
+	}
+
+	if (key.is(KeyCode::PageUp)) {
+		moveSelection(-linesPerPage + 1);
+		return true;
+	}
+
+	if (key.is(KeyCode::PageDown)) {
+		moveSelection(linesPerPage - 1);
 		return true;
 	}
 

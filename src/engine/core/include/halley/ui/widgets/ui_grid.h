@@ -15,6 +15,9 @@ namespace Halley {
         void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 
+        void onAddedToRoot(UIRoot& root) override;
+        void onRemovedFromRoot(UIRoot& root) override;
+
         void setLineColourFilter(LineColourCallback callback);
         void setFilter(FilterCallback callback, bool refresh = true);
         bool refreshFilter();
@@ -86,6 +89,7 @@ namespace Halley {
 
         float fontSize = 13;
 		float cellBorder = 3;
+        mutable int linesPerPage = 1;
 
         LineColourCallback lineColourFilter;
         FilterCallback filter;

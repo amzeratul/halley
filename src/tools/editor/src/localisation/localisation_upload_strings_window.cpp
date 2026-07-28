@@ -6,8 +6,9 @@
 
 using namespace Halley;
 
-LocUploadStringsGrid::LocUploadStringsGrid(UIFactory& factory, LocStringUploadData& data, HashMap<String, Vector<String>>& keysLocalisedIn)
+LocUploadStringsGrid::LocUploadStringsGrid(LocUploadStringsWindow& window, UIFactory& factory, LocStringUploadData& data, HashMap<String, Vector<String>>& keysLocalisedIn)
 	: UIGrid("grid", factory)
+	, window(window)
 	, uploadData(data)
 	, keysLocalisedIn(keysLocalisedIn)
 {
@@ -139,6 +140,20 @@ size_t LocUploadStringsGrid::getNumEntries() const
 	return mapping.size();
 }
 
+bool LocUploadStringsGrid::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::M)) {
+		window.toggleMinor();
+		return true;
+	}
+	if (key.is(KeyCode::S)) {
+		window.toggleSend();
+		return true;
+	}
+
+	return UIGrid::onKeyPress(key);
+}
+
 String LocUploadStringsGrid::getTypeDesc(LocStringUploadEntryType type, bool minor) const
 {
 	switch (type) {
@@ -220,7 +235,7 @@ void LocUploadStringsWindow::onMakeUI()
 		getWidgetAs<UIButton>("upload")->setLabel(LocalisedString::fromHardcodedString("Test Upload"));
 	}
 
-	grid = std::make_shared<LocUploadStringsGrid>(factory, uploadData, keysLocalisedIn);
+	grid = std::make_shared<LocUploadStringsGrid>(*this, factory, uploadData, keysLocalisedIn);
 	loadState();
 	grid->setFilter([this] (int row) -> bool {
 		if (onlyShowSend || onlyShowModified) {
@@ -377,6 +392,46 @@ void LocUploadStringsWindow::updateButtons()
 	getWidget("cancel")->setEnabled(curStatus != Status::Uploading);
 	getWidget("markSend")->setEnabled(curStatus != Status::Success);
 	getWidget("unmarkSend")->setEnabled(curStatus != Status::Success);
+}
+
+void LocUploadStringsWindow::toggleMinor()
+{
+	auto& sel = grid->getSelectedLines();
+	if (sel.empty()) {
+		return;
+	}
+
+	bool anyNotMinor = false;
+	for (auto line: sel) {
+		auto& e = grid->getEntry(line);
+		if (e.type == LocStringUploadEntryType::Modified) {
+			if (!e.minorRevision) {
+				anyNotMinor = true;
+				break;
+			}
+		}
+	}
+
+	markMinor(anyNotMinor);
+}
+
+void LocUploadStringsWindow::toggleSend()
+{
+	auto& sel = grid->getSelectedLines();
+	if (sel.empty()) {
+		return;
+	}
+
+	bool anyNotSend = false;
+	for (auto line: sel) {
+		auto& e = grid->getEntry(line);
+		if (!e.send) {
+			anyNotSend = true;
+			break;
+		}
+	}
+
+	markSend(anyNotSend);
 }
 
 void LocUploadStringsWindow::markSend(bool toSend)

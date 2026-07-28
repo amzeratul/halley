@@ -2,12 +2,13 @@
 #include "localisation_string_upload_data.h"
 
 namespace Halley {
+	class LocUploadStringsWindow;
 	class ProjectWindow;
 	class LocalisationClient;
 
     class LocUploadStringsGrid : public UIGrid {
     public:
-        LocUploadStringsGrid(UIFactory& factory, LocStringUploadData& data, HashMap<String, Vector<String>>& keysLocalisedIn);
+        LocUploadStringsGrid(LocUploadStringsWindow& window, UIFactory& factory, LocStringUploadData& data, HashMap<String, Vector<String>>& keysLocalisedIn);
 
         const String& getKeyAt(int idx) const override;
         size_t getSrcRowCount() const override;
@@ -23,7 +24,10 @@ namespace Halley {
         LocStringUploadChunkData::Entry& getEntry(int idx) const;
         size_t getNumEntries() const;
 
+        bool onKeyPress(KeyboardKeyPress key) override;
+
     private:
+        LocUploadStringsWindow& window;
         LocStringUploadData& uploadData;
         HashMap<String, Vector<String>>& keysLocalisedIn;
 
@@ -76,6 +80,9 @@ namespace Halley {
         void onMakeUI() override;
         void onAddedToRoot(UIRoot& root) override;
         void update(Time t, bool moved) override;
+
+        void toggleMinor();
+        void toggleSend();
 
     private:
         UIFactory& factory;
