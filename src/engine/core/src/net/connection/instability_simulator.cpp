@@ -101,9 +101,29 @@ size_t InstabilitySimulator::getMaxUnreliablePacketSize() const
 	return parent->getMaxUnreliablePacketSize();
 }
 
+size_t InstabilitySimulator::getRealMaxUnreliablePacketSize() const
+{
+	return parent->getRealMaxUnreliablePacketSize();
+}
+
+float InstabilitySimulator::getUnreliablePacketResendTime(float averageAckTime)
+{
+	return parent->getUnreliablePacketResendTime(averageAckTime);
+}
+
+bool InstabilitySimulator::doesInternalPacketAck() const
+{
+	return parent->doesInternalPacketAck();
+}
+
 void InstabilitySimulator::onConnect(short connId)
 {
 	return parent->onConnect(connId);
+}
+
+void InstabilitySimulator::beginSendUnreliablePackets()
+{
+	parent->beginSendUnreliablePackets();
 }
 
 void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id)
@@ -130,6 +150,11 @@ void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packe
 	} while (rng.getFloat(0.0f, 1.0f) < duplication);
 
 	sendPendingPackets();
+}
+
+void InstabilitySimulator::flushSendUnreliablePackets()
+{
+	parent->flushSendUnreliablePackets();
 }
 
 void InstabilitySimulator::setUnreliablePacketListener(IPacketListener* listener)

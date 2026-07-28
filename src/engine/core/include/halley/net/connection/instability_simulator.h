@@ -38,8 +38,17 @@ namespace Halley
 		bool receive(InboundNetworkPacket& packet) override;
 
 		[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
+		size_t getRealMaxUnreliablePacketSize() const override;
+
+		float getUnreliablePacketResendTime(float averageAckTime) override;
+		bool doesInternalPacketAck() const override;
+
 		void onConnect(short connId) override;
+		
+		void beginSendUnreliablePackets() override;
 		void sendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) override;
+		void flushSendUnreliablePackets() override;
+		
 		void setUnreliablePacketListener(IPacketListener* listener) override;
 
 	private:
