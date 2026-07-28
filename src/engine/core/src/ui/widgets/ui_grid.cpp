@@ -569,6 +569,16 @@ bool UIGrid::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::Home)) {
+		setSelectedLine(0);
+		return true;
+	}
+
+	if (key.is(KeyCode::End)) {
+		setSelectedLine(static_cast<int>(lineIndex.size()) - 1);
+		return true;
+	}
+
 	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
 		copySelection();
 		return true;
