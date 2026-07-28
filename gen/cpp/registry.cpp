@@ -23,6 +23,7 @@ using namespace Halley;
 #include "messages/play_animation_message.h"
 #include "messages/play_animation_once_message.h"
 #include "messages/stop_particles_message.h"
+#include "messages/directional_burst_message.h"
 #include "messages/start_script_message.h"
 #include "messages/terminate_script_message.h"
 #include "messages/terminate_scripts_with_tag_message.h"
@@ -93,10 +94,11 @@ public:
 	}
 	Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() override {
 		Vector<std::unique_ptr<MessageReflector>> result;
-		result.reserve(9);
+		result.reserve(10);
 		result.push_back(std::make_unique<MessageReflectorImpl<PlayAnimationMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<PlayAnimationOnceMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<StopParticlesMessage>>());
+		result.push_back(std::make_unique<MessageReflectorImpl<DirectionalBurstMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<StartScriptMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<TerminateScriptMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<TerminateScriptsWithTagMessage>>());

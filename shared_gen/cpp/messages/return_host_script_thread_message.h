@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class ReturnHostScriptThreadMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 7 };
+	static constexpr int messageIndex{ 8 };
 	static const constexpr char* messageName{ "ReturnHostScriptThread" };
 
 	Halley::String script{};

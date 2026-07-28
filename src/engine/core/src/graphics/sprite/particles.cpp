@@ -159,6 +159,16 @@ void Particles::burstParticles(float n)
 	pendingSpawn += n;
 }
 
+void Particles::directionalBurst(Angle1f direction, int count)
+{
+	// We preserve the spread, but change the direction/azimuth
+	float spread = azimuth.end - azimuth.start;
+	float dir = direction.toDegrees();
+	azimuth = Range<float>(dir - spread * 0.5f, dir + spread * 0.5f);
+
+	spawn(static_cast<size_t>(std::max(count, 0)), 0, position);
+}
+
 void Particles::reset()
 {
 	firstUpdate = true;

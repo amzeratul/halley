@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class StartScriptMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 3 };
+	static constexpr int messageIndex{ 4 };
 	static const constexpr char* messageName{ "StartScript" };
 
 	Halley::String name{};

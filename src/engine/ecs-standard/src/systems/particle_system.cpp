@@ -43,6 +43,11 @@ public:
 		particles.particles.particles.setEnabled(false);
 	}
 
+	void onMessageReceived(const DirectionalBurstMessage& msg, ParticleFamily& particles) override
+	{
+		particles.particles.particles.directionalBurst(msg.direction.angle(), msg.count);
+	}
+
 	void spawn(Vector3f pos, EntityId target) override
 	{
 		// TODO: this could be a perf bottleneck

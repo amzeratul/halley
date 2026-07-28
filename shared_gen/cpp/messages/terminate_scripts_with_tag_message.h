@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class TerminateScriptsWithTagMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 5 };
+	static constexpr int messageIndex{ 6 };
 	static const constexpr char* messageName{ "TerminateScriptsWithTag" };
 
 	Halley::String tag{};

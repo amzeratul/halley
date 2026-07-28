@@ -1,4 +1,4 @@
-// Halley codegen version 139
+// Halley codegen version 140
 #pragma once
 
 #include <halley.hpp>
@@ -10,6 +10,7 @@
 #include "components/particles_component.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "messages/stop_particles_message.h"
+#include "messages/directional_burst_message.h"
 
 // Generated file; do not modify.
 template <typename T>
@@ -37,8 +38,10 @@ public:
 
 	virtual void onMessageReceived(const StopParticlesMessage& msg, ParticleFamily& e) = 0;
 
+	virtual void onMessageReceived(const DirectionalBurstMessage& msg, ParticleFamily& e) = 0;
+
 	ParticleSystemBase()
-		: System({&particleFamily}, {StopParticlesMessage::messageIndex})
+		: System({&particleFamily}, {StopParticlesMessage::messageIndex, DirectionalBurstMessage::messageIndex})
 	{
 		static_assert(std::is_final_v<T>, "System must be final.");
 	}
@@ -82,12 +85,13 @@ private:
 	}
 
 	void processMessages() override final {
-		doProcessMessages(particleFamily, std::to_array({ StopParticlesMessage::messageIndex }));
+		doProcessMessages(particleFamily, std::to_array({ StopParticlesMessage::messageIndex, DirectionalBurstMessage::messageIndex }));
 	}
 
 	void onMessagesReceived(int msgIndex, Halley::Message** msgs, size_t* idx, size_t n, Halley::FamilyBindingBase& family) override final {
 		switch (msgIndex) {
 		case StopParticlesMessage::messageIndex: onMessagesReceived(reinterpret_cast<StopParticlesMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ParticleFamily>&>(family)); break;
+		case DirectionalBurstMessage::messageIndex: onMessagesReceived(reinterpret_cast<DirectionalBurstMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ParticleFamily>&>(family)); break;
 		}
 	}
 

@@ -247,6 +247,15 @@ message:
 
 ---
 
+message:
+    name: DirectionalBurst
+    members:
+    - direction: 'Halley::Vector2f'
+    - count: int
+    serializable: true
+
+---
+
 system:
   name: Particle
   families:
@@ -262,6 +271,7 @@ system:
   - ScreenService
   messages:
   - StopParticles: receive particle
+  - DirectionalBurst: receive particle
 
 ---
 

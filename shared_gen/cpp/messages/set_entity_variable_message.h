@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class SetEntityVariableMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 8 };
+	static constexpr int messageIndex{ 9 };
 	static const constexpr char* messageName{ "SetEntityVariable" };
 
 	Halley::String variable{};

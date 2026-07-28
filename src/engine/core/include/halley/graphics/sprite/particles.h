@@ -60,6 +60,7 @@ namespace Halley {
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		void burstParticles(float n);
+		void directionalBurst(Angle1f direction, int count);
 
 		void reset();
 

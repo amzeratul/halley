@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 140
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class TerminateScriptMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 4 };
+	static constexpr int messageIndex{ 5 };
 	static const constexpr char* messageName{ "TerminateScript" };
 
 	Halley::String name{};
