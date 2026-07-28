@@ -51,11 +51,13 @@ int FileSystemResourceLocator::getPriority() const
 
 void FileSystemResourceLocator::purgeAll(SystemAPI& system)
 {
+	auto lock = UniqueLock(mutex);
 	assetDb.reset();
 }
 
 bool FileSystemResourceLocator::purgeIfAffected(SystemAPI& system, gsl::span<const String> assetIds, gsl::span<const String> packIds)
 {
+	auto lock = UniqueLock(mutex);
 	assetDb.reset();
 	return true;
 }
