@@ -60,6 +60,7 @@ void NavigationPathFollower::doSetPath(std::optional<NavigationPath> p)
 {
 	path = std::move(p);
 	nextPathIdx = 0;
+	distPathCache = {};
 }
 
 const std::optional<NavigationPath>& NavigationPathFollower::getPath() const
@@ -105,6 +106,7 @@ void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navm
 
 	if (arrivedAtNextNode) {
 		nextPathIdx++;
+		distPathCache = {};
 		if (nextPathIdx >= path->path.size()) {
 			nextSubPath();
 		}
@@ -165,6 +167,23 @@ void NavigationPathFollower::detachFromNavmesh()
 			p.pos.subWorld = -1;
 		}
 	}
+}
+
+float NavigationPathFollower::getDistanceLeft(float anisotropy) const
+{
+	if (!path) {
+		return 0;
+	}
+	if (nextPathIdx >= path->path.size()) {
+		return 0;
+	}
+
+	const auto nextPos = path->path[nextPathIdx];
+	const float distToNext = ((curPos.pos - nextPos.pos.pos) * Vector2f(1, anisotropy)).length();
+	if (!distPathCache) {
+		distPathCache = path->getLength(anisotropy, nextPathIdx);
+	}
+	return distToNext + *distPathCache;
 }
 
 const ConfigNode& NavigationPathFollower::getParams() const
