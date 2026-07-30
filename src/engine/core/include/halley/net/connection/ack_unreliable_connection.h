@@ -130,7 +130,7 @@ namespace Halley
     	void close(const std::optional<String>& reason);
 
     	bool tryCacheSmallPacket(const OutboundNetworkPacket& packet);
-    	bool tryReceiveSmallPacket(InboundNetworkPacket& packet);
+    	[[nodiscard]] bool tryReceiveSmallPacket(InboundNetworkPacket& packet);
     	void doFlushSmallPackets();
 
         void doSend(gsl::span<const std::byte> packet, bool small);
@@ -139,13 +139,14 @@ namespace Halley
 
         void doSendAckPackets();
         void onAckPacketsReceive(gsl::span<const std::byte> data, uint8_t parity);
+    	bool doProcessAckPacket(SubPacket& slot, int packetIdx, uint16_t seqIdx, uint8_t parity);
     	void forwardOutboundQueue();
 
     	void resendUnAckPackets(float minResendTimeDiff);
     	void resendLostPackets();
 
     	void evictInboundQueue(uint16_t seqIdx, uint8_t parity);
-    	bool checkOutboundQueue(int numPacketsToSend) const;
+    	[[nodiscard]] bool checkOutboundQueue(int numPacketsToSend) const;
 
     	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity);
     };

@@ -7,6 +7,8 @@
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
+#define SIMULATE_PLATFORM_ACK 0
+
 using namespace Halley;
 
 AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> parent, INetworkServiceStatsListener& networkStatsListener)
@@ -217,8 +219,9 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 
 	packet.timestamp = Clock::now();
 
-	// Always set a high bit, so we avoid using id=0.
-	const uint64_t datagramId = 0x100 | packetIdx & 0xff;
+	// Always sets *some* bits by copying the full header, so we avoid using id=0.
+	uint64_t datagramId;
+	memcpy(&datagramId, header, 8);
 
 	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), datagramId);
 }
@@ -303,7 +306,9 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         		cache.dataSize = headerSize; // used as offset
 
         		// Return the first small packet
-        		tryReceiveSmallPacket(packet);
+        		if (!tryReceiveSmallPacket(packet)) {
+        			Logger::logError("Not a small packet");
+        		}
         	} else {
 	      		packet = InboundNetworkPacket(slot.data.byte_span().subspan(headerSize, slot.dataSize));
         	}
@@ -424,7 +429,7 @@ void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::by
     }
 
 	uint8_t parity = header[3];
-    uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
+    uint16_t seqIdx = (static_cast<uint16_t>(header[4]) << 8) | header[5];
 
     if (seqIdx == 0xffff) {
     	// This is an ACK packet.
@@ -495,41 +500,56 @@ void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::by
 
 void AckUnreliableConnection::onUnreliablePacketAck(uint64_t id)
 {
+#if !SIMULATE_PLATFORM_ACK
 	HalleyAssertDev(platformSupportsAck);
-	HalleyAssertDev((id & ~0x1ff) == 0);
+#endif
 
-	const int packetIdx = static_cast<int>(id & 0xff);
+	uint8_t header[8];
+	memcpy(header, &id, 8);
+	HalleyAssertDev(memcmp(header, headerSignature2, 3) == 0);
 
-	auto slot = &outbound.packets[packetIdx];
+	uint8_t parity = header[3];
+	uint16_t seqIdx = (static_cast<uint16_t>(header[4]) << 8) | header[5];
+	uint8_t subIdx = header[6];
+	int packetIdx = header[7];
 
-	if (slot->seqIdx != 0xffff) {
-		if (statsListener) {
-			statsListener->onPacketAcked(slot->seqIdx);
-		}
+	auto& slot = outbound.packets[packetIdx];
 
-		slot->clear();
-	} else {
-		Logger::logDev("rcv ACK for empty slot " + toString(packetIdx));
+	if (doProcessAckPacket(slot, packetIdx, seqIdx, parity)) {
+		HalleyAssertDebug(subIdx == slot.subIdx);
 	}
+
+	forwardOutboundQueue();
 }
 
 void AckUnreliableConnection::onUnreliablePacketLost(uint64_t id)
 {
 	HalleyAssertDev(platformSupportsAck);
-	HalleyAssertDev((id & ~0x1ff) == 0);
 
-	const int packetIdx = static_cast<int>(id & 0xff);
+	uint8_t header[8];
+	memcpy(header, &id, 8);
+	HalleyAssertDev(memcmp(header, headerSignature2, 3) == 0);
 
-	auto slot = &outbound.packets[packetIdx];
+	uint8_t parity = header[3];
+	uint16_t seqIdx = (static_cast<uint16_t>(header[4]) << 8) | header[5];
+	uint8_t subIdx = header[6];
+	int packetIdx = header[7];
 
-	if (slot->seqIdx != 0xffff) {
+	Logger::logDev(".. lost " + toString(packetIdx));
+
+	auto& slot = outbound.packets[packetIdx];
+
+	if (slot.seqIdx == seqIdx) {
+		HalleyAssertDebug(subIdx == slot.subIdx);
+		HalleyAssertDebug(parity == slot.parity);
+
 		if (statsListener) {
-			statsListener->onPackedLost(slot->seqIdx);
+			statsListener->onPackedLost(slot.seqIdx);
 		}
 
-		slot->lost = true;
+		slot.lost = true;
 	} else {
-		Logger::logDev("rcv LOST for empty slot " + toString(packetIdx));
+		Logger::logDev("rcv LOST for non-matching slot " + toString(packetIdx));
 	}
 }
 
@@ -579,33 +599,43 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> dat
 
 	HalleyAssertDev(size > 0 && (size % 3) == 0);
 
+#if SIMULATE_PLATFORM_ACK
+	for (size_t i = 0; i < size; i += 3) {
+		uint8_t packetIdx = ackData[i];
+    	uint16_t seqIdx = (static_cast<uint16_t>(ackData[i + 1]) << 8) | ackData[i + 2];
+
+		auto& slot = outbound.packets[packetIdx];
+
+		uint8_t header[8];
+		memcpy(header, headerSignature2, 3);
+
+		header[3] = parity;
+		header[4] = seqIdx >> 8;
+		header[5] = seqIdx & 0xff;
+		header[6] = slot.subIdx;
+		header[7] = packetIdx;
+
+		uint64_t datagramId;
+		memcpy(&datagramId, header, 8);
+
+		if (!doProcessAckPacket(slot, packetIdx, seqIdx, parity)) {
+			Logger::logError("SIMULATE_PLATFORM_ACK error");
+		}
+	}
+#else
 	float avgLatencySum = 0.f;
 	size_t avgLatencyCount = 0;
 	const Clock::time_point now = Clock::now();
 
     for (size_t i = 0; i < size; i += 3) {
     	uint8_t packetIdx = ackData[i];
-    	uint16_t seqIdx = uint16_t(ackData[i + 1] << 8) | ackData[i + 2];
+    	uint16_t seqIdx = (static_cast<uint16_t>(ackData[i + 1]) << 8) | ackData[i + 2];
 
-        auto slot = &outbound.packets[packetIdx];
+    	auto& slot = outbound.packets[packetIdx];
 
-    	if (slot->seqIdx != 0xffff) {
-    		if (slot->seqIdx == seqIdx) {
-    			if (statsListener) {
-    				statsListener->onPacketAcked(slot->seqIdx);
-    			}
-
-    			slot->clear();
-
-    			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
-    			avgLatencyCount++;
-    		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
-    			// ACKs can be lost and resent too.
-	    		Logger::logDev("rcv mismatch ACK for slot " + toString((int) packetIdx) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
-    		}
-    	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
-    		// Resent packets can be ACKd more than once.
-   			Logger::logDev("rcv ACK for empty slot " + toString((int) packetIdx) + ", remote seqIdx " + toString(seqIdx));
+    	if (doProcessAckPacket(slot, packetIdx, seqIdx, parity)) {
+    		avgLatencySum += std::chrono::duration<float>(now - slot.timestamp).count();
+    		avgLatencyCount++;
     	}
     }
 
@@ -618,6 +648,32 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> dat
 		avgLatencySum /= static_cast<float>(avgLatencyCount);
 		averagePacketAckTime = lerp(averagePacketAckTime, avgLatencySum, 0.2f);
 	}
+#endif
+}
+
+bool AckUnreliableConnection::doProcessAckPacket(SubPacket& slot, int packetIdx, uint16_t seqIdx, uint8_t parity)
+{
+	if (slot.seqIdx != 0xffff) {
+		if (slot.seqIdx == seqIdx) {
+			if (statsListener) {
+				statsListener->onPacketAcked(slot.seqIdx);
+			}
+
+			slot.clear();
+
+			return true;
+		}
+
+		if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
+			// ACKs can be lost and resent too.
+			Logger::logDev("rcv mismatch ACK for slot " + toString(packetIdx) + ", seqIdx " + toString(slot.seqIdx) + ", remote seqIdx " + toString(seqIdx));
+		}
+	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
+		// Resent packets can be ACKd more than once.
+		Logger::logDev("rcv ACK for empty slot " + toString(packetIdx) + ", remote seqIdx " + toString(seqIdx));
+	}
+
+	return false;
 }
 
 void AckUnreliableConnection::forwardOutboundQueue()
