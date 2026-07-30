@@ -959,7 +959,7 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	const size_t statsCapacity = 256; // TODO
 	const size_t lineSize = 64; // TODO
 
-#ifdef DEV_BUILD
+#if defined(DEV_BUILD) && defined(_WIN32)
 	auto simulator = std::make_shared<InstabilitySimulator>(connection);
 	connection = simulator;
 #endif
@@ -983,7 +983,7 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 		rtt[2] = 0;
 	}
 
-#ifdef DEV_BUILD
+#if defined(DEV_BUILD) && defined(_WIN32)
 	peer.simulator = simulator;
 #endif
 
@@ -1118,7 +1118,7 @@ void NetworkSession::sendPing(Time t, Peer& peer)
 
 void NetworkSession::simulateLatency(float average, float variance)
 {
-#ifdef DEV_BUILD
+#if defined(DEV_BUILD) && defined(_WIN32)
 	for (const auto& peer : peers) {
 		peer.simulator->setLag(average, variance);
 	}
@@ -1127,7 +1127,7 @@ void NetworkSession::simulateLatency(float average, float variance)
 
 void NetworkSession::simulateQuality(float packetLoss, float packetDuplicate)
 {
-#ifdef DEV_BUILD
+#if defined(DEV_BUILD) && defined(_WIN32)
 	for (const auto& peer : peers) {
 		peer.simulator->setPacketLoss(packetLoss);
 		peer.simulator->setDuplication(packetDuplicate);

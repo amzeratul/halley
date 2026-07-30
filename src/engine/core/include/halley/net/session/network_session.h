@@ -152,7 +152,7 @@ namespace Halley {
 			int rttIdx = 0;
 			Time delayNextPingMsg = 0;
 
-#ifdef DEV_BUILD
+#if defined(DEV_BUILD) && defined(_WIN32)
 			std::shared_ptr<InstabilitySimulator> simulator = nullptr;
 #endif
 
