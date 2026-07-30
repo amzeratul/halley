@@ -200,7 +200,9 @@ void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool re
 
 				const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
 				auto image = std::make_unique<Image>(imageData, format);
-				HalleyAssertDev(image->getSize() == texture->getSize());
+				if (image->getSize() != texture->getSize()) {
+					Logger::logWarning("Image and texture size mismatch on " + texture->getAssetId() + ": image is " + image->getSize() + ", texture is " + texture->getSize());
+				}
 				alphaMask = ImageMask::fromAlpha(*image);
 				return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
 			} else {
