@@ -143,7 +143,6 @@ namespace Halley
     	void forwardOutboundQueue();
 
     	void resendUnAckPackets(float minResendTimeDiff);
-    	void resendLostPackets();
 
     	void evictInboundQueue(uint16_t seqIdx, uint8_t parity);
     	[[nodiscard]] bool checkOutboundQueue(int numPacketsToSend) const;
