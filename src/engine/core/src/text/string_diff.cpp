@@ -1,4 +1,4 @@
-#include "halley/text/string_diff.h"
+﻿#include "halley/text/string_diff.h"
 #include "../../../contrib/dtl/dtl.hpp"
 #include "halley/utils/algorithm.h"
 
@@ -17,7 +17,7 @@ namespace {
 
 	String makeVisible(const String& str)
 	{
-		return str.replaceAll(u8" ", u8"�").replaceAll(u8"\t", u8"\\t").replaceAll(u8"\n", u8"\\n");
+		return str.replaceAll(u8" ", u8"·").replaceAll(u8"\t", u8"\\t").replaceAll(u8"\n", u8"\\n");
 	}
 
 	Vector<StringDiffEntry> postProcess(Vector<StringDiffEntry> src)
