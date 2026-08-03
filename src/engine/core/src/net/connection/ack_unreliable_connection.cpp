@@ -614,9 +614,7 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> dat
 		uint64_t datagramId;
 		memcpy(&datagramId, header, 8);
 
-		if (!doProcessAckPacket(slot, packetIdx, seqIdx, parity)) {
-			Logger::logError("SIMULATE_PLATFORM_ACK error");
-		}
+		onUnreliablePacketAck(datagramId);
 	}
 #else
 	float avgLatencySum = 0.f;
