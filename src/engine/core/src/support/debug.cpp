@@ -226,6 +226,7 @@ namespace {
 	LONG WINAPI win32ExceptionHandler(EXCEPTION_POINTERS* exceptionInfo)
 	{
 		const char* name = nullptr;
+		bool printCode = false;
 
 		switch (exceptionInfo->ExceptionRecord->ExceptionCode) {
 		case EXCEPTION_ACCESS_VIOLATION:
@@ -288,11 +289,23 @@ namespace {
 		case EXCEPTION_STACK_OVERFLOW:
 			name = "EXCEPTION_STACK_OVERFLOW";
 			break;
+		case 0xE06D7363:
+			// https://stackoverflow.com/questions/9095898/decoding-the-parameters-of-a-thrown-c-exception-0xe06d7363
+			if (exceptionInfo->ExceptionRecord->NumberParameters >= 2) {
+				name = reinterpret_cast<std::exception*>(exceptionInfo->ExceptionRecord->ExceptionInformation[1])->what();
+			} else {
+				name = "Unknown C++ Exception";
+			}
+			break;
 		default:
 			name = "Unknown Win32 Exception";
+			printCode = true;
 		}
 
 		std::cout << "Process aborting due to: " << name << "\n";
+		if (printCode) {
+			std::cout << "Exception code: " << std::hex << uint64_t(exceptionInfo->ExceptionRecord->ExceptionCode) << std::dec << "\n";
+		}
 		std::cout << "[start of stack trace]\n";
 		Debug::printCallStackToUnsafe(std::cout, 4);
 		std::cout << "[end of stack trace]\n";
