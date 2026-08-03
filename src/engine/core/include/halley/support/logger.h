@@ -84,6 +84,7 @@ namespace Halley
 	public:
 	    virtual ~IScreenLogger() = default;
 	    virtual void onLog(std::string_view key, String value, double time = 0) = 0;
+	    virtual void onCounter(std::string_view key) = 0;
 	};
 
 	class ScreenLogger {
@@ -91,6 +92,8 @@ namespace Halley
 		static void logScreen(std::string_view key, String value, double time = 0);
 		static void logScreen(std::string_view key, int value, double time = 0);
 		static void logScreen(std::string_view key, float value, double time = 0);
+
+		static void logScreenCounter(std::string_view key);
 
 	    static void setTarget(IScreenLogger* target);
 

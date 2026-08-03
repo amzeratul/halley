@@ -166,6 +166,13 @@ void ScreenLogger::logScreen(std::string_view key, float value, double time)
 	logScreen(key, toString(value), time);	
 }
 
+void ScreenLogger::logScreenCounter(std::string_view key)
+{
+	if (target) {
+		target->onCounter(key);
+	}
+}
+
 void ScreenLogger::setTarget(IScreenLogger* t)
 {
 	target = t;

@@ -152,6 +152,7 @@ namespace Halley {
 		Vector<DebugEllipse> debugEllipses;
 		Vector<DebugWorldText> debugWorldTexts;
 		Vector<std::pair<String, DebugText>> debugTexts;
+		Vector<std::pair<String, int>> debugCounters;
 		Vector<std::pair<Vector2f, std::shared_ptr<ScriptState>>> scriptStates;
 		HashMap<const UIRoot*, UIRootFrameData> uiRootData;
 

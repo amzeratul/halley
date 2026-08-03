@@ -18,6 +18,7 @@ void BaseFrameData::reset()
 	debugEllipses.clear();
 	scriptStates.clear();
 	debugWorldTexts.clear();
+	debugCounters.clear();
 	uiRootData.clear();
 
 	cameras.clear();
@@ -32,6 +33,7 @@ void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, 
 		for (auto& dt: debugTexts) {
 			dt.second.time -= deltaTime;
 		}
+		debugCounters.clear();
 		std_ex::erase_if_value(debugTexts, [&](const DebugText& dt)
 		{
 			return dt.time <= 0;

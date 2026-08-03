@@ -75,6 +75,11 @@ const Vector<std::pair<String, DebugText>>& DebugDrawService::getDebugTexts()
 	return BaseFrameData::getCurrent().debugTexts;
 }
 
+const Vector<std::pair<String, int>>& DebugDrawService::getDebugCounters()
+{
+	return BaseFrameData::getCurrent().debugCounters;
+}
+
 void DebugDrawService::addDebugText(std::string_view key, String value, Time time)
 {
 	if (BaseFrameData::hasCurrent()) {
@@ -92,6 +97,19 @@ void DebugDrawService::addDebugText(std::string_view key, String value, Time tim
 void DebugDrawService::addDebugText(String value, Vector2f position)
 {
 	BaseFrameData::getCurrent().debugWorldTexts.emplace_back(value, position);
+}
+
+void DebugDrawService::increaseDebugCounter(std::string_view key)
+{
+	if (BaseFrameData::hasCurrent()) {
+		auto& debugCounters = BaseFrameData::getCurrent().debugCounters;
+		const auto iter = std_ex::find_if(debugCounters, [&] (const auto& e) { return e.first == key; });
+		if (iter != debugCounters.end()) {
+			iter->second++;
+		} else {
+			debugCounters.emplace_back(key, 1);
+		}
+	}
 }
 
 void DebugDrawService::addScriptRenderer(Vector2f pos, std::shared_ptr<ScriptState> state)

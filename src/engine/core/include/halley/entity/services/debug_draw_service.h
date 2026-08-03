@@ -25,6 +25,7 @@ namespace Halley {
 		const Vector<DebugEllipse>& getDebugEllipses();
 		const Vector<DebugWorldText>& getDebugWorldTexts();
 		const Vector<std::pair<String, DebugText>>& getDebugTexts();
+		const Vector<std::pair<String, int>>& getDebugCounters();
 
 		void addDebugLine(Vector<Vector2f> line, Colour4f colour, float thickness = 1.0f, bool loop = false, Painter::LineParameters params = {});
 		void addDebugArrow(Vector2f from, Vector2f to, Colour4f colour, float headSize = 10.0f, float thickness = 1.0f, float sideShift = 0.0f);
@@ -33,6 +34,7 @@ namespace Halley {
 		void addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness = 1.0f, Painter::LineParameters params = {});
 		void addDebugText(std::string_view key, String value, Time time = 0);
 		void addDebugText(String value, Vector2f position);
+		void increaseDebugCounter(std::string_view key);
 
 		void initScriptGraphRenderer(Resources& resources, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom);
 		void addScriptRenderer(Vector2f pos, std::shared_ptr<ScriptState> state);
