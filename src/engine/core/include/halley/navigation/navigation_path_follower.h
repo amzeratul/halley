@@ -29,6 +29,8 @@ namespace Halley {
 		bool isDone() const;
 		void detachFromNavmesh();
 
+		float getDistanceLeft(float anisotropy) const;
+
 		const ConfigNode& getParams() const;
 		ConfigNode& getParams();
 
@@ -36,6 +38,7 @@ namespace Halley {
 		WorldPosition curPos;
 		size_t nextPathIdx = 0;
 		std::optional<NavigationPath> path;
+		mutable std::optional<float> distPathCache;
 		bool needsToReEvaluatePath = false;
 		bool computingPath = false;
 		ConfigNode params;

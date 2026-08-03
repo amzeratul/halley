@@ -30,7 +30,7 @@ namespace Halley {
 		bool operator==(const NavigationPath& other) const;
 		bool operator!=(const NavigationPath& other) const;
 
-		float getLength() const;
+		float getLength(float anisotropy = 1.0f, size_t startPoint = 0) const;
 		String toString() const;
 
 		static NavigationPath merge(gsl::span<const NavigationPath> paths);

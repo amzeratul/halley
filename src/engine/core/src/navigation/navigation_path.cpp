@@ -33,12 +33,12 @@ bool NavigationPath::operator!=(const NavigationPath& other) const
 	return !(*this == other);
 }
 
-float NavigationPath::getLength() const
+float NavigationPath::getLength(float anisotropy, size_t startPoint) const
 {
 	float len = 0;
 	const auto ps = path.span();
-	for (size_t i = 1; i < ps.size(); ++i) {
-		len += (ps[i].pos.pos - ps[i - 1].pos.pos).length();
+	for (size_t i = startPoint + 1; i < ps.size(); ++i) {
+		len += ((ps[i].pos.pos - ps[i - 1].pos.pos) * Vector2f(1, anisotropy)).length();
 	}
 	return len;
 }
