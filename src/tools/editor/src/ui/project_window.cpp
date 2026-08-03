@@ -101,6 +101,9 @@ void ProjectWindow::onRemovedFromRoot(UIRoot& root)
 
 void ProjectWindow::makeUI()
 {
+	std::string_view foo("test");
+	Logger::logDev(foo.substr(10));
+	
 	uiTop = std::make_shared<UIWidget>("uiTop", Vector2f(), UISizer(UISizerType::Horizontal));
 	uiMid = std::make_shared<UIWidget>("uiMid", Vector2f(), UISizer(UISizerType::Horizontal));
 	uiBottom = std::make_shared<UIWidget>("uiBottom", Vector2f(), UISizer(UISizerType::Vertical));

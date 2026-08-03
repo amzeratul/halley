@@ -56,15 +56,9 @@ private:
 	bool coreInit = false;
 };
 
-int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args)
-{
-	std::unique_ptr<Core> core;
-	auto guard = ScopedGuard([&] ()
+namespace {
+	int doRunMain(std::unique_ptr<Core>& core, std::unique_ptr<GameLoader> loader, const Vector<std::string>& args)
 	{
-		core->deInit();
-	});
-
-	try {
 		core = loader->createCore(args);
 		loader->setCore(*core);
 		auto* system = core->getAPI().system;
@@ -81,20 +75,39 @@ int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::st
 		}
 
 		return core->getExitCode();
-	} catch (std::exception& e) {
-		if (core) {
-			core->onTerminatedInError(e.what());
-		} else {
-			std::cout << "Exception initialising core: " + String(e.what()) << std::endl;
+	}
+}
+
+int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args)
+{
+	std::unique_ptr<Core> core;
+	auto guard = ScopedGuard([&] ()
+	{
+		core->deInit();
+	});
+
+	constexpr bool runGuarded = getPlatform() != GamePlatform::Windows;
+	
+	if (runGuarded) {
+		try {
+			return doRunMain(core, std::move(loader), args);
+		} catch (std::exception& e) {
+			if (core) {
+				core->onTerminatedInError(e.what());
+			} else {
+				std::cout << "Exception initialising core: " + String(e.what()) << std::endl;
+			}
+			return 1;
+		} catch (...) {
+			if (core) {
+				core->onTerminatedInError("");
+			} else {
+				std::cout << "Unknown exception initialising core." << std::endl;
+			}
+			return 1;
 		}
-		return 1;
-	} catch (...) {
-		if (core) {
-			core->onTerminatedInError("");
-		} else {
-			std::cout << "Unknown exception initialising core." << std::endl;
-		}
-		return 1;
+	} else {
+		return doRunMain(core, std::move(loader), args);
 	}
 }
 
