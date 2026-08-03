@@ -57,7 +57,15 @@ namespace Halley {
 		T* tryGetComponent(bool evenIfDisabled = false)
 		{
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
+				constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+				
+				if constexpr (quickIndex != 0) {
+					if ((quickIndex & componentQuickMask) == 0) {
+						return nullptr;
+					}
+				}
+
 				const auto& span = componentIds.span();
 				const size_t n = liveComponents;
 				for (size_t i = 0; i < n; ++i) {
@@ -73,7 +81,15 @@ namespace Halley {
 		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
+				constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+
+				if constexpr (quickIndex != 0) {
+					if ((quickIndex & componentQuickMask) == 0) {
+						return nullptr;
+					}
+				}
+
 				const auto& span = componentIds.span();
 				const size_t n = liveComponents;
 				for (size_t i = 0; i < n; ++i) {
@@ -111,7 +127,13 @@ namespace Halley {
 		bool hasComponent(const World& world, bool evenIfDisabled = false) const
 		{
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
+				constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
 				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+				
+				if constexpr (quickIndex != 0) {
+					return (quickIndex & componentQuickMask) != 0;
+				}
+				
 				const auto& span = componentIds.span();
 				const size_t n = liveComponents;
 				for (size_t i = 0; i < n; ++i) {
@@ -134,6 +156,19 @@ namespace Halley {
 		template <typename ... Ts>
 		bool hasAnyComponent(const World& world) const
 		{
+			const auto [quickIndices, quickIndexCoverage] = getComponentQuickIndices<Ts...>();
+			if constexpr (quickIndices != 0) {
+				if constexpr (quickIndexCoverage) {
+					// Full coverage, return true or false based purely on this
+					return (quickIndices & componentQuickMask) != 0;
+				} else {
+					// Incomplete coverage - true is enough to satisfy, but not false
+					if ((quickIndices & componentQuickMask) != 0) {
+						return true;
+					}
+				}
+			}
+
 			if (dirty) {
 				return dirtyHasAnyComponents<Ts...>(world);
 			} else {
@@ -208,7 +243,7 @@ namespace Halley {
 		uint8_t hierarchyRevision = 0;
 		uint8_t componentRevision = 0;
 		WorldPartitionId worldPartition = 0;
-		uint32_t lastFrameModified = 0;
+		uint32_t componentQuickMask = 0;
 
 		FamilyMaskType mask;
 		Entity* parent = nullptr;
@@ -223,6 +258,7 @@ namespace Halley {
 		// Cacheline 2
 		std::unique_ptr<String> name;
 		std::unique_ptr<String> enableRules;
+		uint32_t lastFrameModified = 0;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -231,7 +267,7 @@ namespace Halley {
 		Entity& addComponent(World& world, T* component)
 		{
 			auto& deleterTable = getComponentDeleterTable(world);
-			addComponent(component, T::componentIndex, T::componentName, deleterTable);
+			addComponent(component, T::componentIndex, T::quickIndex, T::componentName, deleterTable);
 			TypeDeleter<T>::initialize(deleterTable);
 
 			markDirty(world);
@@ -241,13 +277,14 @@ namespace Halley {
 		template <typename T>
 		Entity& removeComponent(World& world)
 		{
-			removeComponentById(world, T::componentIndex);
+			removeComponentById(world, T::componentIndex, T::quickIndex);
 			return *this;
 		}
 
-		void addComponent(Component* component, int id, const char* componentName, ComponentDeleterTable& deleterTable);
-		void removeComponentAt(int index);
+		void addComponent(Component* component, int id, uint32_t quickIndex, const char* componentName, ComponentDeleterTable& deleterTable);
+		void removeComponentAt(int index, uint32_t quickIndex);
 		void removeComponentById(World& world, int id);
+		void removeComponentById(World& world, int id, uint32_t quickIndex);
 		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
 		void setEnabled(World& world, bool enabled);
@@ -284,6 +321,20 @@ namespace Halley {
 			dst[0] = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
 			if constexpr (sizeof...(Ts) > 0) {
 				getComponentIndices<Ts...>(dst.subspan(1));
+			}
+		}
+
+		template <typename T, typename ... Ts>
+		constexpr static std::pair<uint32_t, bool> getComponentQuickIndices()
+		{
+			const auto quickIdx = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			const bool coverage = quickIdx != 0;
+
+			if constexpr (sizeof...(Ts) > 0) {
+				auto [otherIdx, otherCoverage] = getComponentQuickIndices<Ts...>();
+				return { quickIdx | otherIdx, coverage && otherCoverage };
+			} else {
+				return { quickIdx, coverage };
 			}
 		}
 

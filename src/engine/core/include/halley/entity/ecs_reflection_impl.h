@@ -16,6 +16,11 @@ namespace Halley {
 		{
 			return T::componentIndex;
 		}
+
+		uint32_t getQuickIndex() const override
+		{
+			return T::quickIndex;
+		}
 		
 		ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const override
 		{

@@ -30,7 +30,7 @@ Entity::Entity()
 
 Entity::~Entity() = default;
 
-void Entity::addComponent(Component* component, int id, const char* componentName, ComponentDeleterTable& deleterTable)
+void Entity::addComponent(Component* component, int id, uint32_t quickIndex, const char* componentName, ComponentDeleterTable& deleterTable)
 {
 	// Note that we can't simply delete component here in case of an exception, as deleting it requires using the deleter table from the world
 	
@@ -61,6 +61,7 @@ void Entity::addComponent(Component* component, int id, const char* componentNam
 
 	// ...and increase the list, therefore putting it in living component territory
 	++liveComponents;
+	componentQuickMask = componentQuickMask | quickIndex;
 }
 
 void Entity::destroyComponents(ComponentDeleterTable& table)
@@ -71,20 +72,27 @@ void Entity::destroyComponents(ComponentDeleterTable& table)
 	componentPtrs.clear();
 	componentIds.clear();
 	liveComponents = 0;
+	componentQuickMask = 0;
 }
 
 void Entity::removeComponentById(World& world, int id)
 {
+	const auto quickIndex = world.getReflection().getComponentReflector(id).getQuickIndex();
+	removeComponentById(world, id, quickIndex);
+}
+
+void Entity::removeComponentById(World& world, int id, uint32_t quickIndex)
+{
 	for (uint8_t i = 0; i < liveComponents; ++i) {
 		if (componentIds[i] == id) {
-			removeComponentAt(i);
+			removeComponentAt(i, quickIndex);
 			markDirty(world);
 			return;
 		}
 	}
 }
 
-void Entity::removeComponentAt(int i)
+void Entity::removeComponentAt(int i, uint32_t quickIndex)
 {
 	// Put it at the end of the list of living components... (guaranteed to swap with living component)
 	std::swap(componentIds[i], componentIds[static_cast<size_t>(liveComponents) - 1]);
@@ -92,11 +100,13 @@ void Entity::removeComponentAt(int i)
 
 	// ...then shrink that list, therefore moving it into dead component territory
 	--liveComponents;
+	componentQuickMask = componentQuickMask & ~quickIndex;
 }
 
 void Entity::removeAllComponents(World& world)
 {
 	liveComponents = 0;
+	componentQuickMask = 0;
 	markDirty(world);
 }
 

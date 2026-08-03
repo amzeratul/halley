@@ -13,6 +13,7 @@
 class AudioSourceComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 11 };
+	static constexpr uint32_t quickIndex{ 0 };
 	static const constexpr char* componentName{ "AudioSource" };
 	static constexpr bool alwaysEnabled{ false };
 

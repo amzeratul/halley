@@ -13,6 +13,7 @@
 class VelocityComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 1 };
+	static constexpr uint32_t quickIndex{ 0 };
 	static const constexpr char* componentName{ "Velocity" };
 	static constexpr bool alwaysEnabled{ false };
 

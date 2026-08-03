@@ -4,6 +4,7 @@ component:
   name: Sprite
   category: graphics
   componentDependencies: [Transform2D]
+  hasQuickIndex: true
   members:
   - sprite:
       type: 'Halley::Sprite'
@@ -23,6 +24,7 @@ component:
 component:
   name: Colour
   category: graphics
+  hasQuickIndex: true
   members:
   - colour:
       type: 'Halley::Colour4f'

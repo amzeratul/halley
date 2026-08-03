@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 141
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -13,6 +13,7 @@
 class NetworkComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 16 };
+	static constexpr uint32_t quickIndex{ 4 };
 	static const constexpr char* componentName{ "Network" };
 	static constexpr bool alwaysEnabled{ false };
 

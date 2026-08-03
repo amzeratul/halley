@@ -16,6 +16,7 @@ bool CodegenSourceInfo::operator<(const CodegenSourceInfo& other) const
 void ECSData::loadSources(Vector<CodegenSourceInfo> files, bool throwOnValidationError)
 {
 	++revision;
+	curComponentQuickIndex = 0;
 
 	std::sort(files.begin(), files.end());
 	for (auto& f : files) {
@@ -243,6 +244,13 @@ void ECSData::addComponent(YAML::Node rootNode, bool generate)
 
 	if (components.find(comp.name) == components.end()) {
 		comp.id = int(components.size());
+		if (comp.hasQuickIndex) {
+			if (curComponentQuickIndex < 32) {
+				comp.quickIndex = ++curComponentQuickIndex;
+			} else {
+				Logger::logError("Too many components have a quick index: max of 32 components supported");
+			}
+		}
 		components[comp.name] = comp;
 	}
 	else {

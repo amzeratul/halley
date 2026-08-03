@@ -310,6 +310,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	gen
 		.setAccessLevel(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
+		.addMember(MemberSchema(TypeSchema("uint32_t", false, true, true), "quickIndex", toString(component.quickIndex)))
 		.addMember(MemberSchema(TypeSchema("char*", true, true, true), "componentName", component.name))
 		.addMember(MemberSchema(TypeSchema("bool", false, true, true), "alwaysEnabled", toString(component.alwaysEnabled)))
 		.addBlankLine()

@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 141
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -13,6 +13,7 @@
 class ColourComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 3 };
+	static constexpr uint32_t quickIndex{ 3 };
 	static const constexpr char* componentName{ "Colour" };
 	static constexpr bool alwaysEnabled{ false };
 

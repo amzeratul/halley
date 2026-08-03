@@ -13,6 +13,7 @@
 class EmbeddedScriptComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 13 };
+	static constexpr uint32_t quickIndex{ 0 };
 	static const constexpr char* componentName{ "EmbeddedScript" };
 	static constexpr bool alwaysEnabled{ false };
 

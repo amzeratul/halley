@@ -6,6 +6,7 @@ component:
   name: Transform2D
   category: physics
   customImplementation: "halley/entity/components/transform_2d_component.h"
+  hasQuickIndex: true
   members:
   - position:
       type: 'Halley::Vector2f'

@@ -18,6 +18,7 @@ namespace Halley
 		explicit ComponentSchema(YAML::Node node, bool generate);
 
 		int id = -1;
+		uint32_t quickIndex = 0;
 		String name;
 		String category;
 		Vector<ComponentFieldSchema> members;
@@ -27,6 +28,7 @@ namespace Halley
 		Vector<String> componentDependenciesInAncestors;
 		bool generate = false;
 		bool alwaysEnabled = false;
+		bool hasQuickIndex = false;
 
 		bool operator<(const ComponentSchema& other) const;
 	};

@@ -73,14 +73,15 @@ namespace Halley {
 		template <typename T>
 		struct RetrieveComponentIndex {
 			static constexpr int componentIndex = T::componentIndex;
+			static constexpr int quickIndex = T::quickIndex;
 		};
 
 		template <typename T>
 		struct RetrieveComponentIndex<MaybeRef<T>> {
 			static constexpr int componentIndex = T::componentIndex;
+			static constexpr int quickIndex = T::quickIndex;
 		};
-
-
+		
 
 
 		template <typename... Ts>

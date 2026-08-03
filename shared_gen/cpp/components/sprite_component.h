@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 141
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -13,6 +13,7 @@
 class SpriteComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 2 };
+	static constexpr uint32_t quickIndex{ 2 };
 	static const constexpr char* componentName{ "Sprite" };
 	static constexpr bool alwaysEnabled{ false };
 

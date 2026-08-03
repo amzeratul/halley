@@ -24,6 +24,7 @@ namespace Halley {
 
     	virtual const char* getName() const = 0;
 		virtual int getIndex() const = 0;
+		virtual uint32_t getQuickIndex() const = 0;
 
 		virtual ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const = 0;
 		virtual CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) const = 0;

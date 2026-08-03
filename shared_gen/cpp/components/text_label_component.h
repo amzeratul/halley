@@ -13,6 +13,7 @@
 class TextLabelComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 4 };
+	static constexpr uint32_t quickIndex{ 0 };
 	static const constexpr char* componentName{ "TextLabel" };
 	static constexpr bool alwaysEnabled{ false };
 

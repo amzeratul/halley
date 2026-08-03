@@ -3,6 +3,7 @@
 component:
   name: Network
   category: serialization
+  hasQuickIndex: true
   members:
   - ownerId: 
       type: 'std::optional<uint8_t>'

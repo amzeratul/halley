@@ -58,5 +58,7 @@ namespace Halley {
     	HashMap<String, SystemMessageSchema> systemMessages;
 		HashMap<String, CustomTypeSchema> types;
 		int revision = 0;
+
+		uint32_t curComponentQuickIndex = 0;
     };
 }

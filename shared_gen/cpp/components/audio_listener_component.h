@@ -13,6 +13,7 @@
 class AudioListenerComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 10 };
+	static constexpr uint32_t quickIndex{ 0 };
 	static const constexpr char* componentName{ "AudioListener" };
 	static constexpr bool alwaysEnabled{ false };
 

@@ -13,6 +13,7 @@
 class TimelineComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 17 };
+	static constexpr uint32_t quickIndex{ 0 };
 	static const constexpr char* componentName{ "Timeline" };
 	static constexpr bool alwaysEnabled{ false };
 
