@@ -95,6 +95,7 @@ void ScriptEnvironment::updateState(Time time, ScriptState& graphState, EntityId
 	ProfilerEvent event(ProfilerEventType::ScriptUpdate, s.graph->getAssetId(), reinterpret_cast<uint64_t>(this));
 
 	try {
+		graphState.incrementFrameNumber(); // We want to run this at the START of the update, otherwise scripts relying on this to change might read dt = 0 from editor introspection
 		auto& threads = graphState.getThreads();
 
 		const bool hashChanged = graphState.getGraphHash() != s.graph->getHash();
@@ -143,7 +144,6 @@ void ScriptEnvironment::updateState(Time time, ScriptState& graphState, EntityId
 		}
 
 		graphState.updateDisplayOffset(time);
-		graphState.incrementFrameNumber();
 	} catch (const std::exception& e) {
 		auto entity = getWorld().tryGetEntity(curEntity);
 		String name = entity.isValid() ? entity.getName() : "<invalidEntity>";
