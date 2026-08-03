@@ -17,9 +17,9 @@ namespace Halley {
 		void serialize(Serializer& s, const EntitySerializationContext& context) const;
 		void deserialize(Deserializer& s, const EntitySerializationContext& context);
 
-		const ConfigNode& getVariable(const String& name) const;
-    	void setVariable(const String& name, ConfigNode value);
-		bool hasVariable(const String& name) const;
+		const ConfigNode& getVariable(std::string_view name) const;
+    	void setVariable(std::string_view name, ConfigNode value);
+		bool hasVariable(std::string_view name) const;
 
 		bool empty() const;
 		void clear();

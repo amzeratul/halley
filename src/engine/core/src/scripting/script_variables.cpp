@@ -112,7 +112,7 @@ void ScriptVariables::deserialize(Deserializer& s, const EntitySerializationCont
 	}
 }
 
-const ConfigNode& ScriptVariables::getVariable(const String& name) const
+const ConfigNode& ScriptVariables::getVariable(std::string_view name) const
 {
 	const auto iter = variables.find(name);
 	if (iter != variables.end()) {
@@ -121,12 +121,12 @@ const ConfigNode& ScriptVariables::getVariable(const String& name) const
 	return dummy;
 }
 
-void ScriptVariables::setVariable(const String& name, ConfigNode value)
+void ScriptVariables::setVariable(std::string_view name, ConfigNode value)
 {
 	variables[name] = std::move(value);
 }
 
-bool ScriptVariables::hasVariable(const String& name) const
+bool ScriptVariables::hasVariable(std::string_view name) const
 {
 	return variables.find(name) != variables.end();
 }
