@@ -46,6 +46,11 @@ component:
       defaultValue: true
       canSave: false
       canEdit: true
+  - addedDynamically:
+      type: bool
+      defaultValue: false
+      canEdit: false
+      canSave: true
 
 ---
 
