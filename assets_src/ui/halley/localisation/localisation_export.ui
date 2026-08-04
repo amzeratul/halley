@@ -252,6 +252,48 @@ children:
                           text: Up to date
                         - id: outOfDate
                           text: Out of date
+              - uuid: 4b85ff3f-b567-4315-a1c4-cc9c43087031
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 6e505223-540d-44c8-8bc9-141526eeede0
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: commentStatusEnable
+                      label: Comment status
+                      size: [200, 0]
+                  - uuid: 34cb1353-710a-4871-81a3-285d934183a2
+                    proportion: 1
+                    widget:
+                      class: dropdown
+                      id: commentStatus
+                      options:
+                        - id: hasComment
+                          text: Has Comment
+                        - id: noComment
+                          text: No Comment
+              - uuid: 2278d95a-a922-44aa-b2e1-316ffcf60fb3
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 109c0070-a253-4347-851b-70bd03572200
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: contextStatusEnable
+                      label: Context status
+                      size: [200, 0]
+                  - uuid: 53d790f4-74c4-4612-902e-01013fb3e95c
+                    proportion: 1
+                    widget:
+                      class: dropdown
+                      id: contextStatus
+                      options:
+                        - id: hasContext
+                          text: Has Context
+                        - id: noContext
+                          text: No Context
               - uuid: 7d1880ad-a09e-4390-af71-8e6fd0b3b88c
                 border: [0, 5, 0, 0]
                 widget:
