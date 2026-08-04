@@ -489,7 +489,12 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
 
     journal.digest();
 
-    return !journal.isFull();
+    if (journal.isFull()) {
+        Logger::logError("Serializer journal full, too many networked (child) entities in " + entity.getName(), true);
+        return false;
+    }
+
+    return true;
 }
 
 void EntityNetworkSerialize::doSerializeEntityUpdate(
@@ -974,7 +979,7 @@ bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log)
 
     if (!childrenAdded.empty()) {
         if (log) {
-            Logger::logDev("  - " + toString(childrenAdded.size()) + " children added");
+            Logger::logDev("  - " + toString(childrenAdded.size()) + " children added to " + entity.getName());
             for (const auto& child : childrenAdded) {
                 auto ce = findChildEntity(entity, child);
                 Logger::logDev("    + " + child + " - " + (ce ? ce->first.getName() : "unknown"));
@@ -985,7 +990,7 @@ bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log)
 
     if (!childrenRemoved.empty()) {
         if (log) {
-            Logger::logDev("  - " + toString(childrenRemoved.size()) + " children removed");
+            Logger::logDev("  - " + toString(childrenRemoved.size()) + " children removed from " + entity.getName());
         }
         changes = true;
     }
