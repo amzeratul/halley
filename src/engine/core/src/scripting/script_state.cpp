@@ -534,10 +534,12 @@ void ScriptState::prepareStates(const EntitySerializationContext& context, Time 
 		needsStateLoading = false;
 	}
 
+#ifdef DEV_BUILD
 	const float dt = static_cast<float>(t);
 	for (auto& n: nodeState) {
 		n.timeSinceStart += dt;
 	}
+#endif
 }
 
 size_t& ScriptState::getNodeCounter(GraphNodeId node)
