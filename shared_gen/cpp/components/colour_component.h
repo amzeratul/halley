@@ -13,7 +13,7 @@
 class ColourComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 3 };
-	static constexpr uint32_t quickIndex{ 3 };
+	static constexpr uint32_t quickIndex{ 4 };
 	static const constexpr char* componentName{ "Colour" };
 	static constexpr bool alwaysEnabled{ false };
 

@@ -246,10 +246,12 @@ void ECSData::addComponent(YAML::Node rootNode, bool generate)
 		comp.id = int(components.size());
 		if (comp.hasQuickIndex) {
 			if (curComponentQuickIndex < 32) {
-				comp.quickIndex = ++curComponentQuickIndex;
+				comp.quickIndex = 1 << (curComponentQuickIndex++);
 			} else {
 				Logger::logError("Too many components have a quick index: max of 32 components supported");
 			}
+		} else {
+			comp.quickIndex = 0;
 		}
 		components[comp.name] = comp;
 	}

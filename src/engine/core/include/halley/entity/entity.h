@@ -56,16 +56,16 @@ namespace Halley {
 		template <typename T>
 		T* tryGetComponent(bool evenIfDisabled = false)
 		{
-			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
-				constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
-				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-				
-				if constexpr (quickIndex != 0) {
-					if ((quickIndex & componentQuickMask) == 0) {
-						return nullptr;
-					}
+			constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+			
+			if constexpr (quickIndex != 0) {
+				if ((quickIndex & componentQuickMask) == 0) {
+					return nullptr;
 				}
-
+			}
+			
+			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				const auto& span = componentIds.span();
 				const size_t n = liveComponents;
 				for (size_t i = 0; i < n; ++i) {
@@ -80,16 +80,16 @@ namespace Halley {
 		template <typename T>
 		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
-			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
-				constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
-				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+			constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
 
-				if constexpr (quickIndex != 0) {
-					if ((quickIndex & componentQuickMask) == 0) {
-						return nullptr;
-					}
+			if constexpr (quickIndex != 0) {
+				if ((quickIndex & componentQuickMask) == 0) {
+					return nullptr;
 				}
-
+			}
+			
+			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
 				const auto& span = componentIds.span();
 				const size_t n = liveComponents;
 				for (size_t i = 0; i < n; ++i) {
@@ -126,14 +126,14 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent(const World& world, bool evenIfDisabled = false) const
 		{
+			constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+			
+			if constexpr (quickIndex != 0) {
+				return (quickIndex & componentQuickMask) != 0;
+			}
+			
 			if (evenIfDisabled || (enabled && parentEnabled)) [[likely]] {
-				constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
-				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-				
-				if constexpr (quickIndex != 0) {
-					return (quickIndex & componentQuickMask) != 0;
-				}
-				
 				const auto& span = componentIds.span();
 				const size_t n = liveComponents;
 				for (size_t i = 0; i < n; ++i) {
@@ -143,27 +143,23 @@ namespace Halley {
 				}
 			}
 			return false;
-
-			/*
-			if (dirty) {
-				return tryGetComponent<T>(evenIfDisabled) != nullptr;
-			} else {
-				return hasBit(world, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
-			}
-			*/
 		}
 
 		template <typename ... Ts>
-		bool hasAnyComponent(const World& world) const
+		bool hasAnyComponent(const World& world, bool warnIfNoQuickIndexCoverage = false) const
 		{
-			const auto [quickIndices, quickIndexCoverage] = getComponentQuickIndices<Ts...>();
-			if constexpr (quickIndices != 0) {
-				if constexpr (quickIndexCoverage) {
+			constexpr auto quickIndices = getComponentQuickIndices<Ts...>();
+			if constexpr (quickIndices.first != 0) {
+				if constexpr (quickIndices.second) {
 					// Full coverage, return true or false based purely on this
-					return (quickIndices & componentQuickMask) != 0;
+					return (quickIndices.first & componentQuickMask) != 0;
 				} else {
 					// Incomplete coverage - true is enough to satisfy, but not false
-					if ((quickIndices & componentQuickMask) != 0) {
+					if (warnIfNoQuickIndexCoverage) {
+						Logger::logWarning("Components don't have quick index: " + getComponentsMissingQuickIndices<Ts...>(), true);
+					}
+
+					if ((quickIndices.first & componentQuickMask) != 0) {
 						return true;
 					}
 				}
@@ -327,14 +323,33 @@ namespace Halley {
 		template <typename T, typename ... Ts>
 		constexpr static std::pair<uint32_t, bool> getComponentQuickIndices()
 		{
-			const auto quickIdx = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
-			const bool coverage = quickIdx != 0;
+			constexpr auto quickIdx = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			constexpr bool coverage = quickIdx != 0;
 
 			if constexpr (sizeof...(Ts) > 0) {
 				auto [otherIdx, otherCoverage] = getComponentQuickIndices<Ts...>();
 				return { quickIdx | otherIdx, coverage && otherCoverage };
 			} else {
 				return { quickIdx, coverage };
+			}
+		}
+
+		template <typename T, typename ... Ts>
+		constexpr static String getComponentsMissingQuickIndices()
+		{
+			constexpr auto quickIdx = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			constexpr bool coverage = quickIdx != 0;
+			constexpr auto myName = coverage ? std::string_view(typeid(T).name()) : "";
+
+			if constexpr (sizeof...(Ts) > 0) {
+				auto rest = getComponentsMissingQuickIndices<Ts...>();
+				if (rest.isEmpty()) {
+					return myName;
+				} else {
+					return String(myName) + ", " + rest;
+				}
+			} else {
+				return myName;
 			}
 		}
 
@@ -671,10 +686,10 @@ namespace Halley {
 		}
 
 		template <typename ... Ts>
-		bool hasAnyComponent() const
+		bool hasAnyComponent(bool warnIfNoQuickIndexCoverage = false) const
 		{
 			validate();
-			return entity->hasAnyComponent<Ts...>(*world);
+			return entity->hasAnyComponent<Ts...>(*world, warnIfNoQuickIndexCoverage);
 		}
 
 		template <typename T>

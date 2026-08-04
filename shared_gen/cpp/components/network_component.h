@@ -13,7 +13,7 @@
 class NetworkComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 16 };
-	static constexpr uint32_t quickIndex{ 4 };
+	static constexpr uint32_t quickIndex{ 8 };
 	static const constexpr char* componentName{ "Network" };
 	static constexpr bool alwaysEnabled{ false };
 

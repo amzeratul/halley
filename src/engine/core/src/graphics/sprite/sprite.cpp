@@ -205,7 +205,7 @@ bool Sprite::isInView(Rect4f rect) const
 	}
 
 	const auto aabb = getAABB();
-	return aabb.overlaps(rect) && std::abs(aabb.getWidth()) > 0 && std::abs(aabb.getHeight()) > 0;
+	return aabb.overlaps(rect) && !floatEquals(aabb.getWidth() * aabb.getHeight(), 0.0f);
 }
 
 Sprite& Sprite::setRotation(Angle1f v)
