@@ -983,6 +983,9 @@ void UIList::moveSelection(int dx, int dy)
 	int nRows;
 	int option = curOption;
 	const auto nItems = int(getNumberOfItems());
+	if (nItems == 0) {
+		return;
+	}
 
 	if (gridHorizontalMoveFollowsItems && orientation == UISizerType::Grid && dx != 0) {
 		option += dx;
