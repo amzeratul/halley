@@ -335,7 +335,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename ... Ts>
-		constexpr static String getComponentsMissingQuickIndices()
+		static String getComponentsMissingQuickIndices()
 		{
 			constexpr auto quickIdx = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
 			constexpr bool coverage = quickIdx != 0;
