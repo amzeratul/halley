@@ -459,11 +459,13 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 			entity.setName(delta.getName().value());
 		}
 
-		bool enabled = true;
+		bool enabled = entity.isEnabled();
+
 		if (delta.getFlags()) {
-			entity.setSelectable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
-			entity.setSerializable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
-			enabled = enabled && (delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
+			const auto flags = delta.getFlags().value();
+			entity.setSelectable((flags & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
+			entity.setSerializable((flags & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
+			enabled = (flags & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
 		}
 
 		if (delta.getVariant()) {
