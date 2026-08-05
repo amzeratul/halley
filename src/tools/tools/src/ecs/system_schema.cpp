@@ -43,6 +43,13 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 {
 	name = node["name"].as<std::string>();
 
+	Vector<String> indexedFamilies;
+	if (node["indexedFamilies"].IsDefined()) {
+		for (auto familyEntry : node["indexedFamilies"]) {
+			indexedFamilies += familyEntry.as<std::string>();
+		}
+	}
+
 	if (node["families"].IsDefined()) {
 		for (auto familyEntry : node["families"]) {
 			for (auto iter = familyEntry.begin(); iter != familyEntry.end(); ++iter) {
@@ -81,6 +88,7 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 					}
 				}
 
+				family.indexed = indexedFamilies.contains(family.name);
 				families.push_back(family);
 			}
 		}

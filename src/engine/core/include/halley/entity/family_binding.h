@@ -26,6 +26,10 @@ namespace Halley {
 		T* getElement(size_t index) const noexcept { return family->getElement<T>(index); }
 		void setFamily(Family* family) noexcept;
 
+		template <typename T>
+		T* findElement(EntityId id) const noexcept { return family->findElement<T>(id); }
+
+		void setIndexed();
 		void setOnEntitiesAdded(std::function<void(void*, size_t)> callback);
 		void setOnEntitiesRemoved(std::function<void(void*, size_t)> callback);
 		void setOnEntitiesReloaded(std::function<void(void*, size_t)> callback);
@@ -272,22 +276,12 @@ namespace Halley {
 
 		T* tryFind(EntityId id)
 		{
-			for (auto& e: *this) {
-				if (e.entityId == id) {
-					return &e;
-				}
-			}
-			return nullptr;
+			return getFamily().findElement<T>(id);
 		}
 
 		const T* tryFind(EntityId id) const
 		{
-			for (auto& e: *this) {
-				if (e.entityId == id) {
-					return &e;
-				}
-			}
-			return nullptr;
+			return getFamily().findElement<T>(id);
 		}
 
 		T& find(EntityId id)

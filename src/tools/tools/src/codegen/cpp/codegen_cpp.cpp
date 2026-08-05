@@ -657,7 +657,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 	initBaseMethodBody.push_back("invokeInit<T>(static_cast<T*>(this));");
 	for (auto& family: system.families) {
-		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family, static_cast<T*>(this));");
+		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family, static_cast<T*>(this), " + family.indexed + ");");
 	}
 	
 	sysClassGen

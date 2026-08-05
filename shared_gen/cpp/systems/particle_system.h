@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 142
 #pragma once
 
 #include <halley.hpp>
@@ -77,7 +77,7 @@ private:
 		debugDrawService = &doGetWorld().template getService<DebugDrawService>(getName());
 		screenService = &doGetWorld().template getService<ScreenService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
-		initialiseFamilyBinding<T, ParticleFamily>(particleFamily, static_cast<T*>(this));
+		initialiseFamilyBinding<T, ParticleFamily>(particleFamily, static_cast<T*>(this), false);
 	}
 
 	void updateBase(Halley::Time time) override final {

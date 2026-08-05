@@ -38,6 +38,11 @@ void FamilyBindingBase::setFamily(Family* f) noexcept {
 	family = f;
 }
 
+void FamilyBindingBase::setIndexed()
+{
+	family->setIndexed();
+}
+
 void FamilyBindingBase::setOnEntitiesAdded(std::function<void(void*, size_t)> callback)
 {
 	addedCallback = callback;

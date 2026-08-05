@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 142
 #pragma once
 
 #include <halley.hpp>
@@ -65,8 +65,8 @@ private:
 
 	void initBase() override final {
 		invokeInit<T>(static_cast<T*>(this));
-		initialiseFamilyBinding<T, ScriptableFamily>(scriptableFamily, static_cast<T*>(this));
-		initialiseFamilyBinding<T, TagTargetsFamily>(tagTargetsFamily, static_cast<T*>(this));
+		initialiseFamilyBinding<T, ScriptableFamily>(scriptableFamily, static_cast<T*>(this), false);
+		initialiseFamilyBinding<T, TagTargetsFamily>(tagTargetsFamily, static_cast<T*>(this), false);
 	}
 
 	void updateBase(Halley::Time time) override final {

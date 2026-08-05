@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 142
 #pragma once
 
 #include <halley.hpp>
@@ -185,9 +185,9 @@ private:
 		scriptingService = &doGetWorld().template getService<ScriptingService>(getName());
 		devService = &doGetWorld().template getService<DevService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
-		initialiseFamilyBinding<T, ScriptableFamily>(scriptableFamily, static_cast<T*>(this));
-		initialiseFamilyBinding<T, EmbeddedScriptFamily>(embeddedScriptFamily, static_cast<T*>(this));
-		initialiseFamilyBinding<T, TargetFamily>(targetFamily, static_cast<T*>(this));
+		initialiseFamilyBinding<T, ScriptableFamily>(scriptableFamily, static_cast<T*>(this), true);
+		initialiseFamilyBinding<T, EmbeddedScriptFamily>(embeddedScriptFamily, static_cast<T*>(this), false);
+		initialiseFamilyBinding<T, TargetFamily>(targetFamily, static_cast<T*>(this), false);
 	}
 
 	void updateBase(Halley::Time time) override final {

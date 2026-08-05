@@ -189,6 +189,7 @@ system:
     - EmbeddedScript: write
   - target:
     - ScriptTarget: read
+  indexedFamilies: [ scriptable ]
   strategy: global
   services:
   - ScriptingService

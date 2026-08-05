@@ -37,6 +37,24 @@ namespace Halley {
 			return static_cast<char*>(elems) + (n * elemSize);
 		}
 
+		template<typename T>
+		[[nodiscard]] T* findElement(EntityId id) const
+		{
+			if (indexed) {
+				if (auto idx = findElementInIndex(id)) [[likely]] {
+					return getElement<T>(*idx);
+				}
+			} else {
+				for (size_t i = 0; i < elemCount; ++i) {
+					auto* e = getElement<T>(i);
+					if (e->entityId == id) {
+						return e;
+					}
+				}
+			}
+			return nullptr;
+		}
+
 		void addOnEntitiesAdded(FamilyBindingBase* bind);
 		void removeOnEntityAdded(FamilyBindingBase* bind);
 		void addOnEntitiesRemoved(FamilyBindingBase* bind);
@@ -48,6 +66,9 @@ namespace Halley {
 		void notifyRemove(void* entities, size_t count);
 		void notifyReload(void* entities, size_t count);
 
+		void setIndexed();
+		virtual void rebuildIndex() = 0;
+
 		virtual bool isDirty() const = 0;
 
 	protected:
@@ -57,10 +78,19 @@ namespace Halley {
 		void reloadEntity(Entity& entity);
 		virtual void updateEntities() = 0;
 		virtual void clearEntities() = 0;
+
+		OptionalLite<size_t> findElementInIndex(EntityId id) const;
 		
 		void* elems = nullptr;
 		size_t elemCount = 0;
-		size_t elemSize = 0;
+		uint32_t elemSize = 0;
+		bool indexed = false;
+		
+	private:
+		FamilyMaskType inclusionMask;
+		FamilyMaskType optionalMask;
+
+	protected:
 		Vector<EntityId> toRemove;
 		Vector<EntityId> toReload;
 
@@ -68,9 +98,7 @@ namespace Halley {
 		Vector<FamilyBindingBase*> removeEntityCallbacks;
 		Vector<FamilyBindingBase*> modifiedEntityCallbacks;
 
-	private:
-		FamilyMaskType inclusionMask;
-		FamilyMaskType optionalMask;
+		HashMap<EntityId, size_t> index;
 	};
 
 	class FamilyBase {
@@ -102,7 +130,7 @@ namespace Halley {
 	}
 
 	template <typename T>
-	class FamilyImpl : public Family
+	class FamilyImpl final : public Family
 	{
 		constexpr static size_t storageSize = sizeof(T) - alignUp(sizeof(FamilyBase), alignof(void*));
 		static_assert(std::is_base_of<FamilyBase, T>::value, "Family type does not derive from FamilyBase");
@@ -122,8 +150,12 @@ namespace Halley {
 		}
 			
 	protected:
-		void addEntity(Entity& entity) override
+		void addEntity(Entity& entity) final
 		{
+			if (indexed) {
+				index[entity.getEntityId()] = entities.size();
+			}
+
 			auto& e = entities.emplace_back();
 			e.entityId = entity.getEntityId();
 			T::Type::loadComponents(entity, &e.data[0]);
@@ -131,7 +163,7 @@ namespace Halley {
 			dirty = true;
 		}
 		
-		void refreshEntity(Entity& entity) override
+		void refreshEntity(Entity& entity) final
 		{
 			for (auto& e: entities) {
 				if (e.entityId == entity.getEntityId()) {
@@ -141,7 +173,7 @@ namespace Halley {
 			}
 		}
 
-		void updateEntities() override
+		void updateEntities() final
 		{
 			if (dirty) {
 				// Notify additions
@@ -172,17 +204,31 @@ namespace Halley {
 			removeDeadEntities();
 		}
 
-		void clearEntities() override
+		void clearEntities() final
 		{
 			notifyRemove(entities.data(), entities.size());
 			entities.clear();
 			updateElems();
+			index.clear();
 		}
 
-		bool isDirty() const override
+		bool isDirty() const final
 		{
 			return dirty;
 		}
+
+		void rebuildIndex() final
+		{
+			index.clear();
+			if (indexed) {
+				const size_t n = entities.size();
+				index.reserve(n);
+				for (size_t i = 0; i < n; ++i) {
+					index[entities[i].entityId] = i;
+				}
+			}
+		}
+
 
 	private:
 		Vector<StorageType> entities;
@@ -242,6 +288,7 @@ namespace Halley {
 				// Remove them
 				entities.resize(newSize);
 				updateElems();
+				rebuildIndex();
 			}
 			HalleyAssertDebug(toRemove.empty());
 		}

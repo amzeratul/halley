@@ -96,6 +96,7 @@ system:
   families:
   - network:
     - Network: write
+  indexedFamilies: [ network ]
   strategy: global
   systemMessages:
     - NetworkEntityLock: send receive

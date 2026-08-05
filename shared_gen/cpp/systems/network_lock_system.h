@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 142
 #pragma once
 
 #include <halley.hpp>
@@ -77,7 +77,7 @@ private:
 	void initBase() override final {
 		sessionService = &doGetWorld().template getService<SessionService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
-		initialiseFamilyBinding<T, NetworkFamily>(networkFamily, static_cast<T*>(this));
+		initialiseFamilyBinding<T, NetworkFamily>(networkFamily, static_cast<T*>(this), true);
 	}
 
 	void updateBase(Halley::Time time) override final {

@@ -61,6 +61,24 @@ void Family::notifyReload(void* entities, size_t count)
 	}
 }
 
+OptionalLite<size_t> Family::findElementInIndex(EntityId id) const
+{
+	const auto iter = index.find(id);
+	if (iter != index.end()) {
+		return iter->second;
+	}
+
+	return std::nullopt;
+}
+
+void Family::setIndexed()
+{
+	if (!indexed) {
+		indexed = true;
+		rebuildIndex();
+	}
+}
+
 void Family::removeEntity(Entity& entity)
 {
 	toRemove.push_back(entity.getEntityId());

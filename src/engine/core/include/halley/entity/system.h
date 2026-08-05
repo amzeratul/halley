@@ -179,8 +179,11 @@ namespace Halley {
 		}
 
 		template <typename T, typename F>
-		void initialiseFamilyBinding(FamilyBinding<F>& binding, T* system)
+		void initialiseFamilyBinding(FamilyBinding<F>& binding, T* system, bool indexed = false)
 		{
+			if (indexed) {
+				binding.setIndexed();
+			}
 			initialiseOnEntityAdded<T, F>(binding, system);
 			initialiseOnEntityRemoved<T, F>(binding, system);
 			initializeOnEntityReloaded<T, F>(binding, system);
