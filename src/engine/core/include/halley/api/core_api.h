@@ -60,5 +60,7 @@ namespace Halley
 		virtual bool isDevMode() = 0;
 
 		virtual DevConClient* getDevConClient() const = 0;
+
+		virtual uint32_t getResourceUnloaderFrameIdx() const = 0;
 	};
 }

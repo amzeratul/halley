@@ -45,6 +45,7 @@ namespace Halley {
         ResourceUnloader(Resources& resources, SystemAPI& systemAPI);
 
         void update(Time t, const ResourceUnloaderRules& rules);
+        uint32_t getFrameIdx() const;
 
     private:
         Resources& resources;
@@ -54,6 +55,7 @@ namespace Halley {
         Time budgetMessageTimeout = 0;
         Time unloadPreloadMessageTimeout = 0;
         uint32_t frameIdx = 1000;
+        uint32_t activeFrameIdx = 0;
         Vector<float> frameTimes;
 
         constexpr static float maxTimeLogged = 15.0; // seconds

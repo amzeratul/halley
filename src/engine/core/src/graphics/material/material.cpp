@@ -347,6 +347,33 @@ void Material::markLowPriorityBackgroundLoaded() const
 	}
 }
 
+void Material::markInActiveUse(uint32_t frameIdx) const
+{
+	for (auto& tex: textures) {
+		if (tex) {
+			tex->markActivelyInUse(frameIdx);
+		}
+	}
+}
+
+void Material::markBackgroundLoaded(uint32_t frameIdx) const
+{
+	for (auto& tex: textures) {
+		if (tex) {
+			tex->markBackgroundLoaded(frameIdx);
+		}
+	}
+}
+
+void Material::markLowPriorityBackgroundLoaded(uint32_t frameIdx) const
+{
+	for (auto& tex: textures) {
+		if (tex) {
+			tex->markLowPriorityBackgroundLoaded(frameIdx);
+		}
+	}
+}
+
 bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {

@@ -228,6 +228,11 @@ void Core::init()
 	setStage(game->startGame());
 }
 
+uint32_t Core::getResourceUnloaderFrameIdx() const
+{
+	return resourceUnloaderFrameIdx;
+}
+
 DevConClient* Core::getDevConClient() const
 {
 	return devConClient.get();
@@ -407,6 +412,7 @@ void Core::updateResources(Time time)
 {
 	ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
 	resourceUnloader->update(time, game->getResourceUnloaderRules());
+	resourceUnloaderFrameIdx = resourceUnloader->getFrameIdx();
 
 	if (auto* i18n = game->tryGetI18N()) {
 		const auto language = i18n->getCurrentLanguage();

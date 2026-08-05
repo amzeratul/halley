@@ -88,3 +88,8 @@ DevConClient* CoreAPIWrapper::getDevConClient() const
 {
 	return nullptr;
 }
+
+uint32_t CoreAPIWrapper::getResourceUnloaderFrameIdx() const
+{
+	return parent.getResourceUnloaderFrameIdx();
+}

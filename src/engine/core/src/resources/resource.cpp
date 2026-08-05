@@ -247,9 +247,10 @@ void AsyncResource::markActivelyInUse() const
 	requestLoading();
 }
 
-void AsyncResource::markLowPriorityBackgroundLoaded() const
+void AsyncResource::markActivelyInUse(uint32_t frameIdx) const
 {
-	usageData.lastFrameInBackgroundLowPriority = curFrame;
+	usageData.lastFrameInUse = frameIdx;
+	requestLoading();
 }
 
 bool AsyncResource::hasSucceeded() const

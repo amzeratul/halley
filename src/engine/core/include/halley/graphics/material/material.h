@@ -135,6 +135,9 @@ namespace Halley
 		void markInActiveUse() const;
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
+		void markInActiveUse(uint32_t frameIdx) const;
+		void markBackgroundLoaded(uint32_t frameIdx) const;
+		void markLowPriorityBackgroundLoaded(uint32_t frameIdx) const;
 
 		gsl::span<const MaterialDataBlock> getDataBlocks() const;
 		gsl::span<MaterialDataBlock> getDataBlocks();

@@ -22,6 +22,7 @@ namespace Halley {
 		void removeStartFrameCallback(IStartFrameCallback* callback) override;
 		Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() override;
 		DevConClient* getDevConClient() const override;
+		uint32_t getResourceUnloaderFrameIdx() const override;
 
 	private:
 		CoreAPI& parent;

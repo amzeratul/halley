@@ -76,6 +76,8 @@ namespace Halley
 		Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() override;
 
 		int getExitCode() const { return exitCode; }
+		
+		uint32_t getResourceUnloaderFrameIdx() const override;
 
 		DevConClient* getDevConClient() const override;
 
@@ -151,5 +153,6 @@ namespace Halley
 		ComputerData computerData;
 
 		std::unique_ptr<ResourceUnloader> resourceUnloader;
+		uint32_t resourceUnloaderFrameIdx = 0;
 	};
 }

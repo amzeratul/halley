@@ -70,6 +70,11 @@ void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 	});
 }
 
+uint32_t ResourceUnloader::getFrameIdx() const
+{
+	return frameIdx;
+}
+
 void ResourceUnloader::prepareCollection(float dt, ResourceCollectionBase& collection)
 {
 	if (!collection.isAsync()) {

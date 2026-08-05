@@ -84,6 +84,9 @@ namespace Halley
 		void markInActiveUse() const;
 		void markBackgroundLoaded() const;
 		void markLowPriorityBackgroundLoaded() const;
+		void markInActiveUse(uint32_t curFrame) const;
+		void markBackgroundLoaded(uint32_t curFrame) const;
+		void markLowPriorityBackgroundLoaded(uint32_t curFrame) const;
 
 		Sprite& setImage(Resources& resources, std::string_view imageName, std::string_view materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);

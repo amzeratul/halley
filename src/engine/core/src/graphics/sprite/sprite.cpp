@@ -415,6 +415,27 @@ void Sprite::markLowPriorityBackgroundLoaded() const
 	}
 }
 
+void Sprite::markInActiveUse(uint32_t curFrame) const
+{
+	if (material) [[likely]] {
+		material->markInActiveUse(curFrame);
+	}
+}
+
+void Sprite::markBackgroundLoaded(uint32_t curFrame) const
+{
+	if (material) [[likely]] {
+		material->markBackgroundLoaded(curFrame);
+	}
+}
+
+void Sprite::markLowPriorityBackgroundLoaded(uint32_t curFrame) const
+{
+	if (material) [[likely]] {
+		material->markLowPriorityBackgroundLoaded(curFrame);
+	}
+}
+
 Sprite& Sprite::setImageData(const Texture& image)
 {
 	setSize(Vector2f(image.getSize()));
