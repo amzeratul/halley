@@ -173,9 +173,9 @@ int UIParent::getAbsoluteChildLayerAdjustment() const
 
 std::shared_ptr<UIWidget> UIParent::doGetWidget(const String& id) const
 {
-	auto lists = { children, childrenWaiting };
-	for (auto& cs : lists) {
-		for (auto& c: cs) {
+	const auto lists = { gsl::span<const std::shared_ptr<UIWidget>>(children), gsl::span<const std::shared_ptr<UIWidget>>(childrenWaiting) };
+	for (const auto& cs : lists) {
+		for (const auto& c: cs) {
 			if (c->isAlive()) {
 				if (c->getId() == id) {
 					return c;
