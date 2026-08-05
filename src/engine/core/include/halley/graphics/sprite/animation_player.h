@@ -33,6 +33,7 @@ namespace Halley
 
 		void update(Time time);
 		void updateSprite(Sprite& sprite) const;
+		bool isActiveAnimation() const;
 
 		void setMaterialOverride(std::shared_ptr<const Material> material);
 		std::shared_ptr<const Material> getMaterialOverride() const;
@@ -76,26 +77,11 @@ namespace Halley
 
 	private:
 		void resolveSprite();
-		void doResolveSprite();
 		void updateResourceIfNeeded() const;
 		void doUpdateResource();
 
 		void onSequenceStarted();
 		void onSequenceDone();
-
-		std::shared_ptr<const Material> materialOverride;
-		std::shared_ptr<const Animation> animation;
-		const SpriteSheetEntry* spriteData = nullptr;
-
-		const AnimationFrame* curFrame = nullptr;
-		const AnimationSequence* curSeq = nullptr;
-		const AnimationDirection* curDir = nullptr;
-
-		std::optional<String> nextSequence = {};
-		
-		String curSeqName;
-		String curDirName;
-		ResourceObserver observer;
 
 		Time curSeqTime;
 		Time curFrameTime;
@@ -115,15 +101,28 @@ namespace Halley
 		bool dirFlip;
 		bool playing = false;
 		bool reverse = false;
-		std::optional<bool> visibleUserOverride;
-		std::optional<bool> visibleSyncOverride;
+		OptionalLite<bool> visibleUserOverride;
+		OptionalLite<bool> visibleSyncOverride;
+		bool applyPivot = true;
+		bool applyMaterial = true;
+		mutable bool hasUpdate = true;
 
 		AnimationPlayId curPlayId = 0;
 
-		bool applyPivot = true;
-		bool applyMaterial = true;
+		std::shared_ptr<const Animation> animation;
+		const SpriteSheetEntry* spriteData = nullptr;
 
-		mutable bool hasUpdate = true;
+		const AnimationFrame* curFrame = nullptr;
+		const AnimationSequence* curSeq = nullptr;
+		const AnimationDirection* curDir = nullptr;
+
+		std::shared_ptr<const Material> materialOverride;
+
+		std::optional<String> nextSequence = {};
+		
+		String curSeqName;
+		String curDirName;
+		ResourceObserver observer;
 	};
 
 	class AnimationPlayerLite {

@@ -263,6 +263,12 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 	}
 }
 
+bool AnimationPlayer::isActiveAnimation() const
+{
+	updateResourceIfNeeded();
+	return (curSeq && seqLen > 1) || dirty;
+}
+
 void AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
 {
 	materialOverride = std::move(material);
@@ -401,6 +407,8 @@ void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideI
 
 void AnimationPlayer::setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized)
 {
+	updateResourceIfNeeded();
+
 	if (getCurrentSequenceName() != sequenceName) {
 		setSequence(sequenceName);
 	}
@@ -434,6 +442,8 @@ void AnimationPlayer::setTiming(int currentFrame, Time currentFrameTime)
 void AnimationPlayer::stepFrames(int amount)
 {
 	if (amount != 0) {
+		updateResourceIfNeeded();
+
 		curFrameN = modulo(curFrameN + amount, static_cast<int>(seqLen));
 		curFrameTime = 0;
 
@@ -466,12 +476,6 @@ std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& act
 
 void AnimationPlayer::resolveSprite()
 {
-	updateResourceIfNeeded();
-	doResolveSprite();
-}
-
-void AnimationPlayer::doResolveSprite()
-{
 	if (curSeq && curSeq->numFrames() > 0) {
 		curFrame = &curSeq->getFrame(curFrameN);
 		spriteData = &(curFrame->getSprite(dirId));
@@ -502,7 +506,7 @@ void AnimationPlayer::onSequenceDone()
 void AnimationPlayer::updateResourceIfNeeded() const
 {
 #ifdef ENABLE_HOT_RELOAD
-	if (observer.needsUpdate()) {
+	if (false && observer.needsUpdate()) {
 		const_cast<AnimationPlayer*>(this)->doUpdateResource();
 	}
 #endif
@@ -516,7 +520,7 @@ void AnimationPlayer::doUpdateResource()
 	curSeq = nullptr;
 	setSequence(curSeqName);
 	setDirection(curDirName);
-	doResolveSprite();
+	resolveSprite();
 }
 
 AnimationPlayerLite::AnimationPlayerLite(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)

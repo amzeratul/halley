@@ -76,11 +76,13 @@ private:
 	void updateAnimators(Time time, Rect4f viewPort)
 	{
 		for (auto& e : mainFamily) {
-			if (!isCulledByFixedBounds(e.transform2D, e.spriteAnimation, viewPort)) {
-				e.spriteAnimation.player.update(time);
-				updateSprite(e, viewPort, false);
+			if (e.spriteAnimation.player.isActiveAnimation()) {
+				if (!isCulledByFixedBounds(e.transform2D, e.spriteAnimation, viewPort)) {
+					e.spriteAnimation.player.update(time);
+					updateSprite(e, viewPort, false);
+				}
+				updateEvents(e);
 			}
-			updateEvents(e);
 		}
 	}
 
