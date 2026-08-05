@@ -316,7 +316,7 @@ namespace Halley
 
 		void startFrame(float dt, uint32_t frameIdx) const final;
 		void markActivelyInUse() const;
-		void markBackgroundLoaded() const;
+		void markBackgroundLoaded() const { usageData.lastFrameInBackground = curFrame; }
 		void markLowPriorityBackgroundLoaded() const;
 		const UsagePattern& getUsagePattern() const { return usageData; }
 

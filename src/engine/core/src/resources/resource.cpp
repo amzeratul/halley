@@ -247,11 +247,6 @@ void AsyncResource::markActivelyInUse() const
 	requestLoading();
 }
 
-void AsyncResource::markBackgroundLoaded() const
-{
-	usageData.lastFrameInBackground = curFrame;
-}
-
 void AsyncResource::markLowPriorityBackgroundLoaded() const
 {
 	usageData.lastFrameInBackgroundLowPriority = curFrame;
