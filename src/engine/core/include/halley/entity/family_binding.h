@@ -276,12 +276,12 @@ namespace Halley {
 
 		T* tryFind(EntityId id)
 		{
-			return getFamily().findElement<T>(id);
+			return getFamily().template findElement<T>(id);
 		}
 
 		const T* tryFind(EntityId id) const
 		{
-			return getFamily().findElement<T>(id);
+			return getFamily().template findElement<T>(id);
 		}
 
 		T& find(EntityId id)
