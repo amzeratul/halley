@@ -506,7 +506,7 @@ void AnimationPlayer::onSequenceDone()
 void AnimationPlayer::updateResourceIfNeeded() const
 {
 #ifdef ENABLE_HOT_RELOAD
-	if (false && observer.needsUpdate()) {
+	if (observer.needsUpdate()) {
 		const_cast<AnimationPlayer*>(this)->doUpdateResource();
 	}
 #endif
