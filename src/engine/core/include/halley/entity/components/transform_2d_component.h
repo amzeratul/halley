@@ -84,6 +84,12 @@ public:
 	void markDirty(uint8_t changeMask = (uint8_t)0xFF);
 
 	const Halley::EntityRef& getEntityRef() const { return entity; }
+	uint32_t getEntityRevision() const
+	{
+		return (static_cast<uint32_t>(revision) << 16)
+			| (static_cast<uint32_t>(entity.getHierarchyRevision()) << 8)
+			| static_cast<uint32_t>(entity.getComponentRevision());
+	}
 
 private:
 	friend class Halley::EntityRef;
