@@ -716,8 +716,10 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                 if (result && componentId == Transform2DComponent::componentIndex) {
                     // Check if position interpolation is enabled.
                     // TODO: This lookup is kind of costly, as it is done again in deserializeNetwork().
-                    const auto* interpolator = byteSerializationContext.entityInterpolators->tryGetInterpolator(
-                        byteSerializationContext.entityId, componentId, "position");
+                    const IByteDataInterpolator* interpolator = nullptr;
+                    if (byteSerializationContext.entityInterpolators != nullptr) {
+                        interpolator = byteSerializationContext.entityInterpolators->tryGetInterpolator(byteSerializationContext.entityId, componentId, "position");
+                    }
 
                     if (interpolator && interpolator->isEnabled()) {
                         // Saves the current position before deserialization, and restores it afterward. Return the
