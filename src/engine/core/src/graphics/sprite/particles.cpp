@@ -399,6 +399,21 @@ void Particles::setAnimation(std::shared_ptr<const Animation> animation, String 
 	baseAnimation = std::move(animation);
 	animationSequence = seq;
 	animationDirection = dir;
+
+	if (isAnimated()) {
+		const auto size = particles.size();
+		// Update animation for all existing animationPlayers.
+		if (animationPlayers.size() > 0) {
+			for (auto& player : animationPlayers) {
+				player.setAnimation(baseAnimation, animationSequence, animationDirection);
+			}
+		}
+		// Adjust size of animationPlayers. It might be out of sync, if this wasn't animated when
+		// the last resize happened; see Particles::spawn().
+		if (animationPlayers.size() < size) {
+			animationPlayers.resize(size, AnimationPlayerLite(baseAnimation, animationSequence, animationDirection));
+		}
+	}
 }
 
 bool Particles::isRandomisingAnimationTime() const
