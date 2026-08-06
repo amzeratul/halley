@@ -265,8 +265,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 
 bool AnimationPlayer::isActiveAnimation() const
 {
-	updateResourceIfNeeded();
-	return (curSeq && seqLen > 1) || dirty;
+	return true;
+	//updateResourceIfNeeded();
+	//return (curSeq && seqLen > 1) || dirty;
 }
 
 void AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
