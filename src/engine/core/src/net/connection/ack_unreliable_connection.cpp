@@ -80,8 +80,6 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 		return;
 	}
 
-	doFlushSmallPackets();
-
 	doSend(packet.getBytes(), false);
 }
 
@@ -182,10 +180,8 @@ bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& p
 	auto& slot = outbound.packets[256];
 
 	if (slot.subIdx > 7) {
-		return false; // too many small packets in cache already
+		doFlushSmallPackets(); // too many small packets in cache already, flush
 	}
-
-	HalleyAssertDev(realMaxPacketSize > headerSize);
 
 	const size_t maxSize = realMaxPacketSize - headerSize;
 	if (maxSize < slot.dataSize + size) {
