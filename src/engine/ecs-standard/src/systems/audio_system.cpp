@@ -98,6 +98,18 @@ public:
 		getAPI().audio->getGlobalEmitter()->setVariable(variableName, value);
 	}
 
+	void setSwitch(EntityId entityId, const String& switchName, const String& value) override
+	{
+		if (const auto* source = sourceFamily.tryFind(entityId)) {
+			source->audioSource.emitter->setSwitch(switchName, value);
+		}
+	}
+
+	void setGlobalSwitch(const String& switchName, const String& value) override
+	{
+		getAPI().audio->getGlobalEmitter()->setSwitch(switchName, value);
+	}
+
 	std::optional<String> getSourceName(AudioEmitterId id) const override
 	{
 		for (const auto& source: sourceFamily) {
