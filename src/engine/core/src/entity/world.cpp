@@ -74,12 +74,20 @@ World::~World()
 	for (auto& tl: systems) {
 		tl.clear();
 	}
+
+	for (auto e: entitiesPendingCreation) {
+		e->clearParentAndChildren();
+	}
+	for (auto e: entities) {
+		e->clearParentAndChildren();
+	}
 	for (auto e: entitiesPendingCreation) {
 		deleteEntity(e);
 	}
 	for (auto e: entities) {
 		deleteEntity(e);
 	}
+
 	families.clear();
 	services.clear();
 

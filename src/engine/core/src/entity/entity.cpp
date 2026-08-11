@@ -177,6 +177,12 @@ void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 	}
 }
 
+void Entity::clearParentAndChildren()
+{
+	parent = nullptr;
+	children.clear();
+}
+
 void Entity::addChild(Entity& child)
 {
 	child.setParent(this);

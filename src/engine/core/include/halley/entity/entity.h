@@ -292,6 +292,7 @@ namespace Halley {
 
 		Entity* getParent() const { return parent; }
 		void setParent(Entity* parent, bool propagate = true, size_t childIdx = -1);
+		void clearParentAndChildren();
 		const Vector<Entity*>& getChildren() const { return children; }
 		void addChild(Entity& child);
 		void detachChildren();
