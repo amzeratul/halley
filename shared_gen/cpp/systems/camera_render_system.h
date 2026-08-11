@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 143
 #pragma once
 
 #include <halley.hpp>
@@ -46,6 +46,9 @@ private:
 	PainterService* painterService{ nullptr };
 	DevService* devService{ nullptr };
 	ScreenService* screenService{ nullptr };
+	void preInitBase() override final {
+		invokePreInit<T>(static_cast<T*>(this));
+	}
 	void initBase() override final {
 		painterService = &doGetWorld().template getService<PainterService>(getName());
 		devService = &doGetWorld().template getService<DevService>(getName());

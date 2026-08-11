@@ -1,4 +1,4 @@
-// Halley codegen version 142
+// Halley codegen version 143
 #pragma once
 
 #include <halley.hpp>
@@ -86,6 +86,9 @@ private:
 	friend Halley::System* halleyCreateAudioSystem();
 
 	DevService* devService{ nullptr };
+	void preInitBase() override final {
+		invokePreInit<T>(static_cast<T*>(this));
+	}
 	void initBase() override final {
 		devService = doGetWorld().template tryGetService<DevService>(getName());
 		invokeInit<T>(static_cast<T*>(this));

@@ -646,7 +646,14 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		}
 	}
 
-	// Construct initBase();
+	// Construct preInitBase()
+	Vector<String> preInitBaseMethodBody;
+	preInitBaseMethodBody.push_back("invokePreInit<T>(static_cast<T*>(this));");
+	sysClassGen
+		.setAccessLevel(MemberAccess::Private)
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "preInitBase", false, false, true, true), preInitBaseMethodBody);
+
+	// Construct initBase()
 	Vector<String> initBaseMethodBody;
 	for (auto& service: system.services) {
 		if (service.optional) {

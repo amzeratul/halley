@@ -22,6 +22,7 @@ namespace Halley {
 
 	namespace Detail {
 		template<class T> using InitMember = decltype(std::declval<T&>().init());
+		template<class T> using PreInitMember = decltype(std::declval<T&>().preInit());
 		template<class T, typename F> using OnEntitiesAddedMember = decltype(std::declval<T>().onEntitiesAdded(std::declval<Span<F>>()));
 		template<class T, typename F> using OnEntitiesRemovedMember = decltype(std::declval<T>().onEntitiesRemoved(std::declval<Span<F>>()));
 		template<class T, typename F> using OnEntitiesReloadedMember = decltype(std::declval<T>().onEntitiesReloaded(std::declval<Span<F*>>()));
@@ -52,6 +53,7 @@ namespace Halley {
 		const String& getName() const { return name; }
 		void setName(String n) { name = std::move(n); }
 		size_t getEntityCount() const;
+		bool tryPreInit();
 		bool tryInit();
 
 		virtual bool canHandleSystemMessage(int messageId, const String& targetSystem) const { return false; }
@@ -71,6 +73,7 @@ namespace Halley {
 		Resources& doGetResources() const { return *resources; }
 		SystemMessageBridge doGetMessageBridge() { return SystemMessageBridge(*this); }
 
+		virtual void preInitBase() {}
 		virtual void initBase() {}
 		virtual void deInit() {}
 		virtual void updateBase(Time) {}
@@ -135,6 +138,14 @@ namespace Halley {
 			}
 			
 			return doSendSystemMessage(std::move(context), targetSystem, msgDst.value_or(T::messageDestination));
+		}
+
+		template <typename T>
+		void invokePreInit(T* system)
+		{
+			if constexpr (is_detected_v<Detail::PreInitMember, T>) {
+				system->preInit();
+			}
 		}
 
 		template <typename T>
@@ -204,6 +215,7 @@ namespace Halley {
 		Resources* resources = nullptr;
 		String name;
 		int systemId = -1;
+		bool preInitialised = false;
 		bool initialised = false;
 
 		void doUpdate(Time time);

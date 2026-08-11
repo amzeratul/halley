@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 143
 #pragma once
 
 #include <halley.hpp>
@@ -31,6 +31,9 @@ private:
 	friend Halley::System* halleyCreateEnableRulesSystem();
 
 	EnableRulesService* enableRulesService{ nullptr };
+	void preInitBase() override final {
+		invokePreInit<T>(static_cast<T*>(this));
+	}
 	void initBase() override final {
 		enableRulesService = &doGetWorld().template getService<EnableRulesService>(getName());
 		invokeInit<T>(static_cast<T*>(this));

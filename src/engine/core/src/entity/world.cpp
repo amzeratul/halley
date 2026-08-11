@@ -834,7 +834,14 @@ void World::updateEntities()
 void World::initSystems(gsl::span<const TimeLine> timelines)
 {
 	for (auto& tl: timelines) {
-		for (auto& system : systems[int(tl)]) {
+		auto& curSystems = systems[int(tl)];
+
+		for (auto& system: curSystems) {
+			if (system->tryPreInit()) {
+				updateMemoryPool->reset();
+			}
+		}
+		for (auto& system: systems[int(tl)]) {
 			// If the system is initialised, also check for any entities that need spawning
 			if (system->tryInit()) {
 				spawnPending();

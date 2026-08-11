@@ -6,10 +6,13 @@ using namespace Halley;
 
 class AudioSystem final : public AudioSystemBase<AudioSystem>, public IAudioSystemInterface {
 public:
-	void init()
+	void preInit()
 	{
 		getWorld().setInterface(static_cast<IAudioSystemInterface*>(this));
+	}
 
+	void init()
+	{
 		if (auto* devService = tryGetDevService()) {
 			initConsoleCommands(*devService);
 

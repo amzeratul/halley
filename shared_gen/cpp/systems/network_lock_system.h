@@ -1,4 +1,4 @@
-// Halley codegen version 142
+// Halley codegen version 143
 #pragma once
 
 #include <halley.hpp>
@@ -74,6 +74,9 @@ private:
 	friend Halley::System* halleyCreateNetworkLockSystem();
 
 	SessionService* sessionService{ nullptr };
+	void preInitBase() override final {
+		invokePreInit<T>(static_cast<T*>(this));
+	}
 	void initBase() override final {
 		sessionService = &doGetWorld().template getService<SessionService>(getName());
 		invokeInit<T>(static_cast<T*>(this));

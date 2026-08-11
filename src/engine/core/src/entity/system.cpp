@@ -47,6 +47,17 @@ size_t System::getEntityCount() const
 	return n;
 }
 
+bool System::tryPreInit()
+{
+	if (!preInitialised) {
+		const auto trace = StackDebugTrace("name", name);
+		preInitBase();
+		preInitialised = true;
+		return true;
+	}
+	return false;
+}
+
 bool System::tryInit()
 {
 	if (!initialised) {
