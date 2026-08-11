@@ -663,10 +663,13 @@ TempMemoryPool& World::getRenderMemoryPool() const
 void World::deleteEntity(Entity* entity)
 {
 	HalleyAssertDev(entity);
-	entityMap->freeId(entity->getEntityId().value);
+	const auto id = entity->getEntityId().value;
+
 	entity->destroyComponents(*componentDeleterTable);
 	entity->~Entity();
+
 	entityPool->free(entity);
+	entityMap->freeId(id);
 }
 
 bool World::hasSystemsOnTimeLine(TimeLine timeline) const
