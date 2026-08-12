@@ -39,7 +39,10 @@ using namespace Halley;
 Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 {
 	statics.setupGlobals();
-	Logger::addSink(*this);
+
+	threadedLogger = std::make_unique<ThreadedLogger>();
+	threadedLogger->createBasicThread();
+	Logger::addSink(*threadedLogger);
 
 	game = std::move(g);
 
@@ -104,6 +107,10 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Create API
 	registerDefaultPlugins();
 	api = HalleyAPI::create(this, game->initPlugins(*this));
+
+	// Init threaded logger
+	threadedLogger->setDevMode(game->isDevMode());
+	threadedLogger->createSystemThread(*api->system);
 }
 
 Core::~Core()
@@ -287,7 +294,8 @@ void Core::deInit()
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
 	std::cout.flush();
-	Logger::removeSink(*this);
+	Logger::removeSink(*threadedLogger);
+	threadedLogger = {};
 	out.reset();
 
 #if defined(_WIN32) && !defined(WITH_GDK)
@@ -818,38 +826,6 @@ Vector<Plugin*> Core::getPlugins(PluginType type)
 	}
 	std::sort(result.begin(), result.end(), [] (Plugin* a, Plugin* b) { return a->getPriority() > b->getPriority(); });
 	return result;
-}
-
-void Core::log(LoggerLevel level, const std::string_view msg)
-{
-	if (level == LoggerLevel::Dev && (!game || !game->isDevMode())) {
-		return;
-	}
-
-	if (level == LoggerLevel::Error) {
-		std::cout << ConsoleColour(Console::RED);
-	} else if (level == LoggerLevel::Warning) {
-		std::cout << ConsoleColour(Console::YELLOW);
-	} else if (level == LoggerLevel::Dev) {
-		std::cout << ConsoleColour(Console::CYAN);
-	}
-
-	/*
-	// Print timestamp
-	const auto now = std::chrono::system_clock::now();
-	const auto nowTimeT = std::chrono::system_clock::to_time_t(now);
-	const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-	tm buffer;
-	localtime_s(&buffer, &nowTimeT);
-	std::cout << std::put_time(&buffer, "%T")  << '.' << std::setfill('0') << std::setw(3) << ms.count() << " ";
-	*/
-
-	std::cout << msg << ConsoleColour() << std::endl;
-}
-
-bool Core::canLogInInterruptContext()
-{
-	return true;
 }
 
 void IHalleyEntryPoint::initSharedStatics(const HalleyStatics& parent)

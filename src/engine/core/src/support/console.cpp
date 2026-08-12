@@ -53,14 +53,20 @@ static void setConsoleColour(int, int)
 
 void Halley::Console::setForeground(ColourType colour)
 {
-	curForeground = colour;
-	setConsoleColour(curForeground, curBackground);
+	if (curForeground != colour) {
+		curForeground = colour;
+		setConsoleColour(curForeground, curBackground);
+		std::cout.flush();
+	}
 }
 
 void Halley::Console::setBackground(ColourType colour)
 {
-	curBackground = colour;
-	setConsoleColour(curForeground, curBackground);
+	if (curBackground != colour) {
+		curBackground = colour;
+		setConsoleColour(curForeground, curBackground);
+		std::cout.flush();
+	}
 }
 
 Console::ColourType Halley::Console::getForeground()

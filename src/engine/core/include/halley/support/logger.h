@@ -5,10 +5,12 @@
 #include "../concurrency/mutex.h"
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/data_structures/ring_buffer.h"
 #include "halley/text/enum_names.h"
 
 namespace Halley
 {
+	class SystemAPI;
 	class String;
 
 	enum class LoggerLevel
@@ -35,8 +37,14 @@ namespace Halley
 	{
 	public:
 		virtual ~ILoggerSink() {}
-		virtual void log(LoggerLevel level, std::string_view msg) = 0;
-		virtual bool canLogInInterruptContext() { return false; }
+		virtual void log(LoggerLevel level, std::string_view msg) {}
+		virtual void log(LoggerLevel level, std::string_view msg, bool isInterrupt)
+		{
+			if (canLogInContext(isInterrupt)) {
+				log(level, msg);
+			}
+		}
+		virtual bool canLogInContext(bool isInterrupt) { return !isInterrupt; }
 		virtual void setInterruptContext() {}
 	};
 
@@ -45,7 +53,7 @@ namespace Halley
 		explicit StdOutSink(bool devMode, bool forceFlush = false);
 		~StdOutSink();
 		void log(LoggerLevel level, std::string_view msg) override;
-		bool canLogInInterruptContext() override;
+		bool canLogInContext(bool isInterrupt) override;
 		void setInterruptContext() override;
 
 	private:
@@ -53,6 +61,34 @@ namespace Halley
 		bool devMode = false;
 		bool forceFlush = false;
 		bool interruptContext = false;
+	};
+
+	class ThreadedLogger final : public ILoggerSink {
+	public:
+		ThreadedLogger();
+		~ThreadedLogger() override;
+
+		void setDevMode(bool devMode);
+		void createBasicThread();
+		void createSystemThread(SystemAPI& system);
+
+		void log(LoggerLevel level, std::string_view msg, bool isInterrupt) override;
+
+	private:
+		struct Entry {
+			LoggerLevel level;
+			String msg;
+		};
+
+		RingBuffer<Entry> pendingEntries;
+		std::thread thread;
+		std::atomic<bool> running;
+		mutable Mutex writeMutex;
+		bool devMode = false;
+
+		void run();
+		void stopThread();
+		void doLog(LoggerLevel level, std::string_view msg);
 	};
 
 	class Logger

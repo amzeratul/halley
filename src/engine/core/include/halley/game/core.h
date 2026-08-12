@@ -28,7 +28,7 @@ namespace Halley
 	class DevConClient;
 	class ResourceUnloader;
 
-	class Core final : public CoreAPIInternal, public IMainLoopable, public ILoggerSink
+	class Core final : public CoreAPIInternal, public IMainLoopable
 	{
 		using Clock = std::chrono::steady_clock;
 	public:
@@ -64,9 +64,6 @@ namespace Halley
 		void registerDefaultPlugins();
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;
-
-		void log(LoggerLevel level, std::string_view msg) override;
-		bool canLogInInterruptContext() override;
 
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;
@@ -154,5 +151,7 @@ namespace Halley
 
 		std::unique_ptr<ResourceUnloader> resourceUnloader;
 		uint32_t resourceUnloaderFrameIdx = 0;
+
+		std::unique_ptr<ThreadedLogger> threadedLogger;
 	};
 }

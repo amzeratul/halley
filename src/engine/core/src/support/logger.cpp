@@ -2,6 +2,8 @@
 #include "halley/text/halleystring.h"
 #include "halley/support/assert.h"
 #include <iostream>
+
+#include "halley/api/system_api.h"
 #include "halley/support/console.h"
 #include "halley/utils/hash.h"
 
@@ -50,7 +52,7 @@ void StdOutSink::log(LoggerLevel level, std::string_view msg)
 	}
 }
 
-bool StdOutSink::canLogInInterruptContext()
+bool StdOutSink::canLogInContext(bool isInterrupt)
 {
 	return true;
 }
@@ -58,6 +60,110 @@ bool StdOutSink::canLogInInterruptContext()
 void StdOutSink::setInterruptContext()
 {
 	interruptContext = true;
+}
+
+ThreadedLogger::ThreadedLogger()
+	: pendingEntries(256)
+{
+}
+
+ThreadedLogger::~ThreadedLogger()
+{
+	stopThread();
+
+	while (pendingEntries.canRead(1)) {
+		auto e = pendingEntries.readOne();
+		doLog(e.level, e.msg);
+	}
+
+	std::cout.flush();
+}
+
+void ThreadedLogger::setDevMode(bool devMode)
+{
+	this->devMode = devMode;
+}
+
+void ThreadedLogger::createBasicThread()
+{
+	stopThread();
+
+	running = true;
+	thread = std::thread([this] () {
+		run();
+	});
+}
+
+void ThreadedLogger::createSystemThread(SystemAPI& system)
+{
+	stopThread();
+
+	running = true;
+	thread = system.createThread("ThreadedLogger", ThreadPriority::Low, [this] () {
+		run();
+	});
+}
+
+void ThreadedLogger::log(LoggerLevel level, std::string_view msg, bool isInterrupt)
+{
+	if (!running || isInterrupt) {
+		doLog(level, msg);
+		if (isInterrupt) {
+			std::cout.flush();
+		}
+		return;
+	}
+
+	auto lock = UniqueLock(writeMutex);
+
+	using namespace std::chrono_literals;
+	while (running && !pendingEntries.canWrite(1)) {
+		std::this_thread::sleep_for(10us);
+	}
+
+	if (running) {
+		pendingEntries.writeOne(Entry{ level, msg });
+	} else {
+		doLog(level, msg);
+	}
+}
+
+void ThreadedLogger::run()
+{
+	using namespace std::chrono_literals;
+	while (running) {
+		if (pendingEntries.canRead(1)) {
+			auto e = pendingEntries.readOne();
+			doLog(e.level, e.msg);			
+		} else {
+			std::this_thread::sleep_for(500us);
+		}
+	}
+}
+
+void ThreadedLogger::stopThread()
+{
+	if (running) {
+		running = false;
+		thread.join();
+	}
+}
+
+void ThreadedLogger::doLog(LoggerLevel level, std::string_view msg)
+{
+	if (level == LoggerLevel::Dev && !devMode) {
+		return;
+	}
+
+	if (level == LoggerLevel::Error) {
+		std::cout << ConsoleColour(Console::RED);
+	} else if (level == LoggerLevel::Warning) {
+		std::cout << ConsoleColour(Console::YELLOW);
+	} else if (level == LoggerLevel::Dev) {
+		std::cout << ConsoleColour(Console::CYAN);
+	}
+
+	std::cout << msg << ConsoleColour() << "\n";
 }
 
 void Logger::setInstance(Logger& logger)
@@ -96,9 +202,7 @@ void Logger::log(LoggerLevel level, std::string_view msg, bool once)
 		}
 
 		for (const auto& s: instance->sinks) {
-			if (!instance->interruptContext || s->canLogInInterruptContext()) {
-				s->log(level, msg);
-			}
+			s->log(level, msg, instance->interruptContext);
 		}
 	} else {
 		std::cout << msg << '\n';

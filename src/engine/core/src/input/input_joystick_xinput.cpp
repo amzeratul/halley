@@ -215,7 +215,7 @@ void InputJoystickXInput::update(Time t)
 	if (result == ERROR_SUCCESS) {	// WTF, Microsoft
 		if (!isEnabled()) {
 			setEnabled(true);
-			std::cout << "\tXInput Controller " << ConsoleColour(Console::DARK_GREY) << (index + 1) << ConsoleColour() << " connected: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
+			Logger::logInfo("\tXInput Controller " + toString(index + 1) + " connected: \"" + getName() + "\".");
 		}
 
 		auto& gamepad = state.Gamepad;
@@ -256,7 +256,7 @@ void InputJoystickXInput::update(Time t)
 	} else {
 		if (isEnabled()) {
 			setEnabled(false);
-			std::cout << "\tXInput Controller " << ConsoleColour(Console::DARK_GREY) << (index + 1) << ConsoleColour() << " disconnected.\n";
+			Logger::logInfo("\tXInput Controller " + toString(index + 1) + " disconnected.");
 		}
 		cooldown = 30;
 
