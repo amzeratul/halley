@@ -104,6 +104,21 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 	}
 
 	auto clip = engine.getRNG().getRandomElement(clipData);
+
+	if (!clip) {
+		// If we get an empty clip, try getting ANY non-empty clip (could filter and re-pick random but eh)
+		for (auto& c: clipData) {
+			if (c) {
+				clip = c;
+				break;
+			}
+		}
+		// Give up
+		if (!clip) {
+			return {};
+		}
+	}
+
 	return std::make_unique<AudioSourceClip>(engine, clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd, randomiseStart);
 }
 
