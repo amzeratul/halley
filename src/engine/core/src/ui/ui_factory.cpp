@@ -34,6 +34,7 @@
 #include "halley/ui/behaviours/ui_slide_behaviour.h"
 #include "halley/ui/widgets/ui_custom_paint.h"
 #include "halley/ui/widgets/ui_debug_console.h"
+#include "halley/ui/widgets/ui_mask_override.h"
 #include "halley/ui/widgets/ui_render_surface.h"
 #include "halley/ui/widgets/ui_resize_divider.h"
 #include "halley/ui/widgets/ui_spin_control2.h"
@@ -103,6 +104,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("resizeDivider", [=, this](const ConfigNode& node) { return makeResizeDivider(node); }, getResizeDividerProperties());
 	addFactory("scene3d", [=, this](const ConfigNode& node) { return makeScene3d(node); }, getScene3dProperties());
 	addFactory("placeholder", [=, this](const ConfigNode& node) { return makePlaceholder(node); }, getPlaceholderProperties());
+	addFactory("maskOverride", [=, this](const ConfigNode& node) { return makeMaskOverride(node); }, getMaskOverrideProperties());
 
 	addBehaviourFactory("slide", [=, this](const ConfigNode& node) { return makeSlideBehaviour(node); }, getSlideBehaviourProperties());
 	addBehaviourFactory("fade", [=, this](const ConfigNode& node) { return makeFadeBehaviour(node); }, getFadeBehaviourProperties());
@@ -1967,6 +1969,27 @@ std::shared_ptr<UIWidget> UIFactory::makePlaceholder(const ConfigNode& entryNode
 	}
 
 	return makeBaseWidget(entryNode);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeMaskOverride(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
+	auto minSize = node["minSize"].asVector2f(Vector2f(0, 0));
+	auto innerBorder = node["innerBorder"].asVector4f(Vector4f(0, 0, 0, 0));
+	auto widget = std::make_shared<UIMaskOverride>(id, minSize, makeSizer(entryNode), innerBorder);
+	widget->setMaskOverride(node["maskOverride"].asOptional<int>());
+	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getMaskOverrideProperties() const
+{
+	auto result = getBaseWidgetProperties();
+	result.name = "Mask Override";
+
+	result.entries.emplace_back("Mask Override", "maskOverride", "std::optional<int>", "");
+
+	return result;
 }
 
 UIFactoryWidgetProperties UIFactory::getSlideBehaviourProperties() const

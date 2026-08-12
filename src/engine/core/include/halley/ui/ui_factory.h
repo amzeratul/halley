@@ -203,6 +203,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeResizeDivider(const ConfigNode& node);
         std::shared_ptr<UIWidget> makeScene3d(const ConfigNode& node);
         std::shared_ptr<UIWidget> makePlaceholder(const ConfigNode& node);
+        std::shared_ptr<UIWidget> makeMaskOverride(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
 
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
@@ -237,6 +238,7 @@ namespace Halley
 		UIFactoryWidgetProperties getResizeDividerProperties() const;
         UIFactoryWidgetProperties getScene3dProperties() const;
         UIFactoryWidgetProperties getPlaceholderProperties() const;
+        UIFactoryWidgetProperties getMaskOverrideProperties() const;
 
 		std::shared_ptr<UIBehaviour> makeSlideBehaviour(const ConfigNode& node);
 		std::shared_ptr<UIBehaviour> makeFadeBehaviour(const ConfigNode& node);
