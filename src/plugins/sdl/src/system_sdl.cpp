@@ -39,9 +39,9 @@ void SystemSDL::init()
 	SDL_version linked;
 	SDL_VERSION(&compiled);
 	SDL_GetVersion(&linked);
-	std::cout << ConsoleColour(Console::GREEN) << "\nInitializing SDL..." << ConsoleColour() << std::endl;
-	std::cout << "\tVersion/Compiled: " << ConsoleColour(Console::DARK_GREY) << int(compiled.major) << "." << int(compiled.minor) << "." << int(compiled.patch) << ConsoleColour() << std::endl;
-	std::cout << "\tVersion/Linked: " << ConsoleColour(Console::DARK_GREY) << int(linked.major) << "." << int(linked.minor) << "." << int(linked.patch) << ConsoleColour() << std::endl;
+	Logger::logInfo("\nInitializing SDL...");
+	Logger::logInfo("\tVersion/Compiled: " + toString(int(compiled.major)) + "." + int(compiled.minor) + "." + int(compiled.patch));
+	Logger::logInfo("\tVersion/Linked: " + toString(int(linked.major)) + "." + int(linked.minor) + "." + int(linked.patch));
 
 	// Initialize SDL
 	if (!SDL_WasInit(0)) {
@@ -588,12 +588,11 @@ void SystemSDL::setThreadPriority(ThreadPriority priority)
 
 void SystemSDL::printDebugInfo() const
 {
-	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();
-	std::cout << "Drivers available:\n";
+	Logger::logInfo("Initializing Video Display...\nDrivers available:");
 	for (int i = 0; i < SDL_GetNumVideoDrivers(); i++) {
-		std::cout << "\t" << i << ": " << SDL_GetVideoDriver(i) << "\n";
+		Logger::logInfo("\t" + toString(i) + ": " + SDL_GetVideoDriver(i));
 	}
-	std::cout << "Video driver: " << ConsoleColour(Console::DARK_GREY) << SDL_GetCurrentVideoDriver() << ConsoleColour() << std::endl;
+	Logger::logInfo(String("Video driver: ") + SDL_GetCurrentVideoDriver());
 }
 
 void SystemSDL::initVideo() const

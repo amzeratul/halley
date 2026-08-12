@@ -56,7 +56,7 @@ InputJoystickSDL::InputJoystickSDL(int number)
 	baseButtons = SDL_JoystickNumButtons(joy);
 	init(std::min(baseButtons + 4, 512));
 
-	std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
+	Logger::logInfo(String("\tInitialized SDL Joystick: \"") + getName() + "\".");
 }
 
 InputJoystickSDL::~InputJoystickSDL()
@@ -79,7 +79,7 @@ void InputJoystickSDL::update(Time t)
 void InputJoystickSDL::close()
 {
 	if (joystick) {
-		std::cout << "\tRemoved SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
+		Logger::logInfo(String("\tRemoved SDL Joystick: \"") + getName() + "\".");
 		doSetVibration(0, 0);
 		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
 		joystick = nullptr;

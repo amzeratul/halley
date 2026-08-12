@@ -69,7 +69,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	}
 	setOutRedirect(false);
 
-	std::cout << ConsoleColour(Console::GREEN) << "Halley v" << getHalleyVersion().toString() << " is initializing..." << ConsoleColour() << std::endl;
+	Logger::logInfo("Halley v" + getHalleyVersion().toString() + " is initializing...");
 
 	// Debugging initialization
 	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=, this] (std::string_view error) {
@@ -79,7 +79,11 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Time
 	auto now = std::chrono::system_clock::now();
 	auto now_c = std::chrono::system_clock::to_time_t(now);
-	std::cout << "It is " << std::put_time(std::localtime(&now_c), "%F %T") << std::endl;
+	{
+		std::stringstream temp;
+		temp << "It is " << std::put_time(std::localtime(&now_c), "%F %T");
+		Logger::logInfo(temp.str());
+	}
 
 	// Seed RNG
 	time_t curTime = time(nullptr);
@@ -88,8 +92,8 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	srand(seed);
 
 	// Info
-	std::cout << "Program dir: " << ConsoleColour(Console::DARK_GREY) << environment->getProgramPath() << ConsoleColour() << std::endl;
-	std::cout << "Data dir: " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
+	Logger::logInfo("Program dir: " + environment->getProgramPath());
+	Logger::logInfo("Data dir: " + environment->getDataPath());
 
 	// Computer info
 #ifdef DEV_BUILD
@@ -691,14 +695,14 @@ void Core::showComputerInfo() const
 	String curTime = asctime(localtime(&rawtime));
 	curTime.trim(true);
 
-	std::cout << "Computer data:" << "\n";
-	//std::cout << "\tName: " << computerData.computerName << "\n";
-	//std::cout << "\tUser: " << computerData.userName << "\n";
-	std::cout << "\tOS:   " << ConsoleColour(Console::DARK_GREY) << computerData.osName << ConsoleColour() << "\n";
-	std::cout << "\tCPU:  " << ConsoleColour(Console::DARK_GREY) << computerData.cpuName << ConsoleColour() << "\n";
-	std::cout << "\tGPU:  " << ConsoleColour(Console::DARK_GREY) << computerData.gpuName << ConsoleColour() << "\n";
-	std::cout << "\tRAM:  " << ConsoleColour(Console::DARK_GREY) << String::prettySize(computerData.RAM) << ConsoleColour() << "\n";
-	std::cout << "\tTime: " << ConsoleColour(Console::DARK_GREY) << curTime << ConsoleColour() << "\n" << std::endl;
+	Logger::logInfo("Computer data:");
+	//Logger::logInfo("\tName: " << computerData.computerName);
+	//Logger::logInfo("\tUser: " << computerData.userName);
+	Logger::logInfo("\tOS:   " + computerData.osName);
+	Logger::logInfo("\tCPU:  " + computerData.cpuName);
+	Logger::logInfo("\tGPU:  " + computerData.gpuName);
+	Logger::logInfo("\tRAM:  " + String::prettySize(computerData.RAM));
+	Logger::logInfo("\tTime: " + curTime + "\n");
 }
 
 void Core::setStage(StageID stage)

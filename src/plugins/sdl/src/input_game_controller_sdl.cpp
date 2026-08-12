@@ -51,8 +51,8 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 
 	setEnabled(true);
 
-	std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << getName() << " (idx = " << idx << ")" << ConsoleColour() << "\".\n";
-	std::cout << "\t* Mapping: \"" << ConsoleColour(Console::DARK_GREY) << getMapping() << ConsoleColour() << "\".\n";
+	Logger::logInfo(String("\tInitialized SDL Game Controller: \"") + getName() + " (idx = " + idx + ")\".");
+	Logger::logInfo("\t* Mapping: \"" + getMapping() + "\".");
 }
 
 InputGameControllerSDL::~InputGameControllerSDL()
@@ -63,7 +63,7 @@ InputGameControllerSDL::~InputGameControllerSDL()
 void InputGameControllerSDL::close()
 {
 	if (controller) {
-		std::cout << "\tRemoved SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << getName() << " (idx = " << idx << ")" << ConsoleColour() << "\".\n";
+		Logger::logInfo(String("\tRemoved SDL Game Controller: \"") + getName() + " (idx = " + idx + ")\".");
 		SDL_GameControllerClose(controller);
 		controller = nullptr;
 		id = -1;

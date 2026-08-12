@@ -60,13 +60,13 @@ InputSDL::~InputSDL()
 
 void InputSDL::setResources(Resources& resources)
 {
-	std::cout << ConsoleColour(Console::GREEN) << "\nInitialized SDL input..." << ConsoleColour() << "\n";
+	Logger::logInfo("\nInitialized SDL input...");
 	if (resources.exists<BinaryFile>("binary/sdl/gamecontrollerdb.txt")) {
 		const auto db = resources.get<BinaryFile>("binary/sdl/gamecontrollerdb.txt");
 		const auto bytes = db->getSpan();
 		auto rw = SDL_RWFromConstMem(bytes.data(), int(bytes.size()));
 		const int added = SDL_GameControllerAddMappingsFromRW(rw, 1);
-		std::cout << "\tLoaded " << ConsoleColour(Console::DARK_GREY) << toString(added) << ConsoleColour() << " SDL controller mappings.\n";
+		Logger::logInfo("Loaded " + toString(added) + " SDL controller mappings.");
 	}
 
 	mouseRemap = [] (Vector2i p) { return Vector2f(p); };
