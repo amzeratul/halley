@@ -367,11 +367,11 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 #if defined(DEV_BUILD) && defined(_WIN32)
 	} else {
 		// Dev build only: check if requiresEntityFrameModified is not set, but someone called
-		// setLastFrameModified().
+		// setLastFrameModified(). This isn't a problem, but can pinpoint a potential optimization.
 		uint32_t frameIdx = entity.getLastFrameModified();
 		if (remote.frameModifiedIdx != frameIdx) {
 			remote.frameModifiedIdx = frameIdx;
-			Logger::logWarning("Manual network update notify for " + entity.getEntityId().toDetailedString() + ", " + entity.getName() + ", " +
+			Logger::logDev("Manual network update notify for " + entity.getEntityId().toDetailedString() + ", " + entity.getName() + ", " +
 				entity.getPrefabAssetId().value_or("(no prefab)") + ", but 'requiresEntityFrameModified' not set", true);
 		}
 #endif

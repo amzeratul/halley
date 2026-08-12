@@ -504,7 +504,15 @@ void EntityRef::setReloaded()
 	world->setEntityReloaded();
 }
 
-void EntityRef::setModifiedThisFrame()
+void EntityRef::setModifiedThisFrame(bool checkAnchestors)
 {
+	if (checkAnchestors && !hasComponent<NetworkComponent>()) {
+		if (auto parent = getParent(); parent.isValid()) {
+			parent.setModifiedThisFrame(checkAnchestors);
+		} else {
+			return;
+		}
+	}
+
 	setLastFrameModified(world->getFrameNumber());
 }
