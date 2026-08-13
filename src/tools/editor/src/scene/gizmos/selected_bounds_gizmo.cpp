@@ -115,22 +115,19 @@ void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& spri
 	const float outline = width / zoom;
 	const float padding = std::ceil(outline);
 
-	const auto texelSize = Vector2f(1.0f, 1.0f) / Vector2f(tex0->getSize());
-	const auto ro = padding * texelSize;
-	const auto texRect1 = Rect4f(-ro, Vector2f(1, 1) + ro);
-	const auto newSize = sprite.getSize() + 2 * Vector2f(padding, padding);
+	const auto texRect0 = sprite.getTexRect0();
 
+	const auto texelSize = Vector2f(1.0f, 1.0f) / Vector2f(tex0->getSize());
 	const auto texGrad0 = texelSize / zoom;
-	const auto texGrad1 = texRect1.getSize() / newSize;
-	const auto texGrads = Vector4f(texGrad0.x, texGrad0.y, texGrad1.x, texGrad1.y);
+	const auto texGrads = Vector4f(texGrad0.x, texGrad0.y, 0, 0);
 
 	Sprite s = sprite;
 	s.setMaterial(outlineMaterial);
 	s.setColour(colour);
 	s.getMutableMaterial().set(0, tex0).set("u_texBPP0", TextureDescriptor::getBytesPerPixel(tex0->getDescriptor().format));
 	s.setCustom0(texGrads);
-	s.setTexRect1(Rect4f(0, 0, 1, 1));
 	s.crop(Vector4f(-padding, -padding, -padding, -padding));
+	s.setTexRect1(texRect0);
 
 	s.draw(painter);
 }
