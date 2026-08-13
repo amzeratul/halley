@@ -9,8 +9,9 @@
 
 using namespace Halley;
 
-ControlBindings::ControlBindings(ControlBindingConfigs config)
+ControlBindings::ControlBindings(ControlBindingConfigs config, bool devMode)
 	: config(std::move(config))
+	, devMode(devMode)
 {
 	resolve(true);
 }
@@ -271,8 +272,12 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 	AxisPendingState pendingState;
 
 	for (const auto& bindingConfig: config.getBindings()) {
-		const auto& bs = resolvedBindings.at(bindingConfig.getBindingId());
+		if (bindingConfig.isDevOnly() && !devMode) {
+			continue;
+		}
 
+		const auto& bs = resolvedBindings.at(bindingConfig.getBindingId());
+		
 		for (const auto& binding: bs) {
 			if (binding.getBindingType() == ControlBindingType::KeyboardButton) {
 				const auto [keyCode, keyMods] = binding.getKeyCode();

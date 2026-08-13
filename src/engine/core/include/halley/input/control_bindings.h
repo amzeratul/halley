@@ -28,7 +28,7 @@ namespace Halley {
 			int otherSlot = 0;
 		};
 
-		ControlBindings(ControlBindingConfigs config);
+		ControlBindings(ControlBindingConfigs config, bool devMode);
 
 		void load(const ConfigNode& node);
 		ConfigNode toConfigNode() const;
@@ -86,6 +86,7 @@ namespace Halley {
 
 		mutable HashMap<String, Vector<ControlBinding>> resolvedBindings;
 		mutable bool modified = false;
+		bool devMode = false;
 		uint32_t version = 0;
 		mutable uint32_t hashVersion = std::numeric_limits<uint32_t>::max();
 		mutable uint64_t hash;

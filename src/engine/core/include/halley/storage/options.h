@@ -76,7 +76,7 @@ namespace Halley {
 		void setAudioEventLogging(std::optional<LoggerLevel> level, const std::optional<String>& prefix);
 		void loadAudioEventLogging(AudioAPI& audioAPI) const;
 
-		void loadControlBindings(ControlBindingConfigs config);
+		void loadControlBindings(ControlBindingConfigs config, bool devMode = false);
 		ControlBindings& getControlBindings() const;
 		void saveControlBindings();
 

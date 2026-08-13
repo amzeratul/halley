@@ -195,9 +195,9 @@ void Options::loadAudioEventLogging(AudioAPI& audioAPI) const
 	audioAPI.setEventLogging(getOption("audio_log_level").asOptional<LoggerLevel>(), getOption("audio_log_prefix").asOptional<String>());
 }
 
-void Options::loadControlBindings(ControlBindingConfigs config)
+void Options::loadControlBindings(ControlBindingConfigs config, bool devMode)
 {
-	controlBindings = std::make_shared<ControlBindings>(config);
+	controlBindings = std::make_shared<ControlBindings>(config, devMode);
 	controlBindings->load(getOption("control_bindings"));
 }
 
