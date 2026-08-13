@@ -51,6 +51,11 @@ namespace Halley
     private:
     	using Clock = std::chrono::steady_clock;
 
+    	static constexpr size_t headerSize = 12;
+    	static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
+
+    	static constexpr int maxPacketQueueSize = 512;
+
     	struct SeqIndex
     	{
     		size_t count = 0;
@@ -90,14 +95,15 @@ namespace Halley
         	{
         		seqIdx = 0xffff;
         		// Clear header bytes (keep the signature)
-        		memset(data.data() + 4, 0, headerSize - 4);
+        		constexpr size_t sz = sizeof(headerSignature2);
+        		memset(data.data() + sz, 0, headerSize - sz);
         		dataSize = 0;
         	}
         };
 
         struct InOutQueue
         {
-            std::array<SubPacket, 256 + 1> packets;
+            std::array<SubPacket, maxPacketQueueSize> packets;
         	SeqIndex seqIndex;
             int curPacketIdx = 0;
         	int firstPacketIdx = 0;
@@ -108,14 +114,12 @@ namespace Halley
 
         size_t totalMaxPacketSize;
     	size_t realMaxPacketSize;
-        static constexpr size_t headerSize = 16;
-        static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
 
         Bytes inboundCache;
         InOutQueue inbound;
         InOutQueue outbound;
 
-        std::array<std::pair<uint8_t, uint16_t>, 256> ackPackets = {};
+        std::array<std::pair<int, uint16_t>, maxPacketQueueSize> ackPackets = {};
         int numAckPackets = 0;
 
     	// Platforms may bring their own tracking of packets ack'd/lost.
@@ -129,13 +133,9 @@ namespace Halley
 
     	void close(const std::optional<String>& reason);
 
-    	bool tryCacheSmallPacket(const OutboundNetworkPacket& packet);
-    	[[nodiscard]] bool tryReceiveSmallPacket(InboundNetworkPacket& packet);
-    	void doFlushSmallPackets();
-
-        void doSend(gsl::span<const std::byte> packet, bool small);
+        void doSend(gsl::span<const std::byte> packet);
         void doSend(SubPacket& packet, int packetIdx);
-    	void doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id);
+    	void doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) const;
 
         void doSendAckPackets();
         void onAckPacketsReceive(gsl::span<const std::byte> data, uint8_t parity);
