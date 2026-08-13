@@ -70,10 +70,7 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 	}
 
 	if (realMaxPacketSize == 0) {
-		// Ask connection about the actual size we can use.
-		realMaxPacketSize = parent->getRealMaxUnreliablePacketSize();
-		HalleyAssertDebug(realMaxPacketSize <= totalMaxPacketSize);
-		realMaxPacketSize = std::min(realMaxPacketSize, totalMaxPacketSize);
+		setRealMaxPacketSize();
 	}
 
 	doSend(packet.getBytes());
@@ -175,7 +172,7 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 	header[offs++] = 0; // unused
 	header[offs++] = 0; // unused
 
-	HalleyAssertDebug(headerSize - offs == 8);
+	HalleyAssertDebug(headerSize - offs == 0);
 
 	packet.timestamp = Clock::now();
 
@@ -208,6 +205,10 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
     if (status != ConnectionStatus::Connected) {
         return false;
     }
+
+	if (realMaxPacketSize == 0) {
+		setRealMaxPacketSize();
+	}
 
 	// Need to send ack packets first, code below invalidates the sequence indices.
 	doSendAckPackets();
@@ -297,7 +298,7 @@ size_t AckUnreliableConnection::getMaxUnreliablePacketSize() const
 
 size_t AckUnreliableConnection::getRealMaxUnreliablePacketSize() const
 {
-	return realMaxPacketSize - headerSize;
+	return realMaxPacketSize >= headerSize ? realMaxPacketSize - headerSize : 0;
 }
 
 void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::byte> packet)
@@ -453,6 +454,7 @@ void AckUnreliableConnection::doSendAckPackets()
     }
 
 	// There's a limit how many ACKs fit into a packet.
+	HalleyAssertDebug(realMaxPacketSize != 0);
 	const int maxAcks = static_cast<int>(realMaxPacketSize - 6) / 4;
 	const int numAcksToSend = std::min(maxAcks, numAckPackets);
 
@@ -683,6 +685,14 @@ bool AckUnreliableConnection::checkOutboundQueue(int numPacketsToSend) const
 	}
 
 	return free >= numPacketsToSend;
+}
+
+void AckUnreliableConnection::setRealMaxPacketSize()
+{
+	// Ask connection about the actual size we can use.
+	realMaxPacketSize = parent->getRealMaxUnreliablePacketSize();
+	HalleyAssertDebug(realMaxPacketSize <= totalMaxPacketSize);
+	realMaxPacketSize = std::min(realMaxPacketSize, totalMaxPacketSize);
 }
 
 bool AckUnreliableConnection::isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity)

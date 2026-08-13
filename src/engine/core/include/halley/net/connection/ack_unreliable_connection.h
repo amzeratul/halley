@@ -147,6 +147,8 @@ namespace Halley
     	void evictInboundQueue(uint16_t seqIdx, uint8_t parity);
     	[[nodiscard]] bool checkOutboundQueue(int numPacketsToSend) const;
 
+    	void setRealMaxPacketSize();
+
     	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity);
     };
 
