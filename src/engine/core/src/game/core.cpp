@@ -41,7 +41,6 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	statics.setupGlobals();
 
 	threadedLogger = std::make_unique<ThreadedLogger>();
-	threadedLogger->createBasicThread();
 	Logger::addSink(*threadedLogger);
 
 	game = std::move(g);
