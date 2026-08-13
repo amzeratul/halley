@@ -10,6 +10,13 @@
 #define USE_FAST_NETWORK_COMPONENT_UPDATES 1
 #define WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED 2.0
 
+// Limits the number of "entity create" messages sent per frame, per peer.
+// This is a preventive measure to avoid congestion in AckUnreliableConnection.
+//
+// Above that limit, the host won't create outbound entities, and simply try again
+// the following frame(s) - as long as the entities are still in view.
+#define MAX_SEND_CREATE_PER_FRAME 96
+
 using namespace Halley;
 
 Serializer& EntityNetworkInstanceInfo::serialize(Serializer& s) const
@@ -121,7 +128,6 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 		if (entry.alwaysSend || parentSession->isEntityInView(entity, clientData, peerId)) {
 			++stats.nCheckedRegular;
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
-				parentSession->setupOutboundInterpolators(entity);
 				toCreate.push_back(entity);
 			} else {
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);
@@ -177,8 +183,15 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 				}
 			}
 		}
+		parentSession->setupOutboundInterpolators(e);
 		sendCreateEntity(e);
 		++stats.nCreated;
+
+		if (stats.nCreated >= MAX_SEND_CREATE_PER_FRAME) {
+			// Stop sending for this frame.
+			//Logger::logDev("Sent create for " + toString(stats.nCreated) + "/" + toCreate.size());
+			break;
+		}
 	}
 
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });

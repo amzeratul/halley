@@ -78,7 +78,7 @@ namespace Halley {
     private:
         Page curPage;
 
-        std::array<Page, 512> pages;
+        std::array<Page, 1024> pages;
         int pp = 0;
 
         uint64_t contentHash = 0;
