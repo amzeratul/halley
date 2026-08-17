@@ -73,7 +73,7 @@ namespace Halley {
 		bool update(Time t) override;
 
 		bool isMultiplayer() const override;
-		bool isHost() const;
+		bool isHost() const override;
 		bool hasLocalSave() const override;
 		bool hasHostAuthority() const override;
 		Vector<Rect4f> getRemoteViewPorts() const override;
