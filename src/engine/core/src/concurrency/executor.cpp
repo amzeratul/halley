@@ -172,13 +172,19 @@ void Executor::runForever()
 {
 	while (running)	{
 		auto next = queue.getNext();
-		try {
+		auto trace = StackDebugTrace("taskName", next.name);
+
+		if (Debug::canHandleUncaughtExceptions()) {
 			next.task();
-		} catch (std::exception& e) {
-			Logger::logException(e);
-			Debug::abort("Aborting due to exception while executing task " + String(next.name) + ":\n" + e.what());
-		} catch (...) {
-			Debug::abort("Aborting due to unknown exception while executing task " + String(next.name));
+		} else {
+			try {
+				next.task();
+			} catch (std::exception& e) {
+				Logger::logException(e);
+				Debug::abort("Aborting due to exception while executing task " + String(next.name) + ":\n" + e.what());
+			} catch (...) {
+				Debug::abort("Aborting due to unknown exception while executing task " + String(next.name));
+			}
 		}
 	}
 }
@@ -194,7 +200,7 @@ void Executor::stop()
 SingleThreadExecutor::SingleThreadExecutor(String name, MakeThread makeThread)
 	: executor(queue)
 {
-	thread = makeThread(std::move(name), [=, this] ()
+	thread = makeThread(std::move(name), [this] ()
 	{
 		executor.runForever();
 	});
@@ -228,13 +234,7 @@ ThreadPool::ThreadPool(const String& name, ExecutionQueue& queue, size_t n, Make
 	for (size_t i = 0; i < n; i++) {
 		threads[i] = makeThread(name + " Pool " + toString(i), [this, i]()
 		{
-			try {
-				executors[i]->runForever();
-			} catch (std::exception& e) {
-				Logger::logException(e);
-			} catch (...) {
-				Logger::logError("Unknown exception in thread pool");
-			}
+			executors[i]->runForever();
 		});
 	}
 #endif

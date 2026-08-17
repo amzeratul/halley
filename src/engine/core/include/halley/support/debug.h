@@ -28,6 +28,7 @@
 #include <atomic>
 
 #include "halley/concurrency/mutex.h"
+#include "halley/game/game_platform.h"
 
 namespace Halley {
 	class StackDebugTrace;
@@ -55,6 +56,11 @@ namespace Halley {
 		static void abort(std::string_view message);
 
 		static bool isRunningFromDLL();
+		
+		constexpr static bool canHandleUncaughtExceptions()
+		{
+			return getPlatform() == GamePlatform::Windows;
+		}
 
 	private:
 		static bool debugging;

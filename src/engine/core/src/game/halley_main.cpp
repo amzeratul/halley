@@ -86,9 +86,9 @@ int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::st
 		core->deInit();
 	});
 
-	constexpr bool runGuarded = getPlatform() != GamePlatform::Windows;
-	
-	if (runGuarded) {
+	if (Debug::canHandleUncaughtExceptions()) {
+		return doRunMain(core, std::move(loader), args);
+	} else {
 		try {
 			return doRunMain(core, std::move(loader), args);
 		} catch (std::exception& e) {
@@ -106,8 +106,6 @@ int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::st
 			}
 			return 1;
 		}
-	} else {
-		return doRunMain(core, std::move(loader), args);
 	}
 }
 
