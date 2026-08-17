@@ -435,6 +435,9 @@ Path Path::operator/(const std::string& other) const
 
 Path Path::operator/(std::string_view other) const
 {
+	if (other.empty()) [[unlikely]] {
+		return *this;
+	}
 	if (str == ".") [[unlikely]] {
 		return Path(other);
 	}
@@ -446,6 +449,9 @@ Path Path::operator/(std::string_view other) const
 
 Path Path::operator/(const Path& other) const 
 {
+	if (other.isEmpty()) [[unlikely]] {
+		return *this;
+	}
 	if (str == ".") [[unlikely]] {
 		return other;
 	}

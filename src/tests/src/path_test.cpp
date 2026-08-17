@@ -25,9 +25,16 @@ TEST(HalleyPath, Normalization)
 	EXPECT_NE(Path("foo"), Path("foo/."));
 }
 
+TEST(HalleyPath, ParentPath)
+{
+	EXPECT_EQ(Path("foo").parentPath(), Path(""));
+	EXPECT_EQ(Path("foo/bar").parentPath(), Path("foo/"));
+}
+
 TEST(HalleyPath, Append)
 {
 	EXPECT_EQ(Path("foo") / Path("bar"), Path("foo/bar"));
+	EXPECT_EQ(Path("foo") / Path() / Path("bar"), Path("foo/bar"));
 	EXPECT_EQ(Path("foo/bar/baz") / Path("../.."), Path("foo/."));
 	EXPECT_EQ(Path("foo") / Path("../.."), Path(".."));
 
