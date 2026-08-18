@@ -91,13 +91,8 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
     }
 }
 
-void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, Bytes& buffer)
+void EntityNetworkChanges::serializeEntityHeader(Serializer& serializer, const EntityRef& entity)
 {
-    // Entity "header"
-    beginPage(serializer, Type::Entity);
-    curPage.uuid = entity.getInstanceUUID();
-    curPage.remote = remote;
-
     serializer << entity.getInstanceUUID();
 
     uint8_t flags = 0;
@@ -106,6 +101,16 @@ void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& e
     if (!entity.isEnabled()) flags |= static_cast<uint8_t>(EntityData::Flag::Disabled);
 
     serializer << flags;
+}
+
+void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, Bytes& buffer)
+{
+    // Entity "header"
+    beginPage(serializer, Type::Entity);
+    curPage.uuid = entity.getInstanceUUID();
+    curPage.remote = remote;
+
+    serializeEntityHeader(serializer, entity);
 
     endPage(serializer, buffer, Type::Entity);
 
@@ -394,7 +399,7 @@ void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetwor
     myPeerId = session->getSession().getMyPeerId().value_or(0);
 }
 
-uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, const SerializerOptions& options)
+uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, bool useInterpolators)
 {
     // We lookup components by ID, need to translate from names. This is the same list of component types
     // EntityFactory uses to compile deltas.
@@ -420,13 +425,14 @@ uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, co
     Serializer serializer(opt);
     const SerializationContext context(entity);
 
-    doSerializeEntityHash(context, serializer, entity);
+    doSerializeEntityHash(context, serializer, entity, false, {}, useInterpolators);
 
     return serializer.getHashDigest();
 }
 
 void EntityNetworkSerialize::doSerializeEntityHash(
-    const SerializationContext& context, Serializer& serializer, const EntityRef& entity)
+    const SerializationContext& context, Serializer& serializer,
+    const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, bool useInterpolators)
 {
     context.setCurrentEntity(entity);
 
@@ -440,21 +446,52 @@ void EntityNetworkSerialize::doSerializeEntityHash(
     byteSerializationContext.entityId = context.getCurrentEntityId();
     byteSerializationContext.entitySerializationContext = &serializationContext;
 
-    auto& reflection = serializer.getOptions().world->getReflection();
+    // By default, this path doesn't call byte interpolators. This is faster, but can produce
+    // hash changes for small differences - the kind of changes that interpolators are meant to avoid.
+    //
+    // This means there will be quite some "false positives" that produce a different hash. The other
+    // checks in EntityNetworkRemotePeer::sendUpdateEntity() are used to mitigate this.
+    if (useInterpolators) {
+        byteSerializationContext.interpolators = session->getByteDataInterpolatorSet();
+        byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
+    }
 
-    const auto ids = entity.getComponentIds();
-    const auto ptrs = entity.getComponentPtrs();
+    // Need to include some entity data/flags for computing the hash, to not miss any changes.
+    // TODO: ignores entity "identity" fields right now, check if this is needed
+    EntityNetworkChanges::serializeEntityHeader(serializer, entity);
 
-    for (size_t i = 0; i < ids.size(); ++i) {
-        const auto& componentId = ids[i];
-        const auto& component = ptrs[i];
-
-        if (componentsIgnored.contains(componentId)) {
-            continue;
+    // Mirrors code in doSerializeEntityUpdate(), see comments below.
+    const bool canSerializeNetworkComponent = session->isHost();
+    if (parent && !remote) {
+        if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>()) {
+            if (networkComponent->authorityId.has_value()) {
+                remote = networkComponent->authorityId != myPeerId;
+            }
         }
+    }
 
-        const auto& reflector = reflection.getComponentReflector(componentId);
-        reflector.serializeNetwork(byteSerializationContext, serializer, *component);
+    // Components
+    if (!remote) {
+        auto& reflection = serializer.getOptions().world->getReflection();
+
+        const auto ids = entity.getComponentIds();
+        const auto ptrs = entity.getComponentPtrs();
+
+        for (size_t i = 0; i < ids.size(); ++i) {
+            const auto& componentId = ids[i];
+            const auto& component = ptrs[i];
+
+            if (!canSerializeNetworkComponent && componentId == NetworkComponent::componentIndex) {
+                continue;
+            }
+
+            if (componentsIgnored.contains(componentId)) {
+                continue;
+            }
+
+            const auto& reflector = reflection.getComponentReflector(componentId);
+            reflector.serializeNetwork(byteSerializationContext, serializer, *component);
+        }
     }
 
     // Children
@@ -462,7 +499,7 @@ void EntityNetworkSerialize::doSerializeEntityHash(
         if (!child.isSerializable()) {
             continue;
         }
-        doSerializeEntityHash(context, serializer, child);
+        doSerializeEntityHash(context, serializer, child, remote, entity, useInterpolators);
     }
 }
 

@@ -45,6 +45,7 @@ namespace Halley {
 
         explicit EntityNetworkChanges() = default;
 
+        static void serializeEntityHeader(Serializer& serializer, const EntityRef& entity);
         void pushEntity(Serializer& serializer, const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, Bytes& buffer);
 
         void beginComponent(Serializer& serializer, uint16_t componentId);
@@ -100,7 +101,7 @@ namespace Halley {
 
         void setSession(const EntityNetworkSession* entityNetworkSession);
 
-        uint64_t serializeEntityHash(const EntityRef& entity, const SerializerOptions& options);
+        uint64_t serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, bool useInterpolators);
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
         InboundResult deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options);
 
@@ -159,7 +160,8 @@ namespace Halley {
         };
 
         void doSerializeEntityHash(
-            const SerializationContext& context, Serializer& serializer, const EntityRef& entity);
+            const SerializationContext& context, Serializer& serializer,
+            const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, bool useInterpolators);
 
         void doSerializeEntityUpdate(
             const SerializationContext& context, Serializer& serializer,
@@ -172,12 +174,12 @@ namespace Halley {
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size);
         static std::optional<std::pair<EntityRef, EntityRef>> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
-        const EntityNetworkSession* session;
-        uint8_t myPeerId;
+        const EntityNetworkSession* session = nullptr;
+        uint8_t myPeerId = 0xff;
 
         EntityNetworkChanges journal;
 
-        bool hasComponentsAddedOrRemoved;
+        bool hasComponentsAddedOrRemoved = false;
         HashSet<uint16_t> componentsIgnored;
 
         Bytes scratchpad;
