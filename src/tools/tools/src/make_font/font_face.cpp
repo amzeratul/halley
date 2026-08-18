@@ -10,60 +10,57 @@
 
 using namespace Halley;
 
-namespace Halley {
-	class FontFacePimpl
-	{
-	public:
-		FT_Library library = nullptr;
-		FT_Face face = nullptr;
-	};
-}
-
-FontFace::FontFace(String filename)
-	: pimpl (std::make_unique<FontFacePimpl>())
-{
-	int error = FT_Init_FreeType(&pimpl->library);
-	if (error) {
-		throw Exception("Unable to initialize FreeType", HalleyExceptions::Graphics);
-	}
-	error = FT_New_Face(pimpl->library, filename.c_str(), 0, &pimpl->face);
-	if (error) {
-		throw Exception("Unable to load font face", HalleyExceptions::Graphics);
-	}
-}
-
 FontFace::FontFace(gsl::span<const std::byte> data)
-	: pimpl (std::make_unique<FontFacePimpl>())
 {
-	int error = FT_Init_FreeType(&pimpl->library);
+	int error = FT_Init_FreeType(&library);
 	if (error) {
 		throw Exception("Unable to initialize FreeType", HalleyExceptions::Graphics);
 	}
-	error = FT_New_Memory_Face(pimpl->library, reinterpret_cast<const FT_Byte*>(data.data()), FT_Long(data.size()), 0, &pimpl->face);
+
+	faces.resize(1);
+	error = FT_New_Memory_Face(library, reinterpret_cast<const FT_Byte*>(data.data()), FT_Long(data.size()), 0, &faces[0]);
 	if (error) {
 		throw Exception("Unable to load font face", HalleyExceptions::Graphics);
+	}
+}
+
+FontFace::FontFace(gsl::span<const gsl::span<const std::byte>> datas)
+{
+	int error = FT_Init_FreeType(&library);
+	if (error) {
+		throw Exception("Unable to initialize FreeType", HalleyExceptions::Graphics);
+	}
+
+	for (auto& data: datas) {
+		faces.emplace_back();
+		error = FT_New_Memory_Face(library, reinterpret_cast<const FT_Byte*>(data.data()), FT_Long(data.size()), 0, &faces.back());
+		if (error) {
+			throw Exception("Unable to load font face", HalleyExceptions::Graphics);
+		}
 	}
 }
 
 FontFace::~FontFace()
 {
-	if (pimpl->face) {
-		FT_Done_Face(pimpl->face);
+	for (auto& face: faces) {
+		FT_Done_Face(face);
 	}
-	if (pimpl->library) {
-		FT_Done_FreeType(pimpl->library);
+	if (library) {
+		FT_Done_FreeType(library);
 	}
 }
 
 void FontFace::setSize(float sz)
 {
 	size = sz;
-	FT_Set_Char_Size(pimpl->face, 0, lround(size * 64), 72, 0);
+	for (auto& face: faces) {
+		FT_Set_Char_Size(face, 0, lround(size * 64), 72, 0);
+	}
 }
 
 String FontFace::getName() const
 {
-	return pimpl->face->family_name + String(" ") + pimpl->face->style_name;
+	return faces[0]->family_name + String(" ") + faces[0]->style_name;
 }
 
 float FontFace::getSize() const
@@ -73,29 +70,35 @@ float FontFace::getSize() const
 
 float FontFace::getHeight() const
 {
-	if (pimpl->face->height > 0 && pimpl->face->units_per_EM > 0) {
-		return pimpl->face->height * size / pimpl->face->units_per_EM;
+	auto face = faces[0];
+	if (face->height > 0 && face->units_per_EM > 0) {
+		return face->height * size / face->units_per_EM;
 	} else {
-		return pimpl->face->size->metrics.height / 64.0f;
+		return face->size->metrics.height / 64.0f;
 	}
 }
 
 float FontFace::getAscender() const
 {
-	if (pimpl->face->units_per_EM > 0) {
-		return pimpl->face->ascender * size / pimpl->face->units_per_EM;
+	auto face = faces[0];
+	if (face->units_per_EM > 0) {
+		return face->ascender * size / face->units_per_EM;
 	} else {
-		return pimpl->face->size->metrics.ascender / 64.0f;
+		return face->size->metrics.ascender / 64.0f;
 	}
 }
 
-Vector<int> FontFace::getCharCodes() const
+HashSet<int> FontFace::getCharCodes() const
 {
-	Vector<int> result = {0};
+	HashSet<int> result;
+	result.insert(0);
+
 	FT_UInt index;
-	for (FT_ULong charcode = FT_Get_First_Char(pimpl->face, &index); index != 0; charcode = FT_Get_Next_Char(pimpl->face, charcode, &index)) {
-		if (charcode != 0) {
-			result.push_back(charcode);
+	for (auto& face: faces) {
+		for (FT_ULong charcode = FT_Get_First_Char(face, &index); index != 0; charcode = FT_Get_Next_Char(face, charcode, &index)) {
+			if (charcode != 0) {
+				result.insert(charcode);
+			}
 		}
 	}
 	return result;
@@ -103,22 +106,24 @@ Vector<int> FontFace::getCharCodes() const
 
 Vector2i FontFace::getGlyphSize(int charCode) const
 {
-	int index = charCode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charCode);
-	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_NO_HINTING);
+	auto face = getFreeTypeFace(charCode);
+	int index = charCode == 0 ? 0 : FT_Get_Char_Index(face, charCode);
+	int error = FT_Load_Glyph(face, index, FT_LOAD_NO_HINTING);
 	if (error) {
 		throw Exception("Unable to load glyph " + toString(charCode), HalleyExceptions::Graphics);
 	}
-	auto metrics = pimpl->face->glyph->metrics;
+	auto metrics = face->glyph->metrics;
 	return Vector2i(metrics.width, metrics.height) / 64;
 }
 
 void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos) const
 {
-	auto glyph = pimpl->face->glyph;
+	auto face = getFreeTypeFace(charcode);
+	auto glyph = face->glyph;
 	
-	int index = charcode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charcode);
+	int index = charcode == 0 ? 0 : FT_Get_Char_Index(face, charcode);
 	
-	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
+	int error = FT_Load_Glyph(face, index, FT_LOAD_DEFAULT);
 	if (error) {
 		throw Exception("Unable to load glyph " + toString(charcode), HalleyExceptions::Graphics);
 	}
@@ -134,9 +139,10 @@ void FontFace::drawGlyph(Image& image, int charcode, Vector2i pos) const
 
 FontMetrics FontFace::getMetrics(int charcode, float scale) const
 {
-	int index = FT_Get_Char_Index(pimpl->face, charcode);
+	auto face = getFreeTypeFace(charcode);
+	int index = FT_Get_Char_Index(face, charcode);
 
-	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_NO_HINTING);
+	int error = FT_Load_Glyph(face, index, FT_LOAD_NO_HINTING);
 	if (error) {
 		throw Exception("Unable to load glyph " + toString(charcode), HalleyExceptions::Graphics);
 	}
@@ -144,7 +150,7 @@ FontMetrics FontFace::getMetrics(int charcode, float scale) const
 	FontMetrics result;
 
 	float multiplier = scale / 64.0f;
-	auto& metrics = pimpl->face->glyph->metrics;
+	auto& metrics = face->glyph->metrics;
 	result.advance = Vector2f(Vector2i(metrics.horiAdvance, metrics.vertAdvance)) * multiplier;
 	result.bearingHorizontal = Vector2f(Vector2i(metrics.horiBearingX, metrics.horiBearingY)) * multiplier;
 	result.bearingVertical = Vector2f(Vector2i(metrics.vertBearingX, metrics.vertBearingY)) * multiplier;
@@ -155,14 +161,16 @@ FontMetrics FontFace::getMetrics(int charcode, float scale) const
 Vector<KerningPair> FontFace::getKerning(const Vector<int>& codes) const
 {
 	Vector<KerningPair> results;
-	if (!FT_HAS_KERNING(pimpl->face)) {
+
+	if (std::none_of(faces.begin(), faces.end(), [&] (auto& f) { return FT_HAS_KERNING(f); })) {
 		return results;
 	}
 	
-	HashMap<int32_t, int> indices;
+	HashMap<int32_t, std::pair<int, FT_Face>> indices;
 	for (int code: codes) {
 		if (code != 0) {
-			indices[code] = FT_Get_Char_Index(pimpl->face, code);
+			auto face = getFreeTypeFace(code);
+			indices[code] = { FT_Get_Char_Index(face, code), face };
 		}
 	}
 
@@ -176,12 +184,15 @@ Vector<KerningPair> FontFace::getKerning(const Vector<int>& codes) const
 			if (right == 0) {
 				continue;
 			}
+			const auto indexRight = indices.at(right);
 
-			FT_Vector result;
-			FT_Get_Kerning(pimpl->face, indexLeft, indices.at(right), FT_KERNING_UNFITTED, &result);
-			if (result.x != 0 || result.y != 0) {
-				const auto kerning = Vector2f(result.x / 64.0f, result.y / 64.0f);
-				results.emplace_back(KerningPair(left, right, kerning));
+			if (indexLeft.second == indexRight.second) {
+				FT_Vector result;
+				FT_Get_Kerning(indexLeft.second, indexLeft.first, indexRight.first, FT_KERNING_UNFITTED, &result);
+				if (result.x != 0 || result.y != 0) {
+					const auto kerning = Vector2f(result.x / 64.0f, result.y / 64.0f);
+					results.emplace_back(KerningPair(left, right, kerning));
+				}
 			}
 		}
 	}
@@ -189,12 +200,24 @@ Vector<KerningPair> FontFace::getKerning(const Vector<int>& codes) const
 	return results;
 }
 
-void* FontFace::getFreeTypeLib() const
+FT_Library FontFace::getFreeTypeLib() const
 {
-	return pimpl ? pimpl->library : nullptr;
+	return library;
 }
 
-void* FontFace::getFreeTypeFace() const
+FT_Face FontFace::getFreeTypeFace(std::optional<int> character) const
 {
-	return pimpl ? pimpl->face : nullptr;
+	if (faces.empty()) {
+		return nullptr;
+	}
+
+	if (character && faces.size() > 1) {
+		for (auto& face: faces) {
+			if (FT_Get_Char_Index(face, *character) != 0) {
+				return face;
+			}
+		}
+	}
+
+	return faces[0];
 }

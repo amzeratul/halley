@@ -107,7 +107,7 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateSDF(Image& srcImg, Vector
 
 std::optional<msdfgen::Shape> DistanceFieldGenerator::generateMSDFShape(const FontFace& fontFace, int charcode)
 {
-	const auto ftFace = static_cast<FT_Face>(fontFace.getFreeTypeFace());
+	const auto ftFace = fontFace.getFreeTypeFace(charcode);
 	const auto font = std::unique_ptr<msdfgen::FontHandle, void(*)(msdfgen::FontHandle*)>(msdfgen::adoptFreetypeFont(ftFace), [](msdfgen::FontHandle* p) { msdfgen::destroyFont(p); });
 
 	msdfgen::Shape shape;
@@ -155,6 +155,6 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, msdfgen::
 
 float DistanceFieldGenerator::getScale(const FontFace& font, float fontSize)
 {
-	const auto ftFace = static_cast<FT_Face>(font.getFreeTypeFace());
+	const auto ftFace = font.getFreeTypeFace({});
 	return fontSize / (ftFace->units_per_EM / 64);
 }
