@@ -533,10 +533,21 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 	Vector<String> ids;
 	Vector<String> names;
 	Vector<Sprite> icons;
+	Vector<String> componentIds;
+	Vector<String> componentNames;
+	HashMap<String, Sprite> iconMap;
+
 	entityList->collectEntities(ids, names, icons);
 
-	HashMap<String, Sprite> iconMap;
 	for (size_t i = 0; i < ids.size(); ++i) {
+		if (const auto entityData = sceneData->tryGetEntityNodeData(ids[i])) {
+			for (const auto& comp: entityData->getData().getComponents()) {
+				auto compId = ids[i] + ":" + comp.first;
+				auto compName = comp.first + " [" + names[i] + "]";
+				componentIds += std::move(compId);
+				componentNames += std::move(compName);
+			}
+		}
 		iconMap[ids[i]] = std::move(icons[i]);
 	}
 
@@ -568,6 +579,32 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 		selectEntity(toHighlight);
 		panCameraToEntity(toHighlight);
 	});
+	
+	assetFinder.setAssetIds(std::move(componentIds), std::move(componentNames), initialSelection, "!", [=](std::optional<String> result)
+	{
+		if (!flag) {
+			return;
+		}
+
+		if (result) {
+			const auto id = String::split(std::string_view(*result), ':').first;
+			selectEntity(id);
+		} else {
+			selectEntity(initialSelection);
+			gameBridge->moveCamera(cameraStartPos);
+		}
+		gameBridge->setEntityHighlightedOnList(UUID(), true);
+	}, [=] (const String& toHighlight)
+	{
+		if (!flag) {
+			return;
+		}
+
+		const auto id = String::split(std::string_view(toHighlight), ':').first;
+		gameBridge->setEntityHighlightedOnList(UUID(id), true);
+		selectEntity(id);
+		panCameraToEntity(id);
+	});
 
 	assetFinder.setIconRetriever([=, iconMap = std::move(iconMap)] (const String& prefix, const String& id) -> Sprite
 	{
@@ -576,11 +613,17 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 			if (iter != iconMap.end()) {
 				return iter->second;
 			}
+		} else if (prefix == "!") {
+			const auto entityId = String::split(std::string_view(id), ':').first;
+			const auto iter = iconMap.find(entityId);
+			if (iter != iconMap.end()) {
+				return iter->second;
+			}
 		}
 		return Sprite();
 	});
 
-	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (Prefix with @ to find an entity)"));
+	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (@: find entity, !: find component)"));
 }
 
 Resources& SceneEditorWindow::getGameResources() const
