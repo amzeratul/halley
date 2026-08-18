@@ -542,8 +542,8 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 	for (size_t i = 0; i < ids.size(); ++i) {
 		if (const auto entityData = sceneData->tryGetEntityNodeData(ids[i])) {
 			for (const auto& comp: entityData->getData().getComponents()) {
-				auto compId = ids[i] + ":" + comp.first;
-				auto compName = comp.first + " [" + names[i] + "]";
+				auto compId = ids[i] + ":" + comp.first + ":" + names[i];
+				auto compName = comp.first;
 				componentIds += std::move(compId);
 				componentNames += std::move(compName);
 			}
@@ -621,6 +621,11 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 			}
 		}
 		return Sprite();
+	});
+
+	assetFinder.setPrefixLabelRetriever("!", [=] (const String& id, const String& name) -> LocalisedString {
+		const auto split = id.split(':');
+		return LocalisedString::fromUserString(split[1] + " [" + split[2] + "]");
 	});
 
 	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (@: find entity, !: find component)"));

@@ -62,6 +62,11 @@ void PaletteWindow::setIconRetriever(IconRetriever retriever)
 	iconRetriever = std::move(retriever);
 }
 
+void PaletteWindow::setPrefixLabelRetriever(const String& id, PrefixLabelRetriever retriever)
+{
+	labelRetriever[id] = std::move(retriever);
+}
+
 std::shared_ptr<IUIElement> PaletteWindow::makePreview(const String& id, bool hasSearch)
 {
 	const auto prefix = getCurrentDataSetPrefix();
@@ -89,6 +94,15 @@ bool PaletteWindow::canShowAll() const
 	return !isShowingDefaultDataSet();
 }
 
+LocalisedString PaletteWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
+{
+	const auto iter = labelRetriever.find(getCurrentDataSetPrefix());
+	if (iter != labelRetriever.end()) {
+		return iter->second(id, name);
+	} else {
+		return ChooseAssetWindow::getItemLabel(id, name, hasSearch);
+	}
+}
 
 
 ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, std::optional<String> allowEmpty, Callback callback)
