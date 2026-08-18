@@ -134,6 +134,7 @@ namespace Halley {
 
 		String& trim(bool fromRight);
 		String& trimBoth();
+		[[nodiscard]] std::string_view static trimSpaces(std::string_view str, bool trimLeft = true, bool trimRight = true);
 
 		[[nodiscard]] bool contains(Character chr) const;
 		[[nodiscard]] bool contains(std::string_view string, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
