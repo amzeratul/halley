@@ -23,13 +23,15 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 
 	Vector<Bytes> fontData;
 
-	for (auto& importFallbackFont: meta.getString("importFallbackFiles", "").split(',')) {
-		auto path = asset.inputFiles[0].name.parentPath() / String::trimSpaces(importFallbackFont.trimBoth());
-		auto bs = collector.readAdditionalFile(path);
-		if (bs.empty()) {
-			Logger::logError("Could not find importFallbackFile \"" + path.getString(false) + "\" for " + asset.assetId);
-		} else {
-			fontData += std::move(bs);
+	if (meta.hasKey("importFallbackFiles")) {
+		for (auto& importFallbackFont: meta.getString("importFallbackFiles").split(',')) {
+			auto path = asset.inputFiles[0].name.parentPath() / String::trimSpaces(importFallbackFont.trimBoth());
+			auto bs = collector.readAdditionalFile(path);
+			if (bs.empty()) {
+				Logger::logError("Could not find importFallbackFile \"" + path.getString(false) + "\" for " + asset.assetId);
+			} else {
+				fontData += std::move(bs);
+			}
 		}
 	}
 
