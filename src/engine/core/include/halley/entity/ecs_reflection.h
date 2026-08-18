@@ -30,10 +30,10 @@ namespace Halley {
 		virtual CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) const = 0;
 
 		virtual ConfigNode serializeField(const EntitySerializationContext& context, const Component& component, std::string_view fieldName) const = 0;
-		virtual ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool logError = true) const = 0;
-		virtual ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName, bool logError = true) const = 0;
+		virtual ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool evenIfDisabled, bool logError) const = 0;
+		virtual ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName, bool evenIfDisabled, bool logError) const = 0;
     	virtual void deserializeField(const EntitySerializationContext& context, Component& component, std::string_view fieldName, const ConfigNode& data) const = 0;
-    	virtual void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, const ConfigNode& data) const = 0;
+    	virtual void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool evenIfDisabled, const ConfigNode& data) const = 0;
 
 		virtual Component* tryGetComponent(EntityRef entity, bool evenIfDisabled) const = 0;
 		virtual const Component* tryGetComponent(ConstEntityRef entity, bool evenIfDisabled) const = 0;

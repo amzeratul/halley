@@ -39,9 +39,9 @@ namespace Halley {
 			return static_cast<const T&>(component).serializeField(context, fieldName);
 		}
 
-		ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool logError = true) const override
+		ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool evenIfDisabled, bool logError) const override
 		{
-			if (const auto* component = tryGetComponent(entity, false)) {
+			if (const auto* component = tryGetComponent(entity, evenIfDisabled)) {
 				return serializeField(context, *component, fieldName);
 			} else {
 				if (logError) {
@@ -51,9 +51,9 @@ namespace Halley {
 			}
 		}
 		
-		ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName, bool logError = true) const override
+		ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName, bool evenIfDisabled, bool logError) const override
 		{
-			if (const auto* component = tryGetComponent(entity, false)) {
+			if (const auto* component = tryGetComponent(entity, evenIfDisabled)) {
 				return serializeField(context, *component, fieldName);
 			} else {
 				if (logError) {
@@ -68,9 +68,9 @@ namespace Halley {
 			static_cast<T&>(component).deserializeField(context, fieldName, data);
 		}
 
-		void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, const ConfigNode& data) const override
+		void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool evenIfDisabled, const ConfigNode& data) const override
 		{
-			if (auto* component = tryGetComponent(entity, false)) {
+			if (auto* component = tryGetComponent(entity, evenIfDisabled)) {
 				deserializeField(context, *component, fieldName, data);
 			} else {
 				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());

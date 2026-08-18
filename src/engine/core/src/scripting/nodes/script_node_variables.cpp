@@ -332,7 +332,8 @@ ConfigNode ScriptECSVariableData::toConfigNode(const EntitySerializationContext&
 Vector<IGraphNodeType::SettingType> ScriptECSVariable::getSettingTypes() const
 {
 	return {
-		SettingType{ "field", "Halley::ScriptComponentFieldType", Vector<String>{""} }
+		SettingType{ "field", "Halley::ScriptComponentFieldType", Vector<String>{""} },
+		SettingType{ "evenIfDisabled", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -363,11 +364,15 @@ String ScriptECSVariable::getShortDescription(const ScriptGraphNode& node, const
 std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+	const auto evenIfDisabled = node.getSettings()["evenIfDisabled"].asBool(false);
 	auto str = ColourStringBuilder(true);
 	str.append("ECS Variable ");
 	str.append(type.getName(), settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(node, graph, 0), settingColour);
+	if (evenIfDisabled) {
+		str.append(", even if entity is disabled");
+	}
 	return str.moveResults();
 }
 
@@ -392,7 +397,8 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
 		context.shallow = true;
-		return nodeData.reflector->serializeField(context, entityRef, nodeData.field);
+		const auto evenIfDisabled = node.getSettings()["evenIfDisabled"].asBool(false);
+		return nodeData.reflector->serializeField(context, entityRef, nodeData.field, evenIfDisabled, true);
 	}
 	return {};
 }
@@ -420,7 +426,8 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
-		nodeData.reflector->deserializeField(context, entityRef, nodeData.field, data);
+		const auto evenIfDisabled = node.getSettings()["evenIfDisabled"].asBool(false);
+		nodeData.reflector->deserializeField(context, entityRef, nodeData.field, evenIfDisabled, data);
 	}
 }
 
