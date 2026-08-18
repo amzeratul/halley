@@ -348,14 +348,16 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
 	remote.timeSinceSend = 0;
 
-	// For entities marked as such, check the "last frame modified" counter. If they match, skip
-	// updates (to avoid costly operations to serialize and compare entity/component changes).
 #if defined(DEV_BUILD) && defined(_WIN32)
 	static constexpr bool checkExpectNoUpdate = true;
+	static constexpr bool checkExpectSameHash = false; // very costly, should be off by default
 #else
 	static constexpr bool checkExpectNoUpdate = false;
+	static constexpr bool checkExpectSameHash = false;
 #endif
 
+	// For entities marked as such, check the "last frame modified" counter. If they match, skip
+	// updates (to avoid costly operations to serialize and compare entity/component changes).
 	bool expectNoUpdate = false;
 
 	if (remote.requiresEntityFrameModified) {
@@ -396,14 +398,21 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 	fastSerializer.setSession(parentSession);
 
 	// Serialize entity, using fast path, to compute a content hash. Early-out if the hash did not change.
-	const uint64_t contentHash = fastSerializer.serializeEntityHash(entity, parentSession->getByteSerializationOptions());
+	bool foundSameHash = false;
+
+	const uint64_t contentHash = fastSerializer.serializeEntityHash(entity, parentSession->getByteSerializationOptions(), checkExpectSameHash);
 	if (contentHash == remote.lastSerializerHash) {
 		if (!expectNoUpdate) {
 			++stats.nUpdateSameHash;
 			//Logger::logDev("Checking fast: " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
 		}
-		return;
+		if (checkExpectSameHash) {
+			foundSameHash = true;
+		} else {
+			return;
+		}
 	}
+	uint64_t prevHashRemoveMe = remote.lastSerializerHash;
 	remote.lastSerializerHash = contentHash;
 
 	// Fast updates are possible only if a previous journal is available to compare to,
@@ -479,6 +488,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			if (checkExpectNoUpdate && expectNoUpdate) {
     				Logger::logError("Network entity " + entity.getName() + " has been modified, and requiresEntityFrameModified is set, but no update was signaled", true);
     			}
+    			if (checkExpectSameHash && foundSameHash) {
+    				Logger::logError("Network entity " + entity.getName() + " has been modified, but fast hash check didn't detect the change", true);
+    			}
 #endif
     		}
 
@@ -487,6 +499,13 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			// Wipe the existing journal
     			remote.fastUpdateJournal.clear();
 	    		//Logger::logDev("Network entity " + entity.getName() + " has been modified in structure, fall back using slow path");
+    			if (checkExpectSameHash && foundSameHash) {
+    				Logger::logError("Network entity " + entity.getName() + " has been modified in structure, but fast hash check didn't detect the change", true);
+    			}
+    		}
+
+    		if (checkExpectSameHash && !modified && !modifiedInStructure && !foundSameHash /*&& entity.getName().contains("lava")*/) {
+    			Logger::logError("Network entity " + entity.getName() + " has NOT been modified, but fast hash check found a change " + toString(prevHashRemoveMe, 16));//, true);
     		}
     	} else {
     		// Something went wrong, fall back to the slow path.
@@ -796,7 +815,7 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 	parentSession->requestSetupInterpolators(interpolatorSet, entity, true);
 
 	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>(true).byteDataInterpolatorSet;
-	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
+	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity);
 
 	return entity;
 }
@@ -820,7 +839,7 @@ void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef e
 	parentSession->requestSetupInterpolators(interpolatorSet, entity, true);
 
 	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
-	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
+	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity);
 }
 
 void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg)
