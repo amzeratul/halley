@@ -691,18 +691,23 @@ void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interp
 	}
 }
 
-void EntityNetworkSession::requestSetupByteDataInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote)
+void EntityNetworkSession::requestSetupByteDataInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity)
+{
+	doRequestSetupByteDataInterpolators(interpolatorSet, entity, true);
+}
+
+void EntityNetworkSession::doRequestSetupByteDataInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity, bool isRoot)
 {
 	if (!entity.isSerializable()) {
 		return;
 	}
 
 	if (listener) {
-		listener->setupByteInterpolators(interpolatorSet, entity);
+		listener->setupByteInterpolators(interpolatorSet, entity, isRoot);
 
 		for (const auto& c: entity.getChildren()) {
 			if (!c.getOwnerPeerId()) {
-				requestSetupByteDataInterpolators(interpolatorSet, c, remote);
+				doRequestSetupByteDataInterpolators(interpolatorSet, c, false);
 			}
 		}
 	}
@@ -720,8 +725,8 @@ void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 		if (!interpolatorSet.isReady()) {
 			requestSetupInterpolators(interpolatorSet, entity, false);
 
-			auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
-			requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, false);
+			auto& entityByteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
+			requestSetupByteDataInterpolators(entityByteDataInterpolatorSet, entity);
 		}
 	}
 }
