@@ -164,6 +164,10 @@ void ThreadedLogger::doLog(LoggerLevel level, std::string_view msg)
 	}
 
 	std::cout << msg << ConsoleColour() << "\n";
+	
+	if constexpr (Debug::isDebug()) {
+		std::cout.flush();
+	}
 }
 
 void Logger::setInstance(Logger& logger)
