@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <set>
+#include <thread>
 #include "../concurrency/mutex.h"
 
 #include "halley/data_structures/hash_map.h"
