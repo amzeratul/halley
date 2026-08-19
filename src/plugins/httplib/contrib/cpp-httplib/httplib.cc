@@ -1460,6 +1460,12 @@ bool mmap::open(const char *path) {
   close();
 
 #if defined(_WIN32)
+#if defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_GAMES
+  // Game Core: CreateFileMappingFromApp/MapViewOfFileFromApp are not in the GAMES partition,
+  // so memory-mapped files are unavailable.
+  (void)path;
+  return false;
+#else
   auto wpath = u8string_to_wstring(path);
   if (wpath.empty()) { return false; }
 
@@ -1502,6 +1508,7 @@ bool mmap::open(const char *path) {
     close();
     return false;
   }
+#endif
 #else
   fd_ = ::open(path, O_RDONLY);
   if (fd_ == -1) { return false; }
