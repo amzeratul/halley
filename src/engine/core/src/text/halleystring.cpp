@@ -53,34 +53,6 @@ namespace {
 	{
 		return (chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r');
 	}
-
-	constexpr std::string_view trimSpaces(std::string_view str, bool trimLeft = true, bool trimRight = true)
-	{
-		const size_t n = str.length();
-		size_t leftTrim = 0;
-		size_t rightTrim = 0;
-
-		if (trimLeft) {
-			for (size_t i = 0; i < n; ++i) {
-				if (isSpace(str[i])) {
-					leftTrim = i + 1;
-				} else {
-					break;
-				}
-			}
-		}
-		if (trimRight && leftTrim != n) {
-			for (size_t i = 0; i < n; ++i) {
-				if (isSpace(str[n - i - 1])) {
-					rightTrim = i + 1;
-				} else {
-					break;
-				}
-			}
-		}
-		
-		return str.substr(leftTrim, n - leftTrim - rightTrim);
-	}
 }
 
 String::String()
@@ -1203,7 +1175,7 @@ namespace {
 	template <typename T>
 	T stringToInteger(std::string_view str, int base = 10)
 	{
-		str = trimSpaces(str);
+		str = String::trimSpaces(str);
 
 		if (str.starts_with("+")) [[unlikely]] {
 			str = str.substr(1);
@@ -1227,7 +1199,7 @@ namespace {
 	template <typename T>
 	T stringToFloat(std::string_view str)
 	{
-		str = trimSpaces(str);
+		str = String::trimSpaces(str);
 
 		if (str == ".inf") [[unlikely]] {
 			return std::numeric_limits<T>::infinity();
@@ -1652,3 +1624,30 @@ gsl::span<std::byte> String::asWriteableByteSpan()
 	return gsl::as_writable_bytes(asSpan());
 }
 
+std::string_view String::trimSpaces(std::string_view str, bool trimLeft, bool trimRight)
+{
+	const size_t n = str.length();
+	size_t leftTrim = 0;
+	size_t rightTrim = 0;
+
+	if (trimLeft) {
+		for (size_t i = 0; i < n; ++i) {
+			if (isSpace(str[i])) {
+				leftTrim = i + 1;
+			} else {
+				break;
+			}
+		}
+	}
+	if (trimRight && leftTrim != n) {
+		for (size_t i = 0; i < n; ++i) {
+			if (isSpace(str[n - i - 1])) {
+				rightTrim = i + 1;
+			} else {
+				break;
+			}
+		}
+	}
+	
+	return str.substr(leftTrim, n - leftTrim - rightTrim);
+}

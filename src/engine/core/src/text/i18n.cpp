@@ -370,17 +370,19 @@ void I18N::checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>
 	for (const auto& font: fonts) {
 
 		for (const auto& [language, codepoints]: codepointsPerLanguage) {
-			String missing;
+			String missingList;
+			String missingDetails;
 			for (const auto& codepoint: codepoints) {
 				if (!font->tryGetFontForGlyph(static_cast<int>(codepoint))) {
-					missing += "\n  " + String(static_cast<int>(codepoint)) + " [U+" + toString(static_cast<int>(codepoint), 16, 4) + "]";
+					missingList += String(static_cast<int>(codepoint));
+					missingDetails += "\n  " + String(static_cast<int>(codepoint)) + " [U+" + toString(static_cast<int>(codepoint), 16, 4) + "]";
 				}
 			}
 
-			if (missing.isEmpty()) {
+			if (missingList.isEmpty()) {
 				Logger::logInfo("[" + font->getAssetId() + "] [" + language + "] OK (" + codepoints.size() + " characters)");
 			} else {
-				Logger::logInfo("[" + font->getAssetId() + "] [" + language + "] Missing characters: " + missing);
+				Logger::logInfo("[" + font->getAssetId() + "] [" + language + "] Missing characters: " + missingList + missingDetails);
 			}
 		}
 	}

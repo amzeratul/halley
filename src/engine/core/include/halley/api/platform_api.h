@@ -301,5 +301,7 @@ namespace Halley
 
 		virtual bool useSystemDisplaySize() { return false; }
 		virtual Vector2i getSystemDisplaySize() { return Vector2i(0, 0); }
+		
+		virtual bool mustConformToChineseLegislation() { return false; }
 	};
 }

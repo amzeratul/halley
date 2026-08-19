@@ -3,6 +3,11 @@
 #include <halley/text/halleystring.h>
 #include <gsl/gsl>
 
+struct FT_LibraryRec_;
+typedef FT_LibraryRec_ *FT_Library;
+struct FT_FaceRec_;
+typedef FT_FaceRec_ *FT_Face;
+
 namespace Halley
 {
 	class FontFacePimpl;
@@ -27,8 +32,8 @@ namespace Halley
 	class FontFace
 	{
 	public:
-		explicit FontFace(String filename);
 		explicit FontFace(gsl::span<const std::byte> data);
+		explicit FontFace(gsl::span<const gsl::span<const std::byte>> datas);
 		~FontFace();
 
 		void setSize(float size);
@@ -37,7 +42,7 @@ namespace Halley
 		float getHeight() const;
 		float getAscender() const;
 
-		Vector<int> getCharCodes() const;
+		HashSet<int> getCharCodes() const;
 		Vector2i getGlyphSize(int charCode) const;
 		
 		void drawGlyph(Image& image, int charcode, Vector2i pos) const;
@@ -45,11 +50,12 @@ namespace Halley
 
 		Vector<KerningPair> getKerning(const Vector<int>& codes) const;
 
-		void* getFreeTypeLib() const;
-		void* getFreeTypeFace() const;
+		FT_Library getFreeTypeLib() const;
+		FT_Face getFreeTypeFace(std::optional<int> character) const;
 
 	private:
-		std::unique_ptr<FontFacePimpl> pimpl;
+		FT_Library library = nullptr;
+		Vector<FT_Face> faces;
 		float size = 0;
 	};
 }

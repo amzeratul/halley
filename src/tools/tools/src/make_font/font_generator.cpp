@@ -75,7 +75,7 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const std::byte> fontFile, FontSizeInfo sizeInfo, float radius, Vector<char32_t> characters) {
+FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::span<const std::byte>> fontFiles, FontSizeInfo sizeInfo, float radius, Vector<char32_t> characters) {
 	std::sort(characters.begin(), characters.end());
 
 	const int borderFinal = static_cast<int>(ceil(radius));
@@ -84,7 +84,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		return FontGeneratorResult();
 	}
 
-	FontFace font(fontFile);
+	FontFace font(fontFiles);
 
 	int fontSize = 0;
 	Vector2i imageSize;

@@ -58,18 +58,22 @@ namespace Halley {
 	class PaletteWindow final : public ChooseAssetWindow {
 	public:
 		using IconRetriever = std::function<Sprite(const String& prefix, const String& id)>;
+		using PrefixLabelRetriever = std::function<LocalisedString(const String& id, const String& name)>;
 
 		PaletteWindow(UIFactory& factory, Project& project, std::optional<String> initialQuery, bool listHalleyAssets, Callback callback);
 		void setIconRetriever(IconRetriever retriever);
+		void setPrefixLabelRetriever(const String& id, PrefixLabelRetriever retriever);
 
 	protected:
 		std::shared_ptr<IUIElement> makePreview(const String& id, bool hasSearch) override;
 		bool canShowAll() const override;
+		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
 
 	private:
 		Project& project;
 		std::map<ImportAssetType, Sprite> icons;
 		IconRetriever iconRetriever;
+		HashMap<String, PrefixLabelRetriever> labelRetriever;
 	};
 
 	class ChoosePrefabWindow : public ChooseAssetTypeWindow {
