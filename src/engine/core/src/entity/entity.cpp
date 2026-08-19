@@ -504,13 +504,26 @@ void EntityRef::setReloaded()
 	world->setEntityReloaded();
 }
 
-void EntityRef::setModifiedThisFrame(bool checkAnchestors)
+void EntityRef::setModifiedThisFrame(bool checkAnchestors, bool onlyIfRequired)
 {
-	if (checkAnchestors && !hasComponent<NetworkComponent>()) {
-		if (auto parent = getParent(); parent.isValid()) {
-			parent.setModifiedThisFrame(checkAnchestors);
-		} else {
+	if (checkAnchestors || onlyIfRequired) {
+		// If both flags are false, component lookup is skipped entirely.
+		const NetworkComponent* component = tryGetComponent<NetworkComponent>();
+
+		if (checkAnchestors && component == nullptr) {
+			// Walk up chain of parents, looking for a network component.
+			if (auto parent = getParent(); parent.isValid()) {
+				parent.setModifiedThisFrame(checkAnchestors, onlyIfRequired);
+			}
 			return;
+		}
+
+		if (onlyIfRequired) {
+			// Check if the flag is actually set. By default, setModifiedThisFrame() should not be
+			// called on entities where requiresEntityFrameModified is false.
+			if (component == nullptr || !component->requiresEntityFrameModified) {
+				return;
+			}
 		}
 	}
 

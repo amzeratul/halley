@@ -1041,7 +1041,7 @@ namespace Halley {
 			return entity->lastFrameModified;
 		}
 
-		void setModifiedThisFrame(bool checkAnchestors = false);
+		void setModifiedThisFrame(bool checkAnchestors = false, bool onlyIfRequired = false);
 
 		void setLastFrameModified(uint32_t frame)
 		{

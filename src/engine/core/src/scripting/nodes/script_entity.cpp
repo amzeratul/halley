@@ -676,6 +676,7 @@ IScriptNodeType::Result ScriptSetEntityEnabled::doUpdate(ScriptEnvironment& envi
 	data.entityId = entityRef.getEntityId();
 	data.previousState = entityRef.isEnabled();
 	entityRef.setEnabled(node.getSettings()["enabled"].asBool(true));
+	entityRef.setModifiedThisFrame(true, true);
 	return Result(ScriptNodeExecutionState::Done);
 }
 
@@ -718,6 +719,7 @@ IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& e
 		return Result(ScriptNodeExecutionState::Done);
 	}
 	entityRef.setEnabled(!entityRef.isEnabled());
+	entityRef.setModifiedThisFrame(true, true);
 	return Result(ScriptNodeExecutionState::Done);
 }
 
