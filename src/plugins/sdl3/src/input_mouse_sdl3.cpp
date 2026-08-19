@@ -106,7 +106,7 @@ std::string_view InputMouseSDL3::getName() const
 	return "Mouse";
 }
 
-float InputMouseSDL3::getAxis(int n)
+float InputMouseSDL3::getAxis(int n) const
 {
 	if (n == 0) {
 		return relMove.x;
