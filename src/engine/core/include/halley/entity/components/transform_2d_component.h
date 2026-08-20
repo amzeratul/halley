@@ -60,6 +60,7 @@ public:
 	bool isTranslationOnly() const;
 
 	Halley::Vector2f transformPoint(const Halley::Vector2f& p) const;
+	void transformPoints(gsl::span<Halley::Vector2f> points) const;
 	Halley::Vector2f transformPointNoRotate(const Halley::Vector2f& p) const;
 	Halley::Vector2f transformPointWithHeight(const Halley::Vector2f& p) const;
 	Halley::Vector2f transformPointWithHeightNoRotate(const Halley::Vector2f& p) const;

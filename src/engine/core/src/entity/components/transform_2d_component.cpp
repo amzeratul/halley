@@ -220,6 +220,28 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 	return pos;
 }
 
+void Transform2DComponent::transformPoints(gsl::span<Halley::Vector2f> points) const
+{
+	const auto rot = getGlobalRotation();
+	const auto pos = getGlobalPosition();
+	const auto sca = getGlobalScale();
+
+	if (std::abs(rot.getRadians()) > 0.00001f) {
+		const float anisotropy = entity.getWorld().getTransform2DAnisotropy();
+		for (auto& p: points) {
+			p = pos + p.scaleY(1.0f / anisotropy).rotate(rot).scaleY(anisotropy) * sca;
+		}
+	} else if (sca != Vector2f(1, 1)) {
+		for (auto& p: points) {
+			p = pos + p * sca;
+		}
+	} else {
+		for (auto& p: points) {
+			p += pos;
+		}
+	}
+}
+
 Vector2f Transform2DComponent::transformPointNoRotate(const Vector2f& p) const
 {
 	Vector2f pos = getGlobalPosition() + p * getGlobalScale();
