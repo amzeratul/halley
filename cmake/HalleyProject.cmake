@@ -379,7 +379,11 @@ endfunction(assign_source_group)
 
 
 # Setup libraries
-set(CMAKE_DEBUG_POSTFIX "_d")
+if (_GAMING_XBOX)
+	set(CMAKE_DEBUG_POSTFIX "")
+else()
+	set(CMAKE_DEBUG_POSTFIX "_d")
+endif()
 
 set(HALLEY_PROJECT_EXTERNAL_LIBS
 	${OPENSSL_LIBRARIES}
@@ -689,12 +693,12 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		add_sdl3_runtime_dependencies(${name})
 	endif()
 
-	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 	if (TARGET ${name}-game)
-		set_target_properties(${name}-game PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+		set_target_properties(${name}-game PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 	endif()
 	if (TARGET ${name}-dll)
-		set_target_properties(${name}-dll PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+		set_target_properties(${name}-dll PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 	endif()
 
 	if (BUILD_MACOSX_BUNDLE AND NOT ${name} MATCHES "halley-editor")
