@@ -90,8 +90,7 @@ ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const
 
 ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 {
-	String buffer;
-	return fromString<ScriptVariableScope>(node.getSettings()["scope"].asStringView("local", &buffer));
+	return node.getSettings()["scope"].asEnum(ScriptVariableScope::Local);
 }
 
 
@@ -515,7 +514,7 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 {
 	const auto a = readDataPin(environment, node, 0);
 	const auto b = readDataPin(environment, node, 1);
-	const auto op = fromString<MathRelOp>(node.getSettings()["operator"].asString("=="));
+	const auto op = node.getSettings()["operator"].asEnum(MathRelOp::Equal);
 	return ConfigNode(a.compareTo(op, b));
 }
 
