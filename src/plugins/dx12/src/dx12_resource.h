@@ -81,6 +81,9 @@ namespace Halley {
         void clearTexture() override;
         void doCreateDeferred();
 
+        void doCopyToTexture(Painter& painter, Texture& other) const override;
+        void doCopyToImage(Painter& painter, Image& image) const override;
+
         void doStateTransition(ID3D12GraphicsCommandList* commandList,
                                D3D12_RESOURCE_STATES targetState,
                                D3D12_RESOURCE_STATES fromState) const;

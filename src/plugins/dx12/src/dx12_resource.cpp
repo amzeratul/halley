@@ -522,6 +522,143 @@ size_t DX12Texture::getVRamUsage() const
 	return vramUsage;
 }
 
+void DX12Texture::doCopyToTexture(Painter& painter, Texture& other) const
+{
+    auto& otherDX = dynamic_cast<DX12Texture&>(other);
+    if (!resource || !otherDX.resource) {
+        Logger::logError("DX12Texture doCopyToTexture failed due to resource or other.resource being invalid!");
+        return;
+    }
+
+    ID3D12GraphicsCommandList* commandList = video.getCmdList();
+    const auto srcOldState = state;
+    const auto dstOldState = otherDX.state;
+
+    doStateTransition(commandList, D3D12_RESOURCE_STATE_COPY_SOURCE, srcOldState);
+    otherDX.doStateTransition(commandList, D3D12_RESOURCE_STATE_COPY_DEST, dstOldState);
+
+    commandList->CopyResource(otherDX.resource.Get(), resource.Get());
+
+    doStateTransition(commandList, srcOldState, D3D12_RESOURCE_STATE_COPY_SOURCE);
+    otherDX.doStateTransition(commandList, dstOldState, D3D12_RESOURCE_STATE_COPY_DEST);
+}
+
+void DX12Texture::doCopyToImage(Painter& painter, Image& image) const
+{
+    if (!resource) {
+        Logger::logError("DX12Texture doCopyToImage failed due to resource being invalid!");
+        return;
+    }
+
+    D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout = {};
+    UINT numRows = 0;
+    UINT64 rowSizeInBytes = 0;
+    UINT64 totalBytes = 0;
+
+    video.getDevice().GetCopyableFootprints(&resourceDesc, 0, 1, 0, &layout, &numRows, &rowSizeInBytes, &totalBytes);
+
+    D3D12_HEAP_PROPERTIES heapProps = {};
+    heapProps.Type = D3D12_HEAP_TYPE_READBACK;
+    heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProps.CreationNodeMask = 1;
+    heapProps.VisibleNodeMask = 1;
+
+    D3D12_RESOURCE_DESC bufferDesc = {};
+    bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    bufferDesc.Alignment = 0;
+    bufferDesc.Width = totalBytes;
+    bufferDesc.Height = 1;
+    bufferDesc.DepthOrArraySize = 1;
+    bufferDesc.MipLevels = 1;
+    bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+    bufferDesc.SampleDesc.Count = 1;
+    bufferDesc.SampleDesc.Quality = 0;
+    bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    ComPtr<ID3D12Resource> readbackBuffer;
+    if (FAILED(video.getDevice().CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&readbackBuffer)))) {
+        throw Exception("DX12Texture doCopyToImage Failed to create readback buffer", HalleyExceptions::VideoPlugin);
+    }
+
+    ID3D12GraphicsCommandList* commandList = video.getCmdList();
+    const auto oldState = state;
+    doStateTransition(commandList, D3D12_RESOURCE_STATE_COPY_SOURCE, oldState);
+
+    D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+    dstLocation.pResource = readbackBuffer.Get();
+    dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+    dstLocation.PlacedFootprint = layout;
+
+    D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+    srcLocation.pResource = resource.Get();
+    srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+    srcLocation.SubresourceIndex = 0;
+
+    commandList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, nullptr);
+
+    doStateTransition(commandList, oldState, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+    video.flushMainCommandList();
+
+    D3D12_RANGE readRange = { 0, totalBytes };
+    void* mappedData = nullptr;
+    if (FAILED(readbackBuffer->Map(0, &readRange, &mappedData))) {
+        throw Exception("DX12Texture doCopyToImage failed to map readbackBuffer", HalleyExceptions::VideoPlugin);
+    }
+
+    const size_t h = std::min(static_cast<size_t>(image.getSize().y), static_cast<size_t>(resourceDesc.Height));
+    const size_t w = std::min(static_cast<size_t>(image.getSize().x), static_cast<size_t>(resourceDesc.Width));
+    const char* src = static_cast<const char*>(mappedData) + layout.Offset;
+    const auto dst = image.getPixels4BPP();
+
+    if (descriptor.format == TextureFormat::RGBA || descriptor.format == TextureFormat::SRGBA) {
+        for (size_t y = 0; y < h; ++y) {
+            const auto* srcPx = reinterpret_cast<const uint32_t*>(src + y * layout.Footprint.RowPitch);
+            const auto dstPx = dst.subspan(y * w, w);
+            for (size_t x = 0; x < w; ++x) {
+                dstPx[x] = srcPx[x];
+            }
+        }
+    }
+    else if (descriptor.format == TextureFormat::BGR565) {
+        for (size_t y = 0; y < h; ++y) {
+            const auto* srcPx = reinterpret_cast<const uint16_t*>(src + y * layout.Footprint.RowPitch);
+            const auto dstPx = dst.subspan(y * w, w);
+            for (size_t x = 0; x < w; ++x) {
+                const auto px = static_cast<uint32_t>(srcPx[x]);
+                const auto b = (px & 0x001F) << 19;
+                const auto g = (px & 0x07E0) << 5;
+                const auto r = (px & 0xF800) >> 8;
+                const auto a = static_cast<uint32_t>(0xFF) << 24;
+                dstPx[x] = r | g | b | a;
+            }
+        }
+    }
+    else if (descriptor.format == TextureFormat::BGRX) {
+        for (size_t y = 0; y < h; ++y) {
+            const auto* srcPx = reinterpret_cast<const uint32_t*>(src + y * layout.Footprint.RowPitch);
+            const auto dstPx = dst.subspan(y * w, w);
+            for (size_t x = 0; x < w; ++x) {
+                uint32_t px = srcPx[x];
+                const uint32_t ag = px & 0xFF00FF00u;
+                const uint32_t r = (px & 0x00FF0000u) >> 16;
+                const uint32_t b = (px & 0x000000FFu) << 16;
+                dstPx[x] = r | b | ag;
+            }
+        }
+    }
+    else {
+        D3D12_RANGE emptyRange = { 0, 0 };
+        readbackBuffer->Unmap(0, &emptyRange);
+        throw Exception("DX12Texture doCopyToImage unable to copy texture format to image: " + toString(descriptor.format), HalleyExceptions::VideoPlugin);
+    }
+
+    D3D12_RANGE emptyRange = { 0, 0 };
+    readbackBuffer->Unmap(0, &emptyRange);
+}
+
 DX12TextureView::DX12TextureView(DX12Video& video)
     : video(video)
 {

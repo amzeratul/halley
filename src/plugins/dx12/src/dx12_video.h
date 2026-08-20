@@ -45,6 +45,7 @@ namespace Halley {
         bool hasVsync() const override;
         void waitForVsync() override;
         void flush() override;
+        void flushMainCommandList();
 
         std::unique_ptr<Texture> createTexture(Vector2i size) override;
         std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;

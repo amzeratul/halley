@@ -342,6 +342,24 @@ void DX12Video::flush() {
     //doDeferredResourceUpdates();
 }
 
+void DX12Video::flushMainCommandList()
+{
+    commandList->Close();
+    ID3D12CommandList* lists[1] = { commandList.Get() };
+    {
+        UniqueLock lock(commandQueueLock);
+        commandQueue->ExecuteCommandLists(1, lists);
+    }
+    waitForGpu();
+
+    auto frame = &frames[currentFrameIndex];
+    frame->commandAllocator->Reset();
+    commandList->Reset(frame->commandAllocator.Get(), nullptr);
+
+    ID3D12DescriptorHeap* heaps[] = { srvPool->getHeap(), samPool->getHeap() };
+    commandList->SetDescriptorHeaps(2, heaps);
+}
+
 std::unique_ptr<Texture> DX12Video::createTexture(Vector2i size)
 {
     return std::make_unique<DX12Texture>(*this, size);
