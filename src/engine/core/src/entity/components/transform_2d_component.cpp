@@ -138,8 +138,20 @@ WorldPosition Transform2DComponent::getWorldPosition() const
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (!isCached(CachedIndices::Position)) [[unlikely]] {
+		// transformPoint will retrieve and cache scale and rotation, so might as well cache them now
 		setCached(CachedIndices::Position);
-		cachedGlobalPos = parentTransform ? parentTransform->transformPoint(position) : position;
+		setCached(CachedIndices::Rotation);
+		setCached(CachedIndices::Scale);
+
+		if (parentTransform) {
+			cachedGlobalPos = parentTransform->transformPoint(position);
+			cachedGlobalRotation = parentTransform->cachedGlobalRotation + rotation;
+			cachedGlobalScale = parentTransform->cachedGlobalScale * scale;
+		} else {
+			cachedGlobalPos = position;
+			cachedGlobalRotation = rotation;
+			cachedGlobalScale = scale;
+		}
 	}
 	return cachedGlobalPos;
 }
@@ -244,9 +256,17 @@ void Transform2DComponent::transformPoints(gsl::span<Halley::Vector2f> points) c
 
 Vector2f Transform2DComponent::transformPointNoRotate(const Vector2f& p) const
 {
-	Vector2f pos = getGlobalPosition() + p * getGlobalScale();
+	const auto myPos = getGlobalPosition(); // Actually run this first, as it also retrieves scale
 	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
-	return pos;
+	return p * cachedGlobalScale + myPos;
+}
+
+void Transform2DComponent::transformPointsNoRotate(gsl::span<Halley::Vector2f> points) const
+{
+	const auto myPos = getGlobalPosition();
+	for (auto& p: points) {
+		p = p * cachedGlobalScale + myPos;
+	}
 }
 
 Vector2f Transform2DComponent::transformPointWithHeight(const Vector2f& p) const
@@ -254,9 +274,27 @@ Vector2f Transform2DComponent::transformPointWithHeight(const Vector2f& p) const
 	return transformPoint(p) + Vector2f(0, -getGlobalHeight());
 }
 
+void Transform2DComponent::transformPointsWithHeight(gsl::span<Halley::Vector2f> points) const
+{
+	transformPoints(points);
+	const float h = getGlobalHeight();
+	for (auto& p: points) {
+		p.y -= h;
+	}
+}
+
 Vector2f Transform2DComponent::transformPointWithHeightNoRotate(const Vector2f& p) const
 {
 	return transformPointNoRotate(p) + Vector2f(0, -getGlobalHeight());
+}
+
+void Transform2DComponent::transformPointsWithHeightNoRotate(gsl::span<Halley::Vector2f> points) const
+{
+	transformPointsNoRotate(points);
+	const float h = getGlobalHeight();
+	for (auto& p: points) {
+		p.y -= h;
+	}
 }
 
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const

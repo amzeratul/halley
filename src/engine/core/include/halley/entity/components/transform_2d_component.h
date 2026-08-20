@@ -60,10 +60,15 @@ public:
 	bool isTranslationOnly() const;
 
 	Halley::Vector2f transformPoint(const Halley::Vector2f& p) const;
-	void transformPoints(gsl::span<Halley::Vector2f> points) const;
 	Halley::Vector2f transformPointNoRotate(const Halley::Vector2f& p) const;
 	Halley::Vector2f transformPointWithHeight(const Halley::Vector2f& p) const;
 	Halley::Vector2f transformPointWithHeightNoRotate(const Halley::Vector2f& p) const;
+
+	void transformPoints(gsl::span<Halley::Vector2f> points) const;
+	void transformPointsNoRotate(gsl::span<Halley::Vector2f> points) const;
+	void transformPointsWithHeight(gsl::span<Halley::Vector2f> points) const;
+	void transformPointsWithHeightNoRotate(gsl::span<Halley::Vector2f> points) const;
+
 	Halley::Vector2f inverseTransformPoint(const Halley::Vector2f& p) const;
 
 	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;
