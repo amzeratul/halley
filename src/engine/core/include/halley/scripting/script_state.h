@@ -13,7 +13,7 @@ namespace Halley {
 	public:
 		virtual ~IScriptStateData() = default;
 
-		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) = 0;
+		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) { return {}; }
 		[[nodiscard]] virtual std::unique_ptr<IScriptStateData> clone() const = 0;
 		virtual void copyFrom(IScriptStateData&& src) = 0;
 		virtual void finishData() {}

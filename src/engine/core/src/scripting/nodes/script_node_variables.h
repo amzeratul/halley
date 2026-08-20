@@ -2,7 +2,13 @@
 #include "halley/scripting/script_environment.h"
 
 namespace Halley {
-	class ScriptVariable final : public ScriptNodeTypeBase<void> {
+	class ScriptVariableData : public ScriptStateData<ScriptVariableData> {
+	public:
+		ScriptVariableScope scope;
+		String varName;
+	};
+
+	class ScriptVariable final : public ScriptNodeTypeBase<ScriptVariableData> {
 	public:
 		String getId() const override { return "variable"; }
 		String getName() const override { return "Variable"; }
@@ -15,10 +21,11 @@ namespace Halley {
 		Vector<SettingType> getSettingTypes() const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 
-		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
-		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const override;
-		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const override;
-		ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const override;
+		void doInitData(ScriptVariableData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptVariableData& nodeData) const override;
+		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, ScriptVariableData& nodeData) const override;
+		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptVariableData& nodeData) const override;
+		ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptVariableData& nodeData) const override;
 
 	private:
 		ScriptVariableScope getScope(const ScriptGraphNode& node) const;
@@ -42,8 +49,15 @@ namespace Halley {
 		ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const override;
 		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const override;
 	};
+
 	
-	class ScriptLiteral final : public ScriptNodeTypeBase<void> {
+
+	class ScriptLiteralData : public ScriptStateData<ScriptLiteralData> {
+	public:
+		ConfigNode value;
+	};
+	
+	class ScriptLiteral final : public ScriptNodeTypeBase<ScriptLiteralData> {
 	public:
 		String getId() const override { return "literal"; }
 		String getName() const override { return "Literal"; }
@@ -55,7 +69,8 @@ namespace Halley {
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 
-		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+		void doInitData(ScriptLiteralData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLiteralData& data) const override;
 
 	private:
 		ConfigNode getConfigNode(const BaseGraphNode& node) const;
@@ -125,7 +140,13 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 	};
 
-	class ScriptComparison final : public ScriptNodeTypeBase<void> {
+	
+	class ScriptComparisonData : public ScriptStateData<ScriptComparisonData> {
+	public:
+		MathRelOp op;
+	};
+
+	class ScriptComparison final : public ScriptNodeTypeBase<ScriptComparisonData> {
 	public:
 		String getId() const override { return "comparison"; }
 		String getName() const override { return "Comparison"; }
@@ -138,7 +159,8 @@ namespace Halley {
 		Vector<SettingType> getSettingTypes() const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 
-		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+		void doInitData(ScriptComparisonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptComparisonData& nodeData) const override;
 	};
 	
 	class ScriptArithmetic final : public ScriptNodeTypeBase<void> {

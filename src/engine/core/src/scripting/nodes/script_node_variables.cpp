@@ -47,18 +47,22 @@ std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(con
 	return str.moveResults();
 }
 
-ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+void ScriptVariable::doInitData(ScriptVariableData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	const auto& vars = environment.getVariables(getScope(node));
-	String buffer;
-	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asStringView("", &buffer)));//.makeReference();
+	data.scope = getScope(node);
+	data.varName = node.getSettings()["variable"].asString("");
 }
 
-EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptVariableData& nodeData) const
 {
-	const auto& vars = environment.getVariables(getScope(node));
-	String buffer;
-	const auto& data = vars.getVariable(node.getSettings()["variable"].asStringView("", &buffer));
+	const auto& vars = environment.getVariables(nodeData.scope);
+	return ConfigNode(vars.getVariable(nodeData.varName));//.makeReference();
+}
+
+EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, ScriptVariableData& nodeData) const
+{
+	const auto& vars = environment.getVariables(nodeData.scope);
+	const auto& data = vars.getVariable(nodeData.varName);
 	if (data.getType() == ConfigNodeType::EntityId || data.getType() == ConfigNodeType::Int || data.getType() == ConfigNodeType::Float) {
 		return data.asEntityId();
 	} else {
@@ -66,11 +70,10 @@ EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const Scr
 	}
 }
 
-void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
+void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptVariableData& nodeData) const
 {
-	const auto scope = getScope(node);
-	String buffer;
-	const auto variable = node.getSettings()["variable"].asStringView("", &buffer);
+	const auto scope = nodeData.scope;
+	const auto variable = nodeData.varName;
 
 	if (scope != ScriptVariableScope::Local && !environment.hasNetworkAuthorityOver(environment.getCurrentEntityId())) {
 		if (environment.isNetworkConnected()) {
@@ -83,9 +86,9 @@ void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraph
 	vars.setVariable(variable, std::move(data));
 }
 
-ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
+ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptVariableData& nodeData) const
 {
-	return doGetData(environment, node, 1);
+	return doGetData(environment, node, 1, nodeData);
 }
 
 ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
@@ -229,9 +232,14 @@ std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(cons
 	return str.moveResults();
 }
 
-ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+void ScriptLiteral::doInitData(ScriptLiteralData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	return getConfigNode(node);
+	data.value = getConfigNode(node);
+}
+
+ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLiteralData& data) const
+{
+	return ConfigNode(data.value);
 }
 
 ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
@@ -517,12 +525,16 @@ std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(c
 	return str.moveResults();
 }
 
-ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+void ScriptComparison::doInitData(ScriptComparisonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	const auto a = readDataPin(environment, node, 0);
-	const auto b = readDataPin(environment, node, 1);
-	const auto op = node.getSettings()["operator"].asEnum(MathRelOp::Equal);
-	return ConfigNode(a.compareTo(op, b));
+	data.op = node.getSettings()["operator"].asEnum(MathRelOp::Equal);
+}
+
+ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptComparisonData& data) const
+{
+	const auto& a = readDataPin(environment, node, 0);
+	const auto& b = readDataPin(environment, node, 1);
+	return ConfigNode(a.compareTo(data.op, b));
 }
 
 
