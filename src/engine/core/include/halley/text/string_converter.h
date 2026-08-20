@@ -120,8 +120,8 @@ namespace Halley
 		static T fromString(std::string_view str)
 		{
 			if constexpr (std::is_enum_v<T>) {
-				EnumNames<T> n;
-				auto names = n();
+				constexpr EnumNames<T> n;
+				constexpr auto names = n();
 				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
 				if (res == std::end(names)) {
 					Logger::logError("String \"" + String(str) + "\" does not exist in enum \"" + typeid(T).name() + "\".");
@@ -141,8 +141,8 @@ namespace Halley
 		static std::optional<T> tryFromString(std::string_view str)
 		{
 			if constexpr (std::is_enum_v<T>) {
-				EnumNames<T> n;
-				auto names = n();
+				constexpr EnumNames<T> n;
+				constexpr auto names = n();
 				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
 				if (res == std::end(names)) {
 					return std::nullopt;
