@@ -409,10 +409,10 @@ void ScriptState::deserialize(Deserializer& s, const EntitySerializationContext&
 	throw Exception("Not implemented", HalleyExceptions::Scripting);
 }
 
-String ScriptState::getScriptId() const
+const String& ScriptState::getScriptId() const
 {
 	const auto* script = getScriptGraphPtr();
-	return script ? script->getAssetId() : "";
+	return script ? script->getAssetId() : String::emptyString();
 }
 
 const ScriptGraph* ScriptState::getScriptGraphPtr() const

@@ -170,7 +170,7 @@ namespace Halley {
 
         uint64_t getGraphHash() const { return graphHash; }
 
-		String getScriptId() const;
+		const String& getScriptId() const;
 		const ScriptGraph* getScriptGraphPtr() const;
 		void setScriptGraphPtr(const ScriptGraph* script);
 
