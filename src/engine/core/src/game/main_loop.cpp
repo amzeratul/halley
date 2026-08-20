@@ -53,11 +53,17 @@ void MainLoop::runLoop()
 	auto frameTimes = RollingDataSet<Time>(30, false);
 	double lastSpareTime = 0;
 	double leftOverTime = 0;
+	double previousTargetFPS = 0;
 
 	while (isRunning()) {
 		if (target.transitionStage()) {
 			frameTimes.clear();
 			lastSpareTime = 0;
+		}
+
+		if (target.getTargetFPS() != previousTargetFPS) {
+			previousTargetFPS = target.getTargetFPS();
+			frameTimes.clear();
 		}
 
 		Clock::time_point curFrameStartTime = Clock::now();

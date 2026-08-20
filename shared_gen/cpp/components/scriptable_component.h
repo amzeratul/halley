@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 143
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -20,7 +20,7 @@ public:
 	Halley::ScriptStateSet activeStates{};
 	Halley::Vector<Halley::String> tags{};
 	Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>> scripts{};
-	Halley::Vector<Halley::String> scriptsStarted{};
+	Halley::Vector<bool> scriptsStarted{};
 	Halley::ScriptVariables variables{};
 	Halley::HashMap<Halley::String, Halley::EntityId> entityReferences{};
 	Halley::HashMap<Halley::String, Halley::ConfigNode> entityParams{};

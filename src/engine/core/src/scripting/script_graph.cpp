@@ -283,7 +283,7 @@ std::shared_ptr<ScriptGraph> ScriptGraph::loadResource(ResourceLoader& loader)
 {
 	auto script = std::make_shared<ScriptGraph>();
 	Deserializer::fromBytes(*script, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
-	script->generateRoots();
+	script->generateDerivedNodeValues();
 	return script;
 }
 
@@ -394,14 +394,13 @@ uint64_t ScriptGraph::getAssetHash() const
 
 std::optional<GraphNodeId> ScriptGraph::getMessageInboxId(const String& messageId, bool requiresSpawningScript) const
 {
-	for (size_t i = 0; i < nodes.size(); ++i) {
-		const auto& node = nodes[i];
-		if (node.getType() == "receiveMessage") {
-			ScriptReceiveMessage nodeType;
-			const bool ok = nodeType.canReceiveMessage(node, messageId, requiresSpawningScript);
-			if (ok) {
-				return static_cast<GraphNodeId>(i);
-			}
+	for (auto nodeId: receiveMessageNodes) {
+		const auto& node = nodes[nodeId];
+		HalleyAssertDev(node.getType() == "receiveMessage");
+
+		ScriptReceiveMessage nodeType;
+		if (nodeType.canReceiveMessage(node, messageId, requiresSpawningScript)) {
+			return nodeId;
 		}
 	}
 	return {};
@@ -455,13 +454,18 @@ const ScriptGraphNodeRoots& ScriptGraph::getRoots() const
 	return roots;
 }
 
-void ScriptGraph::generateRoots()
+void ScriptGraph::generateDerivedNodeValues()
 {
 	roots.clear();
+	receiveMessageNodes.clear();
 	for (size_t curNodeId = 0; curNodeId < nodes.size(); ++curNodeId) {
 		const auto parentId = findNodeRoot(static_cast<GraphNodeId>(curNodeId));
 		if (curNodeId != parentId) {
 			roots.addRoot(static_cast<GraphNodeId>(curNodeId), parentId);
+		}
+
+		if (nodes[curNodeId].getType() == "receiveMessage") {
+			receiveMessageNodes += static_cast<GraphNodeId>(curNodeId);
 		}
 	}
 }

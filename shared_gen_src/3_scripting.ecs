@@ -18,7 +18,7 @@ component:
       canEdit: true
       canSave: false
   - scriptsStarted:
-      type: 'Halley::Vector<Halley::String>'
+      type: 'Halley::Vector<bool>'
       canEdit: false
       canSave: false
   - variables:

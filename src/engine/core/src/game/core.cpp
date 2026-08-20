@@ -87,7 +87,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 		Logger::logInfo(temp.str());
 	}
 
-	// Seed RNG
+	// Seed std library RNG
 	time_t curTime = time(nullptr);
 	clock_t curClock = clock();
 	int seed = static_cast<int>(curTime) ^ static_cast<int>(curClock) ^ 0x3F29AB51;
@@ -96,12 +96,10 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Info
 	Logger::logInfo("Program dir: " + environment->getProgramPath());
 	Logger::logInfo("Data dir: " + environment->getDataPath());
-
-	// Computer info
-#ifdef DEV_BUILD
-	computerData = OS::get().getComputerData();
-	showComputerInfo();
-#endif
+	if (isDevMode()) {
+		computerData = OS::get().getComputerData();
+		showComputerInfo();
+	}
 
 	// Create API
 	registerDefaultPlugins();
@@ -109,7 +107,9 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 
 	// Init threaded logger
 	threadedLogger->setDevMode(game->isDevMode());
-	threadedLogger->createSystemThread(*api->system);
+	if constexpr (!Debug::isDebug()) {
+		threadedLogger->createSystemThread(*api->system);
+	}
 }
 
 Core::~Core()

@@ -96,6 +96,7 @@ namespace Halley {
         };
         Vector<State> states;
         int64_t curId = 0;
+        bool hasDeadStates = false;
 
         State& getStateData(int64_t id);
         State* tryGetStateData(int64_t id);

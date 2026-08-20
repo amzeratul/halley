@@ -141,20 +141,20 @@ namespace Halley {
 		const ScriptGraph* getPreviousVersion(uint64_t hash) const;
 
 	private:
+		bool needsNetwork = false;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
 		Vector<std::pair<String, Range<GraphNodeId>>> subGraphs;
 
 		ScriptGraphNodeRoots roots;
+		Vector<GraphNodeId> receiveMessageNodes;
 
 		ConfigNode properties;
 
 		std::shared_ptr<ScriptGraph> previousVersion;
 
-		bool needsNetwork = false;
-
 		GraphNodeId findNodeRoot(GraphNodeId nodeId) const;
-		void generateRoots();
+		void generateDerivedNodeValues();
 		[[nodiscard]] bool isMultiConnection(GraphNodePinType pinType) const override;
 		void updateNeedsNetwork();
 	};

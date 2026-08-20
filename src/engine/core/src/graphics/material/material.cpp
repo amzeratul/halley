@@ -655,24 +655,6 @@ bool Material::hasParameter(std::string_view name) const
 	return false;
 }
 
-uint64_t Material::getPartialHash() const
-{
-	if (needToUpdateHash) {
-		computeHashes();
-		needToUpdateHash = false;
-	}
-	return partialHashValue;
-}
-
-uint64_t Material::getFullHash() const
-{
-	if (needToUpdateHash) {
-		computeHashes();
-		needToUpdateHash = false;
-	}
-	return fullHashValue;
-}
-
 MaterialParameter Material::getParameter(std::string_view name)
 {
 	for (const auto& block: materialDefinition->getUniformBlocks()) {

@@ -122,7 +122,9 @@ namespace Halley {
 			uint8_t threadCount = 0;
 			uint8_t watcherCount = 0;
 			bool hasPendingData = false;
+#ifdef DEV_BUILD
 			float timeSinceStart = std::numeric_limits<float>::max();
+#endif
 			union {
 				gsl::owner<IScriptStateData*> data;
 				gsl::owner<ConfigNode*> pendingData;
@@ -168,7 +170,7 @@ namespace Halley {
 
         uint64_t getGraphHash() const { return graphHash; }
 
-		String getScriptId() const;
+		const String& getScriptId() const;
 		const ScriptGraph* getScriptGraphPtr() const;
 		void setScriptGraphPtr(const ScriptGraph* script);
 
@@ -230,7 +232,7 @@ namespace Halley {
 
 	private:
     	bool started : 1 = false;
-		bool persistAfterDone : 1= false;
+		bool persistAfterDone : 1 = false;
 		bool needsStateLoading : 1 = false;
 		bool frameFlag : 1 = false;
 		bool terminated : 1 = false;
