@@ -465,7 +465,7 @@ void ScriptGraph::generateDerivedNodeValues()
 		}
 
 		if (nodes[curNodeId].getType() == "receiveMessage") {
-			receiveMessageNodes += curNodeId;
+			receiveMessageNodes += static_cast<GraphNodeId>(curNodeId);
 		}
 	}
 }
