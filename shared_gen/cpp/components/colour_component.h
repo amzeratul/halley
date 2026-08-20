@@ -1,4 +1,4 @@
-// Halley codegen version 141
+// Halley codegen version 143
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -21,6 +21,7 @@ public:
 	float intensity{ 1 };
 	bool propagate{ true };
 	bool addedDynamically{ false };
+	bool ignoreSerializeNetwork{ false };
 
 	ColourComponent() {
 	}

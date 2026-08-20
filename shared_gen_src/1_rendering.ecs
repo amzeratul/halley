@@ -51,6 +51,11 @@ component:
       defaultValue: false
       canEdit: false
       canSave: true
+  - ignoreSerializeNetwork:
+      type: bool
+      defaultValue: false
+      canEdit: false
+      canSave: false
 
 ---
 

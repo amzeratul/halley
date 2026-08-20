@@ -6,6 +6,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/net/interpolators/data_interpolator.h"
 #include "halley/net/interpolators/byte_data_interpolator.h"
+#include "components/colour_component.h"
 #include "components/network_component.h"
 
 using namespace Halley;
@@ -485,6 +486,13 @@ void EntityNetworkSerialize::doSerializeEntityHash(
                 continue;
             }
 
+            if (componentId == ColourComponent::componentIndex) {
+                if (const auto colourComponent = reinterpret_cast<const ColourComponent*>(component);
+                    colourComponent->ignoreSerializeNetwork) {
+                    continue;
+                }
+            }
+
             if (componentsIgnored.contains(componentId)) {
                 continue;
             }
@@ -587,6 +595,13 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
 
             if (!canSerializeNetworkComponent && componentId == NetworkComponent::componentIndex) {
                 continue;
+            }
+
+            if (componentId == ColourComponent::componentIndex) {
+                if (const auto colourComponent = reinterpret_cast<const ColourComponent*>(component);
+                    colourComponent->ignoreSerializeNetwork) {
+                    continue;
+                }
             }
 
             if (componentsIgnored.contains(componentId)) {
