@@ -194,7 +194,9 @@ ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializat
 		pendingData = new ConfigNode(node["pendingData"]);
 		hasPendingData = true;
 	}
+#ifdef DEV_BUILD
 	timeSinceStart = node["timeSinceStart"].asFloat(std::numeric_limits<float>::max());
+#endif
 }
 
 ScriptState::NodeState::NodeState(const NodeState& other)
@@ -216,7 +218,9 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other
 	hasPendingData = other.hasPendingData;
 	threadCount = other.threadCount;
 	watcherCount = other.watcherCount;
+#ifdef DEV_BUILD
 	timeSinceStart = other.timeSinceStart;
+#endif
 
 	if (other.hasPendingData) {
 		if (other.pendingData) {
@@ -237,7 +241,9 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(NodeState&& other)
 
 	threadCount = other.threadCount;
 	watcherCount = other.watcherCount;
+#ifdef DEV_BUILD
 	timeSinceStart = other.timeSinceStart;
+#endif
 
 	data = other.data;
 	hasPendingData = other.hasPendingData;
@@ -254,9 +260,11 @@ ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext
 	result["threadCount"] = threadCount;
 	result["watcherCount"] = watcherCount;
 
+#ifdef DEV_BUILD
 	if (context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::DevCon))) {
 		result["timeSinceStart"] = timeSinceStart;
 	}
+#endif
 
 	if (hasPendingData) {
 		if (pendingData) {
@@ -440,7 +448,10 @@ gsl::span<const ConfigNode> ScriptState::getStartParams() const
 
 bool ScriptState::isDone() const
 {
-	return started && messageInbox.empty() && std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
+	// Performance: checking all threads for watcher is a performance bottleneck, but keeping track of that state separately seems fragile
+	return started 
+		&& messageInbox.empty() 
+		&& std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
 }
 
 bool ScriptState::isDead() const
@@ -481,7 +492,11 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(GraphNodeId nod
 	}
 
 	const auto& state = nodeState.at(nodeId);
+#ifdef DEV_BUILD
 	result.activationTime = state.timeSinceStart;
+#else
+	result.activationTime = 0.0f;
+#endif
 	
 	const auto& node = getScriptGraphPtr()->getNodes()[nodeId];
 	const auto classification = node.getNodeType().getClassification();
@@ -690,7 +705,9 @@ void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 		nodeType.initData(*state.data, node, EntitySerializationContext(), ConfigNode());
 	}
 	
+#ifdef DEV_BUILD
 	state.timeSinceStart = 0;
+#endif
 }
 
 void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context)

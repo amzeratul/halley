@@ -75,6 +75,7 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 		for (auto& state: states) {
 			if (!state.present) {
 				state.dead = true;
+				hasDeadStates = true;
 			}
 		}
 	}
@@ -142,8 +143,9 @@ bool ScriptStateSet::empty() const
 
 void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 {
-	HalleyAssertDev(isValid());
+	HalleyAssertDebug(isValid());
 	// Defer evaluation to when it's needed to avoid querying the world too much
+	// We check isDead first since isLocal is always true on single player, so it's unlikely to cut off a lot of work
 	std::optional<bool> isLocalCache;
 	auto isLocal = [&]() -> bool
 	{
@@ -157,17 +159,22 @@ void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 	{
 		return state.state->isDead() && isLocal();
 	});
-	HalleyAssertDev(isValid());
+	HalleyAssertDebug(isValid());
 }
 
 void ScriptStateSet::terminateMarkedDead(ScriptEnvironment& environment, EntityId entityId, ScriptVariables& entityVariables)
 {
-	HalleyAssertDev(isValid());
-	for (auto& state: states) {
-		if (state.dead) {
-			environment.terminateState(*state.state, entityId, entityVariables);
+	HalleyAssertDebug(isValid());
+	if (hasDeadStates) {
+		for (auto& state: states) {
+			if (state.dead) {
+				environment.terminateState(*state.state, entityId, entityVariables);
+			}
 		}
+		hasDeadStates = false;
 	}
+
+	// We run this anyway because there are other ways states can be terminated
 	removeDeadLocalStates(environment.getWorld(), entityId);
 }
 
