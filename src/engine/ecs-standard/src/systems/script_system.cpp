@@ -376,7 +376,10 @@ private:
 				traceY.setValue(e.pos->pos.y);
 				traceX.setValue(e.pos->pos.x);
 			}
-			const auto traceName = StackDebugTrace("entityName", entity.getName());
+
+
+			// This is a surprisingly expensive call, so limit it to PC
+			const auto traceName = StackDebugTrace("entityName", isPCPlatform() ? std::string_view(entity.getName()) : std::string_view());
 
 			auto& scriptable = *e.scriptable;
 			bool hasTransform = e.pos.has_value();
