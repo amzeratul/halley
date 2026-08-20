@@ -1043,7 +1043,8 @@ void InputVirtual::refreshExclusives()
 	if (exclusiveDirty) {
 		exclusiveDirty = false;
 
-		HashMap<uint32_t, Vector<InputExclusiveBinding*>> bindings;
+		TempMemoryPool pool(32 * 1024);
+		auto bindings = HashMapTemp<uint32_t, Vector<InputExclusiveBinding*>>(32, pool);
 		
 		for (const auto& exclusive: exclusiveButtons) {
 			exclusive->activeBinds.clear();
