@@ -458,15 +458,16 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 {
 	HalleyAssertDev(!vertices.empty());
 
+	auto vs = vertices.const_span();
 	const auto scale = Vector2f(1.0f, 1.0f / anisotropy);
 	const auto point = rawPoint * scale;
 	
-	Vector2f bestPoint = vertices[0];
+	Vector2f bestPoint = vs[0];
 	float closestDistance2 = std::numeric_limits<float>::max();
 	
-	const size_t n = vertices.size();
+	const size_t n = vs.size();
 	for (size_t i = 0; i < n; ++i) {
-		const Vector2f p = LineSegment(vertices[i] * scale, vertices[(i + 1) % n] * scale).getClosestPoint(point);
+		const Vector2f p = LineSegment(vs[i] * scale, vs[(i + 1) % n] * scale).getClosestPoint(point);
 
 		const float dist2 = (point - p).squaredLength();
 		if (dist2 < closestDistance2) {
