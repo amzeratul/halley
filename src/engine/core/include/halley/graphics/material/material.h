@@ -178,8 +178,23 @@ namespace Halley
 			return *this;
 		}
 
-		uint64_t getPartialHash() const; // Not including textures
-		uint64_t getFullHash() const; // Including textures
+		uint64_t getPartialHash() const // Not including textures
+		{
+			if (needToUpdateHash) [[unlikely]] {
+				computeHashes();
+				needToUpdateHash = false;
+			}
+			return partialHashValue;
+		}
+
+		uint64_t getFullHash() const // Including textures
+		{
+			if (needToUpdateHash) [[unlikely]] {
+				computeHashes();
+				needToUpdateHash = false;
+			}
+			return fullHashValue;
+		}
 
 		const String& getTexUnitAssetId(int texUnit) const;
 
@@ -187,12 +202,12 @@ namespace Halley
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
 		mutable bool needToUpdateHash = true;
-		bool forceLocalBlocks = false;
-		bool depthStencilEnabled = true;
+		bool forceLocalBlocks : 1 = false;
+		bool depthStencilEnabled : 1 = true;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
-		mutable uint64_t fullHashValue = 0;
 		mutable uint64_t partialHashValue = 0;
+		mutable uint64_t fullHashValue = 0;
 		
 		Vector<MaterialDataBlock, std::allocator<MaterialDataBlock>, 2 * sizeof(MaterialDataBlock)> dataBlocks;
 		Vector<std::shared_ptr<const Texture>, std::allocator<std::shared_ptr<const Texture>>, 4 * sizeof(std::shared_ptr<const Texture>)> textures;
