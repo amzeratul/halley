@@ -283,30 +283,49 @@ private:
 		}
 
 		for (auto& e: scriptableFamily) {
-			const bool isLocalEntity = getWorld().isEntityNetworkOwner(e.entityId);
-			for (const auto& script : e.scriptable.scripts) {
-                if (!script.hasValue()) [[unlikely]] {
-					auto entity = getWorld().getEntity(e.entityId);
-                    Logger::logWarning("Found scriptable component with empty script resource reference on " + entity.getName() + " [" + entity.getPrefabAssetId() + "]", true);
-                    continue;
-                }
-				if (!isLocalEntity && script->isNetwork()) [[unlikely]] {
-					continue;
-				}
-				if (!std_ex::contains(e.scriptable.scriptsStarted, script.getAssetId())) {
-					e.scriptable.scriptsStarted.push_back(script.getAssetId());
-					const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv)
-					{
-						return kv->getScriptGraphPtr() == script.get().get();
-					});
-					if (!running) {
-						addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
+			const size_t n = e.scriptable.scripts.size();
+			if (n > 0) {
+				e.scriptable.scriptsStarted.resize(n);
+				std::optional<bool> isNetworkOwner;
+
+				for (size_t i = 0; i < n; ++i) {
+					if (!e.scriptable.scriptsStarted[i]) {
+						e.scriptable.scriptsStarted[i] = true;
+						initializeScript(e, e.scriptable.scripts[i], isNetworkOwner);
 					}
 				}
 			}
+
 			for (auto& state: e.scriptable.activeStates) {
 				state->setFrameFlag(false);
 			}
+		}
+	}
+
+	void initializeScript(ScriptableFamily& e, const ResourceReference<ScriptGraph>& script, std::optional<bool>& isNetworkOwner)
+	{
+		if (!script.hasValue()) [[unlikely]] {
+			auto entity = getWorld().getEntity(e.entityId);
+            Logger::logWarning("Found scriptable component with empty script resource reference on " + entity.getName() + " [" + entity.getPrefabAssetId() + "]", true);
+            return;
+        }
+		
+		// Defer check of network owner until it's needed, but only do it once per entity
+		if (script->isNetwork()) [[unlikely]] {
+			if (!isNetworkOwner.has_value()) {
+				isNetworkOwner = getWorld().isEntityNetworkOwner(e.entityId);
+			}
+			if (!*isNetworkOwner) {
+				return;
+			}
+		}
+
+		const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv)
+		{
+			return kv->getScriptGraphPtr() == script.get().get();
+		});
+		if (!running) {
+			addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
 		}
 	}
 
