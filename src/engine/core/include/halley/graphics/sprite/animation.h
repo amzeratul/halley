@@ -68,8 +68,8 @@ namespace Halley
 		size_t numFrameDefinitions() const { return frameDefinitions.size(); }
 		const AnimationFrame& getFrame(size_t n) const
 		{
-			HalleyAssertDev(n < frames.size());
-			return frames[n];
+			HalleyAssertDev(!frames.empty());
+			return frames[std::min(n, frames.size() - 1)];
 		}
 		const String& getName() const { return name; }
 		int getId() const { return id; }
