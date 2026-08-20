@@ -48,7 +48,11 @@ namespace Halley
 
 		const ConfigNode& getRoot() const;
 		
-		bool needsUpdate() const;
+		bool needsUpdate() const
+		{
+			return file && assetVersion != file->getAssetVersion();
+		}
+
 		void update();
 		String getAssetId() const;
 		int getAssetVersion() const;

@@ -146,11 +146,6 @@ const ConfigNode& ConfigObserver::getRoot() const
 	return *node;
 }
 
-bool ConfigObserver::needsUpdate() const
-{
-	return file && assetVersion != file->getAssetVersion();
-}
-
 void ConfigObserver::update()
 {
 	if (file) {
