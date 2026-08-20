@@ -98,11 +98,13 @@ private:
 	{
 		auto& player = spriteAnimation.player;
 		const auto nextBounds = Rect4f(player.getAnimation().getBounds());
+		std::array<Vector2f, 2> ps = { nextBounds.getTopLeft(), nextBounds.getBottomRight() };
 		if (player.getAnimation().getMaterial()->getDefinition().hasTagIdx(MaterialTags::NoRotate)) {
-			return Rect4f(transform2D.transformPointWithHeightNoRotate(nextBounds.getTopLeft()), transform2D.transformPointWithHeightNoRotate(nextBounds.getBottomRight()));
+			transform2D.transformPointsWithHeightNoRotate(gsl::span(ps));
 		} else {
-			return Rect4f(transform2D.transformPointWithHeight(nextBounds.getTopLeft()), transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
+			transform2D.transformPointsWithHeight(gsl::span(ps));
 		}
+		return Rect4f(ps[0], ps[1]);
 	}
 
 	bool isInBounds(const Transform2DComponent& transform2D, const SpriteComponent& sprite, const SpriteAnimationComponent& spriteAnimation, const Rect4f& viewPort) const
