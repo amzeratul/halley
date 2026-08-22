@@ -73,6 +73,8 @@ namespace Halley {
 		void setActionPoint(const String& pointId);
 		void clearPoint();
 
+		void setSpriteUnderCursor(const SpriteSheetEntry* sprite);
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -86,6 +88,7 @@ namespace Halley {
 		Sprite origSprite;
 		Sprite drawSprite;
 		Sprite boundsSprite;
+		Sprite curBoundsSprite;
 		Sprite nineSliceVSprite;
 		Sprite nineSliceHSprite;
 		Sprite actionPointSprite;
@@ -93,6 +96,7 @@ namespace Halley {
 		std::optional<Vector2i> origPivot;
 		Rect4i origBounds;
 		Rect4f bounds;
+		std::optional<Rect4f> curBounds;
 		String actionPointId;
 
 		float zoom = 1.0f;

@@ -83,8 +83,10 @@ void AnimationEditor::update(Time t, bool moved)
 	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
 	if (spriteSheet) {
 		if (const SpriteSheetEntry* result = spriteSheet->getSpriteAtTexel(mousePos)) {
+			animationDisplay->setSpriteUnderCursor(result);
 			str += "\nSprite: " + result->name;
 		} else {
+			animationDisplay->setSpriteUnderCursor(nullptr);
 			str += "\nSprite: N/A";
 		}
 	}
@@ -255,7 +257,8 @@ AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	: UIWidget(std::move(id))
 	, resources(resources)
 {
-	boundsSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+	boundsSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0, 0.5f));
+	curBoundsSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	nineSliceVSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	nineSliceHSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	actionPointSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
@@ -342,6 +345,11 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 	drawSprite = origSprite.clone().setPos(pivotPos).setScale(zoom).setNotSliced();
 	boundsSprite.setPos(getPosition()).scaleTo((bounds.getSize() * zoom).round());
 
+	if (curBounds) {
+		const auto scale = bounds.getSize() * zoom;
+		curBoundsSprite.setPos((getPosition() + curBounds->getTopLeft() * scale).round()).scaleTo((curBounds->getSize() * scale).round());
+	}
+
 	const auto actionPointPos = getCurrentActionPoint();
 	if (actionPointPos) {
 		const Vector2f displayPivotPos = imageToScreenSpace(-bounds.getTopLeft() + Vector2f(*actionPointPos));
@@ -386,6 +394,9 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 {
 	painter.draw(drawSprite);
 	painter.draw(boundsSprite);
+	if (curBounds) {
+		painter.draw(curBoundsSprite);
+	}
 	if (actionPointSprite.isVisible()) {
 		painter.draw(actionPointSprite);
 	}
@@ -469,6 +480,15 @@ void AnimationEditorDisplay::setActionPoint(const String& pointId)
 void AnimationEditorDisplay::clearPoint()
 {
 	setCurrentActionPoint(std::nullopt);
+}
+
+void AnimationEditorDisplay::setSpriteUnderCursor(const SpriteSheetEntry* sprite)
+{
+	if (sprite) {
+		curBounds = sprite->coords;
+	} else {
+		curBounds = std::nullopt;
+	}
 }
 
 void AnimationEditorDisplay::updateBounds()
