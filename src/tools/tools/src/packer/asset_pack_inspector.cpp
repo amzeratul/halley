@@ -18,6 +18,9 @@ AssetPackInspector::AssetPackInspector(String name)
 
 void AssetPackInspector::parse(const Bytes& bytes)
 {
+	throw Exception("Unimplemented", 0);
+
+	/*
 	auto s = Deserializer(bytes);
 	AssetPackHeader header;
 	auto headerSpan = gsl::as_writable_bytes(gsl::span<AssetPackHeader>(&header, 1));
@@ -44,6 +47,7 @@ void AssetPackInspector::parse(const Bytes& bytes)
 	});
 
 	computeHash();
+	*/
 }
 
 void AssetPackInspector::parseTable(Deserializer s, const Bytes& packBytes)

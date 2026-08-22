@@ -308,9 +308,9 @@ void AssetPacker::generatePack(Project& project, const String& platformId, const
 		}
 		
 		// Read data into pack data
-		const size_t pos = data.size();
+		const size_t pos = alignUp(data.size(), static_cast<size_t>(16));
 		data.reserve(nextPowerOf2(pos + size));
-		data.resize(pos + size);
+		data.resize(pos + size, 0);
 		memcpy(data.data() + pos, fileData.data(), size);
 
 		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.entryData->meta));

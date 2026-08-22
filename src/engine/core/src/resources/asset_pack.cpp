@@ -8,11 +8,19 @@
 
 using namespace Halley;
 
-void AssetPackHeader::init(size_t assetDbSize)
+void AssetPackHeaderV1::init(size_t assetDbSize)
 {
-	memcpy(identifier.data(), "HALLEYPK", 8);
-	assetDbStartPos = sizeof(AssetPackHeader);
+	assetDbStartPos = sizeof(AssetPackHeaderV1) + 8;
 	dataStartPos = assetDbStartPos + assetDbSize;
+	memset(iv.data(), 0, iv.size());
+}
+
+void AssetPackHeaderV2::init(size_t assetDbSize)
+{
+	version = 2;
+	assetDbStartPos = alignUp<size_t>(sizeof(AssetPackHeaderV2) + 8, 16);
+	assetDbPadding = static_cast<uint8_t>(alignUp<size_t>(assetDbSize, 16) - assetDbSize);
+	dataStartPos = assetDbStartPos + alignUp<size_t>(assetDbSize, 16);
 	memset(iv.data(), 0, iv.size());
 }
 
@@ -30,29 +38,60 @@ AssetPack::AssetPack(AssetPack&& other) noexcept
 AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad)
 	: reader(std::move(_reader))
 {
-	// Read header
 	size_t totalSize = reader->size();
-	if (totalSize < sizeof(AssetPackHeader)) {
+	if (totalSize < 8) {
 		throw Exception("Asset pack is invalid (too small)", HalleyExceptions::Resources);
 	}
-	AssetPackHeader header;
-	int nRead = reader->read(gsl::as_writable_bytes(gsl::span<AssetPackHeader>(&header, 1)));
-	if (nRead != int(sizeof(header))) {
-		throw Exception("Unable to read header", HalleyExceptions::Resources);
+
+	// Read identifier
+	std::array<char, 8> id;
+	if (reader->read(gsl::as_writable_bytes(gsl::span(id))) != 8) {
+		throw Exception("Unable to read pack header identifier", HalleyExceptions::Resources);
 	}
-	if (memcmp(header.identifier.data(), "HALLEYPK", 8) != 0) {
+	int packVersion = 0;
+	if (memcmp(id.data(), "HALLEYPK", 8) == 0) {
+		Logger::logWarning("Loading v1 asset pack");
+		packVersion = 1;
+	} else if (memcmp(id.data(), "HALLEYP2", 8) == 0) {
+		packVersion = 2;
+	} else {
 		throw Exception("Asset pack is invalid (invalid identifier)", HalleyExceptions::Resources);
 	}
-	iv = header.iv;
-	dataOffset = size_t(header.dataStartPos);
+
+	uint8_t assetDbPadding = 0;
+	uint64_t assetDbStartPos = 0;
+	uint64_t dataStartPos = 0;
+
+	if (packVersion == 2) {
+		AssetPackHeaderV2 header;
+		if (reader->read(gsl::as_writable_bytes(gsl::span(&header, 1))) != sizeof(header)) {
+			throw Exception("Unable to read header", HalleyExceptions::Resources);
+		}
+		if (header.version != 2) {
+			throw Exception("Unknown asset pack version", HalleyExceptions::Resources);
+		}
+		iv = header.iv;
+		dataOffset = header.dataStartPos;
+		assetDbStartPos = header.assetDbStartPos;
+		dataStartPos = header.dataStartPos;
+		assetDbPadding = header.assetDbPadding;
+	} else if (packVersion == 1) {
+		AssetPackHeaderV1 header;
+		if (reader->read(gsl::as_writable_bytes(gsl::span(&header, 1))) != sizeof(header)) {
+			throw Exception("Unable to read header", HalleyExceptions::Resources);
+		}
+		iv = header.iv;
+		dataOffset = header.dataStartPos;
+		assetDbStartPos = header.assetDbStartPos;
+		dataStartPos = header.dataStartPos;
+	}
 
 	// Read asset database
 	{
-		const size_t assetDbSize = size_t(header.dataStartPos - header.assetDbStartPos);
+		const size_t assetDbSize = size_t(dataStartPos - assetDbStartPos - assetDbPadding);
 		auto assetDbBytes = Bytes(assetDbSize);
-		nRead = reader->read(gsl::as_writable_bytes(gsl::span<Byte>(assetDbBytes)));
-		if (nRead != int(assetDbBytes.size())) {
-			throw Exception("Unable to read header", HalleyExceptions::Resources);
+		if (reader->read(gsl::as_writable_bytes(gsl::span<Byte>(assetDbBytes))) != assetDbBytes.size()) {
+			throw Exception("Unable to read asset database", HalleyExceptions::Resources);
 		}
 		assetDb = std::make_unique<AssetDatabase>();
 		Deserializer::fromBytes<AssetDatabase>(*assetDb, Compression::decompress(assetDbBytes));
@@ -113,12 +152,13 @@ const Bytes& AssetPack::getData() const
 Bytes AssetPack::writeOut() const
 {
 	auto assetDbBytes = Compression::compress(Serializer::toBytes(*assetDb));
-	AssetPackHeader header;
+	AssetPackHeaderV2 header;
 	header.init(assetDbBytes.size());
 	header.iv = iv;
 
-	auto result = Bytes(size_t(header.dataStartPos + data.size()));
-	memcpy(result.data(), &header, sizeof(AssetPackHeader));
+	auto result = Bytes(header.dataStartPos + data.size(), 0);
+	memcpy(result.data(), decltype(header)::id, 8);
+	memcpy(result.data() + 8, &header, sizeof(header));
 	memcpy(result.data() + header.assetDbStartPos, assetDbBytes.data(), assetDbBytes.size());
 	memcpy(result.data() + header.dataStartPos, data.data(), data.size());
 	return result;
@@ -126,17 +166,18 @@ Bytes AssetPack::writeOut() const
 
 std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType type, bool stream)
 {
-	auto path = asset;
 	const auto* assetInfo = assetDb->getDatabase(type).tryGet(asset);
 	if (!assetInfo) {
 		return {};
 	}
-	auto ps = assetInfo->path.split(':');
-	size_t pos = size_t(ps.at(0).toInteger());
-	size_t size = size_t(ps.at(1).toInteger());
+
+	auto buffer = std::array<std::string_view, 2>();
+	const auto split = String::splitToBuffer(assetInfo->path, ':', buffer);
+	const size_t pos = String::toInteger64(split[0]);
+	const size_t size = String::toInteger64(split[1]);
 
 	if (stream) {
-		return std::make_unique<ResourceDataStream>(path, [=, this] () -> std::unique_ptr<ResourceDataReader> {
+		return std::make_unique<ResourceDataStream>(asset, [=, this] () -> std::unique_ptr<ResourceDataReader> {
 			return std::make_unique<PackDataReader>(*this, pos, size);
 		});
 	} else {
@@ -144,7 +185,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 			auto result = new char[size];
 			try {
 				readData(pos, gsl::as_writable_bytes(gsl::span<char>(result, size)));
-				return std::make_unique<ResourceDataStatic>(result, size, path, true);
+				return std::make_unique<ResourceDataStatic>(result, size, asset, true);
 			} catch (...) {
 				delete[] result;
 				throw;
@@ -155,7 +196,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 				throw Exception("Asset \"" + asset + "\" is out of pack bounds.", HalleyExceptions::Resources);
 			}
 
-			return std::make_unique<ResourceDataStatic>(data.data() + pos, size, path, false);
+			return std::make_unique<ResourceDataStatic>(data.data() + pos, size, asset, false);
 		}
 	}
 }

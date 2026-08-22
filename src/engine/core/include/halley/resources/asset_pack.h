@@ -14,11 +14,25 @@ namespace Halley {
 	class ResourceData;
 	class ResourceDataReader;
 
-	struct AssetPackHeader {
-		std::array<char, 8> identifier;
+	struct AssetPackHeaderV1 {
+		constexpr static char id[8] = { 'H', 'A', 'L', 'L', 'E', 'Y', 'P', 'K' };
+
 		std::array<uint8_t, 16> iv;
 		uint64_t assetDbStartPos;
 		uint64_t dataStartPos;
+
+		void init(size_t assetDbSize);
+	};
+
+	struct AssetPackHeaderV2 {
+		constexpr static char id[8] = { 'H', 'A', 'L', 'L', 'E', 'Y', 'P', '2' };
+
+		uint8_t version;
+		uint8_t assetDbPadding;
+		std::array<char, 6> _padding;
+		uint64_t assetDbStartPos;
+		uint64_t dataStartPos;
+		std::array<uint8_t, 16> iv;
 
 		void init(size_t assetDbSize);
 	};
