@@ -191,7 +191,10 @@ void MoviePlayer::render(Resources& resources, RenderContext& rc)
 			framesRendered++;
 		});
 
+#ifndef _GAMING_XBOX
+		// RenderTexture doesn't retain contents across frames on GDK
 		currentTexture.reset();
+#endif
 	}
 }
 
