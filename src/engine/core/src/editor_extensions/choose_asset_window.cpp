@@ -483,15 +483,15 @@ void ChooseAssetWindow::accept()
 	if (callback.isMultiCallback()) {
 		auto ids = options->getSelectedOptionIds();
 		if (!ids.empty()) {
-			callback(ids);
 			cancelAllExcept(curEntry);
+			callback(ids);
 			destroy();
 		}
 	} else {
 		auto id = options->getSelectedOptionId();
 		if (canShowBlank || !id.isEmpty()) {
-			callback(std::move(id));
 			cancelAllExcept(curEntry);
+			callback(std::move(id));
 			destroy();
 		}
 	}
