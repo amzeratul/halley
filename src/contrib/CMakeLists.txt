@@ -220,7 +220,7 @@ assign_source_group(${HEADERS})
 
 add_library (halley-contrib ${SOURCES} ${HEADERS})
 
-if (_GAMING_XBOX)
+if (_GAMING_XBOX OR _GAMING_DESKTOP)
         # Game Core has no FlushViewOfFile; disable sqlite mmap support
         target_compile_definitions(halley-contrib PRIVATE SQLITE_MAX_MMAP_SIZE=0)
 endif ()
