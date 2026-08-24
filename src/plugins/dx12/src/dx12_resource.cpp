@@ -578,7 +578,7 @@ void DX12Texture::doCopyToImage(Painter& painter, Image& image) const
     bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
     ComPtr<ID3D12Resource> readbackBuffer;
-    if (FAILED(video.getDevice().CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&readbackBuffer)))) {
+    if (FAILED(video.getDevice().CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_IID_ARGS(readbackBuffer)))) {
         throw Exception("DX12Texture doCopyToImage Failed to create readback buffer", HalleyExceptions::VideoPlugin);
     }
 

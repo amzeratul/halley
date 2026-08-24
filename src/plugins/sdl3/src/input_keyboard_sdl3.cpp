@@ -12,6 +12,7 @@ InputKeyboardSDL3::InputKeyboardSDL3(SystemAPI& system, std::shared_ptr<IClipboa
 	: system(dynamic_cast<SystemSDL3&>(system))
 	, InputKeyboard(SDL_SCANCODE_COUNT, clipboard)
 {
+	setupMapping();
 }
 
 void InputKeyboardSDL3::processEvent(const SDL_Event& rawEvent)
@@ -23,37 +24,64 @@ void InputKeyboardSDL3::processEvent(const SDL_Event& rawEvent)
 		//const SDL_TextEditingEvent& event = rawEvent.edit;
 	} else {
 		const SDL_KeyboardEvent& event = rawEvent.key;
+		const auto scanCode = static_cast<KeyCode>(event.scancode);
+		const auto virtualCode = getHalleyKeyCodeFromSDLVirtualKeyCode(event.key);
+		const auto mods = getMods(event.mod);
 		switch (event.type) {
             case SDL_EVENT_KEY_DOWN:
-				onKeyPressed(getKeyCode(event.key), getMods(event.mod));
+				onKeyPressed(scanCode, virtualCode, mods);
 				break;
 			case SDL_EVENT_KEY_UP:
-				onKeyReleased(getKeyCode(event.key), getMods(event.mod));
+				onKeyReleased(scanCode, virtualCode, mods);
 				break;
 		}
 	}
 }
 
-KeyCode InputKeyboardSDL3::getKeyCode(int sdlKeyCode) const
+void InputKeyboardSDL3::setupMapping()
 {
-	// Halley uses uppercase characters
-	if (sdlKeyCode >= 'a' && sdlKeyCode <= 'z') {
-		return KeyCode(sdlKeyCode - 32);
+	auto& v = virtualKeyCodeToHalley;
+
+	for (int16_t code = SDLK_A; code <= SDLK_Z; ++code) {
+		v[code] = static_cast<KeyCode>(static_cast<int>(KeyCode::A) + (code - SDLK_A));
 	}
 
-	// SDL has a special code for Delete for some reason
-	if (sdlKeyCode == SDLK_DELETE) {
-		return KeyCode::Delete;
-	}
+	v[SDLK_RETURN] = KeyCode::Enter;
+	v[SDLK_ESCAPE] = KeyCode::Esc;
+	v[SDLK_BACKSPACE] = KeyCode::Backspace;
+	v[SDLK_TAB] = KeyCode::Tab;
+	v[SDLK_SPACE] = KeyCode::Space;
+	v[SDLK_COMMA] = KeyCode::Comma;
+	v[SDLK_MINUS] = KeyCode::Minus;
+	v[SDLK_PERIOD] = KeyCode::Period;
+	v[SDLK_SLASH] = KeyCode::Slash;
+	v[SDLK_0] = KeyCode::Num0;
+	v[SDLK_1] = KeyCode::Num1;
+	v[SDLK_2] = KeyCode::Num2;
+	v[SDLK_3] = KeyCode::Num3;
+	v[SDLK_4] = KeyCode::Num4;
+	v[SDLK_5] = KeyCode::Num5;
+	v[SDLK_6] = KeyCode::Num6;
+	v[SDLK_7] = KeyCode::Num7;
+	v[SDLK_8] = KeyCode::Num8;
+	v[SDLK_9] = KeyCode::Num9;
+	v[SDLK_SEMICOLON] = KeyCode::Semicolon;
+	v[SDLK_LEFTBRACKET] = KeyCode::LeftBracket;
+	v[SDLK_BACKSLASH] = KeyCode::Backslash;
+	v[SDLK_RIGHTBRACKET] = KeyCode::RightBracket;
+	v[SDLK_GRAVE] = KeyCode::Grave;
+	v[SDLK_DELETE] = KeyCode::Delete;
+};
 
-	// Halley moves scancodes to +128 offset
-	if ((sdlKeyCode & SDLK_SCANCODE_MASK) != 0) {
-		return KeyCode((sdlKeyCode & ~SDLK_SCANCODE_MASK) + 128);
+KeyCode InputKeyboardSDL3::getHalleyKeyCodeFromSDLVirtualKeyCode(int sdlKeyCode) const
+{
+	if (sdlKeyCode & SDLK_SCANCODE_MASK)
+	{
+		return static_cast<KeyCode>(sdlKeyCode ^ SDLK_SCANCODE_MASK);
 	}
-
-	// Otherwise, should be compatible
-	return KeyCode(sdlKeyCode);
+	return virtualKeyCodeToHalley.value_or(sdlKeyCode, KeyCode::Unknown);
 }
+
 
 KeyMods InputKeyboardSDL3::getMods(int sdlMods) const
 {
@@ -75,19 +103,36 @@ KeyMods InputKeyboardSDL3::getMods(int sdlMods) const
 
 String InputKeyboardSDL3::getButtonName(int code) const
 {
-	switch (code) {
-	case static_cast<int>(KeyCode::Esc):
-		return "Esc";
-	case static_cast<int>(KeyCode::Delete):
-		return "Del";
-	default:
-		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
-			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
-		} else {
-			auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code - 128));
-			return str;
-		}
+	const auto keycode = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(code), SDL_KMOD_NONE, false);
+	auto name = String(SDL_GetKeyName(keycode));
+
+	if (name.startsWith("Keypad")) {
+		name = name.replaceOne("Keypad", "KP");
+	} else if (name == "Left Ctrl") {
+		name = "LCtrl";
+	} else if (name == "Right Ctrl") {
+		name = "RCtrl";
+	} else if (name == "Left Alt") {
+		name = "LAlt";
+	} else if (name == "Right Alt") {
+		name = "RAlt";
+	} else if (name == "PrintScreen") {
+		name = "PrtSc";
+	} else if (name == "ScrollLock") {
+		name = "ScrLk";
+	} else if (name == "PageDown") {
+		name = "PgDn";
+	} else if (name == "PageUp") {
+		name = "PgUp";
+	} else if (name == "Delete") {
+		name = "Del";
+	} else if (name == "Insert") {
+		name = "Ins";
+	} else if (name == "Numlock") {
+		name = "Num";
 	}
+
+	return name;
 }
 
 void InputKeyboardSDL3::update()

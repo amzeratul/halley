@@ -346,9 +346,7 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 					DWORD maxLen;
 					DWORD curLen;
 					buffer->Lock(&src, &maxLen, &curLen);
-					DWORD contiguousLen = 0;
-					buffer2d->GetContiguousLength(&contiguousLen);
-					readVideoSample(sampleTime, gsl::span(reinterpret_cast<std::byte*>(src), contiguousLen), minStride);
+					readVideoSample(sampleTime, gsl::span(reinterpret_cast<std::byte*>(src), curLen), minStride);
 					buffer->Unlock();
 				} else {
 					throw Exception("Error while querying for 2D buffer: " + toString(hr), HalleyExceptions::MoviePlugin);

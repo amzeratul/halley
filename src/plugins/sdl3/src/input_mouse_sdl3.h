@@ -12,7 +12,7 @@ namespace Halley {
 		void setPosition(Vector2f position) override;
 		Vector2f getWheelMove() const override;
 		Vector2i getWheelMoveDiscrete() const override;
-		float getAxis(int n) override;
+		float getAxis(int n) const override;
 		void clearPresses() override;
 
 		void update();
