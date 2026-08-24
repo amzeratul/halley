@@ -135,7 +135,7 @@ bool AudioSourceSequence::isReady() const
 	}
 
 	for (auto& p: playingTracks) {
-		if (!p.source->isReady()) {
+		if (p.source && !p.source->isReady()) {
 			return false;
 		}
 	}
