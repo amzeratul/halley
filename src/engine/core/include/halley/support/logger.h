@@ -89,7 +89,7 @@ namespace Halley
 
 		void run();
 		void stopThread();
-		void doLog(LoggerLevel level, std::string_view msg);
+		void doLog(LoggerLevel level, std::string_view msg, bool flush);
 	};
 
 	class Logger

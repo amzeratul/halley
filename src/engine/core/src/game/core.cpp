@@ -108,7 +108,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Init threaded logger
 	threadedLogger->setDevMode(game->isDevMode());
 	if constexpr (!Debug::isDebug()) {
-		threadedLogger->createSystemThread(*api->system);
+		//threadedLogger->createSystemThread(*api->system);
 	}
 }
 

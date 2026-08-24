@@ -73,10 +73,9 @@ ThreadedLogger::~ThreadedLogger()
 
 	while (pendingEntries.canRead(1)) {
 		auto e = pendingEntries.readOne();
-		doLog(e.level, e.msg);
+		doLog(e.level, e.msg, false);
 	}
-
-	std::cout.flush();
+	std::cout << std::endl;
 }
 
 void ThreadedLogger::setDevMode(bool devMode)
@@ -98,6 +97,8 @@ void ThreadedLogger::createSystemThread(SystemAPI& system)
 {
 	stopThread();
 
+	doLog(LoggerLevel::Info, "Starting threaded logger", true);
+
 	running = true;
 	thread = system.createThread("ThreadedLogger", ThreadPriority::Low, [this] () {
 		run();
@@ -107,10 +108,7 @@ void ThreadedLogger::createSystemThread(SystemAPI& system)
 void ThreadedLogger::log(LoggerLevel level, std::string_view msg, bool isInterrupt)
 {
 	if (!running || isInterrupt) {
-		doLog(level, msg);
-		if (isInterrupt) {
-			std::cout.flush();
-		}
+		doLog(level, msg, true);
 		return;
 	}
 
@@ -124,7 +122,7 @@ void ThreadedLogger::log(LoggerLevel level, std::string_view msg, bool isInterru
 	if (running) {
 		pendingEntries.writeOne(Entry{ level, msg });
 	} else {
-		doLog(level, msg);
+		doLog(level, msg, true);
 	}
 }
 
@@ -132,12 +130,13 @@ void ThreadedLogger::run()
 {
 	using namespace std::chrono_literals;
 	while (running) {
-		if (pendingEntries.canRead(1)) {
+		const size_t n = pendingEntries.availableToRead();
+		for (size_t i = 0; i < n; ++i) {
 			auto e = pendingEntries.readOne();
-			doLog(e.level, e.msg);			
-		} else {
-			std::this_thread::sleep_for(500us);
+			doLog(e.level, e.msg, i == n - 1);
 		}
+
+		std::this_thread::sleep_for(500us);
 	}
 }
 
@@ -149,7 +148,7 @@ void ThreadedLogger::stopThread()
 	}
 }
 
-void ThreadedLogger::doLog(LoggerLevel level, std::string_view msg)
+void ThreadedLogger::doLog(LoggerLevel level, std::string_view msg, bool flush)
 {
 	if (level == LoggerLevel::Dev && !devMode) {
 		return;
@@ -163,10 +162,12 @@ void ThreadedLogger::doLog(LoggerLevel level, std::string_view msg)
 		std::cout << ConsoleColour(Console::CYAN);
 	}
 
-	std::cout << msg << ConsoleColour() << "\n";
+	std::cout << msg << ConsoleColour();
 	
-	if constexpr (Debug::isDebug()) {
-		std::cout.flush();
+	if (flush || Debug::isDebug()) {
+		std::cout << std::endl;
+	} else {
+		std::cout << "\n";
 	}
 }
 
