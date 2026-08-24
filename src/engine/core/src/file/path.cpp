@@ -84,7 +84,7 @@ std::string_view Path::normalise(gsl::span<char> buffer, std::string_view str)
 	std::array<char, 2048> winBuf;
 
 	// Some preprocessing on Windows
-	if (getPlatform() == GamePlatform::Windows) {
+	if (getPlatform() == GamePlatform::Windows || getPlatform() == GamePlatform::WindowsGDK) {
 		HalleyAssertDev(winBuf.size() >= str.size());
 		// Convert backslashes
 		for (size_t i = 0; i < str.length(); ++i) {
