@@ -103,8 +103,6 @@ std::pair<String, Vector<ColourOverride>> ScriptMergeAll::getNodeDescription(con
 
 IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto& counter = environment.getNodeCounter(node.getId());
-
 	size_t expected = 0;
 	const auto& pinConfigs = getPinConfiguration(node);
 	const auto& pins = node.getPins();
@@ -118,6 +116,7 @@ IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment,
 		}
 	}
 
+	auto& counter = environment.getNodeCounter(node.getId());
 	if (++counter == expected) {
 		counter = 0;
 		return Result(ScriptNodeExecutionState::MergeAndContinue);
