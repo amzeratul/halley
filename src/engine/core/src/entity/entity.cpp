@@ -508,7 +508,7 @@ void EntityRef::setModifiedThisFrame(bool checkAnchestors, bool onlyIfRequired)
 {
 	if (checkAnchestors || onlyIfRequired) {
 		// If both flags are false, component lookup is skipped entirely.
-		const NetworkComponent* component = tryGetComponent<NetworkComponent>();
+		const NetworkComponent* component = tryGetComponent<NetworkComponent>(true);
 
 		if (checkAnchestors && component == nullptr) {
 			// Walk up chain of parents, looking for a network component.
