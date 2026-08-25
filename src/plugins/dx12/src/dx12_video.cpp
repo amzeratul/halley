@@ -264,6 +264,11 @@ void DX12Video::finishRender()
         uint32_t presentFlags = (allowTearing && !useVSync) ? DXGI_PRESENT_ALLOW_TEARING : 0u;
 
         swapChain->Present(syncInterval, presentFlags);
+        
+        if (useVSync)
+        {
+            waitForVsync();
+        }
 #endif
     }
 
@@ -334,7 +339,13 @@ bool DX12Video::hasVsync() const
 
 void DX12Video::waitForVsync()
 {
-    // TODO
+#ifndef _GAMING_XBOX
+    ComPtr<IDXGIOutput> output;
+    if (swapChain && SUCCEEDED(swapChain->GetContainingOutput(&output)))
+    {
+        output->WaitForVBlank();
+    }
+#endif
 }
 
 void DX12Video::flush() {
