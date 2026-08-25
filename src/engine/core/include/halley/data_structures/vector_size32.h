@@ -1023,7 +1023,7 @@ namespace Halley {
 		void move_data_from(VectorStd& other)
 		{
 			if (other.sbo_active()) {
-				resize(other.size());
+				m_size = other.m_size;
 
 				// Using SBO, move elements
 				if constexpr (std::is_trivially_copyable_v<T>) {
