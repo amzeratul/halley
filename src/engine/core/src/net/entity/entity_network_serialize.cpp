@@ -421,6 +421,7 @@ uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, co
     // Use hashing serializer, no dictionary.
     SerializerOptions opt(options.version);
     opt.toHash = true;
+    opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
     Serializer serializer(opt);
