@@ -74,7 +74,7 @@ void MainLoop::runLoop()
 		// The latter will be fudged to account for timing jitter, as it leads to smoother gameplay
 		const double fps = target.getTargetFPS();
 		const std::optional<Time> elapsedTarget = fps > 0 ? 1.0 / fps : std::optional<Time>();
-		const Time tickLength = clamp(snapElapsedTime(measuredElapsed + leftOverTime, elapsedTarget, frameTimes), 0.0005, 0.100);
+		const Time tickLength = clamp(snapElapsedTime(measuredElapsed + leftOverTime, elapsedTarget, frameTimes), 0.000001, 0.100);
 		leftOverTime = measuredElapsed - tickLength;
 
 		target.onTick(tickLength);
