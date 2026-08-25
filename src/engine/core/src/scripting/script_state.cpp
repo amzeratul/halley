@@ -550,9 +550,11 @@ void ScriptState::prepareStates(const EntitySerializationContext& context, Time 
 	}
 
 #ifdef DEV_BUILD
-	const float dt = static_cast<float>(t);
-	for (auto& n: nodeState) {
-		n.timeSinceStart += dt;
+	if constexpr (isPCPlatform()) {
+		const float dt = static_cast<float>(t);
+		for (auto& n: nodeState) {
+			n.timeSinceStart += dt;
+		}
 	}
 #endif
 }
