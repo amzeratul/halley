@@ -580,10 +580,15 @@ void Core::fixedUpdate(Time time, bool multithreaded)
 	}
 
 	ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
-	try {
+
+	if (Debug::canHandleUncaughtExceptions()) {
 		currentStage->onFixedUpdate(time, *frameDataUpdate);
-	} catch (Exception& e) {
-		game->onUncaughtException(e, TimeLine::FixedUpdate);
+	} else {
+		try {
+			currentStage->onFixedUpdate(time, *frameDataUpdate);
+		} catch (Exception& e) {
+			game->onUncaughtException(e, TimeLine::FixedUpdate);
+		}
 	}
 }
 
@@ -592,10 +597,15 @@ void Core::variableUpdate(Time time)
 	const auto trace = StackDebugTrace("time", time);
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
-		try {
+		
+		if (Debug::canHandleUncaughtExceptions()) {
 			currentStage->onVariableUpdate(time, *frameDataUpdate);
-		} catch (Exception& e) {
-			game->onUncaughtException(e, TimeLine::VariableUpdate);
+		} else {
+			try {
+				currentStage->onVariableUpdate(time, *frameDataUpdate);
+			} catch (Exception& e) {
+				game->onUncaughtException(e, TimeLine::VariableUpdate);
+			}
 		}
 	}
 }
@@ -642,10 +652,14 @@ void Core::render()
 			}
 			RenderContext context(*painter, *camera, *screenTarget);
 
-			try {
+			if (Debug::canHandleUncaughtExceptions()) {
 				currentStage->onRender(context, *frameDataRender);
-			} catch (Exception& e) {
-				game->onUncaughtException(e, TimeLine::Render);
+			} else {
+				try {
+					currentStage->onRender(context, *frameDataRender);
+				} catch (Exception& e) {
+					game->onUncaughtException(e, TimeLine::Render);
+				}
 			}
 		}
 
