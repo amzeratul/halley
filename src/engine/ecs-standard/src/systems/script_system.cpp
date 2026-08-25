@@ -341,26 +341,27 @@ private:
 		return false;
 	}
 
+	struct Entry {
+		EntityId entityId;
+		ScriptableComponent* scriptable;
+		//std::optional<WorldPosition> pos;
+	};
+	Vector<Entry> scriptablesTemp;
+
 	void updateScripts(Time t)
 	{
-		struct Entry {
-			EntityId entityId;
-			ScriptableComponent* scriptable;
-			std::optional<WorldPosition> pos;
-		};
-
 		// Make a copy since script updates can result in World entity refresh, which invalidates iterators
-		auto scriptables = VectorTemp<Entry>(getWorld().getUpdateMemoryPool());
-		scriptables.reserve(scriptableFamily.size());
+		scriptablesTemp.clear();
+		scriptablesTemp.reserve(scriptableFamily.size());
 		for (auto& e : scriptableFamily) {
-			auto pos = e.transform2D.hasValue() ? std::optional(e.transform2D->getWorldPosition()) : std::nullopt;
-			scriptables.emplace_back(Entry{ e.entityId, &e.scriptable, pos });
+			//auto pos = e.transform2D.hasValue() ? std::optional(e.transform2D->getWorldPosition()) : std::nullopt;
+			scriptablesTemp += Entry{ e.entityId, &e.scriptable };
 		}
 
 		auto& env = getScriptingService().getEnvironment();
 		HalleyAssertDev(!env.hasCurrentState());
 
-		for (auto& e: scriptables) {
+		for (auto& e: scriptablesTemp) {
 			const auto entityId = e.entityId;
 			auto entity = getWorld().tryGetEntity(entityId);
 			if (!entity.isValid()) {
@@ -368,6 +369,7 @@ private:
 				continue;
 			}
 
+			/*
 			auto traceSubWorld = StackDebugTrace("subWorld", std::nullopt);
 			auto traceY = StackDebugTrace("y", std::nullopt);
 			auto traceX = StackDebugTrace("x", std::nullopt);
@@ -376,20 +378,22 @@ private:
 				traceY.setValue(e.pos->pos.y);
 				traceX.setValue(e.pos->pos.x);
 			}
+			*/
 
-
-			// This is a surprisingly expensive call, so limit it to PC
-			const auto traceName = StackDebugTrace("entityName", isPCPlatform() ? std::string_view(entity.getName()) : std::string_view());
+			auto traceName = StackDebugTrace("entityName", std::nullopt);
+			if (isPCPlatform()) {
+				// This is a surprisingly expensive call, so limit it to PC
+				traceName.setValue(std::string_view(entity.getName()));
+			}
 
 			auto& scriptable = *e.scriptable;
-			bool hasTransform = e.pos.has_value();
 
 			scriptable.activeStates.terminateMarkedDead(env, entityId, scriptable.variables);
 
 			for (auto& statePtr: scriptable.activeStates) {
 				auto& state = *statePtr;
 				if (!state.getFrameFlag()) {
-					if (hasTransform || !state.getScriptGraphPtr()->needsTransform()) {
+					if (!state.getScriptGraphPtr()->needsTransform() || entity.hasComponent<Transform2DComponent>()) {
 						env.updateState(t, state, entityId, scriptable.variables);
 					} else if (state.hasStarted()) {
 						env.stopState(state, entityId, scriptable.variables, true);
