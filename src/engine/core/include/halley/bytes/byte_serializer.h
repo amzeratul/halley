@@ -78,12 +78,16 @@ namespace Halley {
 		template <typename T, typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
 		static Bytes toBytes(const T& f, SerializerOptions options = {})
 		{
-			auto dry = Serializer(options);
-			f(dry);
-			Bytes result(dry.getSize());
-			auto s = Serializer(gsl::as_writable_bytes(gsl::span<Halley::Byte>(result)), options);
+			// This method should not be used in conjunction with toHash
+			HalleyAssertDev(!options.toHash);
+
+			auto s = Serializer(options);
+			HalleyAssertDev(s.dynamic);
+
 			f(s);
-			return result;
+			
+			s.dynamicDst.resize(s.getPosition());
+			return std::move(s.dynamicDst);
 		}
 
 		template <typename T, typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
@@ -91,23 +95,9 @@ namespace Halley {
 		{
 			return toBytes([&value](Serializer& s) { s << value; }, options);
 		}
-		
-		template <typename T, typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
-		static size_t getSize(const T& f, SerializerOptions options = {})
-		{
-			auto dry = Serializer(options);
-			f(dry);
-			return dry.getSize();
-		}
 
-		template <typename T, typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
-		static size_t getSize(const T& value, SerializerOptions options = {})
-		{
-			return getSize([&value](Serializer& s) { s << value; }, options);
-		}
-
-		size_t getSize() const { return size; }
-		size_t getPosition() const { return size; }
+		size_t getSize() const { return curPos; }
+		size_t getPosition() const { return curPos; }
 
         void rewind(size_t position); // Rewind to a previous write position; use with care!
 
@@ -184,9 +174,11 @@ namespace Halley {
 			using K = std::conditional_t<std::is_same_v<T, Halley::String>, std::string_view, T>;
 			uint32_t sz = static_cast<uint32_t>(val.size());
 
-			// For a dry run, we'll bypass the whole sort algorithm, as it shouldn't affect total size
+			// If we're hashing, bypass the whole sort algorithm
+			// Rationale: if the object doesn't change, it will still iterate in the same order and generate the same hash
+			// It's possible that two identical hash maps will generate different hashes, but that should be benign
 			// Also bypass sorting if there's 0 or 1 keys, as there's nothing to sort
-			if (dryRun || sz <= 1) {
+			if (options.toHash || sz <= 1) {
 				*this << sz;
 				for (const auto& [k, v]: val) {
 					*this << k << v;
@@ -349,10 +341,11 @@ namespace Halley {
 		}
 
 	private:
-		size_t size = 0;
+		bool dynamic = false;
+		size_t curPos = 0;
 		gsl::span<std::byte> dst;
 		std::unique_ptr<Hash::Hasher> hasher;
-		bool dryRun;
+		Bytes dynamicDst;
 
 		template <typename T>
 		Serializer& serializePod(T val)
@@ -396,7 +389,10 @@ namespace Halley {
 		template <typename T>
 		Serializer& serializeInteger(T val)
 		{
-			if (options.version >= 1) [[likely]] {
+			if (hasher) {
+				hasher->feed(val);
+				return *this;
+			} else if (options.version >= 1) {
 				// Variable-length
 				if constexpr (std::is_signed_v<T>) {
 					if (val < 64 && val > -64) {
@@ -429,14 +425,21 @@ namespace Halley {
 
 			if (hasher) {
 				hasher->feed(src);
-			} else if (!dryRun) {
-				if (dst.size() - size < srcSize) [[unlikely]] {
-					throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
-				}
-				memcpy(dst.data() + size, &src, srcSize);
+			} else {
+				ensureSpaceFor(srcSize);
+				memcpy(dst.data() + curPos, &src, srcSize);
+				curPos += srcSize;
 			}
-			size += srcSize;
 		}
+
+		void ensureSpaceFor(size_t newBytes)
+		{
+			if (curPos + newBytes > dst.size()) [[unlikely]] {
+				requestCapacity(curPos + newBytes);
+			}
+		}
+
+		void requestCapacity(size_t bytes);
 
 		void copyBytes(const void* src, size_t size);
 

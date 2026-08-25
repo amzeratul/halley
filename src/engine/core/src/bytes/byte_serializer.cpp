@@ -15,29 +15,29 @@ SerializerState* ByteSerializationBase::setState(SerializerState* s)
 
 Serializer::Serializer(SerializerOptions _options)
 	: ByteSerializationBase(std::move(_options))
-	, dryRun(true)
 {
 	if (options.toHash) {
 		hasher = std::make_unique<Hash::Hasher>();
+	} else {
+		dynamic = true;
+		dynamicDst.resize(4 * 1024);
 	}
 }
 
 Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions _options)
 	: ByteSerializationBase(std::move(_options))
 	, dst(dst)
-	, dryRun(false)
+	, dynamic(false)
 {
-	if (options.toHash) {
-		hasher = std::make_unique<Hash::Hasher>();
-	}
+	HalleyAssertDev(!options.toHash);
 }
 
 void Serializer::rewind(size_t position)
 {
-    if (position >= size) {
+    if (position >= curPos) {
         throw Exception("Rewind position out of range.", HalleyExceptions::Utils);
     }
-    size = position;
+    curPos = position;
 }
 
 Serializer& Serializer::operator<<(std::string_view str)
@@ -173,17 +173,25 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 	*this << gsl::as_bytes(gsl::span<const uint8_t>(buffer.data(), curPos));
 }
 
+void Serializer::requestCapacity(size_t bytes)
+{
+	if (dynamic) {
+		dynamicDst.resize(nextPowerOf2(bytes));
+		dst = dynamicDst.byte_span();
+	} else {
+		throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
+	}
+}
+
 void Serializer::copyBytes(const void* src, size_t srcSize)
 {
 	if (hasher) {
 		hasher->feedBytes(gsl::span<const std::byte>(static_cast<const std::byte*>(src), srcSize));
-	} else if (!dryRun) {
-		if (dst.size() - size < srcSize) [[unlikely]] {
-			throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
-		}
-		memcpy(dst.data() + size, src, srcSize);
+	} else {
+		ensureSpaceFor(srcSize);
+		memcpy(dst.data() + curPos, src, srcSize);
+		curPos += srcSize;
 	}
-	size += srcSize;
 }
 
 Deserializer::Deserializer(gsl::span<const std::byte> src, SerializerOptions options)
