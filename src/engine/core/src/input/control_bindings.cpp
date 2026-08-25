@@ -181,7 +181,8 @@ void ControlBindings::clearRedundantBindings()
 		const auto id = split[0];
 		const auto slot = split[1].toInteger();
 
-		if (getDefaultBindings(config.getBinding(id))[slot] == binding) {
+		const auto* bindingConfig = config.tryGetBinding(id);
+		if (!bindingConfig || getDefaultBindings(*bindingConfig)[slot] == binding) {
 			toErase += key;
 		}
 	}

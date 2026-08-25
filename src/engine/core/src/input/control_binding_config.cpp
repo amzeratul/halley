@@ -458,6 +458,17 @@ ControlBindingConfigs::ControlBindingConfigs(const ConfigNode& node)
 	}
 }
 
+const ControlBindingConfig* ControlBindingConfigs::tryGetBinding(const String& id) const
+{
+	// This might be kinda slow...
+	for (const auto& b: bindingConfigs) {
+		if (b.getBindingId() == id) {
+			return &b;
+		}
+	}
+	return nullptr;
+}
+
 const ControlBindingConfig& ControlBindingConfigs::getBinding(const String& id) const
 {
 	// This might be kinda slow...
