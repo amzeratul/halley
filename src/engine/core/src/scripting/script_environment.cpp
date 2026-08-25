@@ -142,8 +142,6 @@ void ScriptEnvironment::updateState(Time time, ScriptState& graphState, EntityId
 		if (graphState.isDone()) {
 			doTerminateState();
 		}
-
-		graphState.updateDisplayOffset(time);
 	} catch (const std::exception& e) {
 		auto entity = getWorld().tryGetEntity(curEntity);
 		String name = entity.isValid() ? entity.getName() : "<invalidEntity>";

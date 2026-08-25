@@ -120,6 +120,7 @@ void DebugDrawService::addScriptRenderer(Vector2f pos, std::shared_ptr<ScriptSta
 
 void DebugDrawService::drawScripts(Painter& painter)
 {
+	/*
 	for (const auto& s: BaseFrameData::getCurrent().scriptStates) {
 		const float posScale = s.second->getScriptGraphPtr()->getAssetId().isEmpty() ? 1.0f : 0.5f;
 		const Vector2f pos = s.first - s.second->getDisplayOffset() * posScale;
@@ -127,6 +128,7 @@ void DebugDrawService::drawScripts(Painter& painter)
 		scriptGraphRenderer->setState(s.second.get());
 		scriptGraphRenderer->draw(painter, pos, painter.getCurrentCamera().getZoom(), posScale);
 	}
+	*/
 }
 
 void DebugDrawService::initScriptGraphRenderer(Resources& resources, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom)

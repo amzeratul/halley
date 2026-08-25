@@ -205,9 +205,6 @@ namespace Halley {
     	NodeIntrospection getNodeIntrospection(GraphNodeId nodeId) const;
     	size_t& getNodeCounter(GraphNodeId node);
 
-		void updateDisplayOffset(Time t);
-		Vector2f getDisplayOffset() const;
-
 		bool operator==(const ScriptState& other) const;
 		bool operator!=(const ScriptState& other) const;
 
@@ -239,16 +236,12 @@ namespace Halley {
 		int frameNumber = 0;
 
 		const ScriptGraph* scriptGraphRef = nullptr;
+		uint64_t graphHash = 0;
 
     	Vector<ScriptStateThread> threads;
 		Vector<NodeState> nodeState;
-    	std::map<GraphNodeId, size_t> nodeCounters;
     	ScriptVariables localVars;
 		ScriptVariables sharedVars;
-
-    	uint64_t graphHash = 0;
-
-		Vector2f displayOffset;
 
 		Vector<String> tags;
 		Vector<ScriptMessage> messageInbox;
@@ -257,6 +250,7 @@ namespace Halley {
 
 		HashMap<GraphNodeId, std::optional<Future<ConfigNode>>> futureNodeValues;
     	std::shared_ptr<const ScriptGraph> scriptGraph;
+    	HashMap<GraphNodeId, size_t> nodeCounters;
 
     	void onNodeStartedIntrospection(GraphNodeId nodeId);
     	void onNodeEndedIntrospection(GraphNodeId nodeId);
