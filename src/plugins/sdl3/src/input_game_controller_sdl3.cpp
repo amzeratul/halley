@@ -1,5 +1,7 @@
 #include "input_game_controller_sdl3.h"
 
+#include <utility>
+
 #include "halley/support/console.h"
 
 using namespace Halley;
@@ -97,34 +99,32 @@ int InputGameControllerSDL3::getButtonAtPosition(JoystickButtonPosition position
 #ifdef WITH_GDK
 Halley::String InputGameControllerSDL3::getButtonName(int code) const
 {
-	auto buttons = std::array<const char*, 17>{
-		"xbox_a",
-		"xbox_b",
-		"xbox_x",
-		"xbox_y",
-		"xbox_lb",
-		"xbox_rb",
-		"xbox_lsb",
-		"xbox_rsb",
-		"xbox_back",
-		"xbox_start",
-		"xbox_lt",
-		"xbox_rt",
-		"xbox_dpad_up",
-		"xbox_dpad_right",
-		"xbox_dpad_down",
-		"xbox_dpad_left",
-		"xbox_guide"
+	auto buttons = std::array<const char*, 15>{
+		"xbox_a",			// SDL_GAMEPAD_BUTTON_SOUTH
+		"xbox_b",			// SDL_GAMEPAD_BUTTON_EAST
+		"xbox_x",			// SDL_GAMEPAD_BUTTON_WEST
+		"xbox_y",			// SDL_GAMEPAD_BUTTON_NORTH
+		"xbox_back",		// SDL_GAMEPAD_BUTTON_BACK (View)
+		"xbox_guide",		// SDL_GAMEPAD_BUTTON_GUIDE
+		"xbox_start",		// SDL_GAMEPAD_BUTTON_START (Menu)
+		"xbox_lsb",			// SDL_GAMEPAD_BUTTON_LEFT_STICK
+		"xbox_rsb",			// SDL_GAMEPAD_BUTTON_RIGHT_STICK
+		"xbox_lb",			// SDL_GAMEPAD_BUTTON_LEFT_SHOULDER
+		"xbox_rb",			// SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER
+		"xbox_dpad_up",		// SDL_GAMEPAD_BUTTON_DPAD_UP
+		"xbox_dpad_down",	// SDL_GAMEPAD_BUTTON_DPAD_DOWN
+		"xbox_dpad_left",	// SDL_GAMEPAD_BUTTON_DPAD_LEFT
+		"xbox_dpad_right",	// SDL_GAMEPAD_BUTTON_DPAD_RIGHT
 	};
-	if (code < buttons.size())
+	if (code >= 0 && std::cmp_less(code, buttons.size()))
 	{
 		return buttons[code];
 	}
-	if (code == 26)
+	if (code == SDL_GAMEPAD_BUTTON_COUNT)
 	{
 		return "xbox_lt";
 	}
-	if (code == 27)
+	if (code == SDL_GAMEPAD_BUTTON_COUNT + 1)
 	{
 		return "xbox_rt";
 	}
