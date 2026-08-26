@@ -313,9 +313,9 @@ void EntityNetworkSession::receiveUpdates()
 
 		if (largeSplitHeader == 0x0) {
 			// Regular packet, decompress and queue/process.
-			receiveBuffer.resize(receiveBuffer.capacity());
+			receiveBuffer.resize_no_init(receiveBuffer.capacity());
 			if (const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(receiveBuffer.span()))) {
-				receiveBuffer.resize(*size);
+				receiveBuffer.resize_no_init(*size);
 			} else {
 				Logger::logError("Failed to decompress network packet");
 				continue;
@@ -357,11 +357,11 @@ void EntityNetworkSession::receiveUpdates()
 
 			if (largeSplitHeader == 0x1) {
 				// Compressed - decompress, then copy.
-				receiveBuffer.resize(receiveBuffer.capacity());
+				receiveBuffer.resize_no_init(receiveBuffer.capacity());
 				const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(receiveBuffer.span()));
 
 				if (size) {
-					receiveBuffer.resize(*size);
+					receiveBuffer.resize_no_init(*size);
 				} else {
 					throw Exception("Failed to decompress part of large network packet", HalleyExceptions::Network);
 				}

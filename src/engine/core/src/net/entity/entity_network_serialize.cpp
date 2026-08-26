@@ -1025,7 +1025,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
 
         s << journal;
 
-        previous.resize(s.getSize());
+        previous.resize_no_init(s.getSize());
     }
 
     return modified;
