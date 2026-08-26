@@ -12,7 +12,7 @@ namespace Halley {
     
     class SerializationDictionary : public ISerializationDictionary {
     public:
-        SerializationDictionary();
+        SerializationDictionary() = default;
         SerializationDictionary(const ConfigNode& config);
         
         std::optional<size_t> stringToIndex(std::string_view string) override;
@@ -28,7 +28,7 @@ namespace Halley {
     
     private:
         Vector<String> strings;
-        HashMap<String, int> indices;
+        HashMap<uint64_t, int> indices;
     	
         HashMap<String, int> missing;
         bool logMissingStrings = false;
