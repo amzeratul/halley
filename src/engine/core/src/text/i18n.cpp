@@ -71,22 +71,24 @@ void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool 
 	// Make sure this is index 0
 	getLanguageData(fallbackLanguage.value_or(currentLanguage));
 
-	for (auto& language: root.asMap()) {
-		auto langCode = I18NLanguage(language.first);
-		auto& lang = getLanguageData(langCode);
-		for (auto& e: language.second.asMap()) {
-			if (e.first == "null") {
-				Logger::logWarning("null key found on localisation file " + assetId);
-				continue;
-			}
-
-			if (!allowUpdating) {
-				if (const auto iter = lang.strings.find(e.first); iter != lang.strings.end()) {
-					Logger::logError("Duplicated localisation key \"" + e.first + "\": Previously set to \"" + iter->second + "\", now \"" + e.second.asString() + "\" in " + assetId);
+	if (root.getType() == ConfigNodeType::Map) {
+		for (auto& language: root.asMap()) {
+			auto langCode = I18NLanguage(language.first);
+			auto& lang = getLanguageData(langCode);
+			for (auto& e: language.second.asMap()) {
+				if (e.first == "null") {
+					Logger::logWarning("null key found on localisation file " + assetId);
 					continue;
 				}
+
+				if (!allowUpdating) {
+					if (const auto iter = lang.strings.find(e.first); iter != lang.strings.end()) {
+						Logger::logError("Duplicated localisation key \"" + e.first + "\": Previously set to \"" + iter->second + "\", now \"" + e.second.asString() + "\" in " + assetId);
+						continue;
+					}
+				}
+				lang.strings[e.first] = e.second.asString();
 			}
-			lang.strings[e.first] = e.second.asString();
 		}
 	}
 	++version;
