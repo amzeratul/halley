@@ -74,7 +74,7 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 	result.setFlag(EntityData::Flag::Disabled, !entity.isEnabled());
 	result.setInstanceUUID(entity.getInstanceUUID());
 	result.setPrefabUUID(entity.getPrefabUUID());
-	const auto& prefabId = entity.getPrefabAssetId().value_or("");
+	const auto& prefabId = entity.getPrefabAssetId().value_or(String::emptyString());
 	if (prefabId != lastPrefab) {
 		result.setPrefab(prefabId);
 	}
@@ -139,6 +139,51 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 	}
 	//Logger::logInfo("Entity " + entityData.getName() + " has no prefab or prefab data associated with it.");
 	return EntityDataDelta(entityData, deltaOptions);
+}
+
+uint64_t EntityFactory::hashEntity(EntityRef entity, const SerializationOptions& options)
+{
+	Hash::Hasher hasher;
+	doHashEntity(hasher, entity, options);
+	return hasher.digest();
+}
+
+void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options)
+{
+	// Properties
+	hasher.feed(entity.getName());
+	hasher.feed(entity.isSelectable());
+	hasher.feed(entity.isSerializable());
+	hasher.feed(entity.isEnabled());
+	hasher.feedBytes(entity.getInstanceUUID().getBytes());
+	hasher.feedBytes(entity.getPrefabUUID().getBytes());
+	hasher.feed(entity.getPrefabAssetId().value_or(String::emptyString()));
+
+	// Components
+	const auto serializeContext = EntityFactoryContext(world, resources, EntitySerialization::makeMask(options.type), false);
+
+	const auto ids = entity.getComponentIds();
+	const auto ptrs = entity.getComponentPtrs();
+	for (size_t i = 0; i < ids.size(); ++i) {
+		const auto& componentId = ids[i];
+		const auto& component = ptrs[i];
+		const auto& reflector = world.getReflection().getComponentReflector(componentId);
+
+		hasher.feed(std::string_view(reflector.getName()));
+		reflector.hash(hasher, serializeContext.getEntitySerializationContext(), *component);
+	}
+
+	// Children
+	for (const auto& child: entity.getChildren()) {
+		if (child.isSerializable()) {
+			if (options.serializeAsStub && options.serializeAsStub(child)) {
+				// Store just a stub
+				hasher.feedBytes(child.getInstanceUUID().getBytes());
+			} else {
+				doHashEntity(hasher, child, options);
+			}
+		}
+	}
 }
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const

@@ -34,6 +34,8 @@ namespace Halley {
 		virtual ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName, bool evenIfDisabled, bool logError) const = 0;
     	virtual void deserializeField(const EntitySerializationContext& context, Component& component, std::string_view fieldName, const ConfigNode& data) const = 0;
     	virtual void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, bool evenIfDisabled, const ConfigNode& data) const = 0;
+		
+		virtual void hash(Hash::Hasher& hasher, const EntitySerializationContext& context, const Component& component) const = 0;
 
 		virtual Component* tryGetComponent(EntityRef entity, bool evenIfDisabled) const = 0;
 		virtual const Component* tryGetComponent(ConstEntityRef entity, bool evenIfDisabled) const = 0;
