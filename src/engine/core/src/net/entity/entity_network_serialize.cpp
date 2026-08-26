@@ -92,14 +92,17 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
     }
 }
 
-void EntityNetworkChanges::serializeEntityHeader(Serializer& serializer, const EntityRef& entity)
+static void serializeEntityHeader(Serializer& serializer, const EntityRef& entity)
 {
-    serializer << entity.getInstanceUUID();
+    entity.getInstanceUUID().serialize(serializer);
 
     uint8_t flags = 0;
     if (!entity.isSelectable()) flags |= static_cast<uint8_t>(EntityData::Flag::NotSelectable);
-    if (!entity.isSerializable()) flags |= static_cast<uint8_t>(EntityData::Flag::NotSerializable);
     if (!entity.isEnabled()) flags |= static_cast<uint8_t>(EntityData::Flag::Disabled);
+
+    if (!entity.isSerializable()) [[unlikely]] {
+        flags |= static_cast<uint8_t>(EntityData::Flag::NotSerializable);
+    }
 
     serializer << flags;
 }
@@ -460,7 +463,7 @@ void EntityNetworkSerialize::doSerializeEntityHash(
 
     // Need to include some entity data/flags for computing the hash, to not miss any changes.
     // TODO: ignores entity "identity" fields right now, check if this is needed
-    EntityNetworkChanges::serializeEntityHeader(serializer, entity);
+    serializeEntityHeader(serializer, entity);
 
     // Mirrors code in doSerializeEntityUpdate(), see comments below.
     const bool canSerializeNetworkComponent = session->isHost();

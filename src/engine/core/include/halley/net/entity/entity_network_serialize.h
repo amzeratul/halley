@@ -45,7 +45,6 @@ namespace Halley {
 
         explicit EntityNetworkChanges() = default;
 
-        static void serializeEntityHeader(Serializer& serializer, const EntityRef& entity);
         void pushEntity(Serializer& serializer, const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, Bytes& buffer);
 
         void beginComponent(Serializer& serializer, uint16_t componentId);
