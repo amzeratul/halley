@@ -291,6 +291,8 @@ void DX12Texture::doLoad(TextureDescriptor& descriptor)
 
 void DX12Texture::clearTexture()
 {
+    video.removeRecreateTexture(this);
+    
     if (resource) {
         video.addReleaseResource(resource);
         resource.Reset();

@@ -1127,11 +1127,21 @@ void DX12Video::registerFrameEvents()
 
 void DX12Video::addRecreateTexture(DX12Texture* texture)
 {
+    UniqueLock lock(deferredResourceLock);
     deferRecreateTextures.emplace_back(texture);
+}
+
+void DX12Video::removeRecreateTexture(DX12Texture* texture)
+{
+    UniqueLock lock(deferredResourceLock);
+    deferRecreateTextures.erase(
+        std::ranges::remove(deferRecreateTextures, texture).begin(),
+        deferRecreateTextures.end());
 }
 
 void DX12Video::addReleaseResource(ComPtr<ID3D12Resource>& resource)
 {
+    UniqueLock lock(deferredResourceLock);
     deferReleaseResources.emplace_back(std::make_pair(numFrames + 1, resource));
 }
 
@@ -1140,32 +1150,28 @@ void DX12Video::doDeferredResourceUpdates(bool immediate)
     /*
      * Trigger recreation of texture resources (most likely, render targets).
      */
-    if (!deferRecreateTextures.empty()) {
-        waitForGpu();
-        for (auto texture : deferRecreateTextures) {
-            texture->doCreateDeferred();
-        }
+    Vector<DX12Texture*> recreate;
+    Vector<ComPtr<ID3D12Resource>> toRelease;
+    {
+        UniqueLock lock(deferredResourceLock);
+        recreate = std::move(deferRecreateTextures);
         deferRecreateTextures.clear();
-        incrementResourceVersionIndex();
-    }
+        
+        /*
+         * Release resource buffers of deleted DX12Textures.
+         *
+         * TODO: Invalidates the texture view cache, which does hurt performance.
+         */
+        const int step = immediate ? 1000 : 1;
 
-    /*
-     * Release resource buffers of deleted DX12Textures.
-     *
-     * TODO: Invalidates the texture view cache, which does hurt performance.
-     */
-    size_t count = 0;
-    const int step = immediate ? 1000 : 1;
-
-    for (auto& it: deferReleaseResources) {
-   		it.first -= step;
-        if (it.first <= 0) {
-            it.second.Reset();
-            count++;
+        for (auto& it: deferReleaseResources) {
+   		    it.first -= step;
+            if (it.first <= 0) {
+                toRelease.push_back(std::move(it.second));
+            }
         }
-    }
 
-    deferReleaseResources.erase(
+        deferReleaseResources.erase(
             std::remove_if(
                     deferReleaseResources.begin(),
                     deferReleaseResources.end(),
@@ -1173,10 +1179,20 @@ void DX12Video::doDeferredResourceUpdates(bool immediate)
                         return it.first <= 0;
                     }),
             deferReleaseResources.end());
+    }
 
-    if (count > 0) {
-        //Logger::logDev(toString(count) + " resources have been released, invalidating cache!");
+    if (!recreate.empty())
+    {
         waitForGpu();
+        for (auto texutre : recreate) {
+            texutre->doCreateDeferred();
+        }
+        incrementResourceVersionIndex();
+    }
+    
+    if (!toRelease.empty()) {
+        toRelease.clear();
+        waitForGpu(); 
         incrementResourceVersionIndex();
     }
 

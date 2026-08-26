@@ -79,6 +79,7 @@ namespace Halley {
         void finishUpload();
 
         void addRecreateTexture(DX12Texture* texture);
+        void removeRecreateTexture(DX12Texture* texture);
         void addReleaseResource(ComPtr<ID3D12Resource>& resource);
 
         uint64_t getResourceVersionIndex() const { return resourceVersionIndex; }
@@ -108,6 +109,7 @@ namespace Halley {
         ComPtr<ID3D12GraphicsCommandList> commandList;
 
         Mutex commandQueueLock;
+        Mutex deferredResourceLock;
 
         std::unique_ptr<DX12DescriptorPool> srvPool;
         std::unique_ptr<DX12DescriptorPool> samPool;
