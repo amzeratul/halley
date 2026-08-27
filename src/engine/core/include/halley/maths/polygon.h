@@ -183,5 +183,6 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const Polygon& polygon, const EntitySerializationContext&);
 		Polygon deserialize(const EntitySerializationContext&, const ConfigNode& node);
+		void hash(const Polygon& polygon, Hash::Hasher& hasher);
 	};
 }

@@ -13,6 +13,7 @@ namespace Halley {
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+		void feedToHasher(Hash::Hasher& hasher) const;
 
 		void serialize(Serializer& s, const EntitySerializationContext& context) const;
 		void deserialize(Deserializer& s, const EntitySerializationContext& context);
@@ -35,6 +36,7 @@ namespace Halley {
 		ConfigNode serialize(const ScriptVariables& variables, const EntitySerializationContext& context);
 		ScriptVariables deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptVariables& target);
+		void hash(const ScriptVariables& variables, Hash::Hasher& hasher);
     };
 
     template <typename T>

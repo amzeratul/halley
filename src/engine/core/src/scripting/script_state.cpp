@@ -36,6 +36,13 @@ String ScriptStateThread::StackFrame::toString() const
 	return Halley::toString(node) + ":" + Halley::toString(static_cast<int>(outputPin)) + "->" + Halley::toString(static_cast<int>(inputPin));
 }
 
+void ScriptStateThread::StackFrame::feedToHasher(Hash::Hasher& hasher) const
+{
+	hasher.feed(node);
+	hasher.feed(outputPin);
+	hasher.feed(inputPin);
+}
+
 bool ScriptStateThread::StackFrame::operator==(const StackFrame& other) const
 {
 	return node == other.node && outputPin == other.outputPin;
@@ -102,6 +109,14 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 	}
 
 	return node;
+}
+
+void ScriptStateThread::feedToHasher(Hash::Hasher& hasher) const
+{
+	ConfigNodeHelper<decltype(stack)>::hash(stack, hasher);
+	ConfigNodeHelper<decltype(curNode)>::hash(curNode, hasher);
+	hasher.feed(curInputPin);
+	hasher.feed(timeSlice);
 }
 
 void ScriptStateThread::merge(const ScriptStateThread& other)
@@ -276,6 +291,17 @@ ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext
 	return result;
 }
 
+void ScriptState::NodeState::feedToHasher(Hash::Hasher& hasher) const
+{
+	hasher.feed(threadCount);
+	hasher.feed(watcherCount);
+	if (hasPendingData) {
+		pendingData->feedToHash(hasher);
+	} else if (data) {
+		data->toConfigNode({}).feedToHash(hasher);
+	}
+}
+
 void ScriptState::NodeState::releaseData()
 {
 	if (hasPendingData) {
@@ -378,7 +404,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	if (!sharedVars.empty()) {
 		node["sharedVars"] = ConfigNodeSerializer<decltype(sharedVars)>().serialize(sharedVars, context);
 	}
-	auto scriptName = getScriptGraphPtr() ? getScriptGraphPtr()->getAssetId() : "";
+	const auto& scriptName = getScriptGraphPtr() ? getScriptGraphPtr()->getAssetId() : String::emptyString();
 	if (!scriptName.isEmpty()) {
 		node["script"] = std::move(scriptName);
 	}
@@ -393,6 +419,22 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	}
 
 	return node;
+}
+
+void ScriptState::feedToHasher(Hash::Hasher& hasher) const
+{
+	const auto& scriptName = getScriptGraphPtr() ? getScriptGraphPtr()->getAssetId() : String::emptyString();
+	hasher.feed(scriptName);
+	hasher.feed(started);
+	hasher.feed(graphHash);
+	hasher.feed(frameNumber);
+	hasher.feed(persistAfterDone);
+	ConfigNodeHelper<decltype(threads)>::hash(threads, hasher);
+	ConfigNodeHelper<decltype(nodeState)>::hash(nodeState, hasher);
+	ConfigNodeHelper<decltype(localVars)>::hash(localVars, hasher);
+	ConfigNodeHelper<decltype(sharedVars)>::hash(sharedVars, hasher);
+	ConfigNodeHelper<decltype(tags)>::hash(tags, hasher);
+	ConfigNodeHelper<decltype(startParams)>::hash(startParams, hasher);
 }
 
 void ScriptState::serialize(Serializer& s, const EntitySerializationContext& context) const
@@ -722,6 +764,11 @@ void ConfigNodeSerializer<ScriptState>::deserialize(const EntitySerializationCon
 	target.load(node, context);
 }
 
+void ConfigNodeSerializer<ScriptState>::hash(const ScriptState& state, Hash::Hasher& hasher)
+{
+	state.feedToHasher(hasher);
+}
+
 ConfigNode ConfigNodeSerializer<ScriptStateThread>::serialize(const ScriptStateThread& thread, const EntitySerializationContext& context)
 {
 	return thread.toConfigNode(context);
@@ -732,6 +779,11 @@ ScriptStateThread ConfigNodeSerializer<ScriptStateThread>::deserialize(const Ent
 	return ScriptStateThread(node, context);
 }
 
+void ConfigNodeSerializer<ScriptStateThread>::hash(const ScriptStateThread& thread, Hash::Hasher& hasher)
+{
+	thread.feedToHasher(hasher);
+}
+
 ConfigNode ConfigNodeSerializer<ScriptState::NodeState>::serialize(const ScriptState::NodeState& state, const EntitySerializationContext& context)
 {
 	return state.toConfigNode(context);
@@ -740,4 +792,9 @@ ConfigNode ConfigNodeSerializer<ScriptState::NodeState>::serialize(const ScriptS
 ScriptState::NodeState ConfigNodeSerializer<ScriptState::NodeState>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return ScriptState::NodeState(node, context);
+}
+
+void ConfigNodeSerializer<ScriptState::NodeState>::hash(const ScriptState::NodeState& state, Hash::Hasher& hasher)
+{
+	state.feedToHasher(hasher);
 }

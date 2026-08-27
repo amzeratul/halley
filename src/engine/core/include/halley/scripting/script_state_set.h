@@ -69,6 +69,7 @@ namespace Halley {
 
         void load(const ConfigNode& node, const EntitySerializationContext& context);
         ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+        void feedToHasher(Hash::Hasher& hasher) const;
 
         void serialize(Serializer& s, const EntitySerializationContext& context) const;
         void deserialize(Deserializer& s, const EntitySerializationContext& context);
@@ -93,6 +94,8 @@ namespace Halley {
             std::shared_ptr<ScriptState> state;
             bool present = true;
             bool dead = false;
+
+			void feedToHasher(Hash::Hasher& hasher) const;
         };
         Vector<State> states;
         int64_t curId = 0;
@@ -109,6 +112,7 @@ namespace Halley {
 		ConfigNode serialize(const ScriptStateSet& stateSet, const EntitySerializationContext& context);
 		ScriptStateSet deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptStateSet& target);
+        void hash(const ScriptStateSet& stateSet, Hash::Hasher& hasher);
 	};
 
     template <typename T>

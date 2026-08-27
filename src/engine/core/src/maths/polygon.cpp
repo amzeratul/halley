@@ -32,6 +32,7 @@
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/bytes/config_node_serializer.h"
 #include "halley/maths/random.h"
 #include "halley/maths/triangle.h"
 using namespace Halley;
@@ -1611,4 +1612,9 @@ ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, cons
 Polygon ConfigNodeSerializer<Polygon>::deserialize(const EntitySerializationContext&, const ConfigNode& node) 
 {
 	return Polygon(node);
+}
+
+void ConfigNodeSerializer<Polygon>::hash(const Polygon& polygon, Hash::Hasher& hasher)
+{
+	ConfigNodeHelper<VertexList>::hash(polygon.getVertices(), hasher);
 }

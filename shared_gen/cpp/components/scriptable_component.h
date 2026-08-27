@@ -1,4 +1,4 @@
-// Halley codegen version 146
+// Halley codegen version 147
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -61,11 +61,10 @@ public:
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(activeStates)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, activeStates, _context, "activeStates");
-		Halley::EntityConfigNodeSerializer<decltype(tags)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, tags, _context, "tags");
-		Halley::EntityConfigNodeSerializer<decltype(scripts)>::hash<makeMask(Type::Prefab)>(_hasher, scripts, _context, "scripts");
+		Halley::EntityConfigNodeSerializer<decltype(tags)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, tags, _context, "tags");
 		Halley::EntityConfigNodeSerializer<decltype(variables)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, variables, _context, "variables");
-		Halley::EntityConfigNodeSerializer<decltype(entityReferences)>::hash<makeMask(Type::Prefab, Type::Dynamic)>(_hasher, entityReferences, _context, "entityReferences");
-		Halley::EntityConfigNodeSerializer<decltype(entityParams)>::hash<makeMask(Type::Prefab, Type::Dynamic)>(_hasher, entityParams, _context, "entityParams");
+		Halley::EntityConfigNodeSerializer<decltype(entityReferences)>::hash<makeMask(Type::Dynamic)>(_hasher, entityReferences, _context, "entityReferences");
+		Halley::EntityConfigNodeSerializer<decltype(entityParams)>::hash<makeMask(Type::Dynamic)>(_hasher, entityParams, _context, "entityParams");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

@@ -591,7 +591,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, const EntitySerializationContext& context)
 {
 	ConfigNode result = ConfigNode::MapType();
-	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : "";
+	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : String::emptyString();
 	result["sequence"] = player.getCurrentSequenceName();
 	result["direction"] = player.getCurrentDirectionName();
 	if (player.isApplyingPivot() != true) {
@@ -620,4 +620,14 @@ AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const EntityS
 	player.setPlaybackSpeed(node["playbackSpeed"].asFloat(1.0f));
 	player.setApplyMaterial(node["applyMaterial"].asBool(true));
 	return player;
+}
+
+void ConfigNodeSerializer<AnimationPlayer>::hash(const AnimationPlayer& player, Hash::Hasher& hasher)
+{
+	hasher.feed(player.hasAnimation() ? player.getAnimation().getAssetId() : String::emptyString());
+	hasher.feed(player.getCurrentSequenceId());
+	hasher.feed(player.getCurrentDirectionId());
+	hasher.feed(player.isApplyingPivot());
+	hasher.feed(player.getPlaybackSpeed());
+	hasher.feed(player.isApplyingMaterial());
 }

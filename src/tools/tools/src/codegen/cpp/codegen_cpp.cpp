@@ -226,23 +226,32 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			}
 			
 			Vector<String> serializationTypes;
+			Vector<String> hashSerializationTypes;
 			for (auto t: member.serializationTypes) {
 				serializationTypes.push_back("Type::" + toString(t));
+				if (t != EntitySerialization::Type::Prefab) {
+					hashSerializationTypes.push_back("Type::" + toString(t));
+				}
 			}
 			String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";
+			std::optional<String> hashMask = hashSerializationTypes.empty() ? std::nullopt : std::optional("makeMask(" + String::concatList(hashSerializationTypes, ", ") + ")");
 			
 			if (first) {
 				first = false;
 			} else {
 				serializeBody += lineBreak;
 				deserializeBody += lineBreak;
-				hashBody += lineBreak;
+				if (hashMask) {
+					hashBody += lineBreak;
+				}
 				sanitizeBody += lineBreak;
 			}
 
 			serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
 			deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
-			hashBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::hash<" + mask + ">(_hasher, " + member.name + ", _context, \"" + member.name + "\");";
+			if (hashMask) {
+				hashBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::hash<" + *hashMask + ">(_hasher, " + member.name + ", _context, \"" + member.name + "\");";
+			}
 			sanitizeBody += "if ((_mask & " + mask + ") == 0) _node.removeKey(\"" + member.name + "\");";
 		}
 	}

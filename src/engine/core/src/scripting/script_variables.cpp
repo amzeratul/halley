@@ -65,6 +65,11 @@ ConfigNode ScriptVariables::toConfigNode(const EntitySerializationContext& conte
 	return result;
 }
 
+void ScriptVariables::feedToHasher(Hash::Hasher& hasher) const
+{
+	ConfigNodeHelper<decltype(variables)>::hash(variables, hasher);
+}
+
 void ScriptVariables::serialize(Serializer& s, const EntitySerializationContext& context) const
 {
 	for (const auto& [k, v]: variables) {
@@ -154,6 +159,11 @@ ScriptVariables ConfigNodeSerializer<ScriptVariables>::deserialize(const EntityS
 void ConfigNodeSerializer<ScriptVariables>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptVariables& target)
 {
 	target.load(node, context);
+}
+
+void ConfigNodeSerializer<ScriptVariables>::hash(const ScriptVariables& variables, Hash::Hasher& hasher)
+{
+	variables.feedToHasher(hasher);
 }
 
 void ByteSerializationHelper<ScriptVariables>::serialize(const ScriptVariables& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)

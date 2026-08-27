@@ -1,4 +1,4 @@
-// Halley codegen version 146
+// Halley codegen version 147
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -50,9 +50,8 @@ public:
 
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, referenceDistance, _context, "referenceDistance");
+		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, referenceDistance, _context, "referenceDistance");
 		Halley::EntityConfigNodeSerializer<decltype(lastPos)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, lastPos, _context, "lastPos");
-		Halley::EntityConfigNodeSerializer<decltype(speedOfSound)>::hash<makeMask(Type::Prefab)>(_hasher, speedOfSound, _context, "speedOfSound");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

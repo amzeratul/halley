@@ -151,5 +151,6 @@ namespace Halley
 	public:
 		ConfigNode serialize(const AnimationPlayer& player, const EntitySerializationContext& context);
 		AnimationPlayer deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void hash(const AnimationPlayer& player, Hash::Hasher& hasher);
 	};
 }

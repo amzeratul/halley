@@ -45,6 +45,7 @@ namespace Halley {
 			StackFrame(GraphNodeId node, GraphPinId outputPin, GraphPinId inputPin);
 			ConfigNode toConfigNode() const;
 			String toString() const;
+			void feedToHasher(Hash::Hasher& hasher) const;
 
 			bool operator==(const StackFrame& other) const;
 			bool operator!=(const StackFrame& other) const;
@@ -57,6 +58,7 @@ namespace Halley {
 		ScriptStateThread(ScriptStateThread&& other) = default;
 		
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+		void feedToHasher(Hash::Hasher& hasher) const;
 
 		ScriptStateThread& operator=(const ScriptStateThread& other) = default;
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
@@ -140,6 +142,7 @@ namespace Halley {
 			NodeState& operator=(NodeState&& other);
 
 			ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+			void feedToHasher(Hash::Hasher& hasher) const;
 
 			void releaseData();
 		};
@@ -164,6 +167,7 @@ namespace Halley {
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+        void feedToHasher(Hash::Hasher& hasher) const;
 
 	    void serialize(Serializer& s, const EntitySerializationContext& context) const;
     	void deserialize(Deserializer& s, const EntitySerializationContext& context);
@@ -264,6 +268,7 @@ namespace Halley {
 		ConfigNode serialize(const ScriptState& state, const EntitySerializationContext& context);
 		ScriptState deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptState& target);
+		void hash(const ScriptState& state, Hash::Hasher& hasher);
 	};
 	
 	template<>
@@ -271,6 +276,7 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ScriptStateThread& thread, const EntitySerializationContext& context);
 		ScriptStateThread deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void hash(const ScriptStateThread& thread, Hash::Hasher& hasher);
 	};
 	
 	template<>
@@ -278,6 +284,7 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ScriptState::NodeState& state, const EntitySerializationContext& context);
 		ScriptState::NodeState deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void hash(const ScriptState::NodeState& state, Hash::Hasher& hasher);
 	};
 
 }

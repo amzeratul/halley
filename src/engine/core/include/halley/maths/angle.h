@@ -38,7 +38,7 @@ namespace Halley {
 		// Constructors
 		constexpr Angle() noexcept = default;
 		explicit constexpr Angle(T radians) : value(radians) {}
-		constexpr Angle(const Angle &angle) noexcept = default;
+		constexpr Angle(const Angle& angle) noexcept = default;
 
 		// Comparison
 		[[nodiscard]] constexpr bool operator== (const Angle &param) const { return value == param.value; }

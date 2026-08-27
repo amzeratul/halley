@@ -1,4 +1,4 @@
-// Halley codegen version 146
+// Halley codegen version 147
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -57,11 +57,11 @@ public:
 
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(zoom)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, zoom, _context, "zoom");
-		Halley::EntityConfigNodeSerializer<decltype(id)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, id, _context, "id");
-		Halley::EntityConfigNodeSerializer<decltype(uiOffsets)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, uiOffsets, _context, "uiOffsets");
-		Halley::EntityConfigNodeSerializer<decltype(worldOffsets)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, worldOffsets, _context, "worldOffsets");
-		Halley::EntityConfigNodeSerializer<decltype(integerCoords)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, integerCoords, _context, "integerCoords");
+		Halley::EntityConfigNodeSerializer<decltype(zoom)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, zoom, _context, "zoom");
+		Halley::EntityConfigNodeSerializer<decltype(id)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, id, _context, "id");
+		Halley::EntityConfigNodeSerializer<decltype(uiOffsets)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, uiOffsets, _context, "uiOffsets");
+		Halley::EntityConfigNodeSerializer<decltype(worldOffsets)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, worldOffsets, _context, "worldOffsets");
+		Halley::EntityConfigNodeSerializer<decltype(integerCoords)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, integerCoords, _context, "integerCoords");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

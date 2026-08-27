@@ -1,4 +1,4 @@
-// Halley codegen version 146
+// Halley codegen version 147
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -57,8 +57,7 @@ public:
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::hash<makeMask(Type::Network)>(_hasher, authorityId, _context, "authorityId");
-		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)>(_hasher, alwaysSend, _context, "alwaysSend");
-		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::hash<makeMask(Type::Prefab)>(_hasher, requiresEntityFrameModified, _context, "requiresEntityFrameModified");
+		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::hash<makeMask(Type::SaveData, Type::Dynamic)>(_hasher, alwaysSend, _context, "alwaysSend");
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::hash<makeMask(Type::Network)>(_hasher, locks, _context, "locks");
 	}
 

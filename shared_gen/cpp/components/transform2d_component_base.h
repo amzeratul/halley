@@ -1,4 +1,4 @@
-// Halley codegen version 146
+// Halley codegen version 147
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -55,12 +55,12 @@ public:
 
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(position)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, position, _context, "position");
-		Halley::EntityConfigNodeSerializer<decltype(scale)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, scale, _context, "scale");
-		Halley::EntityConfigNodeSerializer<decltype(rotation)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, rotation, _context, "rotation");
-		Halley::EntityConfigNodeSerializer<decltype(height)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, height, _context, "height");
-		Halley::EntityConfigNodeSerializer<decltype(fixedHeight)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, fixedHeight, _context, "fixedHeight");
-		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, subWorld, _context, "subWorld");
+		Halley::EntityConfigNodeSerializer<decltype(position)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, position, _context, "position");
+		Halley::EntityConfigNodeSerializer<decltype(scale)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, scale, _context, "scale");
+		Halley::EntityConfigNodeSerializer<decltype(rotation)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, rotation, _context, "rotation");
+		Halley::EntityConfigNodeSerializer<decltype(height)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, height, _context, "height");
+		Halley::EntityConfigNodeSerializer<decltype(fixedHeight)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, fixedHeight, _context, "fixedHeight");
+		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, subWorld, _context, "subWorld");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

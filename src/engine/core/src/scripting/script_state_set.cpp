@@ -103,6 +103,13 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 	return result;
 }
 
+void ScriptStateSet::feedToHasher(Hash::Hasher& hasher) const
+{
+	for (const auto& state: states) {
+		state.feedToHasher(hasher);
+	}
+}
+
 void ScriptStateSet::serialize(Serializer& s, const EntitySerializationContext& context) const
 {
 	if (s.getOptions().toHash) {
@@ -206,6 +213,16 @@ const std::shared_ptr<ScriptState>& ScriptStateSet::getState(size_t idx) const
 }
 
 
+void ScriptStateSet::State::feedToHasher(Hash::Hasher& hasher) const
+{
+	hasher.feed(id);
+	hasher.feed(present);
+	hasher.feed(dead);
+	if (state) {
+		state->feedToHasher(hasher);
+	}
+}
+
 ScriptStateSet::State& ScriptStateSet::getStateData(int64_t id)
 {
 	for (auto& state: states) {
@@ -246,6 +263,11 @@ ScriptStateSet ConfigNodeSerializer<ScriptStateSet>::deserialize(const EntitySer
 void ConfigNodeSerializer<ScriptStateSet>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptStateSet& target)
 {
 	target.load(node, context);
+}
+
+void ConfigNodeSerializer<ScriptStateSet>::hash(const ScriptStateSet& stateSet, Hash::Hasher& hasher)
+{
+	stateSet.feedToHasher(hasher);
 }
 
 void ByteSerializationHelper<ScriptStateSet>::serialize(const ScriptStateSet& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
