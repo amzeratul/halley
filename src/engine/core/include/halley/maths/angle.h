@@ -36,9 +36,9 @@ namespace Halley {
 	class Angle {
 	public:
 		// Constructors
-		constexpr Angle() : value(0) {}
+		constexpr Angle() noexcept = default;
 		explicit constexpr Angle(T radians) : value(radians) {}
-		constexpr Angle(const Angle &angle) : value(angle.value) {}
+		constexpr Angle(const Angle &angle) noexcept = default;
 
 		// Comparison
 		[[nodiscard]] constexpr bool operator== (const Angle &param) const { return value == param.value; }
@@ -153,7 +153,7 @@ namespace Halley {
 
 	private:
 		// Angle value in radians
-		T value;
+		T value = 0;
 
 		constexpr void limit()
 		{
