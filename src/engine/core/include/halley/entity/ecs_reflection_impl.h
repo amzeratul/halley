@@ -29,6 +29,12 @@ namespace Halley {
 			return result;
 		}
 
+		void hash(Hash::Hasher& hasher, const EntitySerializationContext& context, const Component& component) const override
+		{
+			//static_cast<const T&>(component).hash(hasher, context);
+			serialize(context, component).feedToHash(hasher);
+		}
+
 		CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) const override
 		{
 			return context.createComponent<T>(e, node);

@@ -2264,12 +2264,15 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		hasher.feed(vec2fData);
 		break;
 	case ConfigNodeType::Sequence:
+	case ConfigNodeType::DeltaSequence:
 		hasher.feed(asSequence().size());
 		for (const auto& e: asSequence()) {
 			e.feedToHash(hasher);
 		}
 		break;
 	case ConfigNodeType::Map:
+	case ConfigNodeType::DeltaMap:
+	case ConfigNodeType::MapRef:
 		for (const auto& [k, v]: asMap()) {
 			if (v.getType() != ConfigNodeType::Undefined) {
 				hasher.feed(k);
@@ -2289,7 +2292,12 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 	case ConfigNodeType::Reference:
 		dereference().feedToHash(hasher);
 		break;
+	case ConfigNodeType::Idx:
+		hasher.feed(vec2iData);
+		break;
 	case ConfigNodeType::Undefined:
+	case ConfigNodeType::Noop:
+	case ConfigNodeType::Del:
 		break;
 	default:
 		throw Exception("Unable to type " + toString(type) + " to hash in ConfigNode", HalleyExceptions::Utils);
