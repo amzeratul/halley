@@ -39,6 +39,7 @@ namespace Halley {
 
 		void setOption(std::string_view name, ConfigNode value);
 		ConfigNode getOption(std::string_view name) const;
+		bool hasOption(std::string_view name) const;
 
 		void setDevValue(std::string_view name, float value);
 		float getDevValue(std::string_view name, float defaultValue) const;
@@ -56,6 +57,7 @@ namespace Halley {
 		void setKeyboardLayout(String layout);
 		I18NLanguage getLanguage() const;
 		void setLanguage(I18NLanguage language);
+		bool isLanguageSet() const;
 
 		Vector2i getResolution(bool fullscreen) const;
 		void setResolution(bool fullscreen, Vector2i resolution);

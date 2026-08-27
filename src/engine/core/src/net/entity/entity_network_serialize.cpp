@@ -422,9 +422,11 @@ uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, co
     }
 
     // Use hashing serializer, no dictionary.
+    // NB: There doesn't seem much difference, and maybe even a performance loss, by using the
+    // dictionary here. My guess is that, since both variants are now using the same XXH3 code to
+    // compute string hashes, the additional dictionary lookup is kind of counterproductive.
     SerializerOptions opt(options.version);
     opt.toHash = true;
-    opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
     Serializer serializer(opt);

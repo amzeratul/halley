@@ -80,6 +80,11 @@ ConfigNode Options::getOption(std::string_view name) const
 	return ConfigNode(options[name]);
 }
 
+bool Options::hasOption(std::string_view name) const
+{
+	return options.hasKey(name);
+}
+
 void Options::setDevValue(std::string_view name, float value)
 {
 	options["devValues"][name] = value;
@@ -258,6 +263,11 @@ void Options::setKeyboardLayout(String layout)
 I18NLanguage Options::getLanguage() const
 {
 	return I18NLanguage(getOption("language").asString("en-GB"));
+}
+
+bool Options::isLanguageSet() const
+{
+	return hasOption("language");
 }
 
 void Options::setLanguage(I18NLanguage languageCode)

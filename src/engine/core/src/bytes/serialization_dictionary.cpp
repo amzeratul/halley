@@ -4,10 +4,6 @@
 
 using namespace Halley;
 
-SerializationDictionary::SerializationDictionary()
-{
-}
-
 SerializationDictionary::SerializationDictionary(const ConfigNode& config)
 {
 	size_t idx = 0;
@@ -26,7 +22,8 @@ SerializationDictionary::SerializationDictionary(const ConfigNode& config)
 
 std::optional<size_t> SerializationDictionary::stringToIndex(std::string_view string)
 {
-	if (auto iter = indices.find(string); iter == indices.end()) {
+	const uint64_t hash = Hash::hash(string);
+	if (const auto iter = indices.find(hash); iter == indices.end()) {
 		return {};
 	} else {
 		return iter->second;
@@ -45,10 +42,11 @@ void SerializationDictionary::addEntry(String str)
 
 void SerializationDictionary::addEntry(size_t idx, String str)
 {
-	if (indices.find(str) != indices.end()) {
+	const uint64_t hash = Hash::hash(str);
+	if (indices.find(hash) != indices.end()) {
 		throw Exception("Duplicated string in serialization dictionary: " + str, 0);
 	}
-	indices[str] = static_cast<int>(idx);
+	indices[hash] = static_cast<int>(idx);
 	
 	if (idx == strings.size()) {
 		strings.push_back(std::move(str));

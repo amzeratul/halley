@@ -971,9 +971,11 @@ namespace Halley {
 		void resize_down(size_type newSize)
 		{
 			HalleyAssertDebug(newSize <= st_size());
-			auto* d = data();
-			for (size_type i = newSize; i < st_size(); ++i) {
-				std::allocator_traits<Allocator>::destroy(as_allocator(), d + i);
+			if constexpr (!std::is_trivially_destructible_v<T>) {
+				auto* d = data();
+				for (size_type i = newSize; i < st_size(); ++i) {
+					std::allocator_traits<Allocator>::destroy(as_allocator(), d + i);
+				}
 			}
 			set_size(newSize);
 		}
