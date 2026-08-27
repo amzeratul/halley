@@ -169,3 +169,8 @@ void ConfigNodeSerializer<LuaExpression>::deserialize(const EntitySerializationC
 {
 	target.setExpression(node.asString(""));
 }
+
+void ConfigNodeSerializer<LuaExpression>::hash(const LuaExpression& expression, Hash::Hasher& hasher)
+{
+	hasher.feed(expression.getExpression());
+}

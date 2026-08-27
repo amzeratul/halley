@@ -145,6 +145,7 @@ namespace Halley {
 		ConfigNode serialize(const LuaExpression& expression, const EntitySerializationContext& context);
 		LuaExpression deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, LuaExpression& target);
+		void hash(const LuaExpression& expression, Hash::Hasher& hasher);
 	};
 
 }
