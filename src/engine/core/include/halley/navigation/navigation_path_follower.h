@@ -12,6 +12,7 @@ namespace Halley {
 		explicit NavigationPathFollower(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
+		void feedToHasher(Hash::Hasher& hasher) const;
 
 		void setComputingPath();
 		void clear();
@@ -53,5 +54,6 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const NavigationPathFollower& follower, const EntitySerializationContext& context);
 		NavigationPathFollower deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void hash(const NavigationPathFollower& follower, Hash::Hasher& hasher);
 	};
 }

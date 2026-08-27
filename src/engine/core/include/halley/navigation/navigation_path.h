@@ -26,6 +26,7 @@ namespace Halley {
 		explicit NavigationPath(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
+		void feedToHasher(Hash::Hasher& hasher) const;
 
 		bool operator==(const NavigationPath& other) const;
 		bool operator!=(const NavigationPath& other) const;
@@ -41,5 +42,6 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const NavigationPath& path, const EntitySerializationContext& context);
 		NavigationPath deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void hash(const NavigationPath& path, Hash::Hasher& hasher);
 	};
 }

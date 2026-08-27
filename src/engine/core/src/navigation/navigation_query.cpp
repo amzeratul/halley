@@ -1,4 +1,6 @@
 #include "halley/navigation/navigation_query.h"
+
+#include "halley/bytes/config_node_serializer.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/vector2.h"
 
@@ -43,6 +45,14 @@ ConfigNode NavigationQuery::toConfigNode() const
 	result["quantizationType"] = Halley::toString(quantizationType);
 	
 	return result;
+}
+
+void NavigationQuery::feedToHasher(Hash::Hasher& hasher) const
+{
+	ConfigNodeHelper<decltype(from)>::hash(from, hasher);
+	ConfigNodeHelper<decltype(to)>::hash(to, hasher);
+	ConfigNodeHelper<decltype(postProcessingType)>::hash(postProcessingType, hasher);
+	ConfigNodeHelper<decltype(quantizationType)>::hash(quantizationType, hasher);
 }
 
 String NavigationQuery::toString() const

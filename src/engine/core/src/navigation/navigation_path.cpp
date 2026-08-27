@@ -23,6 +23,11 @@ ConfigNode NavigationPath::toConfigNode() const
 	return result;
 }
 
+void NavigationPath::feedToHasher(Hash::Hasher& hasher) const
+{
+	query.feedToHasher(hasher);
+}
+
 bool NavigationPath::operator==(const NavigationPath& other) const
 {
 	return query == other.query;
@@ -74,4 +79,9 @@ ConfigNode ConfigNodeSerializer<NavigationPath>::serialize(const NavigationPath&
 NavigationPath ConfigNodeSerializer<NavigationPath>::deserialize(const EntitySerializationContext& context,	const ConfigNode& node)
 {
 	return NavigationPath(node);
+}
+
+void ConfigNodeSerializer<NavigationPath>::hash(const NavigationPath& path, Hash::Hasher& hasher)
+{
+	path.feedToHasher(hasher);
 }

@@ -24,7 +24,7 @@ namespace Halley {
 		private:
 			typedef std::true_type yes;
 			typedef std::false_type no;
-			template<typename U> static auto test(int) -> decltype(std::declval<ConfigNodeSerializer<T>>().hash(std::declval<T>(), std::declval<Hash::Hasher&>()), yes());
+			template<typename U> static auto test(int) -> decltype(std::declval<ConfigNodeSerializer<T>>().hash(std::declval<const T&>(), std::declval<Hash::Hasher&>()), yes());
 			template<typename> static no test(...);
 		 
 		public:
@@ -74,7 +74,7 @@ namespace Halley {
 			} else if constexpr (Detail::ConfigNodeSerializerHasHash<T>::value) {
 				ConfigNodeSerializer<T>().hash(value, hasher);
 			} else {
-				static_assert(false, "Unimplemented hash");
+				throw Exception("Implemented hash function for type " + typeid(T).name(), HalleyExceptions::Utils);
 			}
 		}
 	};

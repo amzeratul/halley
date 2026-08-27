@@ -36,6 +36,14 @@ ConfigNode NavigationPathFollower::toConfigNode() const
 	return result;
 }
 
+void NavigationPathFollower::feedToHasher(Hash::Hasher& hasher) const
+{
+	ConfigNodeHelper<decltype(path)>::hash(path, hasher);
+	ConfigNodeHelper<decltype(curPos)>::hash(curPos, hasher);
+	ConfigNodeHelper<decltype(nextPathIdx)>::hash(nextPathIdx, hasher);
+	ConfigNodeHelper<decltype(params)>::hash(params, hasher);
+}
+
 void NavigationPathFollower::setComputingPath()
 {
 	computingPath = true;
@@ -204,4 +212,9 @@ ConfigNode ConfigNodeSerializer<NavigationPathFollower>::serialize(const Navigat
 NavigationPathFollower ConfigNodeSerializer<NavigationPathFollower>::deserialize(const EntitySerializationContext& context,	const ConfigNode& node)
 {
 	return NavigationPathFollower(node);
+}
+
+void ConfigNodeSerializer<NavigationPathFollower>::hash(const NavigationPathFollower& follower, Hash::Hasher& hasher)
+{
+	follower.feedToHasher(hasher);
 }

@@ -39,6 +39,7 @@ namespace Halley {
 		explicit NavigationQuery(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
+		void feedToHasher(Hash::Hasher& hasher) const;
 		String toString() const;
 
 		bool operator==(const NavigationQuery& other) const;

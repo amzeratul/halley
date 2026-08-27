@@ -122,5 +122,10 @@ namespace Halley {
 	        	throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
             }
         }
+
+		void hash(const T& src, Hash::Hasher& hasher)
+        {
+        	throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
+        }
     };
 }
