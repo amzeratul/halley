@@ -278,6 +278,9 @@ void Core::deInit()
 		api->audio->stopPlayback();
 	}
 
+	// Stop the resource unloader while the thread pools are still alive, so its in-flight work can't strand a texture in loading state
+	resourceUnloader.reset();
+	
 	// Stop thread pool and other statics
 	statics.suspend();
 	
