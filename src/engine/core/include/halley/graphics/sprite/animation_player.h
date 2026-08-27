@@ -74,6 +74,8 @@ namespace Halley
 		std::optional<bool> getVisibleOverride() const;
 
 		std::optional<Vector2i> getCurrentActionPoint(const String& actionPointId) const;
+		
+		void feedToHasher(Hash::Hasher& hasher) const;
 
 	private:
 		void resolveSprite();

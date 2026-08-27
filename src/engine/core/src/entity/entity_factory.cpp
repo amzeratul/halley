@@ -143,12 +143,13 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 
 uint64_t EntityFactory::hashEntity(EntityRef entity, const SerializationOptions& options)
 {
+	const auto serializeContext = EntityFactoryContext(world, resources, EntitySerialization::makeMask(options.type), false);
 	Hash::Hasher hasher;
-	doHashEntity(hasher, entity, options);
+	doHashEntity(hasher, entity, options, serializeContext);
 	return hasher.digest();
 }
 
-void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options)
+void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext)
 {
 	// Properties
 	hasher.feed(entity.getName());
@@ -157,30 +158,29 @@ void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const S
 	hasher.feed(entity.isEnabled());
 	hasher.feedBytes(entity.getInstanceUUID().getBytes());
 	hasher.feedBytes(entity.getPrefabUUID().getBytes());
-	hasher.feed(entity.getPrefabAssetId().value_or(String::emptyString()));
+	hasher.feed(entity.getPrefabAssetIdOrEmpty());
 
 	// Components
-	const auto serializeContext = EntityFactoryContext(world, resources, EntitySerialization::makeMask(options.type), false);
-
 	const auto ids = entity.getComponentIds();
 	const auto ptrs = entity.getComponentPtrs();
+	const auto& worldReflection = world.getReflection();
 	for (size_t i = 0; i < ids.size(); ++i) {
 		const auto& componentId = ids[i];
 		const auto& component = ptrs[i];
-		const auto& reflector = world.getReflection().getComponentReflector(componentId);
+		const auto& reflector = worldReflection.getComponentReflector(componentId);
 
 		hasher.feed(std::string_view(reflector.getName()));
 		reflector.hash(hasher, serializeContext.getEntitySerializationContext(), *component);
 	}
 
 	// Children
-	for (const auto& child: entity.getChildren()) {
+	for (const EntityRef& child: entity.getChildren()) {
 		if (child.isSerializable()) {
 			if (options.serializeAsStub && options.serializeAsStub(child)) {
 				// Store just a stub
 				hasher.feedBytes(child.getInstanceUUID().getBytes());
 			} else {
-				doHashEntity(hasher, child, options);
+				doHashEntity(hasher, child, options, serializeContext);
 			}
 		}
 	}

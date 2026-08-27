@@ -1024,7 +1024,7 @@ namespace Halley {
 		{
 			if constexpr (serializationMask != 0) {
 				if (context.matchType(serializationMask)) {
-					hasher.feed(name);
+					//hasher.feed(name);
 					ConfigNodeHelper<T>::hash(value, hasher);
 				}
 			}

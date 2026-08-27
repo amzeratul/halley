@@ -111,7 +111,7 @@ namespace Halley {
 
 		EntityData doSerializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent, const String& lastPrefab);
 		
-		void doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options);
+		void doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext);
 
 		EntityRef tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);

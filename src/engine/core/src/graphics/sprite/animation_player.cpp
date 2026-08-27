@@ -475,6 +475,22 @@ std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& act
 	return {};
 }
 
+void AnimationPlayer::feedToHasher(Hash::Hasher& hasher) const
+{
+	if (animation) {
+		hasher.feed(animation->getAssetId());
+	}
+	if (curSeq) {
+		hasher.feed(curSeq->getId());
+	}
+	if (curDir) {
+		hasher.feed(curDir->getId());
+	}
+	hasher.feed(applyPivot);
+	hasher.feed(applyMaterial);
+	hasher.feed(playbackSpeed);
+}
+
 void AnimationPlayer::resolveSprite()
 {
 	if (curSeq && curSeq->numFrames() > 0) {
@@ -624,10 +640,5 @@ AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const EntityS
 
 void ConfigNodeSerializer<AnimationPlayer>::hash(const AnimationPlayer& player, Hash::Hasher& hasher)
 {
-	hasher.feed(player.hasAnimation() ? player.getAnimation().getAssetId() : String::emptyString());
-	hasher.feed(player.getCurrentSequenceId());
-	hasher.feed(player.getCurrentDirectionId());
-	hasher.feed(player.isApplyingPivot());
-	hasher.feed(player.getPlaybackSpeed());
-	hasher.feed(player.isApplyingMaterial());
+	player.feedToHasher(hasher);
 }

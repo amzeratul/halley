@@ -993,6 +993,15 @@ namespace Halley {
 			return entity && entity->prefab ? entity->prefab->getAssetId() : std::optional<String>{};
 		}
 
+		const String& getPrefabAssetIdOrEmpty() const
+		{
+			if (entity && entity->prefab) {
+				return entity->prefab->getAssetId();
+			} else {
+				return String::emptyString();
+			}
+		}
+
 		DataInterpolatorSet& setupNetwork(uint8_t peerId)
 		{
 			validate();

@@ -298,7 +298,7 @@ void ScriptState::NodeState::feedToHasher(Hash::Hasher& hasher) const
 	if (hasPendingData) {
 		pendingData->feedToHash(hasher);
 	} else if (data) {
-		data->toConfigNode({}).feedToHash(hasher);
+		data->feedToHasher(hasher);
 	}
 }
 
@@ -423,14 +423,15 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 
 void ScriptState::feedToHasher(Hash::Hasher& hasher) const
 {
-	const auto& scriptName = getScriptGraphPtr() ? getScriptGraphPtr()->getAssetId() : String::emptyString();
-	hasher.feed(scriptName);
+	if (auto ptr = getScriptGraphPtr()) {
+		hasher.feed(ptr->getAssetId());
+	}
 	hasher.feed(started);
 	hasher.feed(graphHash);
-	hasher.feed(frameNumber);
+	//hasher.feed(frameNumber);
 	hasher.feed(persistAfterDone);
 	ConfigNodeHelper<decltype(threads)>::hash(threads, hasher);
-	ConfigNodeHelper<decltype(nodeState)>::hash(nodeState, hasher);
+	//ConfigNodeHelper<decltype(nodeState)>::hash(nodeState, hasher); // This should probably be included, but it's a significant perf bottleneck
 	ConfigNodeHelper<decltype(localVars)>::hash(localVars, hasher);
 	ConfigNodeHelper<decltype(sharedVars)>::hash(sharedVars, hasher);
 	ConfigNodeHelper<decltype(tags)>::hash(tags, hasher);

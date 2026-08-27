@@ -14,6 +14,7 @@ namespace Halley {
 		virtual ~IScriptStateData() = default;
 
 		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) { return {}; }
+		virtual void feedToHasher(Hash::Hasher& hasher) { toConfigNode({}).feedToHash(hasher); }
 		[[nodiscard]] virtual std::unique_ptr<IScriptStateData> clone() const = 0;
 		virtual void copyFrom(IScriptStateData&& src) = 0;
 		virtual void finishData() {}
