@@ -212,8 +212,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	contents.push_back("");
 
 	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
-	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak + "Halley::ConfigNode _node = Halley::ConfigNode::MapType();" + lineBreak;
+	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak
+		+ "Halley::ConfigNode _node = Halley::ConfigNode::MapType();" + lineBreak;
+		+ "_node.asMap().reserve(" + toString(component.members.size()) + ");" + lineBreak;
 	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
+	String hashBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	String sanitizeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	{
 		bool first = true;
@@ -233,11 +236,13 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			} else {
 				serializeBody += lineBreak;
 				deserializeBody += lineBreak;
+				hashBody += lineBreak;
 				sanitizeBody += lineBreak;
 			}
 
 			serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
 			deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
+			hashBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::hash<" + mask + ">(_hasher, " + member.name + ", _context, \"" + member.name + "\");";
 			sanitizeBody += "if ((_mask & " + mask + ") == 0) _node.removeKey(\"" + member.name + "\");";
 		}
 	}
@@ -359,6 +364,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "_node")
 		}, "deserialize"), deserializeBody)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Hash::Hasher&"), "_hasher")
+		}, "hash", true), hashBody)
 		.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void", false, true), {
 			VariableSchema(TypeSchema("Halley::ConfigNode&"), "_node"), VariableSchema(TypeSchema("int"), "_mask")

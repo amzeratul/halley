@@ -33,6 +33,11 @@ namespace Halley {
 		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, const Options& options = Options());
 
+		EntityDataDelta(const EntityDataDelta& other) = default;
+		EntityDataDelta(EntityDataDelta&& other) noexcept = default;
+		EntityDataDelta& operator=(const EntityDataDelta& other) = default;
+		EntityDataDelta& operator=(EntityDataDelta&& other) noexcept = default;
+
 		bool hasChange() const;
 
 		void serialize(Serializer& s) const;
@@ -134,8 +139,20 @@ namespace Halley {
 
 	class SceneDataDelta {
 	public:
-		void addEntity(UUID entityId, EntityDataDelta delta);
-		const Vector<std::pair<UUID, EntityDataDelta>>& getEntities() const;
+		struct Entry {
+			UUID uuid;
+			uint64_t hash = 0;
+			EntityDataDelta entityData;
+
+			void serialize(Serializer& s) const;
+    		void deserialize(Deserializer& s);
+
+			ConfigNode toConfigNode() const;
+		};
+
+		void addEntity(Entry entry);
+		const Vector<Entry>& getEntities() const;
+		const Entry* tryGetEntity(const UUID& uuid) const;
 
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
@@ -143,7 +160,10 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 
 	private:
-		Vector<std::pair<UUID, EntityDataDelta>> entities;
+		Vector<Entry> entities;
+		HashMap<UUID, uint32_t> index;
+
+		void buildIndex();
 	};
 
 	class Resources;

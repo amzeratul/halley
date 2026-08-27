@@ -1,4 +1,4 @@
-// Halley codegen version 143
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -49,6 +49,14 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(intensity)>::deserialize(intensity, float{ 1 }, _context, _node, componentName, "intensity", makeMask(Type::Prefab, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(propagate)>::deserialize(propagate, bool{ true }, _context, _node, componentName, "propagate", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(addedDynamically)>::deserialize(addedDynamically, bool{ false }, _context, _node, componentName, "addedDynamically", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(colour)>::hash<makeMask(Type::Prefab, Type::Dynamic, Type::Network)>(_hasher, colour, _context, "colour");
+		Halley::EntityConfigNodeSerializer<decltype(intensity)>::hash<makeMask(Type::Prefab, Type::Dynamic, Type::Network)>(_hasher, intensity, _context, "intensity");
+		Halley::EntityConfigNodeSerializer<decltype(propagate)>::hash<makeMask(Type::Prefab)>(_hasher, propagate, _context, "propagate");
+		Halley::EntityConfigNodeSerializer<decltype(addedDynamically)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, addedDynamically, _context, "addedDynamically");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

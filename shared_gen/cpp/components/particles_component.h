@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -61,6 +61,17 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(direction)>::deserialize(direction, Halley::String{}, _context, _node, componentName, "direction", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, _context, _node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<Halley::SpriteMaskBase>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(particles)>::hash<makeMask(Type::Prefab)>(_hasher, particles, _context, "particles");
+		Halley::EntityConfigNodeSerializer<decltype(sprites)>::hash<makeMask(Type::Prefab)>(_hasher, sprites, _context, "sprites");
+		Halley::EntityConfigNodeSerializer<decltype(animation)>::hash<makeMask(Type::Prefab)>(_hasher, animation, _context, "animation");
+		Halley::EntityConfigNodeSerializer<decltype(sequence)>::hash<makeMask(Type::Prefab)>(_hasher, sequence, _context, "sequence");
+		Halley::EntityConfigNodeSerializer<decltype(direction)>::hash<makeMask(Type::Prefab)>(_hasher, direction, _context, "direction");
+		Halley::EntityConfigNodeSerializer<decltype(layer)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, layer, _context, "layer");
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::hash<makeMask(Type::Prefab)>(_hasher, mask, _context, "mask");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

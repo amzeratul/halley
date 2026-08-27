@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -46,6 +46,13 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::deserialize(referenceDistance, float{ 500 }, _context, _node, componentName, "referenceDistance", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(lastPos)>::deserialize(lastPos, Halley::Vector3f{}, _context, _node, componentName, "lastPos", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(speedOfSound)>::deserialize(speedOfSound, float{ 343 }, _context, _node, componentName, "speedOfSound", makeMask(Type::Prefab));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, referenceDistance, _context, "referenceDistance");
+		Halley::EntityConfigNodeSerializer<decltype(lastPos)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, lastPos, _context, "lastPos");
+		Halley::EntityConfigNodeSerializer<decltype(speedOfSound)>::hash<makeMask(Type::Prefab)>(_hasher, speedOfSound, _context, "speedOfSound");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

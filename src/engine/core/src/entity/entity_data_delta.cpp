@@ -623,24 +623,81 @@ uint32_t EntityDataDelta::getFieldsPresent() const
 	return value;
 }
 
-void SceneDataDelta::addEntity(UUID entityId, EntityDataDelta delta)
+void SceneDataDelta::Entry::serialize(Serializer& s) const
 {
-	entities.emplace_back(std::move(entityId), std::move(delta));
+	int version = 1;
+	s << version;
+	s << uuid;
+	s << hash;
+	s << entityData;
 }
 
-const Vector<std::pair<UUID, EntityDataDelta>>& SceneDataDelta::getEntities() const
+void SceneDataDelta::Entry::deserialize(Deserializer& s)
+{
+	int version;
+	s >> version;
+	s >> uuid;
+	s >> hash;
+	s >> entityData;
+}
+
+ConfigNode SceneDataDelta::Entry::toConfigNode() const
+{
+	ConfigNode result;
+	result["uuid"] = uuid;
+	result["hash"] = static_cast<int64_t>(hash);
+	result["entityData"] = entityData;
+	return result;
+}
+
+void SceneDataDelta::addEntity(Entry entry)
+{
+	index[entry.uuid] = static_cast<uint32_t>(entities.size());
+	entities.emplace_back(std::move(entry));
+}
+
+const Vector<SceneDataDelta::Entry>& SceneDataDelta::getEntities() const
 {
 	return entities;
 }
 
+const SceneDataDelta::Entry* SceneDataDelta::tryGetEntity(const UUID& uuid) const
+{
+	const auto iter = index.find(uuid);
+	if (iter != index.end()) {
+		return &entities[iter->second];
+	} else {
+		return nullptr;
+	}
+}
+
 void SceneDataDelta::serialize(Serializer& s) const
 {
+	int version = 2;
+	s << version;
 	s << entities;
 }
 
 void SceneDataDelta::deserialize(Deserializer& s)
 {
-	s >> entities;
+	int version;
+	s >> version;
+
+	if (version == 1) {
+		Vector<std::pair<UUID, EntityDataDelta>> es;
+		s >> es;
+		entities.resize(es.size());
+		for (size_t i = 0; i < es.size(); ++i) {
+			entities[i].uuid = es[i].first;
+			entities[i].entityData = std::move(es[i].second);
+		}
+	} else if (version == 2) {
+		s >> entities;
+	} else {
+		throw Exception("Unknown SceneDataDelta version: " + toString(version), 0);
+	}
+
+	buildIndex();
 }
 
 ConfigNode SceneDataDelta::toConfigNode() const
@@ -648,6 +705,14 @@ ConfigNode SceneDataDelta::toConfigNode() const
 	ConfigNode::MapType result;
 	result["entities"] = entities;
 	return result;
+}
+
+void SceneDataDelta::buildIndex()
+{
+	index.clear();
+	for (size_t i = 0; i < entities.size(); ++i) {
+		index[entities[i].uuid] = static_cast<uint32_t>(i);
+	}
 }
 
 ConfigNode ConfigNodeSerializer<EntityDataDelta>::serialize(const EntityDataDelta& entityData, const EntitySerializationContext& context)

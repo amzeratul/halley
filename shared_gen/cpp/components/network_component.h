@@ -1,4 +1,4 @@
-// Halley codegen version 141
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -52,6 +52,14 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::deserialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::deserialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::hash<makeMask(Type::Network)>(_hasher, authorityId, _context, "authorityId");
+		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)>(_hasher, alwaysSend, _context, "alwaysSend");
+		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::hash<makeMask(Type::Prefab)>(_hasher, requiresEntityFrameModified, _context, "requiresEntityFrameModified");
+		Halley::EntityConfigNodeSerializer<decltype(locks)>::hash<makeMask(Type::Network)>(_hasher, locks, _context, "locks");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -53,6 +53,15 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(uiOffsets)>::deserialize(uiOffsets, Halley::HashMap<Halley::String, Halley::Vector2f>{}, _context, _node, componentName, "uiOffsets", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(worldOffsets)>::deserialize(worldOffsets, Halley::HashMap<Halley::String, Halley::Vector2f>{}, _context, _node, componentName, "worldOffsets", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(integerCoords)>::deserialize(integerCoords, bool{ false }, _context, _node, componentName, "integerCoords", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(zoom)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, zoom, _context, "zoom");
+		Halley::EntityConfigNodeSerializer<decltype(id)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, id, _context, "id");
+		Halley::EntityConfigNodeSerializer<decltype(uiOffsets)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, uiOffsets, _context, "uiOffsets");
+		Halley::EntityConfigNodeSerializer<decltype(worldOffsets)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, worldOffsets, _context, "worldOffsets");
+		Halley::EntityConfigNodeSerializer<decltype(integerCoords)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, integerCoords, _context, "integerCoords");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

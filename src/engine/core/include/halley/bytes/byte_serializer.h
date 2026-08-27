@@ -26,6 +26,10 @@ namespace Halley {
 	class World;
 	class String;
 
+	namespace Hash {
+		class Hasher;
+	}
+
 	class SerializerOptions {
 	public:
 		constexpr static int maxVersion = 1;

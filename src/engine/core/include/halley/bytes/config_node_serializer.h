@@ -884,6 +884,23 @@ namespace Halley {
 				}
 			}
 		}
+
+		template <int serializationMask>
+		static void hash(Hash::Hasher& hasher, const T& value, const EntitySerializationContext& context, std::string_view name)
+		{
+			if constexpr (serializationMask != 0) {
+				if (context.matchType(serializationMask)) {
+					hasher.feed(name);
+
+					if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String>) {
+						hasher.feed(value);
+					} else {
+						auto result = Halley::ConfigNodeHelper<T>::serialize(value, context);
+						result.feedToHash(hasher);
+					}
+				}
+			}
+		}
 	};
 
 	template<>

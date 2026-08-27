@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -44,6 +44,13 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(timeline)>::deserialize(timeline, Halley::Timeline{}, _context, _node, componentName, "timeline", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(player)>::deserialize(player, Halley::TimelinePlayer{}, _context, _node, componentName, "player", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(playOnStart)>::deserialize(playOnStart, bool{ false }, _context, _node, componentName, "playOnStart", makeMask(Type::Prefab));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(timeline)>::hash<makeMask(Type::Prefab)>(_hasher, timeline, _context, "timeline");
+		Halley::EntityConfigNodeSerializer<decltype(player)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, player, _context, "player");
+		Halley::EntityConfigNodeSerializer<decltype(playOnStart)>::hash<makeMask(Type::Prefab)>(_hasher, playOnStart, _context, "playOnStart");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

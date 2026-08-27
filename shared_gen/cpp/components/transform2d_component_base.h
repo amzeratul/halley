@@ -1,4 +1,4 @@
-// Halley codegen version 141
+// Halley codegen version 146
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -51,6 +51,16 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(height)>::deserialize(height, float{}, _context, _node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(fixedHeight)>::deserialize(fixedHeight, bool{ false }, _context, _node, componentName, "fixedHeight", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::deserialize(subWorld, Halley::OptionalLite<int16_t>{}, _context, _node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+	}
+
+	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(position)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, position, _context, "position");
+		Halley::EntityConfigNodeSerializer<decltype(scale)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, scale, _context, "scale");
+		Halley::EntityConfigNodeSerializer<decltype(rotation)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, rotation, _context, "rotation");
+		Halley::EntityConfigNodeSerializer<decltype(height)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, height, _context, "height");
+		Halley::EntityConfigNodeSerializer<decltype(fixedHeight)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, fixedHeight, _context, "fixedHeight");
+		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::hash<makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, subWorld, _context, "subWorld");
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
