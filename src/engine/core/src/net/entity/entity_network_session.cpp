@@ -539,14 +539,14 @@ void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPee
 
 void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)
 {
-	auto iter = pendingSysMsgResponses.find(msg.msgId);
+	const auto iter = pendingSysMsgResponses.find(msg.msgId);
 	if (iter == pendingSysMsgResponses.end()) {
 		Logger::logWarning("Unexpected system message response received.");
 		return;
 	}
 
 	iter->second.callback(nullptr, msg.responseData);
-	pendingSysMsgResponses.erase(iter);
+	pendingSysMsgResponses.erase(msg.msgId);
 }
 
 void EntityNetworkSession::onReceiveJoinWorld(NetworkSession::PeerId fromPeerId)
