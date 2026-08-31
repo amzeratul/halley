@@ -239,6 +239,14 @@ bool SessionMultiplayer::update(Time t)
 	entitySession->receiveUpdates();
 	entitySession->sendUpdates();
 	entitySession->update(t);
+	
+	if (host && lobby) {
+		const size_t players = session->getClientCount();
+		if (players != lastReportedPlayers) {
+			lastReportedPlayers = players;
+			lobby->setPlayerCount(static_cast<int>(players), options.maxPlayers);
+		}
+	}
 
 	return session->getStatus() != ConnectionStatus::Closed;
 }
