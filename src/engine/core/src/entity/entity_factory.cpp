@@ -156,8 +156,8 @@ void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const S
 	hasher.feed(entity.isSelectable());
 	hasher.feed(entity.isSerializable());
 	hasher.feed(entity.isEnabled());
-	hasher.feedBytes(entity.getInstanceUUID().getBytes());
-	hasher.feedBytes(entity.getPrefabUUID().getBytes());
+	//hasher.feedBytes(entity.getInstanceUUID().getBytes());
+	//hasher.feedBytes(entity.getPrefabUUID().getBytes());
 	hasher.feed(entity.getPrefabAssetIdOrEmpty());
 
 	// Components

@@ -215,7 +215,7 @@ const std::shared_ptr<ScriptState>& ScriptStateSet::getState(size_t idx) const
 
 void ScriptStateSet::State::feedToHasher(Hash::Hasher& hasher) const
 {
-	hasher.feed(id);
+	//hasher.feed(id);
 	hasher.feed(present);
 	hasher.feed(dead);
 	if (state) {
