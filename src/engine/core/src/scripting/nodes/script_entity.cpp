@@ -49,9 +49,10 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::TargetPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Input },
-		PinType{ ET::TargetPin, PD::Input }
+		PinType{ ET::TargetPin, PD::Input },
+        PinType{ ET::ReadDataPin, PD::Input }
 	});
-	return gsl::span<const PinType>(data).subspan(0, asChild ? 6 : 5);
+	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
@@ -66,6 +67,8 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with rotation ");
 	str.append(getConnectedNodeName(node, graph, 4), parameterColour);
+    str.append(" with height ");
+    str.append(getConnectedNodeName(node, graph, 6), parameterColour);
 	if (asChild) {
 		str.append(" relative to parent ");
 		str.append(getConnectedNodeName(node, graph, 5), parameterColour);
@@ -86,6 +89,9 @@ String ScriptSpawnEntity::getPinDescription(const BaseGraphNode& node, PinType e
 	if (elementIdx == 4) {
 		return "Rotation (Radians)";
 	}
+	if (elementIdx == 6) {
+		return "Height";
+	}
 	return ScriptNodeTypeBase<ScriptSpawnEntityData>::getPinDescription(node, elementType, elementIdx);
 }
 
@@ -103,6 +109,7 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 	const bool serializable = node.getSettings()["serializable"].asBool(true);
 	const Vector3f position = readDataPin(environment, node, 2).asVector3f({});
 	const Angle1f rotation = Angle1f(readDataPin(environment, node, 4).asFloat(0.0f));
+	const float height = readDataPin(environment, node, 6).asFloat(0.0f);
 
 	if (!prefab.isEmpty()) {
 		EntityRef parent;
@@ -114,8 +121,9 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 
 		if (auto* transform = entity.tryGetComponent<Transform2DComponent>()) {
 			transform->setLocalPosition(position.xy());
-			transform->setLocalHeight(position.z);
+			transform->setLocalHeight(height);
 			transform->setLocalRotation(rotation);
+			transform->setSubWorld((int)position.z);
 		}
 
 		entity.setSerializable(serializable);
