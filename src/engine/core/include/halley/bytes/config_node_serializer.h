@@ -19,18 +19,10 @@ namespace Halley {
 		using VoidDeserializer = decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const EntitySerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()));
 
 		template<typename T>
-		struct ConfigNodeSerializerHasHash
-		{
-		private:
-			typedef std::true_type yes;
-			typedef std::false_type no;
-			template<typename U> static auto test(int) -> decltype(std::declval<ConfigNodeSerializer<T>>().hash(std::declval<const T&>(), std::declval<Hash::Hasher&>()), yes());
-			template<typename> static no test(...);
-		 
-		public:
-			static constexpr bool value = std::is_same<decltype(test<T>(0)),yes>::value;
-		};
+		using HashFunction = decltype(std::declval<ConfigNodeSerializer<T>>().hash(std::declval<const T&>(), std::declval<Hash::Hasher&>()));
 
+		template<typename T>
+		using HashFunctionWithContext = decltype(std::declval<ConfigNodeSerializer<T>>().hash(std::declval<const T&>(), std::declval<const EntitySerializationContext&>(), std::declval<Hash::Hasher&>()));
 	}
 
 	template <typename T>
@@ -71,10 +63,26 @@ namespace Halley {
 		{
 			if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String> || std::is_same_v<T, std::string_view>) {
 				hasher.feed(value);
-			} else if constexpr (Detail::ConfigNodeSerializerHasHash<T>::value) {
+			} else if constexpr (is_detected<Detail::HashFunction, T>::value) {
+				ConfigNodeSerializer<T>().hash(value, hasher);
+			} else if constexpr (is_detected<Detail::HashFunctionWithContext, T>::value) {
+				EntitySerializationContext context;
+				ConfigNodeSerializer<T>().hash(value, context, hasher);
+			} else {
+				throw Exception("Unimplemented hash function for type " + String(typeid(T).name()), HalleyExceptions::Utils);
+			}
+		}
+		
+		static void hash(const T& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
+		{
+			if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String> || std::is_same_v<T, std::string_view>) {
+				hasher.feed(value);
+			} else if constexpr (is_detected<Detail::HashFunctionWithContext, T>::value) {
+				ConfigNodeSerializer<T>().hash(value, context, hasher);
+			} else if constexpr (is_detected<Detail::HashFunction, T>::value) {
 				ConfigNodeSerializer<T>().hash(value, hasher);
 			} else {
-				throw Exception("Implemented hash function for type " + typeid(T).name(), HalleyExceptions::Utils);
+				throw Exception("Unimplemented hash function for type " + String(typeid(T).name()), HalleyExceptions::Utils);
 			}
 		}
 	};
@@ -420,10 +428,10 @@ namespace Halley {
 			}
         }
 
-		static void hash(const T& value, Hash::Hasher& hasher)
+		static void hash(const T& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 	        if (value) {
-		        ConfigNodeHelper<T>::hash(*value, hasher);
+		        ConfigNodeHelper<T>::hash(*value, context, hasher);
 	        }
         }
     };
@@ -474,14 +482,14 @@ namespace Halley {
 			}
         }
 
-		static void hash(const Vector<T>& value, Hash::Hasher& hasher)
+		static void hash(const Vector<T>& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			hasher.feed(value.size());
 	        if constexpr (std::is_trivially_copyable_v<T>) {
 		        hasher.feedBytes(value.const_byte_span());
 			} else {
 				for (const auto& v: value.const_span()) {
-			        ConfigNodeHelper<T>::hash(v, hasher);
+			        ConfigNodeHelper<T>::hash(v, context, hasher);
 				}
 	        }
         }
@@ -509,10 +517,10 @@ namespace Halley {
 			}
         }
 
-		static void hash(const T& value, Hash::Hasher& hasher)
+		static void hash(const T& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 	        if (value) {
-		        ConfigNodeHelper<T>::hash(*value, hasher);
+		        ConfigNodeHelper<T>::hash(*value, context, hasher);
 	        }
         }
 	};
@@ -555,10 +563,10 @@ namespace Halley {
 			return result;
 		}
 
-		static void hash(const std::pair<A, B>& values, Hash::Hasher& hasher)
+		static void hash(const std::pair<A, B>& values, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
-	        ConfigNodeHelper<A>::hash(values.first, hasher);
-	        ConfigNodeHelper<B>::hash(values.second, hasher);
+	        ConfigNodeHelper<A>::hash(values.first, context, hasher);
+	        ConfigNodeHelper<B>::hash(values.second, context, hasher);
         }
 	};
 
@@ -589,10 +597,10 @@ namespace Halley {
 			return result;
 		}
 
-		static void hash(const std::set<T>& values, Hash::Hasher& hasher)
+		static void hash(const std::set<T>& values, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			for (auto& value: values) {
-        		ConfigNodeHelper<T>::hash(value, hasher);
+        		ConfigNodeHelper<T>::hash(value, context, hasher);
         	}
         }
 	};
@@ -624,10 +632,10 @@ namespace Halley {
 			return result;
 		}
 
-		static void hash(const HashSet<T>& values, Hash::Hasher& hasher)
+		static void hash(const HashSet<T>& values, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			for (auto& value: values) {
-        		ConfigNodeHelper<T>::hash(value, hasher);
+        		ConfigNodeHelper<T>::hash(value, context, hasher);
         	}
         }
 	};
@@ -655,7 +663,7 @@ namespace Halley {
 			}
 		}
 
-		static void hash(const ResourceReference<T>& value, Hash::Hasher& hasher)
+		static void hash(const ResourceReference<T>& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			if (value) {
         		hasher.feed(value.getAssetId());
@@ -676,7 +684,7 @@ namespace Halley {
 			return node.asString("");
 		}
 
-		static void hash(const String& value, Hash::Hasher& hasher)
+		static void hash(const String& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			hasher.feed(value);
         }
@@ -695,10 +703,7 @@ namespace Halley {
 			return EntityId(node, context);
 		}
 
-		static void hash(const EntityId& value, Hash::Hasher& hasher)
-        {
-			hasher.feed(value.value);
-        }
+		static void hash(const EntityId& value, const EntitySerializationContext& context, Hash::Hasher& hasher);
     };
 
 	template <typename T>
@@ -738,11 +743,11 @@ namespace Halley {
 			}
 		}
 
-		static void hash(const std::map<String, T>& values, Hash::Hasher& hasher)
+		static void hash(const std::map<String, T>& values, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			for (auto& [key, value]: values) {
-				ConfigNodeHelper<String>::hash(key, hasher);
-				ConfigNodeHelper<T>::hash(value, hasher);
+				ConfigNodeHelper<String>::hash(key, context, hasher);
+				ConfigNodeHelper<T>::hash(value, context, hasher);
 			}
         }
 	};
@@ -784,11 +789,11 @@ namespace Halley {
 			}
 		}
 
-		static void hash(const std::map<K, V>& values, Hash::Hasher& hasher)
+		static void hash(const std::map<K, V>& values, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			for (auto& [key, value]: values) {
-				ConfigNodeHelper<K>::hash(key, hasher);
-				ConfigNodeHelper<V>::hash(value, hasher);
+				ConfigNodeHelper<K>::hash(key, context, hasher);
+				ConfigNodeHelper<V>::hash(value, context, hasher);
 			}
         }
 	};
@@ -830,11 +835,11 @@ namespace Halley {
 			}
 		}
 
-		static void hash(const HashMap<K, V>& values, Hash::Hasher& hasher)
+		static void hash(const HashMap<K, V>& values, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			for (auto& [key, value]: values) {
-				ConfigNodeHelper<K>::hash(key, hasher);
-				ConfigNodeHelper<V>::hash(value, hasher);
+				ConfigNodeHelper<K>::hash(key, context, hasher);
+				ConfigNodeHelper<V>::hash(value, context, hasher);
 			}
         }
 	};
@@ -860,10 +865,10 @@ namespace Halley {
 			}
 		}
 
-		static void hash(const OptionalLite<T>& value, Hash::Hasher& hasher)
+		static void hash(const OptionalLite<T>& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			if (value) {
-				ConfigNodeHelper<T>::hash(*value, hasher);
+				ConfigNodeHelper<T>::hash(*value, context, hasher);
 			}
         }
 	};
@@ -896,6 +901,13 @@ namespace Halley {
 				ConfigNodeHelper<T>::hash(*value, hasher);
 			}
         }
+
+		static void hash(const std::optional<T>& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
+        {
+			if (value) {
+				ConfigNodeHelper<T>::hash(*value, context, hasher);
+			}
+        }
 	};
 
 	template <typename T>
@@ -924,6 +936,13 @@ namespace Halley {
         {
 			if (value) {
 				ConfigNodeHelper<T>::hash(*value, hasher);
+			}
+        }
+
+		static void hash(const OptionalLite<T>& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
+        {
+			if (value) {
+				ConfigNodeHelper<T>::hash(*value, context, hasher);
 			}
         }
 	};
@@ -1025,7 +1044,7 @@ namespace Halley {
 			if constexpr (serializationMask != 0) {
 				if (context.matchType(serializationMask)) {
 					//hasher.feed(name);
-					ConfigNodeHelper<T>::hash(value, hasher);
+					ConfigNodeHelper<T>::hash(value, context, hasher);
 				}
 			}
 		}
@@ -1048,7 +1067,7 @@ namespace Halley {
 			return ConfigNode(node);
 		}
 
-		static void hash(const ConfigNode& value, Hash::Hasher& hasher)
+		static void hash(const ConfigNode& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			value.feedToHash(hasher);
         }

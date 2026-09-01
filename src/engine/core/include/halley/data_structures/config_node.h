@@ -653,7 +653,7 @@ namespace Halley {
 		static bool isScalarType(ConfigNodeType type, bool acceptUndefined);
 		static bool isVector2Type(ConfigNodeType type, bool acceptUndefined);
 
-		void feedToHash(Hash::Hasher& hasher) const;
+		void feedToHash(Hash::Hasher& hasher, const EntitySerializationContext* context = nullptr) const;
 
 		static const ConfigNode& getUndefined();
 

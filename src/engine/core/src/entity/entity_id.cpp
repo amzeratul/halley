@@ -94,3 +94,12 @@ void EntityId::deserialize(Deserializer& s)
 		throw Exception("Deserializing EntityID requires World to be set in SerializationOptions.", HalleyExceptions::Entity);
 	}
 }
+
+void ConfigNodeSerializer<EntityId>::hash(const EntityId& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
+{
+	if (context.entityContext) {
+		hasher.feedBytes(context.entityContext->getUUIDFromEntityId(value).getBytes());
+	} else {
+		hasher.feed(value.value);
+	}
+}

@@ -2242,7 +2242,7 @@ bool ConfigNode::isVector2Type(ConfigNodeType type, bool acceptUndefined)
 	return type == ConfigNodeType::Int2 || type == ConfigNodeType::Float2 || (acceptUndefined && type == ConfigNodeType::Undefined);
 }
 
-void ConfigNode::feedToHash(Hash::Hasher& hasher) const
+void ConfigNode::feedToHash(Hash::Hasher& hasher, const EntitySerializationContext* context) const
 {
 	hasher.feed(type);
 	switch (type) {
@@ -2254,8 +2254,14 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		hasher.feed(vec2iData);
 		break;
 	case ConfigNodeType::Int64:
-	case ConfigNodeType::EntityId:
 		hasher.feed(int64Data);
+		break;
+	case ConfigNodeType::EntityId:
+		if (context && context->entityContext) {
+			hasher.feedBytes(context->entityContext->getUUIDFromEntityId(asEntityId()).getBytes());
+		} else {
+			hasher.feed(int64Data);
+		}
 		break;
 	case ConfigNodeType::Float:
 		hasher.feed(floatData);
@@ -2267,7 +2273,7 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 	case ConfigNodeType::DeltaSequence:
 		hasher.feed(asSequence().size());
 		for (const auto& e: asSequence()) {
-			e.feedToHash(hasher);
+			e.feedToHash(hasher, context);
 		}
 		break;
 	case ConfigNodeType::Map:
@@ -2276,7 +2282,7 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		for (const auto& [k, v]: asMap()) {
 			if (v.getType() != ConfigNodeType::Undefined) {
 				hasher.feed(k);
-				v.feedToHash(hasher);
+				v.feedToHash(hasher, context);
 			}
 		}
 		break;
@@ -2290,7 +2296,7 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		hasher.feed(rawStrData);
 		break;
 	case ConfigNodeType::Reference:
-		dereference().feedToHash(hasher);
+		dereference().feedToHash(hasher, context);
 		break;
 	case ConfigNodeType::Idx:
 		hasher.feed(vec2iData);
