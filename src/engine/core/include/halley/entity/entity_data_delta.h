@@ -21,10 +21,11 @@ namespace Halley {
             bool deltaComponents = true;
 			bool allowNonSerializable = true;
 			bool omitEmptyComponents = false;
-			bool ignoreNameAndIconChangesInInstances = false;
+        	bool ignoreComponentsRemoved = false;
+			bool canSerializeName = true;
+			bool canSerializeIcon = true;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
-        	bool ignoreComponentsRemoved = false;
 			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
         };
 		
