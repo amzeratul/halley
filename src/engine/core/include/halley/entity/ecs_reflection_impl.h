@@ -4,6 +4,26 @@
 #include "halley/entity/entity_factory.h"
 
 namespace Halley {
+	namespace Detail {
+		template<typename T>
+		class HasCanSerialize
+		{
+			template<typename U> static auto test(int) -> decltype(std::declval<U>().canSerialize(), std::true_type());
+			template<typename> static std::false_type test(...);
+		public:
+			static constexpr bool value = std::is_same<decltype(test<T>(0)), std::true_type>::value;
+		};
+
+		template<typename T>
+		class HasCanHash
+		{
+			template<typename U> static auto test(int) -> decltype(std::declval<U>().canHash(), std::true_type());
+			template<typename> static std::false_type test(...);
+		public:
+			static constexpr bool value = std::is_same<decltype(test<T>(0)), std::true_type>::value;
+		};
+	}
+
 	template <typename T>
 	class ComponentReflectorImpl final : public ComponentReflector {
 	public:
@@ -24,6 +44,12 @@ namespace Halley {
 		
 		ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const override
 		{
+			if constexpr (Detail::HasCanSerialize<T>::value) {
+				if (!static_cast<const T&>(component).canSerialize()) [[unlikely]] {
+					return ConfigNode(ConfigNode::NoopType());
+				}
+			}
+
 			ConfigNode result = static_cast<const T&>(component).serialize(context);
 			result.ensureType(ConfigNodeType::DeltaMap);
 			return result;
@@ -31,6 +57,12 @@ namespace Halley {
 
 		void hash(Hash::Hasher& hasher, const EntitySerializationContext& context, const Component& component) const override
 		{
+			if constexpr (Detail::HasCanHash<T>::value) {
+				if (!static_cast<const T&>(component).canHash()) [[unlikely]] {
+					return;
+				}
+			}
+
 			static_cast<const T&>(component).hash(context, hasher);
 		}
 

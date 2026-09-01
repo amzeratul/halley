@@ -97,6 +97,10 @@ public:
 			| static_cast<uint32_t>(entity.getComponentRevision());
 	}
 
+	bool canSerialize() const { return serializable; }
+	bool canHash() const { return serializable; }
+	void setSerializable(bool s) { serializable = s; }
+
 private:
 	friend class Halley::EntityRef;
 
@@ -109,6 +113,7 @@ private:
 	mutable Halley::Vector2f cachedGlobalScale;
 	mutable Halley::Angle1f cachedGlobalRotation;
 	mutable uint16_t depth = 0;
+	bool serializable = true;
 
 	mutable Halley::EntityRef entity;
 
