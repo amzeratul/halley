@@ -221,7 +221,7 @@ void DX12Painter::setMaterialData(const Material& material)
             // Stream into per-frame constant buffer
             auto range = constantBuffer.writeData(block.getData());
             // Cache until we actually need (are able) to bind CBVs.
-            if (range.first == range.second) {
+            if (range.second == 0) {
                 break; // TODO: Overflow. Bad. Maybe crash immediately instead.
             }
             constantBufferCache[block.getBindPoint()] = range;

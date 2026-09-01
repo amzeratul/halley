@@ -109,7 +109,8 @@ namespace Halley {
         ComPtr<ID3D12GraphicsCommandList> commandList;
 
         Mutex commandQueueLock;
-        Mutex deferredResourceLock;
+        Mutex recreateTexturesLock;
+        Mutex releaseResourcesLock;
 
         std::unique_ptr<DX12DescriptorPool> srvPool;
         std::unique_ptr<DX12DescriptorPool> samPool;
@@ -148,6 +149,7 @@ namespace Halley {
 
         Vector<DX12Texture*> deferRecreateTextures;
         Vector<std::pair<int, ComPtr<ID3D12Resource>>> deferReleaseResources;
+        Vector<ComPtr<ID3D12Resource>> releaseScratch;
 
         uint64_t resourceVersionIndex = 0;
 

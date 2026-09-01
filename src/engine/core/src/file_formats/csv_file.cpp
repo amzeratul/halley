@@ -192,7 +192,7 @@ void CSVFile::load(std::string_view origStr)
 	}
 }
 
-String CSVFile::save(bool withBOM) const
+String CSVFile::save(bool withBOM, bool withHeader) const
 {
 	auto toCSVFormat = [](const String& str) -> String
 	{
@@ -213,15 +213,17 @@ String CSVFile::save(bool withBOM) const
 
 	// Header
 	bool first = true;
-	for (const auto& col: columns) {
-		if (first) {
-			first = false;
-		} else {
-			str << ',';
+	if (withHeader) {
+		for (const auto& col: columns) {
+			if (first) {
+				first = false;
+			} else {
+				str << ',';
+			}
+			str << toCSVFormat(col);
 		}
-		str << toCSVFormat(col);
+		str << '\n';
 	}
-	str << '\n';
 
 	// Rows
 	const auto nRows = getNumRows();

@@ -7,6 +7,7 @@
 #include "dx12_resource.h"
 #include "dx12_shader.h"
 #include "dx12_structured_buffer.h"
+#include "halley/utils/algorithm.h"
 
 #if defined(_GAMING_XBOX_XBOXONE)
 #pragma comment (lib, "d3d12_x.lib")
@@ -1127,21 +1128,19 @@ void DX12Video::registerFrameEvents()
 
 void DX12Video::addRecreateTexture(DX12Texture* texture)
 {
-    UniqueLock lock(deferredResourceLock);
+    UniqueLock lock(recreateTexturesLock);
     deferRecreateTextures.emplace_back(texture);
 }
 
 void DX12Video::removeRecreateTexture(DX12Texture* texture)
 {
-    UniqueLock lock(deferredResourceLock);
-    deferRecreateTextures.erase(
-        std::ranges::remove(deferRecreateTextures, texture).begin(),
-        deferRecreateTextures.end());
+    UniqueLock lock(recreateTexturesLock);
+    std_ex::erase(deferRecreateTextures, texture);
 }
 
 void DX12Video::addReleaseResource(ComPtr<ID3D12Resource>& resource)
 {
-    UniqueLock lock(deferredResourceLock);
+    UniqueLock lock(releaseResourcesLock);
     deferReleaseResources.emplace_back(std::make_pair(numFrames + 1, resource));
 }
 
@@ -1149,53 +1148,48 @@ void DX12Video::doDeferredResourceUpdates(bool immediate)
 {
     /*
      * Trigger recreation of texture resources (most likely, render targets).
+     * Processed while holding recreateTexturesLock: concurrent texture destruction
+     * blocks in removeRecreateTexture until this pass finishes, so entries can't be
+     * freed mid-loop. doCreateDeferred only takes releaseResourcesLock, never this one.
      */
-    Vector<DX12Texture*> recreate;
-    Vector<ComPtr<ID3D12Resource>> toRelease;
     {
-        UniqueLock lock(deferredResourceLock);
-        recreate = std::move(deferRecreateTextures);
-        deferRecreateTextures.clear();
-        
-        /*
-         * Release resource buffers of deleted DX12Textures.
-         *
-         * TODO: Invalidates the texture view cache, which does hurt performance.
-         */
+        UniqueLock lock(recreateTexturesLock);
+        if (!deferRecreateTextures.empty()) {
+            waitForGpu();
+            for (const auto texture : deferRecreateTextures) {
+                texture->doCreateDeferred();
+            }
+            deferRecreateTextures.clear();
+            incrementResourceVersionIndex();
+        }
+    }
+    
+    /*
+     * Release resource buffers of deleted DX12Textures. Runs after the recreate pass so
+     * resources queued by doCreateDeferred are caught by the same immediate flush on shutdown.
+     * 
+     * TODO: Invalidates the texture view cache, which does hurt performance.
+     */
+    {
+        UniqueLock lock(releaseResourcesLock);
         const int step = immediate ? 1000 : 1;
-
+        
         for (auto& it: deferReleaseResources) {
-   		    it.first -= step;
+            it.first -= step;
             if (it.first <= 0) {
-                toRelease.push_back(std::move(it.second));
+                releaseScratch.push_back(std::move(it.second));
             }
         }
-
-        deferReleaseResources.erase(
-            std::remove_if(
-                    deferReleaseResources.begin(),
-                    deferReleaseResources.end(),
-                    [&](const std::pair<int, ComPtr<ID3D12Resource>>& it) -> bool {
-                        return it.first <= 0;
-                    }),
-            deferReleaseResources.end());
+        
+        std_ex::erase_if(deferReleaseResources, [](const auto& it) { return it.first <= 0; });
     }
-
-    if (!recreate.empty())
-    {
+    
+    if (!releaseScratch.empty()) {
+        releaseScratch.clear();
         waitForGpu();
-        for (auto texutre : recreate) {
-            texutre->doCreateDeferred();
-        }
         incrementResourceVersionIndex();
     }
     
-    if (!toRelease.empty()) {
-        toRelease.clear();
-        waitForGpu(); 
-        incrementResourceVersionIndex();
-    }
-
     /*
      * This is a safety measure against running dry of descriptors.
      */

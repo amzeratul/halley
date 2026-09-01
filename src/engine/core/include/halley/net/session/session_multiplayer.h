@@ -120,6 +120,7 @@ namespace Halley {
 		String playerName;
 		SessionState curState = SessionState::Disconnected;
 		bool startRequestPending = false;
+		size_t lastReportedPlayers = 0;
 
 		std::unique_ptr<EntityNetworkSession> entitySession;
 		std::shared_ptr<NetworkSession> session;
