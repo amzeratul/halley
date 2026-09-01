@@ -61,13 +61,13 @@ namespace Halley {
 		
 		static void hash(const T& value, Hash::Hasher& hasher)
 		{
-			if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String> || std::is_same_v<T, std::string_view>) {
-				hasher.feed(value);
-			} else if constexpr (is_detected<Detail::HashFunction, T>::value) {
+			if constexpr (std::is_class_v<T> && is_detected<Detail::HashFunction, T>::value) {
 				ConfigNodeSerializer<T>().hash(value, hasher);
-			} else if constexpr (is_detected<Detail::HashFunctionWithContext, T>::value) {
+			} else if constexpr (std::is_class_v<T> && is_detected<Detail::HashFunctionWithContext, T>::value) {
 				EntitySerializationContext context;
 				ConfigNodeSerializer<T>().hash(value, context, hasher);
+			} else if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String> || std::is_same_v<T, std::string_view>) {
+				hasher.feed(value);
 			} else {
 				throw Exception("Unimplemented hash function for type " + String(typeid(T).name()), HalleyExceptions::Utils);
 			}
@@ -75,12 +75,12 @@ namespace Halley {
 		
 		static void hash(const T& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
 		{
-			if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String> || std::is_same_v<T, std::string_view>) {
-				hasher.feed(value);
-			} else if constexpr (is_detected<Detail::HashFunctionWithContext, T>::value) {
+			if constexpr (std::is_class_v<T> && is_detected<Detail::HashFunctionWithContext, T>::value) {
 				ConfigNodeSerializer<T>().hash(value, context, hasher);
-			} else if constexpr (is_detected<Detail::HashFunction, T>::value) {
+			} else if constexpr (std::is_class_v<T> && is_detected<Detail::HashFunction, T>::value) {
 				ConfigNodeSerializer<T>().hash(value, hasher);
+			} else if constexpr (std::is_trivially_copyable_v<T> || std::is_same_v<T, Halley::String> || std::is_same_v<T, std::string_view>) {
+				hasher.feed(value);
 			} else {
 				throw Exception("Unimplemented hash function for type " + String(typeid(T).name()), HalleyExceptions::Utils);
 			}
