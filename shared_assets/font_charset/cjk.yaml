@@ -1,0 +1,11 @@
+# CJK Symbols and Punctuation
+- id: cjkSymbolsAndPunctuation
+  range: [0x3000, 0x303F]
+
+# Halfwidth and Fullwidth Forms
+- id: cjkHalfwidthAndFullwidth
+  range: [0xFF00, 0xFFEF]
+
+# Ellipses
+- id: cjkEllipses
+  range: [0x2026, 0x2026]

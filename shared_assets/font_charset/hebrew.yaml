@@ -1,0 +1,2 @@
+- id: hebrew
+  range: [0x0590, 0x05FF]

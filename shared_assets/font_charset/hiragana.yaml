@@ -1,0 +1,5 @@
+- id: cjk
+  file: cjk
+
+- id: hiragana
+  range: [0x3040, 0x309F]

@@ -1,0 +1,2 @@
+- id: latin_extended_a
+  range: [0x0100, 0x017F]

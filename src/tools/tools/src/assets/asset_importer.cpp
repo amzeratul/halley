@@ -126,6 +126,8 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::ScriptGraph;
 	} else if (root == "ui") {
 		return ImportAssetType::UIDefinition;
+	} else if (root == "font_charset") {
+		return ImportAssetType::Skip;
 	}
 
 	return ImportAssetType::SimpleCopy;

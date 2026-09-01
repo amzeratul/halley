@@ -1,0 +1,2 @@
+- id: greek
+  range: [0x0370, 0x03FF]

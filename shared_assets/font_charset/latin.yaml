@@ -1,0 +1,12 @@
+- id: basic
+  range: [0x0000, 0x007F]
+
+- id: latin1Supplement
+  range: [0x0080, 0x00FF]
+
+# https://en.wikipedia.org/wiki/General_Punctuation
+- id: punctuation
+  range: [0x2000, 0x205E]
+
+- id: letterlikeSymbols
+  list: ℃℉№™

@@ -1,0 +1,2 @@
+- id: cyrillic
+  range: [0x0400, 0x04FF]
