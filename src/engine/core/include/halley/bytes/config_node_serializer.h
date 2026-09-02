@@ -485,7 +485,7 @@ namespace Halley {
 		static void hash(const Vector<T>& value, const EntitySerializationContext& context, Hash::Hasher& hasher)
         {
 			hasher.feed(value.size());
-	        if constexpr (std::is_trivially_copyable_v<T>) {
+	        if constexpr (!std::is_class_v<T> && std::is_trivially_copyable_v<T>) {
 		        hasher.feedBytes(value.const_byte_span());
 			} else {
 				for (const auto& v: value.const_span()) {

@@ -281,6 +281,14 @@ namespace Halley {
 	};
 	
 	template<>
+	class ConfigNodeSerializer<ScriptStateThread::StackFrame> {
+	public:
+		ConfigNode serialize(const ScriptStateThread::StackFrame& frame, const EntitySerializationContext& context);
+		ScriptStateThread::StackFrame deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void hash(const ScriptStateThread::StackFrame& frame, Hash::Hasher& hasher);
+	};
+	
+	template<>
 	class ConfigNodeSerializer<ScriptState::NodeState> {
 	public:
 		ConfigNode serialize(const ScriptState::NodeState& state, const EntitySerializationContext& context);

@@ -785,6 +785,21 @@ void ConfigNodeSerializer<ScriptStateThread>::hash(const ScriptStateThread& thre
 	thread.feedToHasher(hasher);
 }
 
+ConfigNode ConfigNodeSerializer<ScriptStateThread::StackFrame>::serialize(const ScriptStateThread::StackFrame& frame, const EntitySerializationContext& context)
+{
+	return frame.toConfigNode();
+}
+
+ScriptStateThread::StackFrame ConfigNodeSerializer<ScriptStateThread::StackFrame>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	return ScriptStateThread::StackFrame(node);
+}
+
+void ConfigNodeSerializer<ScriptStateThread::StackFrame>::hash(const ScriptStateThread::StackFrame& frame, Hash::Hasher& hasher)
+{
+	frame.feedToHasher(hasher);
+}
+
 ConfigNode ConfigNodeSerializer<ScriptState::NodeState>::serialize(const ScriptState::NodeState& state, const EntitySerializationContext& context)
 {
 	return state.toConfigNode(context);
