@@ -12,6 +12,15 @@ using namespace Halley;
 
 EntityDataDelta::Options::Options() = default;
 
+void EntityDataDelta::Options::makeIgnoreComponentIds(const WorldReflection& reflection)
+{
+	ignoreComponentIds.reset();
+    for (const auto& componentName: ignoreComponents) {
+        const auto& reflector = reflection.getComponentReflector(componentName);
+        ignoreComponentIds.set(reflector.getIndex());
+    }
+}
+
 EntityDataDelta::EntityDataDelta() = default;
 
 EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)

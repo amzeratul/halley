@@ -89,7 +89,7 @@ namespace Halley {
 		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true, IEntityFactorySerializationDebugListener* debugListener = nullptr);
 		EntityDataDelta entityDataToPrefabDelta(EntityData data, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener = nullptr);
 		
-		uint64_t hashEntity(EntityRef entity, const SerializationOptions& options);
+		uint64_t hashEntity(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions);
 
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
@@ -111,7 +111,7 @@ namespace Halley {
 
 		EntityData doSerializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent, const String& lastPrefab);
 		
-		void doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext);
+		void doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext, const EntityDataDelta::Options& deltaOptions);
 
 		EntityRef tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);

@@ -141,15 +141,15 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 	return EntityDataDelta(entityData, deltaOptions);
 }
 
-uint64_t EntityFactory::hashEntity(EntityRef entity, const SerializationOptions& options)
+uint64_t EntityFactory::hashEntity(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions)
 {
 	const auto serializeContext = EntityFactoryContext(world, resources, EntitySerialization::makeMask(options.type), false);
 	Hash::Hasher hasher;
-	doHashEntity(hasher, entity, options, serializeContext);
+	doHashEntity(hasher, entity, options, serializeContext, deltaOptions);
 	return hasher.digest();
 }
 
-void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext)
+void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext, const EntityDataDelta::Options& deltaOptions)
 {
 	// Properties
 	hasher.feed(entity.getName());
@@ -166,6 +166,10 @@ void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const S
 	const auto& worldReflection = world.getReflection();
 	for (size_t i = 0; i < ids.size(); ++i) {
 		const auto& componentId = ids[i];
+		if (deltaOptions.ignoreComponentIds.test(i)) [[unlikely]] {
+			continue;
+		}
+
 		const auto& component = ptrs[i];
 		const auto& reflector = worldReflection.getComponentReflector(componentId);
 
@@ -180,7 +184,7 @@ void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const S
 				// Store just a stub
 				hasher.feedBytes(child.getInstanceUUID().getBytes());
 			} else {
-				doHashEntity(hasher, child, options, serializeContext);
+				doHashEntity(hasher, child, options, serializeContext, deltaOptions);
 			}
 		}
 	}

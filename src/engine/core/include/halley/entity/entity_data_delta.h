@@ -1,7 +1,10 @@
 #pragma once
+#include <bitset>
+
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/uuid.h"
 #include "entity_data.h"
+#include "family_mask.h"
 #include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
@@ -26,7 +29,10 @@ namespace Halley {
 			bool canSerializeIcon = true;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
+        	std::bitset<maxComponents> ignoreComponentIds;
 			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
+
+			void makeIgnoreComponentIds(const WorldReflection& reflection);
         };
 		
         EntityDataDelta();
