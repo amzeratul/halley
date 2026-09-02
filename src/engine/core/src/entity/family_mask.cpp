@@ -29,7 +29,8 @@ namespace std {
 	{
 		std::size_t operator()(MaskEntry const& s) const noexcept
 		{
-			return Halley::DefaultHash<RealType>()(s.mask);
+			static_assert(std::is_trivially_copyable_v<decltype(s.mask)>);
+			return Hash::hash(s.mask);
 		}
 	};
 }
