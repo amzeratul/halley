@@ -1,4 +1,4 @@
-// Halley codegen version 147
+// Halley codegen version 148
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -76,14 +76,14 @@ public:
 
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(event)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, event, _context, "event");
-		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, rangeMin, _context, "rangeMin");
-		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, rangeMax, _context, "rangeMax");
-		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, rollOff, _context, "rollOff");
-		Halley::EntityConfigNodeSerializer<decltype(curve)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, curve, _context, "curve");
-		Halley::EntityConfigNodeSerializer<decltype(polygon)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, polygon, _context, "polygon");
-		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::hash<makeMask(Type::Dynamic)>(_hasher, dynamicEvents, _context, "dynamicEvents");
-		Halley::EntityConfigNodeSerializer<decltype(offset)>::hash<makeMask(Type::SaveData, Type::Dynamic, Type::Network)>(_hasher, offset, _context, "offset");
+		Halley::EntityConfigNodeSerializer<decltype(event)>::hash(_hasher, event, _context, "event", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::hash(_hasher, rangeMin, _context, "rangeMin", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::hash(_hasher, rangeMax, _context, "rangeMax", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::hash(_hasher, rollOff, _context, "rollOff", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(curve)>::hash(_hasher, curve, _context, "curve", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(polygon)>::hash(_hasher, polygon, _context, "polygon", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::hash(_hasher, dynamicEvents, _context, "dynamicEvents", makeMask(Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(offset)>::hash(_hasher, offset, _context, "offset", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {

@@ -250,7 +250,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
 			deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
 			if (hashMask) {
-				hashBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::hash<" + *hashMask + ">(_hasher, " + member.name + ", _context, \"" + member.name + "\");";
+				hashBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::hash(_hasher, " + member.name + ", _context, \"" + member.name + "\", " + *hashMask + ");";
 			}
 			sanitizeBody += "if ((_mask & " + mask + ") == 0) _node.removeKey(\"" + member.name + "\");";
 		}

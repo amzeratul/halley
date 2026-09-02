@@ -1038,14 +1038,11 @@ namespace Halley {
 			}
 		}
 
-		template <int serializationMask>
-		static void hash(Hash::Hasher& hasher, const T& value, const EntitySerializationContext& context, std::string_view name)
+		static void hash(Hash::Hasher& hasher, const T& value, const EntitySerializationContext& context, std::string_view name, int serializationMask)
 		{
-			if constexpr (serializationMask != 0) {
-				if (context.matchType(serializationMask)) {
-					//hasher.feed(name);
-					ConfigNodeHelper<T>::hash(value, context, hasher);
-				}
+			if (context.matchType(serializationMask)) {
+				//hasher.feed(name);
+				ConfigNodeHelper<T>::hash(value, context, hasher);
 			}
 		}
 	};
