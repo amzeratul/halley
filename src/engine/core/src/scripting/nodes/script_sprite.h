@@ -2,7 +2,14 @@
 #include "halley/scripting/script_environment.h"
 
 namespace Halley {
-	class ScriptSpriteAnimation final : public ScriptNodeTypeBase<void> {
+	class ScriptSpriteAnimationData : public ScriptStateData<ScriptSpriteAnimationData> {
+	public:
+		std::optional<uint32_t> playId;
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptSpriteAnimation final : public ScriptNodeTypeBase<ScriptSpriteAnimationData> {
 	public:
 		String getId() const override { return "spriteAnimation"; }
 		String getName() const override { return "Sprite Animation"; }
@@ -11,8 +18,9 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/play_animation.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-		
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+
+		void doInitData(ScriptSpriteAnimationData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSpriteAnimationData& data) const override;
 	};
 
 	class ScriptSpriteAnimationState final : public ScriptNodeTypeBase<void> {

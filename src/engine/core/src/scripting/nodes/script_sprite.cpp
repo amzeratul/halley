@@ -14,6 +14,11 @@
 
 using namespace Halley;
 
+ConfigNode ScriptSpriteAnimationData::toConfigNode(const EntitySerializationContext& context)
+{
+	return {};
+}
+
 Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() const
 {
 	return {
@@ -56,35 +61,39 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescript
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+void ScriptSpriteAnimation::doInitData(ScriptSpriteAnimationData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	auto entity = environment.tryGetEntity(readEntityId(environment, node, 2));
-	if (entity.isValid()) {
-		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
-		const auto reverse = node.getSettings()["reverse"].asBool(false);
+	data.playId = {};
+}
 
-		if (spriteAnimation) {
-			const auto& sequence = node.getSettings()["sequence"].asString("");
-			const bool loop = node.getSettings()["loop"].asBool(true);
-			const float speed = node.getSettings()["speed"].asFloat(1.0f);
-			spriteAnimation->player.setPlaybackSpeed(speed);
-			if (spriteAnimation->player.getCurrentSequenceName() != sequence || reverse != spriteAnimation->player.isPlayingReverse()) {
-				if (loop) {
-					spriteAnimation->player.setSequence(sequence);
-				} else {
-					spriteAnimation->player.playOnce(sequence, {}, reverse);
-				}
-				if (node.getSettings()["sync"].asBool(false)) {
-					if (environment.getWorld().isEntityNetworkOwner(entity)) {
-						environment.postAnimationEvent(sequence, reverse, !loop, entity.getEntityId());
-					}
+IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSpriteAnimationData& data) const
+{
+	const auto entityId = readEntityId(environment, node, 2);
+
+	if (auto* spriteAnimation = environment.tryGetComponent<SpriteAnimationComponent>(entityId)) {
+		const auto& sequence = node.getSettings()["sequence"].asString("");
+		const bool loop = node.getSettings()["loop"].asBool(true);
+		const auto reverse = node.getSettings()["reverse"].asBool(false);
+		const float speed = node.getSettings()["speed"].asFloat(1.0f);
+		spriteAnimation->player.setPlaybackSpeed(speed);
+
+		if (!data.playId) {
+			if (loop) {
+				data.playId = spriteAnimation->player.setSequence(sequence);
+			} else {
+				data.playId = spriteAnimation->player.playOnce(sequence, {}, reverse);
+			}
+			if (node.getSettings()["sync"].asBool(false)) {
+				auto entity = environment.tryGetEntity(entityId);
+				if (environment.getWorld().isEntityNetworkOwner(entity)) {
+					environment.postAnimationEvent(sequence, reverse, !loop, entity.getEntityId());
 				}
 			}
+		}
 
-			if (node.getSettings()["wait"].asBool(true)) {
-				if (spriteAnimation->player.isPlaying() && spriteAnimation->player.getCurrentSequenceName() == sequence) {
-					return Result(ScriptNodeExecutionState::Executing);
-				}
+		if (node.getSettings()["wait"].asBool(true)) {
+			if (spriteAnimation->player.getCurrentPlayId() == data.playId) {
+				return Result(ScriptNodeExecutionState::Executing);
 			}
 		}
 	}
