@@ -323,8 +323,11 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 		e->mask = FamilyMask::Handle();
 
 		auto entityRef = EntityRef(*e, *this);
-		for (const auto componentId: e->componentIds.const_span()) {
-			reflection->getComponentReflector(e->componentIds[componentId]).rebindComponent(*e->componentPtrs[componentId], entityRef);
+		const auto ids = e->componentIds.const_span();
+		const auto ptrs = e->componentPtrs.const_span();
+		const auto n = ids.size();
+		for (size_t i = 0; i < n; ++i) {
+			reflection->getComponentReflector(ids[i]).rebindComponent(*ptrs[i], entityRef);
 		}
 
 		entitiesPendingCreation.push_back(e);
