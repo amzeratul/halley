@@ -416,7 +416,7 @@ namespace {
 
 		const auto aType = a.getType();
 		const auto bType = b.getType();
-		HalleyAssertDev(aType < bType);
+		HalleyAssertDebug(aType < bType);
 
 		if (aType == ConfigNodeType::Int && bType == ConfigNodeType::Float) {
 			return cmp.compare(a.asFloat(), b.asFloat());

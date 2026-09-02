@@ -7,18 +7,18 @@
 using namespace Halley;
 
 Particles::Particles()
-	: rng(Random::getGlobal().getRawInt64())
 {
 }
 
 Particles::Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
-	: rng(Random::getGlobal().getRawInt64())
 {
 	load(node, resources, context);
 }
 
 void Particles::load(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
 {
+	rng = Random(Random::getGlobal().getRawInt64());
+
 	spawnRate = node["spawnRate"].asFloat(100);
 	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
 	spawnAreaShape = node["spawnAreaShape"].asEnum(ParticleSpawnAreaShape::Rectangle);
