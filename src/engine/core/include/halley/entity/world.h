@@ -103,7 +103,7 @@ namespace Halley {
 		EntityRef createEntity(UUID uuid, String name, EntityId parentId);
 		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {}, WorldPartitionId worldPartition = 0);
 
-		void moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition);
+		void moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition, bool otherIsAboutToBeDestroyed = false);
 
 		bool tryDestroyEntity(EntityId id);
 		void destroyEntity(EntityId id);

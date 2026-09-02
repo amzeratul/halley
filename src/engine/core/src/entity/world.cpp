@@ -287,10 +287,14 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	return e;
 }
 
-void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition)
+void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition, bool otherIsAboutToBeDestroyed)
 {
 	// First, make sure other doesn't have any pending entities that actually need deletion
 	other.spawnPending();
+
+	if (otherIsAboutToBeDestroyed) {
+		other.uuidMap.clear();
+	}
 
 	// Find entities to move
 	Vector<Entity*> entitiesToMove;
@@ -319,9 +323,8 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 		e->mask = FamilyMask::Handle();
 
 		auto entityRef = EntityRef(*e, *this);
-		const auto n = e->componentIds.size();
-		for (size_t i = 0; i < n; ++i) {
-			reflection->getComponentReflector(e->componentIds[i]).rebindComponent(*e->componentPtrs[i], entityRef);
+		for (const auto componentId: e->componentIds.const_span()) {
+			reflection->getComponentReflector(e->componentIds[componentId]).rebindComponent(*e->componentPtrs[componentId], entityRef);
 		}
 
 		entitiesPendingCreation.push_back(e);
