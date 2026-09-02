@@ -119,6 +119,14 @@ ConfigNode DataInterpolatorSetRetriever::createComponentDelta(const UUID& instan
 {
 	const auto iter = uuids.find(instanceUUID);
 	const EntityId entityId = iter != uuids.end() ? iter->second : EntityId();
+	const auto isMap = [] (const ConfigNode& n) {
+		return n.getType() == ConfigNodeType::Map || n.getType() == ConfigNodeType::DeltaMap;
+	};
+	
+	// A component that opted out of serialization (see ComponentReflectorImpl::serialize) is a Noop node, not a map: there are no fields to interpolate.
+	if (!isMap(from) || !isMap(origTo)) {
+		return ConfigNode::createDelta(from, origTo);
+	}
 
 	ConfigNode to = ConfigNode(origTo);
 	for (const auto& [fieldName, fromValue]: from.asMap()) {
