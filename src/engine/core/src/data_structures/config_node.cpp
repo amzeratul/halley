@@ -2421,3 +2421,11 @@ ConfigNode ConfigNode::makeMapReference() const
 
 	return result;
 }
+
+ConfigNode ConfigNode::clone() const
+{
+	if (type == ConfigNodeType::Reference) {
+		return dereference().clone();
+	}
+	return ConfigNode(*this);
+}
