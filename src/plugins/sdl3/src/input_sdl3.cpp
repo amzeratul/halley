@@ -268,7 +268,6 @@ void InputSDL3::processGameControllerDeviceEvent(const SDL_GamepadDeviceEvent& e
 		const auto iter = sdlGameControllers.find(event.which);
 		if (iter != sdlGameControllers.end()) {
 			iter->second->close();
-			std_ex::erase(joysticks, iter->second);
 			sdlGameControllers.erase(iter);
 		}
 	}
@@ -278,10 +277,8 @@ void InputSDL3::addJoystick(SDL_JoystickID instanceId)
 {
 	if (SDL_IsGamepad(instanceId)) {
 		if (!sdlGameControllers.contains(instanceId)) {
-			const auto joy = std::make_shared<InputGameControllerSDL3>(instanceId);
 			HalleyAssertDev(!sdlJoys.contains(instanceId));
-			sdlGameControllers[instanceId] = joy;
-			joysticks.push_back(joy);
+			sdlGameControllers[instanceId] = openGameController(instanceId);
 		}
 	} else {
 		if (!sdlJoys.contains(instanceId)) {
@@ -291,6 +288,22 @@ void InputSDL3::addJoystick(SDL_JoystickID instanceId)
 			joysticks.push_back(joy);
 		}
 	}
+}
+
+std::shared_ptr<InputGameControllerSDL3> InputSDL3::openGameController(SDL_JoystickID instanceId)
+{
+	for (auto& joystick: joysticks) {
+		if (auto controller = std::dynamic_pointer_cast<InputGameControllerSDL3>(joystick)) {
+			if (!controller->isOpen()) {
+				controller->open(instanceId);
+				return controller;
+			}
+		}
+	}
+	
+	auto controller = std::make_shared<InputGameControllerSDL3>(instanceId);
+	joysticks.push_back(controller);
+	return controller;
 }
 
 void InputSDL3::processTouch(int type, long long /*touchDeviceId*/, long long fingerId, float x, float y)

@@ -2,19 +2,11 @@
 
 #include <utility>
 
-#include "halley/support/console.h"
-
 using namespace Halley;
 
 InputGameControllerSDL3::InputGameControllerSDL3(SDL_JoystickID instanceId)
 	: id(instanceId)
 {
-	controller = SDL_OpenGamepad(instanceId);
-	if (!controller) {
-		throw Exception("Could not open Game Controller " + toString(instanceId) + ": " + toString(SDL_GetError()), HalleyExceptions::InputPlugin);
-	}
-	name = String(SDL_GetGamepadName(controller));
-
 	// Axes
 	axes.resize(SDL_GAMEPAD_AXIS_COUNT);
 	axisAdjust = &defaultAxisAdjust;
@@ -26,10 +18,26 @@ InputGameControllerSDL3::InputGameControllerSDL3(SDL_JoystickID instanceId)
 	// Buttons
 	init(SDL_GAMEPAD_BUTTON_COUNT + 2);
 
+	open(instanceId);
+}
+
+void InputGameControllerSDL3::open(SDL_JoystickID instanceId)
+{
+	controller = SDL_OpenGamepad(instanceId);
+	if (!controller) {
+		throw Exception("Could not open Game Controller " + toString(instanceId) + ": " + toString(SDL_GetError()), HalleyExceptions::InputPlugin);
+	}
+	id = instanceId;
+	name = String(SDL_GetGamepadName(controller));
 	setEnabled(true);
 
-	std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << getName() << " (id = " << instanceId << ")" << ConsoleColour() << "\".\n";
-	std::cout << "\t* Mapping: \"" << ConsoleColour(Console::DARK_GREY) << getMapping() << ConsoleColour() << "\".\n";
+	Logger::logInfo(String("\tInitialized SDL Game Controller: \"") + getName() + " (id = " + instanceId + ")\".");
+	Logger::logInfo("\t* Mapping: \"" + getMapping() + "\".");
+}
+
+bool InputGameControllerSDL3::isOpen() const
+{
+	return controller != nullptr;
 }
 
 InputGameControllerSDL3::~InputGameControllerSDL3()
@@ -40,11 +48,21 @@ InputGameControllerSDL3::~InputGameControllerSDL3()
 void InputGameControllerSDL3::close()
 {
 	if (controller) {
-		std::cout << "\tRemoved SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << getName() << " (idx = " << id << ")" << ConsoleColour() << "\".\n";
+		Logger::logInfo(String("\tRemoved SDL Game Controller: \"") + getName() + " (id = " + id + ")\".");
 		doSetVibration(0, 0);
 		SDL_CloseGamepad(controller);
 		controller = nullptr;
 		id = ~0;
+		
+		for (int i = 0; i < static_cast<int>(getNumberButtons()); ++i) {
+			clearButton(i);
+		}
+		
+		for (int i = 0; i < 4; ++i) {
+			hats[0]->clearButton(i);
+		}
+		clearAxes();
+		
 		setEnabled(false);
 	}
 }

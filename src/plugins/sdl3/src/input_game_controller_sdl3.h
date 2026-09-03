@@ -13,7 +13,9 @@ namespace Halley {
 		~InputGameControllerSDL3() override;
 
 		void update(Time t) override;
+		void open(SDL_JoystickID instanceId);
 		void close();
+		bool isOpen() const;
 
 		std::string_view getName() const final;
 		String getMapping() const;

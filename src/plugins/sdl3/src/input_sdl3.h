@@ -52,6 +52,7 @@ namespace Halley {
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
 
 		void addJoystick(SDL_JoystickID instanceId);
+		std::shared_ptr<InputGameControllerSDL3> openGameController(SDL_JoystickID instanceId);
 
 		SystemSDL3& system;
 		

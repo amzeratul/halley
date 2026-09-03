@@ -281,11 +281,15 @@ void ControlBindings::apply(InputVirtual& dst, const IControlBindingMapper& mapp
 		
 		for (const auto& binding: bs) {
 			if (binding.getBindingType() == ControlBindingType::KeyboardButton) {
-				const auto [keyCode, keyMods] = binding.getKeyCode();
-				applyButtonBinding(dst, mapper, keyboard, keyCode, keyMods, bindingConfig, pendingState);
+				if (keyboard) {
+					const auto [keyCode, keyMods] = binding.getKeyCode();
+					applyButtonBinding(dst, mapper, keyboard, keyCode, keyMods, bindingConfig, pendingState);
+				}
 			} else if (binding.getBindingType() == ControlBindingType::MouseButton) {
-				auto b0 = binding.getMouseButtonIdx();
-				applyButtonBinding(dst, mapper, mouse, b0, std::nullopt, bindingConfig, pendingState);
+				if (mouse) {
+					auto b0 = binding.getMouseButtonIdx();
+					applyButtonBinding(dst, mapper, mouse, b0, std::nullopt, bindingConfig, pendingState);
+				}
 			} else if (binding.getBindingType() == ControlBindingType::GamepadButton) {
 				for (const auto& gamepad: gamepads) {
 					const auto [b0, b1] = binding.getGamepadButtonIdx(*gamepad);
