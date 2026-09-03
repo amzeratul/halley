@@ -442,7 +442,7 @@ namespace {
 		for (const auto& entry: data.asSequence()) {
 			String context; // TODO
 			String comment; // TODO
-			result.entries.emplace_back(entry["key"].asString(), entry["value"].asString(""), std::move(context), std::move(comment));
+			result.entries.emplace_back(entry["key"].asString(), entry["value"].asString(""), std::move(context), std::move(comment), LocPriority::Lowest);
 		}
 
 		return result;
