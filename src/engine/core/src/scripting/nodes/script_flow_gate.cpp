@@ -375,7 +375,7 @@ void ScriptLatch::doSetData(ScriptEnvironment& environment, const ScriptGraphNod
 	if (curData.latched != newState) {
 		curData.latched = newState;
 		if (newState) {
-			curData.value = readDataPin(environment, node, 0);
+			curData.value = readDataPin(environment, node, 0).clone();
 		} else {
 			curData.value = ConfigNode();
 		}
@@ -802,7 +802,7 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 	if (!curData.active) {
 		curData.active = true;
 		curData.signaled = false;
-		curData.monitorVariable = environment.readInputDataPin(node, 3);
+		curData.monitorVariable = environment.readInputDataPin(node, 3).clone();
 
 		if (node.getSettings()["flowAtStart"].asBool(true)) {
 			return Result(ScriptNodeExecutionState::Fork, 0, 1);
@@ -815,7 +815,7 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 
 		const auto var = environment.readInputDataPin(node, 3);
 		if (var != curData.monitorVariable) {
-			curData.monitorVariable = var;
+			curData.monitorVariable = var.clone();
 			reset = true;
 		}
 
