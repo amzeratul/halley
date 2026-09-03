@@ -57,7 +57,7 @@ Halley is divided in a several sub-projects:
 ## Platforms
 The following platforms are supported:
 * **Windows**: Tested on Windows 10 Professional 64-bit (Might work on as low as XP 32-bit, but XP is no longer a tested target)
-* **Mac OS X**: Tested on Mac OS X 10.9.6
+* **macOS**: Tested on Mac OS X 10.9.6 (Intel); also builds and runs natively on Apple Silicon (arm64) — see [macOS (Apple Silicon)](#macos-apple-silicon--arm64) below
 * **Linux**: Tested on Ubuntu 16.04
 
 ## Installation
@@ -93,6 +93,29 @@ The following platforms are supported:
     ```
 * Run `halley-editor tests/entity` (or whichever other project you want to test)
 * Launch that project
+
+### macOS (Apple Silicon / arm64)
+The bundled `deps/osx` libraries are x86_64-only, so a native arm64 build pulls current dependencies from [Homebrew](https://brew.sh) instead:
+```
+brew install freetype sdl2 googletest openssl
+```
+(`yaml-cpp` is vendored under `src/contrib`, so its Homebrew package is optional.)
+
+[ShaderConductor](https://github.com/microsoft/ShaderConductor) (required for the tools/editor) has no arm64 prebuilt, so build it from source. Its pinned DXC/LLVM fork needs a couple of flags to compile under recent Apple Clang — configure it with `-DCMAKE_CXX_FLAGS=-Wno-invalid-specialization -DSPIRV_WERROR=OFF`, and drop the `-march=core2 -msse2` / `-Werror` lines that `Source/CMakeLists.txt` forces for non-arm hosts. This yields an arm64 `libShaderConductor.dylib`.
+
+Configure Halley with Ninja, pointing CMake at the Homebrew prefix and your ShaderConductor build. The explicit `SDL2_*` paths matter, otherwise CMake picks up the Windows-configured SDL2 headers under `deps/include`:
+```
+cmake -G Ninja \
+      -DBUILD_HALLEY_TOOLS=1 -DBUILD_HALLEY_TESTS=1 \
+      -DCMAKE_PREFIX_PATH=/opt/homebrew \
+      -DSDL2_INCLUDE_DIR=/opt/homebrew/include/SDL2 \
+      -DSDL2_LIBRARIES=/opt/homebrew/lib/libSDL2.dylib \
+      -DShaderConductor_INCLUDE_DIR="<ShaderConductor>/Include;<ShaderConductor>/Include/ShaderConductor" \
+      -DShaderConductor_LIBRARY=<ShaderConductor>/Build/.../Lib/libShaderConductor.dylib \
+      ..
+cmake --build . --config RelWithDebInfo
+```
+Then launch the editor with `./bin/halley-editor --dont-load-dll`.
 
 ## Documentation
 The full documentation is available on the [Wiki](https://github.com/amzeratul/halley/wiki).
