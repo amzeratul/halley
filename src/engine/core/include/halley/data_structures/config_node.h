@@ -659,6 +659,7 @@ namespace Halley {
 
 		ConfigNode makeReference() const;
 		ConfigNode makeMapReference() const;
+		ConfigNode clone() const;
 
 	private:
 		union {
