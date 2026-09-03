@@ -657,6 +657,7 @@ ConfigNode SceneDataDelta::Entry::toConfigNode() const
 
 void SceneDataDelta::addEntity(Entry entry)
 {
+	entry.entityData.assignChildUUIDs();
 	index[entry.uuid] = static_cast<uint32_t>(entities.size());
 	entities.emplace_back(std::move(entry));
 }
