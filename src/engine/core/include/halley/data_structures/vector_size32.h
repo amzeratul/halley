@@ -286,6 +286,7 @@ namespace Halley {
 		{
 			clear();
 			resize(count, value);
+			shrink_to_fit();
 		}
 
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
@@ -310,6 +311,7 @@ namespace Halley {
 					push_back(*iter);
 				}
 			}
+			shrink_to_fit();
 		}
 
 		void assign(std::initializer_list<T> list)
@@ -1041,6 +1043,7 @@ namespace Halley {
 					other.clear();
 				}
 
+				shrink_to_fit();
 				other.shrink_to_fit();
 			} else {
 				// No SBO, steal data
