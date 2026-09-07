@@ -22,12 +22,6 @@ void LocStringUploadChunkData::Entry::makeDiff()
 	}
 }
 
-LocStringUploadChunkData::LocStringUploadChunkData(String chunkId, bool isDelete)
-	: chunkId(std::move(chunkId))
-	, isDelete(isDelete)
-{
-}
-
 LocStringUploadChunkData::LocStringUploadChunkData(const LocOriginalDataChunk& chunk, const LocOriginalDataChunk* remote)
 {
 	chunkId = chunk.name;
@@ -192,9 +186,10 @@ void LocStringUploadData::generate(const LocOriginalData& origData, const LocOri
 	}
 
 	// Remove stale chunks
-	for (const auto& chunk: curRemoteData.getChunks()) {
-		if (!existingChunks.contains(chunk.name)) {
-			chunks.push_back(LocStringUploadChunkData(chunk.name));
+	for (const auto& remote: curRemoteData.getChunks()) {
+		if (!existingChunks.contains(remote.name)) {
+			auto emptyData = LocOriginalDataChunk(remote.name, remote.category, {});
+			chunks.push_back(LocStringUploadChunkData(emptyData, &remote));
 		}
 	}
 }

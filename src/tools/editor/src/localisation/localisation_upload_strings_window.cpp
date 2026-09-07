@@ -434,6 +434,15 @@ void LocUploadStringsWindow::toggleSend()
 	markSend(anyNotSend);
 }
 
+bool LocUploadStringsWindow::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Esc)) {
+		destroy();
+	}
+
+	return false;
+}
+
 void LocUploadStringsWindow::markSend(bool toSend)
 {
 	markSend(grid->getSelectedLines(), toSend);

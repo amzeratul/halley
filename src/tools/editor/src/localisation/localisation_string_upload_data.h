@@ -48,7 +48,6 @@ namespace Halley {
 		Vector<Entry> entries;
 		bool isDelete = false;
 
-		LocStringUploadChunkData(String chunkId = "", bool isDelete = false);
 		LocStringUploadChunkData(const LocOriginalDataChunk& chunk, const LocOriginalDataChunk* remote = nullptr);
 
 		ConfigNode toConfigNode() const;

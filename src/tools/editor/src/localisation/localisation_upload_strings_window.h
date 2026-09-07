@@ -84,6 +84,8 @@ namespace Halley {
         void toggleMinor();
         void toggleSend();
 
+        bool onKeyPress(KeyboardKeyPress key) override;
+
     private:
         UIFactory& factory;
         ProjectWindow& projectWindow;
