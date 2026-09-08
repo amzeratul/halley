@@ -153,6 +153,17 @@ namespace Halley
 		{}
 	};
 
+	enum class SaveFileChangeType : uint8_t {
+		Unknown,
+		Modified,
+		Deleted
+	};
+
+	struct SaveFileChange {
+		String name;
+		SaveFileChangeType type;
+	};
+
 	class PlatformAPI
 	{
 	public:
@@ -189,6 +200,9 @@ namespace Halley
 
 		virtual bool canProvideCloudSave() const { return false; }
 		virtual std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName = "") { return {}; }
+
+		using SaveFileChangeCallback = std::function<void(Vector<SaveFileChange>)>;
+		virtual void setSaveFileChangeCallback(SaveFileChangeCallback callback) {}
 
 		
 		////////////////////////

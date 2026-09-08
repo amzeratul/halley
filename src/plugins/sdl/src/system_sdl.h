@@ -48,6 +48,7 @@ namespace Halley
 
 		void showCursor(bool show) override;
 
+		Path getStorageContainerPath(SaveDataType type, const String& containerName) const override;
 		std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName) override;
 
 		void setEnvironment(Environment* env) override;

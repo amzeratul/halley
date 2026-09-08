@@ -466,14 +466,19 @@ void SystemSDL::showCursor(bool show)
 	SDL_ShowCursor(show ? 1 : 0);
 }
 
+Path SystemSDL::getStorageContainerPath(SaveDataType type, const String& containerName) const
+{
+	const Path dir = saveDir.at(type);
+	if (containerName.isEmpty()) {
+		return dir;
+	} else {
+		return dir / containerName / ".";
+	}
+}
+
 std::shared_ptr<ISaveData> SystemSDL::getStorageContainer(SaveDataType type, const String& containerName)
 {
-	Path dir = saveDir[type];
-	if (!containerName.isEmpty()) {
-		dir = dir / containerName / ".";
-	}
-
-	return std::make_shared<SDLSaveData>(type, dir, saveCryptKey);
+	return std::make_shared<SDLSaveData>(type, getStorageContainerPath(type, containerName), saveCryptKey);
 }
 
 void SystemSDL::setEnvironment(Environment* env)

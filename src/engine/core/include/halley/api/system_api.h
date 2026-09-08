@@ -57,6 +57,7 @@ namespace Halley
 		virtual bool hasBeenDisconnectedFromTheInternet() { return false; }
 		virtual void onGameOverlayActivated(bool active) {}
 
+		virtual Path getStorageContainerPath(SaveDataType type, const String& containerName = "") const { return {}; }
 		virtual std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName = "") = 0;
 
 		virtual std::thread createThread(const String& name, ThreadPriority priority, std::function<void()> runnable)
