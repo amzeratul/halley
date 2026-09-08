@@ -42,7 +42,7 @@ String OSMac::getUserDataDir()
 		result = getenv("HOME");
 	}
 
-	return result + "/Library/";
+	return result + "/Library/Application Support/";
 }
 
 Path OSMac::parseProgramPath(const String&)
