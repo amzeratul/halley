@@ -45,8 +45,10 @@ public:
 
 	void update(Time t)
 	{
-		updateListeners(t);
-		updateSources(t);
+		if (!getWorld().isBackground()) {
+			updateListeners(t);
+			updateSources(t);
+		}
 	}
 
 	void onMessageReceived(const PlayNetworkSoundSystemMessage& msg) override

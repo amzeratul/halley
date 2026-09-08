@@ -656,6 +656,16 @@ void World::setHeadless(bool headless)
 	this->headless = headless;
 }
 
+bool World::isBackground() const
+{
+	return background;
+}
+
+void World::setBackground(bool background)
+{
+	this->background = background;
+}
+
 TempMemoryPool& World::getUpdateMemoryPool() const
 {
 	return *updateMemoryPool;

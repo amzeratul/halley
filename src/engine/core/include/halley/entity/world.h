@@ -229,8 +229,13 @@ namespace Halley {
 			return nullptr;
 		}
 
+		// Headless worlds are never meant to render, they won't instantiate things like sprites
 		bool isHeadless() const;
 		void setHeadless(bool headless);
+
+		// Background worlds are simulating in the background (presumably because another world is on top), they won't do things like update audio listener
+		bool isBackground() const;
+		void setBackground(bool background);
 
 		TempMemoryPool& getUpdateMemoryPool() const;
 		TempMemoryPool& getRenderMemoryPool() const;
@@ -257,6 +262,7 @@ namespace Halley {
 		bool devMode = false;
 		bool terminating = false;
 		bool headless = false;
+		bool background = false;
 		bool canDeleteEntities = true;
 		uint32_t frameNumber = 0;
 		float transform2DAnisotropy = 1.0f;
