@@ -176,7 +176,10 @@ Future<std::optional<LocStringSet>> LocalisationClient::getStrings(std::optional
 	url += "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 
-	return sendWithAuthorization(HTTPMethod::GET, url).then([origLanguage = origLanguage, url] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
+	HTTPRequestOptions options;
+	options.readTimeoutMs = 60000;
+
+	return sendWithAuthorization(HTTPMethod::GET, url, {}, options).then([origLanguage = origLanguage, url] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
 	{
 		if (response->getResponseCode() == 200) {
 			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));
@@ -446,18 +449,18 @@ Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(
 	}
 }
 
-std::unique_ptr<HTTPRequest> LocalisationClient::makeRequest(HTTPMethod method, const String& path, const ConfigNode& payload) const
+std::unique_ptr<HTTPRequest> LocalisationClient::makeRequest(HTTPMethod method, const String& path, const ConfigNode& payload, const HTTPRequestOptions& options) const
 {
-	auto request = web.makeHTTPRequest(method, baseURL + path);
+	auto request = web.makeHTTPRequest(method, baseURL + path, options);
 	if (payload.getType() != ConfigNodeType::Undefined) {
 		request->setJsonBody(payload);
 	}
 	return request;
 }
 
-Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(HTTPMethod method, const String& url, const ConfigNode& payload)
+Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(HTTPMethod method, const String& url, const ConfigNode& payload, const HTTPRequestOptions& options)
 {
-	return sendWithAuthorization(makeRequest(method, url, payload));
+	return sendWithAuthorization(makeRequest(method, url, payload, options));
 }
 
 Future<bool> LocalisationClient::sendWithAuthorizationSimple(const String& url, std::unique_ptr<HTTPRequest> request)
