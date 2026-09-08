@@ -112,11 +112,21 @@ namespace Halley
 		virtual void listen(const String& address, int port) = 0;
 	};
 
+	class HTTPRequestOptions {
+	public:
+		std::optional<int> readTimeoutMs = 20000;
+		std::optional<int> writeTimeoutMs = 20000;
+	};
+
 	class WebAPI
 	{
 	public:
 		virtual ~WebAPI() {}
 
+		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(HTTPMethod method, const String& url, const HTTPRequestOptions& options)
+		{
+			return makeHTTPRequest(method, url);
+		}
 		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(HTTPMethod method, const String& url) = 0;
 	};
 

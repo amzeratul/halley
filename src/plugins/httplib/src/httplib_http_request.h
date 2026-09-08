@@ -7,8 +7,8 @@ namespace Halley {
 	class HTTPLibHTTPRequest : public HTTPRequest {
 	public:
 		HTTPLibHTTPRequest(HTTPLibHTTPRequest&& other) = default;
-		HTTPLibHTTPRequest(HTTPMethod method, const String& url);
-		HTTPLibHTTPRequest(HTTPMethod method, std::pair<String, String> hostAndPath);
+		HTTPLibHTTPRequest(HTTPMethod method, const String& url, const HTTPRequestOptions& options);
+		HTTPLibHTTPRequest(HTTPMethod method, std::pair<String, String> hostAndPath, const HTTPRequestOptions& options);
 
 		HTTPLibHTTPRequest& operator=(HTTPLibHTTPRequest&& other) = default;
 
@@ -27,6 +27,7 @@ namespace Halley {
 		String path;
 		String contentType;
 		Bytes body;
+		HTTPRequestOptions options;
 
 		httplib::Result run();
 	};

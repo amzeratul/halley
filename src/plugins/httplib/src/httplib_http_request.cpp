@@ -21,15 +21,16 @@ namespace {
 	}
 }
 
-HTTPLibHTTPRequest::HTTPLibHTTPRequest(HTTPMethod method, const String& url)
-	: HTTPLibHTTPRequest(method, parseURL(url))
+HTTPLibHTTPRequest::HTTPLibHTTPRequest(HTTPMethod method, const String& url, const HTTPRequestOptions& options)
+	: HTTPLibHTTPRequest(method, parseURL(url), options)
 {
 }
 
-HTTPLibHTTPRequest::HTTPLibHTTPRequest(HTTPMethod method, std::pair<String, String> hostAndPath)
+HTTPLibHTTPRequest::HTTPLibHTTPRequest(HTTPMethod method, std::pair<String, String> hostAndPath, const HTTPRequestOptions& options)
 	: method(method)
 	, host(hostAndPath.first)
 	, path(hostAndPath.second)
+	, options(options)
 {
 	progress = [](uint64_t cur, uint64_t total)
 	{
@@ -57,8 +58,13 @@ httplib::Result HTTPLibHTTPRequest::run()
 {
 	using namespace std::chrono_literals;
 	httplib::Client client(host.cppStr());
-	client.set_write_timeout(20s);
-	client.set_read_timeout(20s);
+
+	if (options.writeTimeoutMs) {
+		client.set_write_timeout(1ms * *options.writeTimeoutMs);
+	}
+	if (options.readTimeoutMs) {
+		client.set_read_timeout(1ms * *options.readTimeoutMs);
+	}
 
 	if (method == HTTPMethod::GET) {
 		return client.Get(path.cppStr(), headers, progress);

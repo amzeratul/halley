@@ -12,9 +12,14 @@ void HTTPLibWebAPI::deInit()
 {
 }
 
+std::unique_ptr<HTTPRequest> HTTPLibWebAPI::makeHTTPRequest(HTTPMethod method, const String& url, const HTTPRequestOptions& options)
+{
+	return std::make_unique<HTTPLibHTTPRequest>(method, url, options);
+}
+
 std::unique_ptr<HTTPRequest> HTTPLibWebAPI::makeHTTPRequest(HTTPMethod method, const String& url)
 {
-	return std::make_unique<HTTPLibHTTPRequest>(method, url);
+	return std::make_unique<HTTPLibHTTPRequest>(method, url, HTTPRequestOptions());
 }
 
 void HTTPLibWebServerAPI::init()
