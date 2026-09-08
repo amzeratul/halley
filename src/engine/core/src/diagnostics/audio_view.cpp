@@ -66,7 +66,9 @@ void AudioView::paint(Painter& painter)
 		ColourStringBuilder str;
 
 		str.append("Listener", valueCol);
-		str.append(" at regions:");
+		str.append(" at ");
+		str.append(toString(curData.listener.position), valueCol);
+		str.append(" in regions:");
 		for (const auto& region: curData.listener.regions) {
 			str.append("\n- ");
 			str.append(getRegionName(region.regionId), keyCol);
@@ -99,7 +101,9 @@ void AudioView::paint(Painter& painter)
 
 		// TODO: very thread-unsafe, these two calls must happen on main thread!
 		str.append(getEmitterName(emitterData.emitterId), valueCol);
-		str.append(" at region ");
+		str.append(" at ");
+		str.append(toString(emitterData.position), valueCol);
+		str.append(" in region ");
 		str.append(getRegionName(emitterData.regionId), valueCol);
 
 		bool first = true;

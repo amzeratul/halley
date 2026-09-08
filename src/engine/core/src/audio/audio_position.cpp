@@ -133,6 +133,15 @@ void AudioPosition::setPosition(Vector3f position)
 	}
 }
 
+Vector3f AudioPosition::getPosition() const
+{
+	if (sources.empty()) {
+		return {};
+	} else {
+		return sources[0].pos;
+	}
+}
+
 float AudioPosition::getDopplerShift(const AudioListenerData& listener) const
 {
 	if (sources.empty()) {

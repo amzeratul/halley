@@ -154,22 +154,17 @@ public:
 	}
 
 private:
-	String curRegionId;
-	String curRegionPreset;
-	String curFloorType;
 	std::function<AudioRegionId(WorldPosition pos)> regionLookup;
 	Vector<std::function<std::optional<String>(AudioEmitterId)>> emitterNameLookups;
 	
 	void updateListeners(Time t)
 	{
-		t = std::max(t, 0.00001);
-
 		AudioAPI& audio = *getAPI().audio;
 		for (auto& listener: listenerFamily) {
 			const auto pos = Vector3f(listener.transform2D.getGlobalPosition());
 			const auto lastPos = listener.audioListener.lastPos;
 			const auto deltaPos = pos - lastPos;
-			const auto vel = deltaPos.length() < 15.0f ? deltaPos / static_cast<float>(t) : Vector3f();
+			const auto vel = deltaPos.length() < 15.0f ? deltaPos / static_cast<float>(std::max(t, 0.0001)) : Vector3f();
 			listener.audioListener.velAverage.add(vel);
 			listener.audioListener.lastPos = pos;
 			audio.setListener(AudioListenerData(lastPos, listener.audioListener.velAverage.getMean(), listener.audioListener.referenceDistance, listener.audioListener.speedOfSound, listener.audioListener.regions));

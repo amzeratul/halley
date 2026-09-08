@@ -263,6 +263,7 @@ namespace Halley
 			HashMap<String, String> switches;
 			HashMap<String, float> variables;
 			Vector<VoiceData> voices;
+			Vector3f position;
 			float totalMix = 0;
 		};
 

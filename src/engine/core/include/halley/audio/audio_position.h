@@ -48,10 +48,11 @@ namespace Halley
 		float getDistance(const AudioListenerData& listener) const;
 
 		void setPosition(Vector3f position);
+		Vector3f getPosition() const;
 		float getAttenuation(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
 
 		float getDopplerShift(const AudioListenerData& listener) const;
-
+		
 	private:
 		using SpatialSourceVector = Vector<SpatialSource, std::allocator<SpatialSource>, 64, true, 16>;
 		SpatialSourceVector sources;

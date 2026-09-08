@@ -143,6 +143,7 @@ AudioDebugData::EmitterData AudioEmitter::getDebugData() const
 	result.variables = variableValues;
 	result.regionId = regionId;
 	result.totalMix = 0;
+	result.position = position.getPosition();
 
 	result.voices.reserve(voices.size());
 	for (const auto& voice: voices) {

@@ -634,7 +634,7 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	if (object.getPruneDistant()) {
 		if (emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) < 0.000001f) {
 			if (canLog(object.getAssetId())) {
-				Logger::log(*eventLogging, "- Prunned due to distance to listener: " + object.getAssetId());
+				Logger::log(*eventLogging, "- Prunned due to distance to listener at " + toString(listener.position) + ": " + object.getAssetId() + " [" + toString(emitter.getId()) + " at " + emitter.getPosition().getPosition() + "]");
 			}
 			return {};
 		}
