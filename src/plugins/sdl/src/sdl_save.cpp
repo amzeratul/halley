@@ -119,13 +119,15 @@ Bytes SDLSaveData::getData(const String& filename)
 {
 	HalleyAssertDev(!filename.isEmpty());
 
-	auto path = dir / filename;
+	const auto path = dir / filename;
+
 	std::optional<Bytes> data = doGetData(path, filename);
 	if (data) {
 		return *data;
 	} else {
 		// Fallback to backup
-		data = doGetData(path.replaceExtension(path.getExtension() + ".bak"), filename);
+		const auto backupPath = path.replaceExtension(path.getExtension() + ".bak");
+		data = doGetData(backupPath, filename);
 		if (data) {
 			return *data;
 		} else {
@@ -182,23 +184,16 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit,
 	// Paths
 	auto dstPath = dir / path;
 	auto dstPathStr = dstPath.getString();
-	std::optional<Path> backupPath;
 	if (corruptedFiles.find(dstPathStr) != corruptedFiles.end()) {
 		// File we're writing to was corrupted; don't back up, but do remove it from the list
 		corruptedFiles.erase(dstPathStr);
-	} else {
-		// We've read from this file safely before, so back it up!
-		// But don't do it for downloads, those don't count as highly sensitive data
-		if (type != SaveDataType::Downloads) {
-			backupPath = dstPath.replaceExtension(dstPath.getExtension() + ".bak");
-		}
 	}
 
 	// Write
 	OS::get().createDirectories(dir);
-	OS::get().atomicWriteFile(dstPath, gsl::as_bytes(gsl::span<const Byte>(finalData)), backupPath);
+	OS::get().atomicWriteFile(dstPath, gsl::as_bytes(gsl::span<const Byte>(finalData)), {});
 	if (log) {
-		Logger::logDev("Saving \"" + path + "\", " + String::prettySize(finalData.size()));
+		Logger::logDev("Saved \"" + path + "\", " + String::prettySize(finalData.size()));
 	}
 }
 
@@ -233,40 +228,44 @@ Vector<uint8_t> SDLSaveData::getKeyV1() const
 
 std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& filename)
 {
-	auto rawData = Path::readFile(path);
-	if (rawData.empty()) {
+	auto fileData = Path::readFile(path);
+	if (fileData.empty()) {
 		return {};
 	}
 
-	if (!key) {
-		return rawData;
-	}
-
-	// Read header
-	SDLSaveHeader header;
-	const size_t headerSize = header.read(gsl::as_bytes(gsl::span<Byte>(rawData.data(), rawData.size())));
-	if (headerSize == 0) {
-		return rawData;
-	}
-
-	// Basic header validation
-	const auto k = header.v0.version == 1 ? getKeyV1() : getKeyV2();
-	if (!header.isValid(filename, k)) {
-		Logger::logError("Invalid save file: " + filename);
-		return {};
-	}
-
-	// Decrypt data
-	rawData.erase(rawData.begin(), rawData.begin() + headerSize);
-	auto finalData = Encrypt::decryptAES(header.getIV().const_span_size<16>(), k.const_span_size<16>(), rawData);
-
-	// Final validation
-	if (header.v0.version >= 1 && header.v1.dataHash != Hash::hash(finalData)) {
-		Logger::logError("Corrupted save file: " + filename);
-		if (!path.getExtensionStrView().ends_with(".bak")) {
-			corruptedFiles.insert(path.getString());
+	if (key) {
+		// Read header
+		SDLSaveHeader header;
+		const size_t headerSize = header.read(gsl::as_bytes(gsl::span<Byte>(fileData.data(), fileData.size())));
+		if (headerSize == 0) {
+			Logger::logError("Invalid save file (invalid header): " + filename);
+			return {};
 		}
-;		return {};
+
+		// Basic header validation
+		const auto k = header.v0.version == 1 ? getKeyV1() : getKeyV2();
+		if (!header.isValid(filename, k)) {
+			Logger::logError("Invalid save file (unable to decode): " + filename);
+			return {};
+		}
+
+		// Decrypt data
+		fileData.erase(fileData.begin(), fileData.begin() + headerSize);
+		fileData = Encrypt::decryptAES(header.getIV().const_span_size<16>(), k.const_span_size<16>(), fileData);
+
+		// Final validation
+		if (header.v0.version >= 1 && header.v1.dataHash != Hash::hash(fileData)) {
+			Logger::logError("Corrupted save file: " + filename);
+			if (!path.getExtensionStrView().ends_with(".bak")) {
+				corruptedFiles.insert(path.getString());
+			}
+			return {};
+		} 
 	}
-	return finalData;
+
+	const auto backupPath = path.replaceExtension(path.getExtension() + ".bak");
+	if (path != backupPath && Path::exists(backupPath)) {
+		Path::removeFile(backupPath);
+	}
+	return fileData;
 }

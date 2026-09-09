@@ -369,6 +369,25 @@ void OSWin32::setConsoleColor(int foreground, int background)
 	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
 }
 
+static bool verifyFile(const wchar_t* str, gsl::span<const std::byte> data)
+{
+	// Read back to ensure it's OK
+	auto file = CreateFileW(str, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (file == INVALID_HANDLE_VALUE) {
+		return false;
+	}
+	DWORD read = 0;
+	DWORD highSize;
+	DWORD size = GetFileSize(file, &highSize);
+	Bytes readBack;
+	readBack.resize(size_t(size));
+
+	ReadFile(file, readBack.data(), size, &read, nullptr);
+	CloseHandle(file);
+
+	return readBack.size() == data.size() && std::memcmp(readBack.data(), data.data(), size) == 0;
+}
+
 static bool writeFile(const wchar_t* str, gsl::span<const std::byte> data)
 {
 	//std::ofstream fp(str, std::ios::binary | std::ios::out);
@@ -390,32 +409,7 @@ static bool writeFile(const wchar_t* str, gsl::span<const std::byte> data)
 			CloseHandle(file);
 		}
 
-		{
-			// Read back to ensure it's OK
-			auto file = CreateFileW(str, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-			if (file == INVALID_HANDLE_VALUE) {
-				if (i > 0) {
-					continue;
-				}
-				return false;
-			}
-			DWORD read = 0;
-			DWORD highSize;
-			DWORD size = GetFileSize(file, &highSize);
-			Bytes readBack;
-			readBack.resize(size_t(size));
-
-			ReadFile(file, readBack.data(), size, &read, nullptr);
-			CloseHandle(file);
-
-			if (readBack.size() != data.size() || std::memcmp(readBack.data(), data.data(), size) != 0) {
-				if (i > 0) {
-					continue;
-				}
-				return false;
-			}
-
-			// All good
+		if (verifyFile(str, data)) {
 			return true;
 		}
 	}
@@ -435,12 +429,17 @@ bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const std::byte> data,
 			return false;
 		}
 
-		const int result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), backupOldVersionPath ? backupPath.c_str() : nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
-		if (result == 0) {
+		const BOOL result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), backupOldVersionPath ? backupPath.c_str() : nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
+		if (result) {
+			if (verifyFile(dstPath.c_str(), data)) {
+				return true;
+			} else {
+				Logger::logError("Save file readback failed");
+				return false;
+			}
+		} else {
 			Logger::logWarning("Unable to safely overwrite file " + path.getString());
 			return writeFile(dstPath.c_str(), data);
-		} else {
-			return true;
 		}
 	} else {
 		return writeFile(dstPath.c_str(), data);
