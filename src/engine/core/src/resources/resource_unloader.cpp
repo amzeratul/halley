@@ -210,6 +210,8 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	}
 
 	// Do unloads
+	// Unloads moved to happen on start of frame to avoid race conditions
+	/*
 	for (auto& [type, stateCol]: states) {
 		for (auto& state: stateCol.states) {
 			if (state.markAsUnloading) {
@@ -220,6 +222,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 			}
 		}
 	}
+	*/
 
 	// Do loads, in this specific order
 	for (auto& type: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {

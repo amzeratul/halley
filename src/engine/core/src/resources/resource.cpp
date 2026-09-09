@@ -239,6 +239,9 @@ Future<void> AsyncResource::onLoad() const
 void AsyncResource::startFrame(float dt, uint32_t frameIdx) const
 {
 	curFrame = frameIdx;
+	if (desiredLoadState == ResourceDesiredLoadState::Unload) {
+		requestUnloading();
+	}
 }
 
 void AsyncResource::markActivelyInUse() const
@@ -277,6 +280,7 @@ bool AsyncResource::requestLoading() const
 {
 	if (loadState.load(std::memory_order::relaxed) == State::Unloaded) {
 		UniqueLock lock(loadData->loadMutex);
+		desiredLoadState = ResourceDesiredLoadState::Load;
 		usageData.lastFrameInUse = curFrame;
 		if (loadState == State::Unloaded) {
 			return const_cast<AsyncResource*>(this)->doRequestLoading();
@@ -289,7 +293,7 @@ bool AsyncResource::requestUnloading() const
 {
 	if (loadState.load(std::memory_order::relaxed) == State::Loaded) {
 		UniqueLock lock(loadData->loadMutex);
-		if (loadState == State::Loaded && usageData.lastFrameInUse != curFrame) {
+		if (desiredLoadState == ResourceDesiredLoadState::Unload && loadState == State::Loaded && curFrame > usageData.lastFrameInUse + 1) {
 			return const_cast<AsyncResource*>(this)->doRequestUnloading();
 		}
 	}
