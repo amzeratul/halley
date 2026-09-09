@@ -27,12 +27,14 @@ namespace Halley {
 
 	class Options {
 	public:
-		Options(std::shared_ptr<ISaveData> saveData);
+		Options(const HalleyAPI& api);
 		virtual ~Options() = default;
 
 		void load();
 		void save();
 		void reset();
+
+		void update(Time t);
 
 		bool isModified() const;
 		void markModified();
@@ -84,14 +86,24 @@ namespace Halley {
 
 	protected:
 		
-		std::shared_ptr<ISaveData> saveData;
+		std::shared_ptr<ISaveData> localContainer;
+		std::shared_ptr<ISaveData> roamingContainer;
 		std::shared_ptr<ControlBindings> controlBindings;
+
+		Time saveCooldown = 0;
 
 		ConfigNode options;
 		bool modified = false;
+		bool waitingForRoaming = false;
 		
 		virtual void onReset();
-		void load(ConfigNode node);
-		ConfigNode toConfigNode() const;
+
+		void loadLocal();
+		void loadRoaming();
+		void load(ConfigNode node, bool roaming);
+
+		ConfigNode toConfigNode(bool roaming) const;
+
+		virtual bool isRoamingKey(const String& key) const;
 	};
 }

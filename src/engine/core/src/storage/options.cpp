@@ -1,13 +1,20 @@
 #include "halley/storage/options.h"
 
 #include "halley/api/audio_api.h"
+#include "halley/api/halley_api.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/input/control_bindings.h"
 using namespace Halley;
 
-Options::Options(std::shared_ptr<ISaveData> saveData)
-	: saveData(std::move(saveData))
+Options::Options(const HalleyAPI& api)
 {
+	localContainer = api.system->getStorageContainer(SaveDataType::SaveLocal);
+	if (api.platform->canProvideCloudSave()) {
+		roamingContainer = api.platform->getCloudSaveContainer();
+	} else {
+		roamingContainer = api.system->getStorageContainer(SaveDataType::SaveRoaming);
+	}
+
 	load();
 }
 
@@ -15,19 +22,56 @@ void Options::load()
 {
 	reset();
 
-	const auto data = saveData->getData("options");
+	waitingForRoaming = true;
+	loadLocal();
+	loadRoaming();
+	modified = false;
+}
+
+void Options::loadLocal()
+{
+	const auto data = localContainer->getData("options");
 	if (!data.empty()) {
 		auto configFile = Deserializer::fromBytes<ConfigFile>(data, SerializerOptions(SerializerOptions::maxVersion));
-		load(std::move(configFile.getRoot()));
+		load(std::move(configFile.getRoot()), false);
+	}
+}
+
+void Options::loadRoaming()
+{
+	if (roamingContainer->isReady()) {
+		const auto data = roamingContainer->getData("options_roaming");
+		if (!data.empty()) {
+			auto configFile = Deserializer::fromBytes<ConfigFile>(data, SerializerOptions(SerializerOptions::maxVersion));
+			load(std::move(configFile.getRoot()), true);
+		}
+		waitingForRoaming = false;
+	}
+}
+
+void Options::load(ConfigNode node, bool roaming)
+{
+	for (auto& [k, v]: node.asMap()) {
+		options[k] = std::move(v);
 	}
 }
 
 void Options::save()
 {
-	ConfigFile result;
-	result.getRoot() = toConfigNode();
-	auto bytes = Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion));
-	saveData->setData("options", bytes);
+	{
+		ConfigFile result;
+		result.getRoot() = toConfigNode(false);
+		auto bytes = Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion));
+		localContainer->setData("options", bytes);
+	}
+
+	{
+		ConfigFile result;
+		result.getRoot() = toConfigNode(true);
+		auto bytes = Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion));
+		roamingContainer->setData("options_roaming", bytes);
+	}
+
 	modified = false;
 }
 
@@ -44,6 +88,20 @@ void Options::reset()
 	onReset();
 }
 
+void Options::update(Time t)
+{
+	if (waitingForRoaming) {
+		loadRoaming();
+	}
+	
+	if (saveCooldown > 0) {
+		saveCooldown -= t;
+	} else if (isModified()) {
+		save();
+		saveCooldown = 2.0;
+	}
+}
+
 bool Options::isModified() const
 {
 	return modified;
@@ -54,17 +112,20 @@ void Options::markModified()
 	modified = true;
 }
 
-void Options::load(ConfigNode node)
+ConfigNode Options::toConfigNode(bool roaming) const
 {
-	for (auto& [k, v]: node.asMap()) {
-		options[k] = std::move(v);
+	ConfigNode result;
+	for (const auto& [k, v]: options.asMap()) {
+		if (isRoamingKey(k) == roaming) {
+			result[k] = ConfigNode(v);
+		}
 	}
-	modified = false;
+	return std::move(result);
 }
 
-ConfigNode Options::toConfigNode() const
+bool Options::isRoamingKey(const String& key) const
 {
-	return ConfigNode(options);
+	return key == "language" || key == "flashingEffects" || key == "screenShake";
 }
 
 void Options::setOption(std::string_view name, ConfigNode value)
