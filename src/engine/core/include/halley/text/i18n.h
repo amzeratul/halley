@@ -51,7 +51,7 @@ namespace Halley {
 
 		int getLanguageIndex(const I18NLanguage& language) const;
 		const I18NLanguage& getLanguageFromIndex(int languageIdx) const;
-		Vector<I18NLanguage> getLanguagesAvailable() const;
+		Vector<I18NLanguage> getLanguagesAvailable(std::optional<I18NLanguage> idealLanguage = {}) const;
 
 		LocalisedString get(const String& key) const override;
 		std::optional<LocalisedString> tryGet(const String& key) const override;

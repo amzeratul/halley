@@ -191,12 +191,32 @@ const std::optional<I18NLanguage>& I18N::getTempOverrideLanguage() const
 	return tempOverrideLanguage;
 }
 
-Vector<I18NLanguage> I18N::getLanguagesAvailable() const
+Vector<I18NLanguage> I18N::getLanguagesAvailable(std::optional<I18NLanguage> idealLanguage) const
 {
+	std::optional<size_t> bestIdx;
+	I18NLanguageMatch bestMatch = I18NLanguageMatch::None;
+
 	Vector<I18NLanguage> result;
-	for (auto& e: strings) {
-		result.push_back(e.first);
+	for (const auto& [lang, str]: strings) {
+		const auto match = idealLanguage ? lang.getMatch(*idealLanguage) : I18NLanguageMatch::None;
+		if (match > bestMatch) {
+			bestMatch = match;
+			bestIdx = result.size();
+		} else if (!bestIdx && lang.getLanguageCode() == "en") {
+			bestIdx = result.size();
+		}
+
+		result.push_back(lang);
 	}
+
+	std::sort(result.begin(), result.end());
+
+	if (bestIdx) {
+		const auto lang = result[*bestIdx];
+		result.erase(result.begin() + *bestIdx);
+		result.insert(result.begin(), lang);
+	}
+
 	return result;
 }
 
