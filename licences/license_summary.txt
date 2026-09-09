@@ -1,0 +1,75 @@
+Halley Game Engine
+Copyright 2007-2026 Rodrigo Braz Monteiro
+
+constexpr-xxh3 - C++20 constexpr implementation of the XXH3 64-bit variant of xxHash
+Copyright (c) 2021-2023, chys <admin@chys.info> <chys87@github>
+
+Diff Template Library
+Copyright (c) 2015 Tatsuhiko Kubo <cubicdaiya@gmail.com>
+
+fast_float
+Copyright (c) 2021 The fast_float authors
+
+flat_hash_map
+Copyright Malte Skarupke 2017.
+
+FreeType
+Copyright 1996-2002, 2006 by David Turner, Robert Wilhelm, and Werner Lemberg
+
+Guidelines Support Library
+Copyright (c) 2015 Microsoft Corporation. All rights reserved. 
+
+libnogg
+Copyright (c) 2014-2024 Andrew Church
+
+libogg
+Copyright (c) 2002, Xiph.org Foundation
+
+libvorbis
+Copyright (c) 2002-2015 Xiph.org Foundation
+
+lodepng
+Copyright (c) 2005-2018 Lode Vandevenne
+
+Lua
+Copyright © 1994–2026 Lua.org, PUC-Rio.
+
+LZ4 Library
+Copyright (c) 2011-2020, Yann Collet
+
+miniz
+Copyright 2013-2014 RAD Game Tools and Valve Software
+Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC
+
+QOI
+Copyright(c) 2021 Dominic Szablewski
+
+Simple Directmedia Layer
+Copyright (C) 1997-2025 Sam Lantinga <slouken@libsdl.org>
+
+Shader Conductor
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+speex
+Copyright 2002-2008 	Xiph.org Foundation
+Copyright 2002-2008 	Jean-Marc Valin
+Copyright 2005-2007	Analog Devices Inc.
+Copyright 2005-2008	Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+Copyright 1993, 2002, 2006 David Rowe
+Copyright 2003 		EpicGames
+Copyright 1992-1994	Jutta Degener, Carsten Bormann
+
+stb_image
+Copyright (c) 2017 Sean Barrett
+
+TinyXML
+Copyright Lee Thomason
+
+xxHash Library
+Copyright (c) 2012-2021 Yann Collet
+
+yaml-cpp
+Copyright (c) 2008-2015 Jesse Beder.
+
+zlib
+ (C) 1995-2022 Jean-loup Gailly and Mark Adler
