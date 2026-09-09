@@ -1245,7 +1245,7 @@ String ConfigNode::asString() const
 	if (type == ConfigNodeType::String) {
 		return *strData;
 	} else if (type == ConfigNodeType::RawString) {
-		return String(*rawStrData);
+		return String(rawStrData);
 	} else if (type == ConfigNodeType::Int) {
 		return toString(asInt());
 	} else if (type == ConfigNodeType::Int64) {
