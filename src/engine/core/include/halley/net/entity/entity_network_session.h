@@ -88,6 +88,7 @@ namespace Halley {
 		bool isGameStarted() const;
 		bool isReadyToStartGame() const;
 		bool isLobbyReady() const;
+		bool isTerminatedByHost() const;
 
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const;
 		Vector<Rect4i> getRemoteViewPorts() const;
@@ -153,6 +154,7 @@ namespace Halley {
 		bool readyToStartGame = false;
 		bool gameStarted = false;
 		bool lobbyReady = false;
+		bool terminatedByHost = false;
 
         Mutex outboundInterpolatorLock;
 		ByteDataInterpolatorSet byteDataInterpolatorSet;
@@ -164,6 +166,7 @@ namespace Halley {
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveReady(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageReadyToStart& msg);
+		void onReceiveTerminateSession(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageTerminateSession& msg);
 		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageEntityMsg& msg);
 		void onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg);
 		void onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg);

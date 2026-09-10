@@ -68,6 +68,10 @@ EntityNetworkSession::~EntityNetworkSession()
 
 void EntityNetworkSession::close()
 {
+	sendToAll(EntityNetworkMessageTerminateSession());
+	sendMessages();
+	session->update(0);
+
 	for (auto& peer: peers) {
 		peer.destroy();
 	}
@@ -431,6 +435,9 @@ void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, Ent
 	case EntityNetworkHeaderType::ReadyToStart:
 		onReceiveReady(fromPeerId, msg.getMessage<EntityNetworkMessageReadyToStart>());
 		break;
+	case EntityNetworkHeaderType::TerminateSession:
+		onReceiveTerminateSession(fromPeerId, msg.getMessage<EntityNetworkMessageTerminateSession>());
+		break;
 	case EntityNetworkHeaderType::EntityMsg:
 		onReceiveMessageToEntity(fromPeerId, msg.getMessage<EntityNetworkMessageEntityMsg>());
 		break;
@@ -473,6 +480,12 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId, con
 	if (fromPeerId == 0) {
 		readyToStartGame = true;
 	}
+}
+
+void EntityNetworkSession::onReceiveTerminateSession(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageTerminateSession& msg)
+{
+	Logger::logDev("Received EntityNetworkMessageTerminateSession");
+	terminatedByHost = true;
 }
 
 void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageEntityMsg& msg)
@@ -774,6 +787,11 @@ bool EntityNetworkSession::isReadyToStartGame() const
 bool EntityNetworkSession::isLobbyReady() const
 {
 	return lobbyReady;
+}
+
+bool EntityNetworkSession::isTerminatedByHost() const
+{
+	return terminatedByHost;
 }
 
 bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const

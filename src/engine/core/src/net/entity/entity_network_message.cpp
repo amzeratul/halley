@@ -65,6 +65,12 @@ void EntityNetworkMessageReadyToStart::serialize(Serializer& s) const
 void EntityNetworkMessageReadyToStart::deserialize(Deserializer& s)
 {}
 
+void EntityNetworkMessageTerminateSession::serialize(Serializer& s) const
+{}
+
+void EntityNetworkMessageTerminateSession::deserialize(Deserializer& s)
+{}
+
 void EntityNetworkMessageEntityMsg::serialize(Serializer& s) const
 {
 	s << entityUUID;
@@ -200,6 +206,9 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 		break;
 	case EntityNetworkHeaderType::ReadyToStart:
 		message = std::make_unique<EntityNetworkMessageReadyToStart>();
+		break;
+	case EntityNetworkHeaderType::TerminateSession:
+		message = std::make_unique<EntityNetworkMessageTerminateSession>();
 		break;
 	case EntityNetworkHeaderType::EntityMsg:
 		message = std::make_unique<EntityNetworkMessageEntityMsg>();

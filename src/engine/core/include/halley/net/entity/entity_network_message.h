@@ -22,7 +22,8 @@ namespace Halley {
         JoinWorld,
         GetLobbyInfo,
         UpdateLobbyInfo,
-        SetLobbyInfo
+        SetLobbyInfo,
+        TerminateSession
     };
 
     class IEntityNetworkMessage {
@@ -86,6 +87,15 @@ namespace Halley {
 	class EntityNetworkMessageReadyToStart final : public IEntityNetworkMessage {
 	public:
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::ReadyToStart; }
+        bool needsWorld() const override { return false; }
+
+		void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+	};
+
+	class EntityNetworkMessageTerminateSession final : public IEntityNetworkMessage {
+	public:
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::TerminateSession; }
         bool needsWorld() const override { return false; }
 
 		void serialize(Serializer& s) const override;
