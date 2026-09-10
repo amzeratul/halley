@@ -324,7 +324,12 @@ ConnectionStatus NetworkSession::getStatus() const
 			}
 		}
 	} else if (type == NetworkSessionType::Host) {
-		return ConnectionStatus::Connected;
+		if (!service.sessionServiceAvailable()) {
+			return ConnectionStatus::Closed;
+		} else {
+			return ConnectionStatus::Connected;
+		}
+		
 	} else {
 		throw Exception("Unknown session type.", HalleyExceptions::Network);
 	}

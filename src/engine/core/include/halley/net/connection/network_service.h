@@ -56,6 +56,7 @@ namespace Halley
 		virtual ~NetworkService() = default;
 
 		virtual bool isReady();
+		bool sessionServiceAvailable(); // Only relevant for platforms with explicit session services (PS, XBOX), can't host if it returns false
 		virtual void update(Time t) {}
 
 		virtual String startListening(AcceptCallback callback) = 0; // Returns the address that clients will use to connect to
@@ -75,6 +76,9 @@ namespace Halley
 
         [[nodiscard]] short getFreeConnectionId() const;
         [[nodiscard]] virtual bool hasConnectionWithId(short connId) const { return true; }
+
+		virtual bool platformHasSessionService()  const { return false; }
+		virtual bool platformSessionServiceAvailable()  const { return true; }
 	};
 
 	template <>

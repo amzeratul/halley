@@ -33,6 +33,18 @@ bool NetworkService::isReady()
 	return true;
 }
 
+bool NetworkService::sessionServiceAvailable()
+{
+    //Avoid constant locking on platforms that this doesn't matter for
+    if (platformHasSessionService()) {
+        auto lock = this->lock();
+
+        return platformSessionServiceAvailable();
+    }
+
+    return true;
+}
+
 void NetworkService::sendHandshake(IConnection& connection)
 {
     if (connection.getStatus() == ConnectionStatus::Connecting) {
