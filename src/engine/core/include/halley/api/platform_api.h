@@ -163,6 +163,14 @@ namespace Halley
 		String name;
 		SaveFileChangeType type;
 	};
+	
+	enum class ActivityOutcome {
+		Completed,
+		Failed,
+		Abandoned,
+	};
+
+	using PlatformActivityRequestedCallback = std::function<void(const String& activityName)>;
 
 	class PlatformAPI
 	{
@@ -318,5 +326,16 @@ namespace Halley
 		virtual Vector2i getSystemDisplaySize() { return Vector2i(0, 0); }
 		
 		virtual bool mustConformToChineseLegislation() { return false; }
+
+		// Extremely PS5-specific activities functions, though you could hypothetically use them for rich presence too
+		virtual void setSingleActivityAvailable(const String& activityName, bool availability) {};
+		virtual void setActivitiesAvailable(const Vector<String>& availableActivities, const Vector<String>& unavailableActivities, bool wipeOldState) {};
+		virtual void startActivity(const String& activityName) {};
+		virtual void endActivity(const String& activityName, const ActivityOutcome outcome) {};
+
+		// Forcefully ends all in-progress activities with no outcome for a clean slate
+		virtual void terminateAllActivities() {};
+
+		virtual void setActivityRequestedCallback(PlatformActivityRequestedCallback callback) {}
 	};
 }
