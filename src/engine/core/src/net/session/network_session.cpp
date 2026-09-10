@@ -22,12 +22,12 @@ NetworkSession::NetworkSession(NetworkService& service, uint32_t networkVersion,
 
 NetworkSession::~NetworkSession()
 {
+	close();
 	if (type == NetworkSessionType::Host) {
 		service.stopListening();
 	} else {
 		service.disconnect();
 	}
-	close();
 }
 
 void NetworkSession::host(uint16_t maxClients)
@@ -78,6 +78,9 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 void NetworkSession::close()
 {
 	auto lock = service.lock();
+	if (myPeerId) {
+		Logger::logInfo("Closing network session");
+	}
 
 	for (auto& peer: peers) {
 		disconnectPeer(peer);

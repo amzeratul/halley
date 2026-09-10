@@ -55,6 +55,8 @@ namespace Halley {
 		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener);
 		~EntityNetworkSession() override;
 
+		void close();
+
 		void setWorld(World& world, SystemMessageBridge bridge);
 
 		void update(Time t);

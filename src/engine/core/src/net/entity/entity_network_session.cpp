@@ -62,7 +62,16 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 
 EntityNetworkSession::~EntityNetworkSession()
 {
+	close();
 	session->removeListener(this);
+}
+
+void EntityNetworkSession::close()
+{
+	for (auto& peer: peers) {
+		peer.destroy();
+	}
+	peers.clear();
 }
 
 void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
