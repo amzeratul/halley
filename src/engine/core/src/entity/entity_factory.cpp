@@ -166,7 +166,7 @@ void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const S
 	const auto& worldReflection = world.getReflection();
 	for (size_t i = 0; i < ids.size(); ++i) {
 		const auto& componentId = ids[i];
-		if (deltaOptions.ignoreComponentIds.test(i)) [[unlikely]] {
+		if (deltaOptions.ignoreComponentIds.test(componentId)) [[unlikely]] {
 			continue;
 		}
 
