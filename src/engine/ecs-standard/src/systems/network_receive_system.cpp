@@ -11,16 +11,12 @@ public:
 			updateSession();
 		});
 
-		if (!getSessionService().getSession().update(0)) {
-			requestExit();
-		}
+		updateSession(0);
 	}
 
 	void update(Time t)
 	{
-		if (!getSessionService().getSession().update(t)) {
-			requestExit();
-		}
+		updateSession(t);
 
 		auto& world = getWorld();
 		for (auto& e: networkFamily) {
@@ -29,19 +25,27 @@ public:
 		}
 	}
 
+	void updateSession(Time t)
+	{
+		auto& session = getSessionService().getSession();
+		if (!session.update(t)) {
+			auto* networkSession = session.getEntityNetworkSession();
+			requestExit(networkSession && networkSession->isTerminatedByHost());
+		}
+	}
+
 private:
 
 	ListenerSetToken sessionChangeToken;
 	bool requestedExit = false;
 
-	void requestExit()
+	void requestExit(bool terminatedByHost)
 	{
 		if (!requestedExit) {
 			requestedExit = true;
-			if (auto* exitGameInterface = getWorld().tryGetInterface<IExitGameInterface>()) {
-				exitGameInterface->exitGame();
-			} else {
-				getAPI().core->quit();
+
+			if (auto* exitInterface = getWorld().tryGetInterface<IExitGameInterface>()) {
+				exitInterface->onNetworkDisconnected(terminatedByHost);
 			}
 		}
 	}

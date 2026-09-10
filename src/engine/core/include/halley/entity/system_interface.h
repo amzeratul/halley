@@ -105,6 +105,7 @@ namespace Halley {
 		virtual ~IExitGameInterface() override = default;
 
 		virtual void exitGame() = 0;
+		virtual void onNetworkDisconnected(bool terminatedByHost) = 0;
 	};
 
 	class IEnableRulesSystemInterface : public ISystemInterface {

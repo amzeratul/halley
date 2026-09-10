@@ -201,6 +201,11 @@ NetworkSession* SessionMultiplayer::getNetworkSession()
 	return session.get();
 }
 
+ConnectionStatus SessionMultiplayer::getConnectionStatus() const
+{
+	return session->getStatus();
+}
+
 const String& SessionMultiplayer::getPlayerName() const
 {
 	return playerName;

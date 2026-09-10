@@ -90,6 +90,7 @@ namespace Halley {
 		EntityNetworkSession* getEntityNetworkSession() override;
 		const EntityNetworkSession* getEntityNetworkSession() const;
 		NetworkSession* getNetworkSession() override;
+		ConnectionStatus getConnectionStatus() const;
 
 		const String& getPlayerName() const override;
 
