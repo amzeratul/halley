@@ -233,7 +233,7 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, i
 	entitySerializationContext.resources = &resources;
 	entitySerializationContext.entityContext = this;
 	entitySerializationContext.entitySerializationTypeMask = entitySerializationMask;
-	entitySerializationContext.interpolators = interpolators;
+	entitySerializationContext.interpolators = interpolators ? interpolators : (parent ? parent->entitySerializationContext.interpolators : nullptr);
 	worldPartition = scene ? scene->getWorldPartition() : 0;
 	enableRulesService = world.tryGetService<EnableRulesService>();
 
@@ -414,7 +414,10 @@ void EntityFactoryContext::setEntityData(const IEntityData& iData)
 			}
 			entityData = &iData;
 		} else {
-			instancedEntityData = EntityDataInstanced(prefab->getEntityData(), dynamic_cast<const IEntityConcreteData&>(iData),
+			const auto& data = dynamic_cast<const IEntityConcreteData&>(iData);
+			const auto& prefabRoot = prefab->getEntityData();
+			const auto* prefabNode = data.getPrefabUUID().isValid() ? prefabRoot.tryGetPrefabUUID(data.getPrefabUUID()) : nullptr;
+			instancedEntityData = EntityDataInstanced(prefabNode ? *prefabNode : prefabRoot, data, 
 				entitySerializationContext.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network)));
 			entityData = &instancedEntityData;
 		}
@@ -527,9 +530,16 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		}
 
 		entity.setEnabled(enabled);
+		
+		if (delta.getPrefab() || delta.getPrefabUUID()) {
+			const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
+			auto prefab = entity.getPrefab();
+			if (!prefab || delta.getPrefab()) {
+				prefab = context->getPrefab();
+			}
+			entity.setPrefab(prefabUUID.isValid() ? std::move(prefab) : std::shared_ptr<const Prefab>(), prefabUUID);
+		}
 
-		const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
-		entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 		updateEntityComponentsDelta(entity, delta, *context);
 		updateEntityChildrenDelta(entity, delta, context);
 	} else {
@@ -690,7 +700,15 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		} else {
 			const auto iter = std::find_if(delta.getChildrenChanged().begin(), delta.getChildrenChanged().end(), [&] (const auto& e) { return e.first == child.getInstanceUUID() || e.first == child.getPrefabUUID(); });
 			if (iter != delta.getChildrenChanged().end()) {
-				updateEntityNode(iter->second, child, entity, context);
+				const auto& childPrefab = child.getPrefab();
+				const auto& ctxPrefab = context->getPrefab();
+				const bool nestedInstance = childPrefab && (!ctxPrefab || childPrefab->getAssetId() != ctxPrefab->getAssetId());
+				if (nestedInstance) {
+					const auto newContext = makeContext(iter->second, child, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
+					updateEntityNode(newContext->getRootEntityData(), child, entity, newContext);
+				} else {
+					updateEntityNode(iter->second, child, entity, context);
+				}
 			}
 		}
 	}
