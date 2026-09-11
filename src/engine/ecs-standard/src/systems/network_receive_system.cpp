@@ -28,7 +28,7 @@ public:
 	void updateSession(Time t)
 	{
 		auto& session = getSessionService().getSession();
-		if (!session.update(t)) {
+		if (!session.update(t) && !session.isHost()) {
 			auto* networkSession = session.getEntityNetworkSession();
 			requestExit(networkSession && networkSession->isTerminatedByHost());
 		}
