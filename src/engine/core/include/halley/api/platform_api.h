@@ -308,6 +308,7 @@ namespace Halley
 		//////////////////////
 		// Misc platform data
 
+		virtual bool hasInternetAccess() const { return true; }
 		virtual bool customHandlesOnlineErrors() const { return false; }
 		virtual void handleOnlineError() {}
 
