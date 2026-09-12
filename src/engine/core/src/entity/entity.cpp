@@ -143,7 +143,7 @@ void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 		HalleyAssertDev(newParent->parent != this);
 		for (Entity* ancestor = newParent; ancestor != nullptr; ancestor = ancestor->parent) {
 			if (ancestor == this) {
-				Logger::logError("Entity::setParent: refusing to parent " + (name ? *name : String()) + " (" + toString(instanceUUID + ") under its own descendant; would create a cycle."));
+				Logger::logError("Entity::setParent: refusing to parent " + (name ? *name : String()) + " (" + toString(instanceUUID) + ") under its own descendant; would create a cycle.");
 				return;
 			}
 		}
