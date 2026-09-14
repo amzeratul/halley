@@ -26,8 +26,8 @@ Serializer::Serializer(SerializerOptions _options)
 
 Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions _options)
 	: ByteSerializationBase(std::move(_options))
-	, dst(dst)
 	, dynamic(false)
+	, dst(dst)
 {
 	HalleyAssertDev(!options.toHash);
 }
