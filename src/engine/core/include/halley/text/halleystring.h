@@ -143,10 +143,10 @@ namespace Halley {
 		[[nodiscard]] size_t find(std::u8string_view str, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 		[[nodiscard]] size_t count(std::string_view string) const;
 
-		[[nodiscard]] String replaceAll(std::string_view before, std::string_view after) const;
-		[[nodiscard]] String replaceAll(std::u8string_view before, std::u8string_view after) const;
-		[[nodiscard]] String replaceOne(std::string_view before, std::string_view after) const;
-		[[nodiscard]] String replaceOne(std::u8string_view before, std::u8string_view after) const;
+		[[nodiscard]] String replaceAll(std::string_view before, std::string_view after, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] String replaceAll(std::u8string_view before, std::u8string_view after, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] String replaceOne(std::string_view before, std::string_view after, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] String replaceOne(std::u8string_view before, std::u8string_view after, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 		void shrink();
 
 		[[nodiscard]] String left(size_t n) const;

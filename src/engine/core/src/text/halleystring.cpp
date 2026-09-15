@@ -1322,25 +1322,25 @@ std::optional<double> String::tryToDouble(std::string_view str)
 	}
 }
 
-String String::replaceAll(std::string_view before, std::string_view after) const
+String String::replaceAll(std::string_view before, std::string_view after, bool caseSensitive, bool paramIsPreLowercased) const
 {
-	const size_t pos = find(before);
+	const size_t pos = find(before, caseSensitive, paramIsPreLowercased);
 	if (pos == std::string::npos) {
 		return *this;
 	} else {
 		const size_t len = before.length();
-		return substr(0, pos) + after + substr(pos + len).replaceAll(before, after);
+		return substr(0, pos) + after + substr(pos + len).replaceAll(before, after, caseSensitive, paramIsPreLowercased);
 	}
 }
 
-String String::replaceAll(std::u8string_view before, std::u8string_view after) const
+String String::replaceAll(std::u8string_view before, std::u8string_view after, bool caseSensitive, bool paramIsPreLowercased) const
 {
-	return replaceAll(toStringView(before), toStringView(after));
+	return replaceAll(toStringView(before), toStringView(after), caseSensitive, paramIsPreLowercased);
 }
 
-String String::replaceOne(std::string_view before, std::string_view after) const
+String String::replaceOne(std::string_view before, std::string_view after, bool caseSensitive, bool paramIsPreLowercased) const
 {
-	const size_t pos = find(before);
+	const size_t pos = find(before, caseSensitive, paramIsPreLowercased);
 	if (pos == std::string::npos) {
 		return *this;
 	} else {
@@ -1349,9 +1349,9 @@ String String::replaceOne(std::string_view before, std::string_view after) const
 	}
 }
 
-String String::replaceOne(std::u8string_view before, std::u8string_view after) const
+String String::replaceOne(std::u8string_view before, std::u8string_view after, bool caseSensitive, bool paramIsPreLowercased) const
 {
-	return replaceOne(toStringView(before), toStringView(after));
+	return replaceOne(toStringView(before), toStringView(after), caseSensitive, paramIsPreLowercased);
 }
 
 void String::shrink()
