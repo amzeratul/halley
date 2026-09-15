@@ -300,17 +300,19 @@ uint64_t DX12Pipeline::getMaterialHash(const Material& material)
     hasher.feed(material.getStencilReferenceOverride().has_value());
     hasher.feed(material.getStencilReferenceOverride().value_or(0));
 
-    uint32_t numPasses = material.getPassesEnabled().to_ulong();
+    const auto& passesEnabled = material.getPassesEnabled();
+    const int numPasses = material.getDefinition().getNumPasses();
 
     hasher.feed(material.isDepthStencilEnabled());
-    hasher.feed(numPasses);
+    hasher.feed(static_cast<uint32_t>(passesEnabled.to_ulong()));
 
     /*
      * Depth-stencil is part of the pipeline state.
      */
-    for (uint32_t pass = 0; pass < numPasses; pass++) {
-        const auto& depthStencil = material.getDepthStencil(int(pass));
-        hasher.feed(depthStencil.getHash());
+    for (int pass = 0; pass < numPasses; ++pass) {
+        if (passesEnabled[pass]) {
+            hasher.feed(material.getDepthStencil(pass).getHash());
+        }
     }
 
     return hasher.digest();
