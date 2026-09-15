@@ -757,7 +757,7 @@ std::pair<String, Vector<ColourOverride>> ScriptIsEntityEnabled::getNodeDescript
 
 ConfigNode ScriptIsEntityEnabled::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto entityId = readRawEntityId(environment, node, 2);
+	const auto entityId = readRawEntityId(environment, node, 0);
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
 	if (!entityRef.isValid()) {
 		Logger::logError("Entity with id " + toString(entityId) + " does not exist!");
