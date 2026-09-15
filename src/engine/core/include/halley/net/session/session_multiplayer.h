@@ -12,6 +12,7 @@ namespace Halley {
 		Idle,
 		WaitingForService, // Waiting for service to be ready
 		WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
+		PlatformLobbyCallbackFailed, // Platform reported error on join request
 		JoiningSession, // Connecting, waiting for host to assign peer id
 		JoinedSession, // Joined
 		WaitingForLobbyInfo, // Waiting for player info
@@ -30,6 +31,7 @@ namespace Halley {
 				"Idle",
 				"WaitingForService",
 				"WaitingForPlatformLobbyCallback",
+				"PlatformLobbyCallbackFailed",
 				"JoiningSession",
 				"JoinedSession",
 				"WaitingForLobbyInfo",
@@ -135,6 +137,9 @@ namespace Halley {
 
 		void onJoinCallback();
 		static void onPlatformJoinCallback(PlatformJoinCallbackParameters params);
+
+		void onJoinErrorCallback();
+		static void onPlatformJoinErrorCallback();
 
 		void doStart();
 	};

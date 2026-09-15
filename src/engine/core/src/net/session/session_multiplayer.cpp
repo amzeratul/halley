@@ -89,6 +89,7 @@ void SessionMultiplayer::doStart()
 		} else {
 			joinLobbyInstance = this;
 			api.platform->setJoinCallback(onPlatformJoinCallback);
+			api.platform->setJoinErrorCallback(onPlatformJoinErrorCallback);
 		}
 	}
 
@@ -345,6 +346,7 @@ void SessionMultiplayer::onJoinCallback()
 		lobby = std::move(joinLobbyParameters->lobby);
 		Logger::logDev("Got lobby: " + toString(!!lobby));
 		api.platform->setJoinCallback({});
+		api.platform->setJoinErrorCallback({});
 		joinLobbyParameters.reset();
 	} else {
 		Logger::logError("Received platform join lobby callback at unexpected time.");
@@ -356,5 +358,25 @@ void SessionMultiplayer::onPlatformJoinCallback(PlatformJoinCallbackParameters p
 	joinLobbyParameters = std::move(params);
 	if (joinLobbyInstance != nullptr) {
 		joinLobbyInstance->onJoinCallback();
+	}
+}
+
+void SessionMultiplayer::onJoinErrorCallback()
+{
+	if (curState == SessionState::WaitingForPlatformLobbyCallback) {
+		Logger::logDev("Joining multiplayer session as a client failed");
+		setState(SessionState::PlatformLobbyCallbackFailed);
+		api.platform->setJoinCallback({});
+		api.platform->setJoinErrorCallback({});
+		joinLobbyParameters.reset();
+	} else {
+		Logger::logError("Received platform join lobby error callback at unexpected time.");
+	}
+}
+
+void SessionMultiplayer::onPlatformJoinErrorCallback()
+{
+	if (joinLobbyInstance != nullptr) {
+		joinLobbyInstance->onJoinErrorCallback();
 	}
 }
