@@ -26,6 +26,7 @@ void Options::load()
 	loadLocal();
 	loadRoaming();
 	modified = false;
+	roamingDirty = false;
 }
 
 void Options::loadLocal()
@@ -46,6 +47,8 @@ void Options::loadRoaming()
 			load(std::move(configFile.getRoot()), true);
 		}
 		waitingForRoaming = false;
+	} else if (roamingContainer->hasFailed()) {
+		waitingForRoaming = false;
 	}
 }
 
@@ -65,14 +68,21 @@ void Options::save()
 		localContainer->setData("options", bytes);
 	}
 
-	{
-		ConfigFile result;
-		result.getRoot() = toConfigNode(true);
-		auto bytes = Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion));
-		roamingContainer->setData("options_roaming", bytes);
+	saveRoaming();
+	modified = false;
+}
+
+void Options::saveRoaming()
+{
+	if (!roamingDirty || waitingForRoaming) {
+		return;
 	}
 
-	modified = false;
+	ConfigFile result;
+	result.getRoot() = toConfigNode(true);
+	auto bytes = Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion));
+	roamingContainer->setData("options_roaming", bytes);
+	roamingDirty = false;
 }
 
 void Options::reset()
@@ -92,6 +102,9 @@ void Options::update(Time t)
 {
 	if (waitingForRoaming) {
 		loadRoaming();
+		if (!waitingForRoaming) {
+			saveRoaming();
+		}
 	}
 	
 	if (saveCooldown > 0) {
@@ -133,6 +146,9 @@ void Options::setOption(std::string_view name, ConfigNode value)
 {
 	if (options[name] != value) {
 		options[name] = std::move(value);
+		if (isRoamingKey(String(name))) {
+			roamingDirty = true;
+		}
 		markModified();
 	}
 }

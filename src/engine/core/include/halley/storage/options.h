@@ -95,10 +95,12 @@ namespace Halley {
 		ConfigNode options;
 		bool modified = false;
 		bool waitingForRoaming = false;
+		bool roamingDirty = false;
 		
 		virtual void onReset();
 
 		void loadLocal();
+		void saveRoaming();
 		void loadRoaming();
 		void load(ConfigNode node, bool roaming);
 

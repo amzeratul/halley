@@ -32,6 +32,7 @@ namespace Halley {
 		virtual ~ISaveData() = default;
 
 		virtual bool isReady() const = 0;
+		virtual bool hasFailed() const { return false;}
 
 		virtual Bytes getData(const String& path) = 0;
 		virtual void removeData(const String& path) {};
