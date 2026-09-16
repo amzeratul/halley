@@ -167,7 +167,7 @@ void UISlider::onManualControlAnalogueAdjustValue(float input, Time t)
 		maxSpeed = advance(maxSpeed, inputSpeed, float(t * accel));
 	}
 
-	setRelativeValue(getRelativeValue() + float(maxSpeed * t));
+	setRelativeValue(getRelativeValue(false) + float(maxSpeed * t));
 }
 
 std::shared_ptr<UIWidget> UISlider::getLabelBox() const
