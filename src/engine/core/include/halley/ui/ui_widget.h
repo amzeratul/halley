@@ -273,6 +273,7 @@ namespace Halley {
 		virtual void onEnabledChanged();
 
 		virtual void checkActive();
+		virtual bool isDestroying() const { return destroying; }
 
 		Vector<UIStyle> styles = {};
 
