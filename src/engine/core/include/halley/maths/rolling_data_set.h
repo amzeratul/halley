@@ -121,10 +121,12 @@ namespace Halley {
 
         static T getMedianOf(const Vector<T>& d)
         {
-	        if (d.size() % 2 == 0) {
-                return (d[d.size() / 2] + d[d.size() / 2 + 1]) / T(2);
+            const size_t sz = d.size();
+	        if (sz % 2 == 0) {
+	            const size_t idx = sz > 2 ? sz / 2 : 0;
+                return (d[idx] + d[idx + 1]) / T(2);
             } else {
-                return d[d.size() / 2];
+                return d[sz / 2];
             }
         }
     };
