@@ -510,6 +510,22 @@ namespace Halley {
 		}
 
 		template <typename T>
+		bool removeComponentInTree()
+		{
+			validateComponentType<T>();
+			if (hasComponent<T>()) {
+				removeComponent<T>();
+				return true;
+			}
+			for (auto child : getChildren()) {
+				if (child.removeComponentInTree<T>()) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		template <typename T>
 		T& getComponent(bool evenIfDisabled = false)
 		{
 			validateComponentType<T>();
