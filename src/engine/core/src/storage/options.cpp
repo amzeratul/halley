@@ -125,6 +125,11 @@ void Options::markModified()
 	modified = true;
 }
 
+bool Options::isWaitingForRoaming() const
+{
+	return waitingForRoaming;
+}
+
 ConfigNode Options::toConfigNode(bool roaming) const
 {
 	ConfigNode result;

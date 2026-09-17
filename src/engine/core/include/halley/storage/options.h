@@ -38,6 +38,7 @@ namespace Halley {
 
 		bool isModified() const;
 		void markModified();
+		bool isWaitingForRoaming() const;
 
 		void setOption(std::string_view name, ConfigNode value);
 		ConfigNode getOption(std::string_view name) const;
