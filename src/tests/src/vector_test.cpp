@@ -61,7 +61,7 @@ namespace {
 			a.push_back(std::move(a.back()));
 		}
 
-		EXPECT_EQ(a.front(), T::value_type());
+		EXPECT_EQ(a.front(), typename T::value_type());
 		EXPECT_EQ(a.back(), v);
 	}
 
@@ -74,8 +74,8 @@ namespace {
 			a.push_back(std::move(a.back()));
 		}
 
-		EXPECT_EQ(a.front(), T::value_type());
-		EXPECT_NE(a.back(), T::value_type());
+		EXPECT_EQ(a.front(), typename T::value_type());
+		EXPECT_NE(a.back(), typename T::value_type());
 	}
 	
 	template <typename T>
@@ -132,7 +132,7 @@ namespace {
 			if constexpr (std::is_same_v<typename T::value_type, Halley::String>) {
 				a.push_back(toString(val));
 			} else {
-				a.push_back(T::value_type(val));
+				a.push_back(typename T::value_type(val));
 			}
 			EXPECT_TRUE(a.sbo_active());
 		}

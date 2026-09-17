@@ -47,7 +47,9 @@ ShaderOpenGL::ShaderOpenGL(const ShaderDefinition& definition)
 	id = glCreateProgram();
 	glCheckError();	
 #ifdef WITH_OPENGL
-	glObjectLabel(GL_PROGRAM, id, -1, definition.name.c_str());
+	if (glObjectLabel) { // null unless KHR_debug is available (e.g. not on macOS OpenGL 4.1)
+		glObjectLabel(GL_PROGRAM, id, -1, definition.name.c_str());
+	}
 #endif
 
 	name = definition.name;
@@ -86,7 +88,9 @@ static GLuint loadShader(const Bytes& src, GLenum type, String name)
 	GLuint shader = glCreateShader(type);
 	glCheckError();
 #ifdef WITH_OPENGL
-	glObjectLabel(GL_SHADER, shader, -1, name.c_str());
+	if (glObjectLabel) { // null unless KHR_debug is available (e.g. not on macOS OpenGL 4.1)
+		glObjectLabel(GL_SHADER, shader, -1, name.c_str());
+	}
 #endif
 
 	// Load source

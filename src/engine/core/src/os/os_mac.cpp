@@ -51,12 +51,15 @@ Path OSMac::parseProgramPath(const String&)
 	char buffer[2048];
 	uint32_t bufSize = 2048;
 	_NSGetExecutablePath(buffer, &bufSize);
-	Path programPath = Path(String(buffer)).parentPath() / ".";
+	// Return the full executable path; Environment::parseProgramPath derives the
+	// program directory from this via parentPath(), matching other platforms.
+	const Path executablePath = Path(String(buffer));
+	const Path programDir = executablePath.parentPath() / ".";
 
-	std::cout << "Setting CWD to " << programPath << std::endl;
-	chdir(programPath.string().c_str());
+	std::cout << "Setting CWD to " << programDir << std::endl;
+	chdir(programDir.string().c_str());
 
-	return programPath;
+	return executablePath;
 }
 
 void OSMac::openURL(const String& url)
