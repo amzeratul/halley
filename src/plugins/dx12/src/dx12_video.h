@@ -77,6 +77,7 @@ namespace Halley {
         ID3D12GraphicsCommandList* getLoaderCmdList() const { return loaderCommandList.Get(); }
         ID3D12GraphicsCommandList* startUpload();
         void finishUpload();
+        Mutex& getUploadMutex() { return uploadMutex; }
 
         void addRecreateTexture(DX12Texture* texture);
         void removeRecreateTexture(DX12Texture* texture);
@@ -111,6 +112,7 @@ namespace Halley {
         Mutex commandQueueLock;
         Mutex recreateTexturesLock;
         Mutex releaseResourcesLock;
+        Mutex uploadMutex;
 
         std::unique_ptr<DX12DescriptorPool> srvPool;
         std::unique_ptr<DX12DescriptorPool> samPool;

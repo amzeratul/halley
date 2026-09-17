@@ -314,6 +314,8 @@ void DX12Texture::doCreateDeferred()
 
 void DX12Texture::doCreateResource(TextureDescriptor& descriptor, bool keepResource)
 {
+    UniqueLock lock(video.getUploadMutex());
+
 	size_t bpp = TextureDescriptor::getBytesPerPixel(descriptor.format);
 
 	HalleyAssertDev(!descriptor.useMipMap); // TODO: D3D12 doesn't feature mipmap auto-generation
