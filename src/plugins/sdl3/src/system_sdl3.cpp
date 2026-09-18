@@ -375,13 +375,14 @@ std::shared_ptr<Halley::Window> SystemSDL3::createWindow(const WindowDefinition&
 	{
 		SystemSDL3* self = static_cast<SystemSDL3*>(context);
 
-		Concurrent::execute(Executors::getMainUpdateThread(), [self, quiesced]
-		{
-			self->onAppStateChangeNotification(quiesced);
-		}).wait();
-
 		if (quiesced) {
+			self->onAppStateChangeNotification(true);
 			SDL_GDKSuspendComplete_Proxy();
+		} else {
+			Concurrent::execute(Executors::getMainUpdateThread(), [self]
+			{
+				self->onAppStateChangeNotification(false);
+			});
 		}
 	}, this, &plm)) {
 		Logger::logWarning("Couldn't register PLM state change notification");
