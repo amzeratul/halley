@@ -1,7 +1,5 @@
 #include "input_game_controller_sdl3.h"
 
-#include <utility>
-
 using namespace Halley;
 
 InputGameControllerSDL3::InputGameControllerSDL3(SDL_JoystickID instanceId)
@@ -114,42 +112,31 @@ int InputGameControllerSDL3::getButtonAtPosition(JoystickButtonPosition position
 	}
 }
 
-#ifdef WITH_GDK
-Halley::String InputGameControllerSDL3::getButtonName(int code) const
+std::optional<JoystickButtonPosition> InputGameControllerSDL3::getPositionForButton(int code) const
 {
-	auto buttons = std::array<const char*, 15>{
-		"xbox_a",			// SDL_GAMEPAD_BUTTON_SOUTH
-		"xbox_b",			// SDL_GAMEPAD_BUTTON_EAST
-		"xbox_x",			// SDL_GAMEPAD_BUTTON_WEST
-		"xbox_y",			// SDL_GAMEPAD_BUTTON_NORTH
-		"xbox_back",		// SDL_GAMEPAD_BUTTON_BACK (View)
-		"xbox_guide",		// SDL_GAMEPAD_BUTTON_GUIDE
-		"xbox_start",		// SDL_GAMEPAD_BUTTON_START (Menu)
-		"xbox_lsb",			// SDL_GAMEPAD_BUTTON_LEFT_STICK
-		"xbox_rsb",			// SDL_GAMEPAD_BUTTON_RIGHT_STICK
-		"xbox_lb",			// SDL_GAMEPAD_BUTTON_LEFT_SHOULDER
-		"xbox_rb",			// SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER
-		"xbox_dpad_up",		// SDL_GAMEPAD_BUTTON_DPAD_UP
-		"xbox_dpad_down",	// SDL_GAMEPAD_BUTTON_DPAD_DOWN
-		"xbox_dpad_left",	// SDL_GAMEPAD_BUTTON_DPAD_LEFT
-		"xbox_dpad_right",	// SDL_GAMEPAD_BUTTON_DPAD_RIGHT
-	};
-	if (code >= 0 && std::cmp_less(code, buttons.size()))
-	{
-		return buttons[code];
-	}
-	if (code == SDL_GAMEPAD_BUTTON_COUNT)
-	{
-		return "xbox_lt";
-	}
-	if (code == SDL_GAMEPAD_BUTTON_COUNT + 1)
-	{
-		return "xbox_rt";
-	}
+	using enum JoystickButtonPosition;
 
-	return InputJoystick::getButtonName(code);
+	switch (code) {
+		case SDL_GAMEPAD_BUTTON_SOUTH: return FaceBottom;
+		case SDL_GAMEPAD_BUTTON_EAST: return FaceRight;
+		case SDL_GAMEPAD_BUTTON_WEST: return FaceLeft;
+		case SDL_GAMEPAD_BUTTON_NORTH: return FaceTop;
+		case SDL_GAMEPAD_BUTTON_BACK: return Select;
+		case SDL_GAMEPAD_BUTTON_GUIDE: return System;
+		case SDL_GAMEPAD_BUTTON_START: return Start;
+		case SDL_GAMEPAD_BUTTON_LEFT_STICK: return LeftStick;
+		case SDL_GAMEPAD_BUTTON_RIGHT_STICK: return RightStick;
+		case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER: return BumperLeft;
+		case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER: return BumperRight;
+		case SDL_GAMEPAD_BUTTON_DPAD_UP: return DPadUp;
+		case SDL_GAMEPAD_BUTTON_DPAD_DOWN: return DPadDown;
+		case SDL_GAMEPAD_BUTTON_DPAD_LEFT: return DPadLeft;
+		case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: return DPadRight;
+		case SDL_GAMEPAD_BUTTON_COUNT: return TriggerLeft;
+		case SDL_GAMEPAD_BUTTON_COUNT + 1: return TriggerRight;
+		default: return std::nullopt;
+	}
 }
-#endif
 
 void InputGameControllerSDL3::processEvent(const SDL_Event& event)
 {
