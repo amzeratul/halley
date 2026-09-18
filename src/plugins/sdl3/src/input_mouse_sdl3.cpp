@@ -96,16 +96,6 @@ void InputMouseSDL3::update()
 	onButtonStatus(static_cast<int>(MouseButton::WheelLeftRight), false);
 }
 
-InputType InputMouseSDL3::getInputType() const
-{
-	return InputType::Mouse;
-}
-
-std::string_view InputMouseSDL3::getName() const
-{
-	return "Mouse";
-}
-
 float InputMouseSDL3::getAxis(int n) const
 {
 	if (n == 0) {

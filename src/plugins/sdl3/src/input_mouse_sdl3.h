@@ -5,7 +5,7 @@
 
 namespace Halley {
 
-	class InputMouseSDL3 final : public InputButtonBase {
+	class InputMouseSDL3 final : public InputMouse {
 		friend class InputSDL3;
 	public:
 		Vector2f getPosition() const override;
@@ -16,8 +16,6 @@ namespace Halley {
 		void clearPresses() override;
 
 		void update();
-		InputType getInputType() const override;
-		std::string_view getName() const override;
 
 	private:
 		InputMouseSDL3();
