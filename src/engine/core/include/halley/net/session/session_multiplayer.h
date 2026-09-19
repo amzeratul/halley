@@ -13,6 +13,7 @@ namespace Halley {
 		WaitingForService, // Waiting for service to be ready
 		WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
 		PlatformLobbyCallbackFailed, // Platform reported error on join request
+		JoinFailed, // Connection closed or timed out while joining
 		JoiningSession, // Connecting, waiting for host to assign peer id
 		JoinedSession, // Joined
 		WaitingForLobbyInfo, // Waiting for player info
@@ -32,6 +33,7 @@ namespace Halley {
 				"WaitingForService",
 				"WaitingForPlatformLobbyCallback",
 				"PlatformLobbyCallbackFailed",
+				"JoinFailed",
 				"JoiningSession",
 				"JoinedSession",
 				"WaitingForLobbyInfo",
@@ -93,12 +95,14 @@ namespace Halley {
 		const EntityNetworkSession* getEntityNetworkSession() const;
 		NetworkSession* getNetworkSession() override;
 		ConnectionStatus getConnectionStatus() const;
+		std::optional<NetworkConnectError> getConnectError() const;
 
 		const String& getPlayerName() const override;
 
 		void setNetworkQuality(NetworkService::Quality level);
 
 		MultiplayerLobby* tryGetLobby() const;
+		bool canInvite() const;
 
 	protected:
 		virtual void onStarted();
@@ -124,6 +128,9 @@ namespace Halley {
 		SessionState curState = SessionState::Disconnected;
 		bool startRequestPending = false;
 		size_t lastReportedPlayers = 0;
+		std::optional<NetworkConnectError> connectError;
+		Time joiningTime = 0;
+		constexpr static Time joinTimeout = 30.0;
 
 		std::unique_ptr<EntityNetworkSession> entitySession;
 		std::shared_ptr<NetworkSession> session;

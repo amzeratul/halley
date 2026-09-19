@@ -207,6 +207,11 @@ ConnectionStatus SessionMultiplayer::getConnectionStatus() const
 	return session->getStatus();
 }
 
+std::optional<NetworkConnectError> SessionMultiplayer::getConnectError() const
+{
+	return connectError;
+}
+
 const String& SessionMultiplayer::getPlayerName() const
 {
 	return playerName;
@@ -220,6 +225,11 @@ void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 MultiplayerLobby* SessionMultiplayer::tryGetLobby() const
 {
 	return lobby.get();
+}
+
+bool SessionMultiplayer::canInvite() const
+{
+	return lobby && getNumberOfPlayers() < getMaxNumberOfPlayers();
 }
 
 void SessionMultiplayer::onStarted()
@@ -251,6 +261,19 @@ bool SessionMultiplayer::update(Time t)
 		if (players != lastReportedPlayers) {
 			lastReportedPlayers = players;
 			lobby->setPlayerCount(static_cast<int>(players), options.maxPlayers);
+		}
+	}
+	
+	if (!host && curState == SessionState::JoiningSession) {
+		joiningTime += t;
+		if (session->getStatus() == ConnectionStatus::Closed) {
+			connectError = service->getLastConnectError();
+			Logger::logError("Failed to join multiplayer session: " + (connectError ? toString(*connectError) : String("connection closed")));
+			setState(SessionState::JoinFailed);
+		} else if (joiningTime > joinTimeout) {
+			Logger::logError("Failed to join multiplayer session: timed out waiting for the host");
+			setState(SessionState::JoinFailed);
+			session->close();
 		}
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <functional>
+#include <optional>
 #include <halley/text/halleystring.h>
 #include "iconnection.h"
 #include "halley/time/halleytime.h"
@@ -24,6 +25,23 @@ namespace Halley
 		virtual size_t getReceivedDataPerSecond() const = 0;
 		virtual size_t getSentPacketsPerSecond() const = 0;
 		virtual size_t getReceivedPacketsPerSecond() const = 0;
+	};
+
+	enum class NetworkConnectError {
+		Unknown, 
+		SessionFull,
+		SessionNotFound,
+	};
+	
+	template<>
+	struct EnumNames<NetworkConnectError> {
+		constexpr auto operator()() const{
+			return std::to_array({
+				"unknown",
+				"sessionFull",
+				"sessionNotFound",
+			});
+		}
 	};
 
 	class NetworkService : public INetworkServiceStatsListener
@@ -64,6 +82,8 @@ namespace Halley
 
 		virtual std::shared_ptr<IConnection> connect(const String& address) = 0;
 		virtual void disconnect() {}
+
+		[[nodiscard]] virtual std::optional<NetworkConnectError> getLastConnectError() const { return std::nullopt; }
 
 		virtual void setSimulateQualityLevel(Quality quality) {}
 
