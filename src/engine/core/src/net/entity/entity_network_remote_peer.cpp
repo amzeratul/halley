@@ -838,7 +838,7 @@ void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef e
 	parentSession->onRemoteEntityCreated(entity, peerId);
 	parentSession->requestSetupInterpolators(interpolatorSet, entity, true);
 
-	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
+	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>(true).byteDataInterpolatorSet;
 	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity);
 }
 

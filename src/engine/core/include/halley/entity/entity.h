@@ -667,11 +667,11 @@ namespace Halley {
 		}
 
 		template <typename T>
-		size_t tryGetEntityIdsWithComponentInTree(Vector<EntityId>& entityIds) const
+		size_t tryGetEntityIdsWithComponentInTree(Vector<EntityId>& entityIds, bool evenIfDisabled = false) const
 		{
 			validateComponentType<T>();
 			size_t count = 0;
-			auto* comp = tryGetComponent<T>();
+			auto* comp = tryGetComponent<T>(evenIfDisabled);
 			if (comp) {
 				entityIds.emplace_back(getEntityId());
 				++count;
@@ -679,7 +679,7 @@ namespace Halley {
 			for (auto& child : getRawChildren()) {
 				auto childId = EntityRef(*child, getWorld());
 				if (childId.isValid()) {
-					count += childId.tryGetEntityIdsWithComponentInTree<T>(entityIds);
+					count += childId.tryGetEntityIdsWithComponentInTree<T>(entityIds, evenIfDisabled);
 				}
 			}
 			return count;

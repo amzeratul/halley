@@ -1131,7 +1131,9 @@ EntityNetworkSerialize::SerializationContext::SerializationContext(const EntityR
     : entity({})
     , prefab(prefab)
 {
-    if (const auto networkComponent = root.tryGetComponent<NetworkComponent>()) {
+    if (const auto networkComponent = root.tryGetComponent<NetworkComponent>(true)) {
         interpolators = &networkComponent->byteDataInterpolatorSet;
+    } else {
+        Logger::logWarning("Trying to create serialization context for entity '" + root.getName() + "' with no network component");
     }
 }
