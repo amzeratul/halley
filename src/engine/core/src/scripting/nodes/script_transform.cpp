@@ -66,9 +66,12 @@ std::pair<String, Vector<ColourOverride>> ScriptSetHeight::getNodeDescription(co
 
 IScriptNodeType::Result ScriptSetHeight::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2))) {
-		const auto height = readDataPin(environment, node, 3).asFloat(0);
-		transform->setGlobalHeight(height);
+	if (auto entity = environment.tryGetEntity(readEntityId(environment, node, 2)); entity.isValid()) {
+		if (auto* transform = entity.tryGetComponent<Transform2DComponent>()) {
+			const auto height = readDataPin(environment, node, 3).asFloat(0);
+			transform->setGlobalHeight(height);
+			entity.setModifiedThisFrame(false, true);
+		}
 	}
 
 	return Result(ScriptNodeExecutionState::Done);
