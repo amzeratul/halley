@@ -188,6 +188,7 @@ namespace Halley {
 
 		Vector<PeerReadCache> peerReadCache;
 		size_t maxPacketSize = 0;
+		mutable Mutex peerReadCacheMutex;
 
 		Vector<IListener*> listeners;
 
@@ -221,7 +222,6 @@ namespace Halley {
 		void setMyPeerId(PeerId id);
 		Peer& getPeer(PeerId id);
 		const Peer& getPeer(PeerId id) const;
-		const PeerReadCache* getPeerReadCache(PeerId id) const;
 
 		void checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(std::optional<PeerId> ownerId);
