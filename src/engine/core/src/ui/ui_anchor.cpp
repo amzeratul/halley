@@ -54,8 +54,8 @@ void UIAnchor::position(UIWidget& widget) const
 	const auto targetRect = widget.getParent()->getRect();
 	const std::optional<Rect4f> curBounds = autoBounds ? targetRect : bounds;
 	const Vector2f anchorPos = targetRect.getTopLeft() + relativePos * targetRect.getSize();
-	
-	Vector2f targetPos = anchorPos - (size * relativeAlignment).floor() + absoluteOffset;
+
+	Vector2f targetPos = anchorPos - (size * relativeAlignment).round() + absoluteOffset;
 	if (curBounds) {
 		targetPos.x = clamp(targetPos.x, curBounds->getLeft(), curBounds->getRight() - size.x);
 		targetPos.y = clamp(targetPos.y, curBounds->getTop(), curBounds->getBottom() - size.y);
