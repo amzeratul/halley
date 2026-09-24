@@ -198,7 +198,11 @@ void XAudio2AudioOutput::onAudioAvailable()
 
 bool XAudio2AudioOutput::needsMoreAudio()
 {
-	return getAudioOutputInterface().getAvailable() < getAudioBytesNeeded(format, 2);
+	// 8 x 256 frames = 43ms of slack. output() wakes the mixer as audio is consumed,
+	// but a streaming clip's open or seek can still stall it for tens of ms on console, 
+	// and the 5ms timeout wait rounds up to the ~15.6ms scheduler tick on Xbox.
+	// Keep it below 32KB minus one 512-frame block, which is 12 at stereo float.
+	return getAudioOutputInterface().getAvailable() < getAudioBytesNeeded(format, 8);
 }
 
 bool XAudio2AudioOutput::needsAudioThread() const

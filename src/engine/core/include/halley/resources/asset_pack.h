@@ -62,6 +62,11 @@ namespace Halley {
 		void decrypt(Encrypt::AESKey key);
 	    
     	void readData(size_t pos, gsl::span<std::byte> dst);
+    	bool isMemoryResident() const { return !reader; }
+    	
+    	// Largest single read issued to the pack's reader. It bounds how long one call holds the reader's lock,
+    	// which streaming clips on the audio thread share with bulk loads, and it is also the read-ahead chunk size.
+    	constexpr static size_t maxReadChunkSize = 128 * 1024;
 
 		std::unique_ptr<ResourceDataReader> extractReader();
 
@@ -92,10 +97,30 @@ namespace Halley {
 		bool isAvailable() const override;
 
 	private:
+		struct Chunk {
+			Bytes data;
+			size_t start = 0;
+			
+			size_t end() const { return start + data.size(); }
+			bool contains(size_t pos, size_t len) const { return pos >= start && pos + len <= end(); }
+		};
+
+		struct Prefetch {
+			Chunk chunk;
+			std::atomic<bool> ready = false;
+		};
+
 		AssetPack& pack;
 		const size_t startPos;
 		const size_t fileSize;
 		std::atomic<size_t> curPos;
 		std::shared_ptr<bool> aliveToken;
+
+		Chunk cache;
+		std::shared_ptr<Prefetch> prefetched;
+		size_t lastReadEnd = 0;
+	
+		void startPrefetch(size_t chunkStart);
+		bool takePrefetched(size_t pos, size_t len);
 	};
 }
