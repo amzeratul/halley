@@ -25,6 +25,7 @@ namespace Halley
     {
     public:
         explicit AckUnreliableConnection(std::shared_ptr<IConnection> parent, INetworkServiceStatsListener& networkStatsListener);
+        ~AckUnreliableConnection() override;
 
         void close() override;
         [[nodiscard]] ConnectionStatus getStatus() const override;

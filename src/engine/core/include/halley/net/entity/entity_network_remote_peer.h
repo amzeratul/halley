@@ -95,6 +95,7 @@ namespace Halley {
 
     	bool isAlive() const;
     	void destroy();
+    	void onWorldCleared();
         void update(Time dt);
 
     	bool hasJoinedWorld() const;

@@ -58,6 +58,7 @@ namespace Halley {
 		void close();
 
 		void setWorld(World& world, SystemMessageBridge bridge);
+		void clearWorld();
 
 		void update(Time t);
 		void sendUpdates();

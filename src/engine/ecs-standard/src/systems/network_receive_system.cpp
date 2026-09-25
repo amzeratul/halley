@@ -14,6 +14,13 @@ public:
 		updateSession(0);
 	}
 
+	void deInit() override
+	{
+		if (getSessionService().isMultiplayer()) {
+			getSessionService().getMultiplayerSession().getEntityNetworkSession()->clearWorld();
+		}
+	}
+
 	void update(Time t)
 	{
 		updateSession(t);

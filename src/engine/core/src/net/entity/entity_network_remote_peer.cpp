@@ -238,6 +238,15 @@ void EntityNetworkRemotePeer::destroy()
 	}
 }
 
+void EntityNetworkRemotePeer::onWorldCleared()
+{
+	inboundEntities.clear();
+	tempInboundEntities.clear();
+	pendingEntities.clear();
+	outboundEntities.clear();
+	allocatedOutboundIds.clear();
+}
+
 void EntityNetworkRemotePeer::update(Time dt)
 {
 	trySpawningPendingEntities();

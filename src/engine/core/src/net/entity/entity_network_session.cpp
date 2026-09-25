@@ -93,6 +93,14 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 	}
 }
 
+void EntityNetworkSession::clearWorld()
+{
+	for (auto& peer: peers) {
+		peer.onWorldCleared();
+	}
+	factory.reset();
+}
+
 void EntityNetworkSession::update(Time t)
 {
 	session->update(t);

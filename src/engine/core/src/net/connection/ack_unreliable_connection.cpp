@@ -37,6 +37,13 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
 	platformSupportsAck = this->parent->doesInternalPacketAck();
 }
 
+AckUnreliableConnection::~AckUnreliableConnection()
+{
+    if (parent) {
+        parent->setUnreliablePacketListener(nullptr);
+    }
+}
+
 void AckUnreliableConnection::close()
 {
     parent->close();
