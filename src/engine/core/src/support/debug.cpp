@@ -22,6 +22,7 @@
 #include "halley/support/debug.h"
 
 #include <cinttypes>
+#include <cstdio>
 
 #include "halley/text/halleystring.h"
 #include <iostream>
@@ -215,7 +216,9 @@ namespace {
 		std::cout << "std::terminate() invoked.\n";
 		std::cout << "[start of stack trace]\n";
 		Debug::printCallStackToUnsafe(std::cout, 4);
-		std::cout << "[end of stack trace]\n";
+		std::cout << "[end of stack trace]" << std::endl;
+		fflush(stdout);
+		fflush(stderr);
 
 		errorHandler("std::terminate() invoked.");
 
@@ -359,7 +362,8 @@ void Debug::abort()
 	::signal(SIGABRT, SIG_DFL);
 #endif
 
-	std::cout << "Invoking std::abort()\n";
+	std::cout << "Invoking std::abort()" << std::endl;
+	fflush(stdout);
 	std::abort();
 }
 
