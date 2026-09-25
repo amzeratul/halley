@@ -136,6 +136,9 @@ namespace Halley {
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
+		
+		Mutex audioConsumedMutex;
+		ConditionVariable audioConsumedCondition;
 
 		HashMap<AudioEmitterId, std::unique_ptr<AudioEmitter>> emitters;
 		HashMap<AudioRegionId, std::unique_ptr<AudioRegion>> regions;

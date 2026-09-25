@@ -5,6 +5,7 @@
 #include "halley/bytes/compression.h"
 #include "halley/maths/random.h"
 #include "halley/utils/encrypt.h"
+#include "halley/concurrency/executor.h"
 
 using namespace Halley;
 
@@ -223,7 +224,11 @@ void AssetPack::decrypt(Encrypt::AESKey key)
 void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 {
 	if (reader) {
-		reader->readAt(dst, pos + dataOffset);
+		const size_t total = dst.size();
+		for (size_t offset = 0; offset < total; offset += maxReadChunkSize) {
+			const size_t n = std::min(maxReadChunkSize, total - offset);
+			reader->readAt(dst.subspan(offset, n), pos + dataOffset + offset);
+		}
 		return;
 	}
 
@@ -268,18 +273,7 @@ size_t PackDataReader::size() const
 
 int PackDataReader::read(gsl::span<std::byte> dst)
 {
-	if (!*aliveToken) {
-		return 0;
-	}
-
-	const size_t pos = curPos;
-	size_t available = pos < fileSize ? fileSize - pos : 0;
-	size_t toRead = std::min(available, size_t(dst.size()));
-
-	pack.readData(startPos + pos, dst.subspan(0, toRead));
-	curPos += toRead;
-
-	return int(toRead);
+	return readAt(dst, curPos);
 }
 
 int PackDataReader::readAt(gsl::span<std::byte> dst, size_t pos)
@@ -288,13 +282,78 @@ int PackDataReader::readAt(gsl::span<std::byte> dst, size_t pos)
 		return 0;
 	}
 
-	size_t available = pos < fileSize ? fileSize - pos : 0;
-	size_t toRead = std::min(available, size_t(dst.size()));
-
+	const size_t available = pos < fileSize ? fileSize - pos : 0;
+	const size_t toRead = std::min(available, dst.size());
+	
+	const bool sequential = pos == lastReadEnd;
+	lastReadEnd = pos + toRead;
+	curPos = lastReadEnd;
+	
+	if (toRead == 0) {
+		return 0;
+	}
+	
+	// Don't cache packs that are already loaded into memory
+	if (pack.isMemoryResident()) {
+		pack.readData(startPos + pos, dst.subspan(0, toRead));
+		return static_cast<int>(toRead);
+	}
+	
+	if (cache.contains(pos, toRead) || takePrefetched(pos, toRead)) {
+		memcpy(dst.data(), cache.data.data() + (pos - cache.start), toRead);
+		startPrefetch(cache.end());
+		return static_cast<int>(toRead);
+	}
+	
+	// Cache miss 
 	pack.readData(startPos + pos, dst.subspan(0, toRead));
-	curPos = pos + toRead;
+	if (sequential && !prefetched) {
+		startPrefetch(pos + toRead);
+	}
+	
+	return static_cast<int>(toRead);
+}
 
-	return int(toRead);
+void PackDataReader::startPrefetch(size_t chunkStart)
+{
+	if (prefetched || chunkStart >= fileSize) {
+		return;
+	}
+	
+	auto pending = std::make_shared<Prefetch>();
+	pending->chunk.start = chunkStart;
+	pending->chunk.data.resize_no_init(std::min(AssetPack::maxReadChunkSize, fileSize - chunkStart));
+	prefetched = pending;
+	
+	Executors::getDiskIO().addToQueue([pending, packPtr = &pack, alive = aliveToken, absPos = startPos + chunkStart]()
+	{
+		if (*alive) {
+			packPtr->readData(absPos, pending->chunk.data.byte_span());
+		}
+		pending->ready.store(true, std::memory_order_release);
+	}, {});
+}
+
+bool PackDataReader::takePrefetched(size_t pos, size_t len)
+{
+	if (!prefetched) {
+		return false;
+	}
+
+	const auto& chunk = prefetched->chunk;
+
+	if (pos >= chunk.end() || chunk.start > pos + AssetPack::maxReadChunkSize) {
+		prefetched.reset();
+		return false;
+	}
+
+	if (!prefetched->ready.load(std::memory_order_acquire) || !chunk.contains(pos, len)) {
+		return false;
+	}
+
+	cache = std::move(prefetched->chunk);
+	prefetched.reset();
+	return true;
 }
 
 void PackDataReader::seek(int64_t pos, int whence)

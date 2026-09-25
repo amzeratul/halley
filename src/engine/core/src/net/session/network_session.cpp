@@ -110,6 +110,7 @@ uint16_t NetworkSession::getClientCount() const
 	if (type == NetworkSessionType::Client) {
 		return static_cast<uint16_t>(sharedData.size()); // Is this correct?
 	} else if (type == NetworkSessionType::Host) {
+		auto lock = UniqueLock(peerReadCacheMutex);
 		uint16_t i = 1;
 		for (const auto& peer: peerReadCache) {
 			if (peer.connectionStatus == ConnectionStatus::Connected) {
@@ -124,6 +125,7 @@ uint16_t NetworkSession::getClientCount() const
 
 Vector<NetworkSession::PeerId> NetworkSession::getRemotePeers() const
 {
+	auto lock = UniqueLock(peerReadCacheMutex);
 	Vector<PeerId> result;
 	for (auto& peer: peerReadCache) {
 		result.push_back(peer.peerId);
@@ -133,6 +135,7 @@ Vector<NetworkSession::PeerId> NetworkSession::getRemotePeers() const
 
 size_t NetworkSession::getIndexOfRemotePeer(PeerId clientId) const
 {
+	auto lock = UniqueLock(peerReadCacheMutex);
 	for (size_t idx = 0; idx < peerReadCache.size(); idx++) {
 		if (peerReadCache[idx].peerId == clientId) {
 			return idx;
@@ -143,6 +146,7 @@ size_t NetworkSession::getIndexOfRemotePeer(PeerId clientId) const
 
 NetworkSession::PeerId NetworkSession::getRemotePeerAtIndex(size_t idx) const
 {
+	auto lock = UniqueLock(peerReadCacheMutex);
 	return idx < peerReadCache.size() ? peerReadCache.at(idx).peerId : 0xff;
 }
 
@@ -206,17 +210,20 @@ void NetworkSession::update(Time t)
 		}
 
 		// Refresh the cache.
-		peerReadCache.clear();
-		for (const auto& peer: peers) {
-			PeerReadCache cache = {};
+		{
+			auto cacheLock = UniqueLock(peerReadCacheMutex);
+			peerReadCache.clear();
+			for (const auto& peer: peers) {
+				PeerReadCache cache = {};
 
-			cache.peerId = peer.peerId;
-			cache.connectionStatus = peer.alive ? peer.getStatus() : ConnectionStatus::Closed;
-			cache.sessionTimeMs = doGetPeerSessionTimeMs(peer);
-			cache.latency = doGetLatency(peer);
-			cache.stats = peer.stats;
+				cache.peerId = peer.peerId;
+				cache.connectionStatus = peer.alive ? peer.getStatus() : ConnectionStatus::Closed;
+				cache.sessionTimeMs = doGetPeerSessionTimeMs(peer);
+				cache.latency = doGetLatency(peer);
+				cache.stats = peer.stats;
 
-			peerReadCache.emplace_back(cache);
+				peerReadCache.emplace_back(cache);
+			}
 		}
 
 		maxPacketSize = doGetMaxPacketSize();
@@ -314,6 +321,7 @@ ConnectionStatus NetworkSession::getStatus() const
 	if (type == NetworkSessionType::Undefined) {
 		return ConnectionStatus::Undefined;
 	} else if (type == NetworkSessionType::Client) {
+		auto lock = UniqueLock(peerReadCacheMutex);
 		if (peerReadCache.empty()) {
 			return ConnectionStatus::Closed;
 		} else {
@@ -783,11 +791,14 @@ NetworkService& NetworkSession::getService() const
 
 size_t NetworkSession::getNumConnections() const
 {
+	auto lock = UniqueLock(peerReadCacheMutex);
 	return peerReadCache.size();
 }
 
 bool NetworkSession::isConnected(size_t idx) const
 {
+	auto lock = UniqueLock(peerReadCacheMutex);
+
 	if (idx >= peerReadCache.size()) {
 		return false;
 	}
@@ -798,7 +809,7 @@ bool NetworkSession::isConnected(size_t idx) const
 
 std::shared_ptr<AckUnreliableConnectionStats> NetworkSession::getConnectionStats(size_t idx) const
 {
-	auto lock = service.lock();
+	auto lock = UniqueLock(peerReadCacheMutex);
 
 	if (idx < peerReadCache.size()) {
 		return peerReadCache.at(idx).stats;
@@ -809,6 +820,7 @@ std::shared_ptr<AckUnreliableConnectionStats> NetworkSession::getConnectionStats
 
 int32_t NetworkSession::getLatency(size_t idx) const
 {
+	auto lock = UniqueLock(peerReadCacheMutex);
 	return idx < peerReadCache.size() ? peerReadCache.at(idx).latency : 0;
 }
 
@@ -869,12 +881,6 @@ NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 const NetworkSession::Peer& NetworkSession::getPeer(PeerId id) const
 {
 	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });
-}
-
-const NetworkSession::PeerReadCache* NetworkSession::getPeerReadCache(PeerId id) const
-{
-	const auto it = std::find_if(peerReadCache.begin(), peerReadCache.end(), [&](const PeerReadCache& peer) { return peer.peerId == id; });
-	return it != peerReadCache.end() ? &*it : nullptr;
 }
 
 void NetworkSession::checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId)
@@ -1068,8 +1074,16 @@ int32_t NetworkSession::getLocalSessionTimeMs() const
 
 int32_t NetworkSession::getPeerSessionTimeMs(PeerId clientId) const
 {
-	const auto peer = getPeerReadCache(clientId);
-	return peer != nullptr ? peer->sessionTimeMs : 0;
+	auto lock = UniqueLock(peerReadCacheMutex);
+
+	const auto it = std::find_if(peerReadCache.begin(), peerReadCache.end(),
+		[clientId](const PeerReadCache& peer) { return peer.peerId == clientId; });
+
+	if (it == peerReadCache.end()) {
+		return 0;
+	}
+
+	return it->sessionTimeMs;
 }
 
 int32_t NetworkSession::doGetPeerSessionTimeMs(const Peer& peer) const

@@ -1,6 +1,5 @@
 #include "audio_engine.h"
 #include "audio_mixer.h"
-#include <thread>
 #include <chrono>
 #include "audio_sources/audio_source_clip.h"
 #include "audio_filter_resample.h"
@@ -124,12 +123,17 @@ void AudioEngine::run()
 		generateBuffer();
 	}
 
-	// OK, we've supplied it with enough buffers; if that was enough, then, sleep as long as no more buffers are needed
-	for (int i = 0; running && !needsMoreAudio(); ++i) {
-		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(10us);
+	// OK, we've supplied it with enough buffers; if that was enough, then, wait for output to consume audio
+	using namespace std::chrono_literals;
+	constexpr auto waitSlice = 5ms;
+	constexpr auto stallWarnAfter = 2s;
+	
+	const auto waitStart = std::chrono::steady_clock::now();
+	auto lock = UniqueLock(audioConsumedMutex);
+	while (running && !needsMoreAudio()) {
+		audioConsumedCondition.waitFor(lock, waitSlice);
 
-		if (i == 2000) {
+		if (std::chrono::steady_clock::now() - waitStart > stallWarnAfter) {
 			Logger::logError("Audio thread seems to be stalled", true);
 		}
 	}
@@ -336,6 +340,8 @@ size_t AudioEngine::output(gsl::span<std::byte> dst, bool fill)
 		memset(remaining.data(), 0, size_t(remaining.size_bytes()));
 		written = size_t(dst.size());
 	}
+
+	audioConsumedCondition.notifyOne();
 
 	return written;
 }
