@@ -29,6 +29,7 @@ bool AudioSourceDelay::getAudioData(size_t numSamples, AudioMultiChannelSamples 
 	if (curDelay == 0) {
 		return src->getAudioData(numSamples, dst);
 	} else if (numSamples < curDelay) {
+		src->prime();
 		curDelay -= numSamples;
 		AudioMixer::zero(dst);
 		return true;

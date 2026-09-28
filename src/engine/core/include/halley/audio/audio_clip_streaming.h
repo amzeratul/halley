@@ -23,6 +23,7 @@ namespace Halley
 		size_t getLength() const override;
 		size_t getSamplesLeft() const;
 		bool isLoaded() const override;
+		bool isLive() const override { return true; }
 
 		void setLatencyTarget(size_t samples);
 		size_t getLatencyTarget() const;

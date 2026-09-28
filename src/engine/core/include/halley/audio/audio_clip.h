@@ -30,7 +30,8 @@ namespace Halley
 		virtual size_t getLoopPoint() const { return 0; } // in samples
 
 		virtual bool hasStreamHandles() const { return false; }
-		virtual std::unique_ptr<IAudioClipStreamHandle> makeStreamHandle() const { return {}; }
+		virtual bool isLive() const { return false; }
+		virtual std::unique_ptr<IAudioClipStreamHandle> makeStreamHandle(size_t startPos = 0) const { return {}; }
 
 		virtual void prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const = 0;
 		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const = 0;
@@ -57,7 +58,7 @@ namespace Halley
 		size_t getLoopPoint() const override; // in samples
 
 		bool hasStreamHandles() const override;
-		std::unique_ptr<IAudioClipStreamHandle> makeStreamHandle() const override;
+		std::unique_ptr<IAudioClipStreamHandle> makeStreamHandle(size_t startPos) const override;
 
 		void prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const override;
 		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;

@@ -92,6 +92,11 @@ bool AudioFilterResample::isLooping()
 	return source->isLooping();
 }
 
+void AudioFilterResample::prime()
+{
+	source->prime();
+}
+
 void AudioFilterResample::setFromHz(float fromHz)
 {
 	this->fromHz = fromHz;

@@ -17,5 +17,6 @@ namespace Halley
 		virtual bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) = 0;
 		virtual void restart() = 0;
 		virtual bool isLooping() = 0;
+		virtual void prime() {}
 	};
 }

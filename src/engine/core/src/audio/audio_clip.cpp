@@ -84,9 +84,11 @@ bool AudioClip::hasStreamHandles() const
 	return streaming;
 }
 
-std::unique_ptr<IAudioClipStreamHandle> AudioClip::makeStreamHandle() const
+std::unique_ptr<IAudioClipStreamHandle> AudioClip::makeStreamHandle(size_t startPos) const
 {
-	return std::make_unique<AudioClipStreamHandle>(*this);
+	auto handle = std::make_unique<AudioClipStreamHandle>(*this);
+	handle->seek(startPos);
+	return handle;
 }
 
 void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const

@@ -17,6 +17,7 @@ namespace Halley
 		size_t getSamplesLeft() const override;
 		void restart() override;
 		bool isLooping() override;
+		void prime() override;
 
 		void setFromHz(float fromHz);
 

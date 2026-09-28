@@ -3,6 +3,7 @@
 #include "halley/audio/audio_clip.h"
 #include "../audio_mixer.h"
 #include "../audio_engine.h"
+#include "halley/concurrency/executor.h"
 
 using namespace Halley;
 
@@ -44,12 +45,78 @@ void AudioSourceClip::restart()
 {
 	streams[0] = {};
 	streams[1] = {};
+	pendingHandle.reset();
 	initialised = false;
 }
 
 bool AudioSourceClip::isLooping()
 {
 	return looping;
+}
+
+void AudioSourceClip::prime()
+{
+	if (clip->hasStreamHandles() && clip->isLoaded() && !pendingHandle && !streams[0].streamingHandle) {
+		requestStreamHandle(pickStartPos());
+	}
+}
+
+size_t AudioSourceClip::getPrimaryEndPos() const
+{
+	const size_t clipLength = clip->getLength();
+	return loopEnd > 0 && std::cmp_less(loopEnd, clipLength) ? static_cast<size_t>(loopEnd) : clipLength;
+}
+
+size_t AudioSourceClip::pickStartPos() const
+{
+	return looping && randomiseStart ? engine.getRNG().getSizeT(0, getPrimaryEndPos()) : 0;
+}
+
+void AudioSourceClip::requestStreamHandle(size_t startPos)
+{
+	auto pending = std::make_shared<PendingHandle>();
+	pending->startPos = startPos;
+	pendingHandle = pending;
+	
+	Executors::getDiskIO().addToQueue([weak = std::weak_ptr<PendingHandle>(pending), clipRef = clip]()
+	{
+		if (auto p = weak.lock()) {
+			p->handle = clipRef->makeStreamHandle(p->startPos);
+			p->ready.store(true, std::memory_order_release);
+		}
+	}, {});
+}
+
+void AudioSourceClip::takeStreamHandle()
+{
+	auto& stream = streams[0];
+	const size_t startPos = pendingHandle->startPos;
+	auto handle = std::move(pendingHandle->handle);
+	pendingHandle.reset();
+	
+	if (randomiseStart) {
+		stream.streamingHandle = std::move(handle);
+		stream.playbackPos = startPos;
+		return;
+	}
+	
+	// Playback kept moving while the open was in flight. Past a second of drift, or after a loop wrap,
+	// a fresh open at the current position is cheaper than decoding through it and keeps the seek off this thread.
+	constexpr size_t maxCatchUp = AudioConfig::sampleRate;
+	const size_t target = stream.playbackPos;
+	if (target < startPos || target - startPos > maxCatchUp) {
+		requestStreamHandle(target);
+		return;
+	}
+	
+	// Decode forward through whatever played as silence while the open was in flight.
+	// Sequential reads are inexpensive and hit the read-ahead cache; a seek would bisect the file on this thread.
+	// Past a second of drift, let the next read seek instead.
+	stream.streamingHandle = std::move(handle);
+	constexpr size_t step = 4096;
+	for (size_t pos = startPos; pos <target; pos += step) {
+		clip->prepareChannelData(pos, std::min(step, target - pos), stream.streamingHandle.get());
+	}
 }
 
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
@@ -59,9 +126,9 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 
 	// Set stream end positions
 	const auto clipLength = clip->getLength();
-	const bool hasEarlyEnd = loopEnd > 0 && static_cast<size_t>(loopEnd) < clipLength;
-	streams[0].endPos = hasEarlyEnd ? static_cast<size_t>(loopEnd) : clipLength;
-	streams[0].kickOffSecondStream = hasEarlyEnd;
+	const size_t loopRestartPos = std::max(static_cast<size_t>(loopStart), clip->getLoopPoint());
+	streams[0].endPos = getPrimaryEndPos();
+	streams[0].kickOffSecondStream = streams[0].endPos < clipLength;
 	streams[1].endPos = clipLength;
 
 	if (!initialised) {
@@ -69,7 +136,11 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 
 		streams[0].active = true;
 		streams[0].loop = looping;
-		streams[0].playbackPos = looping && randomiseStart ? engine.getRNG().getSizeT(0, streams[0].endPos) : 0;
+		
+		if (clip->hasStreamHandles() && !pendingHandle && !streams[0].streamingHandle) {
+			requestStreamHandle(pickStartPos());
+		}
+		streams[0].playbackPos = pendingHandle ? pendingHandle->startPos : pickStartPos();
 	}
 
 	uint8_t nDstChannels = 0;
@@ -86,6 +157,20 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 		Logger::logError("AudioClip \"" + getName() + "\" has more channels (" + toString(static_cast<int>(nSrcChannels)) + ") than upstream is expecting (" + toString(static_cast<int>(nDstChannels)) + ")", true);
 	}
 
+	if (pendingHandle) {
+		if (!pendingHandle->ready.load(std::memory_order_acquire)) {
+			// Still opening. Silence for now, but keep time moving so we can catch up when it lands.
+			AudioMixer::zeroRange(dstChannels, nChannels, 0, samplesRequested);
+			streams[0].playbackPos += samplesRequested;
+			if (streams[0].playbackPos >= streams[0].endPos) {
+				streams[0].playbackPos = looping ? loopRestartPos : streams[0].endPos;
+			}
+			prevGain = gain;
+			return true;
+		}
+		takeStreamHandle();
+	}
+	
 	size_t samplesWritten = 0;
 
 	while (samplesWritten < samplesRequested) {
@@ -99,7 +184,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 						if (stream.playbackPos >= clipLength) {
 							// Loop failed
 							looping = false;
-							stream.playbackPos = clipLength;
+							stream.playbackPos = loopRestartPos;
 							stream.active = false;
 						} else {
 							// Loop ok
@@ -108,7 +193,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 								streams[1].playbackPos = prevPos;
 							}
 						}
-					} else {
+					} else if (!clip->isLive()){
 						stream.active = false;
 					}
 				}
