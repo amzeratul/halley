@@ -1,4 +1,4 @@
-// Halley codegen version 143
+// Halley codegen version 149
 #pragma once
 
 #include <halley.hpp>
@@ -75,10 +75,10 @@ private:
 
 	SessionService* sessionService{ nullptr };
 	void preInitBase() override final {
+		sessionService = &doGetWorld().template getService<SessionService>(getName());
 		invokePreInit<T>(static_cast<T*>(this));
 	}
 	void initBase() override final {
-		sessionService = &doGetWorld().template getService<SessionService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, NetworkFamily>(networkFamily, static_cast<T*>(this), true);
 	}

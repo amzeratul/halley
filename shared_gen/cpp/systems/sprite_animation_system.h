@@ -1,4 +1,4 @@
-// Halley codegen version 143
+// Halley codegen version 149
 #pragma once
 
 #include <halley.hpp>
@@ -103,10 +103,10 @@ private:
 
 	ScreenService* screenService{ nullptr };
 	void preInitBase() override final {
+		screenService = &doGetWorld().template getService<ScreenService>(getName());
 		invokePreInit<T>(static_cast<T*>(this));
 	}
 	void initBase() override final {
-		screenService = &doGetWorld().template getService<ScreenService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, MainFamily>(mainFamily, static_cast<T*>(this), false);
 		initialiseFamilyBinding<T, ReplicatorFamily>(replicatorFamily, static_cast<T*>(this), false);

@@ -666,6 +666,13 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	// Construct preInitBase()
 	Vector<String> preInitBaseMethodBody;
+	for (auto& service: system.services) {
+		if (service.optional) {
+			preInitBaseMethodBody.push_back(lowerFirst(service.name) + " = doGetWorld().template tryGetService<" + service.name + ">(getName());");
+		} else {
+			preInitBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">(getName());");
+		}
+	}
 	preInitBaseMethodBody.push_back("invokePreInit<T>(static_cast<T*>(this));");
 	sysClassGen
 		.setAccessLevel(MemberAccess::Private)
@@ -673,13 +680,6 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	// Construct initBase()
 	Vector<String> initBaseMethodBody;
-	for (auto& service: system.services) {
-		if (service.optional) {
-			initBaseMethodBody.push_back(lowerFirst(service.name) + " = doGetWorld().template tryGetService<" + service.name + ">(getName());");
-		} else {
-			initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">(getName());");
-		}
-	}
 	initBaseMethodBody.push_back("invokeInit<T>(static_cast<T*>(this));");
 	for (auto& family: system.families) {
 		initBaseMethodBody.push_back("initialiseFamilyBinding<T, " + upperFirst(family.name) + "Family>(" + family.name + "Family, static_cast<T*>(this), " + family.indexed + ");");
