@@ -160,6 +160,11 @@ void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
 
 void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId)
 {
+	if (peerId == getMyPeerId()) {
+		Logger::logError("Trying to send peer message to myself");
+		Logger::logError(Debug::getCallStack());
+		return;
+	}
 	outbox[peerId].push_back(std::move(msg));
 }
 
