@@ -850,6 +850,9 @@ size_t NetworkSession::doGetMaxPacketSize() const
 
 	for (const auto& peer : peers) {
 		const size_t size = peer.connection->getMaxPacketSize();
+		if (size == 0) {
+			continue;
+		}
 		if (smallestMaxSize == 0) {
 			smallestMaxSize = size;
 		} else {
