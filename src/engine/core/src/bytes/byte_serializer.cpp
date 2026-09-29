@@ -387,5 +387,10 @@ void Deserializer::rewind(size_t position)
 	if (position >= pos) {
 		throw Exception("Rewind position out of range.", HalleyExceptions::Utils);
 	}
-	pos = position;
+	setPosition(position);
+}
+
+void Deserializer::setPosition(size_t position)
+{
+	pos = std::min(position, src.size_bytes());
 }

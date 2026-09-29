@@ -752,7 +752,12 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 
         if (reflector != nullptr) {
-            // This checks with evenIfDisabled = true; the entity or its parent could have been
+	        auto getCompAndEntityId = [&] ()
+	        {
+        		return String(reflector->getName()) + " (" + componentId + ") at entity " + toString(entity.getEntityId().value & 0xffffffff) + " [" + entity.getName() + "][" + entity.getPrefabAssetIdOrEmpty() + "]";
+	        };
+
+        	// This checks with evenIfDisabled = true; the entity or its parent could have been
             // disabled while a network update is still in flight.
             auto component = reflector->tryGetComponent(entity, true);
 
@@ -770,51 +775,50 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
             if (component != nullptr) {
                 const size_t expectedEndPos = deserializer.getPosition() + size;
 
+                const IByteDataInterpolator* transformInterpolator = nullptr;
                 // Only done for transform components in root entities, skipped for child entities.
-                if (result && componentId == Transform2DComponent::componentIndex) {
+                if (result && componentId == Transform2DComponent::componentIndex && byteSerializationContext.entityInterpolators != nullptr) {
                     // Check if position interpolation is enabled.
                     // TODO: This lookup is kind of costly, as it is done again in deserializeNetwork().
-                    const IByteDataInterpolator* interpolator = nullptr;
-                    if (byteSerializationContext.entityInterpolators != nullptr) {
-                        interpolator = byteSerializationContext.entityInterpolators->tryGetInterpolator(byteSerializationContext.entityId, componentId, "position");
-                    }
-
-                    if (interpolator && interpolator->isEnabled()) {
-                        // Saves the current position before deserialization, and restores it afterward. Return the
-                        // new position in the function result instead.
-                        // TODO: for debugging, shouldn't be needed as it's updated later.
-                        const auto transform = reinterpret_cast<Transform2DComponent*>(component);
-                        const auto pos = transform->getLocalPosition();
-
-                        reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
-
-                        result->position = transform->getLocalPosition();
-                        transform->setLocalPosition(pos);
-                    } else {
-                        reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
-                    }
-                } else {
-                    reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+                    transformInterpolator = byteSerializationContext.entityInterpolators->tryGetInterpolator(byteSerializationContext.entityId, componentId, "position");
                 }
 
-                if (expectedEndPos < deserializer.getPosition()) {
-                    Logger::logError("Network read error, read past end of component " + toString(componentId) + ", rewind " +
-                        toString(deserializer.getPosition() - expectedEndPos) + " bytes", true);
-                    deserializer.rewind(expectedEndPos);
-                } else if (expectedEndPos > deserializer.getPosition()) {
-                    Logger::logError("Network read error, component " + toString(componentId) + " not fully read, skip " +
-                        toString(expectedEndPos - deserializer.getPosition()) + " bytes", true);
-                    deserializer.skipBytes(expectedEndPos - deserializer.getPosition());
+                auto guardedDeserialize = [&] ()
+                {
+	                try {
+		                reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+                    } catch (const std::exception& e) {
+	                    Logger::logError("Exception while deserializing network component " + getCompAndEntityId());
+		                Logger::logException(e);
+	                }
+                };
+
+                if (transformInterpolator && transformInterpolator->isEnabled()) {
+                    // Saves the current position before deserialization, and restores it afterward. Return the
+                    // new position in the function result instead.
+                    // TODO: for debugging, shouldn't be needed as it's updated later.
+                    const auto transform = reinterpret_cast<Transform2DComponent*>(component);
+                    const auto pos = transform->getLocalPosition();
+
+	                guardedDeserialize();
+
+                    result->position = transform->getLocalPosition();
+                    transform->setLocalPosition(pos);
+                } else {
+                    guardedDeserialize();
+                }
+                
+                if (expectedEndPos != deserializer.getPosition()) {
+                    Logger::logError("Network read error with component " + getCompAndEntityId() + ", " + toString(static_cast<int64_t>(deserializer.getPosition()) - static_cast<int64_t>(expectedEndPos)) + " bytes ahead of expected position", true);
+                    deserializer.setPosition(expectedEndPos);
                 }
             } else {
                 deserializer.skipBytes(size);
-                Logger::logDev("No component " + toString(componentId) + " found in entity " +
-                    toString(entity.getEntityId().value & 0xffffffff) + ", " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
+                Logger::logDev("No component " + getCompAndEntityId() + " to deserialize into, skipping " + toString(size) + " bytes");
             }
         } else {
             deserializer.skipBytes(size);
-            Logger::logDev("Invalid component type " + toString(componentId) + " found for " +
-                entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
+            Logger::logDev("Invalid component type " + toString(componentId) + " found for " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
         }
 
         fetchNextPage(deserializer, type, size);

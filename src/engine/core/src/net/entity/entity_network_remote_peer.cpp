@@ -853,6 +853,8 @@ void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef e
 
 void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg)
 {
+	auto trace = StackDebugTrace("entityName", entity.getName());
+
 	int32_t timestamp = msg.timestamp; // Time the peer sent this msg, using its approximation of our own local network time.
 
 	if (msg.fastSerialize) {
