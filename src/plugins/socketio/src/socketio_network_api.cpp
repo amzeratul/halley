@@ -97,7 +97,7 @@ Future<AuthTokenResult> SocketIOPlatformAPI::getAuthToken(const AuthTokenParamet
     return promise.getFuture();
 }
 
-void SocketIOPlatformAPI::showBrowseGamesToJoinUI()
+void SocketIOPlatformAPI::showBrowseGamesToJoinUI(const String& promptText)
 {
     preparingInvitation = true;
 }

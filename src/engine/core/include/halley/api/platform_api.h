@@ -258,7 +258,7 @@ namespace Halley
 		virtual bool canSetLobbyPrivacy() { return false; }
 
 		virtual void multiplayerInvitationCancel() { }
-		virtual void showBrowseGamesToJoinUI() {}
+		virtual void showBrowseGamesToJoinUI(const String& promptText) {}
 		virtual void setBrowseGamesToJoinCallback(PlatformBrowseGamesToJoinCallback callback) {}
 
 		// When the user joins a session, this function should be called back to let the game know what session they should join

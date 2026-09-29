@@ -28,7 +28,7 @@ namespace Halley
         bool canProvideAuthToken() const override;
         Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) override;
 
-    	void showBrowseGamesToJoinUI() override;
+    	void showBrowseGamesToJoinUI(const String& promptText) override;
     	void setJoinCallback(PlatformJoinCallback callback) override;
     	void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) override;
 

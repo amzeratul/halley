@@ -73,7 +73,7 @@ Future<AuthTokenResult> AsioPlatformAPI::getAuthToken(const Halley::AuthTokenPar
     return promise.getFuture();
 }
 
-void AsioPlatformAPI::showBrowseGamesToJoinUI()
+void AsioPlatformAPI::showBrowseGamesToJoinUI(const String& promptText)
 {
     preparingInvitation = true;
 }
