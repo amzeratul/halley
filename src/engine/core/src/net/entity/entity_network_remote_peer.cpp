@@ -314,7 +314,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	if (assignNetworkIdOnly) {
 		// This is loaded as part of a world chunk - peers already got all the data, they only
 		// need to know about the networkId assigned.
-		EntityNetworkInstanceInfo info = { entity.getInstanceUUID(), {} };
+		EntityNetworkInstanceInfo info = { .instanceUUID = entity.getInstanceUUID(), .parentUUID = {} };
 		if (entity.hasParent()) {
 			info.parentUUID = entity.getParent().getInstanceUUID();
 		}
@@ -421,7 +421,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 			return;
 		}
 	}
-	uint64_t prevHashRemoveMe = remote.lastSerializerHash;
+
+	uint64_t previousContentHash = remote.lastSerializerHash;
 	remote.lastSerializerHash = contentHash;
 
 	// Fast updates are possible only if a previous journal is available to compare to,
@@ -513,8 +514,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			}
     		}
 
-    		if (checkExpectSameHash && !modified && !modifiedInStructure && !foundSameHash /*&& entity.getName().contains("lava")*/) {
-    			Logger::logError("Network entity " + entity.getName() + " has NOT been modified, but fast hash check found a change " + toString(prevHashRemoveMe, 16));//, true);
+    		if (checkExpectSameHash && !modified && !modifiedInStructure && !foundSameHash && previousContentHash != 0) {
+    			Logger::logError("Network entity " + entity.getName() + " has NOT been modified, but fast hash check found a change " + toString(previousContentHash, 16));//, true);
     		}
     	} else {
     		// Something went wrong, fall back to the slow path.
@@ -867,7 +868,7 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
         		inboundEntity.positionUpdates.clear();
         	}
         } catch (const std::exception& e) {
-            Logger::logError("Exception while processing update entity from network");
+            Logger::logError("Exception while processing update entity from network: " + entity.getName() + " (" + entity.getEntityId().toDetailedString() + "), " + entity.getPrefabUUID().toString());
             Logger::logException(e);
         }
     } else {
