@@ -782,43 +782,63 @@ namespace Halley {
     template <typename T>
     class ByteSerializationHelper {
     public:
+		constexpr static bool serializeIndex = true;
+
         static void serialize(const T& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
-        	if (context.entityInterpolators) {
-        		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
-        			interpolator->serialize(&value, sizeof(T), serializer);
-        			return;
-        		}
-        	}
-
-        	if (context.interpolators) {
-        		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
-        			interpolator->serialize(&value, sizeof(T), serializer);
-        			return;
-        		}
-        	}
-
-        	serializer << value;
+			if (auto* interpolator = getInterpolator(context, componentIndex, fieldName)) {
+				if (serializeIndex) {
+					const auto idx = interpolator->getIndex();
+					HalleyAssertDev(idx > 0); // 0 is no interpolator; negative shouldn't exist
+					serializer << idx;
+				}
+				interpolator->serialize(&value, sizeof(T), serializer);
+			} else {
+				if (serializeIndex) {
+					serializer << 0;
+				}
+				serializer << value;
+			}
         }
 
         static void deserialize(T& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
         {
-        	if (context.entityInterpolators) {
-        		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
-        			interpolator->deserialize(&dst, sizeof(T), deserializer);
-        			return;
-        		}
-        	}
+			int incomingIdx = 0;
+			if (serializeIndex) {
+				deserializer >> incomingIdx;
+			}
 
-        	if (context.interpolators) {
-        		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
-        			interpolator->deserialize(&dst, sizeof(T), deserializer);
-        			return;
-        		}
-        	}
+			auto* interpolator = getInterpolator(context, componentIndex, fieldName);
+			const int myIdx = interpolator ? interpolator->getIndex() : 0;
 
-        	deserializer >> dst;
+        	if (!serializeIndex || incomingIdx == myIdx) {
+				if (interpolator) {
+       				interpolator->deserialize(&dst, sizeof(T), deserializer);
+				} else {
+					deserializer >> dst;
+				}
+        	} else {
+				if (incomingIdx == 0) {
+					Logger::logError("ByteSerializerInterpolator mismatch for component " + toString(componentIndex) + ":" + fieldName + ", incoming not interpolated, local is idx " + toString(myIdx), true);
+					deserializer >> dst;
+				} else {
+					// TODO: to recover from this, we'd need to know how many bytes were serialized...
+					Logger::logError("ByteSerializerInterpolator mismatch for component " + toString(componentIndex) + ":" + fieldName + ", incoming is idx " + toString(incomingIdx) + ", local is idx " + myIdx, true);
+				}
+			}
         }
+
+    private:
+		static IByteDataInterpolator* getInterpolator(const ByteSerializationContext& context, int componentIndex, std::string_view fieldName)
+		{
+        	if (context.entityInterpolators) {
+        		return context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName);
+        	}
+        	if (context.interpolators) {
+        		return context.interpolators->tryGetInterpolator({}, componentIndex, fieldName);
+        	}
+			return nullptr;
+		}
     };
 
     template <typename T>

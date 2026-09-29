@@ -23,6 +23,11 @@ namespace Halley {
     class ByteDataInterpolator : public IByteDataInterpolator
     {
     public:
+        int getIndex() const override
+        {
+	        return 1;
+        }
+
         void setEnabled(bool enable) override
         {
             this->enabled = enable;
