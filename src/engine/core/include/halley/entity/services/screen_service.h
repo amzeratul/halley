@@ -39,7 +39,7 @@ namespace Halley {
 	public:
 		virtual ~IScreenGrabInterface() = default;
 
-		virtual Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode) = 0;
+		virtual Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode, std::optional<float> zoom = 1.0f) = 0;
 		virtual Future<std::unique_ptr<Image>> requestGlobalScreenGrab(Rect4i worldRect, ScreenGrabMode mode, float zoom = 1.0f) = 0;
 	};
 
@@ -104,7 +104,7 @@ namespace Halley {
 		}
 
 		void setScreenGrabInterface(IScreenGrabInterface* interface);
-		Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect = {}, ScreenGrabMode mode = ScreenGrabMode::ComposedWithUI) override;
+		Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect = {}, ScreenGrabMode mode = ScreenGrabMode::ComposedWithUI, std::optional<float> zoom = 1.0f) override;
 		Future<std::unique_ptr<Image>> requestGlobalScreenGrab(Rect4i worldRect, ScreenGrabMode mode = ScreenGrabMode::ComposedNoUI, float zoom = 1.0f) override;
 		bool isScreenGrabMode() const;
 		Rect4i getScreenGrabRect() const;

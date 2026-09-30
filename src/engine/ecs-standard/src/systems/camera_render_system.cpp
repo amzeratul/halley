@@ -43,10 +43,10 @@ public:
 		painterService.endRender();
 	}
 
-	Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode) override
+	Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode, std::optional<float> zoom) override
 	{
 		UniqueLock lock(captureMutex);
-		auto& pc = queuedCaptures.emplace_back(PendingCapture{ rect, mode });
+		auto& pc = queuedCaptures.emplace_back(PendingCapture{ rect, mode, {}, false, zoom });
 		return pc.promise.getFuture();
 	}
 
@@ -65,7 +65,7 @@ private:
 		ScreenGrabMode mode;
 		Promise<std::unique_ptr<Image>> promise;
 		bool fulfilled = false;
-		float zoom = 1.0f;
+		std::optional<float> zoom;
 	};
 	Vector<PendingCapture> pendingCaptures;
 	Vector<PendingCapture> queuedCaptures;
@@ -109,7 +109,10 @@ private:
 			modesToCapture.insert(pc.mode);
 		}
 		for (const auto& mode: modesToCapture) {
-			renderGraph.setImageOutputCallback(toString(mode), [=, this] (Image& image) { onImageCaptured(mode, image); });
+			renderGraph.setImageOutputCallback(toString(mode), [=, this] (Image& image)
+			{
+				onImageCaptured(mode, image);
+			});
 		}
 	}
 
@@ -134,9 +137,10 @@ private:
 
 	void onImageCaptured(ScreenGrabMode mode, Image& image)
 	{
-		const int downscale = lroundl(getScreenService().getWorldZoomLevel());
-
 		for (auto& pc: pendingCaptures) {
+			const float worldZoom = getScreenService().getWorldZoomLevel();
+			const int downscale = pc.zoom ? lroundl(worldZoom / *pc.zoom) : 1;
+
 			if (pc.mode == mode) {
 				auto downscaledImage = std::make_unique<Image>(image.getFormat(), image.getSize() / downscale);
 				downscaledImage->blitDownsampled(image, downscale);
@@ -164,7 +168,7 @@ private:
 		const auto mode = pendingGlobalCapture->mode;
 
 		// Determine viewport and create image
-		const float zoom = pendingGlobalCapture->zoom;
+		const float zoom = pendingGlobalCapture->zoom.value_or(1.0f);
 		const auto viewPort = pendingGlobalCapture->rect.value();
 		const auto screenTileSize = Vector2i(2048, 2048);
 		const auto worldTileSize = Vector2i((Vector2f(screenTileSize) / zoom).round());
