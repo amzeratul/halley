@@ -92,7 +92,7 @@ namespace Halley
 
 		size_t getHash() const;
 
-		Vector<Path> enumerateDirectory(bool makeRelative) const;
+		Vector<Path> enumerateDirectory(bool makeRelative, bool recursive = true) const;
 
 		void makeLowerCase();
 		static bool isCaseSensitive();
