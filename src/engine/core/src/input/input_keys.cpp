@@ -234,11 +234,11 @@ std::pair<KeyCode, KeyMods> KeyCodes::fromStringWithMods(std::string_view str)
 			if (split[i] == "Ctrl") {
 				mods = mods | KeyMods::Ctrl;
 			} else if (split[i] == "Shift") {
-				mods = mods | KeyMods::Ctrl;
+				mods = mods | KeyMods::Shift;
 			} else if (split[i] == "Alt") {
-				mods = mods | KeyMods::Ctrl;
+				mods = mods | KeyMods::Alt;
 			} if (split[i] == "Mod") {
-				mods = mods | KeyMods::Ctrl;
+				mods = mods | KeyMods::Mod;
 			}
 		}
 	}
