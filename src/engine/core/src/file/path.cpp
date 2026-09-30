@@ -849,7 +849,7 @@ bool Path::isCaseSensitive()
 
 #else
 
-Vector<Path> Path::enumerateDirectory(bool makeRelative) const
+Vector<Path> Path::enumerateDirectory(bool makeRelative, bool recursive) const
 {
 	Logger::logError("Path::enumerateDirectory() is not implemented due to missing filesystem library");
 	return {};
