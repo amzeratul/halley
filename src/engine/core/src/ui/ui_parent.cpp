@@ -71,7 +71,7 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	}
 	childrenWaiting.clear();
 
-	std::sort(children.begin(), children.end(), [=] (const std::shared_ptr<UIWidget>& a, const std::shared_ptr<UIWidget>& b) {
+	std::stable_sort(children.begin(), children.end(), [=] (const std::shared_ptr<UIWidget>& a, const std::shared_ptr<UIWidget>& b) {
 		return a->getRootPriority() < b->getRootPriority();
 	});
 
