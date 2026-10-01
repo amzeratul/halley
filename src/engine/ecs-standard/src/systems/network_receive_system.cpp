@@ -26,7 +26,20 @@ public:
 		updateSession(t);
 
 		auto& world = getWorld();
-		for (auto& e: networkFamily) {
+		auto myPeerId = getSessionService().getMyClientId();
+		for (const auto& e: networkFamily) {
+			// Don't need to call interpolator updates on any network entities that the local
+			// client has authority or ownership of - these are the entities we *send* data for.
+			if (e.network.authorityId) {
+				if (e.network.authorityId == myPeerId) {
+					continue;
+				}
+			} else {
+				if (e.network.ownerId.value_or(myPeerId) == myPeerId) {
+					continue;
+				}
+			}
+
 			e.network.dataInterpolatorSet.update(t, world);
 			e.network.byteDataInterpolatorSet.update(t, world);
 		}
