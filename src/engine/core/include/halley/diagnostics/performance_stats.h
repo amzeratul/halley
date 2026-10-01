@@ -8,6 +8,10 @@
 #include "halley/net/connection/ack_unreliable_connection_stats.h"
 #include "halley/support/profiler.h"
 
+namespace Halley {
+	class CSVFile;
+}
+
 namespace Halley
 {
 	class NetworkSession;
@@ -34,6 +38,8 @@ namespace Halley
 
 		void setDrawBg(bool drawBg);
 		void setMousePos(std::optional<Vector2f> mousePos);
+
+		CSVFile makeSystemCSV() const;
 
 	protected:
 		bool isInputActive() const override;
@@ -98,6 +104,24 @@ namespace Halley
 
 			void sortIfNeeded() const;
 		};
+
+		struct CurEventData {
+			const String* name;
+			ProfilerEventType type;
+			int64_t minimum;
+			int64_t firstQuartile;
+			int64_t median;
+			int64_t thirdQuartile;
+			int64_t maximum;
+			int64_t latest;
+			Colour4f colour;
+			int instances;
+
+			bool operator< (const CurEventData& other) const
+			{
+				return median > other.median;
+			}
+		};
 		
 		const bool isLocal;
 
@@ -158,6 +182,8 @@ namespace Halley
 		Colour4f getNetworkStatsCol(const AckUnreliableConnectionStats::PacketStats& stats) const;
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
+
+		std::pair<Vector<CurEventData>, int64_t> getCurEventData(const HashMap<String, EventHistoryData>& eventHistory) const;
 
 		void setToolTip(Vector2f pos, String label);
 	};

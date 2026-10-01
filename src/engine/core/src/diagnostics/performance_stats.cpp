@@ -7,6 +7,7 @@
 #include "halley/net/session/network_session.h"
 #include "halley/api/core_api.h"
 #include "halley/api/halley_api.h"
+#include "halley/file_formats/csv_file.h"
 #include "halley/graphics/painter.h"
 #include "halley/resources/resources.h"
 #include "halley/net/connection/ack_unreliable_connection_stats.h"
@@ -247,6 +248,19 @@ void PerformanceStatsView::setDrawBg(bool drawBg)
 void PerformanceStatsView::setMousePos(std::optional<Vector2f> mousePos)
 {
 	this->curMousePos = mousePos;
+}
+
+CSVFile PerformanceStatsView::makeSystemCSV() const
+{
+	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
+	const auto [systems, maxTime] = getCurEventData(systemHistory);
+
+	CSVFile result;
+	result.setColumns({ "name", "median" });
+	for (const auto& system: systems) {
+		result.addRow(std::array<String, 2>{ *system.name, getTimeLabel(system.median) });
+	}
+	return result;
 }
 
 bool PerformanceStatsView::isInputActive() const
@@ -793,24 +807,6 @@ Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionS
 
 void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, const HashMap<String, EventHistoryData>& eventHistory)
 {
-	struct CurEventData {
-		const String* name;
-		ProfilerEventType type;
-		int64_t minimum;
-		int64_t firstQuartile;
-		int64_t median;
-		int64_t thirdQuartile;
-		int64_t maximum;
-		int64_t latest;
-		Colour4f colour;
-		int instances;
-
-		bool operator< (const CurEventData& other) const
-		{
-			return median > other.median;
-		}
-	};
-
 	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
 
 	const auto drawBoxPlot = [&] (const CurEventData& eventData, Rect4f rect, float scale, Colour4f colour)
@@ -871,19 +867,11 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 
 	const std::array<float, 3> xPos = { 0, 410, 460 };
 	const float barDrawX = xPos[2];
+
+	const auto [curEvents, maxTime] = getCurEventData(eventHistory);
+
 	const int64_t granularity = 500'000;
-	int64_t maxTime = granularity;
-
-	Vector<CurEventData> curEvents;
-	curEvents.reserve(eventHistory.size());
-	for (const auto& [k, v]: eventHistory) {
-		const auto col = getEventColour(v.getType());
-		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), v.getLatest(), col, v.getNumInstances() });
-		maxTime = std::max(maxTime, curEvents.back().maximum);
-	}
-	std::sort(curEvents.begin(), curEvents.end());
-
-	const auto maxTimeTarget = std::ceil(static_cast<float>(maxTime) / granularity) * granularity;
+	const auto maxTimeTarget = std::ceil(static_cast<float>(std::max(maxTime, granularity)) / granularity) * granularity;
 	curMaxTime = damp(curMaxTime, maxTimeTarget, 10.0f, static_cast<float>(t));
 	const float scale = (rect.getWidth() - barDrawX) / curMaxTime;
 
@@ -1049,6 +1037,20 @@ int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& d
 	} else {
 		return 0;
 	}
+}
+
+std::pair<Vector<PerformanceStatsView::CurEventData>, int64_t> PerformanceStatsView::getCurEventData(const HashMap<String, EventHistoryData>& eventHistory) const
+{
+	int64_t maxTime = 0;
+	Vector<CurEventData> curEvents;
+	curEvents.reserve(eventHistory.size());
+	for (const auto& [k, v]: eventHistory) {
+		const auto col = getEventColour(v.getType());
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), v.getLatest(), col, v.getNumInstances() });
+		maxTime = std::max(maxTime, curEvents.back().maximum);
+	}
+	std::sort(curEvents.begin(), curEvents.end());
+	return { std::move(curEvents), maxTime };
 }
 
 void PerformanceStatsView::setToolTip(Vector2f pos, String label)

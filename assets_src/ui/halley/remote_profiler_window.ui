@@ -56,6 +56,15 @@ children:
               class: checkbox
               id: autoPause
             fill: [fillHorizontal, centreVertical]
+          - uuid: 05da3d06-d138-44c5-8e60-14f4ee8075a6
+            proportion: 1
+            border: [10, 0, 0, 0]
+            widget:
+              class: button
+              id: saveCSV
+              size: [100, 0]
+              text: Save CSV
+            fill: [centreHorizontal, centreVertical]
         fill: [left, centreVertical]
     fill: [fillHorizontal, fillVertical]
   - uuid: d9d5db3f-11b6-4d91-97cf-4599f9500c77

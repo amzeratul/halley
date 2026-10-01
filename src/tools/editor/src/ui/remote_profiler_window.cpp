@@ -91,6 +91,11 @@ void RemoteProfilerWindow::onMakeUI()
 		display->getView().setPaused(paused);
 	});
 
+	setHandle(UIEventType::ButtonClicked, "saveCSV", [=] (const UIEvent& event)
+	{
+		saveCSV();
+	});
+
 	bindData("autoPauseTime", autoPauseTime, [=] (int valueUs)
 	{
 		autoPauseTime = valueUs;
@@ -150,4 +155,24 @@ void RemoteProfilerWindow::setListeningToProfile(bool listening)
 void RemoteProfilerWindow::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	lastProfileData = std::move(data);
+}
+
+void RemoteProfilerWindow::saveCSV()
+{
+    const auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	tm buffer;
+#ifdef _MSC_VER
+	gmtime_s(&buffer, &time);
+	const auto* tmOut = &buffer;
+#else
+	const auto* tmOut = gmtime_s(&time, &buffer);
+#endif
+
+	char date[256];
+    std::strftime(date, sizeof(date), "%Y%m%d-%H%M%S", tmOut);
+	String timestamp = date;
+
+	const auto csv = display->getView().makeSystemCSV().save();
+	const auto path = api.core->getEnvironment().getDataPath() / "profiler_system_data_ " + timestamp + ".csv";
+	Path::writeFile(path, csv);
 }

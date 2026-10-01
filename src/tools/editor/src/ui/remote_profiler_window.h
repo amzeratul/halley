@@ -49,5 +49,6 @@ namespace Halley {
 
         void setListeningToProfile(bool listening);
         void onProfileData(std::shared_ptr<ProfilerData> data);
+        void saveCSV();
     };
 }
