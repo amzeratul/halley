@@ -19,6 +19,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(const String& sequenc
 
 	if (animation->hasSequence(sequence)) {
 		curSeq = nullptr;
+		seqLen = 0;
 		setSequence(sequence);
 		seqLooping = false;
 
@@ -39,6 +40,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::stop()
 {
 	if (curSeq || playing) {
 		curSeq = nullptr;
+		seqLen = 0;
 		playing = false;
 		++curPlayId;
 	}
@@ -60,6 +62,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<c
 		}
 		curDir = nullptr;
 		curSeq = nullptr;
+		seqLen = 0;
 		curFrame = nullptr;
 		dirId = -1;
 		++curPlayId;
@@ -265,9 +268,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 
 bool AnimationPlayer::isActiveAnimation() const
 {
-	return true;
+	//return true;
 	//updateResourceIfNeeded();
-	//return (curSeq && seqLen > 1) || dirty;
+	return seqLen > 1 || dirty || hasUpdate;
 }
 
 void AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
@@ -535,6 +538,7 @@ void AnimationPlayer::doUpdateResource()
 	dirId = -1;
 	curDir = nullptr;
 	curSeq = nullptr;
+	seqLen = 0;
 	setSequence(curSeqName);
 	setDirection(curDirName);
 	resolveSprite();

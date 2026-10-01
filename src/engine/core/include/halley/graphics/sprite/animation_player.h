@@ -88,7 +88,7 @@ namespace Halley
 		Time curSeqTime;
 		Time curFrameTime;
 
-		size_t seqLen;
+		size_t seqLen = 0;
 
 		int dirId = 0;
 		int curFrameN = 0;
