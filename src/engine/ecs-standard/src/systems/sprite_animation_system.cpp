@@ -72,14 +72,17 @@ private:
 	{
 		return getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
 	}
-
+	
 	void updateAnimators(Time time, Rect4f viewPort)
 	{
+		const auto distCheck = viewPort.grow(1024);
 		for (auto& e : mainFamily) {
 			if (e.spriteAnimation.player.isActiveAnimation()) {
 				if (!isCulledByFixedBounds(e.transform2D, e.spriteAnimation, viewPort)) {
 					e.spriteAnimation.player.update(time);
-					updateSprite(e, viewPort, false);
+					if (distCheck.contains(e.transform2D.getGlobalPosition())) {
+						updateSprite(e, viewPort, false);
+					}
 				}
 				updateEvents(e);
 			}
