@@ -813,7 +813,7 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 		bool reset = curData.signaled;
 		curData.signaled = false;
 
-		const auto var = environment.readInputDataPin(node, 3);
+		const auto& var = environment.readInputDataPin(node, 3);
 		if (var != curData.monitorVariable) {
 			curData.monitorVariable = var.clone();
 			reset = true;
