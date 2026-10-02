@@ -302,8 +302,7 @@ namespace Halley {
 		void propagateEnabled(bool enabled, bool parentEnabled);
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
-		std::optional<uint8_t> getOwnerPeerId() const;
-        std::optional<uint8_t> getAuthorityPeerId() const;
+        std::pair<std::optional<uint8_t>, std::optional<uint8_t>> getAuthorityAndOwnerPeerId() const;
 		void setFromNetwork(bool fromNetwork);
 
 		void destroy(World& world);
@@ -1027,13 +1026,19 @@ namespace Halley {
 		std::optional<uint8_t> getOwnerPeerId() const
 		{
 			validate();
-			return entity->getOwnerPeerId();
+			return entity->getAuthorityAndOwnerPeerId().second;
 		}
 
         std::optional<uint8_t> getAuthorityPeerId() const
         {
             validate();
-            return entity->getAuthorityPeerId();
+            return entity->getAuthorityAndOwnerPeerId().first;
+        }
+
+        std::pair<std::optional<uint8_t>, std::optional<uint8_t>> getAuthorityAndOwnerPeerId() const
+        {
+            validate();
+            return entity->getAuthorityAndOwnerPeerId();
         }
 
 		bool isLocal() const
@@ -1230,16 +1235,10 @@ namespace Halley {
 			return entity != nullptr;
 		}
 
-		std::optional<uint8_t> getOwnerPeerId() const
-		{
-			HalleyAssertDev(entity);
-			return entity->getOwnerPeerId();
-		}
-
-        std::optional<uint8_t> getAuthorityPeerId() const
+        std::pair<std::optional<uint8_t>, std::optional<uint8_t>> getAuthorityAndOwnerPeerId() const
         {
             HalleyAssertDev(entity);
-            return entity->getAuthorityPeerId();
+            return entity->getAuthorityAndOwnerPeerId();
         }
 
 		bool isLocal() const

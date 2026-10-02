@@ -417,32 +417,18 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 	}
 }
 
-std::optional<uint8_t> Entity::getOwnerPeerId() const
+std::pair<std::optional<uint8_t>, std::optional<uint8_t>> Entity::getAuthorityAndOwnerPeerId() const
 {
 	auto e = this;
 
 	while (e) {
 		if (const auto* networkComponent = e->tryGetComponent<NetworkComponent>()) {
-			return networkComponent->ownerId;
+			return { networkComponent->authorityId, networkComponent->ownerId };
 		}
 		e = e->parent;
 	}
 
-	return {};
-}
-
-std::optional<uint8_t> Entity::getAuthorityPeerId() const
-{
-	auto e = this;
-
-	while (e) {
-		if (const auto* networkComponent = e->tryGetComponent<NetworkComponent>()) {
-			return networkComponent->authorityId;
-		}
-		e = e->parent;
-	}
-
-	return {};
+	return { std::nullopt, std::nullopt };
 }
 
 void Entity::setFromNetwork(bool fromNetwork)
