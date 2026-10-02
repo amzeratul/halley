@@ -141,6 +141,19 @@ namespace Halley {
 		struct StorageType : public FamilyBase
 		{
 			alignas(alignof(void*)) std::array<char, storageSize> data;
+
+			bool operator<(const StorageType& other) const
+			{
+				if (T::Type::getNumComponents() == 0) {
+					return entityId < other.entityId;
+				} else {
+					// Compare first component pointer
+					using Type = void*;
+					const auto& myC0 = reinterpret_cast<const Type*>(data.data())[0];
+					const auto& otherC0 = reinterpret_cast<const Type*>(other.data.data())[0];
+					return myC0 < otherC0;
+				}
+			}
 		};
 
 	public:
@@ -175,6 +188,7 @@ namespace Halley {
 
 		void updateEntities() final
 		{
+			bool addedAny = false;
 			if (dirty) {
 				// Notify additions
 				size_t prevSize = elemCount;
@@ -185,6 +199,7 @@ namespace Halley {
 
 				if (curSize > prevSize) {
 					notifyAdd(entities.data() + prevSize, curSize - prevSize);
+					addedAny = true;
 				}
 			}
 
@@ -201,7 +216,12 @@ namespace Halley {
 			}
 
 			// Remove
-			removeDeadEntities();
+			const bool removedAny = removeDeadEntities();
+
+			// Remove will sort, but otherwise sort now
+			if (addedAny && !removedAny) {
+				sortElems();
+			}
 		}
 
 		void clearEntities() final
@@ -241,56 +261,64 @@ namespace Halley {
 			elemSize = sizeof(StorageType);
 		}
 
-		void removeDeadEntities()
+		bool removeDeadEntities()
 		{
+			if (toRemove.empty()) {
+				return false;
+			}
+
 			// Performance-critical code
 			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
-			if (!toRemove.empty()) {
-				size_t removeCount = toRemove.size();
-				HalleyAssertDebug(removeCount > 0);
-				HalleyAssertDebug(removeCount <= entities.size());
-				std::sort(toRemove.begin(), toRemove.end());
+			size_t removeCount = toRemove.size();
+			HalleyAssertDebug(removeCount > 0);
+			HalleyAssertDebug(removeCount <= entities.size());
+			std::sort(toRemove.begin(), toRemove.end());
 
-				for (size_t i = 1; i < toRemove.size(); ++i) {
-					HalleyAssertDebug(toRemove[i - 1] != toRemove[i]);
-				}
+			for (size_t i = 1; i < toRemove.size(); ++i) {
+				HalleyAssertDebug(toRemove[i - 1] != toRemove[i]);
+			}
 
-				// Move all entities to be removed to the back of the vector
-				{
-					int n = int(entities.size());
-					// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
-					// but it causes an issue where an entity is removed and added to the same family in one frame.
-					for (int i = 0; i < n; i++) {
-						EntityId id = entities[i].entityId;
-						auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
-						if (iter != toRemove.end() && id == *iter) {
-							toRemove.erase(iter);
-							if (i != n - 1) {
-								std::swap(entities[i], entities[n - 1]);
-								i--;
-							}
-							n--;
-							if (toRemove.empty()) {
-								break;
-							}
+			// Move all entities to be removed to the back of the vector
+			{
+				int n = int(entities.size());
+				// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
+				// but it causes an issue where an entity is removed and added to the same family in one frame.
+				for (int i = 0; i < n; i++) {
+					EntityId id = entities[i].entityId;
+					auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+					if (iter != toRemove.end() && id == *iter) {
+						toRemove.erase(iter);
+						if (i != n - 1) {
+							std::swap(entities[i], entities[n - 1]);
+							i--;
+						}
+						n--;
+						if (toRemove.empty()) {
+							break;
 						}
 					}
-					HalleyAssertDebug(size_t(n) + removeCount == entities.size());
 				}
-
-				HalleyAssertDebug(toRemove.empty());
-
-				// Notify removal
-				size_t newSize = entities.size() - removeCount;
-				HalleyAssertDebug(newSize < entities.size());
-				notifyRemove(entities.data() + newSize, removeCount);
-
-				// Remove them
-				entities.resize(newSize);
-				updateElems();
-				rebuildIndex();
+				HalleyAssertDebug(size_t(n) + removeCount == entities.size());
 			}
+
 			HalleyAssertDebug(toRemove.empty());
+
+			// Notify removal
+			size_t newSize = entities.size() - removeCount;
+			HalleyAssertDebug(newSize < entities.size());
+			notifyRemove(entities.data() + newSize, removeCount);
+
+			// Remove them
+			entities.resize(newSize);
+			updateElems();
+			sortElems();
+			rebuildIndex();
+			return true;
+		}
+
+		void sortElems()
+		{
+			//std::sort(entities.begin(), entities.end());
 		}
 	};
 }
