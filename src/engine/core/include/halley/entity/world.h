@@ -253,6 +253,9 @@ namespace Halley {
 		uint32_t getFamilyRevision() const;
 		uint32_t getFrameNumber() const;
 
+		void setVisiblePartitionIds(Vector<WorldPartitionId> partitionIds);
+		const Vector<WorldPartitionId>& getVisiblePartitionIds() const;
+
 	private:
 		std::shared_ptr<MappedPool<Entity*>> entityMap;
 		std::shared_ptr<MaskStorage> maskStorage;
@@ -298,6 +301,8 @@ namespace Halley {
 		UUID uuid;
 
 		uint32_t familyRevision = 0;
+
+		Vector<WorldPartitionId> visiblePartitionIds;
 
 		struct StagingWorldTag{};
 		World(World& world, StagingWorldTag tag);

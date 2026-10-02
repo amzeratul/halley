@@ -1165,3 +1165,13 @@ uint32_t World::getFrameNumber() const
 	return frameNumber;
 }
 
+void World::setVisiblePartitionIds(Vector<WorldPartitionId> partitionIds)
+{
+	this->visiblePartitionIds = std::move(partitionIds);
+}
+
+const Vector<WorldPartitionId>& World::getVisiblePartitionIds() const
+{
+	return visiblePartitionIds;
+}
+
