@@ -128,6 +128,11 @@ void Entity::markDirty(World& world)
 		world.onEntityDirty();
 	}
 	++componentRevision;
+	
+	// Notify transform
+	if (auto* transform = tryGetComponent<Transform2DComponent>()) {
+		transform->onEntityMarkedDirty();
+	}
 }
 
 ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)

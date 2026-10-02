@@ -46,6 +46,12 @@ component:
       canEdit: false
       canSave: false
       defaultValue: 0
+  - entityRevision:
+      type: 'mutable uint16_t'
+      access: protected
+      canEdit: false
+      canSave: false
+      defaultValue: 0
   - subWorldRevision:
       type: 'mutable uint16_t'
       access: protected

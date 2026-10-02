@@ -76,6 +76,7 @@ public:
 
 	void onAddedToEntity(Halley::EntityRef& entity);
 	void onHierarchyChanged();
+	void onEntityMarkedDirty();
 	void onWorldPartitionChanged();
 
 	uint16_t getRevision() const { return revision; }
@@ -92,9 +93,7 @@ public:
 	const Halley::EntityRef& getEntityRef() const { return entity; }
 	uint32_t getEntityRevision() const
 	{
-		return (static_cast<uint32_t>(revision) << 16)
-			| (static_cast<uint32_t>(entity.getHierarchyRevision()) << 8)
-			| static_cast<uint32_t>(entity.getComponentRevision());
+		return (static_cast<uint32_t>(revision) << 16) | static_cast<uint32_t>(entityRevision);
 	}
 
 	bool canSerialize() const { return serializable; }

@@ -43,8 +43,14 @@ void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 
 void Transform2DComponent::onHierarchyChanged()
 {
-	updateParentTransform();	
+	updateParentTransform();
 	markDirtyShallow(0xFF);
+	++entityRevision;
+}
+
+void Transform2DComponent::onEntityMarkedDirty()
+{
+	++entityRevision;
 }
 
 void Transform2DComponent::onWorldPartitionChanged()

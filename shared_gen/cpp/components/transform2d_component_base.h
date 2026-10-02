@@ -1,4 +1,4 @@
-// Halley codegen version 148
+// Halley codegen version 149
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -169,6 +169,7 @@ protected:
 	mutable uint8_t cachedValues{ 0 };
 	Halley::OptionalLite<int16_t> subWorld{};
 	mutable uint16_t revision{ 0 };
+	mutable uint16_t entityRevision{ 0 };
 	mutable uint16_t subWorldRevision{ 0 };
 
 };
