@@ -204,6 +204,40 @@ void ScriptGraphNodeRoots::clear()
 	mapping.clear();
 }
 
+ScriptGraphProperties::ScriptGraphProperties(const ConfigNode& node)
+{
+	persistent = node["persistent"].asBool(false);
+	multiCopy = node["multiCopy"].asBool(false);
+	supressDuplicateWarning = node["supressDuplicateWarning"].asBool(false);
+	network = node["network"].asBool(false);
+	serializableToSaveFile = node["serializableToSaveFile"].asBool(false);
+	needsTransform = node["needsTransform"].asBool(false);
+}
+
+ConfigNode ScriptGraphProperties::toConfigNode() const
+{
+	ConfigNode result;
+	if (persistent) {
+		result["persistent"] = persistent;
+	}
+	if (multiCopy) {
+		result["multiCopy"] = multiCopy;
+	}
+	if (supressDuplicateWarning) {
+		result["supressDuplicateWarning"] = supressDuplicateWarning;
+	}
+	if (network) {
+		result["network"] = network;
+	}
+	if (serializableToSaveFile) {
+		result["serializableToSaveFile"] = serializableToSaveFile;
+	}
+	if (needsTransform) {
+		result["needsTransform"] = needsTransform;
+	}
+	return result;
+}
+
 ScriptGraph::ScriptGraph()
 {
 	finishGraph();
@@ -218,7 +252,7 @@ void ScriptGraph::load(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		nodes = node["nodes"].asVector<ScriptGraphNode>({});
-		properties = node["properties"];
+		properties = ScriptGraphProperties(node["properties"]);
 	}
 	lastAssignTypeHash = 0;
 	finishGraph();
@@ -238,27 +272,27 @@ void ScriptGraph::parseYAML(gsl::span<const std::byte> yaml)
 
 bool ScriptGraph::isPersistent() const
 {
-	return properties["persistent"].asBool(false);
+	return properties.persistent;
 }
 
 bool ScriptGraph::isMultiCopy() const
 {
-	return properties["multiCopy"].asBool(false);
+	return properties.multiCopy;
 }
 
 bool ScriptGraph::isSupressDuplicateWarning() const
 {
-	return properties["supressDuplicateWarning"].asBool(false);
+	return properties.supressDuplicateWarning;
 }
 
 bool ScriptGraph::isNetwork() const
 {
-	return needsNetwork || properties["network"].asBool(false);
+	return needsNetwork || properties.network;
 }
 
 bool ScriptGraph::isSerializableToSaveFile() const
 {
-	return properties["serializableToSaveFile"].asBool(false);
+	return properties.serializableToSaveFile;
 }
 
 bool ScriptGraph::isNetworkRequired() const
@@ -268,7 +302,7 @@ bool ScriptGraph::isNetworkRequired() const
 
 bool ScriptGraph::needsTransform() const
 {
-	return properties["needsTransform"].asBool(false);
+	return properties.needsTransform;
 }
 
 ConfigNode ScriptGraph::toConfigNode() const
@@ -310,16 +344,18 @@ void ScriptGraph::serialize(Serializer& s) const
 	s << callerToCallee;
 	s << returnToCaller;
 	s << subGraphs;
-	s << properties;
+	s << properties.toConfigNode();
 }
 
 void ScriptGraph::deserialize(Deserializer& s)
 {
+	ConfigNode propertiesConfigNode;
 	s >> nodes;
 	s >> callerToCallee;
 	s >> returnToCaller;
 	s >> subGraphs;
-	s >> properties;
+	s >> propertiesConfigNode;
+	properties = ScriptGraphProperties(propertiesConfigNode);
 	finishGraph();
 }
 
@@ -523,12 +559,12 @@ const ScriptGraph* ScriptGraph::getPreviousVersion(uint64_t hash) const
 	return previousVersion.get();
 }
 
-ConfigNode& ScriptGraph::getProperties()
+ScriptGraphProperties& ScriptGraph::getProperties()
 {
 	return properties;
 }
 
-const ConfigNode& ScriptGraph::getProperties() const
+const ScriptGraphProperties& ScriptGraph::getProperties() const
 {
 	return properties;
 }
@@ -538,8 +574,6 @@ void ScriptGraph::finishGraph()
 	if (nodes.empty()) {
 		makeBaseGraph();
 	}
-
-	properties.ensureType(ConfigNodeType::Map);
 
 	updateHash();
 	updateNeedsNetwork();

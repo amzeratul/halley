@@ -66,6 +66,20 @@ namespace Halley {
 		GraphNodeId getRoot(GraphNodeId id) const;
 		void clear();
 	};
+
+	class ScriptGraphProperties {
+	public:
+		bool persistent = false;
+		bool multiCopy = false;
+		bool supressDuplicateWarning = false;
+		bool network = false;
+		bool serializableToSaveFile = false;
+		bool needsTransform = false;
+
+		ScriptGraphProperties() = default;
+		explicit ScriptGraphProperties(const ConfigNode& node);
+		ConfigNode toConfigNode() const;
+	};
 	
 	class ScriptGraph final : public BaseGraphImpl<ScriptGraphNode>, public std::enable_shared_from_this<ScriptGraph> {
 	public:
@@ -95,8 +109,8 @@ namespace Halley {
 		bool isNetworkRequired() const;
 		bool needsTransform() const;
 
-		ConfigNode& getProperties();
-		const ConfigNode& getProperties() const;
+		ScriptGraphProperties& getProperties();
+		const ScriptGraphProperties& getProperties() const;
 
 		ConfigNode toConfigNode() const override;
 
@@ -141,6 +155,7 @@ namespace Halley {
 		const ScriptGraph* getPreviousVersion(uint64_t hash) const;
 
 	private:
+		ScriptGraphProperties properties;
 		bool needsNetwork = false;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
@@ -148,8 +163,6 @@ namespace Halley {
 
 		ScriptGraphNodeRoots roots;
 		Vector<GraphNodeId> receiveMessageNodes;
-
-		ConfigNode properties;
 
 		std::shared_ptr<ScriptGraph> previousVersion;
 

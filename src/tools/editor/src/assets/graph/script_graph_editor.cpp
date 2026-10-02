@@ -101,7 +101,7 @@ std::shared_ptr<const Scene> ScriptGraphEditor::getScene() const
 void ScriptGraphEditor::openProperties()
 {
 	if (scriptGraph) {
-		getRoot()->addChild(std::make_shared<ScriptGraphProperties>(factory, *scriptGraph, [=] ()
+		getRoot()->addChild(std::make_shared<ScriptGraphPropertiesWindow>(factory, *scriptGraph, [=] ()
 		{
 			onModified();
 		}));
@@ -388,7 +388,7 @@ bool ScriptGraphEditor::tryAutoAcquire()
 	return false;
 }
 
-ScriptGraphProperties::ScriptGraphProperties(UIFactory& factory, ScriptGraph& script, Callback callback)
+ScriptGraphPropertiesWindow::ScriptGraphPropertiesWindow(UIFactory& factory, ScriptGraph& script, Callback callback)
 	: PopupWindow("scriptGraphProperties")
 	, factory(factory)
 	, scriptGraph(script)
@@ -398,7 +398,7 @@ ScriptGraphProperties::ScriptGraphProperties(UIFactory& factory, ScriptGraph& sc
 	factory.loadUI(*this, "halley/script_graph_properties");
 }
 
-void ScriptGraphProperties::onMakeUI()
+void ScriptGraphPropertiesWindow::onMakeUI()
 {
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
@@ -414,32 +414,32 @@ void ScriptGraphProperties::onMakeUI()
 
 	bindData("serializableToSaveFile", scriptGraph.isSerializableToSaveFile(), [=] (bool value)
 	{
-		properties["serializableToSaveFile"] = value;
+		properties.serializableToSaveFile = value;
 	});
 
 	bindData("persistent", scriptGraph.isPersistent(), [=] (bool value)
 	{
-		properties["persistent"] = value;
+		properties.persistent = value;
 	});
 
 	bindData("multiCopy", scriptGraph.isMultiCopy(), [=] (bool value)
 	{
-		properties["multiCopy"] = value;
+		properties.multiCopy = value;
 	});
 
 	bindData("supressDuplicateWarning", scriptGraph.isSupressDuplicateWarning(), [=] (bool value)
 	{
-		properties["supressDuplicateWarning"] = value;
+		properties.supressDuplicateWarning = value;
 	});
 
 	bindData("network", scriptGraph.isNetwork(), [=] (bool value)
 	{
-		properties["network"] = value;
+		properties.network = value;
 	});
 
 	bindData("needsTransform", scriptGraph.needsTransform(), [=] (bool value)
 	{
-		properties["needsTransform"] = value;
+		properties.needsTransform = value;
 	});
 
 	getWidget("network")->setEnabled(!scriptGraph.isNetworkRequired());

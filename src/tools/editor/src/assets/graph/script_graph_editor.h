@@ -77,10 +77,10 @@ namespace Halley {
 		bool tryAutoAcquire();
 	};
 
-	class ScriptGraphProperties : public PopupWindow {
+	class ScriptGraphPropertiesWindow : public PopupWindow {
 	public:
 		using Callback = std::function<void()>;
-		ScriptGraphProperties(UIFactory& factory, ScriptGraph& script, Callback callback);
+		ScriptGraphPropertiesWindow(UIFactory& factory, ScriptGraph& script, Callback callback);
 
 		void onMakeUI() override;
 
@@ -89,7 +89,7 @@ namespace Halley {
 		ScriptGraph& scriptGraph;
 		Callback callback;
 
-		ConfigNode properties;
+		ScriptGraphProperties properties;
 	};
 
 	class ScriptGraphAssetEditor : public GraphAssetEditor {
