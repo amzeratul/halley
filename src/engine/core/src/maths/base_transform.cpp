@@ -2,15 +2,6 @@
 #include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
-Base2D::Base2D()
-{}
-
-Base2D::Base2D(Vector2f u, Vector2f v)
-	: u(u), v(v)
-{
-	computeInverse();
-}
-
 Base2D::Base2D(const ConfigNode& node)
 	: Base2D(node["u"].asVector2f(), node["v"].asVector2f())
 {
@@ -19,23 +10,6 @@ Base2D::Base2D(const ConfigNode& node)
 Base2D::Base2D(Vector2f u, Vector2f v, Vector2f invU, Vector2f invV)
 	: u(u), v(v), invU(invU), invV(invV)
 {
-}
-
-void Base2D::computeInverse()
-{
-	const float det = 1.0f / u.cross(v);
-	invU = det * Vector2f(v.y, -u.y);
-	invV = det * Vector2f(-v.x, u.x);
-}
-
-Vector2f Base2D::transform(Vector2f point) const
-{
-	return transform(point, u, v);
-}
-
-Vector2f Base2D::inverseTransform(Vector2f point) const
-{
-	return transform(point, invU, invV);
 }
 
 Polygon Base2D::transform(const Polygon& poly) const
@@ -54,11 +28,6 @@ Polygon Base2D::inverseTransform(const Polygon& poly) const
 		v = inverseTransform(v);
 	}
 	return Polygon(std::move(vs));
-}
-
-Vector2f Base2D::transform(Vector2f point, Vector2f u, Vector2f v)
-{
-	return point.x * u + point.y * v;
 }
 
 Base2D Base2D::getInverse() const
@@ -82,8 +51,9 @@ void Base2D::serialize(Serializer& s) const
 
 void Base2D::deserialize(Deserializer& s)
 {
-	s >> u;
-	s >> v;
-	computeInverse();
+	Vector2f a, b;
+	s >> a;
+	s >> b;
+	*this = Base2D(a, b);
 }
 

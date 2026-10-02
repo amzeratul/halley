@@ -27,17 +27,34 @@
 namespace Halley {
 	class Base2D {
 	public:
-		Base2D();
-		Base2D(Vector2f u, Vector2f v);
+		constexpr Base2D() = default;
+
+		constexpr Base2D(Vector2f u, Vector2f v)
+			: u(u), v(v)
+		{
+			const float det = 1.0f / u.cross(v);
+			invU = det * Vector2f(v.y, -u.y);
+			invV = det * Vector2f(-v.x, u.x);
+		}
+
 		explicit Base2D(const ConfigNode& node);
 
-		Vector2f transform(Vector2f point) const;
-		Vector2f inverseTransform(Vector2f point) const;
+		constexpr Vector2f transform(Vector2f point) const
+		{
+			return transform(point, u, v);
+		}
+
+		constexpr Vector2f inverseTransform(Vector2f point) const
+		{
+			return transform(point, invU, invV);
+		}
+		constexpr static Vector2f transform(Vector2f point, Vector2f u, Vector2f v)
+		{
+			return point.x * u + point.y * v;
+		}
 
 		Polygon transform(const Polygon& poly) const;
 		Polygon inverseTransform(const Polygon& poly) const;
-
-		static Vector2f transform(Vector2f point, Vector2f u, Vector2f v);
 
 		Base2D getInverse() const;
 
@@ -51,6 +68,5 @@ namespace Halley {
 		Vector2f invU, invV;
 
 		Base2D(Vector2f u, Vector2f v, Vector2f invU, Vector2f invV);
-		void computeInverse();
 	};
 }

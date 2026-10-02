@@ -283,7 +283,7 @@ namespace Halley {
 	////////////////////
 	// Global operators
 	template <typename T, class U, typename V, std::enable_if_t<std::is_arithmetic_v<V>, int> = 0>
-	inline Vector2D<T, U> operator * (V f, const Vector2D<T,U> &v)
+	constexpr inline Vector2D<T, U> operator * (V f, const Vector2D<T,U> &v)
 	{
 		return Vector2D<T, U>(T(f * v.x), T(f * v.y));
 	}
