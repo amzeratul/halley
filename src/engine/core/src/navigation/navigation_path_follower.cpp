@@ -5,6 +5,38 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
+NavigationPathParams::NavigationPathParams(const ConfigNode& node)
+{
+	run = node["run"].asBool(false);
+	backwards = node["backwards"].asBool(false);
+	manualPath = node["manualPath"].asBool(false);
+	speed = node["speed"].asFloat(1.0f);
+	if (node.hasKey("faceAfter") && node["faceAfter"].getType() == ConfigNodeType::Int) {
+		faceAfter = node["faceAfter"].asInt();
+	}
+}
+
+ConfigNode NavigationPathParams::toConfigNode() const
+{
+	ConfigNode result;
+	if (run) {
+		result["run"] = true;
+	}
+	if (backwards) {
+		result["backwards"] = true;
+	}
+	if (manualPath) {
+		result["manualPath"] = true;
+	}
+	if (!floatEquals(speed, 1.0f)) {
+		result["speed"] = speed;
+	}
+	if (faceAfter) {
+		result["faceAfter"] = *faceAfter;
+	}
+	return result;
+}
+
 Halley::NavigationPathFollower::NavigationPathFollower(const ConfigNode& node)
 {
 	if (node.hasKey("path")) {
@@ -13,7 +45,7 @@ Halley::NavigationPathFollower::NavigationPathFollower(const ConfigNode& node)
 	}
 	curPos = WorldPosition(node["curPos"]);
 	nextPathIdx = node["nextPathIdx"].asInt(0);
-	params = node["params"];
+	params = NavigationPathParams(node["params"]);
 }
 
 ConfigNode NavigationPathFollower::toConfigNode() const
@@ -29,8 +61,10 @@ ConfigNode NavigationPathFollower::toConfigNode() const
 	if (nextPathIdx != 0) {
 		result["nextPathIdx"] = static_cast<int>(nextPathIdx);
 	}
-	if (params.getType() == ConfigNodeType::Map && !params.asMap().empty()) {
-		result["params"] = params;
+
+	auto p = params.toConfigNode();
+	if (p.getType() == ConfigNodeType::Map && !p.asMap().empty()) {
+		result["params"] = std::move(p);
 	}
 	
 	return result;
@@ -53,15 +87,14 @@ void NavigationPathFollower::clear()
 {
 	computingPath = false;
 	doSetPath({});
-	params = ConfigNode();
+	params = {};
 }
 
-void NavigationPathFollower::setPath(std::optional<NavigationPath> p, ConfigNode params)
+void NavigationPathFollower::setPath(std::optional<NavigationPath> p, NavigationPathParams params)
 {
 	computingPath = false;
 	doSetPath(std::move(p));
 	this->params = std::move(params);
-	this->params.ensureType(ConfigNodeType::Map);
 }
 
 void NavigationPathFollower::doSetPath(std::optional<NavigationPath> p)
@@ -194,12 +227,12 @@ float NavigationPathFollower::getDistanceLeft(float anisotropy) const
 	return distToNext + *distPathCache;
 }
 
-const ConfigNode& NavigationPathFollower::getParams() const
+const NavigationPathParams& NavigationPathFollower::getParams() const
 {
 	return params;
 }
 
-ConfigNode& NavigationPathFollower::getParams()
+NavigationPathParams& NavigationPathFollower::getParams()
 {
 	return params;
 }

@@ -6,6 +6,20 @@
 namespace Halley {
 	class NavmeshSet;
 
+	class NavigationPathParams {
+	public:
+		NavigationPathParams() = default;
+		explicit NavigationPathParams(const ConfigNode& node);
+
+		ConfigNode toConfigNode() const;
+
+		bool run = false;
+		bool backwards = false;
+		bool manualPath = false;
+		float speed = 1.0f;
+		OptionalLite<int> faceAfter;
+	};
+
 	class NavigationPathFollower {
 	public:
 		NavigationPathFollower() = default;
@@ -16,7 +30,7 @@ namespace Halley {
 
 		void setComputingPath();
 		void clear();
-		void setPath(std::optional<NavigationPath> p, ConfigNode params = {});
+		void setPath(std::optional<NavigationPath> p, NavigationPathParams params = {});
 		const std::optional<NavigationPath>& getPath() const;
 		gsl::span<const NavigationPath::Point> getNextPathPoints() const;
 
@@ -32,8 +46,8 @@ namespace Halley {
 
 		float getDistanceLeft(float anisotropy) const;
 
-		const ConfigNode& getParams() const;
-		ConfigNode& getParams();
+		const NavigationPathParams& getParams() const;
+		NavigationPathParams& getParams();
 
 	private:
 		WorldPosition curPos;
@@ -42,7 +56,7 @@ namespace Halley {
 		mutable std::optional<float> distPathCache;
 		bool needsToReEvaluatePath = false;
 		bool computingPath = false;
-		ConfigNode params;
+		NavigationPathParams params;
 
 		void nextSubPath();
 		void doSetPath(std::optional<NavigationPath> p);
