@@ -34,6 +34,7 @@ namespace Halley
 		void update(Time time);
 		void updateSprite(Sprite& sprite) const;
 		bool isActiveAnimation() const;
+		bool hasSpriteUpdate() const;
 
 		void setMaterialOverride(std::shared_ptr<const Material> material);
 		std::shared_ptr<const Material> getMaterialOverride() const;
@@ -85,18 +86,7 @@ namespace Halley
 		void onSequenceStarted();
 		void onSequenceDone();
 
-		Time curSeqTime;
-		Time curFrameTime;
-
-		size_t seqLen = 0;
-
-		int dirId = 0;
-		int curFrameN = 0;
-		int curLoopCount = 0;
-		float playbackSpeed = 1.0f;
-
-		Vector2f offsetPivot;
-
+		uint32_t seqLen = 0;
 		bool dirty;
 		bool seqLooping;
 		bool seqNoFlip;
@@ -108,6 +98,16 @@ namespace Halley
 		bool applyPivot = true;
 		bool applyMaterial = true;
 		mutable bool hasUpdate = true;
+
+		Time curSeqTime;
+		Time curFrameTime;
+
+		int dirId = 0;
+		int curFrameN = 0;
+		int curLoopCount = 0;
+		float playbackSpeed = 1.0f;
+
+		Vector2f offsetPivot;
 
 		AnimationPlayId curPlayId = 0;
 

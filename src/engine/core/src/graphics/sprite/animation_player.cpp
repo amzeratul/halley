@@ -93,7 +93,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(const String& _seq
 		curLoopCount = 0;
 		curSeq = &animation->getSequence(curSeqName);
 
-		seqLen = curSeq->numFrames();
+		seqLen = static_cast<uint32_t>(curSeq->numFrames());
 		seqLooping = curSeq->isLooping();
 		seqNoFlip = curSeq->isNoFlip();
 
@@ -270,7 +270,12 @@ bool AnimationPlayer::isActiveAnimation() const
 {
 	//return true;
 	//updateResourceIfNeeded();
-	return seqLen > 1 || dirty || hasUpdate;
+	return seqLen > 1 || dirty;
+}
+
+bool AnimationPlayer::hasSpriteUpdate() const
+{
+	return hasUpdate;
 }
 
 void AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
