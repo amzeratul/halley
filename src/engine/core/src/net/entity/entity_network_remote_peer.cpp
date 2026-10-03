@@ -125,7 +125,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			}
 		}
 
-		if (entry.alwaysSend || parentSession->isEntityInView(entity, clientData, peerId)) {
+		if (entry.alwaysSend || parentSession->isEntityInView(entity, entry.transform, clientData, peerId)) {
 			++stats.nCheckedRegular;
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				toCreate.push_back(entity);

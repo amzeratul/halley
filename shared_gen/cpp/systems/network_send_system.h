@@ -8,6 +8,7 @@
 #include "halley/entity/services/dev_service.h"
 
 #include "components/network_component.h"
+#include "halley/entity/components/transform_2d_component.h"
 
 // Generated file; do not modify.
 template <typename T>
@@ -16,16 +17,19 @@ public:
 	class NetworkFamily : public Halley::FamilyBaseOf<NetworkFamily> {
 	public:
 		NetworkComponent& network;
+		const Halley::MaybeRef<Transform2DComponent> transform2D{};
 	
-		using Type = Halley::FamilyType<NetworkComponent>;
+		using Type = Halley::FamilyType<NetworkComponent, Halley::MaybeRef<Transform2DComponent>>;
 	
 		void prefetch() const {
 			prefetchL2(&network);
+			prefetchL2(transform2D.tryGet());
 		}
 	
 	protected:
-		NetworkFamily(NetworkComponent& network)
+		NetworkFamily(NetworkComponent& network, const Halley::MaybeRef<Transform2DComponent> transform2D)
 			: network(network)
+			, transform2D(transform2D)
 		{
 		}
 	};

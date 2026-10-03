@@ -316,10 +316,8 @@ void SessionMultiplayer::setupInterpolators(DataInterpolatorSet& interpolatorSet
 {
 }
 
-bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId)
+bool SessionMultiplayer::isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId)
 {
-	const auto* transform = entity.tryGetComponent<Transform2DComponent>();
-
 	if (!transform) {
 		return true;
 	}

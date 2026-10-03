@@ -88,7 +88,7 @@ public:
 				if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
 					++networkEntitiesSending;
 					entities.emplace_back(EntityNetworkUpdateInfo{e.entityId, ownerId, authorityId,
-						e.network.alwaysSend, e.network.requiresEntityFrameModified });
+						e.network.alwaysSend, e.network.requiresEntityFrameModified, e.transform2D.tryGet() });
 				}
 			}
 		}

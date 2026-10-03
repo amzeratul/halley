@@ -113,6 +113,7 @@ system:
   families:
   - network:
     - Network: write
+    - Transform2D: optional read
   strategy: global
   services:
     - SessionService

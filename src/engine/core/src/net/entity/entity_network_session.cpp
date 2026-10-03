@@ -807,10 +807,10 @@ bool EntityNetworkSession::isTerminatedByHost() const
 	return terminatedByHost;
 }
 
-bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const
+bool EntityNetworkSession::isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const
 {
 	HalleyAssertDev(listener);
-	return listener->isEntityInView(entity, clientData, peerId);
+	return listener->isEntityInView(entity, transform, clientData, peerId);
 }
 
 Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
