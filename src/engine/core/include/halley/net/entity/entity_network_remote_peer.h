@@ -75,6 +75,7 @@ namespace Halley {
     	uint8_t authorityId;
     	bool alwaysSend;
     	bool requiresEntityFrameModified;
+        const Transform2DComponent* transform = nullptr;
 	};
 
 	struct EntityNetworkInstanceInfo {
