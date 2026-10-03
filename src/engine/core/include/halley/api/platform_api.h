@@ -100,6 +100,21 @@ namespace Halley
 		Error,
 		Unsupported
 	};
+	
+	enum class MultiplayerLobbyError {
+		Unknown,
+		RateLimited,
+	};
+	
+	template <>
+	struct EnumNames<MultiplayerLobbyError> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"unknown",
+				"rateLimited",
+			});
+		}
+	};
 
 	enum class MultiplayerPrivacy {
 		Private,
@@ -122,6 +137,7 @@ namespace Halley
 	public:
 		virtual ~MultiplayerLobby() = default;
 		virtual MultiplayerStatus getStatus() const = 0;
+		virtual MultiplayerLobbyError getError() const { return MultiplayerLobbyError::Unknown; }
 		virtual void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) = 0;
 		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
 		virtual void setParameter(const String& name, const String& value) {}

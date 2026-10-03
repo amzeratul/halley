@@ -227,6 +227,29 @@ MultiplayerLobby* SessionMultiplayer::tryGetLobby() const
 	return lobby.get();
 }
 
+SessionMultiplayer::HostStatus SessionMultiplayer::getHostStatus() const
+{
+	if (!host) {
+		return HostStatus::NotHost;
+	}
+	
+	if (hostOpen) {
+		return HostStatus::Open;
+	}
+	
+	const bool lobbyFailed = lobby && lobby->getStatus() == MultiplayerStatus::Error;
+	if (lobbyFailed || session->getStatus() == ConnectionStatus::Closed) {
+		return HostStatus::Failed;
+	}
+	
+	return HostStatus::Starting;
+}
+
+MultiplayerLobbyError SessionMultiplayer::getHostError() const
+{
+	return lobby ? lobby->getError() : MultiplayerLobbyError::Unknown;
+}
+
 bool SessionMultiplayer::canInvite() const
 {
 	return lobby && getNumberOfPlayers() < getMaxNumberOfPlayers();
@@ -262,6 +285,11 @@ bool SessionMultiplayer::update(Time t)
 			lastReportedPlayers = players;
 			lobby->setPlayerCount(static_cast<int>(players), options.maxPlayers);
 		}
+	}
+	
+	if (host && !hostOpen && curState != SessionState::WaitingForService) {
+		const auto status = lobby ? lobby->getStatus() : MultiplayerStatus::Running;
+		hostOpen = status != MultiplayerStatus::Initializing && status != MultiplayerStatus::Error;
 	}
 	
 	if (!host && curState == SessionState::JoiningSession) {

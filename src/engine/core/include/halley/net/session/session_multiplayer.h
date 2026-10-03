@@ -102,6 +102,9 @@ namespace Halley {
 		void setNetworkQuality(NetworkService::Quality level);
 
 		MultiplayerLobby* tryGetLobby() const;
+		enum class HostStatus { NotHost, Starting, Open, Failed };
+		HostStatus getHostStatus() const;
+		MultiplayerLobbyError getHostError() const;
 		bool canInvite() const;
 
 	protected:
@@ -136,6 +139,7 @@ namespace Halley {
 		std::shared_ptr<NetworkSession> session;
 		std::shared_ptr<NetworkService> service;
 		std::unique_ptr<MultiplayerLobby> lobby;
+		bool hostOpen = false;
 
 		void setupDictionary(SerializationDictionary& dict, std::shared_ptr<const ConfigFile> config);
 
