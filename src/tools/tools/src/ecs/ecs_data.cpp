@@ -114,6 +114,19 @@ void ECSData::validate(ValidateCallback reportError)
 					componentUsed[comp.name] = true;
 				}
 			}
+			for (auto& comp : fam.excludedComponents) {
+				if (components.find(comp) == components.end()) {
+					reportError("Unknown component \"" + comp + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".");
+				} else {
+					componentUsed[comp] = true;
+				}
+			}
+
+			// NB: a family with no mandatory components would trigger an issue with removing entities, since the mask for "dead entity" is "no components", so it'd never be removed from that family
+			// If we ever want to support this, the family adding/removing code in world.cpp needs to handle that case
+			if (std::none_of(fam.components.begin(), fam.components.end(), [](const auto& c) { return !c.optional; })) {
+				reportError("Family \"" + fam.name + "\" has no required components, it must have at least one.");
+			}
 		}
 
 		for (auto& msg : sys.second.messages) {

@@ -61,8 +61,12 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 						String desc = comp->second.as<std::string>();
 						bool read = false;
 						bool write = false;
+						bool exclude = false;
+						bool optional = false;
 						for (auto& d : desc.split(' ')) {
-							if (d == "write") {
+							if (d == "exclude") {
+								exclude = true;
+							} else if (d == "write") {
 								component.write = true;
 								write = true;
 							} else if (d == "read") {
@@ -70,21 +74,32 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 								read = true;
 							} else if (d == "optional") {
 								component.optional = true;
+								optional = true;
 							} else {
 								throw Exception("Unknown component descriptor: " + d + ", in family " + name, HalleyExceptions::Resources);
 							}
 						}
-						if (!read && !write) {
-							throw Exception("Component must be either read or write, in family " + name, HalleyExceptions::Resources);
-						}
-						if (read && write) {
-							throw Exception("Component mark as read and write, simply tag it write, in family " + name, HalleyExceptions::Resources);
-						}
-						component.write = desc.contains("write");
-						component.optional = desc.contains("optional");
+
 						component.name = comp->first.as<std::string>();
 
-						family.components.push_back(component);
+						if (exclude) {
+							if (read || write || optional) {
+								throw Exception("Component " + component.name + " is excluded but also set as read/write/optional, in family " + name, HalleyExceptions::Resources);
+							}
+
+							family.excludedComponents += component.name;
+						} else {
+							if (!read && !write) {
+								throw Exception("Component " + component.name + " must be either read or write, in family " + name, HalleyExceptions::Resources);
+							}
+							if (read && write) {
+								throw Exception("Component " + component.name + " marked as read and write, simply tag it write, in family " + name, HalleyExceptions::Resources);
+							}
+							component.write = desc.contains("write");
+							component.optional = desc.contains("optional");
+
+							family.components.push_back(component);
+						}
 					}
 				}
 

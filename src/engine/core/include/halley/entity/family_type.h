@@ -1,6 +1,7 @@
 #pragma once
 
 #include "family_extractor.h"
+#include <optional>
 
 namespace Halley {
 	template <typename... Ts>
@@ -19,6 +20,11 @@ namespace Halley {
 		constexpr static FamilyMaskType inclusionMask(MaskStorage& storage)
 		{
 			return FamilyMask::InclusionEvaluator<Ts...>::getMask(storage);
+		}
+
+		constexpr static std::optional<FamilyMaskType> exclusionMask(MaskStorage& storage)
+		{
+			return FamilyMask::ExclusionEvaluator<Ts...>::getMask(storage);
 		}
 
 		constexpr static FamilyMaskType optionalMask(MaskStorage& storage)

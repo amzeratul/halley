@@ -103,6 +103,14 @@ bool Handle::contains(const Handle& handle, MaskStorage& storage) const
 	return (mine & theirs) == theirs;
 }
 
+bool Handle::intersects(const Handle& handle, MaskStorage& storage) const
+{
+	const auto& mine = getRealValue(storage);
+	const auto& theirs = handle.getRealValue(storage);
+
+	return (mine & theirs).any();
+}
+
 bool Handle::unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const
 {
 	const auto& mine = getRealValue(storage);

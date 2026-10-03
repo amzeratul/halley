@@ -59,6 +59,7 @@ namespace Halley
 	public:
 		String name;
 		Vector<ComponentReferenceSchema> components;
+		Vector<String> excludedComponents;
 		bool indexed = false;
 	};
 

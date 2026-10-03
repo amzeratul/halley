@@ -18,7 +18,7 @@ namespace Halley {
 		friend class World;
 
 	public:
-		explicit Family(FamilyMaskType inclusionMask, FamilyMaskType optionalMask);
+		explicit Family(FamilyMaskType inclusionMask, std::optional<FamilyMaskType> exclusionMask, FamilyMaskType optionalMask);
 		virtual ~Family() {}
 
 		[[nodiscard]] constexpr size_t count() const
@@ -55,6 +55,10 @@ namespace Halley {
 			return nullptr;
 		}
 
+		bool matches(const FamilyMaskType& entityMask, MaskStorage& storage) const {
+			return entityMask.contains(inclusionMask, storage) && (!exclusionMask || !entityMask.intersects(*exclusionMask, storage));
+		}
+
 		void addOnEntitiesAdded(FamilyBindingBase* bind);
 		void removeOnEntityAdded(FamilyBindingBase* bind);
 		void addOnEntitiesRemoved(FamilyBindingBase* bind);
@@ -88,6 +92,7 @@ namespace Halley {
 		
 	private:
 		FamilyMaskType inclusionMask;
+		std::optional<FamilyMaskType> exclusionMask;
 		FamilyMaskType optionalMask;
 
 	protected:
@@ -158,7 +163,7 @@ namespace Halley {
 
 	public:
 		explicit FamilyImpl(MaskStorage& storage)
-			: Family(T::Type::inclusionMask(storage), T::Type::optionalMask(storage))
+			: Family(T::Type::inclusionMask(storage), T::ExclusionType::exclusionMask(storage), T::Type::optionalMask(storage))
 		{
 		}
 			

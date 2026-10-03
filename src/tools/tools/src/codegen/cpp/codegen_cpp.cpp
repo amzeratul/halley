@@ -504,15 +504,22 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	// Family headers
 	std::set<String> included;
-	for (auto& fam : system.families) {
-		for (auto& comp : fam.components) {
-			if (included.find(comp.name) == included.end()) {
-				auto iter = components.find(comp.name);
-				if (iter != components.end()) {
-					contents.emplace_back("#include \"" + getComponentFileName(iter->second) + "\"");
-					included.emplace(comp.name);
-				}
+	auto addHeader = [&] (const String& name)
+	{
+		if (included.find(name) == included.end()) {
+			auto iter = components.find(name);
+			if (iter != components.end()) {
+				contents.emplace_back("#include \"" + getComponentFileName(iter->second) + "\"");
+				included.emplace(name);
 			}
+		}
+	};
+	for (const auto& fam: system.families) {
+		for (const auto& comp: fam.components) {
+			addHeader(comp.name);
+		}
+		for (const auto& comp: fam.excludedComponents) {
+			addHeader(comp);
 		}
 	}
 	
@@ -556,6 +563,10 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				.addTypeDefinition("Type", "Halley::FamilyType<" + String::concatList(convert<ComponentReferenceSchema, String>(fam.components, [](auto& comp)
 				{
 					return comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component";
+				}), ", ") + ">")
+				.addTypeDefinition("ExclusionType", "Halley::FamilyType<" + String::concatList(convert<String, String>(fam.excludedComponents, [](auto& comp)
+				{
+					return comp + "Component";
 				}), ", ") + ">")
 				.addBlankLine()
 				.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "prefetch", true), prefetchBody)

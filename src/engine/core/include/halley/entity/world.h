@@ -134,7 +134,7 @@ namespace Halley {
 		template <typename T>
 		Family& getFamily() noexcept
 		{
-			// Disable re-using of families due to optional components messing them up
+			// Disable re-using of families due to optional and excluded components messing them up
 			/*
 			FamilyMaskType mask = T::Type::readMask();
 			auto iter = families.find(mask);

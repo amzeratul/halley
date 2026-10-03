@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <optional>
 #include "halley/data_structures/maybe_ref.h"
 #include <gsl/span>
 #include "halley/support/assert.h"
@@ -38,6 +39,7 @@ namespace Halley {
 			
 			Handle intersection(const Handle& h, MaskStorage& storage) const;
 			bool contains(const Handle& handle, MaskStorage& storage) const;
+			bool intersects(const Handle& handle, MaskStorage& storage) const;
 			bool unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const;
 
 		private:
@@ -167,6 +169,41 @@ namespace Halley {
 				RealType mask;
 				makeMask(mask);
 				return HandleType(mask, storage);
+			}
+		};
+
+
+
+		
+		template <typename... Ts>
+		struct ExclusionEvaluator;
+
+		template <>
+		struct ExclusionEvaluator <> {
+			static RealType makeMask(RealType startValue) {
+				return startValue;
+			}
+
+			static std::optional<HandleType> getMask(MaskStorage&) {
+				return std::nullopt;
+			}
+		};
+
+		template <typename T, typename... Ts>
+		struct ExclusionEvaluator <T, Ts...> {
+			static void makeMask(RealType& mask) {
+				FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
+				ExclusionEvaluator<Ts...>::makeMask(mask);
+			}
+
+			static std::optional<HandleType> getMask(MaskStorage& storage) {
+				RealType mask;
+				makeMask(mask);
+				if (mask.any()) {
+					return HandleType(mask, storage);
+				} else {
+					return std::nullopt;
+				}
 			}
 		};
 

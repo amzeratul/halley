@@ -804,14 +804,13 @@ void World::updateEntities()
 	if (maskStorage) {
 		for (auto& todo: pending) {
 			for (auto* fam: getFamiliesFor(todo.first)) {
-				const auto& famMask = fam->inclusionMask;
 				const auto& optFamMask = fam->optionalMask;
 				auto& ms = *maskStorage;
 				
 				for (auto& e: todo.second.toRemove) {
 					// Only remove if the entity is not about to be re-added
 					const auto& newMask = e.first;
-					if (!newMask.contains(famMask, ms)) {
+					if (!fam->matches(newMask, ms)) {
 						fam->removeEntity(*e.second);
 					}
 				}
@@ -819,7 +818,7 @@ void World::updateEntities()
 					// Only add if the entity was not already in this
 					const auto& oldMask = e.first;
 					const auto& newMask = todo.first;
-					if (!oldMask.contains(famMask, ms)) {
+					if (!fam->matches(oldMask, ms)) {
 						fam->addEntity(*e.second);
 					} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
 						// Needs refreshing of optional references
@@ -910,9 +909,7 @@ void World::onAddFamily(Family& family) noexcept
 		size_t nEntities = entities.size();
 		for (size_t i = 0; i < nEntities; i++) {
 			auto& entity = *entities[i];
-			auto eMask = entity.getMask();
-			auto fMask = family.inclusionMask;
-			if ((eMask.intersection(fMask, *maskStorage)) == fMask) {
+			if (family.matches(entity.getMask(), *maskStorage)) {
 				family.addEntity(entity);
 			}
 		}
@@ -930,8 +927,7 @@ const Vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 		if (maskStorage) {
 			for (auto& iter : families) {
 				auto& family = *iter;
-				FamilyMaskType famMask = family.inclusionMask;
-				if (mask.contains(famMask, *maskStorage)) {
+				if (family.matches(mask, *maskStorage)) {
 					result.push_back(&family);
 				}
 			}
