@@ -35,6 +35,7 @@ system:
 
 component:
   name: InvisiblePartitionTag
+  hasQuickIndex: true
   category: general
   members: []
 

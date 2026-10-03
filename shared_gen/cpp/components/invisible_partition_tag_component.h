@@ -13,7 +13,7 @@
 class InvisiblePartitionTagComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 18 };
-	static constexpr uint32_t quickIndex{ 0 };
+	static constexpr uint32_t quickIndex{ 16 };
 	static const constexpr char* componentName{ "InvisiblePartitionTag" };
 	static constexpr bool alwaysEnabled{ false };
 

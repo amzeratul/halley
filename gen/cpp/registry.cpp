@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 150
 #include <halley.hpp>
 using namespace Halley;
 
@@ -20,6 +20,7 @@ using namespace Halley;
 #include "components/script_tag_target_component.h"
 #include "components/network_component.h"
 #include "components/timeline_component.h"
+#include "components/invisible_partition_tag_component.h"
 #include "messages/play_animation_message.h"
 #include "messages/play_animation_once_message.h"
 #include "messages/stop_particles_message.h"
@@ -71,7 +72,7 @@ public:
 	}
 	Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() override {
 		Vector<std::unique_ptr<ComponentReflector>> result;
-		result.reserve(18);
+		result.reserve(19);
 		result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<VelocityComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
@@ -90,6 +91,7 @@ public:
 		result.push_back(std::make_unique<ComponentReflectorImpl<ScriptTagTargetComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<NetworkComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<TimelineComponent>>());
+		result.push_back(std::make_unique<ComponentReflectorImpl<InvisiblePartitionTagComponent>>());
 		return result;
 	}
 	Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() override {

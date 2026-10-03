@@ -4,6 +4,7 @@
 #include <halley/utils/utils.h>
 #include "halley/entity/world.h"
 
+#include "components/invisible_partition_tag_component.h"
 #include "halley/support/assert.h"
 
 #include "halley/entity/system.h"
@@ -15,6 +16,7 @@
 #include "halley/maths/uuid.h"
 #include "halley/api/halley_api.h"
 #include "halley/entity/world_reflection.h"
+#include "halley/entity/components/transform_2d_component.h"
 #include "halley/graphics/render_context.h"
 #include "halley/support/logger.h"
 #include "halley/support/profiler.h"
@@ -774,6 +776,9 @@ void World::updateEntities()
 				pending[entity.getMask()].toRemove.emplace_back(FamilyMaskType(), &entity);
 				entitiesRemoved.push_back(i);
 			} else {
+				// Check visibile partition first, as this might add/remove components
+				updateVisiblePartition(entity);
+
 				// It's alive, so check old and new system inclusions
 				FamilyMaskType oldMask = entity.getMask();
 				entity.refresh(maskStorage.get(), *componentDeleterTable, alwaysEnabledComponents);
@@ -879,6 +884,10 @@ void World::initSystems(gsl::span<const TimeLine> timelines)
 
 void World::updateSystems(TimeLine timeline, Time elapsed)
 {
+	if (!visiblePartitionIds.empty()) {
+		updateAllVisiblePartitions();
+	}
+
 	for (auto& system : getSystems(timeline)) {
 		updateMemoryPool->reset();
 		system->doUpdate(elapsed);
@@ -1163,11 +1172,45 @@ uint32_t World::getFrameNumber() const
 
 void World::setVisiblePartitionIds(Vector<WorldPartitionId> partitionIds)
 {
-	this->visiblePartitionIds = std::move(partitionIds);
+	if (visiblePartitionIds != partitionIds) {
+		this->visiblePartitionIds = std::move(partitionIds);
+		updateAllVisiblePartitions();
+	}
 }
 
 const Vector<WorldPartitionId>& World::getVisiblePartitionIds() const
 {
 	return visiblePartitionIds;
+}
+
+void World::updateAllVisiblePartitions()
+{
+	for (auto* e: entities) {
+		updateVisiblePartition(*e);
+	}
+}
+
+void World::updateVisiblePartition(Entity& entity)
+{
+	auto e = EntityRef(entity, *this);
+	const bool hasTag = e.hasComponent<InvisiblePartitionTagComponent>();
+
+	if (!e.hasComponent<Transform2DComponent>()) {
+		if (hasTag) {
+			e.removeComponent<InvisiblePartitionTagComponent>();
+		}
+		return;
+	}
+
+	const bool visibleSet = visiblePartitionIds.empty() || visiblePartitionIds.contains(e.getComponent<Transform2DComponent>(true).getWorldPartition());
+	if (visibleSet) {
+		if (hasTag) {
+			e.removeComponent<InvisiblePartitionTagComponent>();
+		}
+	} else {
+		if (!hasTag) {
+			e.addComponent(InvisiblePartitionTagComponent());
+		}
+	}
 }
 

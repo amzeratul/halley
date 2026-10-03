@@ -273,6 +273,14 @@ namespace Halley {
 		template <typename T>
 		Entity& removeComponent(World& world)
 		{
+			constexpr auto quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			if constexpr (quickIndex != 0) {
+				// Component not present
+				if ((quickIndex & componentQuickMask) == 0) {
+					return *this;
+				}
+			}
+
 			removeComponentById(world, T::componentIndex, T::quickIndex);
 			return *this;
 		}

@@ -255,6 +255,7 @@ namespace Halley {
 
 		void setVisiblePartitionIds(Vector<WorldPartitionId> partitionIds);
 		const Vector<WorldPartitionId>& getVisiblePartitionIds() const;
+		void updateAllVisiblePartitions();
 
 	private:
 		std::shared_ptr<MappedPool<Entity*>> entityMap;
@@ -324,5 +325,7 @@ namespace Halley {
 		const Vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 
 		void processSystemMessages(TimeLine timeline);
+
+		void updateVisiblePartition(Entity& entity);
 	};
 }
