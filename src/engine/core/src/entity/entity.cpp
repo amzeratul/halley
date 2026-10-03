@@ -94,9 +94,10 @@ void Entity::removeComponentById(World& world, int id, uint32_t quickIndex)
 
 void Entity::removeComponentAt(int i, uint32_t quickIndex)
 {
-	// Put it at the end of the list of living components... (guaranteed to swap with living component)
-	std::swap(componentIds[i], componentIds[static_cast<size_t>(liveComponents) - 1]);
-	std::swap(componentPtrs[i], componentPtrs[static_cast<size_t>(liveComponents) - 1]);
+	// Put it at the end of the list of living components, rotating all subsequent components to before this...
+	// (Previously, this just swapped with last alive component, however that changes the order of components which can have detrimental consequences for delta serialisation)
+	std::rotate(componentIds.begin() + i, componentIds.begin() + (i + 1), componentIds.begin() + liveComponents);
+	std::rotate(componentPtrs.begin() + i, componentPtrs.begin() + (i + 1), componentPtrs.begin() + liveComponents);
 
 	// ...then shrink that list, therefore moving it into dead component territory
 	--liveComponents;
