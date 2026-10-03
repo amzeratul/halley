@@ -884,10 +884,6 @@ void World::initSystems(gsl::span<const TimeLine> timelines)
 
 void World::updateSystems(TimeLine timeline, Time elapsed)
 {
-	if (!visiblePartitionIds.empty()) {
-		updateAllVisiblePartitions();
-	}
-
 	for (auto& system : getSystems(timeline)) {
 		updateMemoryPool->reset();
 		system->doUpdate(elapsed);
@@ -1183,34 +1179,75 @@ const Vector<WorldPartitionId>& World::getVisiblePartitionIds() const
 	return visiblePartitionIds;
 }
 
+namespace {
+
+	template <typename T>
+	void updateVisiblePartitionGeneric(World& world, Entity& entity, const T& partitions)
+	{
+		const bool hasTag = entity.hasComponentQuick<InvisiblePartitionTagComponent>();
+
+		if (!entity.hasComponentQuick<Transform2DComponent>()) {
+			if (hasTag) {
+				auto e = EntityRef(entity, world);
+				e.removeComponent<InvisiblePartitionTagComponent>();
+			}
+			return;
+		}
+
+		const bool visibleSet = std_ex::contains(partitions, entity.getWorldPartition());
+		if (visibleSet) {
+			if (hasTag) {
+				auto e = EntityRef(entity, world);
+				e.removeComponent<InvisiblePartitionTagComponent>();
+			}
+		} else {
+			if (!hasTag) {
+				auto e = EntityRef(entity, world);
+				e.addComponent(InvisiblePartitionTagComponent());
+			}
+		}	
+	}
+
+	void updateVisiblePartitionNoPartition(World& world, Entity& entity)
+	{
+		if (entity.hasComponentQuick<InvisiblePartitionTagComponent>()) {
+			auto e = EntityRef(entity, world);
+			e.removeComponent<InvisiblePartitionTagComponent>();
+		}
+	}
+
+}
+
 void World::updateAllVisiblePartitions()
 {
-	for (auto* e: entities) {
-		updateVisiblePartition(*e);
+	if (visiblePartitionIds.empty()) {
+		for (auto* e: entities) {
+			updateVisiblePartitionNoPartition(*this, *e);
+		}
+	} else {
+		if (visiblePartitionIds.size() <= 8) {
+			std::array<WorldPartitionId, 8> partitions;
+			partitions.fill(std::numeric_limits<WorldPartitionId>::max());
+			for (size_t i = 0; i < visiblePartitionIds.size(); ++i) {
+				partitions[i] = visiblePartitionIds[i];
+			}
+			for (auto* e: entities) {
+				updateVisiblePartitionGeneric(*this, *e, partitions);
+			}
+		} else {
+			const auto partitions = visiblePartitionIds.span();
+			for (auto* e: entities) {
+				updateVisiblePartitionGeneric(*this, *e, partitions);
+			}
+		}
 	}
 }
 
 void World::updateVisiblePartition(Entity& entity)
 {
-	auto e = EntityRef(entity, *this);
-	const bool hasTag = e.hasComponent<InvisiblePartitionTagComponent>();
-
-	if (!e.hasComponent<Transform2DComponent>()) {
-		if (hasTag) {
-			e.removeComponent<InvisiblePartitionTagComponent>();
-		}
-		return;
-	}
-
-	const bool visibleSet = visiblePartitionIds.empty() || visiblePartitionIds.contains(e.getComponent<Transform2DComponent>(true).getWorldPartition());
-	if (visibleSet) {
-		if (hasTag) {
-			e.removeComponent<InvisiblePartitionTagComponent>();
-		}
+	if (visiblePartitionIds.empty()) {
+		updateVisiblePartitionNoPartition(*this, entity);
 	} else {
-		if (!hasTag) {
-			e.addComponent(InvisiblePartitionTagComponent());
-		}
+		updateVisiblePartitionGeneric(*this, entity, visiblePartitionIds.span());
 	}
 }
-

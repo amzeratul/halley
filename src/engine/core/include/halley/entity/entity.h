@@ -124,6 +124,14 @@ namespace Halley {
 		}
 
 		template <typename T>
+		bool hasComponentQuick() const
+		{
+			constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
+			static_assert(quickIndex != 0);
+			return (quickIndex & componentQuickMask) != 0;
+		}
+
+		template <typename T>
 		bool hasComponent(const World& world, bool evenIfDisabled = false) const
 		{
 			constexpr uint32_t quickIndex = FamilyMask::RetrieveComponentIndex<T>::quickIndex;
@@ -198,6 +206,11 @@ namespace Halley {
 		const UUID& getInstanceUUID() const
 		{
 			return instanceUUID;
+		}
+
+		WorldPartitionId getWorldPartition() const
+		{
+			return worldPartition;
 		}
 
 		FamilyMaskType getMask() const;

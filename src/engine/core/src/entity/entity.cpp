@@ -236,6 +236,7 @@ void Entity::propagateChildWorldPartition(WorldPartitionId newWorldPartition)
 {
 	if (worldPartition != newWorldPartition) {
 		worldPartition = newWorldPartition;
+		dirty = true; // Ensures that world will check it for visible set inclusion
 		
 		// Notify transform
 		if (auto* transform = tryGetComponent<Transform2DComponent>()) {
