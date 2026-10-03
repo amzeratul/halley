@@ -1,4 +1,4 @@
-// Halley codegen version 149
+// Halley codegen version 150
 #pragma once
 
 #include <halley.hpp>
@@ -31,6 +31,7 @@ public:
 		const Halley::MaybeRef<Transform2DComponent> transform2D{};
 	
 		using Type = Halley::FamilyType<ScriptableComponent, Halley::MaybeRef<Transform2DComponent>>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&scriptable);
@@ -51,6 +52,7 @@ public:
 		ScriptableComponent& scriptable;
 	
 		using Type = Halley::FamilyType<EmbeddedScriptComponent, ScriptableComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&embeddedScript);
@@ -70,6 +72,7 @@ public:
 		const ScriptTargetComponent& scriptTarget;
 	
 		using Type = Halley::FamilyType<ScriptTargetComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&scriptTarget);

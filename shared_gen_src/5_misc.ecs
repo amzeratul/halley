@@ -31,4 +31,11 @@ system:
     access:
     - world
 
+---
+
+component:
+  name: InvisiblePartitionTag
+  category: general
+  members: []
+
 ...

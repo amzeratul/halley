@@ -1,4 +1,4 @@
-// Halley codegen version 149
+// Halley codegen version 150
 #pragma once
 
 #include <halley.hpp>
@@ -16,6 +16,7 @@ public:
 		const ScriptableComponent& scriptable;
 	
 		using Type = Halley::FamilyType<ScriptableComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&scriptable);
@@ -33,6 +34,7 @@ public:
 		const ScriptTagTargetComponent& scriptTagTarget;
 	
 		using Type = Halley::FamilyType<ScriptTagTargetComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&scriptTagTarget);

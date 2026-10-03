@@ -1,4 +1,4 @@
-// Halley codegen version 149
+// Halley codegen version 150
 #pragma once
 
 #include <halley.hpp>
@@ -17,6 +17,7 @@ public:
 		NetworkComponent& network;
 	
 		using Type = Halley::FamilyType<NetworkComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&network);

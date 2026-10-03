@@ -1,4 +1,4 @@
-// Halley codegen version 149
+// Halley codegen version 150
 #pragma once
 
 #include <halley.hpp>
@@ -20,6 +20,7 @@ public:
 		const Halley::MaybeRef<Transform2DComponent> transform2D{};
 	
 		using Type = Halley::FamilyType<NetworkComponent, Halley::MaybeRef<Transform2DComponent>>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&network);

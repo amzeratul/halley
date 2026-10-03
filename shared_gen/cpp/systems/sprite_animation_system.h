@@ -1,4 +1,4 @@
-// Halley codegen version 149
+// Halley codegen version 150
 #pragma once
 
 #include <halley.hpp>
@@ -26,6 +26,7 @@ public:
 		const Transform2DComponent& transform2D;
 	
 		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, Halley::MaybeRef<SpriteAnimationEventsComponent>, Transform2DComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&sprite);
@@ -52,6 +53,7 @@ public:
 		const Transform2DComponent& transform2D;
 	
 		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, SpriteAnimationReplicatorComponent, Transform2DComponent>;
+		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
 			prefetchL2(&sprite);
