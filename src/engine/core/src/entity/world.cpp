@@ -749,7 +749,8 @@ void World::updateEntities()
 
 	entityDirty = false;
 
-	size_t nEntities = entities.size();
+	auto entitiesLocal = entities.span();
+	size_t nEntities = entitiesLocal.size();
 
 	Vector<size_t> entitiesRemoved;
 
@@ -763,9 +764,9 @@ void World::updateEntities()
 	// Update all entities
 	// This loop should be as fast as reasonably possible
 	for (size_t i = 0; i < nEntities; i++) {
-		auto& entity = *entities[i];
+		auto& entity = *entitiesLocal[i];
 		if (i + 20 < nEntities) { // Watch out for sign! Don't subtract!
-			prefetchL2(entities[i + 20]);
+			prefetchL2(entitiesLocal[i + 20]);
 		}
 
 		// Check if it needs any sort of updating
@@ -795,7 +796,7 @@ void World::updateEntities()
 
 	if (entityReloaded) {
 		for (size_t i = 0; i < nEntities; i++) {
-			auto& entity = *entities[i];
+			auto& entity = *entitiesLocal[i];
 			if (entity.reloaded && entity.isAlive()) {
 				pending[entity.getMask()].toReload.emplace_back(entity.getMask(), &entity);
 				entity.reloaded = false;
@@ -1220,9 +1221,16 @@ namespace {
 
 void World::updateAllVisiblePartitions()
 {
+	const auto entitiesLocal = entities.span();
+	size_t nEntities = entitiesLocal.size();
+
 	if (visiblePartitionIds.empty()) {
-		for (auto* e: entities) {
-			updateVisiblePartitionNoPartition(*this, *e);
+		for (size_t i = 0; i < nEntities; i++) {
+			auto& entity = *entitiesLocal[i];
+			if (i + 20 < nEntities) {
+				prefetchL2(entitiesLocal[i + 20]);
+			}
+			updateVisiblePartitionNoPartition(*this, entity);
 		}
 	} else {
 		if (visiblePartitionIds.size() <= 8) {
@@ -1231,13 +1239,22 @@ void World::updateAllVisiblePartitions()
 			for (size_t i = 0; i < visiblePartitionIds.size(); ++i) {
 				partitions[i] = visiblePartitionIds[i];
 			}
-			for (auto* e: entities) {
-				updateVisiblePartitionGeneric(*this, *e, partitions);
+			for (size_t i = 0; i < nEntities; i++) {
+				auto& entity = *entitiesLocal[i];
+				if (i + 20 < nEntities) {
+					prefetchL2(entitiesLocal[i + 20]);
+				}
+				updateVisiblePartitionGeneric(*this, entity, partitions);
 			}
 		} else {
 			const auto partitions = visiblePartitionIds.span();
-			for (auto* e: entities) {
-				updateVisiblePartitionGeneric(*this, *e, partitions);
+
+			for (size_t i = 0; i < nEntities; i++) {
+				auto& entity = *entitiesLocal[i];
+				if (i + 20 < nEntities) {
+					prefetchL2(entitiesLocal[i + 20]);
+				}
+				updateVisiblePartitionGeneric(*this, entity, partitions);
 			}
 		}
 	}
