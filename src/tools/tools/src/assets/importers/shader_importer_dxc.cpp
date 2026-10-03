@@ -8,12 +8,14 @@
 #include <dxcapi.h>
 #include <wrl.h>
 using namespace Microsoft::WRL;
-#endif
 
+// Uses D3D12 types; only valid on Windows
 #include "shader_importer_dxc.inl"
+#endif
 
 using namespace Halley;
 
+#ifdef _MSC_VER
 static DxcCreateInstanceProc getDxcCreateInstanceFunction(const char* dllName)
 {
 	// NOTE: This leaks the DLL module, FreeLibrary() is never called.
@@ -34,6 +36,7 @@ static DxcCreateInstanceProc getDxcCreateInstanceFunction(const char* dllName)
 
 	return fn;
 }
+#endif
 
 Bytes ShaderImporterDXC::compileDXIL(const String& name, ShaderType type, const Bytes& bytes, const String& language, const MaterialDefinition& material) {
 #ifdef _MSC_VER

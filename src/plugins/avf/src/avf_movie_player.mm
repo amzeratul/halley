@@ -8,8 +8,8 @@
 
 using namespace Halley;
 
-AVFMoviePlayer::AVFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data)
-	: MoviePlayer(video, audio)
+AVFMoviePlayer::AVFMoviePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data)
+	: MoviePlayer(halleyAPI)
 	, data(std::move(data))
 {
 	init();
