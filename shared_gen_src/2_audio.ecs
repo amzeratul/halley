@@ -106,6 +106,7 @@ system:
     - Transform2D: read
     - AudioSource: write
     - Velocity: optional read
+    - InvisiblePartitionTag: exclude
   strategy: global
   systemMessages:
   - PlayNetworkSound: receive

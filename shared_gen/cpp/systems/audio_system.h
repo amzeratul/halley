@@ -9,6 +9,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/audio_source_component.h"
 #include "components/velocity_component.h"
+#include "components/invisible_partition_tag_component.h"
 #include "system_messages/play_network_sound_system_message.h"
 
 // Generated file; do not modify.
@@ -43,7 +44,7 @@ public:
 		const Halley::MaybeRef<VelocityComponent> velocity{};
 	
 		using Type = Halley::FamilyType<AudioSourceComponent, Transform2DComponent, Halley::MaybeRef<VelocityComponent>>;
-		using ExclusionType = Halley::FamilyType<>;
+		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
 			prefetchL2(&audioSource);

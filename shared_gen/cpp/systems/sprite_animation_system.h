@@ -9,6 +9,7 @@
 #include "components/sprite_animation_component.h"
 #include "components/sprite_animation_events_component.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "components/invisible_partition_tag_component.h"
 #include "components/sprite_animation_replicator_component.h"
 #include "messages/play_animation_message.h"
 #include "messages/play_animation_once_message.h"
@@ -26,7 +27,7 @@ public:
 		const Transform2DComponent& transform2D;
 	
 		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, Halley::MaybeRef<SpriteAnimationEventsComponent>, Transform2DComponent>;
-		using ExclusionType = Halley::FamilyType<>;
+		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
 			prefetchL2(&sprite);
@@ -53,7 +54,7 @@ public:
 		const Transform2DComponent& transform2D;
 	
 		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, SpriteAnimationReplicatorComponent, Transform2DComponent>;
-		using ExclusionType = Halley::FamilyType<>;
+		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
 			prefetchL2(&sprite);

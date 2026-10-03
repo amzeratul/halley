@@ -10,7 +10,6 @@ public:
 	}
 
 	void update(Time time) {
-		activeChunkSpan = getWorld().getVisiblePartitionIds();
 		nChecked = 0;
 		nUpdated = 0;
 		nSpritesUpdated = 0;
@@ -78,15 +77,9 @@ public:
 
 private:
 	Callback callback;
-	gsl::span<const WorldPartitionId> activeChunkSpan;
 	int nChecked;
 	int nUpdated;
 	int nSpritesUpdated;
-
-	inline bool isInActiveWorldPartitionSet(uint16_t worldPartition) const
-	{
-		return activeChunkSpan.empty() || std_ex::contains(activeChunkSpan, worldPartition);
-	}
 
 	Rect4f getViewPort() const
 	{
@@ -96,20 +89,18 @@ private:
 	void updateAnimators(Time time, Rect4f viewPort)
 	{
 		for (auto& e: mainFamily) {
-			if (isInActiveWorldPartitionSet(e.transform2D.getWorldPartition())) {
-				++nChecked;
+			++nChecked;
 
-				const bool active = e.spriteAnimation.player.isActiveAnimation();
-				const bool hasUpdate = e.spriteAnimation.player.hasSpriteUpdate();
+			const bool active = e.spriteAnimation.player.isActiveAnimation();
+			const bool hasUpdate = e.spriteAnimation.player.hasSpriteUpdate();
 
-				if (active || hasUpdate) {
-					if (!isCulledByFixedBounds(e.transform2D, e.spriteAnimation, viewPort)) {
-						++nUpdated;
-						e.spriteAnimation.player.update(time);
-						updateSprite(e, viewPort, !active); // If this isn't active, bypass the bounds check and update anyway, so it doesn't enter the condition above on the next update
-					}
-					updateEvents(e);
+			if (active || hasUpdate) {
+				if (!isCulledByFixedBounds(e.transform2D, e.spriteAnimation, viewPort)) {
+					++nUpdated;
+					e.spriteAnimation.player.update(time);
+					updateSprite(e, viewPort, !active); // If this isn't active, bypass the bounds check and update anyway, so it doesn't enter the condition above on the next update
 				}
+				updateEvents(e);
 			}
 		}
 	}
@@ -137,9 +128,6 @@ private:
 
 	bool isInBounds(const Transform2DComponent& transform2D, const SpriteComponent& sprite, const SpriteAnimationComponent& spriteAnimation, const Rect4f& viewPort) const
 	{
-		if (!isInActiveWorldPartitionSet(transform2D.getWorldPartition())) {
-			return false;
-		}
 		return sprite.sprite.getAABB().overlaps(viewPort) || getAnimationBounds(transform2D, spriteAnimation).overlaps(viewPort);
 	}
 
@@ -214,14 +202,12 @@ private:
 		}
 
 		for (auto& e : replicatorFamily) {
-			if (isInActiveWorldPartitionSet(e.transform2D.getWorldPartition())) {
-				if (true || isInBoundsWithCull(e.transform2D, e.sprite, e.spriteAnimation, viewPort)) { // can't cull as sprite replicating might be in view when this isn't
-					auto depth = e.transform2D.getDepth();
-					if (replicatorsPerLevel.size() <= depth) {
-						replicatorsPerLevel.resize(nextPowerOf2(depth + 1));
-					}
-					replicatorsPerLevel[depth].push_back(&e);
+			if (true || isInBoundsWithCull(e.transform2D, e.sprite, e.spriteAnimation, viewPort)) { // can't cull as sprite replicating might be in view when this isn't
+				auto depth = e.transform2D.getDepth();
+				if (replicatorsPerLevel.size() <= depth) {
+					replicatorsPerLevel.resize(nextPowerOf2(depth + 1));
 				}
+				replicatorsPerLevel[depth].push_back(&e);
 			}
 		}
 

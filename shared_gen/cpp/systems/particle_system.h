@@ -9,6 +9,7 @@
 
 #include "components/particles_component.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "components/invisible_partition_tag_component.h"
 #include "messages/stop_particles_message.h"
 #include "messages/directional_burst_message.h"
 
@@ -22,7 +23,7 @@ public:
 		const Transform2DComponent& transform2D;
 	
 		using Type = Halley::FamilyType<ParticlesComponent, Transform2DComponent>;
-		using ExclusionType = Halley::FamilyType<>;
+		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
 			prefetchL2(&particles);

@@ -234,11 +234,13 @@ system:
     - Sprite: write
     - SpriteAnimation: write
     - SpriteAnimationEvents: optional write
+    - InvisiblePartitionTag: exclude
   - replicator:
     - Transform2D: read
     - Sprite: write
     - SpriteAnimationReplicator: read
     - SpriteAnimation: write
+    - InvisiblePartitionTag: exclude
   strategy: global
   access:
   - world
@@ -274,6 +276,7 @@ system:
   - particle:
     - Transform2D: read
     - Particles: write
+    - InvisiblePartitionTag: exclude
   strategy: global
   access:
   - world
