@@ -808,25 +808,19 @@ bool EntityNetworkSession::isTerminatedByHost() const
 	return terminatedByHost;
 }
 
-uint8_t EntityNetworkSession::getEntityViewMask(EntityId entityId, NetworkComponent& network, const Transform2DComponent* transform) const
+uint8_t EntityNetworkSession::getEntityViewMask(EntityId entityId, const Transform2DComponent* transform) const
 {
-	HalleyAssertDev(listener);
+	HalleyAssertDebug(listener);
 
 	uint32_t mask = 0;
+	const auto entityRef = getWorld().getEntity(entityId);
 
-	if (network.alwaysSend) {
-		for (const auto& peer : peers) {
-			mask |= 1 << peer.getPeerId();
-		}
-	} else {
-		const auto entityRef = getWorld().getEntity(entityId);
-		for (const auto& peer : peers) {
-			const uint8_t peerId = peer.getPeerId();
-			// TODO: can we avoid this repeating lookup right here?
-			const auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peerId);
-			if (listener->isEntityInView(entityRef, transform, clientSharedData, peerId)) {
-				mask |= 1 << peerId;
-			}
+	for (const auto& peer : peers) {
+		const uint8_t peerId = peer.getPeerId();
+		// TODO: can we avoid this repeating lookup right here?
+		const auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peerId);
+		if (listener->isEntityInView(entityRef, transform, clientSharedData, peerId)) {
+			mask |= 1 << peerId;
 		}
 	}
 
