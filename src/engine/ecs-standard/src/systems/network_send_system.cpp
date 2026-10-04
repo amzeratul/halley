@@ -92,8 +92,10 @@ public:
 					continue;
 				}
 
-				// Visibility check for all peers - this updates NetworkComponent::peerViewMask.
-				if (!entityNetworkSession.isEntityInView(e.entityId, e.network, e.transform2D.tryGet())) {
+				// Visibility check, for all peers at once.
+				const uint8_t peerViewMask = entityNetworkSession.getEntityViewMask(e.entityId, e.network, e.transform2D.tryGet());
+
+				if (peerViewMask == 0) {
 					continue;
 				}
 
@@ -103,7 +105,7 @@ public:
 					.entityId = e.entityId,
 					.ownerId = ownerId,
 					.authorityId = authorityId,
-					.peerViewMask = e.network.peerViewMask,
+					.peerViewMask = peerViewMask,
 					.requiresEntityFrameModified = e.network.requiresEntityFrameModified,
 				};
 

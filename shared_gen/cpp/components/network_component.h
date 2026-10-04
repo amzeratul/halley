@@ -23,7 +23,6 @@ public:
 	bool sendUpdates{ false };
 	bool alwaysSend{ false };
 	bool requiresEntityFrameModified{ false };
-	uint8_t peerViewMask{};
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};

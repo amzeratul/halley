@@ -808,7 +808,7 @@ bool EntityNetworkSession::isTerminatedByHost() const
 	return terminatedByHost;
 }
 
-bool EntityNetworkSession::isEntityInView(EntityId entityId, NetworkComponent& network, const Transform2DComponent* transform) const
+uint8_t EntityNetworkSession::getEntityViewMask(EntityId entityId, NetworkComponent& network, const Transform2DComponent* transform) const
 {
 	HalleyAssertDev(listener);
 
@@ -831,9 +831,8 @@ bool EntityNetworkSession::isEntityInView(EntityId entityId, NetworkComponent& n
 	}
 
 	HalleyAssertDebug((mask & ~0xff) == 0);
-	network.peerViewMask = static_cast<uint8_t>(mask & 0xff);
 
-	return mask != 0;
+	return mask & 0xff;
 }
 
 Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const

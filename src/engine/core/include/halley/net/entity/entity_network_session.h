@@ -91,7 +91,7 @@ namespace Halley {
 		bool isLobbyReady() const;
 		bool isTerminatedByHost() const;
 
-		bool isEntityInView(EntityId entityId, NetworkComponent& network, const Transform2DComponent* transform) const;
+		uint8_t getEntityViewMask(EntityId entityId, NetworkComponent& network, const Transform2DComponent* transform) const;
 		Vector<Rect4i> getRemoteViewPorts() const;
 
 		bool isHost() const override;
