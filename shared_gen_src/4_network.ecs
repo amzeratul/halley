@@ -35,6 +35,11 @@ component:
       canEdit: true
       canSave: false
       canNetwork: false
+  - peerViewMask:
+      type: uint8_t
+      canEdit: false
+      canSave: false
+      canNetwork: false
   - dataInterpolatorSet:
       type: 'Halley::DataInterpolatorSet'
       canSave: false

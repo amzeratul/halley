@@ -83,13 +83,31 @@ public:
 			}
 
 			if (e.network.sendUpdates && e.network.ownerId) {
-				uint8_t ownerId = e.network.ownerId.value();
-				uint8_t authorityId = e.network.authorityId.value_or(ownerId);
-				if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
-					++networkEntitiesSending;
-					entities.emplace_back(EntityNetworkUpdateInfo{e.entityId, ownerId, authorityId,
-						e.network.alwaysSend, e.network.requiresEntityFrameModified, e.transform2D.tryGet() });
+				const uint8_t ownerId = e.network.ownerId.value();
+				const uint8_t authorityId = e.network.authorityId.value_or(ownerId);
+
+				// - never skip on host
+				// - on peers, skip if the peer doesn't own or grabbed authority
+				if (!isHost && ownerId != myPeerId && authorityId != myPeerId) {
+					continue;
 				}
+
+				// Visibility check for all peers - this updates NetworkComponent::peerViewMask.
+				if (!entityNetworkSession.isEntityInView(e.entityId, e.network, e.transform2D.tryGet())) {
+					continue;
+				}
+
+				++networkEntitiesSending;
+
+				const EntityNetworkUpdateInfo entry = {
+					.entityId = e.entityId,
+					.ownerId = ownerId,
+					.authorityId = authorityId,
+					.peerViewMask = e.network.peerViewMask,
+					.requiresEntityFrameModified = e.network.requiresEntityFrameModified,
+				};
+
+				entities.emplace_back(entry);
 			}
 		}
 

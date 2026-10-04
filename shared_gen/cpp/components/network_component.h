@@ -1,4 +1,4 @@
-// Halley codegen version 148
+// Halley codegen version 150
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -23,6 +23,7 @@ public:
 	bool sendUpdates{ false };
 	bool alwaysSend{ false };
 	bool requiresEntityFrameModified{ false };
+	uint8_t peerViewMask{};
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};

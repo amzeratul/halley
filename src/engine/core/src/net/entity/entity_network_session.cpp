@@ -11,6 +11,7 @@
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "components/network_component.h"
+#include "halley/entity/components/transform_2d_component.h"
 
 class NetworkComponent;
 using namespace Halley;
@@ -805,6 +806,34 @@ bool EntityNetworkSession::isLobbyReady() const
 bool EntityNetworkSession::isTerminatedByHost() const
 {
 	return terminatedByHost;
+}
+
+bool EntityNetworkSession::isEntityInView(EntityId entityId, NetworkComponent& network, const Transform2DComponent* transform) const
+{
+	HalleyAssertDev(listener);
+
+	uint32_t mask = 0;
+
+	if (network.alwaysSend) {
+		for (const auto& peer : peers) {
+			mask |= 1 << peer.getPeerId();
+		}
+	} else {
+		const auto entityRef = getWorld().getEntity(entityId);
+		for (const auto& peer : peers) {
+			const uint8_t peerId = peer.getPeerId();
+			// TODO: can we avoid this repeating lookup right here?
+			const auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peerId);
+			if (listener->isEntityInView(entityRef, transform, clientSharedData, peerId)) {
+				mask |= 1 << peerId;
+			}
+		}
+	}
+
+	HalleyAssertDebug((mask & ~0xff) == 0);
+	network.peerViewMask = static_cast<uint8_t>(mask & 0xff);
+
+	return mask != 0;
 }
 
 bool EntityNetworkSession::isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const
