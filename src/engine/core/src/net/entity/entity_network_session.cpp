@@ -85,6 +85,9 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 	factory->setNetworkFactory(true);
 	messageBridge = bridge;
 
+	// This needs a world to update
+	deltaOptions.makeIgnoreComponentIds(world.getReflection());
+
 	// Clear queue
 	if (!queuedPackets.empty()) {
 		for (auto& qp: queuedPackets) {
