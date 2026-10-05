@@ -11,6 +11,7 @@
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "components/network_component.h"
+#include "halley/entity/components/transform_2d_component.h"
 
 class NetworkComponent;
 using namespace Halley;
@@ -83,6 +84,9 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 	factory = std::make_shared<EntityFactory>(world, resources);
 	factory->setNetworkFactory(true);
 	messageBridge = bridge;
+
+	// This needs a world to update
+	deltaOptions.makeIgnoreComponentIds(world.getReflection());
 
 	// Clear queue
 	if (!queuedPackets.empty()) {
@@ -807,10 +811,24 @@ bool EntityNetworkSession::isTerminatedByHost() const
 	return terminatedByHost;
 }
 
-bool EntityNetworkSession::isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const
+uint64_t EntityNetworkSession::getEntityViewMask(EntityId entityId, const Transform2DComponent* transform) const
 {
-	HalleyAssertDev(listener);
-	return listener->isEntityInView(entity, transform, clientData, peerId);
+	HalleyAssertDebug(listener);
+
+	uint64_t mask = 0;
+	const auto entityRef = getWorld().getEntity(entityId);
+
+	for (const auto& peer : peers) {
+		const uint8_t peerId = peer.getPeerId();
+		HalleyAssertDebug(peerId < 64); // NB: Somebody tries to host multiplayer with more than 63 peers!?
+		// TODO: can we avoid this repeating lookup right here?
+		const auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peerId);
+		if (listener->isEntityInView(entityRef, transform, clientSharedData, peerId)) {
+			mask |= 1ull << peerId;
+		}
+	}
+
+	return mask;
 }
 
 Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const

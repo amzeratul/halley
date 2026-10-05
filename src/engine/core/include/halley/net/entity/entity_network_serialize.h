@@ -179,7 +179,6 @@ namespace Halley {
         EntityNetworkChanges journal;
 
         bool hasComponentsAddedOrRemoved = false;
-        HashSet<uint16_t> componentsIgnored;
 
         Bytes scratchpad;
 

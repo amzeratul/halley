@@ -70,12 +70,11 @@ namespace Halley {
     };
 
     struct EntityNetworkUpdateInfo {
+    	uint64_t peerViewMask;
 		EntityId entityId;
 		uint8_t ownerId;
     	uint8_t authorityId;
-    	bool alwaysSend;
     	bool requiresEntityFrameModified;
-        const Transform2DComponent* transform = nullptr;
 	};
 
 	struct EntityNetworkInstanceInfo {
@@ -129,6 +128,7 @@ namespace Halley {
         	bool forChildEntityTemporaryOnly = false;
         	bool forceNextFastUpdate = false;
         	bool requiresEntityFrameModified = false;
+        	bool hasValidEntityData = false;
 
         	Time timeSinceSend = 0;
 

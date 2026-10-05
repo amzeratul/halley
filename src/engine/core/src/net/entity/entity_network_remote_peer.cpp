@@ -125,7 +125,9 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			}
 		}
 
-		if (entry.alwaysSend || parentSession->isEntityInView(entity, entry.transform, clientData, peerId)) {
+		// Here, the visibility check uses NetworkComponent::peerViewMask which was prepared
+		// in NetworkSendSystem::update() already.
+		if ((entry.peerViewMask & (1ull << peerId)) != 0) {
 			++stats.nCheckedRegular;
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				toCreate.push_back(entity);
@@ -425,32 +427,37 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 	uint64_t previousContentHash = remote.lastSerializerHash;
 	remote.lastSerializerHash = contentHash;
 
-	// Fast updates are possible only if a previous journal is available to compare to,
-    // or if it's an outbound entity marked as "for changed authority".
-    bool canFastUpdate = !remote.fastUpdateJournal.empty() || remote.hasAuthorityOnly;
-
 	if (!expectNoUpdate) {
 		++stats.nUpdateChecked;
 		//Logger::logDev("Checking full: " + entity.getName() + " " + entity.getEntityId().toDetailedString(), true);
 	}
 
-    if (canFastUpdate) {
+	bool needSlowUpdate = false;
+
+    {
         HalleyAssertDev(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
         HalleyAssertDev(!parentSession->getEntitySerializationOptions().serializeAsStub);
 
-    	if (fastSerializer.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) {
+    	if (fastSerializer.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) [[likely]] {
     		bool modified = false;
     		bool modifiedInStructure = false;
 
     		if (remote.fastUpdateJournal.empty()) {
-    			// This must be an outbound entity with "hasAuthorityOnly". If it just has been
-    			// created, its previous journal is still empty.
-    			HalleyAssertDev(remote.hasAuthorityOnly);
-    			// Just process and store the journal, but keep marked as "not modified" ...
-		        fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
-    			// ... but set flag to force an update next tick, so we don't miss any changes.
-    			remote.forceNextFastUpdate = true;
-    			//Logger::logDev("populating outbound entity journal, authority-only, for " + entity.getName());
+    			if (remote.hasAuthorityOnly) {
+    				// This must be an outbound entity with "hasAuthorityOnly". If it just has been
+    				// created, its previous journal is still empty.
+    				// Just process and store the journal, but keep marked as "not modified" ...
+    				fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
+    				// ... but set flag to force an update next tick, so we don't miss any changes.
+    				remote.forceNextFastUpdate = true;
+    				//Logger::logDev("populating outbound entity journal, authority-only, for " + entity.getName());
+    			} else {
+    				// First frame for a fresh network entity, or after a slow path update. We want
+    				// to send this, and fill up the journal for future updates.
+    				fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
+    				modified = true;
+    				modifiedInStructure = false;
+    			}
     		} else {
     			modified = fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, remote.forceNextFastUpdate);
     			modifiedInStructure = fastSerializer.hasEntityChanges(entity, wantToLog);
@@ -495,7 +502,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			// Dev build only: similar to above, but the other way around:
     			// requiresEntityFrameModified is set, nobody called setLastFrameModified(), but the entity has been
     			// modified. Peers would miss changes in release builds.
-    			if (checkExpectNoUpdate && expectNoUpdate) {
+    			if (checkExpectNoUpdate && expectNoUpdate && previousContentHash != 0) {
     				Logger::logError("Network entity " + entity.getName() + " has been modified, and requiresEntityFrameModified is set, but no update was signaled", true);
     			}
     			if (checkExpectSameHash && foundSameHash) {
@@ -505,9 +512,11 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     		}
 
     		if (modifiedInStructure) {
-    			canFastUpdate = false;
-    			// Wipe the existing journal
+    			// Wipe the existing journal, and signal to use the slow path.
+    			needSlowUpdate = true;
     			remote.fastUpdateJournal.clear();
+    			// Also need to make sure the next hash check doesn't match.
+    			remote.lastSerializerHash = 0;
 	    		//Logger::logDev("Network entity " + entity.getName() + " has been modified in structure, fall back using slow path");
     			if (checkExpectSameHash && foundSameHash) {
     				Logger::logError("Network entity " + entity.getName() + " has been modified in structure, but fast hash check didn't detect the change", true);
@@ -519,20 +528,30 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     		}
     	} else {
     		// Something went wrong, fall back to the slow path.
-    		canFastUpdate = false;
+    		needSlowUpdate = true;
     		remote.fastUpdateJournal.clear();
+    		remote.lastSerializerHash = 0;
     		Logger::logWarning("Fast network serialize has failed, fall back using slow path");
     	}
     }
 #else
-    constexpr bool canFastUpdate = false;
+    constexpr bool needSlowUpdate = true;
 #endif
 
-    if (!canFastUpdate) {
+    if (needSlowUpdate) {
     	if (remote.hasAuthorityOnly) {
             Logger::logError("Full network updates unsupported for entities with changed authority");
     		return;
     	}
+
+    	// NB: *technically*, remote.data can be very outdated at this point, since it does not
+    	// reflect any fast updates the entity received since creation, or since a previous call to
+    	// this slow path.
+    	//
+    	// But, luckily, this fallback is only about structural changes, e.g. child entities added
+    	// or removed. The fast path doesn't do any of that. So, we tolerate the delta built below
+    	// to potentially contain component data with wrong values. Instead, we make sure the next
+    	// fast update will contain the full set of data, refreshing all components again.
 
         // Encode delta using interpolators
         auto newData = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
@@ -563,15 +582,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         }
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
-        // Binary serialization to (re-)build the update journal.
-        if (fastSerializer.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) {
-	        fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
-        } else {
-	        // If the fast update further above failed, for example because of a full journal,
-        	// this one here will probably fail too - so we just drop the changes and retry
-        	// next time.
-    		remote.fastUpdateJournal.clear();
-        }
+    	// Just some checks that we did not miss to reset in some path above.
+    	HalleyAssertDev(remote.fastUpdateJournal.empty());
+    	HalleyAssertDev(remote.lastSerializerHash == 0);
 #endif
     }
 }

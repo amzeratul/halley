@@ -83,13 +83,35 @@ public:
 			}
 
 			if (e.network.sendUpdates && e.network.ownerId) {
-				uint8_t ownerId = e.network.ownerId.value();
-				uint8_t authorityId = e.network.authorityId.value_or(ownerId);
-				if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
-					++networkEntitiesSending;
-					entities.emplace_back(EntityNetworkUpdateInfo{e.entityId, ownerId, authorityId,
-						e.network.alwaysSend, e.network.requiresEntityFrameModified, e.transform2D.tryGet() });
+				const uint8_t ownerId = e.network.ownerId.value();
+				const uint8_t authorityId = e.network.authorityId.value_or(ownerId);
+
+				// - never skip on host
+				// - on peers, skip if the peer doesn't own or grabbed authority
+				if (!isHost && ownerId != myPeerId && authorityId != myPeerId) {
+					continue;
 				}
+
+				// Visibility check, for all peers at once.
+				uint64_t peerViewMask = ~0ull;
+				if (!e.network.alwaysSend) [[likely]] {
+					peerViewMask = entityNetworkSession.getEntityViewMask(e.entityId, e.transform2D.tryGet());
+					if (peerViewMask == 0) {
+						continue;
+					}
+				}
+
+				++networkEntitiesSending;
+
+				const EntityNetworkUpdateInfo entry = {
+					.peerViewMask = peerViewMask,
+					.entityId = e.entityId,
+					.ownerId = ownerId,
+					.authorityId = authorityId,
+					.requiresEntityFrameModified = e.network.requiresEntityFrameModified,
+				};
+
+				entities.emplace_back(entry);
 			}
 		}
 
