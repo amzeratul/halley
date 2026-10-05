@@ -859,6 +859,10 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
     bool modified = previous.empty();
     hasComponentsAddedOrRemoved = false;
 
+    childrenAdded.clear();
+    childrenChanged.clear();
+    childrenRemoved.clear();
+
     // Compare with previously saved journal.
 
     if (!previous.empty()) {
@@ -880,10 +884,6 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
         if (modified) {
             // Something has changed. We need to do a more detailed inspection
             // to check for entity/component updates, additions and deletions.
-
-            childrenAdded.clear();
-            childrenChanged.clear();
-            childrenRemoved.clear();
 
             // Enumerate all child entities in current journal. Mark all of
             // them as "potentially added".
