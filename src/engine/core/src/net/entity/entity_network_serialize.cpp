@@ -398,29 +398,16 @@ void EntityNetworkChanges::invalidateHashes()
 
 void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetworkSession)
 {
-    session = entityNetworkSession;
+    HalleyAssertDebug(session == nullptr || session == entityNetworkSession);
+    if (session != entityNetworkSession) {
+        session = entityNetworkSession;
+    }
     hasComponentsAddedOrRemoved = false;
     myPeerId = session->getSession().getMyPeerId().value_or(0);
 }
 
 uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, bool useInterpolators)
 {
-    // We lookup components by ID, need to translate from names. This is the same list of component types
-    // EntityFactory uses to compile deltas.
-    //
-    // The session's delta options are immutable, so we should need to initialize the lookup table only once.
-    // This is done here because this function is called before serializeEntityUpdate().
-    if (componentsIgnored.empty()) {
-        if (const auto& ignoreComponents = session->getEntityDeltaOptions().ignoreComponents; !ignoreComponents.empty()) {
-            const auto& reflection = entity.getWorld().getReflection();
-            componentsIgnored.reserve(ignoreComponents.size());
-            for (const auto& componentName : ignoreComponents) {
-                const auto& reflector = reflection.getComponentReflector(componentName);
-                componentsIgnored.emplace(reflector.getIndex());
-            }
-        }
-    }
-
     // Use hashing serializer, no dictionary.
     // NB: There doesn't seem much difference, and maybe even a performance loss, by using the
     // dictionary here. My guess is that, since both variants are now using the same XXH3 code to
@@ -480,6 +467,7 @@ void EntityNetworkSerialize::doSerializeEntityHash(
     // Components
     if (!remote) {
         auto& reflection = serializer.getOptions().world->getReflection();
+        const auto& componentsIgnored = session->getEntityDeltaOptions().ignoreComponentIds;
 
         const auto ids = entity.getComponentIds();
         const auto ptrs = entity.getComponentPtrs();
@@ -499,7 +487,7 @@ void EntityNetworkSerialize::doSerializeEntityHash(
                 }
             }
 
-            if (componentsIgnored.contains(componentId)) {
+            if (componentsIgnored.test(componentId)) {
                 continue;
             }
 
@@ -592,6 +580,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     // Components
     if (!remote) {
         auto& reflection = serializer.getOptions().world->getReflection();
+        const auto& componentsIgnored = session->getEntityDeltaOptions().ignoreComponentIds;
 
         const auto ids = entity.getComponentIds();
         const auto ptrs = entity.getComponentPtrs();
@@ -610,7 +599,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
                 }
             }
 
-            if (componentsIgnored.contains(componentId)) {
+            if (componentsIgnored.test(componentId)) {
                 continue;
             }
 
