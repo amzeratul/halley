@@ -122,8 +122,6 @@ namespace Halley
 
 		std::optional<String> nextSequence = {};
 		
-		String curSeqName;
-		String curDirName;
 		ResourceObserver observer;
 	};
 

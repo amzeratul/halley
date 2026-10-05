@@ -80,7 +80,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<c
 
 AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(const String& _sequence)
 {
-	curSeqName = _sequence; // DO NOT use _sequence after this, it can be a reference to nextSequence, which is changed on the next line
+	const String curSeqName = _sequence; // DO NOT use _sequence after this, it can be a reference to nextSequence, which is changed on the next line
 	nextSequence = {};
 	reverse = false;
 	updateResourceIfNeeded();
@@ -113,7 +113,6 @@ void AnimationPlayer::setDirection(int direction)
 		auto newDir = &animation->getDirection(direction);
 		if (curDir != newDir) {
 			curDir = newDir;
-			curDirName = newDir->getName();
 			dirFlip = curDir->shouldFlip();
 			dirId = curDir->getId();
 			dirty = true;
@@ -123,7 +122,6 @@ void AnimationPlayer::setDirection(int direction)
 
 void AnimationPlayer::setDirection(const String& direction)
 {
-	curDirName = direction;
 	updateResourceIfNeeded();
 
 	if (animation && (!curDir || curDir->getName() != direction)) {
@@ -321,7 +319,7 @@ bool AnimationPlayer::isPlaying() const
 const String& AnimationPlayer::getCurrentSequenceName() const
 {
 	updateResourceIfNeeded();
-	return curSeq ? curSeq->getName() : curSeqName;
+	return curSeq ? curSeq->getName() : String::emptyString();
 }
 
 int AnimationPlayer::getCurrentSequenceId() const
@@ -531,7 +529,7 @@ void AnimationPlayer::onSequenceDone()
 void AnimationPlayer::updateResourceIfNeeded() const
 {
 #ifdef ENABLE_HOT_RELOAD
-	if (observer.needsUpdate()) {
+	if (false && observer.needsUpdate()) {
 		const_cast<AnimationPlayer*>(this)->doUpdateResource();
 	}
 #endif
@@ -539,13 +537,15 @@ void AnimationPlayer::updateResourceIfNeeded() const
 
 void AnimationPlayer::doUpdateResource()
 {
+	const String seqName = curSeq ? curSeq->getName() : "";
+	const String dirName = curDir ? curDir->getName() : "";
 	observer.update();
 	dirId = -1;
 	curDir = nullptr;
 	curSeq = nullptr;
 	seqLen = 0;
-	setSequence(curSeqName);
-	setDirection(curDirName);
+	setSequence(seqName);
+	setDirection(dirName);
 	resolveSprite();
 }
 
