@@ -36,6 +36,10 @@ namespace Halley {
 			Halley::FamilyExtractor::Evaluator<Ts...>::buildEntity(entity, reinterpret_cast<void**>(data), 0);
 		}
 
+		static void loadOptionalComponents(Entity& entity, char* data) {
+			Halley::FamilyExtractor::Evaluator<Ts...>::buildEntityOptional(entity, reinterpret_cast<void**>(data), 0);
+		}
+
 		constexpr static size_t getNumComponents()
 		{
 			return sizeof...(Ts);

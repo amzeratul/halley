@@ -7,11 +7,13 @@ namespace Halley {
 		template <typename T>
 		struct StripMaybeRef {
 			using type = T;
+			constexpr static bool isMaybe = false;
 		};
 
 		template <typename T>
 		struct StripMaybeRef<MaybeRef<T>> {
 			using type = T;
+			constexpr static bool isMaybe = true;
 		};
 
 
@@ -21,6 +23,7 @@ namespace Halley {
 		template <>
 		struct Evaluator <> {
 			static void buildEntity(Entity&, void**, size_t) {}
+			static void buildEntityOptional(Entity&, void**, size_t) {}
 		};
 
 		template <typename T, typename... Ts>
@@ -28,6 +31,13 @@ namespace Halley {
 			static void buildEntity(Entity& entity, void** data, size_t offset) {
 				data[offset] = entity.tryGetComponent<typename StripMaybeRef<T>::type>(true);
 				Evaluator<Ts...>::buildEntity(entity, data, offset + 1);
+			}
+
+			static void buildEntityOptional(Entity& entity, void** data, size_t offset) {
+				if constexpr (StripMaybeRef<T>::isMaybe) {
+					data[offset] = entity.tryGetComponent<typename StripMaybeRef<T>::type>(true);
+				}
+				Evaluator<Ts...>::buildEntityOptional(entity, data, offset + 1);
 			}
 		};
 	}

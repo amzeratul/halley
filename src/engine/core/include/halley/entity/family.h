@@ -78,6 +78,7 @@ namespace Halley {
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		virtual void refreshEntity(Entity& entity) = 0;
+		virtual void refreshEntityOptionals(Entity& entity) = 0;
 		void removeEntity(Entity& entity);
 		void reloadEntity(Entity& entity);
 		virtual void updateEntities() = 0;
@@ -183,12 +184,32 @@ namespace Halley {
 		
 		void refreshEntity(Entity& entity) final
 		{
-			for (auto& e: entities) {
-				if (e.entityId == entity.getEntityId()) {
-					T::Type::loadComponents(entity, &e.data[0]);
-					break;
+			if (auto* e = getEntityStorage(entity.getEntityId())) {
+				T::Type::loadComponents(entity, &e->data[0]);
+			}
+		}
+		
+		void refreshEntityOptionals(Entity& entity) final
+		{
+			if (auto* e = getEntityStorage(entity.getEntityId())) {
+				T::Type::loadOptionalComponents(entity, &e->data[0]);
+			}
+		}
+
+		StorageType* getEntityStorage(EntityId id)
+		{
+			if (indexed) {
+				if (auto iter = index.find(id); iter != index.end()) {
+					return &entities[iter->second];
+				}
+			} else {
+				for (auto& e: entities) {
+					if (e.entityId == id) {
+						return &e;
+					}
 				}
 			}
+			return nullptr;
 		}
 
 		void updateEntities() final
@@ -278,7 +299,7 @@ namespace Halley {
 				// If equal, they'll all be removed, so no need to re-arrange them
 				toRemove.clear();
 			} else {
-				if (removeCount < 20) {
+				if (removeCount < 100) {
 					moveDeadEntitiesToBackLinear();
 				} else {
 					moveDeadEntitiesToBackHash();
