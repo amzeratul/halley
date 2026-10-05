@@ -93,15 +93,15 @@ void Polygon::checkConvex()
 		auto a = vertices[i];
 		auto b = vertices[(i + 1) % n];
 		auto c = vertices[(i + 2) % n];
-		if ((b - a).length() < epsilon) {
+		if ((b - a).squaredLength() < epsilon * epsilon) [[unlikely]] {
 			valid = false;
 			return;
 		}
 
-		const float cross = (b - a).normalized().cross((c - b).normalized());
+		const float cross = (b - a).cross((c - b));
 		if (cross > epsilon) {
 			right++;
-		} else if (cross < -epsilon) {
+		} else if (cross < -epsilon) [[likely]] {
 			left++;
 		}
 
