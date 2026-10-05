@@ -35,10 +35,14 @@ Transform2DComponent::~Transform2DComponent()
 
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
+	const bool firstAdd = this->entity.isEmpty();
+
 	this->entity = entity;
 	worldPartition = entity.getWorldPartition();
-	updateParentTransform();
-	markDirty(DirtyPropagationMode::Added);
+	if (firstAdd) {
+		updateParentTransform();
+		markDirty(DirtyPropagationMode::Added);
+	}
 }
 
 void Transform2DComponent::onHierarchyChanged()
