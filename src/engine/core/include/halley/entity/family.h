@@ -268,45 +268,22 @@ namespace Halley {
 
 		bool removeDeadEntities()
 		{
-			if (toRemove.empty()) {
+			const size_t removeCount = toRemove.size();
+			if (removeCount == 0) {
 				return false;
 			}
 
-			// Performance-critical code
-			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
-			size_t removeCount = toRemove.size();
-			HalleyAssertDebug(removeCount > 0);
 			HalleyAssertDebug(removeCount <= entities.size());
-			std::sort(toRemove.begin(), toRemove.end());
-
-			for (size_t i = 1; i < toRemove.size(); ++i) {
-				HalleyAssertDebug(toRemove[i - 1] != toRemove[i]);
-			}
-
-			// Move all entities to be removed to the back of the vector
-			{
-				int n = int(entities.size());
-				// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
-				// but it causes an issue where an entity is removed and added to the same family in one frame.
-				for (int i = 0; i < n; i++) {
-					EntityId id = entities[i].entityId;
-					auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
-					if (iter != toRemove.end() && id == *iter) {
-						toRemove.erase(iter);
-						if (i != n - 1) {
-							std::swap(entities[i], entities[n - 1]);
-							i--;
-						}
-						n--;
-						if (toRemove.empty()) {
-							break;
-						}
-					}
+			if (removeCount == entities.size()) {
+				// If equal, they'll all be removed, so no need to re-arrange them
+				toRemove.clear();
+			} else {
+				if (removeCount < 20) {
+					moveDeadEntitiesToBackLinear();
+				} else {
+					moveDeadEntitiesToBackHash();
 				}
-				HalleyAssertDebug(size_t(n) + removeCount == entities.size());
 			}
-
-			HalleyAssertDebug(toRemove.empty());
 
 			// Notify removal
 			size_t newSize = entities.size() - removeCount;
@@ -319,6 +296,65 @@ namespace Halley {
 			sortElems();
 			rebuildIndex();
 			return true;
+		}
+
+		void moveDeadEntitiesToBackLinear()
+		{
+			// Performance-critical code
+			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
+			std::sort(toRemove.begin(), toRemove.end());
+
+			// Move all entities to be removed to the back of the vector
+			int n = int(entities.size());
+			// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
+			// but it causes an issue where an entity is removed and added to the same family in one frame.
+			for (int i = 0; i < n; i++) {
+				const EntityId id = entities[i].entityId;
+				const auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+				if (iter != toRemove.end() && id == *iter) {
+					toRemove.erase(iter);
+					if (i != n - 1) [[likely]] {
+						std::swap(entities[i], entities[n - 1]);
+						--i;
+					}
+					--n;
+					if (toRemove.empty()) [[unlikely]] {
+						break;
+					}
+				}
+			}
+		}
+		
+		void moveDeadEntitiesToBackHash()
+		{
+			struct FastEntityHasher {
+				constexpr uint64_t operator()(const EntityId& id) const noexcept
+				{
+					return Hash::hash(id.value);
+				}
+			};
+
+			static thread_local HashSet<EntityId, FastEntityHasher> toRemoveIds;
+			toRemoveIds.reserve(toRemove.size());
+			for (auto& id: toRemove) {
+				toRemoveIds.insert(id);
+			}
+			toRemove.clear();
+
+			int n = int(entities.size());
+			// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
+			// but it causes an issue where an entity is removed and added to the same family in one frame.
+			for (int i = 0; i < n; i++) {
+				const EntityId id = entities[i].entityId;
+				if (toRemoveIds.contains(id)) {
+					if (i != n - 1) [[likely]] {
+						std::swap(entities[i], entities[n - 1]);
+						--i;
+					}
+					--n;
+				}
+			}
+			toRemoveIds.clear();
 		}
 
 		void sortElems()
