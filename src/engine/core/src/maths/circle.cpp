@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "halley/maths/circle.h"
 
 #include "halley/maths/line.h"
@@ -50,7 +52,6 @@ float Circle::getDistanceTo(const Circle& circle) const
 
 Circle Circle::getSpanningCircle(const Vector<Vector2f>& points)
 {
-
 	if (points.empty()) {
 		return Circle(Vector2f(), 0);
 	}
@@ -59,14 +60,11 @@ Circle Circle::getSpanningCircle(const Vector<Vector2f>& points)
 	for (auto& p: points) {
 		centre += p;
 	}
-	centre /= float(points.size());
+	centre /= static_cast<float>(points.size());
 
 	float radius2 = 0;
-	for (auto& p: points) {
-		const auto d = (p - centre).squaredLength();
-		if (d > radius2) {
-			radius2 = d;
-		}
+	for (const auto& p: points) {
+		radius2 = std::max((p - centre).squaredLength(), radius2);
 	}
 
 	return Circle(centre, std::sqrt(radius2));
