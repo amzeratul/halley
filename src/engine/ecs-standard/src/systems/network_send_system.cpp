@@ -93,7 +93,7 @@ public:
 				}
 
 				// Visibility check, for all peers at once.
-				uint8_t peerViewMask = 0xff;
+				uint64_t peerViewMask = ~0ull;
 				if (!e.network.alwaysSend) [[likely]] {
 					peerViewMask = entityNetworkSession.getEntityViewMask(e.entityId, e.transform2D.tryGet());
 					if (peerViewMask == 0) {
@@ -104,10 +104,10 @@ public:
 				++networkEntitiesSending;
 
 				const EntityNetworkUpdateInfo entry = {
+					.peerViewMask = peerViewMask,
 					.entityId = e.entityId,
 					.ownerId = ownerId,
 					.authorityId = authorityId,
-					.peerViewMask = peerViewMask,
 					.requiresEntityFrameModified = e.network.requiresEntityFrameModified,
 				};
 
