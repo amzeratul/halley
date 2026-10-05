@@ -828,7 +828,7 @@ void World::updateEntities()
 						fam->addEntity(*e.second);
 					} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
 						// Needs refreshing of optional references
-						fam->refreshEntity(*e.second);
+						fam->refreshEntityOptionals(*e.second);
 					}
 				}
 
