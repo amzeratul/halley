@@ -827,16 +827,15 @@ bool EntityNetworkSession::prepareEntityViewMasks()
 	return peerViewMask != 0;
 }
 
-uint64_t EntityNetworkSession::getEntityViewMask(EntityId entityId, const Transform2DComponent* transform) const
+uint64_t EntityNetworkSession::getEntityViewMask(EntityRef entity, const Transform2DComponent* transform) const
 {
 	HalleyAssertDebug(listener);
 
 	uint64_t mask = peerViewMask;
-	const auto entityRef = getWorld().getEntity(entityId);
 
 	for (const auto& peer : peers) {
 		const uint8_t peerId = peer.getPeerId();
-		if (!listener->isEntityInView(entityRef, transform, *peerViewClientDataCache[peerId], peerId)) {
+		if (!listener->isEntityInView(entity, transform, *peerViewClientDataCache[peerId], peerId)) {
 			mask ^= 1ull << peerId;
 		}
 	}

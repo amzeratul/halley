@@ -76,7 +76,8 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			continue;
 		}
 
-		const auto entity = parentSession->getWorld().getEntity(entry.entityId);
+		const auto& entity = entry.entity;
+		const auto entityId = entity.getEntityId();
 
 		if (entry.ownerId == peerId && entry.authorityId == myPeerId) {
 			// Owned by remote peer, but authority has been given to local peer. We want to create
@@ -86,7 +87,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			// This outbound entity isn't created here, but in prepareChangeEntityAuthority().
 			//
 			// TODO: auto-release authority if goes out of view?
-			if (const auto iter = outboundEntities.find(entry.entityId); iter != outboundEntities.end()) {
+			if (const auto iter = outboundEntities.find(entityId); iter != outboundEntities.end()) {
 				// Has an outbound entity assigned. Keep it alive and updating.
 				HalleyAssertDev(iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
@@ -106,7 +107,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			//
 			// We don't want to send updates to the peer who took authority, but we want to keep
 			// this outbound entity alive until authority is given back.
-			if (const auto iter = outboundEntities.find(entry.entityId); iter != outboundEntities.end()) {
+			if (const auto iter = outboundEntities.find(entityId); iter != outboundEntities.end()) {
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				if (entry.authorityId != peerId) {
@@ -129,7 +130,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 		// in NetworkSendSystem::update() already.
 		if ((entry.peerViewMask & (1ull << peerId)) != 0) {
 			++stats.nCheckedRegular;
-			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
+			if (const auto iter = outboundEntities.find(entityId); iter == outboundEntities.end()) {
 				toCreate.push_back(entity);
 			} else {
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);

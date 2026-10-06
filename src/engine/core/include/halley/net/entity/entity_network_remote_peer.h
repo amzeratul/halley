@@ -71,7 +71,7 @@ namespace Halley {
 
     struct EntityNetworkUpdateInfo {
     	uint64_t peerViewMask;
-		EntityId entityId;
+    	EntityRef entity;
 		uint8_t ownerId;
     	uint8_t authorityId;
     	bool requiresEntityFrameModified;
