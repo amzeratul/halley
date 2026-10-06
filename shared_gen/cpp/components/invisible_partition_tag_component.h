@@ -1,4 +1,4 @@
-// Halley codegen version 150
+// Halley codegen version 151
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -15,6 +15,7 @@ public:
 	static constexpr int componentIndex{ 18 };
 	static constexpr uint32_t quickIndex{ 16 };
 	static const constexpr char* componentName{ "InvisiblePartitionTag" };
+	static constexpr bool notifyComponentChange{ false };
 	static constexpr bool alwaysEnabled{ false };
 
 

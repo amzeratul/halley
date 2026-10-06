@@ -77,16 +77,16 @@ void Entity::destroyComponents(ComponentDeleterTable& table)
 
 void Entity::removeComponentById(World& world, int id)
 {
-	const auto quickIndex = world.getReflection().getComponentReflector(id).getQuickIndex();
-	removeComponentById(world, id, quickIndex);
+	const auto& reflector = world.getReflection().getComponentReflector(id);
+	removeComponentById(world, id, reflector.getQuickIndex(), reflector.getNotifyComponentChange());
 }
 
-void Entity::removeComponentById(World& world, int id, uint32_t quickIndex)
+void Entity::removeComponentById(World& world, int id, uint32_t quickIndex, bool notifyComponentChange)
 {
 	for (uint8_t i = 0; i < liveComponents; ++i) {
 		if (componentIds[i] == id) {
 			removeComponentAt(i, quickIndex);
-			markDirty(world);
+			markDirty(world, notifyComponentChange);
 			return;
 		}
 	}
@@ -108,7 +108,7 @@ void Entity::removeAllComponents(World& world)
 {
 	liveComponents = 0;
 	componentQuickMask = 0;
-	markDirty(world);
+	markDirty(world, true);
 }
 
 void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable& table)
@@ -122,17 +122,20 @@ void Entity::onReady()
 {
 }
 
-void Entity::markDirty(World& world)
+void Entity::markDirty(World& world, bool notifyComponentsChanged)
 {
 	if (!dirty) {
 		dirty = true;
 		world.onEntityDirty();
 	}
-	++componentRevision;
-	
-	// Notify transform
-	if (auto* transform = tryGetComponent<Transform2DComponent>()) {
-		transform->onEntityMarkedDirty();
+
+	if (notifyComponentsChanged) {
+		++componentRevision;
+
+		// Notify transform
+		if (auto* transform = tryGetComponent<Transform2DComponent>()) {
+			transform->onEntityMarkedDirty();
+		}
 	}
 }
 

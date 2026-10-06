@@ -41,6 +41,11 @@ namespace Halley {
 		{
 			return T::quickIndex;
 		}
+
+		bool getNotifyComponentChange() const override
+		{
+			return T::notifyComponentChange;
+		}
 		
 		ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const override
 		{

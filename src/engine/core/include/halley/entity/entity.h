@@ -279,7 +279,7 @@ namespace Halley {
 			addComponent(component, T::componentIndex, T::quickIndex, T::componentName, deleterTable);
 			TypeDeleter<T>::initialize(deleterTable);
 
-			markDirty(world);
+			markDirty(world, T::notifyComponentChange);
 			return *this;
 		}
 
@@ -294,21 +294,21 @@ namespace Halley {
 				}
 			}
 
-			removeComponentById(world, T::componentIndex, T::quickIndex);
+			removeComponentById(world, T::componentIndex, T::quickIndex, T::notifyComponentChange);
 			return *this;
 		}
 
 		void addComponent(Component* component, int id, uint32_t quickIndex, const char* componentName, ComponentDeleterTable& deleterTable);
 		void removeComponentAt(int index, uint32_t quickIndex);
 		void removeComponentById(World& world, int id);
-		void removeComponentById(World& world, int id, uint32_t quickIndex);
+		void removeComponentById(World& world, int id, uint32_t quickIndex, bool notifyComponentChange);
 		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
 		void setEnabled(World& world, bool enabled);
 
 		void onReady();
 
-		void markDirty(World& world);
+		void markDirty(World& world, bool notifyComponentsChanged);
 		ComponentDeleterTable& getComponentDeleterTable(World& world);
 
 		Entity* getParent() const { return parent; }

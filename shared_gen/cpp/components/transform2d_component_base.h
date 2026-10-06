@@ -1,4 +1,4 @@
-// Halley codegen version 149
+// Halley codegen version 151
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -16,6 +16,7 @@ public:
 	static constexpr int componentIndex{ 0 };
 	static constexpr uint32_t quickIndex{ 1 };
 	static const constexpr char* componentName{ "Transform2D" };
+	static constexpr bool notifyComponentChange{ true };
 	static constexpr bool alwaysEnabled{ false };
 
 	Transform2DComponentBase() {

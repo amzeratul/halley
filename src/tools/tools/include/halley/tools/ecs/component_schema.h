@@ -28,6 +28,7 @@ namespace Halley
 		Vector<String> componentDependenciesInAncestors;
 		bool generate = false;
 		bool alwaysEnabled = false;
+		bool notifyComponentChange = true;
 		bool hasQuickIndex = false;
 
 		bool operator<(const ComponentSchema& other) const;
