@@ -133,7 +133,7 @@ namespace Halley {
 		std::shared_ptr<Material> material;
 
 		bool enabled = true;
-		bool firstUpdate = true;
+		bool hasDoneInitialBurst = false;
 		float spawnRateMultiplier = 1.0f;
 		float speedMultiplier = 1.0f;
 
@@ -144,6 +144,8 @@ namespace Halley {
 		size_t nParticlesAlive = 0;
 		size_t nParticlesVisible = 0;
 		float pendingSpawn = 0;
+
+		float curTime = 0;
 
 		float spawnRate = 100;
 		Vector2f spawnArea;
@@ -177,6 +179,7 @@ namespace Halley {
 		bool killOnMinHeight = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
+		float burstDelay = 0;
 		std::optional<float> minHeight;
 		Range<float> trailSpawnInterval;
 		bool toggleToBurst = false;

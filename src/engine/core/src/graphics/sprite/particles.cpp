@@ -94,6 +94,7 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
 	burstOnSpawn = node["burstOnSpawn"].asBool(true);
+	burstDelay = node["burstDelay"].asFloat(0);
 	randomiseAnimationTime = node["randomiseAnimationTime"].asBool(false);
 	fixedTriggerSpawnPosition = node["fixedTriggerSpawnPosition"].asBool(false);
 	trailSpawnInterval = node["trailSpawnInterval"].asFloatRange(Range<float>(0.1f, 0.1f));
@@ -144,6 +145,7 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
 	result["burstOnSpawn"] = burstOnSpawn;
+	result["burstDelay"] = burstDelay;
 	result["randomiseAnimationTime"] = randomiseAnimationTime;
 	result["trailSpawnInterval"] = trailSpawnInterval;
 	result["fixedTriggerSpawnPosition"] = fixedTriggerSpawnPosition;
@@ -171,7 +173,8 @@ void Particles::directionalBurst(Angle1f direction, int count)
 
 void Particles::reset()
 {
-	firstUpdate = true;
+	hasDoneInitialBurst = false;
+	curTime = 0;
 }
 
 void Particles::setEnabled(bool e)
@@ -355,19 +358,13 @@ void Particles::setSpawnPositionOffset(Vector2f offset)
 	spawnPositionOffset = offset;
 }
 
-void Particles::start()
-{
-	if (burst && burstOnSpawn) {
-		spawn(burst.value(), 0, position);
-	}
-	pendingSpawn = clamp(pendingSpawn, 0.0f, 1.0f);
-}
-
 void Particles::update(Time t)
 {
-	if (firstUpdate) {
-		firstUpdate = false;
-		start();
+	curTime += static_cast<float>(t);
+	if (burst && !hasDoneInitialBurst && curTime >= burstDelay) {
+		spawn(burst.value(), 0, position);
+		hasDoneInitialBurst = true;
+		pendingSpawn = clamp(pendingSpawn, 0.0f, 1.0f);
 	}
 	
 	pendingSpawn += static_cast<float>(t * spawnRate * (enabled && !burst ? spawnRateMultiplier : 0));

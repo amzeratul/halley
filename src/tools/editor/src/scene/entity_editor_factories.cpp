@@ -1439,6 +1439,8 @@ public:
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Burst on Spawn"));
 		spawnContainer->add(context.makeField("bool", pars.withSubKey("burstOnSpawn", "true"), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel("Burst Delay"));
+		spawnContainer->add(context.makeField("float", pars.withSubKey("burstDelay", "0"), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel(""));
 		spawnContainer->add(context.makeField("Halley::UIButton<Trigger Burst>", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Height"));
