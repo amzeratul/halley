@@ -212,6 +212,7 @@ ScriptGraphProperties::ScriptGraphProperties(const ConfigNode& node)
 	network = node["network"].asBool(false);
 	serializableToSaveFile = node["serializableToSaveFile"].asBool(false);
 	needsTransform = node["needsTransform"].asBool(false);
+	needsVisiblePartition = node["needsVisiblePartition"].asBool(false);
 }
 
 ConfigNode ScriptGraphProperties::toConfigNode() const
@@ -234,6 +235,9 @@ ConfigNode ScriptGraphProperties::toConfigNode() const
 	}
 	if (needsTransform) {
 		result["needsTransform"] = needsTransform;
+	}
+	if (needsVisiblePartition) {
+		result["needsVisiblePartition"] = needsVisiblePartition;
 	}
 	return result;
 }
@@ -268,41 +272,6 @@ void ScriptGraph::parseYAML(gsl::span<const std::byte> yaml)
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
 	load(config.getRoot());
-}
-
-bool ScriptGraph::isPersistent() const
-{
-	return properties.persistent;
-}
-
-bool ScriptGraph::isMultiCopy() const
-{
-	return properties.multiCopy;
-}
-
-bool ScriptGraph::isSupressDuplicateWarning() const
-{
-	return properties.supressDuplicateWarning;
-}
-
-bool ScriptGraph::isNetwork() const
-{
-	return needsNetwork || properties.network;
-}
-
-bool ScriptGraph::isSerializableToSaveFile() const
-{
-	return properties.serializableToSaveFile;
-}
-
-bool ScriptGraph::isNetworkRequired() const
-{
-	return needsNetwork;
-}
-
-bool ScriptGraph::needsTransform() const
-{
-	return properties.needsTransform;
 }
 
 ConfigNode ScriptGraph::toConfigNode() const

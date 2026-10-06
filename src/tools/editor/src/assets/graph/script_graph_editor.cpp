@@ -442,6 +442,11 @@ void ScriptGraphPropertiesWindow::onMakeUI()
 		properties.needsTransform = value;
 	});
 
+	bindData("needsVisiblePartition", scriptGraph.needsVisiblePartition(), [=] (bool value)
+	{
+		properties.needsVisiblePartition = value;
+	});
+
 	getWidget("network")->setEnabled(!scriptGraph.isNetworkRequired());
 }
 

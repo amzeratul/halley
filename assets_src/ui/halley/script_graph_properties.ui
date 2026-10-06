@@ -56,6 +56,11 @@ children:
           class: checkbox
           id: needsTransform
           label: Needs Transform
+      - uuid: d5b2b7ef-ca66-4e1b-a11f-1a914432f78e
+        widget:
+          class: checkbox
+          id: needsVisiblePartition
+          label: Needs Visible Partition
   - uuid: dbf6ddbd-688e-4769-b7cb-1e22c79b5f4f
     sizer:
       gap: 4

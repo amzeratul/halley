@@ -75,6 +75,7 @@ namespace Halley {
 		bool network = false;
 		bool serializableToSaveFile = false;
 		bool needsTransform = false;
+		bool needsVisiblePartition = false;
 
 		ScriptGraphProperties() = default;
 		explicit ScriptGraphProperties(const ConfigNode& node);
@@ -101,13 +102,14 @@ namespace Halley {
 		void load(const ConfigNode& node, Resources& resources) override;
 		void parseYAML(gsl::span<const std::byte> data);
 
-		bool isPersistent() const;
-		bool isMultiCopy() const;
-		bool isSupressDuplicateWarning() const;
-		bool isNetwork() const;
-		bool isSerializableToSaveFile() const;
-		bool isNetworkRequired() const;
-		bool needsTransform() const;
+		bool isPersistent() const { return properties.persistent; }
+		bool isMultiCopy() const { return properties.multiCopy; }
+		bool isSupressDuplicateWarning() const { return properties.supressDuplicateWarning; }
+		bool isNetwork() const { return needsNetwork || properties.network; }
+		bool isSerializableToSaveFile() const { return properties.serializableToSaveFile; }
+		bool isNetworkRequired() const { return needsNetwork; }
+		bool needsTransform() const { return properties.needsTransform; }
+		bool needsVisiblePartition() const { return properties.needsVisiblePartition; }
 
 		ScriptGraphProperties& getProperties();
 		const ScriptGraphProperties& getProperties() const;

@@ -1,5 +1,7 @@
 #include <systems/script_system.h>
 
+#include "components/invisible_partition_tag_component.h"
+
 using namespace Halley;
 
 class ScriptSystem final : public ScriptSystemBase<ScriptSystem>, IScriptSystemInterface, IEntityFactoryContext {
@@ -393,7 +395,10 @@ private:
 			for (auto& statePtr: scriptable.activeStates) {
 				auto& state = *statePtr;
 				if (!state.getFrameFlag()) {
-					if (!state.getScriptGraphPtr()->needsTransform() || entity.hasComponent<Transform2DComponent>()) {
+					const bool canRun = 
+						(!state.getScriptGraphPtr()->needsTransform() || entity.hasComponent<Transform2DComponent>())
+						&& (!state.getScriptGraphPtr()->needsVisiblePartition() || !entity.hasComponent<InvisiblePartitionTagComponent>());
+					if (canRun) {
 						env.updateState(t, state, entityId, scriptable.variables);
 					} else if (state.hasStarted()) {
 						env.stopState(state, entityId, scriptable.variables, true);
