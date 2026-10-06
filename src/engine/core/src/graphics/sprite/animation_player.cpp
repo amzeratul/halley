@@ -269,9 +269,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 
 bool AnimationPlayer::isActiveAnimation() const
 {
-	//return true;
+	return true;
 	//updateResourceIfNeeded();
-	return seqLen > 1 || dirty;
+	//return seqLen > 1 || dirty;
 }
 
 bool AnimationPlayer::hasSpriteUpdate() const
