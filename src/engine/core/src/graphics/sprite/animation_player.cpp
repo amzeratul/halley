@@ -78,20 +78,19 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<c
 	return curPlayId;
 }
 
-AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(const String& _sequence)
+AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(std::string_view sequence)
 {
-	const String curSeqName = _sequence; // DO NOT use _sequence after this, it can be a reference to nextSequence, which is changed on the next line
-	nextSequence = {};
-	reverse = false;
-	updateResourceIfNeeded();
+	//updateResourceIfNeeded(); // Can this invalidate sequence?
 
-	if (animation && (!curSeq || curSeq->getName() != curSeqName)) {
+	if (animation && (!curSeq || curSeq->getName() != sequence)) {
 		curSeqTime = 0;
 		curFrameTime = 0;
 		curFrameN = 0;
 		curFrame = nullptr;
 		curLoopCount = 0;
-		curSeq = &animation->getSequence(curSeqName);
+		curSeq = &animation->getSequence(sequence);
+		nextSequence = {};
+		reverse = false;
 
 		seqLen = static_cast<uint32_t>(curSeq->numFrames());
 		seqLooping = curSeq->isLooping();
@@ -101,7 +100,11 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(const String& _seq
 		++curPlayId;
 
 		onSequenceStarted();
+	} else {
+		nextSequence = {};
+		reverse = false;
 	}
+
 	return curPlayId;
 }
 
@@ -120,7 +123,7 @@ void AnimationPlayer::setDirection(int direction)
 	}
 }
 
-void AnimationPlayer::setDirection(const String& direction)
+void AnimationPlayer::setDirection(std::string_view direction)
 {
 	updateResourceIfNeeded();
 
@@ -135,7 +138,7 @@ void AnimationPlayer::setDirection(const String& direction)
 	}
 }
 
-bool AnimationPlayer::trySetSequence(const String& sequence)
+bool AnimationPlayer::trySetSequence(std::string_view sequence)
 {
 	updateResourceIfNeeded();
 	if (animation && animation->hasSequence(sequence)) {
@@ -529,7 +532,7 @@ void AnimationPlayer::onSequenceDone()
 void AnimationPlayer::updateResourceIfNeeded() const
 {
 #ifdef ENABLE_HOT_RELOAD
-	if (observer.needsUpdate()) {
+	if (false && observer.needsUpdate()) {
 		const_cast<AnimationPlayer*>(this)->doUpdateResource();
 	}
 #endif

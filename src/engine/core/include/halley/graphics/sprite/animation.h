@@ -68,7 +68,7 @@ namespace Halley
 		size_t numFrameDefinitions() const { return frameDefinitions.size(); }
 		const AnimationFrame& getFrame(size_t n) const
 		{
-			HalleyAssertDev(!frames.empty());
+			HalleyAssertDebug(!frames.empty());
 			return frames[std::min(n, frames.size() - 1)];
 		}
 		const String& getName() const { return name; }
@@ -156,8 +156,8 @@ namespace Halley
 		const AnimationSequence& getSequence(std::string_view name) const;
 		const AnimationSequence& getSequence(size_t idx) const;
 		size_t getSequenceIdx(std::string_view name) const;
-		const AnimationDirection& getDirection(const String& name) const;
-		int getDirectionIdx(const String& name) const;
+		const AnimationDirection& getDirection(std::string_view name) const;
+		int getDirectionIdx(std::string_view name) const;
 		const AnimationDirection& getDirection(int id) const;
 		Vector<String> getSequenceNames() const;
 		Vector<String> getDirectionNames() const;

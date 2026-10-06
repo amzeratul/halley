@@ -344,7 +344,7 @@ size_t Animation::getSequenceIdx(std::string_view name) const
 	return sequenceFallbackIndex.value_or(0);
 }
 
-const AnimationDirection& Animation::getDirection(const String& dirName) const
+const AnimationDirection& Animation::getDirection(std::string_view dirName) const
 {
 	HalleyAssertDev(directions.size() > 0);
 
@@ -356,7 +356,7 @@ const AnimationDirection& Animation::getDirection(const String& dirName) const
 	return directions[0];
 }
 
-int Animation::getDirectionIdx(const String& name) const
+int Animation::getDirectionIdx(std::string_view name) const
 {
 	for (int i = 0; i < static_cast<int>(directions.size()); ++i) {
 		if (directions[i].getName() == name) {

@@ -21,10 +21,10 @@ namespace Halley
 		AnimationPlayId stop();
 
 		AnimationPlayId setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
-		AnimationPlayId setSequence(const String& sequence);
+		AnimationPlayId setSequence(std::string_view sequence);
 		void setDirection(int direction);
-		void setDirection(const String& direction);
-		bool trySetSequence(const String& sequence);
+		void setDirection(std::string_view direction);
+		bool trySetSequence(std::string_view sequence);
 
 		AnimationPlayId getCurrentPlayId() const;
 
@@ -87,10 +87,10 @@ namespace Halley
 		void onSequenceDone();
 
 		uint32_t seqLen = 0;
-		bool dirty;
-		bool seqLooping;
-		bool seqNoFlip;
-		bool dirFlip;
+		bool dirty = false;
+		bool seqLooping = false;
+		bool seqNoFlip = false;
+		bool dirFlip = false;
 		bool playing = false;
 		bool reverse = false;
 		OptionalLite<bool> visibleUserOverride;
