@@ -24,6 +24,7 @@ namespace Halley {
 		SystemMessageReflector& getSystemMessageReflector(int id) const;
 
 		Vector<int> getAlwaysEnabledComponents() const;
+		Vector<int> getRebindableComponents() const;
 
 	private:
 		Vector<SystemReflector> systemReflectors;

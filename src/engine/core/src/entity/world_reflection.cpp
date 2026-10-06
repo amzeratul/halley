@@ -115,3 +115,16 @@ Vector<int> WorldReflection::getAlwaysEnabledComponents() const
 
 	return result;
 }
+
+Vector<int> WorldReflection::getRebindableComponents() const
+{
+	Vector<int> result;
+
+	for (const auto& comp: componentReflectors) {
+		if (comp->canRebindComponent()) {
+			result += comp->getIndex();
+		}
+	}
+
+	return result;
+}

@@ -318,18 +318,20 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 	other.canDeleteEntities = true;
 
 	// Add entities to my pending list
+	const auto canRebindIds = reflection->getRebindableComponents();
 	entitiesPendingCreation.reserve(entitiesPendingCreation.size() + entitiesToMove.size());
+	uuidMap.reserve(uuidMap.size() + entitiesToMove.size());
 	for (auto* e: entitiesToMove) {
 		e->dirty = true;
 		e->alive = true;
 		e->mask = FamilyMask::Handle();
 
-		auto entityRef = EntityRef(*e, *this);
 		const auto ids = e->componentIds.const_span();
-		const auto ptrs = e->componentPtrs.const_span();
 		const auto n = ids.size();
 		for (size_t i = 0; i < n; ++i) {
-			reflection->getComponentReflector(ids[i]).rebindComponent(*ptrs[i], entityRef);
+			if (canRebindIds.contains(ids[i])) {
+				reflection->getComponentReflector(ids[i]).rebindComponent(*e->componentPtrs[i], EntityRef(*e, *this));
+			}
 		}
 
 		entitiesPendingCreation.push_back(e);
@@ -759,7 +761,8 @@ void World::updateEntities()
 		Vector<std::pair<FamilyMaskType, Entity*>> toRemove;
 		Vector<std::pair<FamilyMaskType, Entity*>> toReload;
 	};
-	std::map<FamilyMaskType, FamilyTodo> pending;
+	HashMap<FamilyMaskType, FamilyTodo> pending;
+	pending.reserve(32);
 
 	// Update all entities
 	// This loop should be as fast as reasonably possible

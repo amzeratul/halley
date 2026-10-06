@@ -158,6 +158,11 @@ namespace Halley {
 			}
 		}
 
+		bool canRebindComponent() const override
+		{
+			return HasOnAddedToEntityMember<T>::value;
+		}
+
 		bool isAlwaysEnabled() const override
 		{
 			return T::alwaysEnabled;
