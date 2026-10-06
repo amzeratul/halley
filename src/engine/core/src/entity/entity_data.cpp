@@ -567,7 +567,9 @@ void EntityData::instantiateWith(const EntityData& instance)
 
 	flags |= instance.flags;
 	variant = instance.getVariant();
-	enableRules = instance.getEnableRules();
+	if (!instance.enableRules.isEmpty()) {
+		enableRules = instance.getEnableRules();
+	}
 }
 
 EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
