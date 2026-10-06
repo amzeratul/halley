@@ -98,6 +98,7 @@ namespace Halley
 		bool applyPivot = true;
 		bool applyMaterial = true;
 		mutable bool hasUpdate = true;
+		mutable bool someoneCheckingOnPlayId = false;
 
 		Time curSeqTime;
 		Time curFrameTime;

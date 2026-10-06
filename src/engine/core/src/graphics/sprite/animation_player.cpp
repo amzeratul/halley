@@ -42,6 +42,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::stop()
 		curSeq = nullptr;
 		seqLen = 0;
 		playing = false;
+		someoneCheckingOnPlayId = false;
 		++curPlayId;
 	}
 
@@ -66,6 +67,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<c
 		curFrame = nullptr;
 		dirId = -1;
 		++curPlayId;
+		someoneCheckingOnPlayId = false;
 	}
 
 	updateResourceIfNeeded();
@@ -97,6 +99,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(std::string_view s
 		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
+		someoneCheckingOnPlayId = false;
 		++curPlayId;
 
 		onSequenceStarted();
@@ -150,6 +153,7 @@ bool AnimationPlayer::trySetSequence(std::string_view sequence)
 
 AnimationPlayer::AnimationPlayId AnimationPlayer::getCurrentPlayId() const
 {
+	someoneCheckingOnPlayId = true;
 	return curPlayId;
 }
 
@@ -269,9 +273,8 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 
 bool AnimationPlayer::isActiveAnimation() const
 {
-	return true;
 	//updateResourceIfNeeded();
-	//return seqLen > 1 || dirty;
+	return seqLen > 1 || dirty || someoneCheckingOnPlayId;
 }
 
 bool AnimationPlayer::hasSpriteUpdate() const
