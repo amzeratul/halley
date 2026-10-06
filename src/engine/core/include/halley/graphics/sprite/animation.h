@@ -26,7 +26,7 @@ namespace Halley
 
 		const SpriteSheetEntry& getSprite(int dir) const
 		{
-			HalleyAssertDev(dir >= 0 && dir < int(sprites.size()));
+			HalleyAssertDebug(dir >= 0 && dir < int(sprites.size()));
 			return *sprites[dir];
 		}
 
