@@ -118,9 +118,6 @@ namespace Halley {
 	};
 
 	class FamilyBase {
-	protected:
-		NullableReferenceAnchor anchor;
-
 	public:
 		EntityId entityId;
 	};
@@ -128,15 +125,6 @@ namespace Halley {
 	template <typename T>
 	class FamilyBaseOf : public FamilyBase {
 	public:
-		NullableReferenceOf<T> getReference()
-		{
-			return anchor.getReferenceOf<T>();
-		}
-
-		NullableReferenceOf<const T> getReference() const
-		{
-			return anchor.getReferenceOf<const T>();
-		}
 	};
 	
 	// Apple's Clang 3.5 does not seem to have constexpr std::max...
@@ -289,6 +277,8 @@ namespace Halley {
 	private:
 		Vector<StorageType> entities;
 		bool dirty = false;
+
+		static_assert(std::is_trivially_copyable_v<StorageType>);
 
 		void updateElems()
 		{
