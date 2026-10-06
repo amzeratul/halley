@@ -94,6 +94,7 @@ namespace Halley {
 		};
 		static HashSet<EntityId, FastEntityHasher>& getToRemoveIds();
 		bool hasRemoveCallbacks() const { return !removeEntityCallbacks.empty(); }
+		static int getHashAlgorithmEntityThreshold();
 		
 		void* elems = nullptr;
 		size_t elemCount = 0;
@@ -311,8 +312,7 @@ namespace Halley {
 				toRemove.clear();
 			} else {
 				// Performance-critical code
-				// Not sure if this number is the correct value
-				if (removeCount < 100) {
+				if (removeCount < getHashAlgorithmEntityThreshold()) {
 					moveDeadEntitiesToBackLinear(hasCallbacks);
 				} else {
 					moveDeadEntitiesToBackHash(hasCallbacks);
@@ -342,41 +342,38 @@ namespace Halley {
 			// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
 			// but it causes an issue where an entity is removed and added to the same family in one frame.
 
+			const auto beg = toRemove.begin();
+			const auto end = toRemove.end();
+
 			if (preserveRemoved) {
 				// Will notify, so keep those at the end of vector
 				for (int i = 0; i < n; i++) {
 					const EntityId id = entities[i].entityId;
-					const auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+					const auto iter = std::lower_bound(beg, end, id);
 					if (iter != toRemove.end() && id == *iter) {
-						toRemove.erase(iter);
 						if (i != n - 1) [[likely]] {
 							std::swap(entities[i], entities[n - 1]);
 							--i;
 						}
 						--n;
-						if (toRemove.empty()) [[unlikely]] {
-							break;
-						}
 					}
 				}
 			} else {
 				// Won't notify, just erase them
 				for (int i = 0; i < n; i++) {
 					const EntityId id = entities[i].entityId;
-					const auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+					const auto iter = std::lower_bound(beg, end, id);
 					if (iter != toRemove.end() && id == *iter) {
-						toRemove.erase(iter);
 						if (i != n - 1) [[likely]] {
 							entities[i] = std::move(entities[n - 1]);
 							--i;
 						}
 						--n;
-						if (toRemove.empty()) [[unlikely]] {
-							break;
-						}
 					}
 				}
 			}
+
+			toRemove.clear();
 		}
 		
 		void moveDeadEntitiesToBackHash(bool preserveRemoved)

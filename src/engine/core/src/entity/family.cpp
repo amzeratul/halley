@@ -79,6 +79,11 @@ HashSet<EntityId, Family::FastEntityHasher>& Family::getToRemoveIds()
 	return toRemoveIds;
 }
 
+int Family::getHashAlgorithmEntityThreshold()
+{
+	return 5000;
+}
+
 void Family::setIndexed()
 {
 	if (!indexed) {
