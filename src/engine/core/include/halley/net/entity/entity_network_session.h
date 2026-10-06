@@ -91,7 +91,8 @@ namespace Halley {
 		bool isLobbyReady() const;
 		bool isTerminatedByHost() const;
 
-		uint64_t getEntityViewMask(EntityId entityId, const Transform2DComponent* transform) const;
+		bool prepareEntityViewMasks();
+		uint64_t getEntityViewMask(EntityRef entity, const Transform2DComponent* transform) const;
 		Vector<Rect4i> getRemoteViewPorts() const;
 
 		bool isHost() const override;
@@ -147,6 +148,9 @@ namespace Halley {
 
 		std::shared_ptr<NetworkSession> session;
 		Vector<EntityNetworkRemotePeer> peers;
+
+		uint64_t peerViewMask;
+		Vector<const EntityClientSharedData*> peerViewClientDataCache;
 
 		Vector<QueuedMessage> queuedPackets;
 

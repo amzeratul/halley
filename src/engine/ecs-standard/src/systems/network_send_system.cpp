@@ -23,12 +23,18 @@ public:
 
 		auto& mpSession = getSessionService().getMultiplayerSession();
 		auto& entityNetworkSession = *mpSession.getEntityNetworkSession();
+
 		const auto maybePeerId = mpSession.getNetworkSession()->getMyPeerId();
 		if (!maybePeerId) {
 			// Not ready
 			return;
 		}
-		
+
+		if (!entityNetworkSession.prepareEntityViewMasks()) {
+			// No peers (host with no client connected)
+			return;
+		}
+
 		const auto myPeerId = maybePeerId.value();
 		const bool isHost = mpSession.isHost();
 
@@ -59,8 +65,9 @@ public:
 		for (auto& e: networkFamily) {
 			// Try to automatically assign a peerId to any NetworkComponent that hasn't been bound yet.
 			// This is done for entities created locally; remote entities will be pre-populated.
+			EntityRef entity;
 			if (!e.network.ownerId) [[unlikely]] {
-				auto entity = getWorld().getEntity(e.entityId);
+				entity = getWorld().getEntity(e.entityId);
 
 				if (isHost) {
 					// The host always claims ownership.
@@ -92,10 +99,16 @@ public:
 					continue;
 				}
 
+				// Lookup the entity right here and pass it along, to save some additional lookups
+				// further down the call chain.
+				if (!entity.isValid()) [[likely]] {
+					entity = getWorld().getEntity(e.entityId);
+				}
+
 				// Visibility check, for all peers at once.
 				uint64_t peerViewMask = ~0ull;
 				if (!e.network.alwaysSend) [[likely]] {
-					peerViewMask = entityNetworkSession.getEntityViewMask(e.entityId, e.transform2D.tryGet());
+					peerViewMask = entityNetworkSession.getEntityViewMask(entity, e.transform2D.tryGet());
 					if (peerViewMask == 0) {
 						continue;
 					}
@@ -105,7 +118,7 @@ public:
 
 				const EntityNetworkUpdateInfo entry = {
 					.peerViewMask = peerViewMask,
-					.entityId = e.entityId,
+					.entity = entity,
 					.ownerId = ownerId,
 					.authorityId = authorityId,
 					.requiresEntityFrameModified = e.network.requiresEntityFrameModified,
