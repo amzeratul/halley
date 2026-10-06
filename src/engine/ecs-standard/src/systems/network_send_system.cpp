@@ -23,12 +23,18 @@ public:
 
 		auto& mpSession = getSessionService().getMultiplayerSession();
 		auto& entityNetworkSession = *mpSession.getEntityNetworkSession();
+
 		const auto maybePeerId = mpSession.getNetworkSession()->getMyPeerId();
 		if (!maybePeerId) {
 			// Not ready
 			return;
 		}
-		
+
+		if (!entityNetworkSession.prepareEntityViewMasks()) {
+			// No peers (host with no client connected)
+			return;
+		}
+
 		const auto myPeerId = maybePeerId.value();
 		const bool isHost = mpSession.isHost();
 

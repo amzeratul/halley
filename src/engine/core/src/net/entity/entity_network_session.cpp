@@ -811,20 +811,33 @@ bool EntityNetworkSession::isTerminatedByHost() const
 	return terminatedByHost;
 }
 
-uint64_t EntityNetworkSession::getEntityViewMask(EntityId entityId, const Transform2DComponent* transform) const
+bool EntityNetworkSession::prepareEntityViewMasks()
 {
-	HalleyAssertDebug(listener);
-
-	uint64_t mask = 0;
-	const auto entityRef = getWorld().getEntity(entityId);
+	peerViewMask = 0;
+	peerViewClientDataCache.resize_no_init(64);
 
 	for (const auto& peer : peers) {
 		const uint8_t peerId = peer.getPeerId();
 		HalleyAssertDebug(peerId < 64); // NB: Somebody tries to host multiplayer with more than 63 peers!?
-		// TODO: can we avoid this repeating lookup right here?
-		const auto& clientSharedData = session->getClientSharedData<EntityClientSharedData>(peerId);
-		if (listener->isEntityInView(entityRef, transform, clientSharedData, peerId)) {
-			mask |= 1ull << peerId;
+		peerViewMask |= 1ull << peerId;
+		peerViewClientDataCache[peerId] = session->tryGetClientSharedData<EntityClientSharedData>(peerId);
+		HalleyAssertDev(peerViewClientDataCache[peerId] != nullptr);
+	}
+
+	return peerViewMask != 0;
+}
+
+uint64_t EntityNetworkSession::getEntityViewMask(EntityId entityId, const Transform2DComponent* transform) const
+{
+	HalleyAssertDebug(listener);
+
+	uint64_t mask = peerViewMask;
+	const auto entityRef = getWorld().getEntity(entityId);
+
+	for (const auto& peer : peers) {
+		const uint8_t peerId = peer.getPeerId();
+		if (!listener->isEntityInView(entityRef, transform, *peerViewClientDataCache[peerId], peerId)) {
+			mask ^= 1ull << peerId;
 		}
 	}
 
