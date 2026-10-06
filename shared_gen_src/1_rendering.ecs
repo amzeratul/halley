@@ -81,6 +81,7 @@ component:
 component:
   name: SpriteAnimation
   category: graphics
+  hasQuickIndex: true
   members:
   - player:
       type: 'Halley::AnimationPlayer'

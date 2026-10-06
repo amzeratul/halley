@@ -13,7 +13,7 @@
 class SpriteAnimationComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 5 };
-	static constexpr uint32_t quickIndex{ 0 };
+	static constexpr uint32_t quickIndex{ 8 };
 	static const constexpr char* componentName{ "SpriteAnimation" };
 	static constexpr bool notifyComponentChange{ true };
 	static constexpr bool alwaysEnabled{ false };
