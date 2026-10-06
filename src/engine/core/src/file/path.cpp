@@ -23,6 +23,19 @@
 
 using namespace Halley;
 
+#ifndef _LIBCPP_HAS_NO_FILESYSTEM_LIBRARY
+namespace {
+	std::filesystem::path toSTDPath(const Path& path)
+	{
+#ifdef _WIN32
+		return std::filesystem::path(path.getNativeString(false).getUTF16().c_str());
+#else
+		return std::filesystem::path(reinterpret_cast<const char8_t*>(path.getNativeString(false).c_str()));
+#endif
+	}
+}
+#endif
+
 Path::Path()
 {}
 
@@ -565,7 +578,7 @@ bool Path::exists(const Path& path)
 {
 #if !defined(_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY) && !defined(NN_NINTENDO_SDK)
 	std::error_code ec;
-	return std::filesystem::exists(path.string(), ec);
+	return std::filesystem::exists(toSTDPath(path), ec);
 #else
 	return false;
 #endif
@@ -577,14 +590,14 @@ void Path::rename(const Path& from, const Path& to)
 	std::error_code ec;
 
 	if (!exists(to.parentPath())) {
-		std::filesystem::create_directories(to.parentPath().string(), ec);
+		std::filesystem::create_directories(toSTDPath(to.parentPath()), ec);
 		if (ec) {
 			Logger::logError(ec.message());
 			return;
 		}
 	}
 
-	std::filesystem::rename(from.string(), to.string(), ec);
+	std::filesystem::rename(toSTDPath(from), toSTDPath(to), ec);
 	if (ec) {
 		Logger::logError(ec.message());
 	}
