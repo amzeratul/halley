@@ -15,12 +15,12 @@ namespace Halley
 	public:
 		using AnimationPlayId = uint32_t;
 
-		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
+		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), std::string_view sequence = "default", std::string_view direction = "default");
 
-		AnimationPlayId playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence = {}, bool reverse = false, std::optional<int> startFrame = {});
+		AnimationPlayId playOnce(std::string_view sequence, const std::optional<String>& nextLoopingSequence = std::nullopt, bool reverse = false, std::optional<int> startFrame = {});
 		AnimationPlayId stop();
 
-		AnimationPlayId setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
+		AnimationPlayId setAnimation(std::shared_ptr<const Animation> animation, std::string_view sequence = "default", std::string_view direction = "default");
 		AnimationPlayId setSequence(std::string_view sequence);
 		void setDirection(int direction);
 		void setDirection(std::string_view direction);

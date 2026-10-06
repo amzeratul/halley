@@ -564,6 +564,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 {
 	const auto& reflection = world.getReflection();
 	const size_t nComponents = data.getNumComponents();
+	entity.reserveComponents(nComponents);
 
 	context.getEntitySerializationContext().debugCurrentContext = entity.getName() + " [" + entity.getPrefabAssetId() + "]";
 	context.getEntitySerializationContext().entityHasEnableRules = !data.getEnableRules().isEmpty();

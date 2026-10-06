@@ -183,6 +183,12 @@ namespace Halley {
 			}
 		}
 
+		void reserveComponents(size_t size)
+		{
+			componentIds.reserve(size);
+			componentPtrs.reserve(size);
+		}
+
 		bool needsRefresh() const
 		{
 			return dirty;
@@ -770,6 +776,12 @@ namespace Halley {
 			}
 
 			return false;
+		}
+
+		void reserveComponents(size_t size)
+		{
+			validate();
+			entity->reserveComponents(size);
 		}
 
 		const String& getName() const

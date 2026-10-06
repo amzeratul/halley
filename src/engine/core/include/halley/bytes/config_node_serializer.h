@@ -363,7 +363,8 @@ namespace Halley {
 		
 		Colour4f deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
-			return Colour4f::fromString(node.asString("#000000"));
+			String buf;
+			return Colour4f::fromString(node.asStringView("#000000", &buf));
         }
     };
 
@@ -455,7 +456,7 @@ namespace Halley {
         {
 			Vector<T> result;
         	if (node.getType() == ConfigNodeType::Sequence) {
-				auto seq = node.asSequence();
+				const auto& seq = node.asSequence();
 				result.reserve(seq.size());
         		for (auto& s: seq) {
 					result.push_back(ConfigNodeSerializer<T>().deserialize(context, s));
@@ -469,7 +470,7 @@ namespace Halley {
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, Vector<T>& target)
         {
 			if (node.getType() == ConfigNodeType::Sequence) {
-				auto seq = node.asSequence();
+				const auto& seq = node.asSequence();
 		        target.resize(seq.size());
 				for (size_t i = 0; i < target.size(); ++i) {
 					ConfigNodeHelper<T>::deserialize(target[i], context, seq[i]);
@@ -650,8 +651,12 @@ namespace Halley {
 		
         ResourceReference<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
-			const auto assetId = node.hasKey("asset") ? node["asset"].asString("") : (node.getType() == ConfigNodeType::String ? node.asString("") : "");
-			if (assetId.isEmpty()) {
+			String buffer;
+			const auto assetId = node.hasKey("asset") ?
+				node["asset"].asStringView("", &buffer) :
+				(node.getType() == ConfigNodeType::String ? node.asStringView("", &buffer) : "");
+
+			if (assetId.empty()) {
 				return {};
 			} else {
 				if (context.resources->exists<T>(assetId)) {
@@ -968,7 +973,7 @@ namespace Halley {
 		if (node.getType() == ConfigNodeType::Int) {
 			return T(node.asInt());
 		} else {
-			return fromString<T>(node.asString());
+			return node.asEnum<T>();
 		}
 	}
 

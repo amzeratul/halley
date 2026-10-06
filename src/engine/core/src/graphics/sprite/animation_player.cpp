@@ -8,12 +8,12 @@
 
 using namespace Halley;
 
-AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)
+AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, std::string_view sequence, std::string_view direction)
 {
-	setAnimation(animation, sequence, direction);
+	setAnimation(std::move(animation), sequence, direction);
 }
 
-AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse, std::optional<int> startFrame)
+AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(std::string_view sequence, const std::optional<String>& nextLoopingSequence, bool reverse, std::optional<int> startFrame)
 {
 	updateResourceIfNeeded();
 
@@ -51,7 +51,7 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::stop()
 }
 
 
-AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, const String& sequence, const String& direction)
+AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, std::string_view sequence, std::string_view direction)
 {
 	if (animation != v) {
 		animation = v;
@@ -639,11 +639,12 @@ AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const EntityS
 	if (node.getType() == ConfigNodeType::Undefined) {
 		return AnimationPlayer();
 	}
-	
-	auto animName = node["animation"].asString("");
-	auto anim = animName.isEmpty() ? std::shared_ptr<Animation>() : context.resources->get<Animation>(animName);
 
-	auto player = AnimationPlayer(anim, node["sequence"].asString("default"), node["direction"].asString("default"));
+	String buf1, buf2, buf3;
+	auto animName = node["animation"].asStringView("", &buf1);
+	auto anim = animName.empty() ? std::shared_ptr<Animation>() : context.resources->get<Animation>(animName);
+
+	auto player = AnimationPlayer(anim, node["sequence"].asStringView("default", &buf2), node["direction"].asStringView("default", &buf3));
 	player.setApplyPivot(node["applyPivot"].asBool(true));
 	player.setPlaybackSpeed(node["playbackSpeed"].asFloat(1.0f));
 	player.setApplyMaterial(node["applyMaterial"].asBool(true));

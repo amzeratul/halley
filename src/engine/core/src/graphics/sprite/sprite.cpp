@@ -938,8 +938,10 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		} else {
 			// Load each texture
 			size_t i = 0;
+			char buffer[256];
 			for (const auto& tex: materialDefinition->getTextures()) {
-				const bool loaded = loadTexture("tex_" + tex.name, i);
+				const auto texName = String::concatInBuffer(buffer, "tex_", tex.name);
+				const bool loaded = loadTexture(texName, i);
 				if (!loaded) {
 					if (i == 0) {
 						if (!loadTexture("image", i)) {

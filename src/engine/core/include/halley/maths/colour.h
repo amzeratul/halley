@@ -210,11 +210,12 @@ namespace Halley {
 		[[nodiscard]] static Colour4 fromString(std::string_view str)
 		{
 			Colour4 col;
-			size_t len = str.length();
+			const size_t len = str.length();
 			if (len >= 1 && str[0] == '#') {
 				return fromHexString(str);
 			} else if (len >= 5 && str.substr(0, 4) == "col(" && str.substr(len - 1, 1) == ")") {
-				auto args = String(str.substr(4, len - 5)).split(',');
+				std::array<std::string_view, 8> buffer;
+				const auto args = String::splitToBuffer(str.substr(4, len - 5), ',', buffer);
 				if (args.size() >= 1) {
 					col.r = parseDecimal(args[0]);
 				}
