@@ -72,16 +72,22 @@ OptionalLite<size_t> Family::findElementInIndex(EntityId id) const
 	return std::nullopt;
 }
 
-HashSet<EntityId, Family::FastEntityHasher>& Family::getToRemoveIds()
+HashSet<EntityId, Family::FastEntityHasher>& Family::getScratchHashSet()
 {
-	static thread_local HashSet<EntityId, FastEntityHasher> toRemoveIds;
-	toRemoveIds.clear();
-	return toRemoveIds;
+	static thread_local HashSet<EntityId, FastEntityHasher> scratch;
+	scratch.clear();
+	return scratch;
 }
 
-int Family::getHashAlgorithmEntityThreshold()
+Vector<uint8_t>& Family::getScratchBitSet()
 {
-	return 5000;
+	static thread_local Vector<uint8_t> scratch;
+	return scratch;
+}
+
+Family::RemovalAlgorithm Family::getRemovalAlgorithm(size_t numElems, size_t numToRemove)
+{
+	return RemovalAlgorithm::BitSet;
 }
 
 void Family::setIndexed()

@@ -83,6 +83,7 @@ namespace Halley {
 		void reloadEntity(Entity& entity);
 		virtual void updateEntities() = 0;
 		virtual void clearEntities() = 0;
+		bool hasRemoveCallbacks() const { return !removeEntityCallbacks.empty(); }
 
 		OptionalLite<size_t> findElementInIndex(EntityId id) const;
 
@@ -92,9 +93,15 @@ namespace Halley {
 				return Hash::hash(id.value);
 			}
 		};
-		static HashSet<EntityId, FastEntityHasher>& getToRemoveIds();
-		bool hasRemoveCallbacks() const { return !removeEntityCallbacks.empty(); }
-		static int getHashAlgorithmEntityThreshold();
+		static HashSet<EntityId, FastEntityHasher>& getScratchHashSet();
+		static Vector<uint8_t>& getScratchBitSet();
+
+		enum class RemovalAlgorithm {
+			BitSet,
+			BinarySearch,
+			HashSet,
+		};
+		static RemovalAlgorithm getRemovalAlgorithm(size_t numElems, size_t numToRemove);
 		
 		void* elems = nullptr;
 		size_t elemCount = 0;
@@ -275,7 +282,7 @@ namespace Halley {
 
 
 	private:
-		Vector<StorageType> entities;
+		Vector<StorageType, std::allocator<StorageType>, 0, false> entities;
 		bool dirty = false;
 
 		static_assert(std::is_trivially_copyable_v<StorageType>);
@@ -302,9 +309,12 @@ namespace Halley {
 				toRemove.clear();
 			} else {
 				// Performance-critical code
-				if (removeCount < getHashAlgorithmEntityThreshold()) {
+				const auto algorithm = getRemovalAlgorithm(entities.size(), removeCount);
+				if (algorithm == RemovalAlgorithm::BitSet) {
+					moveDeadEntitiesToBackBitSet(hasCallbacks);
+				} else if (algorithm == RemovalAlgorithm::BinarySearch) {
 					moveDeadEntitiesToBackLinear(hasCallbacks);
-				} else {
+				} else if (algorithm == RemovalAlgorithm::HashSet) {
 					moveDeadEntitiesToBackHash(hasCallbacks);
 				}
 			}
@@ -368,7 +378,7 @@ namespace Halley {
 		
 		void moveDeadEntitiesToBackHash(bool preserveRemoved)
 		{
-			auto& toRemoveIds = getToRemoveIds();
+			auto& toRemoveIds = getScratchHashSet();
 
 			toRemoveIds.reserve(toRemove.size());
 			for (auto& id: toRemove) {
@@ -404,6 +414,100 @@ namespace Halley {
 				}
 			}
 			toRemoveIds.clear();
+		}
+
+		void moveDeadEntitiesToBackBitSet(bool preserveRemoved)
+		{
+			auto& scratch = getScratchBitSet();
+			// Should already be all zeroed out from last usage
+			
+			const auto toIdx = [] (EntityId id) -> uint32_t
+			{
+				return static_cast<uint32_t>(id.value & 0xFFFFFFFFull);
+			};
+
+
+			// Find range
+			// We'll assume min is 0 as it simplifies the algorithm
+			uint32_t max = std::numeric_limits<uint32_t>::min();
+			for (auto& id: toRemove) {
+				max = std::max(max, toIdx(id));
+			}
+
+			// Resize if it needs to be bigger
+			scratch.resize(std::max(scratch.size(), static_cast<size_t>(max / 8 + 1)), 0);
+			auto bitmap = scratch.span();
+			
+
+			const auto contains = [&] (EntityId id) -> bool
+			{
+				const auto idx = toIdx(id);
+				return idx <= max && (bitmap[idx / 8] & (1 << (idx % 8)));
+			};
+			
+			const auto setBit = [&] (EntityId id)
+			{
+				const auto idx = toIdx(id);
+				bitmap[idx / 8] |= 1 << (idx % 8);
+			};
+			
+			const auto clearBit = [&] (EntityId id)
+			{
+				const auto idx = toIdx(id);
+				bitmap[idx / 8] &= ~static_cast<uint8_t>(1 << (idx % 8));
+			};
+
+			// Set bits
+			for (auto& id: toRemove) {
+				setBit(id);
+			}
+			const int nToRemove = static_cast<int>(toRemove.size());
+			toRemove.clear();
+
+			int n = static_cast<int>(entities.size());
+			int nRemoved = 0;
+
+			if (preserveRemoved) {
+				// Will notify, so keep those at the end of vector
+				for (int i = 0; i < n; i++) {
+					if (contains(entities[i].entityId)) {
+						clearBit(entities[i].entityId);
+						if (i != n - 1) [[likely]] {
+							std::swap(entities[i], entities[n - 1]);
+							--i;
+						}
+						--n;
+						++nRemoved;
+						if (nRemoved == nToRemove) [[unlikely]] {
+							break;
+						}
+					}
+				}
+			} else {
+				// Won't notify, just erase them
+				for (int i = 0; i < n; i++) {
+					if (contains(entities[i].entityId)) {
+						clearBit(entities[i].entityId);
+						if (i != n - 1) [[likely]] {
+							entities[i] = std::move(entities[n - 1]);
+							--i;
+						}
+						--n;
+						++nRemoved;
+						if (nRemoved == nToRemove) [[unlikely]] {
+							break;
+						}
+					}
+				}
+			}
+
+			// Since we rely on all bits being set back to zero, this must happen
+			if (nRemoved != nToRemove) {
+				for (auto& v: bitmap) {
+					v = 0;
+				}
+			}
+			HalleyAssertDev(nRemoved == nToRemove);
 		}
 
 		void sortElems()
