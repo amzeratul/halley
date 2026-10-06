@@ -18,6 +18,12 @@ namespace Halley {
 			uint64_t hash32Bytes(const void* bytes);
 			uint64_t hash64Bytes(const void* bytes);
 			uint64_t hashNBytes(const void* bytes, size_t len);
+		
+			uint64_t hash4BytesAligned4(const void* bytes);
+			uint64_t hash8BytesAligned8(const void* bytes);
+			uint64_t hash16BytesAligned8(const void* bytes);
+			uint64_t hash32BytesAligned8(const void* bytes);
+			uint64_t hash64BytesAligned8(const void* bytes);
 		}
 
         constexpr uint64_t hash(const char* bytes, size_t len)
@@ -64,15 +70,35 @@ namespace Halley {
 			} else if constexpr (sizeof(T) == 2) {
 				return Detail::hash2Bytes(&v);
 			} else if constexpr (sizeof(T) == 4) {
-				return Detail::hash4Bytes(&v);
+				if constexpr (alignof(T) >= 4) {
+					return Detail::hash4BytesAligned4(&v);
+				} else {
+					return Detail::hash4Bytes(&v);
+				}
 			} else if constexpr (sizeof(T) == 8) {
-				return Detail::hash8Bytes(&v);
+				if constexpr (alignof(T) >= 8) {
+					return Detail::hash8BytesAligned8(&v);
+				} else {
+					return Detail::hash8Bytes(&v);
+				}
 			} else if constexpr (sizeof(T) == 16) {
-				return Detail::hash16Bytes(&v);
+				if constexpr (alignof(T) >= 8) {
+					return Detail::hash16BytesAligned8(&v);
+				} else {
+					return Detail::hash16Bytes(&v);
+				}
 			} else if constexpr (sizeof(T) == 32) {
-				return Detail::hash32Bytes(&v);
+				if constexpr (alignof(T) >= 8) {
+					return Detail::hash32BytesAligned8(&v);
+				} else {
+					return Detail::hash32Bytes(&v);
+				}
 			} else if constexpr (sizeof(T) == 64) {
-				return Detail::hash64Bytes(&v);
+				if constexpr (alignof(T) >= 8) {
+					return Detail::hash64BytesAligned8(&v);
+				} else {
+					return Detail::hash64Bytes(&v);
+				}
 			} else {
 				return hash(gsl::as_bytes(gsl::span<const T>(&v, 1)));
 			}

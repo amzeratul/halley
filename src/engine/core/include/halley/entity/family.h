@@ -85,6 +85,15 @@ namespace Halley {
 		virtual void clearEntities() = 0;
 
 		OptionalLite<size_t> findElementInIndex(EntityId id) const;
+
+		struct FastEntityHasher {
+			constexpr uint64_t operator()(const EntityId& id) const noexcept
+			{
+				return Hash::hash(id.value);
+			}
+		};
+		static HashSet<EntityId, FastEntityHasher>& getToRemoveIds();
+		bool hasRemoveCallbacks() const { return !removeEntityCallbacks.empty(); }
 		
 		void* elems = nullptr;
 		size_t elemCount = 0;
@@ -294,22 +303,27 @@ namespace Halley {
 				return false;
 			}
 
+			const bool hasCallbacks = hasRemoveCallbacks();
+
 			HalleyAssertDebug(removeCount <= entities.size());
 			if (removeCount == entities.size()) {
 				// If equal, they'll all be removed, so no need to re-arrange them
 				toRemove.clear();
 			} else {
+				// Performance-critical code
+				// Not sure if this number is the correct value
 				if (removeCount < 100) {
-					moveDeadEntitiesToBackLinear();
+					moveDeadEntitiesToBackLinear(hasCallbacks);
 				} else {
-					moveDeadEntitiesToBackHash();
+					moveDeadEntitiesToBackHash(hasCallbacks);
 				}
 			}
+			size_t newSize = entities.size() - removeCount;
 
 			// Notify removal
-			size_t newSize = entities.size() - removeCount;
-			HalleyAssertDebug(newSize < entities.size());
-			notifyRemove(entities.data() + newSize, removeCount);
+			if (hasCallbacks) {
+				notifyRemove(entities.data() + newSize, removeCount);
+			}
 
 			// Remove them
 			entities.resize(newSize);
@@ -319,43 +333,56 @@ namespace Halley {
 			return true;
 		}
 
-		void moveDeadEntitiesToBackLinear()
+		void moveDeadEntitiesToBackLinear(bool preserveRemoved)
 		{
-			// Performance-critical code
-			// Benchmarks suggest that using a Vector is faster than std::set and std::unordered_set
 			std::sort(toRemove.begin(), toRemove.end());
 
 			// Move all entities to be removed to the back of the vector
 			int n = int(entities.size());
 			// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
 			// but it causes an issue where an entity is removed and added to the same family in one frame.
-			for (int i = 0; i < n; i++) {
-				const EntityId id = entities[i].entityId;
-				const auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
-				if (iter != toRemove.end() && id == *iter) {
-					toRemove.erase(iter);
-					if (i != n - 1) [[likely]] {
-						std::swap(entities[i], entities[n - 1]);
-						--i;
+
+			if (preserveRemoved) {
+				// Will notify, so keep those at the end of vector
+				for (int i = 0; i < n; i++) {
+					const EntityId id = entities[i].entityId;
+					const auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+					if (iter != toRemove.end() && id == *iter) {
+						toRemove.erase(iter);
+						if (i != n - 1) [[likely]] {
+							std::swap(entities[i], entities[n - 1]);
+							--i;
+						}
+						--n;
+						if (toRemove.empty()) [[unlikely]] {
+							break;
+						}
 					}
-					--n;
-					if (toRemove.empty()) [[unlikely]] {
-						break;
+				}
+			} else {
+				// Won't notify, just erase them
+				for (int i = 0; i < n; i++) {
+					const EntityId id = entities[i].entityId;
+					const auto iter = std::lower_bound(toRemove.begin(), toRemove.end(), id);
+					if (iter != toRemove.end() && id == *iter) {
+						toRemove.erase(iter);
+						if (i != n - 1) [[likely]] {
+							entities[i] = std::move(entities[n - 1]);
+							--i;
+						}
+						--n;
+						if (toRemove.empty()) [[unlikely]] {
+							break;
+						}
 					}
 				}
 			}
 		}
 		
-		void moveDeadEntitiesToBackHash()
+		void moveDeadEntitiesToBackHash(bool preserveRemoved)
 		{
-			struct FastEntityHasher {
-				constexpr uint64_t operator()(const EntityId& id) const noexcept
-				{
-					return Hash::hash(id.value);
-				}
-			};
+			auto& toRemoveIds = getToRemoveIds();
 
-			static thread_local HashSet<EntityId, FastEntityHasher> toRemoveIds;
 			toRemoveIds.reserve(toRemove.size());
 			for (auto& id: toRemove) {
 				toRemoveIds.insert(id);
@@ -363,16 +390,30 @@ namespace Halley {
 			toRemove.clear();
 
 			int n = int(entities.size());
-			// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
-			// but it causes an issue where an entity is removed and added to the same family in one frame.
-			for (int i = 0; i < n; i++) {
-				const EntityId id = entities[i].entityId;
-				if (toRemoveIds.contains(id)) {
-					if (i != n - 1) [[likely]] {
-						std::swap(entities[i], entities[n - 1]);
-						--i;
+
+			if (preserveRemoved) {
+				// Will notify, so keep those at the end of vector
+				for (int i = 0; i < n; i++) {
+					const EntityId id = entities[i].entityId;
+					if (toRemoveIds.contains(id)) {
+						if (i != n - 1) [[likely]] {
+							std::swap(entities[i], entities[n - 1]);
+							--i;
+						}
+						--n;
 					}
-					--n;
+				}
+			} else {
+				// Won't notify, just erase them
+				for (int i = 0; i < n; i++) {
+					const EntityId id = entities[i].entityId;
+					if (toRemoveIds.contains(id)) {
+						if (i != n - 1) [[likely]] {
+							entities[i] = std::move(entities[n - 1]);
+							--i;
+						}
+						--n;
+					}
 				}
 			}
 			toRemoveIds.clear();

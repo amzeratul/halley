@@ -72,6 +72,13 @@ OptionalLite<size_t> Family::findElementInIndex(EntityId id) const
 	return std::nullopt;
 }
 
+HashSet<EntityId, Family::FastEntityHasher>& Family::getToRemoveIds()
+{
+	static thread_local HashSet<EntityId, FastEntityHasher> toRemoveIds;
+	toRemoveIds.clear();
+	return toRemoveIds;
+}
+
 void Family::setIndexed()
 {
 	if (!indexed) {

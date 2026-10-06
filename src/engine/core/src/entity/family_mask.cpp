@@ -38,26 +38,20 @@ namespace std {
 class MaskStorage
 {
 public:
-	Vector<MaskEntry*> values;
+	Vector<RealType> values;
 	HashSet<MaskEntry> entries;
 
 	int getHandle(const RealType& value)
 	{
-		auto entry = MaskEntry(value, 0);
-		auto i = entries.find(entry);
+		const auto i = entries.find(MaskEntry(value, -1));
 		if (i == entries.end()) [[unlikely]] {
 			// Not found, assign a new index
 			const int idx = static_cast<int>(values.size());
-			entry.idx = idx;
+			auto entry = MaskEntry(value, idx);
 
 			// Insert new entry
 			entries.insert(entry);
-			values.emplace_back();
-
-			// A re-hash might have happened, so update all references
-			for (auto& e: entries) {
-				values[e.idx] = &e;
-			}
+			values.emplace_back(value);
 
 			return idx;
 		} else {
@@ -71,7 +65,7 @@ public:
 		if (handle == -1) [[unlikely]] {
 			return dummy;
 		} else {
-			return values[handle]->mask;
+			return values[handle];
 		}
 	}
 

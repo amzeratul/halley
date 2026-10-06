@@ -45,6 +45,31 @@ uint64_t Hash::Detail::hashNBytes(const void* bytes, size_t len)
 	return XXH3_64bits(bytes, len);
 }
 
+uint64_t Hash::Detail::hash4BytesAligned4(const void* bytes)
+{
+	return XXH3_64bits(std::assume_aligned<4>(bytes), 4);
+}
+
+uint64_t Hash::Detail::hash8BytesAligned8(const void* bytes)
+{
+	return XXH3_64bits(std::assume_aligned<8>(bytes), 8);
+}
+
+uint64_t Hash::Detail::hash16BytesAligned8(const void* bytes)
+{
+	return XXH3_64bits(std::assume_aligned<8>(bytes), 16);
+}
+
+uint64_t Hash::Detail::hash32BytesAligned8(const void* bytes)
+{
+	return XXH3_64bits(std::assume_aligned<8>(bytes), 32);
+}
+
+uint64_t Hash::Detail::hash64BytesAligned8(const void* bytes)
+{
+	return XXH3_64bits(std::assume_aligned<8>(bytes), 64);
+}
+
 Hash::Hasher::Hasher()
 {
 	static_assert(alignof(Hasher) == 64);
