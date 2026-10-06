@@ -56,13 +56,21 @@ ConfigNode ScriptHostAuthority::doGetData(ScriptEnvironment& environment, const 
 }
 
 
-
+String ScriptIfEntityAuthority::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "Has Authority";
+	} else if (elementIdx == 2) {
+		return "Doesn't Have Authority";
+	}
+	return ScriptNodeTypeBase::getPinDescription(node, elementType, elementIdx);
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptIfEntityAuthority::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } });
+	const static auto data = std::to_array({ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } });
 	return data;
 }
 
@@ -78,7 +86,7 @@ IScriptNodeType::Result ScriptIfEntityAuthority::doUpdate(ScriptEnvironment& env
 {
 	const auto entityId = readEntityId(environment, node, 1);
 	const bool hasAuthority = environment.hasNetworkAuthorityOver(entityId);
-	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 0);
+	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 2);
 }
 
 

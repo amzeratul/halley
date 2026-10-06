@@ -38,6 +38,7 @@ namespace Halley {
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/entity_authority.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
+		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
