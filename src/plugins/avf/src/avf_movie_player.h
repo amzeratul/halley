@@ -12,11 +12,12 @@
 namespace Halley
 {
 	class VideoAPI;
+	class HalleyAPI;
 
 	class AVFMoviePlayer : public MoviePlayer
 	{
 	public:
-		AVFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data);
+		AVFMoviePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data);
 		~AVFMoviePlayer() noexcept;
 
 	protected:
