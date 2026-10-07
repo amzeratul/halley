@@ -177,6 +177,7 @@ namespace Halley {
         uint8_t myPeerId = 0xff;
 
         EntityNetworkChanges journal;
+        EntityNetworkChanges previousJournal;
 
         bool hasComponentsAddedOrRemoved = false;
 

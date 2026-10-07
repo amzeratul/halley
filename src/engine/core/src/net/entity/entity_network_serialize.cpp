@@ -867,8 +867,8 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
 
     if (!previous.empty()) {
         Deserializer s(previous);
-        EntityNetworkChanges previousJournal;
 
+        previousJournal.reset();
         s >> previousJournal;
 
         // Fast check. We don't want to do the rather expensive work below if
