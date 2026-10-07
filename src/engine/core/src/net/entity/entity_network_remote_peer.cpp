@@ -36,7 +36,10 @@ Deserializer& EntityNetworkInstanceInfo::deserialize(Deserializer& s)
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parentSession, NetworkSession::PeerId peerId)
 	: parentSession(&parentSession)
 	, peerId(peerId)
-{}
+{
+	toCreate.resize(MAX_SEND_CREATE_PER_FRAME);
+	toUpdate.resize(256);
+}
 
 NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 {
@@ -67,8 +70,8 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 		e.second.alive = false;
 	}
 
-	Vector<EntityRef> toCreate;
-	Vector<std::pair<EntityRef, OutboundEntity*>> toUpdate;
+	toCreate.clear();
+	toUpdate.clear();
 
 	for (const auto& entry: entityIds) {
 		if (entry.ownerId == peerId && entry.authorityId == peerId) {

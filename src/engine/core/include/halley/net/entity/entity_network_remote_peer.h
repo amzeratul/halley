@@ -165,7 +165,10 @@ namespace Halley {
     	bool alive = true;
         bool hasSentData = false;
         bool joinedWorld = false;
-    	
+
+    	Vector<EntityRef> toCreate;
+    	Vector<std::pair<EntityRef, OutboundEntity*>> toUpdate;
+
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;
         HashMap<EntityNetworkId, InboundEntity> tempInboundEntities;
