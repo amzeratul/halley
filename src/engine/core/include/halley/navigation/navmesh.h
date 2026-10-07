@@ -168,7 +168,7 @@ namespace Halley {
 		[[nodiscard]] bool isConnectivityRoot() const;
 		void markConnectedSet();
 		void clearConnectedSet();
-		[[nodiscard]] bool isConnectedSet() const;
+		[[nodiscard]] bool isConnectedSet() const { return connectivityRoot || connectedSet; }
 
 		[[nodiscard]] float getArea() const;
 		[[nodiscard]] Vector2f getRandomPoint(Random& rng) const;
@@ -204,13 +204,17 @@ namespace Halley {
 		};
 
 		uint16_t id;
+		bool connectivityRoot = false;
+		bool connectedSet = false;
+		int subWorld = 0;
+		Circle boundingCircle;
+		float totalArea = 0;
 
 		Vector<Node> nodes;
 		Vector<Polygon> polygons;
 		Vector<Portal> portals;
 		Vector<float> weights;
 		Vector<std::pair<uint16_t, LineSegment>> openEdges;
-		int subWorld = 0;
 
 		Vector2i gridSize = Vector2i(20, 20);
 		Vector<Vector<NodeId>> polyGrid; // Quick lookup of polygons
@@ -222,13 +226,7 @@ namespace Halley {
 		Vector2f offset;
 		Vector2i worldGridPos;
 
-		float totalArea = 0;
-		Circle boundingCircle;
-
 		String debugName;
-
-		bool connectivityRoot = false;
-		bool connectedSet = false;
 
 		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;

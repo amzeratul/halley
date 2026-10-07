@@ -9,20 +9,43 @@ namespace Halley {
 
 	class Circle {
     public:
-        Circle() = default;
-        Circle(Vector2f centre, float radius)
+        constexpr Circle() = default;
+        constexpr Circle(Vector2f centre, float radius)
             : centre(centre)
             , radius(radius)
         {}
         Circle(const LineSegment& segment);
 
-        float getRadius() const { return radius; }
-        Vector2f getCentre() const { return centre; }
+        [[nodiscard]] constexpr float getRadius() const { return radius; }
+        [[nodiscard]] constexpr Vector2f getCentre() const { return centre; }
 
-    	[[nodiscard]] bool contains(Vector2f point) const;
-        [[nodiscard]] float getDistanceTo(Vector2f point) const;
-        [[nodiscard]] float getDistanceTo(const Circle& circle) const;
-        [[nodiscard]] bool overlaps(const Circle& circle) const;
+    	[[nodiscard]] constexpr bool contains(Vector2f point) const
+		{
+			return (point - centre).squaredLength() <= radius * radius;
+		}
+
+        [[nodiscard]] constexpr float getDistanceTo(Vector2f point) const
+        {
+			return std::max((centre - point).length() - radius, 0.0f);
+		}
+
+		[[nodiscard]] constexpr float getDistanceTo(const Circle& circle) const
+        {
+			return std::max((centre - circle.centre).length() - radius - circle.radius, 0.0f);
+		}
+
+		[[nodiscard]] constexpr bool overlaps(const Circle& circle) const
+        {
+			const float r = radius + circle.radius;
+			return (circle.centre - centre).squaredLength() <= r * r;
+		}
+
+		[[nodiscard]] constexpr bool isDistanceAtMost(Vector2f point, float maxDist) const
+		{
+			const float r = maxDist + radius;
+			const float r2 = r * r;
+			return (centre - point).squaredLength() <= r2;
+		}
 
     	[[nodiscard]] Circle expand(float radius) const;
         [[nodiscard]] Rect4f getAABB() const;

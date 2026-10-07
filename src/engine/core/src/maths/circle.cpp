@@ -14,17 +14,6 @@ Circle::Circle(const LineSegment& segment)
 	radius = 0.5f * (segment.a - segment.b).length();
 }
 
-bool Circle::contains(Vector2f point) const
-{
-	return (point - centre).squaredLength() <= radius * radius;
-}
-
-bool Circle::overlaps(const Circle& circle) const
-{
-	const float r = radius + circle.radius;
-	return (circle.centre - centre).squaredLength() <= r * r;
-}
-
 Circle Circle::expand(float r) const
 {
 	return Circle(centre, radius + r);
@@ -38,16 +27,6 @@ Rect4f Circle::getAABB() const
 Vector2f Circle::project(Vector2f point) const
 {
 	return centre + (point - centre).normalized() * radius;
-}
-
-float Circle::getDistanceTo(Vector2f point) const
-{
-	return std::max((centre - point).length() - radius, 0.0f);
-}
-
-float Circle::getDistanceTo(const Circle& circle) const
-{
-	return std::max((centre - circle.centre).length() - radius - circle.radius, 0.0f);
 }
 
 Circle Circle::getSpanningCircle(const Vector<Vector2f>& points)

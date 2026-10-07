@@ -223,7 +223,7 @@ bool Navmesh::containsPoint(WorldPosition position) const
 
 std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotropy, float maxDist) const
 {
-	if (boundingCircle.getDistanceTo(pos) > maxDist) {
+	if (!boundingCircle.isDistanceAtMost(pos, maxDist)) {
 		return {};
 	}
 
@@ -236,8 +236,7 @@ std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotrop
 
 	for (const auto& poly: polygons) {
 		// Coarse test vs circle first
-		const auto distToCircle = poly.getBoundingCircle().getDistanceTo(pos);
-		if (distToCircle <= bestDist) {
+		if (poly.getBoundingCircle().isDistanceAtMost(pos, bestDist)) {
 			const auto p = poly.getClosestPoint(pos, anisotropy);
 			const float dist = (p - pos).length();
 			if (dist < bestDist) {
@@ -860,11 +859,6 @@ void Navmesh::markConnectedSet()
 void Navmesh::clearConnectedSet()
 {
 	connectedSet = false;
-}
-
-bool Navmesh::isConnectedSet() const
-{
-	return connectivityRoot || connectedSet;
 }
 
 void Navmesh::computeArea()

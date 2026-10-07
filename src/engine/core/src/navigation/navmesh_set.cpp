@@ -6,6 +6,7 @@
 #include "halley/support/debug.h"
 #include "halley/support/logger.h"
 #include "halley/time/stopwatch.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 NavmeshSet::NavmeshSet()
@@ -85,7 +86,7 @@ void NavmeshSet::clear()
 
 void NavmeshSet::clearSubWorld(int subWorld)
 {
-	navmeshes.erase(std::remove_if(navmeshes.begin(), navmeshes.end(), [&] (const Navmesh& nav) { return nav.getSubWorld() == subWorld; }), navmeshes.end());
+	std_ex::erase_if(navmeshes, [&] (const Navmesh& nav) { return nav.getSubWorld() == subWorld; });
 	assignNavmeshIds();
 }
 
@@ -223,6 +224,41 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 	return std::nullopt;
 }
 
+Vector<WorldPosition> NavmeshSet::getClosestPointInEverySubWorld(Vector2f pos, Range<int> subWorldRange, float maxDist, float anisotropy, bool allowNonConnected) const
+{
+	struct SubWorldInfo {
+		std::optional<WorldPosition> bestPoint;
+		float bestDist;
+	};
+	Vector<SubWorldInfo> info;
+	info.resize(subWorldRange.end - subWorldRange.start + 1);
+	for (auto& i: info) {
+		i.bestDist = maxDist;
+	}
+
+	for (const auto& navmesh: navmeshes) {
+		const auto subWorld = navmesh.getSubWorld();
+		if (subWorldRange.contains(subWorld) && (allowNonConnected || navmesh.isConnectedSet())) {
+			auto& sbInfo = info.at(subWorld - subWorldRange.start);
+			if (const auto curPoint = navmesh.getClosestPointTo(pos, anisotropy, sbInfo.bestDist)) {
+				const float dist2 = (*curPoint - pos).squaredLength();
+				if (dist2 < sbInfo.bestDist * sbInfo.bestDist) {
+					sbInfo.bestDist = sqrt(dist2);
+					sbInfo.bestPoint = WorldPosition(*curPoint, subWorld);
+				}
+			}
+		}
+	}
+
+	Vector<WorldPosition> result;
+	for (auto& i: info) {
+		if (i.bestPoint) {
+			result += *i.bestPoint;
+		}
+	}
+	return result;
+}
+
 std::optional<std::pair<WorldPosition, uint16_t>> NavmeshSet::getClosestPointAndNavmeshIdxTo(WorldPosition pos, float maxDist, float anisotropy, float nudge, bool anySubWorld, bool allowNonConnected) const
 {
 	std::optional<WorldPosition> bestPoint;
@@ -233,9 +269,9 @@ std::optional<std::pair<WorldPosition, uint16_t>> NavmeshSet::getClosestPointAnd
 	for (const auto& navmesh: navmeshes) {
 		if ((allowNonConnected || navmesh.isConnectedSet()) && (anySubWorld || navmesh.getSubWorld() == pos.subWorld)) {
 			if (const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy, bestDist)) {
-				const float dist = (*curPoint - pos.pos).length();
-				if (dist < bestDist) {
-					bestDist = dist;
+				const float dist2 = (*curPoint - pos.pos).squaredLength();
+				if (dist2 < bestDist * bestDist) {
+					bestDist = std::sqrt(dist2);
 					bestPoint = WorldPosition(*curPoint, navmesh.getSubWorld());
 					bestNavmeshIdx = i;
 				}
