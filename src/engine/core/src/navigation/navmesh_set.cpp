@@ -271,7 +271,7 @@ std::optional<std::pair<WorldPosition, uint16_t>> NavmeshSet::getClosestPointAnd
 	for (const auto& navmesh: navmeshes) {
 		if ((allowNonConnected || navmesh.isConnectedSet()) && (anySubWorld || navmesh.getSubWorld() == pos.subWorld)) {
 			if (const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy, bestDist)) {
-				const float dist2 = (*curPoint - pos.pos).squaredLength();
+				const float dist2 = (*curPoint - pos.pos).scaleY(1.0f / anisotropy).squaredLength();
 				if (dist2 < bestDist * bestDist) {
 					bestDist = std::sqrt(dist2);
 					bestPoint = WorldPosition(*curPoint, navmesh.getSubWorld());

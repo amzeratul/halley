@@ -238,7 +238,7 @@ std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotrop
 		// Coarse test vs circle first
 		if (poly.getBoundingCircle().isDistanceAtMost(pos, bestDist)) {
 			const auto p = poly.getClosestPoint(pos, anisotropy);
-			const float dist = (p - pos).length();
+			const float dist = (p - pos).scaleY(1.0f / anisotropy).length();
 			if (dist < bestDist) {
 				bestPoint = p;
 				bestDist = dist;
