@@ -54,6 +54,7 @@ namespace Halley {
 
 		std::optional<PeerId> getMyPeerId() const;
 		uint16_t getClientCount() const;
+		uint16_t getReservedSlotCount() const;
 		Vector<PeerId> getRemotePeers() const;
 		size_t getIndexOfRemotePeer(PeerId clientId) const;
 		PeerId getRemotePeerAtIndex(size_t idx) const;

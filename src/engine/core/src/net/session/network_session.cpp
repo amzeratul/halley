@@ -123,6 +123,18 @@ uint16_t NetworkSession::getClientCount() const
 	}
 }
 
+uint16_t NetworkSession::getReservedSlotCount() const
+{
+	auto lock = UniqueLock(peerReadCacheMutex);
+	uint16_t i = 1;
+	for (const auto& peer: peerReadCache) {
+		if (peer.connectionStatus != ConnectionStatus::Closed) {
+			++i;
+		}
+	}
+	return i;
+}
+
 Vector<NetworkSession::PeerId> NetworkSession::getRemotePeers() const
 {
 	auto lock = UniqueLock(peerReadCacheMutex);
@@ -931,7 +943,7 @@ OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlM
 
 void NetworkSession::onConnection(NetworkService::Acceptor& acceptor)
 {
-	if (getClientCount() < maxClients) { // I'm also a client!
+	if (getClientCount() < maxClients && allocatePeerId()) { // I'm also a client!
 		acceptConnection(acceptor.accept());
 	} else {
 		Logger::logInfo("Rejecting network session connection as we're already at max clients.");

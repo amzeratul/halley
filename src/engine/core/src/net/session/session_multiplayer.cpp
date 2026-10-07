@@ -252,7 +252,7 @@ MultiplayerLobbyError SessionMultiplayer::getHostError() const
 
 bool SessionMultiplayer::canInvite() const
 {
-	return lobby && getNumberOfPlayers() < getMaxNumberOfPlayers();
+	return lobby && session->getReservedSlotCount() < getMaxNumberOfPlayers();
 }
 
 void SessionMultiplayer::onStarted()
@@ -280,7 +280,7 @@ bool SessionMultiplayer::update(Time t)
 	entitySession->update(t);
 	
 	if (host && lobby) {
-		const size_t players = session->getClientCount();
+		const size_t players = session->getReservedSlotCount();
 		if (players != lastReportedPlayers) {
 			lastReportedPlayers = players;
 			lobby->setPlayerCount(static_cast<int>(players), options.maxPlayers);
