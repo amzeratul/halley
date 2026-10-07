@@ -46,7 +46,7 @@ namespace Halley {
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet) = 0;
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity, bool isRoot) = 0;
 			virtual bool allowComponentAddedForFastUpdate(uint16_t componentId) const { return false; }
-			virtual bool isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) = 0;
+			virtual uint64_t getEntityViewMask(EntityRef entity, const Transform2DComponent* transform, const Vector<const EntityClientSharedData*>& peerViewClientData, uint64_t peerViewMask) = 0;
 			virtual ConfigNode getLobbyInfo() = 0;
 			virtual bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
 			virtual void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) = 0;

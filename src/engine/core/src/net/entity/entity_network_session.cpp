@@ -830,17 +830,7 @@ bool EntityNetworkSession::prepareEntityViewMasks()
 uint64_t EntityNetworkSession::getEntityViewMask(EntityRef entity, const Transform2DComponent* transform) const
 {
 	HalleyAssertDebug(listener);
-
-	uint64_t mask = peerViewMask;
-
-	for (const auto& peer : peers) {
-		const uint8_t peerId = peer.getPeerId();
-		if (!listener->isEntityInView(entity, transform, *peerViewClientDataCache[peerId], peerId)) {
-			mask ^= 1ull << peerId;
-		}
-	}
-
-	return mask;
+	return listener->getEntityViewMask(entity, transform, peerViewClientDataCache, peerViewMask);
 }
 
 Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const

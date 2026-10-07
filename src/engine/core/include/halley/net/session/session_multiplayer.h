@@ -113,7 +113,7 @@ namespace Halley {
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
-		bool isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) override;
+		uint64_t getEntityViewMask(EntityRef entity, const Transform2DComponent *transform, const Vector<const EntityClientSharedData *> &peerViewClientData, uint64_t peerViewMask) override;
 		ConfigNode getLobbyInfo() override;
 		bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) override;
 		void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) override;

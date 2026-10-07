@@ -316,24 +316,39 @@ void SessionMultiplayer::setupInterpolators(DataInterpolatorSet& interpolatorSet
 {
 }
 
-bool SessionMultiplayer::isEntityInView(EntityRef entity, const Transform2DComponent* transform, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId)
+uint64_t SessionMultiplayer::getEntityViewMask(EntityRef entity, const Transform2DComponent* transform, const Vector<const EntityClientSharedData*>& peerViewClientData, uint64_t peerViewMask)
 {
+	uint64_t mask = peerViewMask;
+
 	if (!transform) {
-		return true;
+		return mask;
 	}
 
-    // Ignore view rect if send to host
-    if (peerId == 0) {
-        return true;
-    }
-
-    // Rect not defined, don't send
-	if (!clientData.viewRect) {
-		return false;
+	// Ignore view rect if send to host
+	if (peerViewMask == 1) {
+		return mask;
 	}
 
-	// Send if it's in an expanded rect
-	return clientData.viewRect->grow(256).contains(Vector2i(transform->getGlobalPosition()));
+	const auto position = Vector2i(transform->getGlobalPosition());
+
+	uint8_t peerId = 0;
+	for (uint64_t remain = mask; remain != 0; remain >>= 1, peerId++) {
+		if (remain & 1) {
+			const auto* clientData = peerViewClientData[peerId];
+
+			// Don't send if reect not defined
+			bool isInView = clientData->viewRect.has_value();
+
+			// Send if inside an expanded rect
+			isInView = isInView && clientData->viewRect->grow(256).contains(position);
+
+			if (!isInView) {
+				mask ^= 1ull << peerId;
+			}
+		}
+	}
+
+	return mask;
 }
 
 ConfigNode SessionMultiplayer::getLobbyInfo()
