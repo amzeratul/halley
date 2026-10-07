@@ -6,6 +6,7 @@
 #include "halley/net/interpolators/data_interpolator.h"
 #include "components/network_component.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "halley/maths/random.h"
 
 #define USE_FAST_NETWORK_COMPONENT_UPDATES 1
 #define WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED 2.0
@@ -310,6 +311,10 @@ uint16_t EntityNetworkRemotePeer::assignId()
 void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 {
 	OutboundEntity result;
+	
+	// Spread entities across the send interval, otherwise everything created in the same frame
+	// (e.g. a whole chunk set when a peer joins) hashes and sends on the same frame forever.
+	result.timeSinceSend = Random::getGlobal().getDouble(0.0, parentSession->getMinSendInterval());
 
 	result.networkId = assignId();
 
@@ -361,7 +366,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 		return;
 	}
 
-	remote.timeSinceSend = 0;
+	remote.timeSinceSend -= minSendInterval;
 
 #if defined(DEV_BUILD) && defined(_WIN32)
 	static constexpr bool checkExpectNoUpdate = true;
