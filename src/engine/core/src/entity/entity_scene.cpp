@@ -32,6 +32,7 @@ const String& EntityScene::getVariant() const
 
 bool EntityScene::needsUpdate() const
 {
+#ifdef DEV_BUILD
 	for (const auto& entry: sceneObservers) {
 		if (entry.needsUpdate()) {
 			return true;
@@ -42,6 +43,7 @@ bool EntityScene::needsUpdate() const
 			return true;
 		}
 	}
+#endif
 	return false;
 }
 
