@@ -129,7 +129,7 @@ namespace Halley
 		Sprite& setFlip(bool flip);
 		bool isFlipped() const { return flip; }
 
-		Sprite& setColour(Colour4f colour) { vertexAttrib.colour = colour; return *this; }
+		Sprite& setColour(Colour4f colour) { vertexAttrib.colour = std::move(colour); return *this; }
 		Colour4f getColour() const { return vertexAttrib.colour; }
 		Colour4f& getColour() { return vertexAttrib.colour; }
 		Sprite& setAlpha(float alpha) { vertexAttrib.colour.a = alpha; return *this; }

@@ -217,7 +217,7 @@ Sprite& Sprite::setRotation(Angle1f v)
 
 Sprite& Sprite::setScale(Vector2f v)
 {
-	vertexAttrib.scale = v;
+	vertexAttrib.scale = std::move(v);
 	return *this;
 }
 
