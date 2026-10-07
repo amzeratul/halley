@@ -40,6 +40,7 @@ namespace Halley {
 			: VariableBase(parent, key)
 		{
 			value = getValue(parent, key).asType<T>();
+			initialised = true;
 		}
 
 		Variable(const Variable<T>& other) = delete;
@@ -49,7 +50,7 @@ namespace Halley {
 
 		bool isValid() const
 		{
-			return parent != nullptr;
+			return initialised;
 		}
 
 		operator T() const
@@ -66,10 +67,11 @@ namespace Halley {
 
 	private:
 #ifdef DEV_BUILD
-		mutable T value;
+		mutable T value = {};
 #else
-		T value;
+		T value = {};
 #endif
+		bool initialised = false;
 
 		void refresh() const
 		{
