@@ -3,20 +3,30 @@
 #include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
-Internal::VariableBase::VariableBase(const VariableTable& parent, String key)
+Internal::VariableBase::VariableBase(const VariableTable& parent, std::string_view key)
+#ifdef DEV_BUILD
 	: parent(&parent)
-	, key(std::move(key))
+	, key(key)
+#endif
 {
-	refresh();
 }
 
-void Internal::VariableBase::refresh() const
+const ConfigNode& Internal::VariableBase::getValue(const VariableTable& parent, std::string_view key)
 {
-	HalleyAssertDev(parent);
+	return parent.getRawStorage(key);
+}
+
+bool Internal::VariableBase::needsRefresh() const
+{
+#ifdef DEV_BUILD
+	HalleyAssertDebug(parent);
+	const bool version = parent->getAssetVersion();
 	if (parent->getAssetVersion() != parentVersion) [[unlikely]] {
-		parentVersion = parent->getAssetVersion();
-		storage = parent->getRawStorage(key);
+		parentVersion = version;
+		return true;
 	}
+#endif
+	return false;
 }
 
 VariableTable::VariableTable()

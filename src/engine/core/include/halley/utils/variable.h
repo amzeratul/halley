@@ -18,14 +18,16 @@ namespace Halley {
 			VariableBase& operator=(VariableBase&& other) noexcept = default;
 
 		protected:
-			VariableBase(const VariableTable& parent, String key);
+			VariableBase(const VariableTable& parent, std::string_view key);
+			static const ConfigNode& getValue(const VariableTable& parent, std::string_view key);
 
+#ifdef DEV_BUILD
 			const VariableTable* parent = nullptr;
 			String key;
 			mutable int parentVersion = -1;
-			mutable ConfigNode storage;
+#endif
 
-			void refresh() const;
+			bool needsRefresh() const;
 		};		
 	}
 
@@ -34,9 +36,11 @@ namespace Halley {
 	public:
 		Variable() = default;
 		
-		Variable(const VariableTable& parent, String key)
-			: VariableBase(parent, std::move(key))
-		{}
+		Variable(const VariableTable& parent, std::string_view key)
+			: VariableBase(parent, key)
+		{
+			value = getValue(parent, key).asType<T>();
+		}
 
 		Variable(const Variable<T>& other) = delete;
 		Variable(Variable<T>&& other) = default;
@@ -51,13 +55,29 @@ namespace Halley {
 		operator T() const
 		{
 			refresh();
-			return storage.asType<T>();
+			return value;
 		}
 		
 		T get() const
 		{
 			refresh();
-			return storage.asType<T>();
+			return value;
+		}
+
+	private:
+#ifdef DEV_BUILD
+		mutable T value;
+#else
+		T value;
+#endif
+
+		void refresh() const
+		{
+#ifdef DEV_BUILD
+			if (needsRefresh()) {
+				value = getValue(*parent, key).asType<T>();
+			}
+#endif
 		}
 	};
 
