@@ -90,7 +90,7 @@ void NavmeshSet::clearSubWorld(int subWorld)
 	assignNavmeshIds();
 }
 
-std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQuery, String* errorOut, float anisotropy, float nudge) const
+std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQuery, String* errorOut, float anisotropy, float nudge, bool postProcess) const
 {
 	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(origQuery.from, maxStartDistanceToNavMesh, anisotropy, nudge);
 	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(origQuery.to, maxEndDistanceToNavMesh, anisotropy, nudge);
@@ -116,7 +116,7 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQu
 	if (fromRegion == toRegion) {
 		// Just path in that mesh
 		auto path = pathfindInRegion(query, *fromRegion);
-		if (path) {
+		if (path && postProcess) {
 			postProcessPath(*path);
 		}
 		return path;
@@ -131,7 +131,9 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQu
 			return {};
 		} else {
 			auto path = extendToFullPath(query, regionPath);
-			postProcessPath(path);
+			if (postProcess) {
+				postProcessPath(path);
+			}
 			return path;
 		}
 	}

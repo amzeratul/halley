@@ -32,7 +32,7 @@ namespace Halley {
 		size_t reportDisconnectedNavmeshes(Vector<WorldPosition> startPositions, std::function<String(Vector2i)> getChunkName) const;
 		void setMaxDistancesToNavmesh(float startDistance, float endDistance);
 
-		std::optional<NavigationPath> pathfind(const NavigationQuery& query, String* errorOut = nullptr, float anisotropy = 1.0f, float nudge = 0.1f) const;
+		std::optional<NavigationPath> pathfind(const NavigationQuery& query, String* errorOut = nullptr, float anisotropy = 1.0f, float nudge = 0.1f, bool postProcess = true) const;
 		std::optional<NavigationPath> pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const;
 
 		gsl::span<const Navmesh> getNavmeshes() const { return navmeshes; }
@@ -49,6 +49,8 @@ namespace Halley {
 
 		bool isPathClear(gsl::span<const NavigationPath::Point> points) const;
 		bool isPathClear(gsl::span<const WorldPosition> points) const;
+
+		void postProcessPath(NavigationPath& path) const;
 
 		using RayResult = Navmesh::RayResult;
 		RayResult findRayCollision(NavigationPath::Point from, NavigationPath::Point to, std::optional<uint16_t> startNodeId = std::nullopt) const;
@@ -133,7 +135,6 @@ namespace Halley {
 		NavigationPath extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& path) const;
 		Vector<NodeAndConn> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
 
-		void postProcessPath(NavigationPath& path) const;
 		void simplifyPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const;
 		void quantizePath(Vector<NavigationPath::Point>& points, NavigationQuery::QuantizationType type) const;
 		void quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const;
