@@ -608,12 +608,21 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 	if (type == ConfigNodeType::String) {
 		if (op == MathOp::Add) {
 			String buffer1, buffer2;
-			if (Colour4f::isColour(a.asStringView("", &buffer1)) && Colour4f::isColour(b.asStringView("", &buffer2))) {
+			const auto aStr = a.asStringView("", &buffer1);
+			const auto bStr = b.asStringView("", &buffer2);
+
+			if (Colour4f::isColour(aStr) && Colour4f::isColour(bStr)) {
 				// Treat as colours
-				return (Colour4f(a) + Colour4f(b)).toConfigNode();
+				return (Colour4f::fromString(aStr) + Colour4f::fromString(bStr)).toConfigNode();
 			}
 
-			return ConfigNode(a.asString("") + b.asString(""));
+			std::array<char, 1024> buffer;
+			if (aStr.length() + bStr.length() + 1 < buffer.size()) {
+				const auto res = String::concatInBuffer(buffer, aStr, bStr);
+				return ConfigNode(res);
+			} else {
+				return ConfigNode(String(aStr) + bStr);
+			}
 		} else {
 			Logger::logError("Attempting to perform illegal op " + toString(op) + " with string types."
 				+ " Requested operation: " + aOrig.asString("null") + toString(op) + bOrig.asString("null"));

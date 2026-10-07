@@ -121,10 +121,11 @@ namespace Halley {
 
 		Colour4(const ConfigNode& node)
 		{
+			String buffer;
 			if (node.getType() == ConfigNodeType::Map) {
-				*this = fromString(node["colour"].asString());
+				*this = fromString(node["colour"].asStringView(&buffer));
 			} else {
-				*this = fromString(node.asString("#000000"));
+				*this = fromString(node.asStringView("#000000", &buffer));
 			}
 		}
 
