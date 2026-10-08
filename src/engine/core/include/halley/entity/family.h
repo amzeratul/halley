@@ -42,7 +42,10 @@ namespace Halley {
 		{
 			if (indexed) {
 				if (auto idx = findElementInIndex(id)) [[likely]] {
-					return getElement<T>(*idx);
+					auto* e = getElement<T>(*idx);
+					if (e->entityId == id) {
+						return e;
+					}
 				}
 			} else {
 				for (size_t i = 0; i < elemCount; ++i) {
