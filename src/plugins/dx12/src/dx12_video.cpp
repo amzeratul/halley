@@ -144,6 +144,10 @@ void DX12Video::startRender()
     if (suspended) {
 	    return;
     }
+    
+    if (frameInProgress) {
+        finishRender();
+    }
 
 #ifdef _GAMING_XBOX
     framePipelineToken = D3D12XBOX_FRAME_PIPELINE_TOKEN_NULL;
@@ -166,6 +170,7 @@ void DX12Video::startRender()
 
     frame->commandAllocator->Reset();
     commandList->Reset(frame->commandAllocator.Get(), nullptr);
+    frameInProgress = true;
 
     /*
      * Transition back buffer into "render-target" state.
@@ -216,7 +221,7 @@ void DX12Video::startRender()
 
 void DX12Video::finishRender()
 {
-    if (suspended) {
+    if (suspended || !frameInProgress) {
 	    return;
     }
 
@@ -274,6 +279,7 @@ void DX12Video::finishRender()
     }
 
     moveToNextFrame();
+    frameInProgress = false;
 }
 
 ID3D12GraphicsCommandList* DX12Video::startUpload()

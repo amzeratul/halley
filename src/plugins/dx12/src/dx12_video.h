@@ -135,6 +135,7 @@ namespace Halley {
 
         uint32_t numFrames = 2;
         uint32_t currentFrameIndex = 0;
+        bool frameInProgress = false;
 
         bool useVSync = false;
         bool allowTearing = false;
