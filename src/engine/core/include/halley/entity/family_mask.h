@@ -6,8 +6,6 @@
 #include <gsl/span>
 #include "halley/support/assert.h"
 
-class MaskStorage;
-
 namespace Halley {
 	class HalleyStatics;
 
@@ -19,6 +17,74 @@ namespace Halley {
 	namespace FamilyMask {
 		using RealType = std::bitset<maxComponents>;
 
+		struct MaskEntry
+		{
+			RealType mask;
+			int idx;
+
+			MaskEntry(const RealType& m, int i)
+				: mask(m)
+				, idx(i)
+			{
+			}
+
+			bool operator==(const MaskEntry& o) const {
+				return mask == o.mask;
+			}
+		};
+	}
+}
+
+namespace std {
+	template<>
+	struct hash<Halley::FamilyMask::MaskEntry>
+	{
+		std::size_t operator()(Halley::FamilyMask::MaskEntry const& s) const noexcept
+		{
+			static_assert(std::is_trivially_copyable_v<decltype(s.mask)>);
+			return Halley::Hash::hash(s.mask);
+		}
+	};
+}
+
+namespace Halley {
+	namespace FamilyMask {
+
+		class MaskStorage
+		{
+		public:
+			Vector<RealType> values;
+			HashSet<MaskEntry> entries;
+
+			MaskStorage()
+			{
+				getHandle(RealType());
+			}
+
+			int getHandle(const RealType& value)
+			{
+				const auto i = entries.find(MaskEntry(value, 0));
+				if (i == entries.end()) [[unlikely]] {
+					// Not found, assign a new index
+					const int idx = static_cast<int>(values.size());
+					auto entry = MaskEntry(value, idx);
+
+					// Insert new entry
+					entries.insert(entry);
+					values.emplace_back(value);
+
+					return idx;
+				} else {
+					// Found
+					return i->idx;
+				}
+			}
+
+			const RealType& retrieve(int handle) const
+			{
+				return values[handle];
+			}
+		};
 
 		class Handle
 		{
@@ -26,7 +92,11 @@ namespace Halley {
 			constexpr Handle() = default;
 			constexpr Handle(const Handle& h) = default;
 			constexpr Handle(Handle&& h) noexcept = default;
-			Handle(const RealType& mask, MaskStorage& storage);
+
+			Handle(const RealType& mask, MaskStorage& storage)
+				: value(storage.getHandle(mask))
+			{
+			}
 
 			constexpr Handle& operator=(const Handle& h) { value = h.value; return *this; }
 
@@ -34,16 +104,41 @@ namespace Halley {
 			constexpr bool operator!=(const Handle& h) const { return value != h.value; }
 			constexpr bool operator<(const Handle& h) const { return value < h.value; }
 
-			const RealType& getRealValue(MaskStorage& storage) const;
+			const RealType& getRealValue(MaskStorage& storage) const { return storage.retrieve(value); }
 			int getRawValue() const { return value; }
 			
-			Handle intersection(const Handle& h, MaskStorage& storage) const;
-			bool contains(const Handle& handle, MaskStorage& storage) const;
-			bool intersects(const Handle& handle, MaskStorage& storage) const;
-			bool unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const;
+			Handle intersection(const Handle& h, MaskStorage& storage) const
+			{
+				return Handle(getRealValue(storage) & h.getRealValue(storage), storage);
+			}
+
+			bool contains(const Handle& handle, MaskStorage& storage) const
+			{
+				const auto& mine = getRealValue(storage);
+				const auto& theirs = handle.getRealValue(storage);
+
+				return (mine & theirs) == theirs;
+			}
+
+			bool intersects(const Handle& handle, MaskStorage& storage) const
+			{
+				const auto& mine = getRealValue(storage);
+				const auto& theirs = handle.getRealValue(storage);
+
+				return (mine & theirs).any();
+			}
+
+			bool unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const
+			{
+				const auto& mine = getRealValue(storage);
+				const auto& theirsA = a.getRealValue(storage);
+				const auto& theirsB = b.getRealValue(storage);
+
+				return (mine & theirsA) != (mine & theirsB);
+			}
 
 		private:
-			int value = -1;
+			int value = 0;
 		};
 
 		using HandleType = Handle;
@@ -243,11 +338,12 @@ namespace Halley {
 	}
 
 	using FamilyMaskType = FamilyMask::HandleType;
+	using MaskStorage = FamilyMask::MaskStorage;
 }
 
 namespace std {
-	//template <class T> struct hash;
-	template<> struct hash<Halley::FamilyMask::Handle>
+	template<>
+	struct hash<Halley::FamilyMask::Handle>
 	{
 		std::size_t operator()(const Halley::FamilyMask::Handle& h) const noexcept
 		{
