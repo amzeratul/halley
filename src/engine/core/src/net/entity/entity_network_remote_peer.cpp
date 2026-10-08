@@ -319,6 +319,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	result.networkId = assignId();
 
 	result.data = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
+	result.data.setPrefab(entity.getPrefab()->getAssetId());
 
 	const bool assignNetworkIdOnly = entity.getWorldPartition() != 0 && !entity.getPrefab();
 
@@ -337,7 +338,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 		// Without this, the peer wouldn't be notified about any modifications until the next actual change.
 		result.forceNextFastUpdate = true;
 	} else {
-		auto deltaData = parentSession->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parentSession->getEntityDeltaOptions());
+		auto deltaData = parentSession->getFactory().serializeEntityDataAsDelta(result.data, entity.getPrefab(), parentSession->getEntityDeltaOptions());
 
 		auto bytes = Serializer::toBytes(deltaData, parentSession->getByteSerializationOptions());
 		//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");

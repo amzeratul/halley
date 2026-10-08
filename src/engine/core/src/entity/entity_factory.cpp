@@ -125,13 +125,21 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 EntityDataDelta EntityFactory::serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent, IEntityFactorySerializationDebugListener* debugListener)
 {
 	auto entityData = serializeEntity(entity, options, canStoreParent);
-	return entityDataToPrefabDelta(std::move(entityData), entity.getPrefab(), deltaOptions, debugListener);
+	if (entity.getPrefab()) {
+		entityData.setPrefab(entity.getPrefab()->getAssetId());
+	}
+	return entityDataToPrefabDelta(entityData, entity.getPrefab(), deltaOptions, debugListener);
 }
 
-EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener)
+EntityDataDelta EntityFactory::serializeEntityDataAsDelta(const EntityData& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener) const
+{
+	return entityDataToPrefabDelta(entityData, prefab, deltaOptions, debugListener);
+}
+
+EntityDataDelta EntityFactory::entityDataToPrefabDelta(const EntityData& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener) const
 {
 	if (prefab) {
-		entityData.setPrefab(prefab->getAssetId());
+		HalleyAssertDev(entityData.getPrefab() == prefab->getAssetId()); // Caller needs to preset this
 		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
 			const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
 			auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
