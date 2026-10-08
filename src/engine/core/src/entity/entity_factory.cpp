@@ -84,6 +84,7 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 
 	const auto ids = entity.getComponentIds();
 	const auto ptrs = entity.getComponentPtrs();
+	result.getComponents().reserve(ids.size());
 	for (size_t i = 0; i < ids.size(); ++i) {
 		const auto& componentId = ids[i];
 		const auto& component = ptrs[i];
@@ -92,6 +93,13 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 	}
 
 	// Children
+	size_t numSerializableChildren = 0;
+	for (const auto& child: entity.getChildren()) {
+		if (child.isSerializable()) {
+			++numSerializableChildren;
+		}
+	}
+	result.getChildren().reserve(numSerializableChildren);
 	for (const auto& child: entity.getChildren()) {
 		if (child.isSerializable()) {
 			if (options.serializeAsStub && options.serializeAsStub(child)) {
