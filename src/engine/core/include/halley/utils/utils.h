@@ -378,14 +378,48 @@ namespace Halley {
 #if defined( _MSC_VER)
 		_mm_prefetch(static_cast<const char*>(p), _MM_HINT_T0);
 #else
-		__builtin_prefetch(p);
+		__builtin_prefetch(p, 0, 3);
 #endif
 	}
 	static inline void prefetchL2(const void* p) {
 #if defined( _MSC_VER)
 		_mm_prefetch(static_cast<const char*>(p), _MM_HINT_T1);
 #else
-		__builtin_prefetch(p);
+		__builtin_prefetch(p, 0, 2);
 #endif
+	}
+
+	template <int lines, size_t cacheLineSize>
+	static inline void prefetchLinesL1(const char* p) {
+		prefetchL1(p);
+		if constexpr (lines > 1) {
+			prefetchLinesL1<lines - 1, cacheLineSize>(p + cacheLineSize);
+		}
+	}
+
+	template <int lines, size_t cacheLineSize>
+	static inline void prefetchLinesL2(const char* p) {
+		prefetchL2(p);
+		if constexpr (lines > 1) {
+			prefetchLinesL2<lines - 1, cacheLineSize>(p + cacheLineSize);
+		}
+	}
+
+	template <typename T>
+	static inline void prefetchObjectL1(const T& v)
+	{
+		const char* addr = reinterpret_cast<const char*>(&v);
+		constexpr size_t cacheLineSize = 64;
+		constexpr size_t lines = (sizeof(T) + cacheLineSize - 1) / cacheLineSize;
+		prefetchLinesL1<lines, cacheLineSize>(addr);
+	}
+
+	template <typename T>
+	static inline void prefetchObjectL2(const T& v)
+	{
+		const char* addr = reinterpret_cast<const char*>(&v);
+		constexpr size_t cacheLineSize = 64;
+		constexpr size_t lines = (sizeof(T) + cacheLineSize - 1) / cacheLineSize;
+		prefetchLinesL2<lines, cacheLineSize>(addr);
 	}
 }

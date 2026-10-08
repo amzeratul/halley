@@ -64,30 +64,18 @@ void Family::notifyReload(void* entities, size_t count)
 
 OptionalLite<size_t> Family::findElementInIndex(EntityId id) const
 {
-	const auto iter = index.find(id);
+	const auto iter = index.find(id.getIndex());
 	if (iter != index.end()) {
-		return iter->second;
+		return static_cast<size_t>(iter->second);
 	}
 
 	return std::nullopt;
-}
-
-HashSet<EntityId, Family::FastEntityHasher>& Family::getScratchHashSet()
-{
-	static thread_local HashSet<EntityId, FastEntityHasher> scratch;
-	scratch.clear();
-	return scratch;
 }
 
 Vector<uint8_t>& Family::getScratchBitSet()
 {
 	static thread_local Vector<uint8_t> scratch;
 	return scratch;
-}
-
-Family::RemovalAlgorithm Family::getRemovalAlgorithm(size_t numElems, size_t numToRemove)
-{
-	return RemovalAlgorithm::BitSet;
 }
 
 void Family::setIndexed()
@@ -98,12 +86,12 @@ void Family::setIndexed()
 	}
 }
 
-void Family::removeEntity(Entity& entity)
+void Family::removeEntity(EntityId::Index idx)
 {
-	toRemove.push_back(entity.getEntityId());
+	toRemove.push_back(idx);
 }
 
-void Family::reloadEntity(Entity& entity)
+void Family::reloadEntity(EntityId::Index idx)
 {
-	toReload.push_back(entity.getEntityId());
+	toReload.push_back(idx);
 }

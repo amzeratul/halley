@@ -73,14 +73,22 @@ namespace Halley {
 		void setIndexed();
 		virtual void rebuildIndex() = 0;
 
-		virtual bool isDirty() const = 0;
+		bool isDirty() const
+		{
+			return dirty;
+		}
+
+		bool needsUpdate() const
+		{
+			return dirty || !toRemove.empty() || !toReload.empty();
+		}
 
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		virtual void refreshEntity(Entity& entity) = 0;
 		virtual void refreshEntityOptionals(Entity& entity) = 0;
-		void removeEntity(Entity& entity);
-		void reloadEntity(Entity& entity);
+		void removeEntity(EntityId::Index entityId);
+		void reloadEntity(EntityId::Index entityId);
 		virtual void updateEntities() = 0;
 		virtual void clearEntities() = 0;
 		bool hasRemoveCallbacks() const { return !removeEntityCallbacks.empty(); }
@@ -93,20 +101,13 @@ namespace Halley {
 				return Hash::hash(id.value);
 			}
 		};
-		static HashSet<EntityId, FastEntityHasher>& getScratchHashSet();
 		static Vector<uint8_t>& getScratchBitSet();
 
-		enum class RemovalAlgorithm {
-			BitSet,
-			BinarySearch,
-			HashSet,
-		};
-		static RemovalAlgorithm getRemovalAlgorithm(size_t numElems, size_t numToRemove);
-		
 		void* elems = nullptr;
 		size_t elemCount = 0;
 		uint32_t elemSize = 0;
 		bool indexed = false;
+		bool dirty = false;
 		
 	private:
 		FamilyMaskType inclusionMask;
@@ -114,14 +115,14 @@ namespace Halley {
 		FamilyMaskType optionalMask;
 
 	protected:
-		Vector<EntityId> toRemove;
-		Vector<EntityId> toReload;
+		Vector<EntityId::Index> toRemove;
+		Vector<EntityId::Index> toReload;
 
 		Vector<FamilyBindingBase*> addEntityCallbacks;
 		Vector<FamilyBindingBase*> removeEntityCallbacks;
 		Vector<FamilyBindingBase*> modifiedEntityCallbacks;
 
-		HashMap<EntityId, size_t> index;
+		HashMap<EntityId::Index, uint32_t> index;
 	};
 
 	class FamilyBase {
@@ -177,7 +178,7 @@ namespace Halley {
 		void addEntity(Entity& entity) final
 		{
 			if (indexed) {
-				index[entity.getEntityId()] = entities.size();
+				index[entity.getEntityId().getIndex()] = static_cast<uint32_t>(entities.size());
 			}
 
 			auto& e = entities.emplace_back();
@@ -204,8 +205,11 @@ namespace Halley {
 		StorageType* getEntityStorage(EntityId id)
 		{
 			if (indexed) {
-				if (auto iter = index.find(id); iter != index.end()) {
-					return &entities[iter->second];
+				if (auto iter = index.find(id.getIndex()); iter != index.end()) {
+					auto* e = &entities[iter->second];
+					if (e->entityId == id) {
+						return e;
+					}
 				}
 			} else {
 				for (auto& e: entities) {
@@ -222,8 +226,8 @@ namespace Halley {
 			bool addedAny = false;
 			if (dirty) {
 				// Notify additions
-				size_t prevSize = elemCount;
-				size_t curSize = entities.size();
+				const size_t prevSize = elemCount;
+				const size_t curSize = entities.size();
 				updateElems();
 				HalleyAssertDebug(curSize >= prevSize);
 				dirty = false;
@@ -236,9 +240,10 @@ namespace Halley {
 
 			if (!toReload.empty()) {
 				// Notify reloads
+				// This is pretty slow, should probably use the bitmap algorithm that remove uses, but then again this is a dev-only feature
 				Vector<StorageType*> reloadedEntities;
 				for (auto& entity : entities) {
-					if (std::find(toReload.begin(), toReload.end(), entity.entityId) != toReload.end()) {
+					if (std::find(toReload.begin(), toReload.end(), entity.entityId.getIndex()) != toReload.end()) {
 						reloadedEntities.push_back(&entity);
 					}
 				}
@@ -263,11 +268,6 @@ namespace Halley {
 			index.clear();
 		}
 
-		bool isDirty() const final
-		{
-			return dirty;
-		}
-
 		void rebuildIndex() final
 		{
 			index.clear();
@@ -275,7 +275,7 @@ namespace Halley {
 				const size_t n = entities.size();
 				index.reserve(n);
 				for (size_t i = 0; i < n; ++i) {
-					index[entities[i].entityId] = i;
+					index[entities[i].entityId.getIndex()] = static_cast<uint32_t>(i);
 				}
 			}
 		}
@@ -283,7 +283,6 @@ namespace Halley {
 
 	private:
 		Vector<StorageType, std::allocator<StorageType>, 0, false> entities;
-		bool dirty = false;
 
 		static_assert(std::is_trivially_copyable_v<StorageType>);
 
@@ -309,14 +308,7 @@ namespace Halley {
 				toRemove.clear();
 			} else {
 				// Performance-critical code
-				const auto algorithm = getRemovalAlgorithm(entities.size(), removeCount);
-				if (algorithm == RemovalAlgorithm::BitSet) {
-					moveDeadEntitiesToBackBitSet(hasCallbacks);
-				} else if (algorithm == RemovalAlgorithm::BinarySearch) {
-					moveDeadEntitiesToBackLinear(hasCallbacks);
-				} else if (algorithm == RemovalAlgorithm::HashSet) {
-					moveDeadEntitiesToBackHash(hasCallbacks);
-				}
+				moveDeadEntitiesToBackBitSet(hasCallbacks);
 			}
 			size_t newSize = entities.size() - removeCount;
 
@@ -333,105 +325,16 @@ namespace Halley {
 			return true;
 		}
 
-		void moveDeadEntitiesToBackLinear(bool preserveRemoved)
-		{
-			std::sort(toRemove.begin(), toRemove.end());
-
-			// Move all entities to be removed to the back of the vector
-			int n = int(entities.size());
-			// Note: it's important to scan it forward. Scanning backwards would improve performance for short-lived entities,
-			// but it causes an issue where an entity is removed and added to the same family in one frame.
-
-			const auto beg = toRemove.begin();
-			const auto end = toRemove.end();
-
-			if (preserveRemoved) {
-				// Will notify, so keep those at the end of vector
-				for (int i = 0; i < n; i++) {
-					const EntityId id = entities[i].entityId;
-					const auto iter = std::lower_bound(beg, end, id);
-					if (iter != toRemove.end() && id == *iter) {
-						if (i != n - 1) [[likely]] {
-							std::swap(entities[i], entities[n - 1]);
-							--i;
-						}
-						--n;
-					}
-				}
-			} else {
-				// Won't notify, just erase them
-				for (int i = 0; i < n; i++) {
-					const EntityId id = entities[i].entityId;
-					const auto iter = std::lower_bound(beg, end, id);
-					if (iter != toRemove.end() && id == *iter) {
-						if (i != n - 1) [[likely]] {
-							entities[i] = std::move(entities[n - 1]);
-							--i;
-						}
-						--n;
-					}
-				}
-			}
-
-			toRemove.clear();
-		}
-		
-		void moveDeadEntitiesToBackHash(bool preserveRemoved)
-		{
-			auto& toRemoveIds = getScratchHashSet();
-
-			toRemoveIds.reserve(toRemove.size());
-			for (auto& id: toRemove) {
-				toRemoveIds.insert(id);
-			}
-			toRemove.clear();
-
-			int n = int(entities.size());
-
-			if (preserveRemoved) {
-				// Will notify, so keep those at the end of vector
-				for (int i = 0; i < n; i++) {
-					const EntityId id = entities[i].entityId;
-					if (toRemoveIds.contains(id)) {
-						if (i != n - 1) [[likely]] {
-							std::swap(entities[i], entities[n - 1]);
-							--i;
-						}
-						--n;
-					}
-				}
-			} else {
-				// Won't notify, just erase them
-				for (int i = 0; i < n; i++) {
-					const EntityId id = entities[i].entityId;
-					if (toRemoveIds.contains(id)) {
-						if (i != n - 1) [[likely]] {
-							entities[i] = std::move(entities[n - 1]);
-							--i;
-						}
-						--n;
-					}
-				}
-			}
-			toRemoveIds.clear();
-		}
-
 		void moveDeadEntitiesToBackBitSet(bool preserveRemoved)
 		{
-			auto& scratch = getScratchBitSet();
 			// Should already be all zeroed out from last usage
-			
-			const auto toIdx = [] (EntityId id) -> uint32_t
-			{
-				return static_cast<uint32_t>(id.value & 0xFFFFFFFFull);
-			};
-
+			auto& scratch = getScratchBitSet();
 
 			// Find range
 			// We'll assume min is 0 as it simplifies the algorithm
 			uint32_t max = std::numeric_limits<uint32_t>::min();
 			for (auto& id: toRemove) {
-				max = std::max(max, toIdx(id));
+				max = std::max(max, id);
 			}
 
 			// Resize if it needs to be bigger
@@ -441,19 +344,18 @@ namespace Halley {
 
 			const auto contains = [&] (EntityId id) -> bool
 			{
-				const auto idx = toIdx(id);
+				const auto idx = id.getIndex();
 				return idx <= max && (bitmap[idx / 8] & (1 << (idx % 8)));
 			};
 			
-			const auto setBit = [&] (EntityId id)
+			const auto setBit = [&] (EntityId::Index idx)
 			{
-				const auto idx = toIdx(id);
 				bitmap[idx / 8] |= 1 << (idx % 8);
 			};
 			
 			const auto clearBit = [&] (EntityId id)
 			{
-				const auto idx = toIdx(id);
+				const auto idx = id.getIndex();
 				bitmap[idx / 8] &= ~static_cast<uint8_t>(1 << (idx % 8));
 			};
 
@@ -474,6 +376,7 @@ namespace Halley {
 						clearBit(entities[i].entityId);
 						if (i != n - 1) [[likely]] {
 							std::swap(entities[i], entities[n - 1]);
+							prefetchObjectL2(entities[n - 2]);
 							--i;
 						}
 						--n;
@@ -490,6 +393,7 @@ namespace Halley {
 						clearBit(entities[i].entityId);
 						if (i != n - 1) [[likely]] {
 							entities[i] = std::move(entities[n - 1]);
+							prefetchObjectL2(entities[n - 2]);
 							--i;
 						}
 						--n;

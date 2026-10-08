@@ -15,6 +15,8 @@ namespace Halley {
 	using DefaultHash = std::hash<T>;
 
 	struct alignas(8) EntityId {
+		using Index = uint32_t;
+
 		int64_t value;
 
 		EntityId() : value(-1) {}
@@ -36,6 +38,9 @@ namespace Halley {
 
 		String toString() const;
 		String toDetailedString() const;
+
+		// Index is guaranteed to be unique between all LIVING entities, but can be reused in time
+		Index getIndex() const { return static_cast<Index>(value & 0xFFFFFFFFull); }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

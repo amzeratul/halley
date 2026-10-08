@@ -35,7 +35,7 @@ Transform2DComponent::~Transform2DComponent()
 
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
-	const bool firstAdd = this->entity.isEmpty();
+	const bool firstAdd = !this->entity.isValid();
 
 	this->entity = entity;
 	worldPartition = entity.getWorldPartition();

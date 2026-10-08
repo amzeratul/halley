@@ -756,10 +756,31 @@ void World::updateEntities()
 
 	Vector<size_t> entitiesRemoved;
 
+	struct FullEntry {
+		FamilyMaskType maskType;
+		EntityId::Index index;
+		Entity* entity;
+
+		FullEntry() = default;
+		FullEntry(FamilyMaskType maskType, EntityId::Index index, Entity* entity)
+			: maskType(std::move(maskType)), index(index), entity(entity)
+		{}
+	};
+	
+	struct ShortEntry {
+		FamilyMaskType maskType;
+		EntityId::Index index;
+
+		ShortEntry() = default;
+		ShortEntry(FamilyMaskType maskType, EntityId::Index index)
+			: maskType(std::move(maskType)), index(index)
+		{}
+	};
+
 	struct FamilyTodo {
-		Vector<std::pair<FamilyMaskType, Entity*>> toAdd;
-		Vector<std::pair<FamilyMaskType, Entity*>> toRemove;
-		Vector<std::pair<FamilyMaskType, Entity*>> toReload;
+		Vector<FullEntry> toAdd;
+		Vector<ShortEntry> toRemove;
+		Vector<ShortEntry> toReload;
 	};
 	HashMap<FamilyMaskType, FamilyTodo> pending;
 	pending.reserve(32);
@@ -769,7 +790,7 @@ void World::updateEntities()
 	for (size_t i = 0; i < nEntities; i++) {
 		auto& entity = *entitiesLocal[i];
 		if (i + 20 < nEntities) { // Watch out for sign! Don't subtract!
-			prefetchL2(entitiesLocal[i + 20]);
+			prefetchObjectL2(*entitiesLocal[i + 20]);
 		}
 
 		// Check if it needs any sort of updating
@@ -777,7 +798,7 @@ void World::updateEntities()
 			// First of all, let's check if it's dead
 			if (!entity.isAlive()) {
 				// Remove from systems
-				pending[entity.getMask()].toRemove.emplace_back(FamilyMaskType(), &entity);
+				pending[entity.getMask()].toRemove.emplace_back(FamilyMaskType(), entity.getEntityId().getIndex());
 				entitiesRemoved.push_back(i);
 			} else {
 				// Check visibile partition first, as this might add/remove components
@@ -790,8 +811,9 @@ void World::updateEntities()
 
 				// Did it change?
 				if (oldMask != newMask) {
-					pending[oldMask].toRemove.emplace_back(newMask, &entity);
-					pending[newMask].toAdd.emplace_back(oldMask, &entity);
+					const auto idx = entity.getEntityId().getIndex();
+					pending[oldMask].toRemove.emplace_back(newMask, idx);
+					pending[newMask].toAdd.emplace_back(oldMask, idx, &entity);
 				}
 			}
 		}
@@ -801,7 +823,7 @@ void World::updateEntities()
 		for (size_t i = 0; i < nEntities; i++) {
 			auto& entity = *entitiesLocal[i];
 			if (entity.reloaded && entity.isAlive()) {
-				pending[entity.getMask()].toReload.emplace_back(entity.getMask(), &entity);
+				pending[entity.getMask()].toReload.emplace_back(entity.getMask(), entity.getEntityId().getIndex());
 				entity.reloaded = false;
 			}
 		}
@@ -818,25 +840,25 @@ void World::updateEntities()
 				
 				for (auto& e: todo.second.toRemove) {
 					// Only remove if the entity is not about to be re-added
-					const auto& newMask = e.first;
+					const auto& newMask = e.maskType;
 					if (!fam->matches(newMask, ms)) {
-						fam->removeEntity(*e.second);
+						fam->removeEntity(e.index);
 					}
 				}
 				for (auto& e: todo.second.toAdd) {
 					// Only add if the entity was not already in this
-					const auto& oldMask = e.first;
+					const auto& oldMask = e.maskType;
 					const auto& newMask = todo.first;
 					if (!fam->matches(oldMask, ms)) {
-						fam->addEntity(*e.second);
+						fam->addEntity(*e.entity);
 					} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
 						// Needs refreshing of optional references
-						fam->refreshEntityOptionals(*e.second);
+						fam->refreshEntityOptionals(*e.entity);
 					}
 				}
 
 				for (auto& e : todo.second.toReload) {
-					fam->reloadEntity(*e.second);
+					fam->reloadEntity(e.index);
 				}
 			}
 		}
@@ -844,7 +866,9 @@ void World::updateEntities()
 
 	// Update families
 	for (auto& iter : families) {
-		iter->updateEntities();
+		if (iter->needsUpdate()) {
+			iter->updateEntities();
+		}
 	}
 	
 	// Actually remove dead entities
