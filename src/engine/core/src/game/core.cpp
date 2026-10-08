@@ -492,7 +492,8 @@ void Core::tickFrame(Time time)
 			HalleyAssertDev(curStageFrames > 0);
 			BaseFrameData::setThreadFrameData(frameDataRender.get());
 			render();
-			waitForRenderEnd();
+			finishVideoRender();
+			finishPainterRender();
 		}
 		updateTask.wait();
 	} else {
@@ -500,7 +501,8 @@ void Core::tickFrame(Time time)
 		update(time, multithreaded);
 		if (isRunning()) { // Check again, it might have changed
 			render();
-			waitForRenderEnd();
+			finishVideoRender();
+			finishPainterRender();
 		}
 	}
 
@@ -678,11 +680,17 @@ void Core::render()
 	}
 }
 
-void Core::waitForRenderEnd()
+void Core::finishVideoRender()
 {
-	if (api->video && painter) {
+	if (api->video) {
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
+	}
+}
+
+void Core::finishPainterRender()
+{
+	if (painter) {
 		painter->onFinishRender();
 	}
 }
