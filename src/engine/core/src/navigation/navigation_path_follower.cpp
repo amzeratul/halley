@@ -75,7 +75,12 @@ void NavigationPathFollower::feedToHasher(Hash::Hasher& hasher) const
 	ConfigNodeHelper<decltype(path)>::hash(path, hasher);
 	ConfigNodeHelper<decltype(curPos)>::hash(curPos, hasher);
 	ConfigNodeHelper<decltype(nextPathIdx)>::hash(nextPathIdx, hasher);
-	ConfigNodeHelper<decltype(params)>::hash(params, hasher);
+	
+	hasher.feed(params.run);
+	hasher.feed(params.backwards);
+	hasher.feed(params.manualPath);
+	hasher.feed(params.speed);
+	ConfigNodeHelper<decltype(params.faceAfter)>::hash(params.faceAfter, hasher);
 }
 
 void NavigationPathFollower::setComputingPath()

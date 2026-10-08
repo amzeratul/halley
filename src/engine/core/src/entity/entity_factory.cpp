@@ -188,6 +188,11 @@ void EntityFactory::doHashEntity(Hash::Hasher& hasher, EntityRef entity, const S
 			}
 		}
 	}
+	
+	// Parent
+	if (const auto parent = entity.tryGetParent()) {
+		hasher.feedBytes(parent->getInstanceUUID().getBytes());
+	}
 }
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
