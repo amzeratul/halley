@@ -25,7 +25,7 @@ namespace Halley {
 
 	// True if T::onAddedToEntity(EntityRef&) exists
 	template <class, class = std::void_t<>> struct HasOnAddedToEntityMember : std::false_type {};
-	template <class T> struct HasOnAddedToEntityMember<T, decltype(std::declval<T&>().onAddedToEntity(std::declval<EntityRef&>()))> : std::true_type { };
+	template <class T> struct HasOnAddedToEntityMember<T, decltype(std::declval<T&>().onAddedToEntity(std::declval<EntityRef&>(), std::declval<bool>()))> : std::true_type { };
 	
 	class MessageEntry
 	{
@@ -488,7 +488,7 @@ namespace Halley {
 			entity->addComponent(*world, c);
 
 			if constexpr (HasOnAddedToEntityMember<T>::value) {
-				c->onAddedToEntity(*this);
+				c->onAddedToEntity(*this, false);
 			}
 
 			return *this;

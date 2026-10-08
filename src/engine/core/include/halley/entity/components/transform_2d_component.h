@@ -74,7 +74,7 @@ public:
 	Halley::Rect4f getSpriteAABB(const Halley::Sprite& sprite) const;
 	Halley::Rect4f getSpriteUncroppedAABB(const Halley::Sprite& sprite) const;
 
-	void onAddedToEntity(Halley::EntityRef& entity);
+	void onAddedToEntity(Halley::EntityRef& entity, bool sameEntity);
 	void onHierarchyChanged();
 	void onEntityMarkedDirty();
 	void onWorldPartitionChanged();

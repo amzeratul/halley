@@ -33,13 +33,11 @@ Transform2DComponent::~Transform2DComponent()
 	}
 }
 
-void Transform2DComponent::onAddedToEntity(EntityRef& entity)
+void Transform2DComponent::onAddedToEntity(EntityRef& entity, bool sameEntity)
 {
-	const bool firstAdd = !this->entity.isValid();
-
 	this->entity = entity;
 	worldPartition = entity.getWorldPartition();
-	if (firstAdd) {
+	if (!sameEntity) {
 		updateParentTransform();
 		markDirty(DirtyPropagationMode::Added);
 	}

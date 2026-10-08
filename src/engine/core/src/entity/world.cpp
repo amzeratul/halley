@@ -330,7 +330,7 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 		const auto n = ids.size();
 		for (size_t i = 0; i < n; ++i) {
 			if (canRebindIds.contains(ids[i])) {
-				reflection->getComponentReflector(ids[i]).rebindComponent(*e->componentPtrs[i], EntityRef(*e, *this));
+				reflection->getComponentReflector(ids[i]).rebindComponent(*e->componentPtrs[i], EntityRef(*e, *this), true);
 			}
 		}
 

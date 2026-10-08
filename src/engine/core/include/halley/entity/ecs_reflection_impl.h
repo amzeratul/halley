@@ -151,10 +151,10 @@ namespace Halley {
 			return entity.tryGetComponent<T>(false);
 		}
 
-		void rebindComponent(Component& component, EntityRef entity) const override
+		void rebindComponent(Component& component, EntityRef entity, bool sameEntity) const override
 		{
 			if constexpr (HasOnAddedToEntityMember<T>::value) {
-				static_cast<T&>(component).onAddedToEntity(entity);
+				static_cast<T&>(component).onAddedToEntity(entity, sameEntity);
 			}
 		}
 
