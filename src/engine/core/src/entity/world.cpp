@@ -300,12 +300,18 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 
 	// Find entities to move
 	Vector<Entity*> entitiesToMove;
-	for (auto& e: other.entities) {
-		if (!e->fromNetwork && (!worldPartition || e->worldPartition == worldPartition)) {
-			entitiesToMove.push_back(e);
-			e->alive = false;
-			e->dirty = true;
-			other.uuidMap.erase(e->getInstanceUUID());
+	const auto entitySpan = other.entities.const_span();
+	const auto nEntities = entitySpan.size();
+	for (size_t i = 0; i < nEntities; i++) {
+		auto& e = *entitySpan[i];
+		if (i + 20 < nEntities) {
+			prefetchObjectL2(*entitySpan[i + 20]);
+		}
+		if (!e.fromNetwork && (!worldPartition || e.worldPartition == worldPartition)) {
+			entitiesToMove.push_back(&e);
+			e.alive = false;
+			e.dirty = true;
+			other.uuidMap.erase(e.getInstanceUUID());
 		}
 	}
 
@@ -754,7 +760,7 @@ void World::updateEntities()
 	auto entitiesLocal = entities.span();
 	size_t nEntities = entitiesLocal.size();
 
-	Vector<size_t> entitiesRemoved;
+	Vector<uint32_t> entitiesRemoved;
 
 	struct FullEntry {
 		FamilyMaskType maskType;
@@ -799,7 +805,7 @@ void World::updateEntities()
 			if (!entity.isAlive()) {
 				// Remove from systems
 				pending[entity.getMask()].toRemove.emplace_back(FamilyMaskType(), entity.getEntityId().getIndex());
-				entitiesRemoved.push_back(i);
+				entitiesRemoved.push_back(static_cast<uint32_t>(i));
 			} else {
 				// Check visibile partition first, as this might add/remove components
 				updateVisiblePartition(entity);
@@ -875,7 +881,7 @@ void World::updateEntities()
 	if (!entitiesRemoved.empty()) {
 		size_t livingEntityCount = entities.size();
 		for (int i = int(entitiesRemoved.size()); --i >= 0; ) {
-			size_t idx = entitiesRemoved[i];
+			const auto idx = entitiesRemoved[i];
 			auto& entity = *entities[idx];
 
 			// Remove
