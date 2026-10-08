@@ -20,6 +20,9 @@ namespace Halley {
         virtual void reset() {}
         virtual bool update(Time t, World& world, EntityId entityId) { return false; }
         [[nodiscard]] virtual bool isUpdating() const { return false; }
+
+        // This should return false for implementations that do network quantize only.
+        [[nodiscard]] virtual bool canUpdate() const { return false; }
     };
 
     class IByteDataInterpolatorSet

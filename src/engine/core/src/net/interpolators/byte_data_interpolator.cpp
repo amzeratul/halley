@@ -44,13 +44,15 @@ void ByteDataInterpolatorSet::reset() const
 void ByteDataInterpolatorSet::update(Time t, World& world) const
 {
     for (const auto& entry : interpolators) {
-        const bool modified = entry.second->update(t, world, std::get<0>(entry.first));
+        if (entry.second->canUpdate()) {
+            const bool modified = entry.second->update(t, world, std::get<0>(entry.first));
 
-        // This hack is needed to make sure that transform 2D gets marked as dirty properly
-        if (modified && std::get<1>(entry.first) == Transform2DComponent::componentIndex) {
-            auto entity = world.getEntity(std::get<0>(entry.first));
-            if (const auto transform = entity.tryGetComponent<Transform2DComponent>()) {
-                transform->markDirty();
+            // This hack is needed to make sure that transform 2D gets marked as dirty properly
+            if (modified && std::get<1>(entry.first) == Transform2DComponent::componentIndex) {
+                auto entity = world.getEntity(std::get<0>(entry.first));
+                if (const auto transform = entity.tryGetComponent<Transform2DComponent>()) {
+                    transform->markDirty();
+                }
             }
         }
     }
