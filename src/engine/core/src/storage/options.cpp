@@ -134,7 +134,7 @@ ConfigNode Options::toConfigNode(bool roaming) const
 {
 	ConfigNode result;
 	for (const auto& [k, v]: options.asMap()) {
-		// Local mode serialises all keys, roaming only serialises its own
+		// Local mode only serialises local keys, roaming only serialises roaming keys
 		if (roaming == isRoamingKey(k)) {
 			result[k] = ConfigNode(v);
 		}
