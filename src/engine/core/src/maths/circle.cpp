@@ -8,12 +8,6 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
-Circle::Circle(const LineSegment& segment)
-{
-	centre = 0.5f * (segment.a + segment.b);
-	radius = 0.5f * (segment.a - segment.b).length();
-}
-
 Circle Circle::expand(float r) const
 {
 	return Circle(centre, radius + r);

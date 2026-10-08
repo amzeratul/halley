@@ -1,20 +1,25 @@
 #pragma once
 
+#include "line.h"
 #include "vector2.h"
 #include "halley/data_structures/vector.h"
 #include "rect.h"
 
 namespace Halley {
-	class LineSegment;
-
 	class Circle {
     public:
         constexpr Circle() = default;
-        constexpr Circle(Vector2f centre, float radius)
+        
+		constexpr Circle(Vector2f centre, float radius)
             : centre(centre)
             , radius(radius)
         {}
-        Circle(const LineSegment& segment);
+        
+		constexpr Circle(const LineSegment& segment)
+        {
+			centre = 0.5f * (segment.a + segment.b);
+			radius = 0.5f * (segment.a - segment.b).length();
+        }
 
         [[nodiscard]] constexpr float getRadius() const { return radius; }
         [[nodiscard]] constexpr Vector2f getCentre() const { return centre; }
