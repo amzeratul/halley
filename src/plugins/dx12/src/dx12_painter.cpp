@@ -17,7 +17,7 @@ DX12Painter::DX12Painter(DX12Video &video, Resources &resources)
 
     for (size_t i = 0; i < numBuffers; ++i) {
         vertexBuffers.emplace_back(video, DX12Buffer::Type::DynamicVertex, 8 * 1024 * 1024);
-        indexBuffers.emplace_back(video, DX12Buffer::Type::DynamicIndex, 128 * 1024);
+        indexBuffers.emplace_back(video, DX12Buffer::Type::DynamicIndex, 256 * 1024);
     }
 }
 

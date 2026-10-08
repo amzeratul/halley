@@ -77,7 +77,7 @@ namespace Halley {
 		{
 #ifdef DEV_BUILD
 			if (needsRefresh()) {
-				value = getValue(*parent, key).asType<T>();
+				value = getValue(*parent, key).template asType<T>();
 			}
 #endif
 		}

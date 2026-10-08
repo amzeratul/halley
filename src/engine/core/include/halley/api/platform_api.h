@@ -343,7 +343,7 @@ namespace Halley
 
 		virtual bool canShowSubscriptionNeeded() const { return false; }
 		virtual bool showSubscriptionNeeded() const { return true; }
-		virtual bool canShowEULA() const { return true; }
+		virtual bool canShowEULA() const { return false; }
 		
 		// Returns arbitrary platform-specific data
 		virtual String getStringData(const String& key) { return ""; }
