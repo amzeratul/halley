@@ -512,10 +512,10 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			// requiresEntityFrameModified is set, nobody called setLastFrameModified(), but the entity has been
     			// modified. Peers would miss changes in release builds.
     			if (checkExpectNoUpdate && expectNoUpdate && previousContentHash != 0) {
-    				Logger::logError("Network entity " + entity.getName() + " has been modified, and requiresEntityFrameModified is set, but no update was signaled", true);
+    				Logger::logError("Network entity " + entity.getName() + " [" + entity.getPrefabAssetIdOrEmpty() + "]" + " has been modified, and requiresEntityFrameModified is set, but no update was signaled", true);
     			}
     			if (checkExpectSameHash && foundSameHash) {
-    				Logger::logError("Network entity " + entity.getName() + " has been modified, but fast hash check didn't detect the change", true);
+    				Logger::logError("Network entity " + entity.getName() + " [" + entity.getPrefabAssetIdOrEmpty() + "]" + " has been modified, but fast hash check didn't detect the change", true);
     			}
 #endif
     		}
