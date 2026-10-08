@@ -2,6 +2,8 @@
 
 #include <bitset>
 #include <optional>
+#include "halley/data_structures/hash_map.h"
+#include "halley/utils/hash.h"
 #include "halley/data_structures/maybe_ref.h"
 #include <gsl/span>
 #include "halley/support/assert.h"
