@@ -971,8 +971,14 @@ Vector2f ConfigNode::doAsVector2f(bool expandScalar) const
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
 		return Vector2f(asFloat(), expandScalar ? asFloat() : 0);
 	} else if (type == ConfigNodeType::Sequence) {
-		const auto& seq = asSequence();
-		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
+		const auto& seq = asSequence().const_span();
+		if (seq.size() >= 2) [[likely]] {
+			return Vector2f(seq[0].asFloat(), seq[1].asFloat());
+		} else if (seq.size() >= 1) {
+			return Vector2f(seq[0].asFloat(), 0);
+		} else {
+			return {};
+		}
 	} else if (type == ConfigNodeType::Reference) {
 		return dereference().doAsVector2f(expandScalar);
 	} else {
