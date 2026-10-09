@@ -8,39 +8,6 @@
 
 using namespace Halley;
 
-UUID::UUID()
-{
-	qwords[0] = 0;
-	qwords[1] = 0;
-}
-
-UUID::UUID(std::array<Byte, 16> b)
-{
-	memcpy(qwords.data(), b.data(), 16);
-}
-
-UUID::UUID(gsl::span<const std::byte> b)
-{
-	if (b.size_bytes() < 16) [[unlikely]] {
-		qwords[0] = 0;
-		qwords[1] = 0;
-		memcpy(qwords.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
-	} else {
-		memcpy(qwords.data(), b.data(), 16);
-	}
-}
-
-UUID::UUID(const Bytes& b)
-{
-	if (b.size() < 16) [[unlikely]] {
-		qwords[0] = 0;
-		qwords[1] = 0;
-		memcpy(qwords.data(), b.data(), std::min(b.size(), size_t(16)));
-	} else {
-		memcpy(qwords.data(), b.data(), 16);
-	}
-}
-
 UUID::UUID(std::string_view strView)
 {
 	if (strView.length() != 36) {
@@ -90,26 +57,6 @@ std::optional<UUID> UUID::tryParse(std::string_view strView)
 	return UUID(strView);
 }
 
-bool UUID::operator==(const UUID& other) const
-{
-	return qwords == other.qwords;
-}
-
-bool UUID::operator!=(const UUID& other) const
-{
-	return qwords != other.qwords;
-}
-
-bool UUID::operator<(const UUID& other) const
-{
-	return qwords < other.qwords;
-}
-
-UUID UUID::operator^(const UUID& other) const
-{
-	return xorUUIDs(*this, other);
-}
-
 String UUID::toString() const
 {
 	using namespace Encode;
@@ -138,31 +85,6 @@ UUID UUID::generate()
 	return result;
 }
 
-UUID UUID::xorUUIDs(const UUID& one, const UUID& two)
-{
-	UUID result;
-	for (size_t i = 0; i < result.qwords.size(); i++) {
-		result.qwords[i] = one.qwords[i] ^ two.qwords[i];
-	}
-	result.setVersionBits();
-	return result;
-}
-
-bool UUID::isValid() const
-{
-	for (size_t i = 0; i < qwords.size(); ++i) {
-		if (qwords[i] != 0) {
-			return true;
-		}
-	}
-	return false;
-}
-
-gsl::span<std::byte> UUID::getWriteableBytes()
-{
-	return gsl::as_writable_bytes(gsl::span<uint64_t>(qwords));
-}
-
 void UUID::serialize(Serializer& s) const
 {
 	s << getBytes();
@@ -171,14 +93,6 @@ void UUID::serialize(Serializer& s) const
 void UUID::deserialize(Deserializer& s)
 {
 	s >> getWriteableBytes();
-}
-
-void UUID::setVersionBits()
-{
-	auto* bs = reinterpret_cast<unsigned char*>(qwords.data());
-
-	bs[6] = (bs[6] & 0b00001111) | (4 << 4); // Version 4
-	bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
 }
 
 ConfigNode ConfigNodeSerializer<UUID>::serialize(UUID id, const EntitySerializationContext& context)

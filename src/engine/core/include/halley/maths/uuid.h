@@ -16,31 +16,93 @@ namespace Halley {
 
 	class UUID {
     public:
-        UUID();
-        UUID(std::array<Byte, 16> bytes);
-        explicit UUID(gsl::span<const std::byte> bytes);
-		explicit UUID(const Bytes& bytes);
+
+		constexpr UUID()
+		{
+			qwords[0] = 0;
+			qwords[1] = 0;
+		}
+
+		UUID(std::array<Byte, 16> b)
+		{
+			memcpy(qwords.data(), b.data(), 16);
+		}
+
+		UUID(gsl::span<const std::byte> b)
+		{
+			if (b.size_bytes() < 16) [[unlikely]] {
+				qwords[0] = 0;
+				qwords[1] = 0;
+				memcpy(qwords.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
+			} else {
+				memcpy(qwords.data(), b.data(), 16);
+			}
+		}
+
+		UUID(const Bytes& b)
+		{
+			if (b.size() < 16) [[unlikely]] {
+				qwords[0] = 0;
+				qwords[1] = 0;
+				memcpy(qwords.data(), b.data(), std::min(b.size(), size_t(16)));
+			} else {
+				memcpy(qwords.data(), b.data(), 16);
+			}
+		}
+
         explicit UUID(std::string_view str);
         explicit UUID(const ConfigNode& node);
 
         [[nodiscard]] static bool isUUID(std::string_view str);
         [[nodiscard]] static std::optional<UUID> tryParse(std::string_view str);
 
-        bool operator==(const UUID& other) const;
-        bool operator!=(const UUID& other) const;
-		bool operator<(const UUID& other) const;
+		[[nodiscard]] constexpr bool operator==(const UUID& other) const
+		{
+			return qwords == other.qwords;
+		}
 
-        UUID operator^(const UUID& other) const;
+		[[nodiscard]] constexpr bool operator!=(const UUID& other) const
+		{
+			return qwords != other.qwords;
+		}
+
+		[[nodiscard]] constexpr bool operator<(const UUID& other) const
+		{
+			return qwords < other.qwords;
+		}
+
+		[[nodiscard]] UUID operator^(const UUID& other) const
+		{
+			return xorUUIDs(*this, other);
+		}
 
 		String toString() const;
         ConfigNode toConfigNode() const;
 
         [[nodiscard]] static UUID generate();
-        [[nodiscard]] static UUID xorUUIDs(const UUID& one, const UUID& two);
-    	[[nodiscard]] bool isValid() const;
+
+		[[nodiscard]] static UUID xorUUIDs(const UUID& one, const UUID& two)
+		{
+			UUID result;
+			for (size_t i = 0; i < result.qwords.size(); i++) {
+				result.qwords[i] = one.qwords[i] ^ two.qwords[i];
+			}
+			result.setVersionBits();
+			return result;
+		}
+
+		[[nodiscard]] constexpr bool isValid() const
+		{
+			for (size_t i = 0; i < qwords.size(); ++i) {
+				if (qwords[i] != 0) {
+					return true;
+				}
+			}
+			return false;
+		}
 
         gsl::span<const std::byte> getBytes() const { return gsl::as_bytes(gsl::span<const uint64_t>(qwords)); }
-		gsl::span<std::byte> getWriteableBytes();
+		gsl::span<std::byte> getWriteableBytes() { return gsl::as_writable_bytes(gsl::span<uint64_t>(qwords)); }
         gsl::span<const uint64_t> getUint64Bytes() const { return qwords; }
 
     	void serialize(Serializer& s) const;
@@ -49,7 +111,13 @@ namespace Halley {
     private:
         std::array<uint64_t, 2> qwords;
 
-        void setVersionBits();
+		void setVersionBits()
+		{
+			auto* bs = reinterpret_cast<unsigned char*>(qwords.data());
+
+			bs[6] = (bs[6] & 0b00001111) | (4 << 4); // Version 4
+			bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
+		}
 	};
 
     template <>
