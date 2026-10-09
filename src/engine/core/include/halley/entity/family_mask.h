@@ -17,14 +17,17 @@ namespace Halley {
 	constexpr static int maxComponents = 512; // Increasing this number has performance consequences
 
 	namespace FamilyMask {
-		using RealType = std::bitset<maxComponents>;
+		using UnderlyingType = std::bitset<maxComponents>;
+		struct RealType {
+			alignas(64) UnderlyingType v;
+		};
 
 		struct MaskEntry
 		{
-			RealType mask;
+			UnderlyingType mask;
 			int idx;
 
-			MaskEntry(const RealType& m, int i)
+			MaskEntry(const UnderlyingType& m, int i)
 				: mask(m)
 				, idx(i)
 			{
@@ -65,11 +68,11 @@ namespace Halley {
 
 			int getHandle(const RealType& value)
 			{
-				const auto i = entries.find(MaskEntry(value, 0));
+				const auto i = entries.find(MaskEntry(value.v, 0));
 				if (i == entries.end()) [[unlikely]] {
 					// Not found, assign a new index
 					const int idx = static_cast<int>(values.size());
-					auto entry = MaskEntry(value, idx);
+					auto entry = MaskEntry(value.v, idx);
 
 					// Insert new entry
 					entries.insert(entry);
@@ -111,7 +114,7 @@ namespace Halley {
 			
 			Handle intersection(const Handle& h, MaskStorage& storage) const
 			{
-				return Handle(getRealValue(storage) & h.getRealValue(storage), storage);
+				return Handle(RealType{ getRealValue(storage).v & h.getRealValue(storage).v }, storage);
 			}
 
 			bool contains(const Handle& handle, MaskStorage& storage) const
@@ -119,7 +122,7 @@ namespace Halley {
 				const auto& mine = getRealValue(storage);
 				const auto& theirs = handle.getRealValue(storage);
 
-				return (mine & theirs) == theirs;
+				return (mine.v & theirs.v) == theirs.v;
 			}
 
 			bool intersects(const Handle& handle, MaskStorage& storage) const
@@ -127,7 +130,7 @@ namespace Halley {
 				const auto& mine = getRealValue(storage);
 				const auto& theirs = handle.getRealValue(storage);
 
-				return (mine & theirs).any();
+				return (mine.v & theirs.v).any();
 			}
 
 			bool unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const
@@ -136,7 +139,7 @@ namespace Halley {
 				const auto& theirsA = a.getRealValue(storage);
 				const auto& theirsB = b.getRealValue(storage);
 
-				return (mine & theirsA) != (mine & theirsB);
+				return (mine.v & theirsA.v) != (mine.v & theirsB.v);
 			}
 
 		private:
@@ -148,19 +151,19 @@ namespace Halley {
 
 		inline void setBit(RealType& mask, int bit) {
 			HalleyAssertDebug(bit < maxComponents);
-			mask[bit] = true;
+			mask.v[bit] = true;
 		}
 
 		inline bool hasBit(HandleType handle, int bit, MaskStorage& storage) {
 			HalleyAssertDebug(bit < maxComponents);
-			return handle.getRealValue(storage)[bit];
+			return handle.getRealValue(storage).v[bit];
 		}
 
 		inline bool hasAnyBit(HandleType handle, gsl::span<const int> bits, MaskStorage& storage) {
 			const auto& val = handle.getRealValue(storage);
 			for (auto bit: bits) {
 				HalleyAssertDebug(bit < maxComponents);
-				if (val[bit]) {
+				if (val.v[bit]) {
 					return true;
 				}
 			}
@@ -296,7 +299,7 @@ namespace Halley {
 			static std::optional<HandleType> getMask(MaskStorage& storage) {
 				RealType mask;
 				makeMask(mask);
-				if (mask.any()) {
+				if (mask.v.any()) {
 					return HandleType(mask, storage);
 				} else {
 					return std::nullopt;
