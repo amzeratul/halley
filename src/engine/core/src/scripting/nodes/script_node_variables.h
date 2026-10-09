@@ -96,6 +96,7 @@ namespace Halley {
 	class ScriptECSVariableData : public ScriptStateData<ScriptECSVariableData> {
 	public:
 		ComponentReflector* reflector = nullptr;
+		bool evenIfDisabled = false;
 		String field;
 
 		ScriptECSVariableData() = default;

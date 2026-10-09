@@ -389,12 +389,8 @@ void ScriptECSVariable::doInitData(ScriptECSVariableData& data, const ScriptGrap
 
 ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptECSVariableData& nodeData) const
 {
-	EntityRef entityRef{};
-	if (node.getPin(0).hasConnection()) {
-		entityRef = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
-	} else {
-		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
-	}
+	const auto entityId = readEntityId(environment, node, 0);
+	EntityRef entityRef = environment.tryGetEntity(entityId);
 
 	initReflector(environment, node, nodeData);
 
@@ -404,20 +400,15 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
 		context.shallow = true;
-		const auto evenIfDisabled = node.getSettings()["evenIfDisabled"].asBool(false);
-		return nodeData.reflector->serializeField(context, entityRef, nodeData.field, evenIfDisabled, true);
+		return nodeData.reflector->serializeField(context, entityRef, nodeData.field, nodeData.evenIfDisabled, true);
 	}
 	return {};
 }
 
 void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptECSVariableData& nodeData) const
 {
-	EntityRef entityRef{};
-	if (node.getPin(0).hasConnection()) {
-		entityRef = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
-	} else {
-		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
-	}
+	const auto entityId = readEntityId(environment, node, 0);
+	EntityRef entityRef = environment.tryGetEntity(entityId);
 
 	initReflector(environment, node, nodeData);
 
@@ -433,8 +424,7 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
-		const auto evenIfDisabled = node.getSettings()["evenIfDisabled"].asBool(false);
-		nodeData.reflector->deserializeField(context, entityRef, nodeData.field, evenIfDisabled, data);
+		nodeData.reflector->deserializeField(context, entityRef, nodeData.field, nodeData.evenIfDisabled, data);
 	}
 }
 
@@ -446,6 +436,7 @@ void ScriptECSVariable::initReflector(ScriptEnvironment& environment, const Scri
 		ScriptComponentFieldType::parse(node.getSettings()["field"], component, field);
 		nodeData.reflector = &environment.getWorld().getReflection().getComponentReflector(component);
 		nodeData.field = field;
+		nodeData.evenIfDisabled = node.getSettings()["evenIfDisabled"].asBool(false);
 	}
 }
 
