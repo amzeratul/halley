@@ -159,6 +159,7 @@ SendEntitiesStats EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRec
 
 void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
 {
+	auto lock = UniqueLock(outboxMutex);
 	outbox[-1].push_back(std::move(msg));
 }
 
@@ -169,6 +170,7 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 		Logger::logError(Debug::getCallStack());
 		return;
 	}
+	auto lock = UniqueLock(outboxMutex);
 	outbox[peerId].push_back(std::move(msg));
 }
 

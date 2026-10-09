@@ -155,6 +155,7 @@ namespace Halley {
 		Vector<QueuedMessage> queuedPackets;
 
 		HashMap<int, Vector<EntityNetworkMessage>> outbox;
+		Mutex outboxMutex;
 
 		bool readyToStartGame = false;
 		bool gameStarted = false;
