@@ -299,10 +299,15 @@ void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::sp
 			mask = {};
 		} else {
 			auto m = FamilyMask::RealType();
-			bool componentsEnabled = enabled && parentEnabled;
-			for (auto i : componentIds) {
-				if (componentsEnabled || std_ex::contains(alwaysEnabledComponents, i)) {
+			if (enabled && parentEnabled) {
+				for (auto i : componentIds) {
 					FamilyMask::setBit(m, i);
+				}
+			} else {
+				for (auto i : componentIds) {
+					if (std_ex::contains(alwaysEnabledComponents, i)) {
+						FamilyMask::setBit(m, i);
+					}
 				}
 			}
 			mask = FamilyMaskType(m, *storage);
