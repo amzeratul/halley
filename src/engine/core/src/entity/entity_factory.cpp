@@ -293,10 +293,18 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 		return EntityRef();
 	}
 
-	const auto combined = UUID::xorUUIDs(uuid, getRootUUID());
-	for (const auto& e: entities) {
- 		if (e.getInstanceUUID() == uuid || (allowPrefabUUID && (e.getPrefabUUID() == uuid || e.getInstanceUUID() == combined))) {
-			return e;
+	if (allowPrefabUUID) {
+		const auto combined = UUID::xorUUIDs(uuid, getRootUUID());
+		for (const auto& e: entities) {
+ 			if (e.getInstanceUUID() == uuid || e.getPrefabUUID() == uuid || e.getInstanceUUID() == combined) {
+				return e;
+			}
+		}
+	} else {
+		for (const auto& e: entities) {
+ 			if (e.getInstanceUUID() == uuid) {
+				return e;
+			}
 		}
 	}
 
@@ -571,7 +579,9 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 	const size_t nComponents = data.getNumComponents();
 	entity.reserveComponents(nComponents);
 
+#ifdef DEV_BUILD
 	context.getEntitySerializationContext().debugCurrentContext = entity.getName() + " [" + entity.getPrefabAssetId() + "]";
+#endif
 	context.getEntitySerializationContext().entityHasEnableRules = !data.getEnableRules().isEmpty();
 
 	if (entity.getNumComponents() == 0) {
