@@ -406,27 +406,31 @@ void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetwor
     myPeerId = session->getSession().getMyPeerId().value_or(0);
 }
 
-uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, bool useInterpolators)
+uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, const bool useInterpolators) const
 {
-    // Use hashing serializer, no dictionary.
+    // Serialize into a per-thread scratch buffer and hash it in one go. 
     // NB: There doesn't seem much difference, and maybe even a performance loss, by using the
     // dictionary here. My guess is that, since both variants are now using the same XXH3 code to
     // compute string hashes, the additional dictionary lookup is kind of counterproductive.
+    thread_local Bytes hashScratch;
+    if (hashScratch.empty()) {
+        hashScratch.resize_no_init(256 * 1024); // a span-backed Serializer throws if this overflows
+    }
+    
     SerializerOptions opt(options.version);
-    opt.toHash = true;
     opt.world = &entity.getWorld();
 
-    Serializer serializer(opt);
+    Serializer serializer(hashScratch.byte_span(), opt);
     const SerializationContext context(entity);
 
     doSerializeEntityHash(context, serializer, entity, false, {}, useInterpolators);
 
-    return serializer.getHashDigest();
+    return Hash::hash(gsl::span<const std::byte>(hashScratch.byte_span().data(), serializer.getSize()));
 }
 
 void EntityNetworkSerialize::doSerializeEntityHash(
     const SerializationContext& context, Serializer& serializer,
-    const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, bool useInterpolators)
+    const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, bool useInterpolators) const
 {
     context.setCurrentEntity(entity);
 

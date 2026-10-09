@@ -100,7 +100,7 @@ namespace Halley {
 
         void setSession(const EntityNetworkSession* entityNetworkSession);
 
-        uint64_t serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, bool useInterpolators);
+        uint64_t serializeEntityHash(const EntityRef& entity, const SerializerOptions& options, bool useInterpolators) const;
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
         InboundResult deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options);
 
@@ -160,7 +160,7 @@ namespace Halley {
 
         void doSerializeEntityHash(
             const SerializationContext& context, Serializer& serializer,
-            const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, bool useInterpolators);
+            const EntityRef& entity, bool remote, const std::optional<EntityRef>& parent, bool useInterpolators) const;
 
         void doSerializeEntityUpdate(
             const SerializationContext& context, Serializer& serializer,
