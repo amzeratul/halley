@@ -909,14 +909,16 @@ namespace Halley {
 
 				// Move old objects
 				auto* oldData = data();
-				if constexpr (std::is_trivially_copyable_v<T>) {
-					if (size > 0) {
-						memcpy(newData, oldData, size * sizeof(T));
-					}
-				} else {
-					for (size_type i = 0; i < size; ++i) {
-						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
-						std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
+				if (newData != oldData) {
+					if constexpr (std::is_trivially_copyable_v<T>) {
+						if (size > 0) {
+							memcpy(newData, oldData, size * sizeof(T));
+						}
+					} else {
+						for (size_type i = 0; i < size; ++i) {
+							std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
+							std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
+						}
 					}
 				}
 
