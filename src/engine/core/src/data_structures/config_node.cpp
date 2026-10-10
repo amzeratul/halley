@@ -567,51 +567,76 @@ bool ConfigNode::operator!=(std::string_view str) const
 
 ConfigNode& ConfigNode::operator=(Bytes value)
 {
-	reset();
-	type = ConfigNodeType::Bytes;
-	bytesData = new Bytes(std::move(value));
+	if (type == ConfigNodeType::Bytes) {
+		*bytesData = std::move(value);
+	} else {
+		reset();
+		type = ConfigNodeType::Bytes;
+		bytesData = new Bytes(std::move(value));
+	}
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(gsl::span<const std::byte> bytes)
 {
-	reset();
-	type = ConfigNodeType::Bytes;
-	auto b = new Bytes(bytes.size_bytes());
-	memcpy(b->data(), bytes.data(), bytes.size_bytes());
-	bytesData = b;
+	if (type == ConfigNodeType::Bytes) {
+		bytesData->resize(bytes.size_bytes());
+		memcpy(bytesData->data(), bytes.data(), bytes.size_bytes());
+	} else {
+		reset();
+		type = ConfigNodeType::Bytes;
+		auto b = new Bytes(bytes.size_bytes());
+		memcpy(b->data(), bytes.data(), bytes.size_bytes());
+		bytesData = b;
+	}
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(MapType entry) 
 {
-	reset();
-	type = ConfigNodeType::Map;
-	mapData = new MapType(std::move(entry));
+	if (type == ConfigNodeType::Map) {
+		*mapData = std::move(entry);
+	} else {
+		reset();
+		type = ConfigNodeType::Map;
+		mapData = new MapType(std::move(entry));
+	}
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(SequenceType entry) 
 {
-	reset();
-	type = ConfigNodeType::Sequence;
-	sequenceData = new SequenceType(std::move(entry));
+	if (type == ConfigNodeType::Sequence) {
+		*sequenceData = std::move(entry);
+	} else {
+		reset();
+		type = ConfigNodeType::Sequence;
+		sequenceData = new SequenceType(std::move(entry));
+	}
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(const char* value)
 {
-	reset();
-	type = ConfigNodeType::String;
-	strData = new String(value);
+	if (type == ConfigNodeType::String) {
+		*strData = value;
+	} else {
+		reset();
+		type = ConfigNodeType::String;
+		strData = new String(value);
+	}
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(String entry) 
 {
-	reset();
-	type = ConfigNodeType::String;
-	strData = new String(std::move(entry));
+	if (type == ConfigNodeType::String) {
+		*strData = std::move(entry);
+	} else {
+		reset();
+		type = ConfigNodeType::String;
+		strData = new String(std::move(entry));
+	}
 	return *this;
 }
 
