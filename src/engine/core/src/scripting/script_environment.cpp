@@ -149,7 +149,7 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 	while (timeLeft > 0 && thread.isRunning()) {
 		// Get node type
 		const auto nodeId = thread.getCurNode().value();
-		const auto& node = s.graph->getNodes().at(nodeId);
+		const auto& node = s.graph->getNodes()[nodeId];
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
 		s.inputPin = thread.getCurInputPin();
@@ -501,9 +501,10 @@ void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t ou
 
 void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pending)
 {
-	Vector<GraphNodeId> toStart;
-	getState().state->processMessages(toStart);
-	for (const auto nodeId: toStart) {
+	graphNodeScratch.clear();
+	getState().state->processMessages(graphNodeScratch);
+	pending.reserve(pending.size() + graphNodeScratch.size());
+	for (const auto nodeId: graphNodeScratch) {
 		pending.push_back(startThread(ScriptStateThread(nodeId, 0)));
 	}
 }

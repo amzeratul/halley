@@ -210,6 +210,8 @@ namespace Halley {
         ScriptTargetRetriever scriptTargetRetriever;
 
         const VariableTable* variableTable = nullptr;
+
+    	Vector<GraphNodeId> graphNodeScratch;
         
         void pushState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, Time deltaTime);
         void pushStateCopy(const ScriptGraph& graph);
