@@ -151,7 +151,7 @@ namespace Halley {
 					memcpy(data(), other.data(), other.size() * sizeof(T));
 				}
 			} else {
-				change_capacity(other.st_capacity());
+				change_capacity(other.st_size());
 				auto* dst = data();
 				const auto iterEnd = other.end();
 				for (auto iter = other.begin(); iter != iterEnd; ++iter) {
@@ -168,7 +168,7 @@ namespace Halley {
 				resize_no_init(other.size());
 				memcpy(data(), other.data(), other.size() * sizeof(T));
 			} else {
-				change_capacity(static_cast<SizeType>(other.capacity()));
+				change_capacity(static_cast<SizeType>(other.size()));
 				auto* dst = data();
 				const auto iterEnd = other.end();
 				for (auto iter = other.begin(); iter != iterEnd; ++iter) {
@@ -181,7 +181,7 @@ namespace Halley {
 		VectorStd(const VectorStd& other, const Allocator& alloc)
 			: Allocator(alloc)
 		{
-			change_capacity(other.st_capacity());
+			change_capacity(other.st_size());
 			auto* dst = data();
 			const auto iterEnd = other.end();
 			for (auto iter = other.begin(); iter != iterEnd; ++iter) {
@@ -207,7 +207,7 @@ namespace Halley {
 		{
 			reserve(list.size());
 			for (const auto& e: list) {
-				push_back(T(e));
+				push_back(e);
 			}
 		}
 		
@@ -403,7 +403,7 @@ namespace Halley {
 		{
 			do_resize(size, [this] (pointer bytes)
 			{
-				std::allocator_traits<Allocator>::construct(as_allocator(), bytes, T());
+				std::allocator_traits<Allocator>::construct(as_allocator(), bytes);
 			});
 		}
 
@@ -460,11 +460,19 @@ namespace Halley {
 		iterator insert(const_iterator pos, size_t count, const T& value)
 		{
 			return do_insert(pos, [&](size_t prevSize) {
-				reserve(size() + count);
-				for (size_t i = 0; i < count; ++i) {
-					std::allocator_traits<Allocator>::construct(as_allocator(), data() + (i + prevSize), value);
+				const auto fill = [&](const T& v) {
+					for (size_t i = 0; i < count; ++i) {
+						std::allocator_traits<Allocator>::construct(as_allocator(), data() + (i + prevSize), v);
+					}
+					set_size(static_cast<size_type>(prevSize + count));
+				};
+				if (prevSize + count > capacity()) {
+					const auto tmp = value;
+					reserve(prevSize + count);
+					fill(tmp);
+				} else {
+					fill(value);
 				}
-				set_size(static_cast<size_type>(prevSize + count));
 			});
 		}
 
@@ -512,7 +520,7 @@ namespace Halley {
 			if constexpr (std::is_trivially_copyable_v<T>) {
 				memmove(&*de_const_iter(first), &*de_const_iter(last), (end() - last) * sizeof(T));
 			} else {
-				std::rotate(de_const_iter(first), de_const_iter(last), end());
+				std::move(de_const_iter(last), end(), de_const_iter(first));
 			}
 			resize_down(static_cast<size_type>(size() - (last - first)));
 			return begin() + idx;
@@ -604,6 +612,7 @@ namespace Halley {
 
 		VectorStd& operator+= (const VectorStd& other)
 		{
+			reserve(size() + other.size());
 			insert(end(), other.begin(), other.end());
 			return *this;
 		}
@@ -1028,16 +1037,14 @@ namespace Halley {
 		FORCEINLINE iterator do_insert(const_iterator pos, F f)
 		{
 			const auto prevSize = size();
-			const auto idx = pos - begin();
+			const auto idx = static_cast<size_t>(pos - begin());
 
 			f(prevSize);
 
-			if (pos != end()) {
+			if (idx != prevSize) {
 				std::rotate(begin() + idx, begin() + prevSize, end());
-				return begin() + idx;
-			} else {
-				return begin() + prevSize;
 			}
+			return begin() + idx;
 		}
 
 		void move_data_from(VectorStd& other)
