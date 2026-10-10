@@ -99,11 +99,23 @@ bool AudioSubObjectClips::canCollapseToClip() const
 
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
-	if (clipData.empty()) {
+	const auto nClips = clipData.size();
+	if (nClips == 0) {
 		return {};
 	}
 
-	auto clip = engine.getRNG().getRandomElement(clipData);
+	size_t clipIdx = 0;
+	if (lastClipPicked && nClips >= 2) {
+		// Skip the last picked. We pretend the vector is one item smaller than it is, then adjust the result index if it's at or beyond the skipped one
+		clipIdx = engine.getRNG().getSizeT(0, nClips - 2);
+		if (clipIdx >= static_cast<size_t>(*lastClipPicked)) {
+			++clipIdx;
+		}
+	} else {
+		clipIdx = engine.getRNG().getRandomIndex(clipData);
+	}
+	lastClipPicked = static_cast<uint32_t>(clipIdx);
+	auto clip = clipData[clipIdx];
 
 	if (!clip) {
 		// If we get an empty clip, try getting ANY non-empty clip (could filter and re-pick random but eh)
@@ -119,7 +131,7 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 		}
 	}
 
-	return std::make_unique<AudioSourceClip>(engine, clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd, randomiseStart);
+	return std::make_unique<AudioSourceClip>(engine, std::move(clip), loop, engine.getRNG().getFloat(gain), loopStart, loopEnd, randomiseStart);
 }
 
 void AudioSubObjectClips::loadDependencies(Resources& resources)

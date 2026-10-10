@@ -113,6 +113,8 @@ int8_t Random::getInt(int8_t min, int8_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint8_t base = getRawInt();
 	if (min == std::numeric_limits<int8_t>::min() && max == std::numeric_limits<int8_t>::max()) {
@@ -126,6 +128,8 @@ uint8_t Random::getInt(uint8_t min, uint8_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint8_t base = getRawInt();
 	const uint8_t range = max - min + 1;
@@ -139,6 +143,8 @@ int16_t Random::getInt(int16_t min, int16_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint16_t base = getRawInt();
 	if (min == std::numeric_limits<int16_t>::min() && max == std::numeric_limits<int16_t>::max()) {
@@ -152,6 +158,8 @@ uint16_t Random::getInt(uint16_t min, uint16_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint16_t base = getRawInt();
 	const uint16_t range = max - min + 1;
@@ -165,6 +173,8 @@ int32_t Random::getInt(int32_t min, int32_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint32_t base = getRawInt();
 	if (min == std::numeric_limits<int32_t>::min() && max == std::numeric_limits<int32_t>::max()) {
@@ -178,6 +188,8 @@ uint32_t Random::getInt(uint32_t min, uint32_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint32_t base = getRawInt();
 	const uint32_t range = max - min + 1;
@@ -191,6 +203,8 @@ int64_t Random::getInt(int64_t min, int64_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const int64_t base = int64_t(getRawInt64());
 	if (min == std::numeric_limits<int64_t>::min() && max == std::numeric_limits<int64_t>::max()) {
@@ -204,6 +218,8 @@ uint64_t Random::getInt(uint64_t min, uint64_t max)
 {
 	if (min > max) {
 		std::swap(min, max);
+	} else if (min == max) {
+		return min;
 	}
 	const uint64_t base = getRawInt64();
 	const uint64_t range = max - min + 1;
@@ -215,7 +231,7 @@ uint64_t Random::getInt(uint64_t min, uint64_t max)
 
 size_t Random::getSizeT(size_t min, size_t max)
 {
-	return size_t(getInt(uint64_t(min), uint64_t(max)));
+	return static_cast<size_t>(getInt(static_cast<uint64_t>(min), static_cast<uint64_t>(max)));
 }
 
 float Random::getFloat(float min, float max)

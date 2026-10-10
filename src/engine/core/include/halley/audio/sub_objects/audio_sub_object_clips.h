@@ -47,10 +47,10 @@ namespace Halley {
 		Vector<std::shared_ptr<const AudioClip>> clipData;
 		bool loop = false;
 		bool randomiseStart = false;
+		bool depsLoaded = false;
 		int loopStart = 0;
 		int loopEnd = 0;
+		mutable OptionalLite<uint32_t> lastClipPicked;
 		Range<float> gain = Range<float>(1, 1);
-
-		bool depsLoaded = false;
 	};
 }
