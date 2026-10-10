@@ -103,7 +103,7 @@ namespace Halley {
 
         gsl::span<const std::byte> getBytes() const { return gsl::as_bytes(gsl::span<const uint64_t>(qwords)); }
 		gsl::span<std::byte> getWriteableBytes() { return gsl::as_writable_bytes(gsl::span<uint64_t>(qwords)); }
-        gsl::span<const uint64_t> getUint64Bytes() const { return qwords; }
+        constexpr const std::array<uint64_t, 2>& getQwords() const { return qwords; }
 
     	void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -133,7 +133,8 @@ struct std::hash<Halley::UUID>
 {
     constexpr std::size_t operator() (const Halley::UUID& uuid) const noexcept
     {
-        return Halley::Hash::hash(gsl::as_bytes(uuid.getUint64Bytes()));
+		const auto& vs = uuid.getQwords();
+		return vs[0] ^ vs[1];
     }
 };
 
