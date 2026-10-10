@@ -165,13 +165,8 @@ namespace Halley {
 		VectorStd(const VectorStd<U, US, UES, UPad, UA, UAlign>& other)
 		{
 			if constexpr (std::is_same_v<T, U> && std::is_trivially_copyable_v<T>) {
-				if (other.sbo_active() && (sbo_active() || empty())) {
-					memcpy(static_cast<void*>(this), &other, sizeof(*this));
-				} else {
-					resize_no_init(other.size());
-					shrink_to_fit();
-					memcpy(data(), other.data(), other.size() * sizeof(T));
-				}
+				resize_no_init(other.size());
+				memcpy(data(), other.data(), other.size() * sizeof(T));
 			} else {
 				change_capacity(static_cast<SizeType>(other.capacity()));
 				auto* dst = data();
@@ -228,7 +223,7 @@ namespace Halley {
 			}
 
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				if (other.sbo_active() && (sbo_active() || empty())) {
+				if (other.sbo_active() && (sbo_active() || capacity() == 0)) {
 					memcpy(static_cast<void*>(this), &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
@@ -250,13 +245,9 @@ namespace Halley {
 				}
 			}
 
-			if constexpr (std::is_trivially_copyable_v<T>) {
-				if (other.sbo_active() && (sbo_active() || empty())) {
-					memcpy(static_cast<void*>(this), &other, sizeof(*this));
-				} else {
-					resize_no_init(other.size());
-					memcpy(data(), other.data(), other.size() * sizeof(T));
-				}
+			if constexpr (std::is_same_v<T, U> && std::is_trivially_copyable_v<T>) {
+				resize_no_init(other.size());
+				memcpy(data(), other.data(), other.size() * sizeof(T));
 			} else {
 				assign(other.begin(), other.end());
 			}
@@ -301,7 +292,7 @@ namespace Halley {
 				auto* dst = data();
 
 				for (auto iter = begin; iter != end; ++iter) {
-					std::allocator_traits<Allocator>::construct(as_allocator(), dst, *iter);
+					std::allocator_traits<Allocator>::construct(as_allocator(), dst, static_cast<T>(*iter));
 					++dst;
 				}
 				set_size(static_cast<size_type>(sz));
@@ -636,9 +627,16 @@ namespace Halley {
 
 		void swap(VectorStd& other) noexcept
 		{
-			std::swap(m_data, other.m_data);
-			std::swap(m_size, other.m_size);
-			std::swap(m_capacity, other.m_capacity);
+			if (sbo_active() || other.sbo_active()) {
+				auto tmp = VectorStd(std::move(other));
+				other = std::move(*this);
+				*this = std::move(tmp);
+			} else {
+				std::swap(as_allocator(), other.as_allocator());
+				std::swap(m_data, other.m_data);
+				std::swap(m_size, other.m_size);
+				std::swap(m_capacity, other.m_capacity);
+			}
 		}
 
 		[[nodiscard]] iterator begin()
