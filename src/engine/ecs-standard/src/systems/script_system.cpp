@@ -6,6 +6,9 @@ using namespace Halley;
 
 class ScriptSystem final : public ScriptSystemBase<ScriptSystem>, IScriptSystemInterface, IEntityFactoryContext {
 public:
+	uint32_t nScriptsRan;
+	uint32_t nScriptsConsidered;
+
 	void init()
 	{
 		getWorld().setInterface<IScriptSystemInterface>(this);
@@ -15,11 +18,16 @@ public:
 
 	void update(Time t)
 	{
+		nScriptsRan = 0;
+		nScriptsConsidered = 0;
+
 		initializeEnvironment();
 		initializeScripts();
 
-		while (hasScriptPendingUpdate()) {
-			updateScripts(t);
+		while (true) {
+			if (!updateScripts(t)) {
+				break;
+			}
 			updatePendingMessages(t);
 			fulfillScriptExecutionRequests();
 			sendMessages();
@@ -28,6 +36,9 @@ public:
 		if (getDevService().isDevMode()) {
 			updateDevCon();
 		}
+
+		//ScreenLogger::logScreen("Scripts ran", toString(nScriptsRan));
+		//ScreenLogger::logScreen("Scripts considered", toString(nScriptsConsidered));
 	}
 
 	void onEntitiesRemoved(Span<ScriptableFamily> es)
@@ -350,14 +361,22 @@ private:
 	};
 	Vector<Entry> scriptablesTemp;
 
-	void updateScripts(Time t)
+	bool updateScripts(Time t)
 	{
 		// Make a copy since script updates can result in World entity refresh, which invalidates iterators
 		scriptablesTemp.clear();
 		scriptablesTemp.reserve(scriptableFamily.size());
 		for (auto& e : scriptableFamily) {
-			//auto pos = e.transform2D.hasValue() ? std::optional(e.transform2D->getWorldPosition()) : std::nullopt;
-			scriptablesTemp += Entry{ e.entityId, &e.scriptable };
+			// Only include if at least one state is active
+			for (auto& statePtr: e.scriptable.activeStates) {
+				if (!statePtr->getFrameFlag()) {
+					scriptablesTemp += Entry{ e.entityId, &e.scriptable };
+					break;
+				}
+			}
+		}
+		if (scriptablesTemp.empty()) {
+			return false;
 		}
 
 		auto& env = getScriptingService().getEnvironment();
@@ -395,10 +414,12 @@ private:
 			for (auto& statePtr: scriptable.activeStates) {
 				auto& state = *statePtr;
 				if (!state.getFrameFlag()) {
+					++nScriptsConsidered;
 					const bool canRun = 
 						(!state.getScriptGraphPtr()->needsTransform() || entity.hasComponent<Transform2DComponent>())
 						&& (!state.getScriptGraphPtr()->needsVisiblePartition() || !entity.hasComponent<InvisiblePartitionTagComponent>());
 					if (canRun) {
+						++nScriptsRan;
 						env.updateState(t, state, entityId, scriptable.variables);
 					} else if (state.hasStarted()) {
 						env.stopState(state, entityId, scriptable.variables, true);
@@ -414,6 +435,7 @@ private:
 
 			eraseDeadScripts(entityId, scriptable);
 		}
+		return true;
 	}
 
 	void eraseDeadScripts(ScriptableFamily& e)
