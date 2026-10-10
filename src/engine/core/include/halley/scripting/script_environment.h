@@ -198,7 +198,8 @@ namespace Halley {
 	        GraphPinId inputPin = 0;
 	        Time deltaTime = 0;
         };
-        Vector<CurState> stateStack;
+        Vector<CurState, std::allocator<CurState>, 48> stateStack;
+        static_assert(decltype(stateStack)::sbo_max_objects() >= 1);
 
         EntitySerializationContext serializationContext;
 
@@ -213,8 +214,18 @@ namespace Halley {
         void pushState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, Time deltaTime);
         void pushStateCopy(const ScriptGraph& graph);
         void popState();
-        CurState& getState();
-        const CurState& getState() const;
+        
+		CurState& getState()
+		{
+			HalleyAssertDebug(!stateStack.empty());
+			return stateStack.back();
+		}
+
+		const CurState& getState() const
+		{
+			HalleyAssertDebug(!stateStack.empty());
+			return stateStack.back();
+		}
 
     private:
 

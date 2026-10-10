@@ -59,9 +59,8 @@ namespace Halley {
 		void setPosition(Vector2f p) { position = p; }
 
 		const String& getType() const { return type; }
-		
-		Vector<Pin>& getPins() { return pins; }
-		const Vector<Pin>& getPins() const { return pins; }
+
+		gsl::span<const Pin> getPins() const { return pins.const_span(); }
 		Pin& getPin(size_t idx)
 		{
 			if (idx >= pins.size()) {
@@ -77,6 +76,7 @@ namespace Halley {
 			}
 			return pins[idx];
 		}
+		void resizePins(size_t n);
 
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
@@ -101,7 +101,8 @@ namespace Halley {
 
 	protected:
 		ConfigNode settings;
-		Vector<Pin> pins;
+		Vector<Pin, std::allocator<Pin>, 64> pins;
+		static_assert(decltype(pins)::sbo_max_objects() >= 4);
 		String type;
 		Vector2f position;
 		GraphNodeId id = 0;

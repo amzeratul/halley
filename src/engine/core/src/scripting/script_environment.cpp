@@ -68,20 +68,8 @@ void ScriptEnvironment::pushStateCopy(const ScriptGraph& graph)
 
 void ScriptEnvironment::popState()
 {
-	HalleyAssertDev(!stateStack.empty());
+	HalleyAssertDebug(!stateStack.empty());
 	stateStack.pop_back();
-}
-
-ScriptEnvironment::CurState& ScriptEnvironment::getState()
-{
-	HalleyAssertDev(!stateStack.empty());
-	return stateStack.back();
-}
-
-const ScriptEnvironment::CurState& ScriptEnvironment::getState() const
-{
-	HalleyAssertDev(!stateStack.empty());
-	return stateStack.back();
 }
 
 void ScriptEnvironment::updateState(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
@@ -937,7 +925,7 @@ ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, Grap
 	if (pin.connections.empty() || !pin.connections[0].dstNode) [[unlikely]] {
 		return {};
 	}
-	HalleyAssertDev(pin.connections.size() == 1);
+	HalleyAssertDebug(pin.connections.size() == 1);
 
 	const auto& dst = pin.connections[0];
 	const auto& dstNode = getState().graph->getNodes()[dst.dstNode.value()];
@@ -951,14 +939,15 @@ ConfigNode ScriptEnvironment::readOutputDataPin(const ScriptGraphNode& node, Gra
 
 EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN, bool disconnectedIsSelf)
 {
-	if (pinN < node.getPins().size()) {
+	if (pinN < node.getPins().size()) [[likely]] {
 		const auto& pin = node.getPins()[pinN];
-		if (!pin.connections.empty()) {
+		if (!pin.connections.empty()) [[likely]] {
 			const auto& conn = pin.connections[0];
-			if (conn.dstNode) {
+			if (conn.dstNode) [[likely]] {
 				const auto& nodes = getCurrentGraph()->getNodes();
-				const auto& dstNode = nodes.at(conn.dstNode.value());
-				return dstNode.getNodeType().getEntityId(*this, dstNode, conn.dstPin, getNodeData(conn.dstNode.value()));
+				const auto& dstNode = nodes[conn.dstNode.value()];
+				const auto& nodeType = dstNode.getNodeType();
+				return nodeType.getEntityId(*this, dstNode, conn.dstPin, nodeType.hasData() ? getNodeData(conn.dstNode.value()) : nullptr);
 			}
 		}
 	}

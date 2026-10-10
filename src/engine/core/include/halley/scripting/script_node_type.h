@@ -43,6 +43,7 @@ namespace Halley {
 		virtual bool hasDestructor(const ScriptGraphNode& node, const ScriptGraph& graph) const { return hasDestructor(node); }
 		virtual bool showDestructor() const { return true; }
 
+		virtual bool hasData() const { return false; }
 		virtual std::unique_ptr<IScriptStateData> makeData() const { return {}; }
         virtual void initData(IScriptStateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const {}
 
@@ -98,6 +99,7 @@ namespace Halley {
 		virtual EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, DataType& curData) const { return EntityId(); }
 		virtual ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, DataType& curData) const { return {}; }
 
+		bool hasData() const override { return true; }
 		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<DataType>(); }
 		void initData(IScriptStateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override { doInitData(static_cast<DataType&>(data), node, context, nodeData); }
 

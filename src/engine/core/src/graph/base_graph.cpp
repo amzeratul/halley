@@ -43,7 +43,7 @@ BaseGraphNode::BaseGraphNode(const ConfigNode& node)
 	} else {
 		settings = ConfigNode::MapType();
 	}
-	pins = node["pins"].asVector<Pin>();
+	pins = node["pins"].asVector<Pin, std::allocator<Pin>, 64>();
 }
 
 ConfigNode BaseGraphNode::toConfigNode() const
@@ -54,7 +54,7 @@ ConfigNode BaseGraphNode::toConfigNode() const
 	if (settings.getType() == ConfigNodeType::Map && !settings.asMap().empty()) {
 		result["settings"] = ConfigNode(settings);
 	}
-	result["pins"] = pins;
+	result["pins"] = pins.const_span();
 	return result;
 }
 
@@ -158,7 +158,7 @@ void BaseGraph::validateNodePins(GraphNodeId nodeIdx) {
 		for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
 			disconnectPin(nodeIdx, static_cast<GraphPinId>(i));
 		}
-		node.getPins().resize(nPinsTarget);
+		node.resizePins(nPinsTarget);
 	}
 }
 
@@ -209,6 +209,11 @@ void BaseGraph::updateHash()
 	assetHash = hash = hasher.digest();
 }
 
+
+void BaseGraphNode::resizePins(size_t n)
+{
+	pins.resize(n);
+}
 
 void BaseGraphNode::onNodeRemoved(GraphNodeId nodeId)
 {
