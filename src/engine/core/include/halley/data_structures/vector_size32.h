@@ -251,7 +251,7 @@ namespace Halley {
 			} else {
 				assign(other.begin(), other.end());
 			}
-			
+
 			return *this;
 		}
 
@@ -529,8 +529,14 @@ namespace Halley {
 		{
 			const auto idx = size();
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				ensure_capacity(st_size() + 1);
-				data()[idx] = T(std::forward<Args>(args)...);
+				const auto minCapacity = st_size() + 1;
+				if (capacity() < minCapacity) {
+					auto value = T(std::forward<Args>(args)...);
+					do_change_capacity_to_at_least(minCapacity);
+					data()[idx] = value;
+				} else {
+					data()[idx] = T(std::forward<Args>(args)...);
+				}
 			} else {
 				construct_with_ensure_capacity(st_size() + 1, [&] (pointer data)
 				{
@@ -545,8 +551,14 @@ namespace Halley {
 		{
 			const auto idx = size();
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				ensure_capacity(st_size() + 1);
-				data()[idx] = value;
+				const auto minCapacity = st_size() + 1;
+				if (capacity() < minCapacity) {
+					const auto tmp = value;
+					do_change_capacity_to_at_least(minCapacity);
+					data()[idx] = tmp;
+				} else {
+					data()[idx] = value;
+				}
 			} else {
 				construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
 				{
@@ -560,8 +572,14 @@ namespace Halley {
 		{
 			const auto idx = size();
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				ensure_capacity(st_size() + 1);
-				data()[idx] = std::move(value);
+				const auto minCapacity = st_size() + 1;
+				if (capacity() < minCapacity) {
+					const auto tmp = value;
+					do_change_capacity_to_at_least(minCapacity);
+					data()[idx] = tmp;
+				} else {
+					data()[idx] = value;
+				}
 			} else {
 				construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
 				{
@@ -991,11 +1009,9 @@ namespace Halley {
 			}
 		}
 
-		void ensure_capacity(size_type minCapacity)
+		void do_change_capacity_to_at_least(size_type minCapacity)
 		{
-			if (capacity() < minCapacity) {
-				change_capacity(std::max(minCapacity, static_cast<size_type>(capacity() * growth_factor)));
-			}
+			change_capacity(std::max(minCapacity, static_cast<size_type>(capacity() * growth_factor)));
 		}
 
 		template <typename F>
