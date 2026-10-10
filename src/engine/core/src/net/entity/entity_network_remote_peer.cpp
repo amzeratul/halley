@@ -6,7 +6,6 @@
 #include "halley/net/interpolators/data_interpolator.h"
 #include "components/network_component.h"
 #include "halley/entity/components/transform_2d_component.h"
-#include "halley/maths/random.h"
 
 #define USE_FAST_NETWORK_COMPONENT_UPDATES 1
 #define WAIT_UNTIL_DORMANT_AFTER_FRAME_MODIFIED 2.0
@@ -95,8 +94,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 				// Has an outbound entity assigned. Keep it alive and updating.
 				HalleyAssertDev(iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
-				iter->second.requiresEntityFrameModified = entry.requiresEntityFrameModified;
-				toUpdate.emplace_back(entity, &iter->second);
+				toUpdate.emplace_back(&entry, &iter->second);
 				++stats.nCheckedAcquiredAuthority;
 			} else {
 				Logger::logWarning("No temporary outbound entity found for " + entity.getName() + ", " +
@@ -115,8 +113,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				if (entry.authorityId != peerId) {
-					iter->second.requiresEntityFrameModified = entry.requiresEntityFrameModified;
-					toUpdate.emplace_back(entity, &iter->second);
+					toUpdate.emplace_back(&entry, &iter->second);
 					++stats.nCheckedRelinquishedAuthority;
 				}
 				continue;
@@ -139,8 +136,7 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			} else {
 				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
-				iter->second.requiresEntityFrameModified = entry.requiresEntityFrameModified;
-				toUpdate.emplace_back(entity, &iter->second);
+				toUpdate.emplace_back(&entry, &iter->second);
 			}
 		}
 	}
@@ -167,8 +163,8 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 	}
 
 	// Update existing entities
-	for (auto& [e, oe] : toUpdate) {
-		sendUpdateEntity(t, sessionTimestamp, *oe, e, stats);
+	for (auto& [entry, oe] : toUpdate) {
+		sendUpdateEntity(sessionTimestamp, *oe, *entry, stats);
 	}
 
 	// Create new entities
@@ -311,10 +307,6 @@ uint16_t EntityNetworkRemotePeer::assignId()
 void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 {
 	OutboundEntity result;
-	
-	// Spread entities across the send interval, otherwise everything created in the same frame
-	// (e.g. a whole chunk set when a peer joins) hashes and sends on the same frame forever.
-	result.timeSinceSend = Random::getGlobal().getDouble(0.0, parentSession->getMinSendInterval());
 
 	result.networkId = assignId();
 
@@ -352,22 +344,20 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	outboundEntities[entity.getEntityId()] = std::move(result);
 }
 
-void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, const EntityRef& entity, SendEntitiesStats& stats)
+void EntityNetworkRemotePeer::sendUpdateEntity(int32_t sessionTimestamp, OutboundEntity& remote, const EntityNetworkUpdateInfo& entry, SendEntitiesStats& stats)
 {
 	const Time minSendInterval = parentSession->getMinSendInterval();
+	const EntityRef& entity = entry.entity;
 
-	remote.timeSinceSend += t;
-	if (remote.timeSinceSend < minSendInterval) {
+	if (!entry.dueThisFrame) {
 		// These updates are just to keep the stats counters from oscillating too much.
-		if (remote.requiresEntityFrameModified) {
+		if (entry.requiresEntityFrameModified) {
 			++stats.nUpdateIdle;
 		} else {
 			++stats.nUpdateSameHash;
 		}
 		return;
 	}
-
-	remote.timeSinceSend -= minSendInterval;
 
 #if defined(DEV_BUILD) && defined(_WIN32)
 	static constexpr bool checkExpectNoUpdate = true;
@@ -381,7 +371,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 	// updates (to avoid costly operations to serialize and compare entity/component changes).
 	bool expectNoUpdate = false;
 
-	if (remote.requiresEntityFrameModified) {
+	if (entry.requiresEntityFrameModified) {
 		uint32_t frameIdx = entity.getLastFrameModified();
 		if (remote.frameModifiedIdx != frameIdx) {
 			// Counter has been changed.
@@ -421,7 +411,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 	// Serialize entity, using fast path, to compute a content hash. Early-out if the hash did not change.
 	bool foundSameHash = false;
 
-	const uint64_t contentHash = fastSerializer.serializeEntityHash(entity, parentSession->getByteSerializationOptions(), checkExpectSameHash);
+	const uint64_t contentHash = (entry.precomputedHash != 0 && !checkExpectSameHash) ? 
+		entry.precomputedHash : 
+		fastSerializer.serializeEntityHash(entity, parentSession->getByteSerializationOptions(), checkExpectSameHash);
 	if (contentHash == remote.lastSerializerHash) {
 		if (!expectNoUpdate) {
 			++stats.nUpdateSameHash;

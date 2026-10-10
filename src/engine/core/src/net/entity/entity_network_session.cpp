@@ -119,7 +119,7 @@ void EntityNetworkSession::sendUpdates()
 	sendMessages();
 }
 
-SendEntitiesStats EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds)
+SendEntitiesStats EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<EntityNetworkUpdateInfo> entityIds)
 {
 	// Update viewport
 	auto& data = session->getMySharedData<EntityClientSharedData>();
@@ -130,6 +130,8 @@ SendEntitiesStats EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRec
 			data.markModified();
 		}
 	}
+	
+	precomputeEntityHashes(t, entityIds);
 
 	SendEntitiesStats stats;
 	if (!peers.empty()) {
@@ -656,6 +658,42 @@ void EntityNetworkSession::sendUpdatedLobbyInfos(std::optional<NetworkSession::P
 	if (!toPeerId || toPeerId == 0) {
 		listener->onReceiveLobbyInfo(lobbyInfo);
 	}
+}
+
+void EntityNetworkSession::precomputeEntityHashes(const Time t, const gsl::span<EntityNetworkUpdateInfo> entityIds)
+{
+	if (entityIds.empty()) {
+		return;
+	}
+	
+	const double delta = t * (4294967296.0 / getMinSendInterval());
+	const bool allDue = delta >= 4294967296.0;
+	const uint32_t delta32 = allDue ? 0 : static_cast<uint32_t>(delta);
+	const uint32_t clock0 = sendClock;
+	sendClock += delta32;
+	
+	const uint8_t myPeerId = getMyPeerId();
+	hashSerializer.setSession(this); // once, on this thread; the hash path is const from here on out
+	
+	Concurrent::foreach(entityIds.begin(), entityIds.end(), [&] (EntityNetworkUpdateInfo& e)
+	{
+		const uint32_t start = clock0 + static_cast<uint32_t>(Hash::hash(e.entity.getEntityId()));
+		e.dueThisFrame = allDue || start + delta32 < start;
+		
+		// Pre-hash only what a peer will compare.
+		if (!e.dueThisFrame || e.requiresEntityFrameModified) {
+			return;
+		}
+		
+		uint64_t users = e.peerViewMask;
+		if (e.authorityId != myPeerId) {
+			users &= ~(1ull << e.authorityId);
+		}
+		
+		if (users != 0) {
+			e.precomputedHash = hashSerializer.serializeEntityHash(e.entity, byteSerializationOptions, false);
+		}
+	});
 }
 
 World& EntityNetworkSession::getWorld() const

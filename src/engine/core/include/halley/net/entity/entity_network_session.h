@@ -62,7 +62,7 @@ namespace Halley {
 
 		void update(Time t);
 		void sendUpdates();
-		SendEntitiesStats sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds);
+		SendEntitiesStats sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<EntityNetworkUpdateInfo> entityIds);
 		void receiveUpdates();
 
 		World& getWorld() const;
@@ -148,6 +148,9 @@ namespace Halley {
 
 		std::shared_ptr<NetworkSession> session;
 		Vector<EntityNetworkRemotePeer> peers;
+		
+		uint32_t sendClock = 0;
+		EntityNetworkSerialize hashSerializer;
 
 		uint64_t peerViewMask;
 		Vector<const EntityClientSharedData*> peerViewClientDataCache;
@@ -189,5 +192,7 @@ namespace Halley {
 
 		ConfigNode getLobbyInfo();
 		void sendUpdatedLobbyInfos(std::optional<NetworkSession::PeerId> toPeerId);
+		
+		void precomputeEntityHashes(Time t, gsl::span<EntityNetworkUpdateInfo> entityIds);
 	};
 }

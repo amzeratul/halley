@@ -75,6 +75,9 @@ namespace Halley {
 		uint8_t ownerId;
     	uint8_t authorityId;
     	bool requiresEntityFrameModified;
+
+    	bool dueThisFrame = false;
+    	uint64_t precomputedHash = 0; // 0 = not precomputed, the peer hashes it itself
 	};
 
 	struct EntityNetworkInstanceInfo {
@@ -127,10 +130,7 @@ namespace Halley {
         	bool hasAuthorityOnly = false;
         	bool forChildEntityTemporaryOnly = false;
         	bool forceNextFastUpdate = false;
-        	bool requiresEntityFrameModified = false;
         	bool hasValidEntityData = false;
-
-        	Time timeSinceSend = 0;
 
         	uint64_t lastSerializerHash = 0;
 
@@ -167,7 +167,7 @@ namespace Halley {
         bool joinedWorld = false;
 
     	Vector<EntityRef> toCreate;
-    	Vector<std::pair<EntityRef, OutboundEntity*>> toUpdate;
+    	Vector<std::pair<const EntityNetworkUpdateInfo*, OutboundEntity*>> toUpdate;
 
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;
@@ -185,7 +185,7 @@ namespace Halley {
 
         uint16_t assignId();
         void sendCreateEntity(const EntityRef& entity);
-        void sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, const EntityRef& entity, SendEntitiesStats& stats);
+        void sendUpdateEntity(int32_t sessionTimestamp, OutboundEntity& remote, const EntityNetworkUpdateInfo& entry, SendEntitiesStats& stats);
         void sendDestroyEntity(OutboundEntity& remote, EntityId entityId);
         void sendKeepAlive();
         void send(EntityNetworkMessage message);
