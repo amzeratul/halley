@@ -42,12 +42,12 @@ namespace Halley {
 		
 		constexpr VectorIterator& operator++() { ++v; return *this; }
 		constexpr VectorIterator& operator--() { --v; return *this; }
-		constexpr VectorIterator operator++(int) const { return VectorIterator(v + 1); }
-		constexpr VectorIterator operator--(int) const { return VectorIterator(v - 1); }
+		constexpr VectorIterator operator++(int) { return VectorIterator(v++); }
+		constexpr VectorIterator operator--(int) { return VectorIterator(v--); }
 		constexpr VectorIterator operator+(ptrdiff_t o) const { return VectorIterator(v + o); }
 		constexpr VectorIterator operator-(ptrdiff_t o) const { return VectorIterator(v - o); }
-		constexpr VectorIterator operator+=(ptrdiff_t o) { v += o; return *this; }
-		constexpr VectorIterator operator-=(ptrdiff_t o) { v -= o; return *this; }
+		constexpr VectorIterator& operator+=(ptrdiff_t o) { v += o; return *this; }
+		constexpr VectorIterator& operator-=(ptrdiff_t o) { v -= o; return *this; }
 		
 		template<typename OtherPointer>
 		constexpr ptrdiff_t operator-(const VectorIterator<T, OtherPointer>& other) const { return v - other.v; }
@@ -679,22 +679,22 @@ namespace Halley {
 
 		[[nodiscard]] reverse_iterator rbegin()
 		{
-			return reverse_iterator(end())++;
+			return reverse_iterator(end());
 		}
 
 		[[nodiscard]] reverse_iterator rend()
 		{
-			return reverse_iterator(begin())++;
+			return reverse_iterator(begin());
 		}
 
 		[[nodiscard]] const_reverse_iterator rbegin() const
 		{
-			return const_reverse_iterator(end())++;
+			return const_reverse_iterator(end());
 		}
 
 		[[nodiscard]] const_reverse_iterator rend() const
 		{
-			return const_reverse_iterator(begin())++;
+			return const_reverse_iterator(begin());
 		}
 
 		[[nodiscard]] constexpr static bool sbo_enabled()
@@ -1148,19 +1148,19 @@ namespace Halley {
 	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
 	bool operator>(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
-		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a > b; });
+		return b < a;
 	}
 
 	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
 	bool operator<=(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
-		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a <= b; });
+		return !(b < a);
 	}
 
 	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1, size_t Align0, size_t Align1>
 	bool operator>=(const VectorStd<T, SizeType, SBO0, SBOP0, A0, Align0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1, Align1>& b)
 	{
-		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a >= b; });
+		return !(a < b);
 	}
 
 
