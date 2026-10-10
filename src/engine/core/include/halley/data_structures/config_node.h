@@ -169,6 +169,12 @@ namespace Halley {
 		}
 		
 		template <typename T>
+		explicit ConfigNode(gsl::span<const T> sequence)
+		{
+			*this = sequence;
+		}
+		
+		template <typename T>
 		explicit ConfigNode(const std::optional<T>& opt)
 		{
 			*this = opt;
@@ -242,6 +248,21 @@ namespace Halley {
 
 		template <typename T>
 		ConfigNode& operator=(const Vector<T>& sequence)
+		{
+			SequenceType seq;
+			seq.reserve(sequence.size());
+			for (const auto& e: sequence) {
+				if constexpr (HasToConfigNode<T>::value) {
+					seq.push_back(e.toConfigNode());
+				} else {
+					seq.push_back(ConfigNode(e));
+				}
+			}
+			return *this = std::move(seq);
+		}
+
+		template <typename T>
+		ConfigNode& operator=(gsl::span<const T> sequence)
 		{
 			SequenceType seq;
 			seq.reserve(sequence.size());
@@ -403,13 +424,14 @@ namespace Halley {
 		Range<int> asIntRange(Range<int> defaultValue) const;
 		Bytes asBytes(Bytes defaultValue) const;
 
-		template <typename T>
-		Vector<T> asVector() const
+		template <typename T, typename A = std::allocator<T>, int Pad = 0, bool SBO = true, size_t Align = 0>
+		Vector<T, A, Pad, SBO, Align> asVector() const
 		{
 			if (type == ConfigNodeType::Sequence) {
-				Vector<T> result;
-				result.reserve(asSequence().size());
-				for (const auto& e : asSequence()) {
+				Vector<T, A, Pad, SBO, Align> result;
+				const auto& seq = asSequence();
+				result.reserve(seq.size());
+				for (const auto& e : seq) {
 					if constexpr (HasConfigNodeConstructor<T>::value) {
 						result.emplace_back(T(e));
 					} else if constexpr (std::is_enum_v<T>) {

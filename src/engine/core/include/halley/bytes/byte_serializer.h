@@ -128,8 +128,8 @@ namespace Halley {
 		Serializer& operator<<(const Bytes& bytes);
 		Serializer& operator<<(const BitVector& val);
 
-		template <typename T>
-		Serializer& operator<<(const Vector<T>& val)
+		template <typename T, bool SBO, size_t Pad, typename A, size_t Align>
+		Serializer& operator<<(const VectorStd<T, uint32_t, SBO, Pad, A, Align>& val)
 		{
 			uint32_t sz = static_cast<uint32_t>(val.size());
 			*this << sz;
@@ -507,8 +507,8 @@ namespace Halley {
 		Deserializer& operator>>(Bytes& bytes);
 		Deserializer& operator>>(BitVector& val);
 
-		template <typename T>
-		Deserializer& operator>>(Vector<T>& val)
+		template <typename T, bool SBO, size_t Pad, typename A, size_t Align>
+		Deserializer& operator>>(VectorStd<T, uint32_t, SBO, Pad, A, Align>& val)
 		{
 			uint32_t sz;
 			*this >> sz;
