@@ -62,12 +62,6 @@ namespace Halley
 			return *this;
 		}
 
-		[[maybe_unused]] constexpr OptionalLite& operator=(const OptionalLite& other) noexcept
-		{
-			val = other.val;
-			return *this;
-		}
-
 		[[nodiscard]] constexpr const T& value() const
 		{
 			HalleyAssertDev(has_value());
