@@ -27,6 +27,7 @@
 #include <halley/utils/utils.h>
 #include "halley/text/string_converter.h"
 #include <gsl/gsl>
+#include <compare>
 
 namespace Halley {
 	//////////////////////////////
@@ -81,7 +82,7 @@ namespace Halley {
 		constexpr Vector2D& operator= (T param) { x = param; y = param; return *this; }
 		[[nodiscard]] constexpr bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
 		[[nodiscard]] constexpr bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
-		[[nodiscard]] constexpr bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
+		[[nodiscard]] constexpr auto operator <=> (Vector2D param) const -> decltype(x <=> x) { return x != param.x ? x <=> param.x : y <=> param.y; }
 
 		// Basic algebra
 		[[nodiscard]] constexpr Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
