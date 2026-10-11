@@ -30,6 +30,24 @@ namespace Halley {
             return samples[idx];
         }
 
+        T getMax() const
+        {
+            T max = std::numeric_limits<T>::min();
+	        for (uint32_t i = 0; i < nValues; ++i) {
+                max = std::max(max, samples[i]);
+	        }
+            return max;
+        }
+
+        T getMin() const
+        {
+            T min = std::numeric_limits<T>::max();
+	        for (uint32_t i = 0; i < nValues; ++i) {
+                min = std::min(min, samples[i]);
+	        }
+            return min;
+        }
+
     private:
         std::array<T, nSamples> samples;
         uint32_t idx = 0;

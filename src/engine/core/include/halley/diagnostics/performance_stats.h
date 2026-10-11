@@ -166,14 +166,18 @@ namespace Halley
 		std::optional<Vector2f> curMousePos;
 		std::optional<std::pair<Vector2f, String>> curToolTip;
 
+		Averaging<int64_t, 120> frameLengths;
+		int64_t curFrameLength = 0;
+		int curFrameLengthFreeze = 0;
+
 		bool paused = false;
 
 		void drawHeader(Painter& painter, bool simple);
 		void drawFrameTimeline(Painter& painter, Rect4f rect);
 		void drawAudioTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
-		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange);
-		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);
+		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange, float frameLength);
+		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange, float frameLength);
 		void drawTopEvents(Painter& painter, Rect4f rect, Time t, const HashMap<String, EventHistoryData>& eventHistory);
 		void drawNetworkStats(Painter& painter, Rect4f rect);
 		void drawToolTip(Painter& painter, Rect4f rect);

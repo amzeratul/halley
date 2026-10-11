@@ -634,8 +634,20 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 	}
 
 	const auto duration = std::max<int64_t>(16'999'999LL, alignUp<int64_t>(lastProfileData->getTotalElapsedTime(), 1'000'000LL) - 1);
-	const auto timeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
-	const int64_t numMs = timeRange.getLength() / 1'000'000LL;
+	const auto lastTimeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
+	frameLengths.pushValue(lastTimeRange.getLength());
+	const auto max = frameLengths.getMax();
+	if (max > curFrameLength) {
+		curFrameLength = max;
+		curFrameLengthFreeze = 15;
+	} else {
+		if (curFrameLengthFreeze > 0) {
+			--curFrameLengthFreeze;
+		} else {
+			curFrameLength = advance(curFrameLength, max, 50'000LL);
+		}
+	}
+	const int64_t numMs = curFrameLength / 1'000'000LL;
 
 	boxBg
 		.clone()
@@ -644,7 +656,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		.draw(painter);
 
 	// Vertical dividers
-	const float divPerNs = rect.getWidth() / static_cast<float>(timeRange.getLength());
+	const float divPerNs = rect.getWidth() / static_cast<float>(curFrameLength);
 	auto drawDivider = [&] (int64_t ns, Colour4f col, String label)
 	{
 		const float xPos = static_cast<float>(ns) * divPerNs;
@@ -672,10 +684,10 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 	// Vsync divider
 	drawDivider(16'666'666, Colour4f(1.0f, 0.75f, 0.0f), "vsync");
 
-	drawTimeGraphThreads(painter, rect.shrink(2), timeRange);
+	drawTimeGraphThreads(painter, rect.shrink(2), lastTimeRange, static_cast<float>(curFrameLength));
 }
 
-void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange)
+void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange, float frameLength)
 {
 	const auto& threads = lastProfileData->getThreads();
 
@@ -689,24 +701,23 @@ void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, R
 	float heightSoFar = 0;
 	for (const auto& threadInfo: threads) {
 		const int depth = threadInfo.maxDepth + 1;
-		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar, rect.getWidth(), threadHeight * depth), threadInfo, timeRange);
+		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar, rect.getWidth(), threadHeight * depth), threadInfo, timeRange, frameLength);
 		heightSoFar += static_cast<float>(depth) * threadHeight + threadSpacing;
 	}
 }
 
-void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange)
+void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange, float frameLength)
 {
 	auto box = whitebox.clone();
 	const auto frameStartTime = timeRange.start;
 	const auto frameEndTime = timeRange.end;
-	const auto frameLength = frameEndTime - frameStartTime;
 
 	const auto origin = rect.getTopLeft();
 	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth + 1));
 
 	for (const auto& e: threadInfo.events) {
-		const float relativeStart = static_cast<float>(e.startTime - frameStartTime) / static_cast<float>(frameLength);
-		const float relativeEnd = static_cast<float>(e.endTime - frameStartTime) / static_cast<float>(frameLength);
+		const float relativeStart = static_cast<float>(e.startTime - frameStartTime) / frameLength;
+		const float relativeEnd = static_cast<float>(e.endTime - frameStartTime) / frameLength;
 
 		const float startPos = std::floor(relativeStart * rect.getWidth());
 		const float endPos = std::floor(relativeEnd * rect.getWidth());
