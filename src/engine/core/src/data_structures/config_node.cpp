@@ -186,9 +186,17 @@ ConfigNode::~ConfigNode()
 
 ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 {
+	const auto otherType = other.type;
+	const auto otherAuxData = other.auxData;
+	const auto otherPtr = other.rawPtrData;
+
 	switch (other.type) {
 		case ConfigNodeType::String:
-			*this = other.asString();
+			if (type == ConfigNodeType::String) {
+				*strData = *other.strData;
+			} else {
+				*this = *other.strData;
+			}
 			break;
 		case ConfigNodeType::Sequence:
 		case ConfigNodeType::DeltaSequence:
@@ -221,49 +229,53 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 			*this = other.asVector2f();
 			break;
 		case ConfigNodeType::Bytes:
-			*this = other.asBytes();
+			if (type == ConfigNodeType::Bytes) {
+				*bytesData = *other.bytesData;
+			} else {
+				*this = other.asBytes();
+			}
 			break;
 		case ConfigNodeType::MapRef:
-			reset();
-			mapData = other.mapData;
-			break;
 		case ConfigNodeType::RawString:
-			reset();
-			rawStrData = other.rawStrData;
-			break;
 		case ConfigNodeType::Reference:
 			reset();
-			rawPtrData = other.rawPtrData;
+			rawPtrData = otherPtr;
 			break;
 		case ConfigNodeType::Undefined:
 		case ConfigNodeType::Noop:
 		case ConfigNodeType::Del:
+			reset();
 			break;
 		default:
 			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
-	type = other.type;
-	auxData = other.auxData;
+	type = otherType;
+	auxData = otherAuxData;
 
 	return *this;
 }
 
 ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 {
-	reset();
-
-	type = other.type;
-	rawPtrData = other.rawPtrData;
-
+	const auto otherType = other.type;
+	const auto otherPtr = other.rawPtrData;
+	const auto otherAuxData = other.auxData;
 #if defined(STORE_CONFIG_NODE_PARENTING)
-	parent = std::move(other.parent);
+	auto otherParent = std::move(other.parent);
 #endif
-	auxData = other.auxData;
-	
 	other.type = ConfigNodeType::Undefined;
 	other.rawPtrData = nullptr;
-	
+
+	reset();
+
+	type = otherType;
+	rawPtrData = otherPtr;
+	auxData = otherAuxData;
+#if defined(STORE_CONFIG_NODE_PARENTING)
+	parent = std::move(otherParent);
+#endif
+
 	return *this;
 }
 
@@ -333,37 +345,65 @@ ConfigNode& ConfigNode::operator=(Vector2f value)
 
 ConfigNode& ConfigNode::operator=(Vector3i value)
 {
-	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z) });
+	SequenceType seq;
+	seq.reserve(3);
+	seq += ConfigNode(value.x);
+	seq += ConfigNode(value.y);
+	seq += ConfigNode(value.z);
 	return *this = std::move(seq);
 }
 
 ConfigNode& ConfigNode::operator=(Vector3f value)
 {
-	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z) });
+	SequenceType seq;
+	seq.reserve(3);
+	seq += ConfigNode(value.x);
+	seq += ConfigNode(value.y);
+	seq += ConfigNode(value.z);
 	return *this = std::move(seq);
 }
 
 ConfigNode& ConfigNode::operator=(Vector4i value)
 {
-	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z), ConfigNode(value.w) });
+	SequenceType seq;
+	seq.reserve(4);
+	seq += ConfigNode(value.x);
+	seq += ConfigNode(value.y);
+	seq += ConfigNode(value.z);
+	seq += ConfigNode(value.w);
 	return *this = std::move(seq);
 }
 
 ConfigNode& ConfigNode::operator=(Vector4f value)
 {
-	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z), ConfigNode(value.w) });
+	SequenceType seq;
+	seq.reserve(4);
+	seq += ConfigNode(value.x);
+	seq += ConfigNode(value.y);
+	seq += ConfigNode(value.z);
+	seq += ConfigNode(value.w);
 	return *this = std::move(seq);
 }
 
 ConfigNode& ConfigNode::operator=(Rect4i value)
 {
-	auto seq = SequenceType({ ConfigNode(value.getP1().x), ConfigNode(value.getP1().y), ConfigNode(value.getP2().x), ConfigNode(value.getP2().y) });
+	SequenceType seq;
+	seq.reserve(4);
+	seq += ConfigNode(value.getP1().x);
+	seq += ConfigNode(value.getP1().y);
+	seq += ConfigNode(value.getP2().x);
+	seq += ConfigNode(value.getP2().y);
 	return *this = std::move(seq);
 }
 
 ConfigNode& ConfigNode::operator=(Rect4f value)
 {
-	auto seq = SequenceType({ ConfigNode(value.getP1().x), ConfigNode(value.getP1().y), ConfigNode(value.getP2().x), ConfigNode(value.getP2().y) });
+	SequenceType seq;
+	seq.reserve(4);
+	seq += ConfigNode(value.getP1().x);
+	seq += ConfigNode(value.getP1().y);
+	seq += ConfigNode(value.getP2().x);
+	seq += ConfigNode(value.getP2().y);
 	return *this = std::move(seq);
 }
 
@@ -404,7 +444,7 @@ namespace {
 			if constexpr (op == MathRelOp::Equal || op == MathRelOp::Different) {
 				return MathOps::compareEq<op, T>(a, b);
 			} else {
-				return false;
+				throw Exception("Unsupported comparison for this type", HalleyExceptions::Utils);
 			}
 		}
 	};
@@ -431,10 +471,10 @@ namespace {
 			return cmp.compare(a.asInt(), b.asInt());
 		}
 		if (aType == ConfigNodeType::Sequence && bType == ConfigNodeType::Int2 && a.asSequence().size() >= 2) {
-			return cmp.compareEq(a.asVector2i(), b.asVector2i());
+			return cmp.compare(a.asVector2i(), b.asVector2i());
 		}
 		if (aType == ConfigNodeType::Sequence && bType == ConfigNodeType::Float2 && a.asSequence().size() >= 2) {
-			return cmp.compareEq(a.asVector2f(), b.asVector2f());
+			return cmp.compare(a.asVector2f(), b.asVector2f());
 		}
 		if (aType == ConfigNodeType::Sequence && (bType == ConfigNodeType::Float || bType == ConfigNodeType::Int) && a.asSequence().size() == 2) {
 			return cmp.compare(a.asVector2f().length(), b.asFloat());
@@ -444,6 +484,9 @@ namespace {
 		}
 		if (aType == ConfigNodeType::String && bType == ConfigNodeType::RawString) {
 			return cmp.compare(a.asStringView(), b.asStringView());
+		}
+		if (aType == ConfigNodeType::Map && bType == ConfigNodeType::MapRef) {
+			return cmp.compareEq(a.asMap(), b.asMap());
 		}
 
 		return cmp.compare(0, 1);
@@ -463,6 +506,7 @@ namespace {
 					return cmp.compare(a.asSequence(), b.asSequence());
 				case ConfigNodeType::Map:
 				case ConfigNodeType::DeltaMap:
+				case ConfigNodeType::MapRef:
 					return cmp.compareEq(a.asMap(), b.asMap());
 				case ConfigNodeType::Int:
 					return cmp.compare(a.asInt(), b.asInt());
@@ -476,9 +520,9 @@ namespace {
 					return cmp.compare(a.asFloat(), b.asFloat());
 				case ConfigNodeType::Int2:
 				case ConfigNodeType::Idx:
-					return cmp.compareEq(a.asVector2i(), b.asVector2i());
+					return cmp.compare(a.asVector2i(), b.asVector2i());
 				case ConfigNodeType::Float2:
-					return cmp.compareEq(a.asVector2f(), b.asVector2f());
+					return cmp.compare(a.asVector2f(), b.asVector2f());
 				case ConfigNodeType::Bytes:
 					return cmp.compare(a.asBytes(), b.asBytes());
 				default:
@@ -836,6 +880,7 @@ void ConfigNode::deserialize(Deserializer& s)
 		case ConfigNodeType::Del:
 		case ConfigNodeType::Undefined:
 		{
+			reset();
 			break;
 		}
 		default:
@@ -851,10 +896,7 @@ void ConfigNode::deserialize(Deserializer& s)
 		s >> line >> column;
 
 #if defined(STORE_CONFIG_NODE_PARENTING)
-		if (parent) {
-			parent->line = line;
-			parent->column = column;
-		}
+		setOriginalPosition(line, column);
 #endif
 	}
 }
@@ -887,7 +929,7 @@ int64_t ConfigNode::asInt64() const
 	} else if (type == ConfigNodeType::Int) {
 		return intData;
 	} else if (type == ConfigNodeType::Float) {
-		return int(floatData);
+		return int64_t(floatData);
 	} else if (type == ConfigNodeType::Bool) {
 		return intData;
 	} else if (type == ConfigNodeType::String || type == ConfigNodeType::RawString) {
@@ -895,7 +937,7 @@ int64_t ConfigNode::asInt64() const
 	} else if (type == ConfigNodeType::Reference) {
 		return dereference().asInt64();
 	} else {
-		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
+		throw Exception(getNodeDebugId() + " cannot be converted to int64.", HalleyExceptions::Resources);
 	}
 }
 
@@ -973,8 +1015,14 @@ Vector2i ConfigNode::doAsVector2i(bool expandScalar) const
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
 		return Vector2i(asInt(), expandScalar ? asInt() : 0);
 	} else if (type == ConfigNodeType::Sequence) {
-		const auto& seq = asSequence();
-		return Vector2i(seq.at(0).asInt(), seq.at(1).asInt());
+		const auto& seq = asSequence().const_span();
+		if (seq.size() >= 2) [[likely]] {
+			return Vector2i(seq[0].asInt(), seq[1].asInt());
+		} else if (seq.size() >= 1) {
+			return Vector2i(seq[0].asInt(), 0);
+		} else {
+			return {};
+		}
 	} else if (type == ConfigNodeType::Reference) {
 		return dereference().doAsVector2i(expandScalar);
 	} else {
@@ -1594,18 +1642,7 @@ const ConfigNode& ConfigNode::operator[](size_t idx) const
 
 ConfigNode& ConfigNode::at(std::string_view key)
 {
-	auto& map = asMap();
-	const auto iter = map.find(key);
-	if (iter != map.end()) {
-		return iter->second;
-	} else {
-#if defined(STORE_CONFIG_NODE_PARENTING)
-		undefinedConfigNode.setParent(this, -1);
-		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
-#endif
-		//undefinedConfigNodeName = key;
-		return undefinedConfigNode;
-	}
+	return asMap().at(key);
 }
 
 const ConfigNode& ConfigNode::at(std::string_view key) const
@@ -1662,10 +1699,11 @@ void ConfigNode::reset()
 std::pair<int, int> ConfigNode::getOriginalPosition() const
 {
 #if defined(STORE_CONFIG_NODE_PARENTING)
-	return { parent->line, parent->column };
-#else
-	return { 0, 0 };
+	if (parent) {
+		return { parent->line, parent->column };
+	}
 #endif
+	return { 0, 0 };
 }
 
 void ConfigNode::setOriginalPosition(int l, int c)
@@ -1896,7 +1934,7 @@ String ConfigNode::convertTo(Tag<String> tag) const
 	return asString({});
 }
 
-const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
+const Bytes& ConfigNode::convertTo(Tag<Bytes> tag) const
 {
 	return asBytes();
 }
@@ -2091,9 +2129,7 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 		
 		// Ask the hints for the best element to compare with
 		std::optional<size_t> matchIdx;
-		if (hints) {
-			matchIdx = hints->getSequenceMatch(fromSeq, curVal, curIdx, breadCrumb);
-		}
+		matchIdx = hints->getSequenceMatch(fromSeq, curVal, curIdx, breadCrumb);
 
 		if (matchIdx) {
 			// Found a match, delta code to that
@@ -2121,7 +2157,7 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 
 	// Check if it's just a permutation of the old data
 	if (!hasNewData && refCount == fromSeq.size()) {
-		if (hints && !hints->doesSequenceOrderMatter(breadCrumb)) {
+		if (!hints->doesSequenceOrderMatter(breadCrumb)) {
 			Vector<char> matches(fromSeq.size(), 0);
 			for (const auto& e: resultSeq) {
 				const auto range = e.asVector2i();
@@ -2275,6 +2311,11 @@ bool ConfigNode::isVector2Type(ConfigNodeType type, bool acceptUndefined)
 
 void ConfigNode::feedToHash(Hash::Hasher& hasher, const EntitySerializationContext* context) const
 {
+	if (type == ConfigNodeType::Reference) {
+		dereference().feedToHash(hasher, context);
+		return;
+	}
+
 	hasher.feed(type);
 	switch (type) {
 	case ConfigNodeType::Int:
@@ -2324,10 +2365,7 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher, const EntitySerializationConte
 		hasher.feed(*strData);
 		break;
 	case ConfigNodeType::RawString:
-		hasher.feed(rawStrData);
-		break;
-	case ConfigNodeType::Reference:
-		dereference().feedToHash(hasher, context);
+		hasher.feed(std::string_view(rawStrData));
 		break;
 	case ConfigNodeType::Idx:
 		hasher.feed(vec2iData);

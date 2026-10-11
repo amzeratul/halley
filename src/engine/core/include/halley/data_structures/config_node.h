@@ -459,7 +459,7 @@ namespace Halley {
 		}
 
 		template <typename K, typename V>
-		std::map<K, V> asMap() const
+		std::map<K, V> asStdMap() const
 		{
 			if (type == ConfigNodeType::Map) {
 				std::map<K, V> result;
@@ -742,7 +742,7 @@ namespace Halley {
 		Range<int> convertTo(Tag<Range<int>> tag) const;
 		Range<float> convertTo(Tag<Range<float>> tag) const;
 		String convertTo(Tag<String> tag) const;
-		const Bytes& convertTo(Tag<Bytes&> tag) const;
+		const Bytes& convertTo(Tag<Bytes> tag) const;
 
 		template <typename T>
 		Vector<T> convertTo(Tag<Vector<T>> tag) const
