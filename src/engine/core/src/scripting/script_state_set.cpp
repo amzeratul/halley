@@ -162,9 +162,9 @@ void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 		return *isLocalCache;
 	};
 
-	std_ex::erase_if(states, [&](const auto& state)
+	std_ex::erase_if(states, [&](const State& state)
 	{
-		return state.state->isDead() && isLocal();
+		return state.state->isDead() && (!state.state->getScriptGraphPtr()->isNetwork() || state.dead || isLocal());
 	});
 	HalleyAssertDebug(isValid());
 }
