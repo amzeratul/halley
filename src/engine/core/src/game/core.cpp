@@ -490,9 +490,9 @@ void Core::tickFrame(Time time)
 		});
 		if (frameDataRender) {
 			HalleyAssertDev(curStageFrames > 0);
+			finishVideoRender();
 			BaseFrameData::setThreadFrameData(frameDataRender.get());
 			render();
-			finishVideoRender();
 			finishPainterRender();
 		}
 		updateTask.wait();
