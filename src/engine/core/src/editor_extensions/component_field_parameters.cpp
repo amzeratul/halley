@@ -10,14 +10,14 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 	, labelName(std::move(labelName))
 	, name(fieldName)
 {
-	retriever = [&componentData, fieldName] (RetrievalType type) -> ConfigNode&
+	retriever = [&componentData, fieldName = std::move(fieldName)] (RetrievalType type) -> ConfigNode&
 	{
 		if (type == RetrievalType::ReadParent) {
 			return componentData;
 		} else if (type == RetrievalType::Write) {
 			return componentData[fieldName];
-		} else {
-			return componentData.at(fieldName);
+		} else { // Read
+			return const_cast<ConfigNode&>(componentData.at(fieldName)); // NB: this will be cast back to const
 		}
 	};
 }

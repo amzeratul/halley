@@ -380,7 +380,13 @@ namespace Halley {
 		bool operator==(std::string_view str) const;
 		bool operator!=(std::string_view str) const;
 
-		ConfigNodeType getType() const;
+		ConfigNodeType getType() const
+		{
+			if (type == ConfigNodeType::Reference) [[unlikely]] {
+				return dereference().getType();
+			}
+			return type;
+		}
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -427,7 +433,7 @@ namespace Halley {
 		template <typename T, typename A = std::allocator<T>, int Pad = 0, bool SBO = true, size_t Align = 0>
 		Vector<T, A, Pad, SBO, Align> asVector() const
 		{
-			if (type == ConfigNodeType::Sequence) {
+			if (getType() == ConfigNodeType::Sequence) {
 				Vector<T, A, Pad, SBO, Align> result;
 				const auto& seq = asSequence();
 				result.reserve(seq.size());
@@ -441,7 +447,7 @@ namespace Halley {
 					}
 				}
 				return result;
-			} else if (type == ConfigNodeType::Undefined) {
+			} else if (getType() == ConfigNodeType::Undefined) {
 				return {};
 			} else {
 				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to Vector<T>.", HalleyExceptions::Resources);
@@ -451,7 +457,7 @@ namespace Halley {
 		template <typename T>
 		Vector<T> asVector(const Vector<T>& defaultValue) const
 		{
-			if (type == ConfigNodeType::Sequence) {
+			if (getType() == ConfigNodeType::Sequence) {
 				return asVector<T>();
 			} else {
 				return defaultValue;
@@ -461,7 +467,8 @@ namespace Halley {
 		template <typename K, typename V>
 		std::map<K, V> asStdMap() const
 		{
-			if (type == ConfigNodeType::Map) {
+			const auto t = getType();
+			if (t == ConfigNodeType::Map || t == ConfigNodeType::MapRef) {
 				std::map<K, V> result;
 				for (const auto& [k, v] : asMap()) {
 					const K key = fromString<K>(k);
@@ -475,17 +482,18 @@ namespace Halley {
 					}
 				}
 				return result;
-			} else if (type == ConfigNodeType::Undefined) {
+			} else if (t == ConfigNodeType::Undefined) {
 				return {};
 			} else {
-				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::map<K, V>.", HalleyExceptions::Resources);
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(t) + " to std::map<K, V>.", HalleyExceptions::Resources);
 			}
 		}
 
 		template <typename K, typename V>
 		HashMap<K, V> asHashMap() const
 		{
-			if (type == ConfigNodeType::Map) {
+			const auto t = getType();
+			if (t == ConfigNodeType::Map || t == ConfigNodeType::MapRef) {
 				HashMap<K, V> result;
 				for (const auto& [k, v] : asMap()) {
 					const K key = fromString<K>(k);
@@ -499,17 +507,18 @@ namespace Halley {
 					}
 				}
 				return result;
-			} else if (type == ConfigNodeType::Undefined) {
+			} else if (t == ConfigNodeType::Undefined) {
 				return {};
 			} else {
-				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to HashMap<K, V>.", HalleyExceptions::Resources);
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(t) + " to HashMap<K, V>.", HalleyExceptions::Resources);
 			}
 		}
 
 		template <typename T>
 		HashSet<T> asHashSet() const
 		{
-			if (type == ConfigNodeType::Sequence) {
+			const auto t = getType();
+			if (t == ConfigNodeType::Sequence) {
 				HashSet<T> result;
 				for (const auto& v : asSequence()) {
 					if constexpr (HasConfigNodeConstructor<T>::value) {
@@ -519,25 +528,26 @@ namespace Halley {
 					}
 				}
 				return result;
-			} else if (type == ConfigNodeType::Undefined) {
+			} else if (t == ConfigNodeType::Undefined) {
 				return {};
 			} else {
-				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to HashSet<T>.", HalleyExceptions::Resources);
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(t) + " to HashSet<T>.", HalleyExceptions::Resources);
 			}
 		}
 
 		template <typename P1, typename P2>
 		std::pair<P1, P2> asPair() const
 		{
-			if (type == ConfigNodeType::Map) {
+			const auto t = getType();
+			if (t == ConfigNodeType::Map || t == ConfigNodeType::MapRef) {
 				return std::pair<P1, P2>{ (*this)["first"].convertTo(Tag<P1>()), (*this)["second"].convertTo(Tag<P2>()) };
-			} else if (type == ConfigNodeType::Sequence) {
+			} else if (t == ConfigNodeType::Sequence) {
 				const auto& seq = asSequence();
 				return std::pair<P1, P2>{ seq.size() >= 1 ? seq[0].convertTo(Tag<P1>()) : P1(), seq.size() >= 2 ? seq[1].convertTo(Tag<P2>()) : P2() };
-			} else if (type == ConfigNodeType::Undefined) {
+			} else if (t == ConfigNodeType::Undefined) {
 				return {};
 			} else {
-				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::pair<P1, P2>.", HalleyExceptions::Resources);
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(t) + " to std::pair<P1, P2>.", HalleyExceptions::Resources);
 			}
 		}
 
@@ -616,8 +626,6 @@ namespace Halley {
 
 		const ConfigNode& operator[](std::string_view key) const;
 		const ConfigNode& operator[](size_t idx) const;
-
-		ConfigNode& at(std::string_view key);
 		const ConfigNode& at(std::string_view key) const;
 
 		SequenceType::iterator begin();

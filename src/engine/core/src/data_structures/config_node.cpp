@@ -714,14 +714,6 @@ const ConfigNode& ConfigNode::dereference() const
 	throw Exception("Cannot dereference a non-reference ConfigNode", HalleyExceptions::Utils);
 }
 
-ConfigNodeType ConfigNode::getType() const
-{
-	if (type == ConfigNodeType::Reference) [[unlikely]] {
-		return dereference().getType();
-	}
-	return type;
-}
-
 void ConfigNode::serialize(Serializer& s) const
 {
 	if (type == ConfigNodeType::Reference) [[unlikely]] {
@@ -731,6 +723,8 @@ void ConfigNode::serialize(Serializer& s) const
 
 	if (type == ConfigNodeType::RawString) [[unlikely]] {
 		s << ConfigNodeType::String;
+	} else if (type == ConfigNodeType::MapRef) [[unlikely]] {
+		s << ConfigNodeType::Map;
 	} else {
 		s << type;
 	}
@@ -744,6 +738,7 @@ void ConfigNode::serialize(Serializer& s) const
 			s << asSequence();
 			break;
 		case ConfigNodeType::Map:
+		case ConfigNodeType::MapRef:
 			s << asMap();
 			break;
 		case ConfigNodeType::Bool:
@@ -1222,7 +1217,7 @@ const Bytes& ConfigNode::asBytes() const
 
 Vector2i ConfigNode::asVector2i(Vector2i defaultValue, bool expandScalar) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return doAsVector2i(expandScalar);
@@ -1231,7 +1226,7 @@ Vector2i ConfigNode::asVector2i(Vector2i defaultValue, bool expandScalar) const
 
 Vector2f ConfigNode::asVector2f(Vector2f defaultValue, bool expandScalar) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return doAsVector2f(expandScalar);
@@ -1240,7 +1235,7 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue, bool expandScalar) const
 
 Vector3i ConfigNode::asVector3i(Vector3i defaultValue, bool expandScalar) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return doAsVector3i(expandScalar);
@@ -1249,7 +1244,7 @@ Vector3i ConfigNode::asVector3i(Vector3i defaultValue, bool expandScalar) const
 
 Vector3f ConfigNode::asVector3f(Vector3f defaultValue, bool expandScalar) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return doAsVector3f(expandScalar);
@@ -1258,7 +1253,7 @@ Vector3f ConfigNode::asVector3f(Vector3f defaultValue, bool expandScalar) const
 
 Vector4i ConfigNode::asVector4i(Vector4i defaultValue, bool expandScalar) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return doAsVector4i(expandScalar);
@@ -1267,7 +1262,7 @@ Vector4i ConfigNode::asVector4i(Vector4i defaultValue, bool expandScalar) const
 
 Vector4f ConfigNode::asVector4f(Vector4f defaultValue, bool expandScalar) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return doAsVector4f(expandScalar);
@@ -1276,7 +1271,7 @@ Vector4f ConfigNode::asVector4f(Vector4f defaultValue, bool expandScalar) const
 
 Rect4i ConfigNode::asRect4i(Rect4i defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asRect4i();
@@ -1285,7 +1280,7 @@ Rect4i ConfigNode::asRect4i(Rect4i defaultValue) const
 
 Rect4f ConfigNode::asRect4f(Rect4f defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asRect4f();
@@ -1294,7 +1289,7 @@ Rect4f ConfigNode::asRect4f(Rect4f defaultValue) const
 
 Range<float> ConfigNode::asFloatRange(Range<float> defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asFloatRange();
@@ -1303,7 +1298,7 @@ Range<float> ConfigNode::asFloatRange(Range<float> defaultValue) const
 
 Range<int> ConfigNode::asIntRange(Range<int> defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asIntRange();
@@ -1312,7 +1307,7 @@ Range<int> ConfigNode::asIntRange(Range<int> defaultValue) const
 
 Bytes ConfigNode::asBytes(Bytes defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return std::move(defaultValue);
 	} else {
 		return asBytes();
@@ -1353,7 +1348,7 @@ String ConfigNode::asString() const
 	} else if (type == ConfigNodeType::Int2) {
 		auto v = asVector2i();
 		return "(" + toString(v.x) + ", " + toString(v.y) + ")";
-	} else if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
+	} else if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
 		String result = "{";
 		bool first = true;
 		for (auto& [k, v] : asMap()) {
@@ -1410,7 +1405,7 @@ std::string_view ConfigNode::asStringView(String* buffer) const
 
 int ConfigNode::asInt(int defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asInt();
@@ -1419,7 +1414,7 @@ int ConfigNode::asInt(int defaultValue) const
 
 int64_t ConfigNode::asInt64(int64_t defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asInt64();
@@ -1428,7 +1423,7 @@ int64_t ConfigNode::asInt64(int64_t defaultValue) const
 
 EntityId ConfigNode::asEntityId(EntityId defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asEntityId();
@@ -1437,7 +1432,7 @@ EntityId ConfigNode::asEntityId(EntityId defaultValue) const
 
 float ConfigNode::asFloat(float defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asFloat();
@@ -1446,7 +1441,7 @@ float ConfigNode::asFloat(float defaultValue) const
 
 bool ConfigNode::asBool(bool defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asBool();
@@ -1455,7 +1450,7 @@ bool ConfigNode::asBool(bool defaultValue) const
 
 String ConfigNode::asString(const std::string_view& defaultValue) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asString();
@@ -1464,7 +1459,7 @@ String ConfigNode::asString(const std::string_view& defaultValue) const
 
 std::string_view ConfigNode::asStringView(const std::string_view& defaultValue, String* buffer) const
 {
-	if (type == ConfigNodeType::Undefined) {
+	if (getType() == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
 		return asStringView(buffer);
@@ -1586,7 +1581,8 @@ void ConfigNode::ensureType(ConfigNodeType t)
 
 bool ConfigNode::hasKey(std::string_view key) const
 {
-	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
+	const auto t = getType();
+	if (t == ConfigNodeType::Map || t == ConfigNodeType::DeltaMap || t == ConfigNodeType::MapRef) {
 		auto& map = asMap();
 		auto iter = map.find(key);
 		return iter != map.end() && iter->second.getType() != ConfigNodeType::Undefined;
@@ -1638,11 +1634,6 @@ const ConfigNode& ConfigNode::operator[](std::string_view key) const
 const ConfigNode& ConfigNode::operator[](size_t idx) const
 {
 	return asSequence().at(idx);
-}
-
-ConfigNode& ConfigNode::at(std::string_view key)
-{
-	return asMap().at(key);
 }
 
 const ConfigNode& ConfigNode::at(std::string_view key) const
@@ -1946,6 +1937,7 @@ bool ConfigNode::isNullOrEmpty() const
 		return true;
 	case ConfigNodeType::Map:
 	case ConfigNodeType::DeltaMap:
+	case ConfigNodeType::MapRef:
 		return asMap().empty();
 	case ConfigNodeType::Sequence:
 	case ConfigNodeType::DeltaSequence:
@@ -2145,6 +2137,9 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 				}
 			} else {
 				// Store delta
+				if (delta.getType() == ConfigNodeType::DeltaMap || delta.getType() == ConfigNodeType::DeltaSequence) {
+					delta.auxData = static_cast<int>(matchIdx.value());
+				}
 				resultSeq.emplace_back(std::move(delta));
 				hasNewData = true;
 			}
