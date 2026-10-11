@@ -219,6 +219,8 @@ namespace Halley {
 			return worldPartition;
 		}
 
+		void setWorldPartition(WorldPartitionId partition);
+
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;
 
@@ -921,6 +923,12 @@ namespace Halley {
 		{
 			validate();
 			return entity->worldPartition;
+		}
+
+		void setWorldPartition(WorldPartitionId partition)
+		{
+			validate();
+			entity->setWorldPartition(partition);
 		}
 
 		bool isValid() const

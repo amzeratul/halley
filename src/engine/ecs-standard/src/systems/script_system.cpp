@@ -415,9 +415,10 @@ private:
 				auto& state = *statePtr;
 				if (!state.getFrameFlag()) {
 					++nScriptsConsidered;
+					const auto& scriptGraph = *state.getScriptGraphPtr();
 					const bool canRun = 
-						(!state.getScriptGraphPtr()->needsTransform() || entity.hasComponent<Transform2DComponent>())
-						&& (!state.getScriptGraphPtr()->needsVisiblePartition() || !entity.hasComponent<InvisiblePartitionTagComponent>());
+						(!(scriptGraph.needsTransform() || scriptGraph.needsVisiblePartition()) || entity.hasComponent<Transform2DComponent>())
+						&& (!scriptGraph.needsVisiblePartition() || !entity.hasComponent<InvisiblePartitionTagComponent>());
 					if (canRun) {
 						++nScriptsRan;
 						env.updateState(t, state, entityId, scriptable.variables);

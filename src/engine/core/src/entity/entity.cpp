@@ -277,6 +277,14 @@ void Entity::setEnabled(World& world, bool enabled)
 	}
 }
 
+void Entity::setWorldPartition(WorldPartitionId partition)
+{
+	if (worldPartition != partition) {
+		HalleyAssertDev(!parent);
+		propagateChildWorldPartition(partition);
+	}
+}
+
 FamilyMaskType Entity::getMask() const
 {
 	return mask;
