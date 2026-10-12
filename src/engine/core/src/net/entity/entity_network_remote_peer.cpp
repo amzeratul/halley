@@ -565,6 +565,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
         // Encode delta using interpolators
         auto newData = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
+		newData.setPrefab(entity.getPrefabAssetIdOrEmpty());
+
         auto retriever = DataInterpolatorSetRetriever(entity, true);
         auto options = parentSession->getEntityDeltaOptions();
         options.interpolatorSet = &retriever;
@@ -862,6 +864,7 @@ void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef e
 	InboundEntity remote;
 	// Construct entity data from local entity, since the host doesn't send any delta in this case.
 	remote.data = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
+	remote.data.setPrefab(entity.getPrefabAssetIdOrEmpty());
 	remote.worldId = entity.getEntityId();
 	remote.appliedOnExistingEntity = true;
 	remote.debugName = entity.getName();
