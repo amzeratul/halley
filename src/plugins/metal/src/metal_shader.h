@@ -13,7 +13,7 @@ namespace Halley {
 		~MetalShader();
 		int getUniformLocation(const String& name, ShaderType stage) override;
 		int getBlockLocation(const String& name, ShaderType stage) override;
-		MTLRenderPipelineDescriptor* setupMaterial(const Material& material);
+		MTLRenderPipelineDescriptor* setupMaterial(const Material& material, id<MTLTexture> renderTargetTexture);
 
 	private:
 		MetalVideo& video;
