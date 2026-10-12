@@ -319,7 +319,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	result.networkId = assignId();
 
 	result.data = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
-	result.data.setPrefab(entity.getPrefab()->getAssetId());
+	result.data.setPrefab(entity.getPrefabAssetIdOrEmpty());
 
 	const bool assignNetworkIdOnly = entity.getWorldPartition() != 0 && !entity.getPrefab();
 
