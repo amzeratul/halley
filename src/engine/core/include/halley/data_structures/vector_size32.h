@@ -582,11 +582,11 @@ namespace Halley {
 			if constexpr (std::is_trivially_copyable_v<T>) {
 				const auto minCapacity = st_size() + 1;
 				if (capacity() < minCapacity) {
-					const auto tmp = value;
+					auto tmp = std::move(value);
 					do_change_capacity_to_at_least(minCapacity);
-					data()[idx] = tmp;
+					data()[idx] = std::move(tmp);
 				} else {
-					data()[idx] = value;
+					data()[idx] = std::move(value);
 				}
 			} else {
 				construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
