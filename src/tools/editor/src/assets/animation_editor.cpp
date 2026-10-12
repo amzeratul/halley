@@ -22,6 +22,7 @@ void AnimationEditor::onResourceLoaded()
 
 void AnimationEditor::refreshAssets()
 {
+	colourCountCache.clear();
 	AssetEditor::refreshAssets();
 	if (resource) {
 		loadAssetData();
@@ -82,17 +83,39 @@ void AnimationEditor::update(Time t, bool moved)
 #ifdef ENABLE_HOT_RELOAD
 	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
 	if (spriteSheet) {
-		if (const SpriteSheetEntry* result = spriteSheet->getSpriteAtTexel(mousePos)) {
-			animationDisplay->setSpriteUnderCursor(result);
-			str += "\nSprite: " + result->name;
+		const auto* curSprite = spriteSheet->getSpriteAtTexel(mousePos);
+		if (curSprite) {
+			animationDisplay->setSpriteUnderCursor(curSprite);
+			str += "\nSprite: " + curSprite->name;
 		} else {
 			animationDisplay->setSpriteUnderCursor(nullptr);
-			str += "\nSprite: N/A";
+			str += "\nSprite: <none>";
 		}
+
+		const auto size = spriteSheet->getTexture()->getSize();
+		const auto rect = curSprite ? Rect4i(curSprite->coords * Vector2f(size)) : Rect4i(Vector2i(), size);
+		str += "\nColours: " + toString(getColours(rect));
 	}
 #endif
 
 	info->setText(LocalisedString::fromUserString(str));
+}
+
+size_t AnimationEditor::getColours(Rect4i rect)
+{
+	if (const auto iter = colourCountCache.find(rect); iter != colourCountCache.end()) {
+		return iter->second;
+	}
+
+	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
+	if (spriteSheet) {
+		if (auto* origImage = spriteSheet->getTexture()->tryGetOriginalImage()) {
+			auto result = origImage->countColours(rect);
+			colourCountCache[rect] = result;
+			return result;
+		}
+	}
+	return 0;
 }
 
 std::shared_ptr<const Resource> AnimationEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)

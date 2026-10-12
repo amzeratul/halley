@@ -394,6 +394,29 @@ void Image::drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity)
 	}, src, *this, pos, opacity);
 }
 
+size_t Image::countColours(std::optional<Rect4i> rect) const
+{
+	const auto r = rect.value_or(getRect());
+	const auto x0 = r.getLeft();
+	const auto x1 = r.getRight();
+	const auto y0 = r.getTop();
+	const auto y1 = r.getBottom();
+
+	HashSet<int> cols;
+	cols.reserve(1024);
+
+	const auto px = getPixels4BPP();
+	for (int y = y0; y < y1; ++y) {
+		const auto offset = y * getWidth();
+		for (int x = x0; x < x1; ++x) {
+			const auto col = px[x + offset];
+			cols.insert(col);
+		}
+	}
+
+	return cols.size();
+}
+
 std::unique_ptr<Image> Image::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<Image>(*loader.getStatic(), loader.getMeta());

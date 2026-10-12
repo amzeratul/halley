@@ -551,3 +551,33 @@ namespace Halley {
 
 	static_assert(std::is_trivially_copyable_v<Rect4f>);
 }
+
+
+namespace std {
+	template<>
+	struct hash<Halley::Rect4f>
+	{
+		constexpr size_t operator()(const Halley::Rect4f& v) const noexcept
+		{
+			return Halley::Hash::hash(v);
+		}
+	};
+
+	template<>
+	struct hash<Halley::Rect4d>
+	{
+		constexpr size_t operator()(const Halley::Rect4d& v) const noexcept
+		{
+			return Halley::Hash::hash(v);
+		}
+	};
+
+	template<>
+	struct hash<Halley::Rect4i>
+	{
+		constexpr size_t operator()(const Halley::Rect4i& v) const noexcept
+		{
+			return Halley::Hash::hash(v);
+		}
+	};
+}

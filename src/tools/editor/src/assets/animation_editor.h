@@ -39,9 +39,13 @@ namespace Halley {
 		void updatePlayIcon();
 		void updateActionPointList();
 
+		size_t getColours(Rect4i rect);
+
         std::shared_ptr<AnimationEditorDisplay> animationDisplay;
         std::shared_ptr<UILabel> info;
         std::shared_ptr<ScrollBackground> scrollBg;
+
+		HashMap<Rect4i, size_t> colourCountCache;
 	};
 
 	class AnimationEditorDisplay : public UIWidget {
