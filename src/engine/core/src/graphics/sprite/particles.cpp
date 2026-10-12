@@ -361,7 +361,7 @@ void Particles::setSpawnPositionOffset(Vector2f offset)
 void Particles::update(Time t)
 {
 	curTime += static_cast<float>(t);
-	if (burst && !hasDoneInitialBurst && curTime >= burstDelay) {
+	if (burst && burstOnSpawn && !hasDoneInitialBurst && curTime >= burstDelay) {
 		spawn(burst.value(), 0, position);
 		hasDoneInitialBurst = true;
 		pendingSpawn = clamp(pendingSpawn, 0.0f, 1.0f);
