@@ -57,3 +57,17 @@ void ByteDataInterpolatorSet::update(Time t, World& world) const
         }
     }
 }
+
+void ByteDataInterpolatorSet::copyState(const ByteDataInterpolatorSet& from)
+{
+    for (const auto& entry : interpolators) {
+        if (entry.second->canUpdate()) {
+            const auto& entityId = std::get<0>(entry.first);
+            const auto& componentId = std::get<1>(entry.first);
+            const auto& fieldName = std::get<2>(entry.first);
+            if (const auto other = from.tryGetInterpolator(entityId, componentId, fieldName)) {
+                entry.second->copyState(other);
+            }
+        }
+    }
+}

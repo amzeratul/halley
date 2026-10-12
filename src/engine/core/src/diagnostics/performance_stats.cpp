@@ -974,7 +974,7 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 
 		connLabel
 			.setPosition(totalArea.getTopLeft())
-			.setText("#" + toString(i + 1) +
+			.setText("Peer #" + toString(static_cast<int>(networkSession->getRemotePeerAtIndex(i))) +
 				": latency = " + toString(networkSession->getLatency(i)) + " ms"
 				", local = " + toString(localTimeMs / 60000) + ":" + toString((localTimeMs / 1000) % 60, 10, 2) +
 				", remote = " + toString(remoteTimeMs / 60000) + ":" + toString((remoteTimeMs / 1000) % 60, 10, 2))

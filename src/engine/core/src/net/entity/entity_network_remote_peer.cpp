@@ -580,10 +580,13 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
             //Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
         	if (wantToLog) {
-        		Logger::logInfo("  - send EntityDataDelta, " + toString(bytes.size()) + " bytes");
+        		Logger::logInfo("  - send EntityDataDelta for " + entity.getName() + ", " + toString(bytes.size()) + " bytes");
         	}
 
             send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), false, remote.hasAuthorityOnly, sessionTimestamp));
+
+        	// The structure may have changed, need to refresh interpolators
+        	refreshInterpolatorSet(entity);
 
         	// Entity is (still) changing, refresh wait timer.
         	if (remote.waitAfterFrameModified > 0) {
@@ -920,6 +923,9 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
             Logger::logException(e);
         }
         inboundEntity.data.applyDelta(delta);
+
+    	// Need to refresh interpolators
+    	refreshInterpolatorSet(entity);
     }
 }
 
@@ -1308,4 +1314,16 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 	for (auto& [_, inboundEntity] : tempInboundEntities) {
 		interpolateRemoteEntityPosition(inboundEntity, now, latency);
 	}
+}
+
+void EntityNetworkRemotePeer::refreshInterpolatorSet(EntityRef entity) const
+{
+	auto& networkComponent = entity.getComponent<NetworkComponent>(true);
+
+	ByteDataInterpolatorSet set;
+	parentSession->requestSetupByteDataInterpolators(set, entity);
+
+	set.copyState(networkComponent.byteDataInterpolatorSet);
+
+	networkComponent.byteDataInterpolatorSet = set;
 }

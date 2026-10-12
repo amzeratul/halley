@@ -23,6 +23,8 @@ namespace Halley {
 
         // This should return false for implementations that do network quantize only.
         [[nodiscard]] virtual bool canUpdate() const { return false; }
+
+        virtual void copyState(const IByteDataInterpolator* from) {}
     };
 
     class IByteDataInterpolatorSet

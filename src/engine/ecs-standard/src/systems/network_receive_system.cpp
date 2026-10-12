@@ -30,7 +30,7 @@ public:
 		for (const auto& e: networkFamily) {
 			// Don't need to call interpolator updates on any network entities that the local
 			// client has authority or ownership of - these are the entities we *send* data for.
-			if (e.network.authorityId) {
+			if (e.network.authorityId) [[unlikely]] {
 				if (e.network.authorityId == myPeerId) {
 					continue;
 				}

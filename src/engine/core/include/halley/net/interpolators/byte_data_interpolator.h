@@ -14,6 +14,8 @@ namespace Halley {
         void reset() const override;
         void update(Time t, World& world) const override;
 
+        void copyState(const ByteDataInterpolatorSet& from);
+
     private:
 		using Key = std::tuple<EntityId, int, std::string_view>;
         Vector<std::pair<Key, std::shared_ptr<IByteDataInterpolator>>> interpolators;
@@ -63,6 +65,12 @@ namespace Halley {
 
         virtual void doSerialize(const T& value, Serializer& serializer) = 0;
         virtual void doDeserialize(T& value, Deserializer& deserializer) = 0;
+
+        void copyState(const IByteDataInterpolator* from) override
+        {
+            auto other = static_cast<const ByteDataInterpolator*>(from);
+            enabled = other->enabled;
+        }
 
     protected:
         template <typename Intermediate = T, typename Discrete = T>
