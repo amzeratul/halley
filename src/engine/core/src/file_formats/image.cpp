@@ -405,12 +405,23 @@ size_t Image::countColours(std::optional<Rect4i> rect) const
 	HashSet<int> cols;
 	cols.reserve(1024);
 
-	const auto px = getPixels4BPP();
-	for (int y = y0; y < y1; ++y) {
-		const auto offset = y * getWidth();
-		for (int x = x0; x < x1; ++x) {
-			const auto col = px[x + offset];
-			cols.insert(col);
+	if (getBytesPerPixel() == 1) {
+		const auto px = getPixels1BPP();
+		for (int y = y0; y < y1; ++y) {
+			const auto offset = y * getWidth();
+			for (int x = x0; x < x1; ++x) {
+				const auto col = px[x + offset];
+				cols.insert(col);
+			}
+		}
+	} else if (getBytesPerPixel() == 4) {
+		const auto px = getPixels4BPP();
+		for (int y = y0; y < y1; ++y) {
+			const auto offset = y * getWidth();
+			for (int x = x0; x < x1; ++x) {
+				const auto col = px[x + offset];
+				cols.insert(col);
+			}
 		}
 	}
 
@@ -420,8 +431,10 @@ size_t Image::countColours(std::optional<Rect4i> rect) const
 void Image::collectColours(HashMap<uint32_t, uint32_t>& dst) const
 {
 	dst.reserve(1024);
-	for (const auto px: getPixels4BPP()) {
-		dst[px]++;
+	if (getBytesPerPixel() == 4) {
+		for (const auto px: getPixels4BPP()) {
+			dst[px]++;
+		}
 	}
 }
 
