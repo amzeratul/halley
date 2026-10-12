@@ -619,14 +619,14 @@ int AnimationEditorDisplay::getMetaIntOr(const String& key, int defaultValue) co
 	return result.toInteger();
 }
 
-void AnimationEditor::makePalette(Project& project, const Path& path, const Metadata& meta)
+Path AnimationEditor::makePalette(Project& project, const Path& path, const Metadata& meta)
 {
 	Logger::logInfo("Making palette for " + path.getString() + "...");
 
 	const auto bytes = Path::readFile(path);
 	if (bytes.empty()) {
 		Logger::logError("Unable to read source file");
-		return;
+		return {};
 	}
 
 	const auto extension = path.getExtension().asciiLower();
@@ -638,7 +638,7 @@ void AnimationEditor::makePalette(Project& project, const Path& path, const Meta
 		file.load(bytes.const_byte_span());
 		const auto n = file.getNumberOfFrames();
 		for (int i = 0; i < static_cast<int>(n); ++i) {
-			for (const auto& [k, img]: file.makeGroupFrameImages(i, meta.getBool("group_separated", false))) {
+			for (const auto& [k, img]: file.makeGroupFrameImages(i, meta.getBool("group_separated", false), false)) {
 				img->collectColours(colours);
 			}
 		}
@@ -652,8 +652,35 @@ void AnimationEditor::makePalette(Project& project, const Path& path, const Meta
 	
 	if (colours.size() > 256) {
 		Logger::logError("Too many colours to palettise");
-		return;
+		return {};
 	}
 
-	// TODO
+	// Sort by frequency
+	Vector<std::pair<uint32_t, uint32_t>> colList;
+	for (const auto& [col, count]: colours) {
+		colList += { col, count };
+	}
+	std::sort(colList.begin(), colList.end(), [] (std::pair<uint32_t, uint32_t> a, std::pair<uint32_t, uint32_t> b) {
+		if (a.second != b.second) {
+			return a.second > b.second;
+		}
+		return a.first < b.first;
+	});
+
+	// Generate palette image
+	auto palette = Image(Image::Format::RGBA, Vector2i(256, 1));
+	auto px = palette.getPixels4BPP();
+	for (size_t i = 0; i < colList.size(); ++i) {
+		px[i] = colList[i].first;
+	}
+
+	// Palette path
+	auto palettePath = path.makeRelativeTo(project.getAssetsSrcPath() / "image").replaceExtension("");
+	palettePath = Path("image") / "palettes" / palettePath.parentPath() / palettePath.getFilename() + "_palette.png";
+	Logger::logInfo("Saving to " + palettePath.getString());
+
+	// Save palette
+	project.writeAssetToDisk(palettePath, palette.savePNGToBytes(false));
+
+	return palettePath.dropFront(1);
 }

@@ -477,7 +477,7 @@ const Vector<AsepriteTag>& AsepriteFile::getTags() const
 	return tags;
 }
 
-std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int frameNumber, bool groupSeparated)
+std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int frameNumber, bool groupSeparated, bool premultiply)
 {
 	std::map<String, std::unique_ptr<Image>> groupImages;
 	Vector<String> groupsFound;
@@ -534,8 +534,10 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 		groupImages[""] = std::make_unique<Image>(Image::Format::RGBA, size, true);
 	}
 	
-	for (auto& group: groupImages) {
-		group.second->preMultiply();
+	if (premultiply) {
+		for (auto& group: groupImages) {
+			group.second->preMultiply();
+		}
 	}
 
 	return groupImages;

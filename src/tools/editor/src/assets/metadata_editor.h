@@ -27,6 +27,8 @@ namespace Halley
 		ConfigNode getValue(const String& key) const;
 		void setValue(const String& key, ConfigNode value);
 
+		void reload();
+
 	private:
 		UIFactory& factory;
 		ProjectWindow& projectWindow;

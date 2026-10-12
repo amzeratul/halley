@@ -25,7 +25,7 @@ namespace Halley {
 		void onRemovedFromRoot(UIRoot& root) override;
 		bool onKeyPress(KeyboardKeyPress key) override;
         
-		static void makePalette(Project& project, const Path& file, const Metadata& meta);
+		static Path makePalette(Project& project, const Path& file, const Metadata& meta);
 
     protected:
         void update(Time t, bool moved) override;

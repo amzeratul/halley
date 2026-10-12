@@ -261,5 +261,11 @@ void AssetEditorWindow::onMakePalette()
 	const auto& db = project.getImportAssetsDatabase();
 	const auto primaryFilePath = db.getPrimaryInputFile(assets.at(0).first, assets.at(0).second, true);
 	const auto effectiveMeta = db.getMetadata(assets.at(0).first, assets.at(0).second).value_or(Metadata());
-	AnimationEditor::makePalette(project, primaryFilePath, effectiveMeta);
+	
+	const auto palettePath = AnimationEditor::makePalette(project, primaryFilePath, effectiveMeta);
+	if (!palettePath.isEmpty()) {
+		metadataEditor->setValue("palette", ConfigNode(palettePath.getString()));
+		metadataEditor->reload();
+		metadataEditor->saveMetadata();
+	}
 }

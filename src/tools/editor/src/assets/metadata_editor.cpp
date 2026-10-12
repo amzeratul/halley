@@ -218,6 +218,11 @@ void MetadataEditor::setValue(const String& key, ConfigNode value)
 	onMetadataChanged();
 }
 
+void MetadataEditor::reload()
+{
+	makeUI();
+}
+
 ConfigNode MetadataEditor::getValue(const String& key) const
 {
 	return metadata.getValue(key);
