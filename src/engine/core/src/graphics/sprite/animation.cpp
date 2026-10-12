@@ -246,6 +246,14 @@ std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 
 void Animation::reload(Resource&& resource)
 {
+#ifdef DEV_BUILD
+	if (!oldData) {
+		oldData = std::make_shared<OldData>();
+	}
+	oldData->sequences = std::move(sequences);
+	oldData->directions = std::move(directions);
+#endif
+
 	*this = std::move(dynamic_cast<Animation&>(resource));
 }
 

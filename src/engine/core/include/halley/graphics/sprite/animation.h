@@ -202,6 +202,15 @@ namespace Halley
 		HashMap<String, int> sequenceIndex;
 		std::optional<int> sequenceFallbackIndex;
 
+#ifdef DEV_BUILD
+		// We keep this around to avoid invalidating pointers on reload
+		struct OldData {
+			Vector<AnimationSequence> sequences;
+			Vector<AnimationDirection> directions;
+		};
+		std::shared_ptr<OldData> oldData;
+#endif
+
 		void generateSequenceIndex();
 	};
 }
