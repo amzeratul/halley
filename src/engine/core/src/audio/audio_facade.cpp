@@ -296,7 +296,7 @@ AudioHandle AudioFacade::postEvent(const String& name)
 AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitter)
 {
 	if (!emitter) {
-		Logger::logError("Cannot post event \"" + name + "\" to invalid emitter.");
+		Logger::logWarning("Cannot post event \"" + name + "\" to invalid emitter.");
 		return std::make_shared<AudioHandleImpl>(*this, curEventId++, 0);
 	}
 	return doPostEvent(name, emitter->getId());
