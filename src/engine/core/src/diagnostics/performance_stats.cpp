@@ -644,7 +644,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		if (curFrameLengthFreeze > 0) {
 			--curFrameLengthFreeze;
 		} else {
-			curFrameLength = advance(curFrameLength, max, 50'000LL);
+			curFrameLength = advance(curFrameLength, max, static_cast<decltype(max)>(50'000));
 		}
 	}
 	const int64_t numMs = curFrameLength / 1'000'000LL;
