@@ -13,6 +13,16 @@ public:
 		});
 	}
 
+	void onEntitiesAdded(Span<NetworkFamily> es)
+	{
+		++globalNetworkRevision;
+	}
+
+	void onEntitiesRemoved(Span<NetworkFamily> es)
+	{
+		++globalNetworkRevision;
+	}
+
 	void update(Time t)
 	{
 		if (!getSessionService().isMultiplayer()) {
@@ -41,24 +51,7 @@ public:
 		for (const auto& e: networkFamily) {
 			++networkEntities;
 
-			// By default, consider sending updates for all entities.
-			e.network.sendUpdates = true;
-
-			if (e.network.authorityId) [[unlikely]] {
-				// The check below must be skipped if someone grabbed authority.
-			} else {
-				// Disable updates for entities that are children of other entities with a
-				// network component. This doesn't require recursion, and should be faster than
-				// walking down the child hierarchy.
-				auto parent = getWorld().getEntity(e.entityId).getParent();
-				while (parent.isValid() && parent.isSerializable()) {
-					if (parent.hasComponent<NetworkComponent>()) {
-						e.network.sendUpdates = false;
-						break;
-					}
-					parent = parent.getParent();
-				}
-			}
+			updateSendUpdates(e);
 		}
 
 		entities.clear();
@@ -140,6 +133,37 @@ public:
 private:
 	Vector<EntityNetworkUpdateInfo> entities;
 	ListenerSetToken sessionChangeToken;
+	uint32_t globalNetworkRevision = 1;
+
+	void updateSendUpdates(const NetworkFamily& e)
+	{
+		if (e.network.authorityId || !e.transform2D) [[unlikely]] {
+			e.network.sendUpdates = true;
+			e.network.lastRevision = 0;
+			return;
+		}
+
+		const auto rev = e.transform2D->getEntityRevision() + globalNetworkRevision;
+		if (e.network.lastRevision == rev) [[likely]] {
+			return;
+		}
+		e.network.lastRevision = rev;
+
+		// Disable updates for entities that are children of other entities with a
+		// network component. This doesn't require recursion, and should be faster than
+		// walking down the child hierarchy.
+		auto parent = getWorld().getEntity(e.entityId).getParent();
+		while (parent.isValid() && parent.isSerializable()) {
+			if (parent.hasComponent<NetworkComponent>()) {
+				e.network.sendUpdates = false;
+				return;
+			}
+			parent = parent.getParent();
+		}
+
+		// If we got here, we're good
+		e.network.sendUpdates = true;
+	}
 
 	void setupSession()
 	{

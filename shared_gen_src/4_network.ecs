@@ -35,6 +35,11 @@ component:
       canEdit: true
       canSave: false
       canNetwork: false
+  - lastRevision:
+      type: uint32_t
+      canSave: false
+      canEdit: false
+      defaultValue: 0
   - dataInterpolatorSet:
       type: 'Halley::DataInterpolatorSet'
       canSave: false
