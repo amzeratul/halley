@@ -44,6 +44,11 @@ void AssetEditorWindow::onMakeUI()
 	{
 		projectWindow.showFileExternally(getCurrentAssetPath());
 	});
+
+	setHandle(UIEventType::ButtonClicked, "makePalette", [=] (const UIEvent& event)
+	{
+		onMakePalette();
+	});
 }
 
 void AssetEditorWindow::reload()
@@ -60,7 +65,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 
 	loadedAsset = name;
 	loadedType = type;
-		
+
 	content->clear();
 	contentList->clear();
 	curEditors.clear();
@@ -74,11 +79,16 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 	});
 
 	bool showMetadataEditor = false;
+	bool hasAnimation = false;
 	for (const auto& asset: assets) {
 		if (MetadataEditor::hasEditorForType(asset.first)) {
 			showMetadataEditor = true;
 		}
+		if (asset.first == AssetType::Animation) {
+			hasAnimation = true;
+		}
 	}
+	getWidget("makePalette")->setActive(hasAnimation);
 
 	if (!showMetadataEditor || assets.empty()) {
 		metadataEditor->clear();
@@ -243,4 +253,13 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(AssetType type)
 		return std::make_shared<MeshEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}
 	return {};
+}
+
+void AssetEditorWindow::onMakePalette()
+{
+	const auto assets = getAssetsFromFile(Path(loadedAsset));
+	const auto& db = project.getImportAssetsDatabase();
+	const auto primaryFilePath = db.getPrimaryInputFile(assets.at(0).first, assets.at(0).second, true);
+	const auto effectiveMeta = db.getMetadata(assets.at(0).first, assets.at(0).second).value_or(Metadata());
+	AnimationEditor::makePalette(project, primaryFilePath, effectiveMeta);
 }

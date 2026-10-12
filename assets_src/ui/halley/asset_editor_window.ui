@@ -56,6 +56,7 @@ children:
       - uuid: 1924c1e0-ffb7-4b61-a83a-c763f2d48633
         sizer:
           columnProportions: []
+          gap: 5
           type: vertical
         widget:
           class: widget
@@ -73,3 +74,9 @@ children:
               class: button
               id: showFile
               text: Show File
+          - uuid: cdc6772e-f613-447e-8985-bbd764915f08
+            widget:
+              active: false
+              class: button
+              id: makePalette
+              text: Make Palette

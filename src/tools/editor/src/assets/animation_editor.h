@@ -24,7 +24,9 @@ namespace Halley {
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
 		bool onKeyPress(KeyboardKeyPress key) override;
-	
+        
+		static void makePalette(Project& project, const Path& file, const Metadata& meta);
+
     protected:
         void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;

@@ -1,6 +1,7 @@
 #include "animation_editor.h"
 
 #include "metadata_editor.h"
+#include "../../../tools/src/sprites/aseprite_file.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/widgets/ui_dropdown.h"
@@ -616,4 +617,43 @@ int AnimationEditorDisplay::getMetaIntOr(const String& key, int defaultValue) co
 		return defaultValue;
 	}
 	return result.toInteger();
+}
+
+void AnimationEditor::makePalette(Project& project, const Path& path, const Metadata& meta)
+{
+	Logger::logInfo("Making palette for " + path.getString() + "...");
+
+	const auto bytes = Path::readFile(path);
+	if (bytes.empty()) {
+		Logger::logError("Unable to read source file");
+		return;
+	}
+
+	const auto extension = path.getExtension().asciiLower();
+	HashMap<uint32_t, uint32_t> colours;
+
+	// Collect colours
+	if (extension == ".ase" || extension == ".aseprite") {
+		AsepriteFile file;
+		file.load(bytes.const_byte_span());
+		const auto n = file.getNumberOfFrames();
+		for (int i = 0; i < static_cast<int>(n); ++i) {
+			for (const auto& [k, img]: file.makeGroupFrameImages(i, meta.getBool("group_separated", false))) {
+				img->collectColours(colours);
+			}
+		}
+	} else if (extension == ".png") {
+		Image img;
+		img.load(bytes.const_byte_span());
+		img.collectColours(colours);
+	}
+
+	Logger::logInfo("Found " + toString(colours.size()) + " unique colours");
+	
+	if (colours.size() > 256) {
+		Logger::logError("Too many colours to palettise");
+		return;
+	}
+
+	// TODO
 }

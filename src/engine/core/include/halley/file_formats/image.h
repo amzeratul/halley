@@ -131,6 +131,7 @@ namespace Halley {
 		void drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity = 255);
 
 		size_t countColours(std::optional<Rect4i> rect) const;
+		void collectColours(HashMap<uint32_t, uint32_t>& dst) const;
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Image; }

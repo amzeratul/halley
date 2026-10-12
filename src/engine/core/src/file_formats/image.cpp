@@ -397,10 +397,10 @@ void Image::drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity)
 size_t Image::countColours(std::optional<Rect4i> rect) const
 {
 	const auto r = rect.value_or(getRect());
-	const auto x0 = r.getLeft();
-	const auto x1 = r.getRight();
-	const auto y0 = r.getTop();
-	const auto y1 = r.getBottom();
+	const auto x0 = clamp<int>(r.getLeft(), 0, static_cast<int>(getWidth() - 1));
+	const auto x1 = clamp<int>(r.getRight(), 0, static_cast<int>(getWidth() - 1));
+	const auto y0 = clamp<int>(r.getTop(), 0, static_cast<int>(getHeight() - 1));
+	const auto y1 = clamp<int>(r.getBottom(), 0, static_cast<int>(getHeight() - 1));
 
 	HashSet<int> cols;
 	cols.reserve(1024);
@@ -415,6 +415,14 @@ size_t Image::countColours(std::optional<Rect4i> rect) const
 	}
 
 	return cols.size();
+}
+
+void Image::collectColours(HashMap<uint32_t, uint32_t>& dst) const
+{
+	dst.reserve(1024);
+	for (const auto px: getPixels4BPP()) {
+		dst[px]++;
+	}
 }
 
 std::unique_ptr<Image> Image::loadResource(ResourceLoader& loader)
