@@ -252,9 +252,14 @@ void Animation::reload(Resource&& resource)
 	}
 	oldData->sequences = std::move(sequences);
 	oldData->directions = std::move(directions);
+	auto oldDataTemp = std::move(oldData);
 #endif
 
 	*this = std::move(dynamic_cast<Animation&>(resource));
+
+#ifdef DEV_BUILD
+	oldData = std::move(oldDataTemp);
+#endif
 }
 
 void Animation::loadDependencies(ResourceLoader& loader)
