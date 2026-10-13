@@ -195,7 +195,10 @@ bool Core::hasVsync()
 void Core::waitForVsync()
 {
 	if (api && api->video) {
-		api->video->waitForVsync();
+		if (api->video->hasVsync()) {
+			ProfilerEvent event(ProfilerEventType::CoreVSync);
+			api->video->waitForVsync();
+		}
 	}
 }
 
@@ -491,6 +494,7 @@ void Core::tickFrame(Time time)
 		if (frameDataRender) {
 			HalleyAssertDev(curStageFrames > 0);
 			BaseFrameData::setThreadFrameData(frameDataRender.get());
+			waitForVsync();
 			render();
 			finishVideoRender();
 			finishPainterRender();
@@ -503,6 +507,7 @@ void Core::tickFrame(Time time)
 			render();
 			finishVideoRender();
 			finishPainterRender();
+			waitForVsync();
 		}
 	}
 
@@ -683,7 +688,6 @@ void Core::render()
 void Core::finishVideoRender()
 {
 	if (api->video) {
-		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 	}
 }
