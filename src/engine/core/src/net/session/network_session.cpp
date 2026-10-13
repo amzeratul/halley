@@ -11,6 +11,9 @@
 
 using namespace Halley;
 
+#define PING_CONTROL_MSG_DELAY 2.0
+#define PING_CONTROL_MSG_NO_REPLY_TIMEOUT_CLIENT 4
+
 NetworkSession::NetworkSession(NetworkService& service, uint32_t networkVersion, String userName, ISharedDataHandler* sharedDataHandler)
 	: service(service)
 	, sharedDataHandler(sharedDataHandler)
@@ -191,9 +194,15 @@ void NetworkSession::update(Time t)
 		}
 	}
 
-	// Close if connection is lost
+	// Clients:
+	// - close if connection is lost
+	// - close if there has been no reply from host since N pings went out
 	if (type == NetworkSessionType::Client) {
 		if (peers.empty()) {
+			close();
+		}
+
+		if (peers[0].rttSentSinceLastReply >= PING_CONTROL_MSG_NO_REPLY_TIMEOUT_CLIENT) {
 			close();
 		}
 	}
@@ -735,6 +744,8 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgPingReply& 
 {
 	auto& peer = getPeer(peerId);
 
+	peer.rttSentSinceLastReply = 0;
+
 	// Measure how long it took for one round trip.
 	int32_t curTimestamp = getLocalSessionTimeMs();
 
@@ -1129,14 +1140,12 @@ int32_t NetworkSession::doGetPeerSessionTimeMs(const Peer& peer) const
 
 void NetworkSession::sendPing(Time t, Peer& peer)
 {
-	constexpr float DELAY = 2.0f;
-
 	peer.delayNextPingMsg -= t;
 	if (peer.delayNextPingMsg > 0.0) {
 		return;
 	}
 
-	peer.delayNextPingMsg = DELAY;
+	peer.delayNextPingMsg = PING_CONTROL_MSG_DELAY;
 
 	// Send Ping! with local timestamp
 	ControlMsgPing msg = {};
@@ -1148,6 +1157,7 @@ void NetworkSession::sendPing(Time t, Peer& peer)
 	rtt[2] = 0;
 
 	peer.rttIdx = (peer.rttIdx + 1) % peer.rtt.size();
+	peer.rttSentSinceLastReply++;
 
 	const auto bytes = Serializer::toBytes(msg);
 	doSendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::Ping, OutboundNetworkPacket(bytes)));
