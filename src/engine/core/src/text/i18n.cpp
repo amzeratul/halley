@@ -10,6 +10,14 @@
 
 using namespace Halley;
 
+namespace {
+#if defined(DEV_BUILD)
+	constexpr bool canHotReload = isPCPlatform();
+#else
+	constexpr bool canHotReload = false;
+#endif
+}
+
 I18N::I18N()
 {
 }
@@ -44,6 +52,9 @@ void I18N::loadStrings(Resources& resources)
 		if (assetName.startsWith("strings/")) {
 			//resources.of<ConfigFile>().unload(assetName);
 			loadLocalisationFile(*resources.get<ConfigFile>(assetName));
+			if constexpr (!canHotReload) {
+				resources.unload<ConfigFile>(assetName);
+			}
 		}
 	}
 }
@@ -51,9 +62,9 @@ void I18N::loadStrings(Resources& resources)
 void I18N::loadLocalisationFile(const ConfigFile& config)
 {
 	loadLocalisation(config.getRoot(), config.getAssetId(), false);
-#ifdef DEV_BUILD
-	observers[config.getAssetId()] = ConfigObserver(config);
-#endif
+	if constexpr (canHotReload) {
+		observers[config.getAssetId()] = ConfigObserver(config);
+	}
 }
 
 I18N::LangData& I18N::getLanguageData(const I18NLanguage& language)
