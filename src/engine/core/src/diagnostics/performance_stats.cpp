@@ -638,13 +638,17 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 	frameLengths.pushValue(lastTimeRange.getLength());
 	const auto max = frameLengths.getMax();
 	if (max > curFrameLength) {
-		curFrameLength = max;
+		framesIncreased++;
+		if (framesIncreased >= 3 || curFrameLength < 1000) {
+			curFrameLength = static_cast<int64_t>(lerp(static_cast<double>(curFrameLength), static_cast<double>(max), 0.3f));
+		}
 		curFrameLengthFreeze = 15;
 	} else {
+		framesIncreased = 0;
 		if (curFrameLengthFreeze > 0) {
 			--curFrameLengthFreeze;
 		} else {
-			curFrameLength = advance(curFrameLength, max, static_cast<decltype(max)>(50'000));
+			curFrameLength = static_cast<int64_t>(lerp(static_cast<double>(curFrameLength), static_cast<double>(max), 0.3f));
 		}
 	}
 	const int64_t numMs = curFrameLength / 1'000'000LL;

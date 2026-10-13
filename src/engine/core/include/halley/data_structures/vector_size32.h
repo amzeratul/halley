@@ -166,6 +166,7 @@ namespace Halley {
 		{
 			if constexpr (std::is_same_v<T, U> && std::is_trivially_copyable_v<T>) {
 				resize_no_init(other.size());
+				shrink_to_fit();
 				memcpy(data(), other.data(), other.size() * sizeof(T));
 			} else {
 				change_capacity(static_cast<SizeType>(other.size()));

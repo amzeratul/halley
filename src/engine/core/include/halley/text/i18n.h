@@ -83,6 +83,8 @@ namespace Halley {
 		I18NLanguage getNextLanguageAvailable(const I18NLanguage& after) const;
 		void setCurrentLanguageToNextOneAvailable();
 
+		size_t getMemoryUsage() const;
+
 	private:
 		struct LangData {
 			HashMap<String, String> strings;

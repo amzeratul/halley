@@ -94,7 +94,9 @@ public:
 	void setVariable(EntityId entityId, const String& variableName, float value) override
 	{
 		if (const auto* source = sourceFamily.tryFind(entityId)) {
-			source->audioSource.emitter->setVariable(variableName, value);
+			if (source->audioSource.emitter) {
+				source->audioSource.emitter->setVariable(variableName, value);
+			}
 		}
 	}
 
@@ -106,7 +108,9 @@ public:
 	void setSwitch(EntityId entityId, const String& switchName, const String& value) override
 	{
 		if (const auto* source = sourceFamily.tryFind(entityId)) {
-			source->audioSource.emitter->setSwitch(switchName, value);
+			if (source->audioSource.emitter) {
+				source->audioSource.emitter->setSwitch(switchName, value);
+			}
 		}
 	}
 
@@ -216,7 +220,9 @@ private:
 				vel = (pos - lastPos) / static_cast<float>(t);
 			}
 
-			source.audioSource.emitter->setPosition(getAudioPosition(source, vel));
+			if (source.audioSource.emitter) {
+				source.audioSource.emitter->setPosition(getAudioPosition(source, vel));
+			}
 		}
 	}
 

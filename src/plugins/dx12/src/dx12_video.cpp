@@ -270,11 +270,6 @@ void DX12Video::finishRender()
         uint32_t presentFlags = (allowTearing && !useVSync) ? DXGI_PRESENT_ALLOW_TEARING : 0u;
 
         swapChain->Present(syncInterval, presentFlags);
-        
-        if (useVSync)
-        {
-            waitForVsync();
-        }
 #endif
     }
 

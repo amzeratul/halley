@@ -172,8 +172,7 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 		Logger::logError(Debug::getCallStack());
 		return;
 	}
-
-	UniqueLock lock(outboxLock);
+	auto lock = UniqueLock(outboxMutex);
 	outbox[peerId].push_back(std::move(msg));
 }
 
