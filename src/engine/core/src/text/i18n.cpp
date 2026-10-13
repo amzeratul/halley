@@ -445,3 +445,18 @@ void I18N::setCurrentLanguageToNextOneAvailable()
 {
 	setCurrentLanguage(getNextLanguageAvailable(getChosenCurrentLanguage()));
 }
+
+size_t I18N::getMemoryUsage() const
+{
+	size_t total = strings.size_bytes();
+
+	for (const auto& [lang, langData]: strings) {
+		total += langData.strings.size_bytes();
+		for (const auto& [key, value]: langData.strings) {
+			total += key.getSizeBytes();
+			total += value.getSizeBytes();
+		}
+	}
+
+	return total;
+}

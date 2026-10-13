@@ -1174,6 +1174,14 @@ void World::generateMemoryReport() const
 	}
 	named.emplace_back("Entities", entityTotal);
 
+	ResourceMemoryUsage familyTotal;
+	for (const auto& family: families) {
+		familyTotal.ramUsage += family->getMemoryUsage();
+	}
+	named.emplace_back("Families", familyTotal);
+
+	named.emplace_back("UUID Map", uuidMap.size());
+
 	for (const auto& service: services) {
 		const auto usage = service.second->getMemoryUsage();
 		if (usage.getTotal() > 0) {
@@ -1181,12 +1189,6 @@ void World::generateMemoryReport() const
 			serviceTotal += usage;
 		}
 	}
-
-	ResourceMemoryUsage familyTotal;
-	for (const auto& family: families) {
-		familyTotal.ramUsage += family->getMemoryUsage();
-	}
-	named.emplace_back("Families", familyTotal);
 
 	const auto total = serviceTotal + entityTotal;
 
