@@ -169,6 +169,7 @@ namespace Halley
 		Averaging<int64_t, 120> frameLengths;
 		int64_t curFrameLength = 0;
 		int curFrameLengthFreeze = 0;
+		int framesIncreased = 0;
 
 		bool paused = false;
 
