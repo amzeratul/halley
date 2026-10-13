@@ -891,7 +891,11 @@ void ConfigNode::deserialize(Deserializer& s)
 		s >> line >> column;
 
 #if defined(STORE_CONFIG_NODE_PARENTING)
-		setOriginalPosition(line, column);
+		// setOriginalPosition(line, column);
+		if (parent) {
+			parent->line = line;
+			parent->column = column;
+		}
 #endif
 	}
 }
