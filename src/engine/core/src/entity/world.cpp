@@ -1182,6 +1182,12 @@ void World::generateMemoryReport() const
 		}
 	}
 
+	ResourceMemoryUsage familyTotal;
+	for (const auto& family: families) {
+		familyTotal.ramUsage += family->getMemoryUsage();
+	}
+	named.emplace_back("Families", familyTotal);
+
 	const auto total = serviceTotal + entityTotal;
 
 	Logger::logInfo("World memory usage: " + total.toString());

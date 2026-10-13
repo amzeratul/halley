@@ -86,6 +86,8 @@ namespace Halley {
 			return dirty || !toRemove.empty() || !toReload.empty();
 		}
 
+		virtual size_t getMemoryUsage() const = 0;
+
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		virtual void refreshEntity(Entity& entity) = 0;
@@ -281,6 +283,11 @@ namespace Halley {
 					index[entities[i].entityId.getIndex()] = static_cast<uint32_t>(i);
 				}
 			}
+		}
+
+		size_t getMemoryUsage() const override
+		{
+			return sizeof(*this) + index.size_bytes() + entities.size_bytes() + toRemove.size_bytes() + toReload.size_bytes();
 		}
 
 
