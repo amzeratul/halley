@@ -167,7 +167,6 @@ namespace Halley {
 		bool terminatedByHost = false;
 
         Mutex outboundInterpolatorLock;
-		Mutex outboxLock;
 		ByteDataInterpolatorSet byteDataInterpolatorSet;
 
 		Bytes receiveBuffer;
