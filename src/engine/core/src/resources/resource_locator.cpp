@@ -209,12 +209,16 @@ size_t ResourceLocator::getLocatorCount() const
 void ResourceLocator::generateMemoryReport() const
 {
 	size_t totalSize = 0;
-	std::map<String, size_t> sizes;
+	Vector<std::pair<String, size_t>> sizes;
 	for (const auto& locator: locators) {
 		const auto size = locator->getMemoryUsage();
 		totalSize += size;
-		sizes[locator->getName()] = size;
+		sizes.emplace_back(locator->getName(), size);
 	}
+
+	std::sort(sizes.begin(), sizes.end(), [] (const auto& a, const auto& b) {
+		return a.second > b.second;
+	});
 
 	Logger::logInfo("Resource locator memory usage: " + String::prettySize(totalSize));
 	for (const auto& [k, v]: sizes) {
