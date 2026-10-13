@@ -359,7 +359,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(int32_t sessionTimestamp, Outboun
 		return;
 	}
 
-#if defined(DEV_BUILD) && defined(_WIN32)
+#if defined(DEV_BUILD) && defined(_WIN32) && !defined(_GAMING_XBOX)
 	static constexpr bool checkExpectNoUpdate = true;
 	static constexpr bool checkExpectSameHash = false; // very costly, should be off by default
 #else
