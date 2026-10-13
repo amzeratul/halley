@@ -134,6 +134,8 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		size_t getSizeBytes() const;
+
 	private:
 		String expression;
 	};

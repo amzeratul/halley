@@ -1,6 +1,8 @@
 #include <lua/src/lua.hpp>
 #include "halley/lua/lua_reference.h"
 
+#include <complex>
+
 #include "halley/bytes/byte_serializer.h"
 #include "halley/lua/lua_state.h"
 #include "halley/support/exception.h"
@@ -153,6 +155,11 @@ void LuaExpression::deserialize(Deserializer& s)
 	String expr;
 	s >> expr;
 	setExpression(expr);
+}
+
+size_t LuaExpression::getSizeBytes() const
+{
+	return expression.getSizeBytes();
 }
 
 ConfigNode ConfigNodeSerializer<LuaExpression>::serialize(const LuaExpression& expression, const EntitySerializationContext& context)

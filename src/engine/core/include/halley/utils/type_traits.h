@@ -31,4 +31,5 @@ namespace Halley
 	
 	template<template<class...> class Expr, class... Args>
 	constexpr bool is_detected_v = is_detected<Expr, Args...>::value;
+
 }

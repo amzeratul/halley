@@ -7,6 +7,7 @@
 #include <typeinfo>
 
 #include "halley/utils/algorithm.h"
+#include "halley/utils/memory_usage_calculator.h"
 
 namespace Halley {
     class ConfigNode;
@@ -156,7 +157,7 @@ namespace Halley {
 
         size_t getMemoryUsage() const override
         {
-            return sizeof(keys) + sizeof(entries) + keys.size() * sizeof(String) + entries.size_bytes();
+            return getSizeBytesOf(entries);
         }
 
         void collectLocStringContexts(ILocStringCollector& dst) const override

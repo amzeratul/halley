@@ -955,6 +955,7 @@ set(HEADERS
         "include/halley/utils/hash.h"
         "include/halley/utils/halley_iostream.h"
         "include/halley/utils/macros.h"
+        "include/halley/utils/memory_usage_calculator.h"
         "include/halley/utils/noncopyable.h"
         "include/halley/utils/scoped_guard.h"
         "include/halley/utils/type_traits.h"

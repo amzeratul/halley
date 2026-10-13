@@ -69,12 +69,16 @@ int ConfigDatabase::getVersion() const
 void ConfigDatabase::generateMemoryReport()
 {
 	size_t totalSize = 0;
-	std::map<String, size_t> results;
+	Vector<std::pair<String, size_t>> results;
 	for (const auto& db: dbs) {
 		const auto size = db->getMemoryUsage();
 		totalSize += size;
-		results[db->getKey()] = size;
+		results.emplace_back(db->getKey(), size);
 	}
+
+	std::sort(results.begin(), results.end(), [&] (const auto& a, const auto& b) {
+		return a.second > b.second;
+	});
 
 	Logger::logInfo("ConfigDatabase memory usage: " + String::prettySize(totalSize));
 	for (const auto& [k, v]: results) {
