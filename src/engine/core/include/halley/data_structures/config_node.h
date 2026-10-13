@@ -15,7 +15,7 @@
 #include "halley/maths/rect.h"
 #include "halley/utils/type_traits.h"
 
-#if defined(DEV_BUILD)
+#if defined(DEV_BUILD) && defined(_WIN32)
 #define STORE_CONFIG_NODE_PARENTING
 #endif
 
