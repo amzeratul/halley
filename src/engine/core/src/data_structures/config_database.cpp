@@ -80,9 +80,21 @@ void ConfigDatabase::generateMemoryReport()
 		return a.second > b.second;
 	});
 
+	size_t otherSize = 0;
+	int n = 0;
+
 	Logger::logInfo("ConfigDatabase memory usage: " + String::prettySize(totalSize));
 	for (const auto& [k, v]: results) {
-		Logger::logInfo("\t" + k + ": " + String::prettySize(v));
+		if (n < 10) {
+			Logger::logInfo("\t" + k + ": " + String::prettySize(v));
+		} else {
+			otherSize += v;
+		}		
+		++n;
+	}
+
+	if (otherSize > 0) {
+		Logger::logInfo("\t[other]: " + String::prettySize(otherSize));
 	}
 }
 
