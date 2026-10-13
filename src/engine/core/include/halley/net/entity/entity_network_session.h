@@ -151,6 +151,7 @@ namespace Halley {
 		
 		uint32_t sendClock = 0;
 		EntityNetworkSerialize hashSerializer;
+		Vector<uint32_t> hashTodo;
 
 		uint64_t peerViewMask;
 		Vector<const EntityClientSharedData*> peerViewClientDataCache;

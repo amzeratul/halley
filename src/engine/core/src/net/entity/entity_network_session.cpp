@@ -673,28 +673,48 @@ void EntityNetworkSession::precomputeEntityHashes(const Time t, const gsl::span<
 	const uint32_t clock0 = sendClock;
 	sendClock += delta32;
 	
+	// Decide the cadence for every entry and collect the ones that some peer will actually compare.
+	// Flagged `requiresEntityFrameModified` entities stay on the per-peer path, and a remote peer
+	// holding authority over an entity never receives updates for it.
 	const uint8_t myPeerId = getMyPeerId();
-	hashSerializer.setSession(this); // once, on this thread; the hash path is const from here on out
-	
-	Concurrent::foreach(entityIds.begin(), entityIds.end(), [&] (EntityNetworkUpdateInfo& e)
-	{
+	hashTodo.clear();
+	for (size_t i = 0; i < entityIds.size(); ++i) {
+		auto& e = entityIds[i]; 
 		const uint32_t start = clock0 + static_cast<uint32_t>(Hash::hash(e.entity.getEntityId()));
 		e.dueThisFrame = allDue || start + delta32 < start;
-		
-		// Pre-hash only what a peer will compare.
 		if (!e.dueThisFrame || e.requiresEntityFrameModified) {
-			return;
+			continue;
 		}
 		
 		uint64_t users = e.peerViewMask;
 		if (e.authorityId != myPeerId) {
 			users &= ~(1ull << e.authorityId);
 		}
-		
+
 		if (users != 0) {
-			e.precomputedHash = hashSerializer.serializeEntityHash(e.entity, byteSerializationOptions, false);
+			hashTodo.push_back(static_cast<uint32_t>(i));
 		}
-	});
+	}
+	
+	if (hashTodo.empty()) {
+		return;
+	}
+	
+	hashSerializer.setSession(this);
+	const auto hashOne = [&] (uint32_t i)
+	{
+		auto& e = entityIds[i];
+		e.precomputedHash = hashSerializer.serializeEntityHash(e.entity, byteSerializationOptions, false);
+	};
+	
+	constexpr size_t minParallel = 512;
+	if (hashTodo.size() < minParallel) {
+		for (const uint32_t i: hashTodo) {
+			hashOne(i);
+		}
+	} else {
+		Concurrent::foreach(hashTodo.begin(), hashTodo.end(), hashOne);
+	}
 }
 
 World& EntityNetworkSession::getWorld() const
