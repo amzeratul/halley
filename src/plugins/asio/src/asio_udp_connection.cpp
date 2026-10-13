@@ -114,14 +114,15 @@ void AsioUDPConnection::receiveAll(
             if (err == asio::error::would_block) {
                 break;
             } else {
-                if (err == asio::error::connection_reset) {
-                    Logger::logWarning("Connection reset by peer");
-                } else {
+                if (err != asio::error::connection_reset) {
                     Logger::logError("Error receiving packet: " + err.message());
                 }
                 for (const auto& pair: connections) {
                     const auto& conn = pair.second;
                     if (conn->matchesEndpoint(from)) {
+                        if (err == asio::error::connection_reset) {
+                            Logger::logWarning("Connection reset by peer");
+                        }
                         conn->close();
                         break;
                     }

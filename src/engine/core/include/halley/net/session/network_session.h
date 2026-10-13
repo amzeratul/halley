@@ -151,6 +151,7 @@ namespace Halley {
 
 			std::array<int32_t[3], 16> rtt;
 			int rttIdx = 0;
+			int rttSentSinceLastReply = 0;
 			Time delayNextPingMsg = 0;
 
 #if defined(DEV_BUILD) && defined(_WIN32)
