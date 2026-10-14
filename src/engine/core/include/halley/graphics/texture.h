@@ -56,6 +56,7 @@ namespace Halley
 		bool retainPixelData = false;
 		bool unloadable = false;
 		std::optional<TextureFormat> expectedTextureFormat;
+		std::optional<ResourceMemoryUsage> lastLoadedMemoryUsage;
 
 		TextureDescriptor descriptor;
 		ImageMask mask;

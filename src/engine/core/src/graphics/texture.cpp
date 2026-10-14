@@ -87,13 +87,18 @@ ResourceMemoryUsage Texture::getMemoryUsage() const
 
 ResourceMemoryUsage Texture::getEstimatedMemoryUsage() const
 {
+	if (lastLoadedMemoryUsage) {
+		return *lastLoadedMemoryUsage;
+	}
+
 	const auto format = expectedTextureFormat.value_or(TextureFormat::RGBA);
 
 	const auto estimatedMaskSize = size.x * size.y / 8;
 	const auto estimatedVRAM = size.x * size.y * TextureDescriptor::getBytesPerPixel(format);
+	const auto estimatedPixelData = retainPixelData ? estimatedVRAM : 0;
 
 	ResourceMemoryUsage result;
-	result.ramUsage = sizeof(*this) + estimatedMaskSize;
+	result.ramUsage = sizeof(*this) + estimatedMaskSize + estimatedPixelData;
 	result.vramUsage = estimatedVRAM;
 	return result;
 }
@@ -123,6 +128,7 @@ void Texture::moveFrom(Texture& other)
 	unloadable = other.unloadable;
 	loaderFunc = std::move(other.loaderFunc);
 	expectedTextureFormat = other.expectedTextureFormat;
+	lastLoadedMemoryUsage.reset();
 }
 
 bool Texture::canUnload() const
@@ -138,6 +144,7 @@ bool Texture::doRequestLoading()
 
 bool Texture::doRequestUnloading()
 {
+	lastLoadedMemoryUsage = getMemoryUsage();
 	clearTexture();
 	descriptor = {};
 	mask = {};
