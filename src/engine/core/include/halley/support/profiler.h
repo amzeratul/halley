@@ -25,6 +25,9 @@ namespace Halley {
 		CoreRender,
 		CoreVSync,
 
+		CoreStartFrameData,
+		CoreStartFrame,
+
 		PainterDrawCall,
 		PainterEndRender,
 		PainterUpdateProjection,
@@ -69,6 +72,9 @@ namespace Halley {
 				"CoreStartRender",
 				"CoreRender",
 				"CoreVSync",
+
+				"CoreStartFrameData",
+				"CoreStartFrame",
 
 				"PainterDrawCall",
 				"PainterEndRender",

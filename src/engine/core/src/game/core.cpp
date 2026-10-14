@@ -396,6 +396,7 @@ void Core::clearPresses()
 void Core::runStartFrame(Time time)
 {
 	if (currentStage) {
+		ProfilerEvent event(ProfilerEventType::CoreStartFrame);
 		currentStage->onStartFrame(time, *frameDataUpdate);
 	}
 }
@@ -704,6 +705,7 @@ void Core::finishPainterRender()
 
 void Core::startFrameData(bool multithreaded, Time time)
 {
+	ProfilerEvent event(ProfilerEventType::CoreStartFrameData);
 	if (multithreaded) {
 		std::swap(frameDataUpdate, frameDataRender);
 	} else {

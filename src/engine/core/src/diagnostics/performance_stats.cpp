@@ -762,6 +762,8 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 		return Colour4f(0.1f, 0.1f, 1.0f);
 	case ProfilerEventType::CoreFixedUpdate:
 	case ProfilerEventType::CoreVariableUpdate:
+	case ProfilerEventType::CoreStartFrame:
+	case ProfilerEventType::CoreStartFrameData:
 	case ProfilerEventType::WorldSystemUpdate:
 	case ProfilerEventType::WorldFixedUpdate:
 	case ProfilerEventType::WorldVariableUpdate:
