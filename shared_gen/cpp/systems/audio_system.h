@@ -1,4 +1,4 @@
-// Halley codegen version 150
+// Halley codegen version 152
 #pragma once
 
 #include <halley.hpp>
@@ -25,8 +25,8 @@ public:
 		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
-			prefetchL2(&audioListener);
-			prefetchL2(&transform2D);
+			prefetchObjectHeadL1<2>(audioListener);
+			prefetchObjectHeadL1<2>(transform2D);
 		}
 	
 	protected:
@@ -47,9 +47,9 @@ public:
 		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
-			prefetchL2(&audioSource);
-			prefetchL2(&transform2D);
-			prefetchL2(velocity.tryGet());
+			prefetchObjectHeadL1<2>(audioSource);
+			prefetchObjectHeadL1<2>(transform2D);
+			if (const auto* p = velocity.tryGet()) { prefetchL1(p); }
 		}
 	
 	protected:

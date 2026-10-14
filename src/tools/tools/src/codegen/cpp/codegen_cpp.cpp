@@ -551,9 +551,16 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			return MemberSchema(TypeSchema(type, !comp.write), lowerFirst(comp.name));
 		});
 
+		constexpr size_t maxPrefetchedRequired = 3;
+		size_t nRequired = 0;
 		Vector<String> prefetchBody;
 		for (const auto& comp: fam.components) {
-			prefetchBody += "prefetchL2(" + (comp.optional ? (lowerFirst(comp.name) + ".tryGet()") : ("&" + lowerFirst(comp.name))) + ");";
+			const auto name = lowerFirst(comp.name);
+			if (comp.optional) {
+				prefetchBody += "if (const auto* p = " + name + ".tryGet()) { prefetchL1(p); }";
+			} else if (nRequired++ < maxPrefetchedRequired) {
+				prefetchBody += "prefetchObjectHeadL1<2>(" + name + ");";
+			}
 		}
 
 		sysClassGen

@@ -1,4 +1,4 @@
-// Halley codegen version 150
+// Halley codegen version 152
 #pragma once
 
 #include <halley.hpp>
@@ -19,7 +19,7 @@ public:
 		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
-			prefetchL2(&scriptable);
+			prefetchObjectHeadL1<2>(scriptable);
 		}
 	
 	protected:
@@ -37,7 +37,7 @@ public:
 		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
-			prefetchL2(&scriptTagTarget);
+			prefetchObjectHeadL1<2>(scriptTagTarget);
 		}
 	
 	protected:

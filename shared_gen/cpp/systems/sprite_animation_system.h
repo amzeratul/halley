@@ -1,4 +1,4 @@
-// Halley codegen version 150
+// Halley codegen version 152
 #pragma once
 
 #include <halley.hpp>
@@ -30,10 +30,10 @@ public:
 		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
-			prefetchL2(&sprite);
-			prefetchL2(&spriteAnimation);
-			prefetchL2(spriteAnimationEvents.tryGet());
-			prefetchL2(&transform2D);
+			prefetchObjectHeadL1<2>(sprite);
+			prefetchObjectHeadL1<2>(spriteAnimation);
+			if (const auto* p = spriteAnimationEvents.tryGet()) { prefetchL1(p); }
+			prefetchObjectHeadL1<2>(transform2D);
 		}
 	
 	protected:
@@ -57,10 +57,9 @@ public:
 		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
-			prefetchL2(&sprite);
-			prefetchL2(&spriteAnimation);
-			prefetchL2(&spriteAnimationReplicator);
-			prefetchL2(&transform2D);
+			prefetchObjectHeadL1<2>(sprite);
+			prefetchObjectHeadL1<2>(spriteAnimation);
+			prefetchObjectHeadL1<2>(spriteAnimationReplicator);
 		}
 	
 	protected:

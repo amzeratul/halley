@@ -61,7 +61,7 @@ namespace Halley {
 #define FAMILY_BINDING_DEBUG_ITERATORS
 #endif
 
-#if !defined(NN_NINTENDO_SDK) && !defined(_GAMING_XBOX_XBOXONE)
+#if !defined(NN_NINTENDO_SDK)
 #define FAMILY_BINDING_PREFETCH
 #endif
 	

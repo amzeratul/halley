@@ -422,4 +422,12 @@ namespace Halley {
 		constexpr size_t lines = (sizeof(T) + cacheLineSize - 1) / cacheLineSize;
 		prefetchLinesL2<lines, cacheLineSize>(addr);
 	}
+	
+	template <size_t maxLines, typename T>
+	static inline void prefetchObjectHeadL1(const T& v)
+	{
+		constexpr size_t cacheLineSize = 64;
+		constexpr size_t lines = std::min(maxLines, (sizeof(T) + cacheLineSize - 1) / cacheLineSize);
+		prefetchLinesL1<static_cast<int>(lines), cacheLineSize>(reinterpret_cast<const char*>(&v));
+	}
 }

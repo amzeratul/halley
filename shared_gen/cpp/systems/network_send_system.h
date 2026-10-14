@@ -1,4 +1,4 @@
-// Halley codegen version 150
+// Halley codegen version 152
 #pragma once
 
 #include <halley.hpp>
@@ -23,8 +23,8 @@ public:
 		using ExclusionType = Halley::FamilyType<>;
 	
 		void prefetch() const {
-			prefetchL2(&network);
-			prefetchL2(transform2D.tryGet());
+			prefetchObjectHeadL1<2>(network);
+			if (const auto* p = transform2D.tryGet()) { prefetchL1(p); }
 		}
 	
 	protected:
