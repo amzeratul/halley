@@ -147,7 +147,6 @@ namespace Halley {
 					memcpy(static_cast<void*>(this), &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
-					shrink_to_fit();
 					memcpy(data(), other.data(), other.size() * sizeof(T));
 				}
 			} else {
@@ -1067,7 +1066,9 @@ namespace Halley {
 					other.clear();
 				}
 
-				shrink_to_fit();
+				if (size() < capacity() / 2) {
+					shrink_to_fit();
+				}
 				other.shrink_to_fit();
 			} else {
 				// No SBO, steal data
