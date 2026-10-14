@@ -395,7 +395,6 @@ void Core::clearPresses()
 
 void Core::runStartFrame(Time time)
 {
-
 	if (currentStage) {
 		currentStage->onStartFrame(time, *frameDataUpdate);
 	}
@@ -427,6 +426,7 @@ void Core::updatePlatform()
 
 void Core::updateResources(Time time)
 {
+	ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
 	resourceUnloaderFrameIdx = resourceUnloader->startFrame();
 
 	if (auto* i18n = game->tryGetI18N()) {
