@@ -246,13 +246,15 @@ void AsyncResource::startFrame(float dt, uint32_t frameIdx) const
 
 void AsyncResource::markActivelyInUse() const
 {
-	usageData.lastFrameInUse = curFrame;
-	requestLoading();
+	markActivelyInUse(curFrame);
 }
 
 void AsyncResource::markActivelyInUse(uint32_t frameIdx) const
 {
 	usageData.lastFrameInUse = frameIdx;
+	if (desiredLoadState.load(std::memory_order_relaxed) == ResourceDesiredLoadState::Unload && loadState.load(std::memory_order_relaxed) != State::Unloaded) {
+		setDesiredLoadState(ResourceDesiredLoadState::Load);
+	}
 	requestLoading();
 }
 
@@ -268,6 +270,10 @@ bool AsyncResource::hasFailed() const
 
 void AsyncResource::setDesiredLoadState(ResourceDesiredLoadState state) const
 {
+	if (desiredLoadState.load(std::memory_order_relaxed) == state) {
+		return;
+	}
+	UniqueLock lock(loadData->loadMutex);
 	desiredLoadState = state;
 }
 
@@ -293,7 +299,8 @@ bool AsyncResource::requestUnloading() const
 {
 	if (loadState.load(std::memory_order::relaxed) == State::Loaded) {
 		UniqueLock lock(loadData->loadMutex);
-		if (desiredLoadState == ResourceDesiredLoadState::Unload && loadState == State::Loaded && curFrame > usageData.lastFrameInUse + 1) {
+		constexpr uint32_t minFramesSinceUse = 4;
+		if (desiredLoadState == ResourceDesiredLoadState::Unload && loadState == State::Loaded && curFrame > usageData.lastFrameInUse + minFramesSinceUse) {
 			return const_cast<AsyncResource*>(this)->doRequestUnloading();
 		}
 	}

@@ -26,7 +26,6 @@ namespace Halley {
             std::shared_ptr<const AsyncResource> res;
             bool loaded = false;
             bool markAsLoading = false;
-            bool markAsUnloading = false;
 			ResourceDesiredLoadState desiredState = ResourceDesiredLoadState::Load;
             size_t memoryUsage = 0;
             Time timeSinceUse = 0;
@@ -59,7 +58,7 @@ namespace Halley {
         Vector<float> frameTimes;
 
         constexpr static float maxTimeLogged = 15.0; // seconds
-
+        
         HashMap<ResourceDesiredLoadState, StateCollection> lastStates;
 
         Future<void> pendingUpdate;

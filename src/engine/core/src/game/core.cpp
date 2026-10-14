@@ -472,6 +472,8 @@ void Core::tickFrame(Time time)
 
 	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
 
+	// Unload resources when neither update nor render is running
+	updateResources(time);
 	startFrameData(multithreaded, time);
 	runStartFrame(time);
 
@@ -554,7 +556,6 @@ void Core::preUpdate(Time time)
 		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update(time);
 	}
-	updateResources(time);
 	if (api->audioInternal) {
 		api->audioInternal->onStartFrame();
 	}

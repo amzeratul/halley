@@ -14,7 +14,7 @@ ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget)
 ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget)
 	: budget(budget)
 	, staleBudget(staleBudget)
-{	
+{
 }
 
 bool ResourceUnloader::LoadStateInfo::operator<(const LoadStateInfo& other) const
@@ -48,6 +48,7 @@ void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 	}
 	
 	const float dt = static_cast<float>(origDt);
+	++frameIdx;
 
 	for (const auto& [type, rule]: rules.rules) {
 		prepareCollection(dt, resources.ofType(type));
@@ -65,8 +66,6 @@ void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 		for (const auto& [type, rule]: rules.rules) {
 			updateCollection(dt, resources.ofType(type), rule);
 		}
-
-		++frameIdx;
 	});
 }
 
@@ -101,6 +100,17 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 
 	const bool verbose = false;
 
+	// Do unloads
+	// Unloads moved to happen on start of frame to avoid race conditions
+	size_t pendingUnloadMemory = 0;
+	const auto evict = [&] (LoadStateInfo& s) {
+		pendingUnloadMemory += s.memoryUsage;
+		s.res->setDesiredLoadState(ResourceDesiredLoadState::Unload);
+		if (verbose) {
+			Logger::logDev(String("Evicting [") + toString(collection.getAssetType()) + "] " + s.res->getAssetId());
+		}
+	};
+
 	auto& states = lastStates;
 	for (auto& [k, v]: states) {
 		v.curMemoryUsage = 0;
@@ -120,7 +130,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	// Anything marked as "Unload" will be unloaded
 	for (auto& s: states[ResourceDesiredLoadState::Unload].states) {
 		if (s.loaded) {
-			s.markAsUnloading = true;
+			pendingUnloadMemory += s.memoryUsage;
 			curMemoryUsage -= s.memoryUsage;
 		}
 	}
@@ -152,10 +162,10 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	// Otherwise it's OK to keep them around
 	for (auto& s: states[ResourceDesiredLoadState::Stale].states) {
 		if (s.loaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
-			s.markAsUnloading = true;
+			evict(s);
 			memoryUsageWithAllPreloads -= s.memoryUsage;
 			curMemoryUsage -= s.memoryUsage;
-		} else {
+		} else if (s.loaded) {
 			++unloadableKept;
 		}
 	}
@@ -165,10 +175,10 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	for (const auto state: { ResourceDesiredLoadState::PreloadLowPriority, ResourceDesiredLoadState::Preload }) {
 		for (auto& s: states[state].states) {
 			if (s.loaded && curMemoryUsage > rules.budget) {
-				s.markAsUnloading = true;
+				evict(s);
 				curMemoryUsage -= s.memoryUsage;
 				preloadUnloaded = true;
-			} else {
+			} else if (s.loaded) {
 				++unloadableKept;
 			}
 		}
@@ -179,7 +189,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 		for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
 			bool preloadingAny = false;
 			for (auto& s: states[state].states) {
-				if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+				if (!s.loaded && curMemoryUsage + pendingUnloadMemory + s.memoryUsage <= rules.budget) {
 					s.markAsLoading = true;
 					curMemoryUsage += s.memoryUsage;
 					preloadingAny = true;
@@ -201,28 +211,13 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	}
 
 	// If we've run out of memory and there was nothing else we could have unloaded, notify error
-	if (curMemoryUsage > static_cast<size_t>(rules.budget * 1.1f) && unloadableKept > 0) {
+	if (curMemoryUsage > static_cast<size_t>(rules.budget * 1.1f) && unloadableKept == 0) {
 		if (budgetMessageTimeout <= 0.001) {
 			Logger::logError("Memory budget for " + toString(collection.getAssetType()) + " exceeded: "
 				+ String::prettySize(curMemoryUsage) + "/" + String::prettySize(rules.budget));
 			budgetMessageTimeout = 1.0;
 		}
 	}
-
-	// Do unloads
-	// Unloads moved to happen on start of frame to avoid race conditions
-	/*
-	for (auto& [type, stateCol]: states) {
-		for (auto& state: stateCol.states) {
-			if (state.markAsUnloading) {
-				const bool unloaded = state.res->requestUnloading();
-				if (unloaded && verbose) {
-					Logger::logDev(String("Unloaded [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
-				}
-			}
-		}
-	}
-	*/
 
 	// Do loads, in this specific order
 	for (auto& type: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
@@ -291,7 +286,7 @@ uint32_t ResourceUnloader::getFramesSince(uint32_t idx) const
 template <typename T>
 ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T> res, float t) const
 {
-	const AsyncResource::UsagePattern usagePattern = res->getUsagePattern();
+	const AsyncResource::UsagePattern& usagePattern = res->getUsagePattern();
 	const auto loaded = res->isLoaded();
 	const ResourceMemoryUsage memoryUsage = loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
 
@@ -316,6 +311,10 @@ ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T
 	} else if (timeSinceInUse < 15 || timeSinceInBackground < 10) {
 		state.desiredState = ResourceDesiredLoadState::Stale;
 	} else {
+		state.desiredState = ResourceDesiredLoadState::Unload;
+	}
+
+	if (loaded && state.desiredState != ResourceDesiredLoadState::Load && res->getDesiredLoadState() == ResourceDesiredLoadState::Unload) {
 		state.desiredState = ResourceDesiredLoadState::Unload;
 	}
 	res->setDesiredLoadState(state.desiredState);

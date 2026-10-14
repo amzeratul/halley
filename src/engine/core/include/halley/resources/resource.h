@@ -291,9 +291,9 @@ namespace Halley
 		};
 
 		struct UsagePattern {
-			uint32_t lastFrameInUse = 0;
-			uint32_t lastFrameInBackground = 0;
-			uint32_t lastFrameInBackgroundLowPriority = 0;
+			std::atomic<uint32_t> lastFrameInUse = 0;
+			std::atomic<uint32_t> lastFrameInBackground = 0;
+			std::atomic<uint32_t> lastFrameInBackgroundLowPriority = 0;
 		};
 
 		AsyncResource();
@@ -344,7 +344,7 @@ namespace Halley
 
 		std::atomic<bool> failed;
 		std::atomic<State> loadState;
-		mutable ResourceDesiredLoadState desiredLoadState = ResourceDesiredLoadState::Undefined;
+		mutable std::atomic<ResourceDesiredLoadState> desiredLoadState = ResourceDesiredLoadState::Undefined;
 
 		mutable uint32_t curFrame = 0;
 		mutable ValuePtr<LoadData> loadData;
