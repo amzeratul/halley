@@ -1,4 +1,4 @@
-// Halley codegen version 152
+// Halley codegen version 153
 #pragma once
 
 #include <halley.hpp>
@@ -49,7 +49,7 @@ public:
 		void prefetch() const {
 			prefetchObjectHeadL1<2>(audioSource);
 			prefetchObjectHeadL1<2>(transform2D);
-			if (const auto* p = velocity.tryGet()) { prefetchL1(p); }
+			if (const auto* p = velocity.tryGet()) { prefetchObjectHeadL1<1>(*p); }
 		}
 	
 	protected:

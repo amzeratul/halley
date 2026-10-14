@@ -1,4 +1,4 @@
-// Halley codegen version 152
+// Halley codegen version 153
 #pragma once
 
 #include <halley.hpp>
@@ -24,7 +24,7 @@ public:
 	
 		void prefetch() const {
 			prefetchObjectHeadL1<2>(network);
-			if (const auto* p = transform2D.tryGet()) { prefetchL1(p); }
+			if (const auto* p = transform2D.tryGet()) { prefetchObjectHeadL1<1>(*p); }
 		}
 	
 	protected:

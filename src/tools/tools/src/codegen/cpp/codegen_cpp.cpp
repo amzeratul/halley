@@ -552,12 +552,16 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		});
 
 		constexpr size_t maxPrefetchedRequired = 3;
+		constexpr size_t maxPrefetchedOptional = 4;
 		size_t nRequired = 0;
+		size_t nOptional = 0;
 		Vector<String> prefetchBody;
 		for (const auto& comp: fam.components) {
 			const auto name = lowerFirst(comp.name);
 			if (comp.optional) {
-				prefetchBody += "if (const auto* p = " + name + ".tryGet()) { prefetchL1(p); }";
+				if (nOptional++ < maxPrefetchedOptional) {
+					prefetchBody += "if (const auto* p = " + name + ".tryGet()) { prefetchObjectHeadL1<1>(*p); }";
+				}
 			} else if (nRequired++ < maxPrefetchedRequired) {
 				prefetchBody += "prefetchObjectHeadL1<2>(" + name + ");";
 			}

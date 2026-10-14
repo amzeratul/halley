@@ -1,4 +1,4 @@
-// Halley codegen version 152
+// Halley codegen version 153
 #pragma once
 
 #include <halley.hpp>
@@ -32,7 +32,7 @@ public:
 		void prefetch() const {
 			prefetchObjectHeadL1<2>(sprite);
 			prefetchObjectHeadL1<2>(spriteAnimation);
-			if (const auto* p = spriteAnimationEvents.tryGet()) { prefetchL1(p); }
+			if (const auto* p = spriteAnimationEvents.tryGet()) { prefetchObjectHeadL1<1>(*p); }
 			prefetchObjectHeadL1<2>(transform2D);
 		}
 	
