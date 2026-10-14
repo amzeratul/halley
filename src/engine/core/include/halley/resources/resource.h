@@ -316,11 +316,11 @@ namespace Halley
 
 		void startFrame(float dt, uint32_t frameIdx) const final;
 		void markActivelyInUse() const;
-		void markBackgroundLoaded() const { usageData.lastFrameInBackground = curFrame; }
-		void markLowPriorityBackgroundLoaded() const { usageData.lastFrameInBackgroundLowPriority = curFrame; }
+		void markBackgroundLoaded() const { usageData.lastFrameInBackground.store(curFrame, std::memory_order_relaxed); }
+		void markLowPriorityBackgroundLoaded() const { usageData.lastFrameInBackgroundLowPriority.store(curFrame, std::memory_order_relaxed); }
 		void markActivelyInUse(uint32_t frameIdx) const;
-		void markBackgroundLoaded(uint32_t frameIdx) const { usageData.lastFrameInBackground = frameIdx; }
-		void markLowPriorityBackgroundLoaded(uint32_t frameIdx) const { usageData.lastFrameInBackgroundLowPriority = frameIdx; }
+		void markBackgroundLoaded(uint32_t frameIdx) const { usageData.lastFrameInBackground.store(frameIdx, std::memory_order_relaxed); }
+		void markLowPriorityBackgroundLoaded(uint32_t frameIdx) const { usageData.lastFrameInBackgroundLowPriority.store(frameIdx, std::memory_order_relaxed); }
 		void markUnload();
 		const UsagePattern& getUsagePattern() const { return usageData; }
 
