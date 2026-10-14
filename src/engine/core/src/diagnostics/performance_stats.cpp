@@ -636,7 +636,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 	const auto duration = std::max<int64_t>(16'999'999LL, alignUp<int64_t>(lastProfileData->getTotalElapsedTime(), 1'000'000LL) - 1);
 	const auto lastTimeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
 	frameLengths.pushValue(lastTimeRange.getLength());
-	const auto max = frameLengths.getMax();
+	const auto max = std::min<int64_t>(frameLengths.getMax(), 33'000'000ll);
 	if (max > curFrameLength) {
 		framesIncreased++;
 		if (framesIncreased >= 3 || curFrameLength < 1000) {
