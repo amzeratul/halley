@@ -314,13 +314,36 @@ namespace Halley
 		void waitForLoad(bool acceptFailed = false, std::optional<int> notifyIfMoreThanUs = 10'000) const;
 		Future<void> onLoad() const;
 
-		void startFrame(float dt, uint32_t frameIdx) const final;
-		void markActivelyInUse() const;
+		void startFrame(float dt, uint32_t frameIdx) const final
+		{
+			curFrame = frameIdx;
+			if (desiredLoadState.load(std::memory_order_relaxed) == ResourceDesiredLoadState::Unload) [[unlikely]] {
+				requestUnloading();
+			}
+		}
+
+		void markActivelyInUse() const
+		{
+			markActivelyInUse(curFrame);
+		}
+
+		void markActivelyInUse(uint32_t frameIdx) const
+		{
+			usageData.lastFrameInUse.store(frameIdx, std::memory_order_relaxed);
+			const auto state = loadState.load(std::memory_order::relaxed);
+			if (state == State::Unloaded) [[unlikely]] {
+				requestLoading();
+			} else if (desiredLoadState.load(std::memory_order_relaxed) == ResourceDesiredLoadState::Unload) [[unlikely]] {
+				setDesiredLoadState(ResourceDesiredLoadState::Load);
+			}
+		}
+
 		void markBackgroundLoaded() const { usageData.lastFrameInBackground.store(curFrame, std::memory_order_relaxed); }
-		void markLowPriorityBackgroundLoaded() const { usageData.lastFrameInBackgroundLowPriority.store(curFrame, std::memory_order_relaxed); }
-		void markActivelyInUse(uint32_t frameIdx) const;
 		void markBackgroundLoaded(uint32_t frameIdx) const { usageData.lastFrameInBackground.store(frameIdx, std::memory_order_relaxed); }
+
+		void markLowPriorityBackgroundLoaded() const { usageData.lastFrameInBackgroundLowPriority.store(curFrame, std::memory_order_relaxed); }
 		void markLowPriorityBackgroundLoaded(uint32_t frameIdx) const { usageData.lastFrameInBackgroundLowPriority.store(frameIdx, std::memory_order_relaxed); }
+		
 		void markUnload();
 		const UsagePattern& getUsagePattern() const { return usageData; }
 

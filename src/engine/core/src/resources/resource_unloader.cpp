@@ -87,7 +87,8 @@ void ResourceUnloader::prepareCollection(float dt, ResourceCollectionBase& colle
 
 	collection.getAllResources(tmpResources);
 	for (const auto* resource: tmpResources) {
-		resource->startFrame(dt, frameIdx);
+		HalleyAssertDebug(dynamic_cast<const AsyncResource*>(resource) == static_cast<const AsyncResource*>(resource));
+		static_cast<const AsyncResource*>(resource)->startFrame(dt, frameIdx);
 	}
 }
 

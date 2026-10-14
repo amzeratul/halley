@@ -236,28 +236,6 @@ Future<void> AsyncResource::onLoad() const
 	}
 }
 
-void AsyncResource::startFrame(float dt, uint32_t frameIdx) const
-{
-	curFrame = frameIdx;
-	if (desiredLoadState == ResourceDesiredLoadState::Unload) {
-		requestUnloading();
-	}
-}
-
-void AsyncResource::markActivelyInUse() const
-{
-	markActivelyInUse(curFrame);
-}
-
-void AsyncResource::markActivelyInUse(uint32_t frameIdx) const
-{
-	usageData.lastFrameInUse.store(frameIdx, std::memory_order_relaxed);
-	if (desiredLoadState.load(std::memory_order_relaxed) == ResourceDesiredLoadState::Unload && loadState.load(std::memory_order_relaxed) != State::Unloaded) {
-		setDesiredLoadState(ResourceDesiredLoadState::Load);
-	}
-	requestLoading();
-}
-
 bool AsyncResource::hasSucceeded() const
 {
 	return !failed;
