@@ -238,7 +238,7 @@ void ProfilerCapture::startFrame(bool rec, Time dt)
 {
 	HalleyAssertDev(state != State::FrameStarted);
 	
-	if (state == State::Idle) {
+	if (true || state == State::Idle) {
 		frameStartTime = std::chrono::steady_clock::now();
 	} else {
 		frameStartTime = frameEndTime;
