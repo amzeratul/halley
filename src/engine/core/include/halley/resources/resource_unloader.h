@@ -43,6 +43,7 @@ namespace Halley {
     public:
         ResourceUnloader(Resources& resources, SystemAPI& systemAPI);
 
+        uint32_t startFrame();
         void update(Time t, const ResourceUnloaderRules& rules);
         uint32_t getFrameIdx() const;
 
@@ -62,6 +63,7 @@ namespace Halley {
         HashMap<ResourceDesiredLoadState, StateCollection> lastStates;
 
         Future<void> pendingUpdate;
+        Vector<Resource*> tmpResources;
 
         void prepareCollection(float t, ResourceCollectionBase& collection);
         void updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);

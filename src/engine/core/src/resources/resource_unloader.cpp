@@ -41,14 +41,19 @@ ResourceUnloader::ResourceUnloader(Resources& resources, SystemAPI& systemAPI)
 {
 }
 
-void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
+uint32_t ResourceUnloader::startFrame()
 {
 	if (pendingUpdate.isValid()) {
 		pendingUpdate.wait();
 	}
 	
-	const float dt = static_cast<float>(origDt);
 	++frameIdx;
+	return frameIdx;
+}
+
+void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
+{
+	const float dt = static_cast<float>(origDt);
 
 	for (const auto& [type, rule]: rules.rules) {
 		prepareCollection(dt, resources.ofType(type));
@@ -80,9 +85,10 @@ void ResourceUnloader::prepareCollection(float dt, ResourceCollectionBase& colle
 		return;
 	}
 
-	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
+	collection.getAllResources(tmpResources);
+	for (const auto* resource: tmpResources) {
 		resource->startFrame(dt, frameIdx);
-	});
+	}
 }
 
 void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules)

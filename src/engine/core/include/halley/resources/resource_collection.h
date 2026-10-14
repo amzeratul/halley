@@ -94,6 +94,7 @@ namespace Halley
 		}
 
 		Vector<std::shared_ptr<Resource>> getAllResources() const;
+		void getAllResources(Vector<Resource*>& dst) const;
 
 #ifdef VIRTUAL_RESOURCE_GET
 		virtual std::shared_ptr<Resource> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal, bool allowFallback = true);

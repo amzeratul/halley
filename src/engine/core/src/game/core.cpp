@@ -427,9 +427,7 @@ void Core::updatePlatform()
 
 void Core::updateResources(Time time)
 {
-	ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
-	resourceUnloader->update(time, game->getResourceUnloaderRules());
-	resourceUnloaderFrameIdx = resourceUnloader->getFrameIdx();
+	resourceUnloaderFrameIdx = resourceUnloader->startFrame();
 
 	if (auto* i18n = game->tryGetI18N()) {
 		const auto language = i18n->getCurrentLanguage();
@@ -552,6 +550,10 @@ void Core::update(Time time, bool multithreaded)
 
 void Core::preUpdate(Time time)
 {
+	{
+		ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
+		resourceUnloader->update(time, game->getResourceUnloaderRules());
+	}
 	if (devConClient) {
 		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update(time);

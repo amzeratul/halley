@@ -236,6 +236,18 @@ Vector<std::shared_ptr<Resource>> ResourceCollectionBase::getAllResources() cons
 	return result;
 }
 
+void ResourceCollectionBase::getAllResources(Vector<Resource*>& dst) const
+{
+	dst.clear();
+	SharedLock lock(mutex);
+	dst.reserve(nextPowerOf2(resources.size()));
+	for (auto& r: resources) {
+		if (r.res) {
+			dst += r.res.get();
+		}
+	}
+}
+
 #ifdef VIRTUAL_RESOURCE_GET
 std::shared_ptr<Resource> ResourceCollectionBase::get(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {
