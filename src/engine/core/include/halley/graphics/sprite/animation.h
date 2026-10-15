@@ -35,6 +35,8 @@ namespace Halley
 			return duration;
 		}
 
+		bool operator==(const AnimationFrame& other) const = default;
+
 	private:
 		Vector<const SpriteSheetEntry*> sprites;
 		int duration;
@@ -49,6 +51,8 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		bool operator==(const AnimationFrameDefinition& other) const = default;
 
 	private:
 		String imageName;
@@ -84,6 +88,8 @@ namespace Halley
 
 		Rect4i getBounds() const;
 
+		bool operator==(const AnimationSequence& other) const = default;
+
 	private:
 		Vector<AnimationFrame> frames;
 		Vector<AnimationFrameDefinition> frameDefinitions;
@@ -113,6 +119,8 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		bool operator==(const AnimationDirection& other) const = default;
+
 	private:
 		String name;
 		String fileName;
@@ -131,6 +139,8 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		bool operator==(const AnimationActionPoint& other) const = default;
 
 	private:
 		String name;
@@ -208,9 +218,12 @@ namespace Halley
 			Vector<AnimationSequence> sequences;
 			Vector<AnimationDirection> directions;
 		};
-		std::shared_ptr<OldData> oldData;
+		Vector<OldData> oldData;
 #endif
 
 		void generateSequenceIndex();
+
+		void moveFromDev(Animation&& other);
+		void moveFrom(Animation&& other);
 	};
 }

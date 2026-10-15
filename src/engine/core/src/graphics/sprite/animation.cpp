@@ -247,19 +247,50 @@ std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 void Animation::reload(Resource&& resource)
 {
 #ifdef DEV_BUILD
-	if (!oldData) {
-		oldData = std::make_shared<OldData>();
-	}
-	oldData->sequences = std::move(sequences);
-	oldData->directions = std::move(directions);
-	auto oldDataTemp = std::move(oldData);
+	moveFromDev(dynamic_cast<Animation&&>(std::move(resource)));
+#else
+	moveFrom(dynamic_cast<Animation&&>(std::move(resource)));
 #endif
+}
 
-	*this = std::move(dynamic_cast<Animation&>(resource));
-
+void Animation::moveFromDev(Animation&& other)
+{
 #ifdef DEV_BUILD
+	// AnimationPlayer keeps a pointer to entries in sequences and directions
+	// This causes dangling pointers on resource reload
+	// The solution is to keep those pointers alive forever
+
+	// SBO would break this, I need this data to live on the heap
+	static_assert(decltype(sequences)::sbo_max_objects() == 0);
+	static_assert(decltype(directions)::sbo_max_objects() == 0);
+
+	// Backup old data before it gets wiped by operator=
+	Vector<OldData> oldDataTemp = std::move(oldData);
+
+	if (sequences == other.sequences && directions == other.directions) {
+		// If sequences and directions haven't changed, we'll just keep the original vectors
+		auto seqBackup = std::move(sequences);
+		auto dirBackup = std::move(directions);
+
+		*this = std::move(other);
+
+		sequences = std::move(seqBackup);
+		directions = std::move(dirBackup);
+	} else {
+		// They've changed, keep old data around (forever)
+		oldDataTemp.emplace_back(OldData{ std::move(sequences), std::move(directions) });
+
+		*this = std::move(other);
+	}
+
+	// Restore this
 	oldData = std::move(oldDataTemp);
 #endif
+}
+
+void Animation::moveFrom(Animation&& other)
+{
+	*this = std::move(other);
 }
 
 void Animation::loadDependencies(ResourceLoader& loader)
