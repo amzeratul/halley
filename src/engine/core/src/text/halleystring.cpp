@@ -1109,15 +1109,6 @@ Vector<String> String::split(std::string_view delimiter, size_t limit) const
 	return result;
 }
 
-std::pair<std::string_view, std::string_view> String::split(std::string_view src, char delimeter)
-{
-	if (const auto pos = src.find(delimeter); pos != std::string_view::npos) {
-		return { src.substr(0, pos), src.substr(pos + 1) };
-	} else {
-		return { src, {} };
-	}
-}
-
 std::string_view String::splitAndAdvance(std::string_view& src, char delimeter)
 {
 	auto [res, next] = split(src, delimeter);

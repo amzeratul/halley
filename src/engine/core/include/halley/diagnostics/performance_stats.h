@@ -24,6 +24,7 @@ namespace Halley
 		PerformanceStatsView(Resources& resources, const HalleyAPI& api, bool local = true);
 		~PerformanceStatsView() override;
 		
+		void update(Time t) override;
 		void paint(Painter& painter) override;
 
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
@@ -147,7 +148,9 @@ namespace Halley
 		HashMap<String, EventHistoryData> systemHistory;
 		HashMap<String, EventHistoryData> scriptHistory;
 		HashMap<String, EventHistoryData> audioHistory;
+
 		std::shared_ptr<ProfilerData> lastProfileData;
+		std::shared_ptr<ProfilerData> pendingProfileData;
 
 		float curMaxTime = 500000.0f;
 		std::chrono::steady_clock::time_point lastUpdateTime;
@@ -172,6 +175,8 @@ namespace Halley
 		int framesIncreased = 0;
 
 		bool paused = false;
+
+		void processProfileData(std::shared_ptr<ProfilerData> data);
 
 		void drawHeader(Painter& painter, bool simple);
 		void drawFrameTimeline(Painter& painter, Rect4f rect);

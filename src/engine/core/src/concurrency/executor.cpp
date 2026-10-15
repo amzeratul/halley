@@ -6,6 +6,7 @@
 #include "halley/support/debug.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/logger.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
@@ -132,9 +133,10 @@ ExecutionQueue& ExecutionQueue::getContinuationDefault()
 	return Executors::get().getImmediate();
 }
 
-Executor::Executor(ExecutionQueue& queue)
+Executor::Executor(ExecutionQueue& queue, std::optional<ProfilerEventType> profilerEventType)
 	: queue(queue)
 	, running(true)
+	, profilerEventType(profilerEventType)
 {
 #if HAS_THREADS
 	queue.onAttached();
@@ -153,6 +155,7 @@ void Executor::runUpTo(size_t n)
 #if HAS_THREADS
 	auto tasks = queue.getUpTo(n);
 	for (auto& t : tasks) {
+		auto event = ProfilerEvent(profilerEventType, t.name);
 		t.task();
 	}
 #endif
@@ -163,6 +166,7 @@ void Executor::runPending()
 #if HAS_THREADS
 	auto tasks = queue.getAll();
 	for (auto& t : tasks) {
+		auto event = ProfilerEvent(profilerEventType, t.name);
 		t.task();
 	}
 #endif
@@ -173,6 +177,7 @@ void Executor::runForever()
 	while (running)	{
 		auto next = queue.getNext();
 		auto trace = StackDebugTrace("taskName", next.name);
+		auto event = ProfilerEvent(profilerEventType, next.name);
 
 		if (Debug::canHandleUncaughtExceptions()) {
 			next.task();
@@ -222,12 +227,12 @@ void SingleThreadExecutor::stop()
 	executor.stop();
 }
 
-ThreadPool::ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread)
+ThreadPool::ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread, std::optional<ProfilerEventType> profilerEventType)
 	: name(name)
 {
 #if HAS_THREADS
 	for (size_t i = 0; i < n; i++) {
-		executors.emplace_back(std::make_unique<Executor>(queue));
+		executors.emplace_back(std::make_unique<Executor>(queue, profilerEventType));
 	}
 	threads.resize(n);
 

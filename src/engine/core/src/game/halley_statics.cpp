@@ -9,6 +9,7 @@
 #include "halley/support/logger.h"
 #include "halley/api/system_api.h"
 #include "halley/game/game_platform.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
@@ -90,9 +91,9 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 		nCPU = std::max(size_t(4), maxThreads - 4);
 	}
 
-	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), nCPU, makeThreadNormalPriority);
-	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), nAuxCPU, makeThreadLowPriority);
-	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), nDiskIO, makeThreadNormalPriority);
+	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), nCPU, makeThreadNormalPriority, ProfilerEventType::ConcurrentTask);
+	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), nAuxCPU, makeThreadLowPriority, ProfilerEventType::ConcurrentTask);
+	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), nDiskIO, makeThreadNormalPriority, ProfilerEventType::DiskIO);
 #endif
 }
 

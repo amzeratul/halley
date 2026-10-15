@@ -441,16 +441,22 @@ void Core::updateResources(Time time)
 
 void Core::onTick(Time delta)
 {
-	auto& capture = ProfilerCapture::get();
 	const bool record = !profileCallbacks.empty();
+
+	// End last frame first (we end it here to make sure it's as close to adjacent to start frame as possible)
+	auto& capture = ProfilerCapture::get();
+	if (capture.hasStartedFrame()) {
+		capture.endFrame();
+		if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
+			onProfileData(std::make_shared<ProfilerData>(capture.getCapture(*api)));
+		}
+	}
+	
+	// Start new profiling frame
 	capture.startFrame(record, delta);
 	
+	// Tick
 	tickFrame(delta);
-
-	capture.endFrame();
-	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
-		onProfileData(std::make_shared<ProfilerData>(capture.getCapture(*api)));
-	}
 }
 
 void Core::tickFrame(Time time)

@@ -234,6 +234,11 @@ bool ProfilerCapture::isRecording() const
 	return recording;
 }
 
+bool ProfilerCapture::hasStartedFrame() const
+{
+	return state == State::FrameStarted;
+}
+
 void ProfilerCapture::startFrame(bool rec, Time dt)
 {
 	HalleyAssertDev(state != State::FrameStarted);
@@ -327,10 +332,28 @@ ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name, uint
 	}
 }
 
+ProfilerEvent::ProfilerEvent(std::optional<ProfilerEventType> type, std::string_view name, uint64_t sourceId)
+	: id(0)
+{
+	if (type) {
+		if (isDevMode() || alwaysLogType(*type)) {
+			id = ProfilerCapture::get().recordEventStart(*type, name, sourceId);
+		}
+	}
+}
+
 ProfilerEvent::~ProfilerEvent() noexcept
 {
 	if (id != 0) {
 		ProfilerCapture::get().recordEventEnd(id);
+	}
+}
+
+void ProfilerEvent::finish()
+{
+	if (id != 0) {
+		ProfilerCapture::get().recordEventEnd(id);
+		id = 0;
 	}
 }
 

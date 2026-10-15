@@ -10,6 +10,7 @@
 
 namespace Halley
 {
+	enum class ProfilerEventType : uint8_t;
 	using TaskBase = std::function<void()>;
 
 	class ExecutionQueue
@@ -86,7 +87,7 @@ namespace Halley
 	class Executor
 	{
 	public:
-		Executor(ExecutionQueue& queue);
+		Executor(ExecutionQueue& queue, std::optional<ProfilerEventType> profilerEventType = {});
 		~Executor();
 
 		void runUpTo(size_t n);
@@ -97,6 +98,9 @@ namespace Halley
 	private:
 		ExecutionQueue& queue;
 		std::atomic<bool> running;
+		std::optional<ProfilerEventType> profilerEventType;
+
+		void runTask();
 	};
 
 	class SingleThreadExecutor {
@@ -121,7 +125,7 @@ namespace Halley
 	public:
 		using MakeThread = std::function<std::thread(String, std::function<void()>)>;
 
-		ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread);
+		ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread, std::optional<ProfilerEventType> profilerEventType = {});
 		~ThreadPool();
 
 	private:

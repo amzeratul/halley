@@ -28,6 +28,8 @@ namespace Halley {
 		CoreStartFrameData,
 		CoreStartFrame,
 
+		ConcurrentTask,
+
 		PainterDrawCall,
 		PainterEndRender,
 		PainterUpdateProjection,
@@ -75,6 +77,8 @@ namespace Halley {
 
 				"CoreStartFrameData",
 				"CoreStartFrame",
+
+				"ConcurrentTask",
 
 				"PainterDrawCall",
 				"PainterEndRender",
@@ -201,6 +205,7 @@ namespace Halley {
     	void recordEventEnd(EventId id, std::chrono::steady_clock::time_point time);
 
     	[[nodiscard]] bool isRecording() const;
+		[[nodiscard]] bool hasStartedFrame() const;
 
     	void startFrame(bool record, Time dt);
     	void endFrame();
@@ -233,7 +238,10 @@ namespace Halley {
 	class ProfilerEvent {
 	public:
 		ProfilerEvent(ProfilerEventType type, std::string_view name = "", uint64_t sourceId = 0);
+		ProfilerEvent(std::optional<ProfilerEventType> type, std::string_view name = "", uint64_t sourceId = 0);
 		~ProfilerEvent() noexcept;
+
+		void finish();
 
 		ProfilerEvent(const ProfilerEvent& other) = delete;
 		ProfilerEvent(ProfilerEvent&& other) = delete;

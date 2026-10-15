@@ -25,7 +25,7 @@ namespace Halley
 		auto execute(ExecutionQueue& e, F f) -> Future<typename std::invoke_result<F>::type>
 		{
 			using R = typename std::invoke_result<F>::type;
-			return TaskQueueHelper<R>::enqueueOn(e, MovableFunction<R>(std::move(f)), typeid(f).name());
+			return TaskQueueHelper<R>::enqueueOn(e, MovableFunction<R>(std::move(f)), getCleanTypeName<decltype(f)>());
 		}
 
 		template <typename F>

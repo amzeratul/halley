@@ -526,6 +526,8 @@ namespace Halley
 		}
 	};
 
+	
+
 	template<typename T>
 	template<typename E, typename F>
 	inline auto Future<T>::then(E & e, F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
@@ -535,7 +537,7 @@ namespace Halley
 
 		auto promise = Promise<R>();
 		data->addContinuation([promise, f, executor](typename TaskHelper<T>::DataType v) mutable {
-			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, typeid(f).name());
+			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, getCleanTypeName<decltype(f)>());
 		});
 		return promise.getFuture();
 	}
@@ -551,7 +553,7 @@ namespace Halley
 
 		auto promise = Promise<R>();
 		data->addContinuation([promise, f, executor, flag=NonOwningAliveFlag(flag)](typename TaskHelper<T>::DataType v) mutable {
-			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, typeid(f).name(), &flag);
+			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, getCleanTypeName<decltype(f)>(), &flag);
 		});
 		return promise.getFuture();
 	}

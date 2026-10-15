@@ -245,7 +245,15 @@ namespace Halley {
 		[[nodiscard]] Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 		[[nodiscard]] Vector<String> split(std::string_view delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 
-		[[nodiscard]] static std::pair<std::string_view, std::string_view> split(std::string_view src, char delimeter);
+		[[nodiscard]] constexpr static std::pair<std::string_view, std::string_view> split(std::string_view src, char delimeter)
+		{
+			if (const auto pos = src.find(delimeter); pos != std::string_view::npos) {
+				return { src.substr(0, pos), src.substr(pos + 1) };
+			} else {
+				return { src, {} };
+			}
+		}
+
 		[[nodiscard]] static std::string_view splitAndAdvance(std::string_view& src, char delimeter);
 		[[nodiscard]] static gsl::span<std::string_view> splitToBuffer(std::string_view src, char delimeter, gsl::span<std::string_view> buffer);
 
@@ -369,6 +377,33 @@ namespace Halley {
 	constexpr void UnicodeViewIterator<T>::next()
 	{
 		nextValue = String::extractNextCharacterAndAdvance(view).value_or(0);
+	}
+
+	template <typename T>
+	constexpr static std::string_view getCleanTypeName()
+	{
+#ifdef _MSC_VER
+		const std::string_view rawName = typeid(T).name();
+		
+		auto src = rawName;
+		bool foundCallConvention = false;
+		do {
+			auto [str, remainder] = String::split(src, ' ');
+			if (foundCallConvention) {
+				auto [a, b] = String::split(str, '(');
+				return a;
+			}
+			if (str == "__cdecl" || str == "__stdcall" || str == "__fastcall") {
+				foundCallConvention = true;
+			}
+			src = remainder;
+		} while (!src.empty());
+
+		// Failed
+		return rawName;
+#else
+		return typeid(T).name();
+#endif
 	}
 }
 

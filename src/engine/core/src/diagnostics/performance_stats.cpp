@@ -61,6 +61,14 @@ PerformanceStatsView::~PerformanceStatsView()
 	}
 }
 
+void PerformanceStatsView::update(Time t)
+{
+	StatsView::update(t);
+	if (pendingProfileData) {
+		processProfileData(std::move(pendingProfileData));
+	}
+}
+
 void PerformanceStatsView::paint(Painter& painter)
 {
 	ProfilerEvent event(ProfilerEventType::StatsView, "", reinterpret_cast<uint64_t>(this));
@@ -113,9 +121,13 @@ void PerformanceStatsView::paint(Painter& painter)
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	if (paused) {
-		return;
-	}
+	if (!paused) {
+		pendingProfileData = std::move(data);
+	}	
+}
+
+void PerformanceStatsView::processProfileData(std::shared_ptr<ProfilerData> data)
+{
 	if (!data) {
 		vsyncTime.clear();
 		updateTime.clear();
@@ -751,7 +763,7 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 {
 	switch (type) {
 	case ProfilerEventType::CoreVSync:
-		return Colour4f(0.6f, 0.6f, 0.4f);
+		return Colour4f(0.7f, 0.5f, 0.1f);
 	case ProfilerEventType::CoreUpdate:
 	case ProfilerEventType::CoreUpdatePlatform:
 	case ProfilerEventType::CoreUpdateResources:
@@ -769,6 +781,8 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 	case ProfilerEventType::WorldVariableUpdate:
 	case ProfilerEventType::WorldSystemMessages:
 		return Colour4f(0.1f, 0.1f, 0.7f);
+	case ProfilerEventType::ConcurrentTask:
+		return Colour4f(0.1f, 0.7f, 0.3f);
 	case ProfilerEventType::CoreRender:
 	case ProfilerEventType::WorldSystemRender:
 	case ProfilerEventType::WorldRender:
@@ -1031,9 +1045,13 @@ void PerformanceStatsView::drawToolTip(Painter& painter, Rect4f rect)
 		return;
 	}
 
+	const auto w = toolTipLabel.getExtents(curToolTip->second).x;
+	auto pos = curToolTip->first;
+	pos.x = clamp(pos.x, rect.getLeft() + w / 2, rect.getRight() - w / 2);
+
 	toolTipLabel
 		.setOffset(Vector2f(0.5f, 1.0f))
-		.setPosition(curToolTip->first)
+		.setPosition(pos)
 		.setText(curToolTip->second)
 		.draw(painter);
 }
