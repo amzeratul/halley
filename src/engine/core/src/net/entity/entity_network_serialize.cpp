@@ -862,6 +862,13 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
             deserializer.rewind(marker);
             deserializer.skipBytes(size);
 
+            uint8_t skipNumComponentsRemoved;
+            deserializer >> skipNumComponentsRemoved;
+            for (uint8_t i = 0; i < skipNumComponentsRemoved; i++) {
+                uint16_t componentIdToRemove;
+                deserializer >> componentIdToRemove;
+            }
+
             fetchNextPage(deserializer, type, size);
 
             if (type == EntityNetworkChanges::Type::EntityIdentity) {
