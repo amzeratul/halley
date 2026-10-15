@@ -7,6 +7,7 @@
 #include "halley/text/localised_string.h"
 #include "halley/text/string_output_server.h"
 #include "halley/utils/algorithm.h"
+#include "halley/utils/memory_usage_calculator.h"
 
 using namespace Halley;
 
@@ -23,6 +24,7 @@ I18N::I18N()
 }
 
 I18N::I18N(Resources& resources, I18NLanguage currentLanguage, std::optional<I18NLanguage> fallbackLanguage)
+	: resources(&resources)
 {
 	setCurrentLanguage(currentLanguage);
 	if (fallbackLanguage) {
@@ -86,23 +88,81 @@ void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool 
 		for (auto& language: root.asMap()) {
 			auto langCode = I18NLanguage(language.first);
 			auto& lang = getLanguageData(langCode);
-			for (auto& e: language.second.asMap()) {
-				if (e.first == "null") {
-					Logger::logWarning("null key found on localisation file " + assetId);
-					continue;
-				}
+			if (!lang.assetIds.contains(assetId)) {
+				lang.assetIds += assetId;
+			}
 
-				if (!allowUpdating) {
-					if (const auto iter = lang.strings.find(e.first); iter != lang.strings.end()) {
-						Logger::logError("Duplicated localisation key \"" + e.first + "\": Previously set to \"" + iter->second + "\", now \"" + e.second.asString() + "\" in " + assetId);
-						continue;
-					}
-				}
-				lang.strings[e.first] = e.second.asString();
+			if (shouldBeLoaded(langCode)) {
+				doLoadLocalisation(langCode, language.second, assetId, allowUpdating);
+				lang.loaded = true;
 			}
 		}
 	}
 	++version;
+}
+
+void I18N::doLoadLocalisation(const I18NLanguage& langCode, const ConfigNode& node, const String& assetId, bool allowUpdating)
+{
+	auto& lang = getLanguageData(langCode);
+	for (auto& e: node.asMap()) {
+		if (e.first == "null") {
+			Logger::logWarning("null key found on localisation file " + assetId);
+			continue;
+		}
+
+		if (!allowUpdating) {
+			if (const auto iter = lang.strings.find(e.first); iter != lang.strings.end()) {
+				Logger::logError("Duplicated localisation key \"" + e.first + "\": Previously set to \"" + iter->second + "\", now \"" + e.second.asString() + "\" in " + assetId);
+				continue;
+			}
+		}
+		lang.strings[e.first] = e.second.asString();
+	}
+}
+
+void I18N::loadLanguage(const I18NLanguage& language)
+{
+	auto& lang = getLanguageData(language);
+	lang.strings.clear();
+	for (auto& assetId: lang.assetIds) {
+		const auto& config = resources->get<ConfigFile>(assetId);
+		doLoadLocalisation(language, config->getRoot().asMap().at(language.getISOCode()), assetId, false);
+		if constexpr (!canHotReload) {
+			resources->unload<ConfigFile>(assetId);
+		}
+	}
+	lang.loaded = true;
+}
+
+void I18N::unloadLanguage(const I18NLanguage& language)
+{
+	auto& lang = getLanguageData(language);
+	lang.strings.clear();
+	lang.strings.shrink_to_fit();
+	lang.loaded = false;
+}
+
+void I18N::updateLoadedLanguages()
+{
+	for (auto& [langId, langData]: strings) {
+		const bool target = shouldBeLoaded(langId);
+		if (target != langData.loaded) {
+			if (target) {
+				loadLanguage(langId);
+				//Logger::logInfo("Loaded " + langId.getISOCode());
+			} else {
+				unloadLanguage(langId);
+				//Logger::logInfo("Unloaded " + langId.getISOCode());
+			}
+		}
+	}
+	//Logger::logDev("I18N memory usage: " + String::prettySize(getMemoryUsage()));
+	//Logger::logDev("Known languages: " + toString(strings.size()));
+}
+
+bool I18N::shouldBeLoaded(const I18NLanguage& language) const
+{
+	return canHotReload || language == currentLanguage || language == secondaryLanguage || language == fallbackLanguage || language == tempOverrideLanguage;
 }
 
 void I18N::updateStrings(const I18NLanguage& language, HashMap<String, String> newStrings)
@@ -151,8 +211,10 @@ bool I18NVersionChecker::checkChanged()
 void I18N::setCurrentLanguage(I18NLanguage language)
 {
 	if (language != currentLanguage) {
+		Logger::logInfo("Setting language: " + language.getISOCode());
 		currentLanguage = std::move(language);
 		++version;
+		updateLoadedLanguages();
 	}
 }
 
@@ -171,7 +233,10 @@ const I18NLanguage& I18N::getChosenCurrentLanguage() const
 
 void I18N::setFallbackLanguage(std::optional<I18NLanguage> language)
 {
-	fallbackLanguage = std::move(language);
+	if (language != fallbackLanguage) {
+		fallbackLanguage = std::move(language);
+		updateLoadedLanguages();
+	}
 }
 
 const std::optional<I18NLanguage>& I18N::getFallbackLanguage() const
@@ -181,7 +246,10 @@ const std::optional<I18NLanguage>& I18N::getFallbackLanguage() const
 
 void I18N::setSecondaryLanguage(std::optional<I18NLanguage> language)
 {
-	secondaryLanguage = std::move(language);
+	if (secondaryLanguage != language) {
+		secondaryLanguage = std::move(language);
+		updateLoadedLanguages();
+	}
 }
 
 const std::optional<I18NLanguage>& I18N::getSecondaryLanguage() const
@@ -194,6 +262,7 @@ void I18N::setTempOverrideLanguage(std::optional<I18NLanguage> language)
 	if (language != tempOverrideLanguage) {
 		tempOverrideLanguage = std::move(language);
 		++version;
+		updateLoadedLanguages();
 	}
 }
 
@@ -459,15 +528,10 @@ void I18N::setCurrentLanguageToNextOneAvailable()
 
 size_t I18N::getMemoryUsage() const
 {
-	size_t total = strings.size_bytes();
+	return getSizeBytesOf(strings);
+}
 
-	for (const auto& [lang, langData]: strings) {
-		total += langData.strings.size_bytes();
-		for (const auto& [key, value]: langData.strings) {
-			total += key.getSizeBytes();
-			total += value.getSizeBytes();
-		}
-	}
-
-	return total;
+size_t I18N::LangData::getSizeBytes() const
+{
+	return sizeof(this) + getSizeBytesOf(strings);
 }

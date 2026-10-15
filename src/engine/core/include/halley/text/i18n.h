@@ -89,6 +89,10 @@ namespace Halley {
 		struct LangData {
 			HashMap<String, String> strings;
 			int index = 0;
+			bool loaded = false;
+			Vector<String> assetIds;
+
+			size_t getSizeBytes() const;
 		};
 
 		I18NLanguage currentLanguage;
@@ -103,9 +107,15 @@ namespace Halley {
 		int version = 0;
 
 		std::unique_ptr<StringOutputServer> stringOutputServer;
+		Resources* resources = nullptr;
 
 		LangData& getLanguageData(const I18NLanguage& language);
 		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
+		void doLoadLocalisation(const I18NLanguage& language, const ConfigNode& node, const String& assetId, bool allowUpdating);
+		void loadLanguage(const I18NLanguage& language);
+		void unloadLanguage(const I18NLanguage& language);
+		void updateLoadedLanguages();
+		bool shouldBeLoaded(const I18NLanguage& language) const;
 	};
 
 	class I18NVersionChecker {
