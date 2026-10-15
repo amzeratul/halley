@@ -6,10 +6,9 @@
 #include "halley/graphics/texture_descriptor.h"
 using namespace Halley;
 
-constexpr static int numBuffers = 2;
-
-DX11SwapChain::DX11SwapChain(DX11Video& video, Window& window)
+DX11SwapChain::DX11SwapChain(DX11Video& video, Window& window, int numBuffers)
 	: video(video)
+	, numBuffers(numBuffers)
 {
 	init(window);
 }

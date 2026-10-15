@@ -14,7 +14,7 @@ namespace Halley
 	class DX11SwapChain
 	{
 	public:
-		DX11SwapChain(DX11Video& video, Window& window);
+		DX11SwapChain(DX11Video& video, Window& window, int numBuffers);
 		~DX11SwapChain();
 		
 		Vector2i getSize() const;
@@ -34,6 +34,7 @@ namespace Halley
 		Vector2i size;
 		DX11Video& video;
 		int curBuffer = 0;
+		int numBuffers = 2;
 
 		void init(Window& window);
 		void initRenderTarget();

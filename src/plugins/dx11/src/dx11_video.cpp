@@ -92,7 +92,7 @@ void DX11Video::initD3D(Window& window)
 		mt->SetMultithreadProtected(true);
 	}
 
-	swapChain = std::make_unique<DX11SwapChain>(*this, window);
+	swapChain = std::make_unique<DX11SwapChain>(*this, window, 3);
 
 	initialised = true;
 }
