@@ -87,8 +87,8 @@ namespace Halley
 		void render();
 		void finishVideoRender();
 		void finishPainterRender();
-		void startFrameData(bool multithreaded, Time time);
-		void endFrameData(bool multithreaded, Time time);
+		void startFrameData(bool multithreaded);
+		void endFrameData(bool multithreaded);
 
 		void showComputerInfo() const;
 

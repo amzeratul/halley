@@ -479,7 +479,7 @@ void Core::tickFrame(Time time)
 
 	// Unload resources when neither update nor render is running
 	updateResources(time);
-	startFrameData(multithreaded, time);
+	startFrameData(multithreaded);
 	runStartFrame(time);
 
 	if (multithreaded || !game->shouldProcessEventsOnFixedUpdate()) {
@@ -518,7 +518,7 @@ void Core::tickFrame(Time time)
 		}
 	}
 
-	endFrameData(multithreaded, time);
+	endFrameData(multithreaded);
 	BaseFrameData::setThreadFrameData(nullptr);
 
 	if (stringOutputServer) {
@@ -530,6 +530,8 @@ void Core::tickFrame(Time time)
 
 void Core::update(Time time, bool multithreaded)
 {
+	BaseFrameData::getCurrentBase().doStartUpdate(multithreaded, time);
+
 	// Run pre update, then ONE fixed update (if needed), then variable, then remaining fixed updates, with input cleared. This makes sure that input is consistent.
 	preUpdate(time);
 
@@ -709,7 +711,7 @@ void Core::finishPainterRender()
 	}
 }
 
-void Core::startFrameData(bool multithreaded, Time time)
+void Core::startFrameData(bool multithreaded)
 {
 	ProfilerEvent event(ProfilerEventType::CoreStartFrameData);
 	if (multithreaded) {
@@ -721,10 +723,10 @@ void Core::startFrameData(bool multithreaded, Time time)
 		frameDataUpdate = game->makeFrameData();
 		HalleyAssertDev(!!frameDataUpdate);
 	}
-	frameDataUpdate->doStartFrame(multithreaded, multithreaded ? frameDataRender.get() : nullptr, time);
+	frameDataUpdate->doStartFrame(multithreaded, multithreaded ? frameDataRender.get() : nullptr);
 }
 
-void Core::endFrameData(bool multithreaded, Time time)
+void Core::endFrameData(bool multithreaded)
 {
 	if (multithreaded) {
 		if (frameDataRender) {

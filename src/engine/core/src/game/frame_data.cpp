@@ -26,30 +26,36 @@ void BaseFrameData::reset()
 	zoomLevel = 1;
 }
 
-void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime)
+void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous)
 {
-	if (multithreaded && previous) {
-		debugTexts = previous->debugTexts;
-		for (auto& dt: debugTexts) {
-			dt.second.time -= deltaTime;
-		}
-		debugCounters.clear();
-		std_ex::erase_if_value(debugTexts, [&](const DebugText& dt)
-		{
-			return dt.time <= 0;
-		});
+	if (multithreaded) {
+		if (previous) {
+			debugTexts = previous->debugTexts;
 
-		for (size_t i = 0; i < painters.size(); ++i) {
-			painters[i]->copyPrevious(*previous->painters.at(i));
-		}
-	}
+			for (size_t i = 0; i < painters.size(); ++i) {
+				painters[i]->copyPrevious(*previous->painters.at(i));
+			}
 
-	if (previous) {
-		frameIdx = previous->frameIdx + 1;
+			frameIdx = previous->frameIdx + 1;
+		} else {
+			frameIdx = 0;
+		}
 	} else {
-		frameIdx = 0;
+		++frameIdx;
 	}
+}
 
+void BaseFrameData::baseStartUpdate(bool multithreaded, Time deltaTime)
+{
+	for (auto& dt: debugTexts) {
+		dt.second.time -= deltaTime;
+	}
+	debugCounters.clear();
+	std_ex::erase_if_value(debugTexts, [&](const DebugText& dt)
+	{
+		return dt.time <= 0;
+	});
+	
 	for (auto& painter: painters) {
 		painter->startFrame(multithreaded);
 	}

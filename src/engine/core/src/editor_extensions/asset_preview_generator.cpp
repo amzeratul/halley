@@ -130,7 +130,8 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		auto sceneCreated = entityFactory->createScene(prefab, true);
 
 		// Run a simulation step
-		frameData->doStartFrame(false, nullptr, 0.1);
+		frameData->doStartFrame(false, nullptr);
+		frameData->doStartUpdate(false, 0.1);
 		world->step(TimeLine::VariableUpdate, 0.1);
 		
 		// Get main entity info
@@ -160,7 +161,8 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 
 		// Simulate again
 		frameData->doEndFrame();
-		frameData->doStartFrame(false, nullptr, 0.1);
+		frameData->doStartFrame(false, nullptr);
+		frameData->doStartUpdate(false, 0.1);
 		world->step(TimeLine::VariableUpdate, 0.1);
 
 		return AssetPreviewInfo{ world, rect, zoom, name, std::move(frameData) };

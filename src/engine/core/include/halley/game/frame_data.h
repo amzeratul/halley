@@ -123,7 +123,8 @@ namespace Halley {
 			return threadInstance != nullptr;
 		}
 
-		virtual void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) {}
+		virtual void doStartFrame(bool multithreaded, BaseFrameData* previous) {}
+		virtual void doStartUpdate(bool multithreaded, Time deltaTime) {}
 		virtual void doEndFrame() {}
 
 		void reset();
@@ -168,14 +169,16 @@ namespace Halley {
 	protected:
 		static thread_local BaseFrameData* threadInstance;
 
-		void baseStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime);
+		void baseStartFrame(bool multithreaded, BaseFrameData* previous);
+		void baseStartUpdate(bool multithreaded, Time deltaTime);
 		void baseEndFrame();
 	};
 
 	template <typename T>
 	class FrameData : public BaseFrameData {
 	public:
-		virtual void startFrame(bool multithreaded, T* previous, Time deltaTime) {}
+		virtual void startFrame(bool multithreaded, T* previous) {}
+		virtual void startUpdate(bool multithreaded, Time deltaTime) {}
 		virtual void endFrame() {}
 
 		static T& getCurrent()
@@ -185,10 +188,16 @@ namespace Halley {
 		}
 
 	protected:
-		void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) override
+		void doStartFrame(bool multithreaded, BaseFrameData* previous) override
 		{
-			baseStartFrame(multithreaded, previous, deltaTime);
-			startFrame(multithreaded, static_cast<T*>(previous), deltaTime);
+			baseStartFrame(multithreaded, previous);
+			startFrame(multithreaded, static_cast<T*>(previous));
+		}
+
+		void doStartUpdate(bool multithreaded, Time deltaTime) override
+		{
+			baseStartUpdate(multithreaded, deltaTime);
+			startUpdate(multithreaded, deltaTime);
 		}
 
 		void doEndFrame() override
