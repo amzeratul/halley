@@ -121,6 +121,8 @@ size_t Texture::getVRamUsage() const
 
 void Texture::moveFrom(Texture& other)
 {
+	AsyncResource::operator=(std::move(other));
+
 	size = other.size;
 	descriptor = std::move(other.descriptor);
 	mask = std::move(other.mask);

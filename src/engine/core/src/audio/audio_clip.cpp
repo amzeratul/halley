@@ -13,7 +13,6 @@ using namespace Halley;
 AudioClip::AudioClip(uint8_t numChannels)
 	: numChannels(numChannels)
 {
-	startLoading();
 }
 
 AudioClip::~AudioClip()
@@ -22,8 +21,9 @@ AudioClip::~AudioClip()
 
 AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 {
-	other.markActivelyInUse();
-	other.waitForLoad(true);
+	AsyncResource::operator=(std::move(other));
+
+	lastLoadedMemoryUsage.reset();
 
 	sampleLength = other.sampleLength;
 	numChannels = other.numChannels;
@@ -34,9 +34,72 @@ AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 	buffer = std::move(other.buffer);
 	streamingResource = std::move(other.streamingResource);
 
+	loaderFunc = std::move(other.loaderFunc);
+
 	doneLoading();
 
 	return *this;
+}
+
+std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
+{
+	auto meta = loader.getMeta();
+
+	const bool streaming = meta.getBool("streaming", false);
+	const auto channels = static_cast<uint8_t>(meta.getInt("channels", 1));
+	const auto nSamples = meta.getInt("samples", 0);
+
+	auto clip = std::make_shared<AudioClip>(channels);
+	clip->setMeta(meta);
+
+	if (streaming) {
+		clip->streaming = true;
+		clip->startLoading();
+		std::shared_ptr<ResourceDataStream> stream = loader.getStream();
+		Concurrent::execute([stream, clip, meta] () {
+			clip->loadFromStream(stream, meta);
+		});
+	} else {
+		clip->loaderFunc = loader.getLoaderFunction();
+		clip->sampleLength = nSamples;
+	}
+
+	return clip;
+}
+
+bool AudioClip::canUnload() const
+{
+	return !streaming;
+}
+
+bool AudioClip::doRequestLoading()
+{
+	if (!loaderFunc) {
+		return false;
+	}
+
+	startLoading();
+	auto clip = shared_from_this();
+	
+	Concurrent::execute(Executors::getDiskIO(), loaderFunc)
+		.then(Executors::getCPU(), [clip] (std::unique_ptr<ResourceDataStatic> data)
+	{	
+		clip->loadFromStatic(std::shared_ptr<ResourceDataStatic>(std::move(data)), clip->getMeta());
+	});
+
+	return true;
+}
+
+bool AudioClip::doRequestUnloading()
+{
+	lastLoadedMemoryUsage = getMemoryUsage();
+	streamingResource = {};
+	samples.clear();
+	samples.shrink_to_fit();
+	buffer.clear();
+	buffer.shrink_to_fit();
+	doneUnloading();
+	return true;
 }
 
 void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata metadata)
@@ -73,6 +136,11 @@ void AudioClip::load(std::shared_ptr<ResourceData> data, Metadata metadata, bool
 	vorbis.close();
 
 	doneLoading();
+}
+
+void AudioClip::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<AudioClip&>(resource));
 }
 
 const String& AudioClip::getName() const
@@ -162,6 +230,7 @@ size_t AudioClip::getLoopPoint() const
 
 bool AudioClip::isLoaded() const
 {
+	markActivelyInUse();
 	return AsyncResource::isLoaded();
 }
 
@@ -180,50 +249,15 @@ ResourceMemoryUsage AudioClip::getMemoryUsage() const
 	return result;
 }
 
-std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
+ResourceMemoryUsage AudioClip::getEstimatedMemoryUsage() const
 {
-	auto meta = loader.getMeta();
-	bool streaming = meta.getBool("streaming", false);
-	int channels = meta.getInt("channels", 1);
-	auto result = std::make_shared<AudioClip>(uint8_t(channels));
-
-	if (streaming) {
-		std::shared_ptr<ResourceDataStream> stream = loader.getStream();
-		Concurrent::execute([stream, result, meta] () {
-			result->loadFromStream(stream, meta);
-		});
-	} else {
-		loader
-			.getAsync()
-			.then([result, meta](std::unique_ptr<ResourceDataStatic> data) {
-				result->loadFromStatic(std::shared_ptr<ResourceDataStatic>(std::move(data)), meta);
-			});
+	if (lastLoadedMemoryUsage) {
+		return *lastLoadedMemoryUsage;
 	}
 
+	ResourceMemoryUsage result;
+	result.ramUsage = numChannels * sampleLength * sizeof(AudioSample);
 	return result;
-}
-
-void AudioClip::reload(Resource&& resource)
-{
-	*this = std::move(dynamic_cast<AudioClip&>(resource));
-}
-
-bool AudioClip::canUnload() const
-{
-	return false;
-	//return !streaming;
-}
-
-bool AudioClip::doRequestLoading()
-{
-	// TODO
-	return false;
-}
-
-bool AudioClip::doRequestUnloading()
-{
-	// TODO
-	return false;
 }
 
 AudioClipStreamHandle::AudioClipStreamHandle(const AudioClip& parent)

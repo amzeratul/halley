@@ -37,7 +37,7 @@ namespace Halley
 		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const = 0;
 	};
 
-	class AudioClip final : public AsyncResource, public IAudioClip
+	class AudioClip final : public AsyncResource, public IAudioClip, public std::enable_shared_from_this<AudioClip>
 	{
 		friend class AudioClipStreamHandle;
 
@@ -64,6 +64,7 @@ namespace Halley
 		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 
 		ResourceMemoryUsage getMemoryUsage() const override;
+		ResourceMemoryUsage getEstimatedMemoryUsage() const override;
 
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
@@ -87,6 +88,9 @@ namespace Halley
 
 		mutable Vector<Vector<AudioSample>> samples;
 		mutable Vector<Vector<AudioSample>> buffer;
+		
+		ResourceLoader::LoaderFunc loaderFunc;
+		std::optional<ResourceMemoryUsage> lastLoadedMemoryUsage;
 
 		void load(std::shared_ptr<ResourceData> data, Metadata metadata, bool stream);
 	};

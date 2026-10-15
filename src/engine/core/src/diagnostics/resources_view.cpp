@@ -9,6 +9,7 @@ ResourcesView::ResourcesView(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
+	assetType = AssetType::AudioClip;
 	text = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 }
 

@@ -29,12 +29,13 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	int sampleRate = 0;
 	bool needsEncoding = false;
 	bool needsResampling = false;
+	size_t numSamples = 0;
 
 	if (mainFile.getExtension() == ".ogg") { // assuming Ogg Vorbis
 		// Load vorbis data
 		VorbisData vorbis(resData, true);
 		numChannels = vorbis.getNumChannels();
-		size_t numSamples = vorbis.getNumSamples();
+		numSamples = vorbis.getNumSamples();
 		sampleRate = vorbis.getSampleRate();
 		samples.resize(numChannels);
 		for (size_t i = 0; i < numChannels; ++i) {
@@ -58,6 +59,9 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 			s = resampleChannel(sampleRate, 48000, s);
 		});
 		sampleRate = 48000;
+		if (numChannels > 0) { // Should always be, but...
+			numSamples = samples[0].size();
+		}
 		needsEncoding = true;
 	}
 
@@ -72,6 +76,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("channels", numChannels);
 	meta.set("sampleRate", sampleRate);
+	meta.set("samples", static_cast<int>(numSamples));
 
 	// Output
 	collector.output(asset.assetId, AssetType::AudioClip, *fileData, meta);

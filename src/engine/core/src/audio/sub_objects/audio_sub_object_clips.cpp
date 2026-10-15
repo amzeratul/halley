@@ -131,6 +131,8 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 		}
 	}
 
+	clip->markActivelyInUse();
+
 	return std::make_unique<AudioSourceClip>(engine, std::move(clip), loop, engine.getRNG().getFloat(gain), loopStart, loopEnd, randomiseStart);
 }
 
