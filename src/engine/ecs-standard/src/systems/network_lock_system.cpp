@@ -376,14 +376,18 @@ private:
 		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
 
 		if (!targetId.isValid()) {
-			Logger::logDev("Peer attempted to lock invalid entity.");
+			if (lock) {
+				Logger::logDev("Peer tries to lock entity, but ID is invalid");
+			} else if (destroyOnUnlock) {
+				Logger::logDev("Peer tries to unlock entity, with destroyOnUnlock flag set, but ID is invalid");
+			}
 			return {false, {}};
 		}
 
 		const auto* e = tryFindNetworkRoot(targetId);
 		if (e) {
 			if (e->network.ownerId.value_or(0) != getMyPeerId()) {
-				Logger::logError("Peer attempted to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
+				Logger::logError("Peer tries to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host");
 				return {false, {}};
 			}
 
@@ -437,7 +441,7 @@ private:
 		} else {
 			// Entity not found
 			if (const auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
-				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity");
+				Logger::logWarning("Peer tries to lock entity " + entity.getName() + " which isn't a network entity");
 			}
 			return {false, {}};
 		}
