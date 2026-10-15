@@ -885,10 +885,14 @@ namespace Halley {
             String assetId;
             deserializer >> assetId;
 
-            if (!assetId.isEmpty() && context.resources->exists<T>(assetId)) {
-                dst = ResourceReference<T>(context.resources->get<T>(assetId));
+            if (!assetId.isEmpty()) {
+	            if (context.resources->exists<T>(assetId)) {
+	            	dst = ResourceReference<T>(context.resources->get<T>(assetId));
+	            } else {
+	            	Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId + ", component ID " + toString(componentIndex) + ", field '" + fieldName + "'", true);
+	            }
             } else {
-                Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId + ", component ID " + toString(componentIndex) + ", field '" + fieldName + "'", true);
+	            dst = {};
             }
         }
     };
