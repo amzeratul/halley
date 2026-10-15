@@ -41,6 +41,7 @@ namespace Halley {
             // Volatile, intermediate, per-frame data; not serialized!
 
             mutable bool modified = false;
+            mutable uint8_t numComponentsRemoved = 0;
         };
 
         explicit EntityNetworkChanges() = default;
@@ -75,6 +76,8 @@ namespace Halley {
 
         void invalidateHashes();
 
+        void notifyComponentRemoved(int pageIdx, uint16_t componentId);
+
     private:
         Page curPage;
 
@@ -83,6 +86,8 @@ namespace Halley {
 
         uint64_t contentHash = 0;
         Hash::Hasher contentHasher;
+
+        Vector<std::pair<int, uint16_t>> componentsRemoved;
 
         void beginPage(Serializer& serializer, Type type);
         void endPage(Serializer& serializer, Bytes& buffer, Type type);

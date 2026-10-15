@@ -162,6 +162,7 @@ void EntityNetworkChanges::reset()
     pp = 0;
     contentHash = 0;
     contentHasher.reset();
+    componentsRemoved.clear();
 }
 
 void EntityNetworkChanges::serialize(Serializer& s) const
@@ -245,7 +246,7 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
 
         if (page.type == Type::Entity) {
             // The check for page 0 is important here - we don't want to skip the root entity!
-            if (p > 0 && !page.modified) {
+            if (p > 0 && !page.modified && page.numComponentsRemoved == 0) {
                 skip = true;
 
                 // Seek forward to the next entity.
@@ -300,6 +301,21 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
             HalleyAssertDev(size > 0);
             auto span = buffer.const_byte_span().subspan(page.from, size);
             serializer << span;
+
+            if (page.type == Type::Entity) {
+                // Write component IDs to be removed, *after* entity data.
+                serializer << page.numComponentsRemoved;
+                if (page.numComponentsRemoved != 0) {
+                    int matchesFound = 0;
+                    for (const auto& entry : componentsRemoved) {
+                        if (entry.first == p) {
+                            serializer << entry.second;
+                            matchesFound++;
+                        }
+                    }
+                    HalleyAssertDev(matchesFound == page.numComponentsRemoved);
+                }
+            }
 
             if (log) {
                 if (page.type == Type::Entity) {
@@ -394,6 +410,11 @@ void EntityNetworkChanges::invalidateHashes()
             page.hash = 0;
         }
     }
+}
+
+void EntityNetworkChanges::notifyComponentRemoved(int pageIdx, uint16_t componentId)
+{
+    componentsRemoved.emplace_back(pageIdx, componentId);
 }
 
 void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetworkSession)
@@ -694,6 +715,16 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 
     entity.setEnabled(enabled);
 
+    // Remove components
+    uint8_t numComponentsRemoved;
+    deserializer >> numComponentsRemoved;
+
+    for (uint8_t i = 0; i < numComponentsRemoved; i++) {
+        uint16_t componentIdToRemove;
+        deserializer >> componentIdToRemove;
+        entity.removeComponentById(componentIdToRemove);
+    }
+
     // EntityIdentity
     EntityNetworkChanges::Type type;
     uint32_t size;
@@ -931,6 +962,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
 
                         // Compare hashes for the entity page.
                         page.modified = !page.remote && page.hash != prevEntityPage.hash;
+                        page.numComponentsRemoved = 0;
 
                         // Compare identity pages.
                         {
@@ -977,7 +1009,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
                         // If no components have been added, compare the components again,
                         // but "reversed" - check for components that have been removed.
 
-                        if (!page.remote && !hasComponentsAddedOrRemoved) {
+                        if (!page.remote) {
                             int prevComponentPageIdx = prevPageIdx + 2;
 
                             while (auto prevComponentPage = previousJournal.findNextComponent(prevComponentPageIdx)) {
@@ -990,9 +1022,16 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous, bool se
                                     }
                                 }
 
-                                if (componentPage == nullptr && !session->allowComponentAddedForFastUpdate(prevComponentPage->componentId)) {
-                                    hasComponentsAddedOrRemoved = true;
-                                    break;
+                                if (componentPage == nullptr) {
+                                    if (!session->allowComponentAddedForFastUpdate(prevComponentPage->componentId)) {
+                                        hasComponentsAddedOrRemoved = true;
+                                    } else {
+                                        // For component types that the listener allows to be added
+                                        // or removed on the fly. Keep track of (and count) the
+                                        // removed component(s).
+                                        page.numComponentsRemoved++;
+                                        journal.notifyComponentRemoved(pageIdx, prevComponentPage->componentId);
+                                    }
                                 }
                             }
                         }
