@@ -98,6 +98,7 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 							component.write = desc.contains("write");
 							component.optional = desc.contains("optional");
 
+							component.declarationIndex = static_cast<int>(family.components.size());
 							family.components.push_back(component);
 						}
 					}

@@ -1,4 +1,4 @@
-// Halley codegen version 152
+// Halley codegen version 154
 #pragma once
 
 #include <halley.hpp>
@@ -26,8 +26,8 @@ public:
 		using ExclusionType = Halley::FamilyType<InvisiblePartitionTagComponent>;
 	
 		void prefetch() const {
-			prefetchObjectHeadL1<2>(particles);
 			prefetchObjectHeadL1<2>(transform2D);
+			prefetchObjectHeadL1<2>(particles);
 		}
 	
 	protected:

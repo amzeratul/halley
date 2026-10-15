@@ -556,7 +556,17 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		size_t nRequired = 0;
 		size_t nOptional = 0;
 		Vector<String> prefetchBody;
-		for (const auto& comp: fam.components) {
+		
+		// fam.components is sorted by name (that order is the element layout, shared across systems
+		// using the same family). For choosing what to prefetch, use the .ecs declaration order instead,
+		// so the author puts the components the hot path actually touches first. 
+		auto prefetchOrder = fam.components;
+		std::sort(prefetchOrder.begin(), prefetchOrder.end(), [] (const ComponentReferenceSchema& a, const ComponentReferenceSchema& b)
+		{
+			return a.declarationIndex < b.declarationIndex;
+		});
+		
+		for (const auto& comp: prefetchOrder) {
 			const auto name = lowerFirst(comp.name);
 			if (comp.optional) {
 				if (nOptional++ < maxPrefetchedOptional) {

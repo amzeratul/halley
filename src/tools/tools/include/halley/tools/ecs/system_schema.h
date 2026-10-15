@@ -40,6 +40,7 @@ namespace Halley
 		String name;
 		bool write = false;
 		bool optional = false;
+		int declarationIndex = 0; // position in the .ecs family list; components are later sorted by name for layout
 	};
 
 	class MessageReferenceSchema
