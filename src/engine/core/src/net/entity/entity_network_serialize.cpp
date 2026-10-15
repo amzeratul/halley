@@ -850,8 +850,9 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                 fetchNextPage(deserializer, type, size);
             }
 
-            Logger::logWarning("Child entity '" + childInstanceUUID + "' not found as child of " +
-                entity.getEntityId().toDetailedString() + " for deserializing update, skipped " + toString(totalSkipSize) + " bytes", true);
+            Logger::logWarning("Child entity '" + childInstanceUUID + "' not found as child of '" +
+                entity.getName() + "', " + entity.getEntityId().toDetailedString() + ", '" + entity.getInstanceUUID() +
+                "' for deserializing update, skipped " + toString(totalSkipSize) + " bytes", true);
         }
     }
 
