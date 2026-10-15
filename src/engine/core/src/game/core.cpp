@@ -530,7 +530,10 @@ void Core::tickFrame(Time time)
 
 void Core::update(Time time, bool multithreaded)
 {
-	BaseFrameData::getCurrentBase().doStartUpdate(multithreaded, time);
+	{
+		ProfilerEvent event(ProfilerEventType::CoreStartFrameData);
+		BaseFrameData::getCurrentBase().doStartUpdate(multithreaded, time);
+	}
 
 	// Run pre update, then ONE fixed update (if needed), then variable, then remaining fixed updates, with input cleared. This makes sure that input is consistent.
 	preUpdate(time);
