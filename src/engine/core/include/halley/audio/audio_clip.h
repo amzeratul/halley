@@ -69,6 +69,11 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
 		void reload(Resource&& resource) override;
 
+	protected:
+		bool canUnload() const override;
+		bool doRequestLoading() override;
+		bool doRequestUnloading() override;
+
 	private:
 		size_t sampleLength = 0;
 		size_t loopPoint = 0;

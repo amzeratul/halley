@@ -22,6 +22,7 @@ AudioClip::~AudioClip()
 
 AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 {
+	other.markActivelyInUse();
 	other.waitForLoad(true);
 
 	sampleLength = other.sampleLength;
@@ -93,8 +94,6 @@ std::unique_ptr<IAudioClipStreamHandle> AudioClip::makeStreamHandle(size_t start
 
 void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const
 {
-	const auto trace = StackDebugTrace("audioClip", getAssetId());
-
 	markActivelyInUse();
 
 	if (!streaming) {
@@ -106,6 +105,7 @@ void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandl
 		return;
 	}
 
+	const auto trace = StackDebugTrace("audioClip", getAssetId());
 	try {
 		HalleyAssertDev(pos + len <= sampleLength);
 
@@ -131,6 +131,7 @@ void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandl
 size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	const auto trace = StackDebugTrace("audioClip", getAssetId());
+	waitForLoad();
 
 	HalleyAssertDev(pos + len <= sampleLength);
 
@@ -205,6 +206,24 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 void AudioClip::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<AudioClip&>(resource));
+}
+
+bool AudioClip::canUnload() const
+{
+	return false;
+	//return !streaming;
+}
+
+bool AudioClip::doRequestLoading()
+{
+	// TODO
+	return false;
+}
+
+bool AudioClip::doRequestUnloading()
+{
+	// TODO
+	return false;
 }
 
 AudioClipStreamHandle::AudioClipStreamHandle(const AudioClip& parent)
