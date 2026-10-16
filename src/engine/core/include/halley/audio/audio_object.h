@@ -78,11 +78,12 @@ namespace Halley {
 	    void setInstanceLimitType(AudioObjectInstanceLimitType type);
 		int getPriority() const;
 		void setPriority(int value);
+	    bool isLooping() const override;
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 		gsl::span<const AudioSubObjectHandle> getSubObjects() const;
 
-		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
+		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter, bool loadSources) const;
     	
     	void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

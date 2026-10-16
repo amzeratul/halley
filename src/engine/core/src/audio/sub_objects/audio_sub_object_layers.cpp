@@ -65,6 +65,16 @@ void AudioSubObjectLayers::setObjectName(const String& name)
 	objectName = name;
 }
 
+bool AudioSubObjectLayers::isLooping() const
+{
+	for (auto& layer: layers) {
+		if (layer.object->isLooping()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 size_t AudioSubObjectLayers::getNumSubObjects() const
 {
 	return layers.size();

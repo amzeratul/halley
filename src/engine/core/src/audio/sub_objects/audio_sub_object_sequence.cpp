@@ -76,6 +76,11 @@ AudioSubObjectHandle& AudioSubObjectSequence::getSubObject(size_t n)
 	return segments.at(n).object;
 }
 
+bool AudioSubObjectSequence::isLooping() const
+{
+	return true;
+}
+
 bool AudioSubObjectSequence::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
 {
 	return true;

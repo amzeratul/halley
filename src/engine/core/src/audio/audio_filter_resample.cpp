@@ -29,6 +29,13 @@ bool AudioFilterResample::isReady() const
 bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSamples dstBuffers)
 {
 	const size_t nChannels = source->getNumberOfChannels();
+	if (!resamplers.empty() && resamplers.size() != nChannels) {
+		resamplers.clear();
+		for (auto& s: leftoverSamples) {
+			s.n = 0;
+		}
+	}
+
 	const size_t additionalPaddingSamples = 2;
 	const size_t nLeftOver = leftoverSamples[0].n;
 	const size_t samplesToGenerate = numSamples >= nLeftOver ? numSamples - nLeftOver : 0;

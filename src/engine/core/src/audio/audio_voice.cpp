@@ -148,7 +148,7 @@ bool AudioVoice::isPlaying() const
 
 bool AudioVoice::isReady() const
 {
-	return source && source->isReady();
+	return source && (source->isReady() || (suspended && !resumingFromSuspension));
 }
 
 bool AudioVoice::isDone() const
@@ -223,6 +223,8 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	}
 
 	if (resumingFromSuspension && source->isReady()) {
+		nChannels = source->getNumberOfChannels();
+		isFirstUpdate = true;
 		resumingFromSuspension = false;
 		suspended = false;
 	}

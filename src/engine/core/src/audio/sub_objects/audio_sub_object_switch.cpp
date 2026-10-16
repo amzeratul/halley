@@ -189,6 +189,16 @@ bool AudioSubObjectSwitch::reload(AudioSubObject&& otherRaw)
 	return modified;
 }
 
+bool AudioSubObjectSwitch::isLooping() const
+{
+	for (const auto& [k, v]: cases) {
+		if (v.getObject().isLooping()) { // This is not strictly true, but probably better to err on the side of returning true
+			return true;
+		}
+	}
+	return false;
+}
+
 const String& AudioSubObjectSwitch::getSwitchId() const
 {
 	return switchId;

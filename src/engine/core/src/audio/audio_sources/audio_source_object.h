@@ -8,7 +8,7 @@ namespace Halley
 	class AudioSourceObject final : public AudioSource
 	{
 	public:
-		AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter, const AudioObject& object);
+		AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter, const AudioObject& object, bool loadSources);
 
 		String getName() const override;
 

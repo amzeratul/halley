@@ -3,10 +3,14 @@
 #include "halley/audio/audio_object.h"
 using namespace Halley;
 
-AudioSourceObject::AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter, const AudioObject& object)
+AudioSourceObject::AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter, const AudioObject& object, bool load)
 	: object(object)
 {
-	loadSources(engine, emitter);
+	if (load) {
+		loadSources(engine, emitter);
+	} else {
+		looping = object.isLooping();
+	}
 }
 
 void AudioSourceObject::loadSources(AudioEngine& engine, AudioEmitter& emitter)
@@ -59,7 +63,7 @@ bool AudioSourceObject::isReady() const
 
 uint8_t AudioSourceObject::getNumberOfChannels() const
 {
-	return sources.empty() ? 0 : sources[0]->getNumberOfChannels();
+	return sources.empty() ? 1 : sources[0]->getNumberOfChannels();
 }
 
 size_t AudioSourceObject::getSamplesLeft() const

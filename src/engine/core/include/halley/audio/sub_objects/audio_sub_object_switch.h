@@ -31,6 +31,8 @@ namespace Halley {
 
         bool reload(AudioSubObject&& other) override;
 
+        bool isLooping() const override;
+
     	const String& getSwitchId() const;
         void setSwitchId(String value);
 

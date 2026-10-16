@@ -47,6 +47,7 @@ namespace Halley {
 		virtual AudioSubObjectHandle removeObject(const IAudioObject* object);
 		virtual void removeClip(const String& clipId);
 		virtual void swapClips(size_t idxA, size_t idxB);
+		virtual bool isLooping() const = 0;
 
 		void propagateObjectName(const String& name);
 		virtual void setObjectName(const String& name) {}

@@ -639,14 +639,14 @@ std::optional<AudioDebugData> AudioEngine::getDebugData() const
 
 std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> playGain, Range<float> playPitch, uint32_t delaySamples)
 {
+	const bool inAudibleRange = emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) >= 0.000001f;
+
 	// Prune if out of range
-	if (object.getPruneDistant()) {
-		if (emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) < 0.000001f) {
-			if (canLog(object.getAssetId())) {
-				Logger::log(*eventLogging, "- Prunned due to distance to listener at " + toString(listener.position) + ": " + object.getAssetId() + " [" + toString(emitter.getId()) + " at " + emitter.getPosition().getPosition() + "]");
-			}
-			return {};
+	if (object.getPruneDistant() && !inAudibleRange) {
+		if (canLog(object.getAssetId())) {
+			Logger::log(*eventLogging, "- Prunned due to distance to listener at " + toString(listener.position) + ": " + object.getAssetId() + " [" + toString(emitter.getId()) + " at " + emitter.getPosition().getPosition() + "]");
 		}
+		return {};
 	}
 
 	auto [playingData, playStatus] = tryToStartVoiceForObject(object, emitter);
@@ -667,11 +667,16 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	const float pitch = clamp(getRNG().getFloat(pitchRange), 0.1f, 4.0f);
 	const float dopplerScale = object.getDopplerScale();
 
-	auto source = object.makeSource(*this, emitter);
+	const bool loadSamples = inAudibleRange || !object.isLooping();
+	auto source = object.makeSource(*this, emitter, loadSamples);
 	auto voice = std::make_unique<AudioVoice>(*this, std::move(source), gain, pitch, dopplerScale, delaySamples, getBusId(object.getBus()));
 
 	voice->setIds(uniqueId, object.getAudioObjectId());
 	voice->setMixingProperties(object.getMixingProperties());
+
+	if (!loadSamples) {
+		voice->suspend();
+	}
 
 	if (playingData) {
 		playingData->playingVoices += voice.get();

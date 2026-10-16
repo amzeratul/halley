@@ -17,6 +17,7 @@ namespace Halley {
 		gsl::span<const String> getClips() const override;
 		gsl::span<String> getClips();
 		bool canCollapseToClip() const override;
+		bool isLooping() const override;
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 		void loadDependencies(Resources& resources) override;

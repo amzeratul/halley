@@ -233,6 +233,16 @@ void AudioObject::setPriority(int value)
 	priority = value;
 }
 
+bool AudioObject::isLooping() const
+{
+	for (const auto& o: getSubObjects()) {
+		if (o->isLooping()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 std::optional<float> AudioObject::getMinStereoWidth() const
 {
 	return minStereoWidth;
@@ -273,10 +283,10 @@ gsl::span<const AudioSubObjectHandle> AudioObject::getSubObjects() const
 	return objects;
 }
 
-std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
+std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioEmitter& emitter, bool loadSources) const
 {
 	if (!objects.empty()) {
-		return std::make_unique<AudioSourceObject>(engine, emitter, *this);
+		return std::make_unique<AudioSourceObject>(engine, emitter, *this, loadSources);
 	} else {
 		return {};
 	}

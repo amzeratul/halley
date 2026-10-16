@@ -97,6 +97,11 @@ bool AudioSubObjectClips::canCollapseToClip() const
 	return true;
 }
 
+bool AudioSubObjectClips::isLooping() const
+{
+	return loop;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	const auto nClips = clipData.size();
