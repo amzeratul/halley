@@ -161,18 +161,20 @@ namespace Halley {
 
     private:
 
+    	Vector<EntityData> children;
+    	Vector<std::pair<String, ConfigNode>> components;
+        uint8_t flags = 0;
+    	bool sceneRoot = false;
+
+    	UUID instanceUUID;
+    	UUID prefabUUID;
+    	UUID parentUUID;
+
     	String name;
     	String prefab;
     	String icon;
         String variant;
         String enableRules;
-        uint8_t flags = 0;
-    	UUID instanceUUID;
-    	UUID prefabUUID;
-    	UUID parentUUID;
-    	Vector<EntityData> children;
-    	Vector<std::pair<String, ConfigNode>> components;
-    	bool sceneRoot = false;
 
     	void addComponent(String key, ConfigNode data);
     	void parseUUID(UUID& dst, const ConfigNode& node);

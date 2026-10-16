@@ -6,6 +6,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+#include "halley/utils/memory_usage_calculator.h"
 using namespace Halley;
 
 EntityChangeOperation EntityChangeOperation::clone() const
@@ -687,22 +688,18 @@ std::optional<size_t> EntityData::getChildIndex(const UUID& uuid) const
 
 size_t EntityData::getSizeBytes() const
 {
-	size_t result = sizeof(EntityData);
-	result += name.getSizeBytes();
-	result += prefab.getSizeBytes();
-	result += icon.getSizeBytes();
-	result += variant.getSizeBytes();
-	result += enableRules.getSizeBytes();
+	MemoryUsageCounter counter;
+	counter.total += sizeof(*this);
 
-	for (const auto& c: children) {
-		result += c.getSizeBytes();
-	}
-	for (const auto& c: components) {
-		result += c.first.getSizeBytes();
-		result += c.second.getSizeBytes();
-	}
+	counter << name;
+	counter << prefab;
+	counter << icon;
+	counter << variant;
+	counter << enableRules;
+	counter << children;
+	counter << components;
 
-	return result;
+	return counter.total;
 }
 
 void EntityData::generateUUIDs(HashMap<UUID, UUID>& changes, gsl::span<const UUID> uuidsToChange)
