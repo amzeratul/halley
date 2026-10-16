@@ -11,9 +11,11 @@ namespace Halley {
         size_t budget = 1024 * 1024 * 1024;     /// Total byte budget for this asset type; can preload to that amount, and tries to keep all resources below it
         size_t staleBudget = 768 * 1024 * 1024; /// Unload stale objects when this usage is exceeded
         float useTimeGrace = 0.1f;              /// How many seconds before this no longer counts as being in use
+        float staleTimeUse = 15.0f;             /// How many seconds since it was last in use before unloading
+        float staleTimeBackground = 10.0f;      /// How many seconds since it was last in the background before unloading
 
         ResourceUnloaderAssetTypeRules() = default;
-        ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget, float useTimeGrace);
+        ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget, float useTimeGrace = 0.1f, float staleTimeUse = 15.0f, float staleTimeBackground = 10.0f);
     };
 
     class ResourceUnloaderRules {

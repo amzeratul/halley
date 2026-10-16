@@ -5,10 +5,12 @@
 
 using namespace Halley;
 
-ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget, float useTimeGrace)
+ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget, float useTimeGrace, float staleTimeUse, float staleTimeBackground)
 	: budget(budget)
 	, staleBudget(staleBudget)
 	, useTimeGrace(useTimeGrace)
+	, staleTimeUse(staleTimeUse)
+	, staleTimeBackground(staleTimeBackground)
 {
 }
 
@@ -310,7 +312,7 @@ ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T
 		state.desiredState = ResourceDesiredLoadState::Preload;
 	} else if (framesSinceInLowPriorityBackground <= 1 || timeSinceInLowPriorityBackground < 1) {
 		state.desiredState = ResourceDesiredLoadState::PreloadLowPriority;
-	} else if (timeSinceInUse < 15 || timeSinceInBackground < 10) {
+	} else if (timeSinceInUse < rules.staleTimeUse || timeSinceInBackground < rules.staleTimeBackground) {
 		state.desiredState = ResourceDesiredLoadState::Stale;
 	} else {
 		state.desiredState = ResourceDesiredLoadState::Unload;
