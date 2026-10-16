@@ -7,6 +7,7 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/support/debug.h"
 #include "halley/text/string_converter.h"
+#include "halley/utils/memory_usage_calculator.h"
 
 using namespace Halley;
 
@@ -237,16 +238,14 @@ bool AudioClip::isLoaded() const
 
 ResourceMemoryUsage AudioClip::getMemoryUsage() const
 {
+	MemoryUsageCounter counter;
+	counter.total += sizeof(*this);
+
+	counter << samples;
+	counter << buffer;
+
 	ResourceMemoryUsage result;
-
-	for (auto& s: samples) {
-		result.ramUsage += s.byte_span().size();
-	}
-	for (auto& b: buffer) {
-		result.ramUsage += b.byte_span().size();
-	}
-	result.ramUsage += sizeof(*this);
-
+	result.ramUsage = counter.total;
 	return result;
 }
 
