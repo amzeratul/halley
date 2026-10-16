@@ -12,6 +12,7 @@ using namespace Halley;
 
 AudioClip::AudioClip(uint8_t numChannels)
 	: numChannels(numChannels)
+	, useCount(0)
 {
 }
 
@@ -69,7 +70,7 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 
 bool AudioClip::canUnload() const
 {
-	return !streaming;
+	return !streaming && useCount.load(std::memory_order::relaxed) == 0;
 }
 
 bool AudioClip::doRequestLoading()
@@ -258,6 +259,16 @@ ResourceMemoryUsage AudioClip::getEstimatedMemoryUsage() const
 	ResourceMemoryUsage result;
 	result.ramUsage = numChannels * sampleLength * sizeof(AudioSample);
 	return result;
+}
+
+void AudioClip::incUseCounter() const
+{
+	++useCount;
+}
+
+void AudioClip::decUseCounter() const
+{
+	--useCount;
 }
 
 AudioClipStreamHandle::AudioClipStreamHandle(const AudioClip& parent)

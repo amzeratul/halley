@@ -19,6 +19,14 @@ AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAud
 	, randomiseStart(randomiseStart)
 {
 	HalleyAssertDev(clip != nullptr);
+	clip->incUseCounter();
+}
+
+AudioSourceClip::~AudioSourceClip()
+{
+	if (clip) {
+		clip->decUseCounter();
+	}
 }
 
 String AudioSourceClip::getName() const

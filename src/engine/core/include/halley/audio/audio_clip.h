@@ -35,6 +35,9 @@ namespace Halley
 
 		virtual void prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const = 0;
 		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const = 0;
+
+		virtual void incUseCounter() const {}
+		virtual void decUseCounter() const {}
 	};
 
 	class AudioClip final : public AsyncResource, public IAudioClip, public std::enable_shared_from_this<AudioClip>
@@ -43,7 +46,7 @@ namespace Halley
 
 	public:
 		AudioClip(uint8_t numChannels);
-		~AudioClip();
+		~AudioClip() override;
 
 		AudioClip& operator=(AudioClip&& other) noexcept;
 
@@ -66,6 +69,9 @@ namespace Halley
 		ResourceMemoryUsage getMemoryUsage() const override;
 		ResourceMemoryUsage getEstimatedMemoryUsage() const override;
 
+		void incUseCounter() const override;
+		void decUseCounter() const override;
+
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
 		void reload(Resource&& resource) override;
@@ -83,6 +89,8 @@ namespace Halley
 
 		[[maybe_unused]] mutable uint8_t readsWithSeek = 0;
 		[[maybe_unused]] mutable uint8_t readsWithoutSeek = 0;
+
+		mutable std::atomic<uint32_t> useCount;
 
 		std::shared_ptr<ResourceData> streamingResource;
 
