@@ -77,6 +77,20 @@ void AudioEvent::collectVariablesUsed(Vector<String>& variables, Vector<String>&
 	}
 }
 
+void AudioEvent::markActivelyInUse() const
+{
+	for (const auto& action : actions) {
+		action->markActivelyInUse();
+	}
+}
+
+void AudioEvent::markBackgroundLoaded() const
+{
+	for (const auto& action: actions) {
+		action->markBackgroundLoaded();
+	}	
+}
+
 String AudioEvent::toYAML() const
 {
 	auto actionsNode = ConfigNode::SequenceType();
@@ -268,6 +282,14 @@ ConfigNode AudioEventAction::toConfigNode() const
 	return result;
 }
 
+void AudioEventAction::markActivelyInUse() const
+{
+}
+
+void AudioEventAction::markBackgroundLoaded() const
+{
+}
+
 void AudioEventActionObject::loadObject(const ConfigNode& node, bool requiresObject)
 {
 	AudioEventAction::load(node);
@@ -355,6 +377,20 @@ void AudioEventActionObject::collectVariablesUsed(Vector<String>& variables, Vec
 {
 	if (object) {
 		object->collectVariablesUsed(variables, switches);
+	}
+}
+
+void AudioEventActionObject::markActivelyInUse() const
+{
+	if (object) {
+		object->markActivelyInUse();
+	}
+}
+
+void AudioEventActionObject::markBackgroundLoaded() const
+{
+	if (object) {
+		object->markBackgroundLoaded();
 	}
 }
 

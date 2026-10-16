@@ -245,6 +245,20 @@ uint32_t AudioSubObjectLayers::getVersion() const
 	return version;
 }
 
+void AudioSubObjectLayers::markActivelyInUse() const
+{
+	for (auto& layer: layers) {
+		layer.object.getObject().markActivelyInUse();
+	}
+}
+
+void AudioSubObjectLayers::markBackgroundLoaded() const
+{
+	for (auto& layer: layers) {
+		layer.object.getObject().markBackgroundLoaded();
+	}
+}
+
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 {
 	object = AudioSubObject::makeSubObject(node["object"]);

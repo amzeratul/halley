@@ -5,15 +5,10 @@
 
 using namespace Halley;
 
-ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget)
-	: budget(budget)
-	, staleBudget((budget / 4) * 3)
-{
-}
-
-ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget)
+ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget, float useTimeGrace)
 	: budget(budget)
 	, staleBudget(staleBudget)
+	, useTimeGrace(useTimeGrace)
 {
 }
 
@@ -123,7 +118,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 		v.curMemoryUsage = 0;
 		v.states.clear();
 	}
-	updateResourcesAndCollectStates(t, collection, states);
+	updateResourcesAndCollectStates(t, collection, states, rules);
 	
 	size_t startMemoryUsage = 0;
 	for (auto& [type, stateCollection]: states) {
@@ -250,7 +245,7 @@ void ResourceUnloader::updateCollection(float t, ResourceCollectionBase& collect
 	}
 }
 
-void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states)
+void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states, const ResourceUnloaderAssetTypeRules& rules)
 {
 	//Logger::logDev("Updating " + toString(collection.enumerate().size()) + " resources.");
 	auto resources = collection.getAllResources();
@@ -258,9 +253,9 @@ void ResourceUnloader::updateResourcesAndCollectStates(float t, ResourceCollecti
 	for (auto& resource: resources) {
 		LoadStateInfo state;
 		if (collection.getAssetType() == AssetType::Texture) {
-			state = getStateInfo<Texture>(std::static_pointer_cast<Texture>(std::move(resource)), t);
+			state = getStateInfo<Texture>(std::static_pointer_cast<Texture>(std::move(resource)), rules);
 		} else {
-			state = getStateInfo<AsyncResource>(std::static_pointer_cast<AsyncResource>(std::move(resource)), t);
+			state = getStateInfo<AsyncResource>(std::static_pointer_cast<AsyncResource>(std::move(resource)), rules);
 		}
 
 		auto& stateCollection = states[state.desiredState];
@@ -291,7 +286,7 @@ uint32_t ResourceUnloader::getFramesSince(uint32_t idx) const
 }
 
 template <typename T>
-ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T> res, float t) const
+ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T> res, const ResourceUnloaderAssetTypeRules& rules) const
 {
 	const AsyncResource::UsagePattern& usagePattern = res->getUsagePattern();
 	const auto loaded = res->isLoaded();
@@ -309,7 +304,7 @@ ResourceUnloader::LoadStateInfo ResourceUnloader::getStateInfo(std::shared_ptr<T
 	state.memoryUsage = memoryUsage.getTotal();
 	state.timeSinceUse = std::min(timeSinceInUse, timeSinceInBackground * 2.0f); // Time spent in background counts as double
 
-	if (framesSinceInUse <= 1 || timeSinceInUse < 0.1 || !res->canUnload()) {
+	if (framesSinceInUse <= 1 || timeSinceInUse < rules.useTimeGrace || !res->canUnload()) {
 		state.desiredState = ResourceDesiredLoadState::Load;
 	} else if (framesSinceInBackground <= 1 || timeSinceInBackground < 1) {
 		state.desiredState = ResourceDesiredLoadState::Preload;

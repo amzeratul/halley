@@ -34,6 +34,9 @@ namespace Halley {
     	const String& getSwitchId() const;
         void setSwitchId(String value);
 
+		virtual void markActivelyInUse() const;
+		virtual void markBackgroundLoaded() const;
+
     private:
 		String switchId;
 		HashMap<String, AudioSubObjectHandle> cases;

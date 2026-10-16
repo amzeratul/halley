@@ -215,6 +215,20 @@ uint32_t AudioSubObjectSequence::getVersion() const
 	return version;
 }
 
+void AudioSubObjectSequence::markActivelyInUse() const
+{
+	for (const auto& segment: segments) {
+		segment.object.getObject().markActivelyInUse();
+	}
+}
+
+void AudioSubObjectSequence::markBackgroundLoaded() const
+{
+	for (const auto& segment: segments) {
+		segment.object.getObject().markBackgroundLoaded();
+	}
+}
+
 
 AudioSubObjectSequence::Segment::Segment(AudioSubObjectHandle subObject)
 	: object(std::move(subObject))

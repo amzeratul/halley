@@ -102,6 +102,9 @@ namespace Halley
 		void loadDependencies(Resources& resources);
 		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const;
 
+		void markActivelyInUse() const;
+		void markBackgroundLoaded() const;
+
 	private:
 		Vector<std::unique_ptr<AudioEventAction>> actions;
 	};
@@ -123,6 +126,9 @@ namespace Halley
 		virtual void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const {}
 
 		virtual ConfigNode toConfigNode() const;
+
+		virtual void markActivelyInUse() const;
+		virtual void markBackgroundLoaded() const;
 
 	protected:
 		AudioEventScope scope = AudioEventScope::Object;
@@ -147,6 +153,9 @@ namespace Halley
 
 		void loadDependencies(const AudioEvent& event, Resources& resources) override;
 		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const override;
+
+		void markActivelyInUse() const override;
+		void markBackgroundLoaded() const override;
 
 	protected:
 		std::optional<AudioObjectId> objectId;

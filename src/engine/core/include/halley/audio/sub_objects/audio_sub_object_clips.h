@@ -42,6 +42,9 @@ namespace Halley {
 		bool getRandomiseStart() const;
 		void setRandomiseStart(bool enabled);
 
+		void markActivelyInUse() const;
+		void markBackgroundLoaded() const;
+
 	private:
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;

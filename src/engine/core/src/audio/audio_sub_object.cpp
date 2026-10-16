@@ -111,6 +111,14 @@ std::unique_ptr<AudioSubObject> AudioSubObject::makeSubObject(const ConfigNode& 
 	return obj;
 }
 
+void AudioSubObject::markActivelyInUse() const
+{
+}
+
+void AudioSubObject::markBackgroundLoaded() const
+{
+}
+
 size_t IAudioObject::getNumSubObjects() const
 {
 	return 0;

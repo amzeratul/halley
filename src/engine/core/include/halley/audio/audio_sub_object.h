@@ -79,6 +79,9 @@ namespace Halley {
 		static void copySubObject(AudioSubObject& dst, const AudioSubObject& src);
 		static std::unique_ptr<AudioSubObject> makeSubObject(const ConfigNode& node);
 
+		virtual void markActivelyInUse() const;
+		virtual void markBackgroundLoaded() const;
+
 	private:
 		String id;
 	};

@@ -131,8 +131,13 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 		}
 	}
 
-	clip->markActivelyInUse();
+	if (!loop) {
+		for (auto& otherClip: clipData) {
+			otherClip->markBackgroundLoaded();
+		}
+	}
 
+	clip->markActivelyInUse();
 	return std::make_unique<AudioSourceClip>(engine, std::move(clip), loop, engine.getRNG().getFloat(gain), loopStart, loopEnd, randomiseStart);
 }
 
@@ -309,4 +314,22 @@ bool AudioSubObjectClips::getRandomiseStart() const
 void AudioSubObjectClips::setRandomiseStart(bool enabled)
 {
 	randomiseStart = enabled;
+}
+
+void AudioSubObjectClips::markActivelyInUse() const
+{
+	for (const auto& clip: clipData) {
+		if (clip) {
+			clip->markActivelyInUse();
+		}
+	}
+}
+
+void AudioSubObjectClips::markBackgroundLoaded() const
+{
+	for (const auto& clip: clipData) {
+		if (clip) {
+			clip->markBackgroundLoaded();
+		}
+	}
 }

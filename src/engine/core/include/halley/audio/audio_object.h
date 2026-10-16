@@ -112,6 +112,9 @@ namespace Halley {
 			size_t unchanged = 0;
 		};
 		static ReloadResult reloadObjects(Vector<AudioSubObjectHandle>& objects, Vector<AudioSubObjectHandle> newObjects);
+		
+		void markActivelyInUse() const;
+		void markBackgroundLoaded() const;
 
     private:
 		AudioObjectId audioObjectId = 0;

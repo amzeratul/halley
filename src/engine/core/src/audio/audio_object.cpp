@@ -456,3 +456,17 @@ AudioObject::ReloadResult AudioObject::reloadObjects(Vector<AudioSubObjectHandle
 
 	return result;
 }
+
+void AudioObject::markActivelyInUse() const
+{
+	for (const auto& obj: objects) {
+		obj.getObject().markActivelyInUse();
+	}
+}
+
+void AudioObject::markBackgroundLoaded() const
+{
+	for (const auto& obj: objects) {
+		obj.getObject().markBackgroundLoaded();
+	}
+}

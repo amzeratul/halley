@@ -10,10 +10,10 @@ namespace Halley {
     public:
         size_t budget = 1024 * 1024 * 1024;     /// Total byte budget for this asset type; can preload to that amount, and tries to keep all resources below it
         size_t staleBudget = 768 * 1024 * 1024; /// Unload stale objects when this usage is exceeded
+        float useTimeGrace = 0.1f;              /// How many seconds before this no longer counts as being in use
 
         ResourceUnloaderAssetTypeRules() = default;
-        ResourceUnloaderAssetTypeRules(size_t budget);
-        ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget);
+        ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget, float useTimeGrace);
     };
 
     class ResourceUnloaderRules {
@@ -67,10 +67,10 @@ namespace Halley {
 
         void prepareCollection(float t, ResourceCollectionBase& collection);
         void updateCollection(float t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);
-        void updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);
+        void updateResourcesAndCollectStates(float t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states, const ResourceUnloaderAssetTypeRules& rules);
 
         template<typename T>
-        LoadStateInfo getStateInfo(std::shared_ptr<T> resource, float t) const;
+        LoadStateInfo getStateInfo(std::shared_ptr<T> resource, const ResourceUnloaderAssetTypeRules& rules) const;
 
         float getTimeSince(uint32_t idx) const;
         uint32_t getFramesSince(uint32_t idx) const;

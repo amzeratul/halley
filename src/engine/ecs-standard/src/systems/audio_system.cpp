@@ -223,6 +223,10 @@ private:
 			if (source.audioSource.emitter) {
 				source.audioSource.emitter->setPosition(getAudioPosition(source, vel));
 			}
+
+			if (source.audioSource.event) {
+				source.audioSource.event->markBackgroundLoaded();
+			}
 		}
 	}
 

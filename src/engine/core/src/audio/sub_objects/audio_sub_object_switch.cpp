@@ -198,3 +198,17 @@ void AudioSubObjectSwitch::setSwitchId(String value)
 {
 	switchId = std::move(value);
 }
+
+void AudioSubObjectSwitch::markActivelyInUse() const
+{
+	for (const auto& [k, v]: cases) {
+		v.getObject().markActivelyInUse();
+	}
+}
+
+void AudioSubObjectSwitch::markBackgroundLoaded() const
+{
+	for (const auto& [k, v]: cases) {
+		v.getObject().markBackgroundLoaded();
+	}
+}
