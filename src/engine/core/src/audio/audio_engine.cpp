@@ -383,6 +383,9 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, AudioBuffersRef
 			// Render
 			if (v->isPlaying()) {
 				v->update(channels, e.second->getPosition(), listener, masterGain * getCompositeBusGain(v->getBus()));
+				if (v->needsResumeFromSuspension()) {
+					v->resumeFromSuspension(*this, *e.second);
+				}
 				v->render(numSamples, *pool);
 			}
 		}

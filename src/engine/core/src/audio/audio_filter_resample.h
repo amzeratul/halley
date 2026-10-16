@@ -18,6 +18,8 @@ namespace Halley
 		void restart() override;
 		bool isLooping() override;
 		void prime() override;
+		void suspend() override;
+		void resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter) override;
 
 		void setFromHz(float fromHz);
 

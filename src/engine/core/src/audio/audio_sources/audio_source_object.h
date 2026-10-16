@@ -18,9 +18,15 @@ namespace Halley
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
 		void restart() override;
 		bool isLooping() override;
+		void suspend() override;
+		void resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter) override;
 
 	private:
 		const AudioObject& object;
 		Vector<std::unique_ptr<AudioSource>> sources;
+		bool looping = false;
+
+		void loadSources(AudioEngine& engine, AudioEmitter& emitter);
+		void unloadSources();
     };
 }

@@ -16,6 +16,8 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	, playing(false)
 	, done(false)
 	, isFirstUpdate(true)
+	, suspended(false)
+	, resumingFromSuspension(false)
 	, baseGain(gain)
 	, userGain(1.0f)
 	, basePitch(pitch)
@@ -123,6 +125,22 @@ void AudioVoice::resume(AudioFade fade, bool force)
 	}
 }
 
+void AudioVoice::suspend()
+{
+	if (!suspended && !resumingFromSuspension) {
+		suspended = true;
+		source->suspend();
+	}
+}
+
+void AudioVoice::resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter)
+{
+	if (suspended && !resumingFromSuspension) {
+		resumingFromSuspension = true;
+		source->resumeFromSuspension(engine, emitter);
+	}
+}
+
 bool AudioVoice::isPlaying() const
 {
 	return playing;
@@ -136,6 +154,11 @@ bool AudioVoice::isReady() const
 bool AudioVoice::isDone() const
 {
 	return done;
+}
+
+bool AudioVoice::needsResumeFromSuspension() const
+{
+	return suspended && hasMixOutput;
 }
 
 uint8_t AudioVoice::getBus() const
@@ -199,6 +222,11 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		return;
 	}
 
+	if (resumingFromSuspension && source->isReady()) {
+		resumingFromSuspension = false;
+		suspended = false;
+	}
+
 	if (fader.isFading()) {
 		if (fader.update(elapsedTime)) {
 			onFadeEnd();
@@ -235,8 +263,14 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 	elapsedTime = 0;
 	
-	if (!hasMixOutput && !source->isLooping()) {
-		stop({});
+	if (!hasMixOutput && !suspended && !resumingFromSuspension) {
+		if (source->isLooping()) {
+			if (gain > 0 && silentTime > 2.5f) { // "gain" being over 0 means that hasMixOutput is only false because of distance attenuation
+				suspend();
+			}
+		} else {
+			stop({});
+		}
 	}
 }
 
@@ -262,19 +296,21 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 		startDstSample += delayNow;
 		numSamples -= delayNow;
 	}
-	numSamplesRendered = numSamples;
 
 	// Get sample data
 	bool isPlaying = true;
-	if (numSamples > 0) {
+	bool outputting = false;
+	if (numSamples > 0 && !suspended && !resumingFromSuspension) {
 		audioData = pool.getBuffers(getNumberOfChannels(), numSamples);
 		if (hasMixOutput) {
 			isPlaying = source->getAudioData(numSamples, audioData.getSampleSpans());
+			outputting = true;
+			numSamplesRendered = numSamples;
 		}
 	}
 
 	// Advance playback state
-	advancePlayback(numSamples);
+	advancePlayback(numSamples, outputting);
 	if (!isPlaying) {
 		stop(AudioFade());
 	}
@@ -327,10 +363,16 @@ void AudioVoice::clearBuffers()
 	audioData = {};
 }
 
-void AudioVoice::advancePlayback(size_t samples)
+void AudioVoice::advancePlayback(size_t samples, bool outputting)
 {
 	if (!paused) {
-		elapsedTime += static_cast<float>(samples) / AudioConfig::sampleRate;
+		const float dt = static_cast<float>(samples) / AudioConfig::sampleRate;
+		elapsedTime += dt;
+		if (outputting) {
+			silentTime = 0;
+		} else {
+			silentTime += dt;
+		}
 	}
 }
 

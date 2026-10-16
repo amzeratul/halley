@@ -225,7 +225,7 @@ private:
 			}
 
 			if (source.audioSource.event) {
-				source.audioSource.event->markBackgroundLoaded();
+				//source.audioSource.event->markBackgroundLoaded();
 			}
 		}
 	}

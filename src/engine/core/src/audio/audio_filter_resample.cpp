@@ -97,6 +97,16 @@ void AudioFilterResample::prime()
 	source->prime();
 }
 
+void AudioFilterResample::suspend()
+{
+	source->suspend();
+}
+
+void AudioFilterResample::resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter)
+{
+	source->resumeFromSuspension(engine, emitter);
+}
+
 void AudioFilterResample::setFromHz(float fromHz)
 {
 	this->fromHz = fromHz;

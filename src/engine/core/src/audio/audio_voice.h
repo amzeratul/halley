@@ -26,9 +26,13 @@ namespace Halley {
 		void pause(AudioFade fade);
 		void resume(AudioFade fade, bool force = false);
 
+		void suspend();
+		void resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter);
+
 		bool isPlaying() const;
 		bool isReady() const;
 		bool isDone() const;
+		bool needsResumeFromSuspension() const;
 
 		void setBaseGain(float gain);
 		float getBaseGain() const;
@@ -71,11 +75,14 @@ namespace Halley {
 		bool playing : 1;
 		bool done : 1;
 		bool isFirstUpdate : 1;
+		bool suspended : 1;
+		bool resumingFromSuspension : 1;
     	float baseGain = 1.0f;
 		float userGain = 1.0f;
 		float basePitch = 1.0f;
 		float dopplerScale = 0.0f;
 		float elapsedTime = 0.0f;
+		float silentTime = 0.0f;
 		uint32_t delaySamples = 0;
 		uint32_t paused = 0;
 		uint32_t pendingPauses = 0;
@@ -94,7 +101,6 @@ namespace Halley {
 		uint8_t lastDstChannels = 0;
 		bool hasMixOutput = false;
 
-		AudioBuffersRef audioData;
 		size_t startDstSample = 0;
 		size_t numSamplesRendered = 0;
 		float mixAmount = 0;
@@ -102,7 +108,9 @@ namespace Halley {
 		AudioMixingProperties mixingProperties;
 		float curDistance = 0;
 
-		void advancePlayback(size_t samples);
+		AudioBuffersRef audioData;
+
+		void advancePlayback(size_t samples, bool outputting);
 		void onFadeEnd();
-    };
+	};
 }

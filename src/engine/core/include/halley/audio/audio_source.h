@@ -6,6 +6,8 @@
 
 namespace Halley
 {
+	class AudioEmitter;
+
 	class AudioSource {
 	public:
 		virtual ~AudioSource() {}
@@ -18,5 +20,7 @@ namespace Halley
 		virtual void restart() = 0;
 		virtual bool isLooping() = 0;
 		virtual void prime() {}
+		virtual void suspend() {}
+		virtual void resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter) {}
 	};
 }

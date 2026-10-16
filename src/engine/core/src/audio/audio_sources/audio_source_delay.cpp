@@ -71,3 +71,13 @@ bool AudioSourceDelay::isLooping()
 {
 	return src->isLooping();
 }
+
+void AudioSourceDelay::suspend()
+{
+	src->suspend();
+}
+
+void AudioSourceDelay::resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter)
+{
+	src->resumeFromSuspension(engine, emitter);
+}

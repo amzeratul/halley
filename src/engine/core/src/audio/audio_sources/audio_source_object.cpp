@@ -6,9 +6,20 @@ using namespace Halley;
 AudioSourceObject::AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter, const AudioObject& object)
 	: object(object)
 {
+	loadSources(engine, emitter);
+}
+
+void AudioSourceObject::loadSources(AudioEngine& engine, AudioEmitter& emitter)
+{
+	sources.clear();
 	sources.reserve(object.getSubObjects().size());
+	looping = false;
+
 	for (const auto& subObject: object.getSubObjects()) {
 		if (auto source = subObject->makeSource(engine, emitter)) {
+			if (source->isLooping()) {
+				looping = true;
+			}
 			sources.emplace_back(std::move(source));
 		}
 	}
@@ -20,6 +31,11 @@ AudioSourceObject::AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter,
 			}
 		}
 	}
+}
+
+void AudioSourceObject::unloadSources()
+{
+	sources.clear();
 }
 
 String AudioSourceObject::getName() const
@@ -76,10 +92,15 @@ void AudioSourceObject::restart()
 
 bool AudioSourceObject::isLooping()
 {
-	for (const auto& src: sources) {
-		if (src->isLooping()) {
-			return true;
-		}
-	}
-	return false;
+	return looping;
+}
+
+void AudioSourceObject::suspend()
+{
+	unloadSources();
+}
+
+void AudioSourceObject::resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter)
+{
+	loadSources(engine, emitter);
 }

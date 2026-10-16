@@ -18,6 +18,8 @@ namespace Halley
         void restart() override;
 		void setInitialDelay(size_t delay);
 		bool isLooping() override;
+		void suspend() override;
+		void resumeFromSuspension(AudioEngine& engine, AudioEmitter& emitter) override;
 
 	private:
 		std::shared_ptr<AudioSource> src;
