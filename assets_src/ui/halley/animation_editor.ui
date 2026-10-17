@@ -93,7 +93,7 @@ children:
               tooltip: Clear Point from Frame
       - uuid: 8359aa34-632f-4489-ab2e-6bfc2a3e7505
         widget:
-          active: false
+          active: true
           class: button
           id: makePolygon
           style: buttonThin

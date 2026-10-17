@@ -3,6 +3,7 @@
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/sprite/sprite.h"
 #include "halley/maths/polygon.h"
+#include "halley/maths/triangle.h"
 
 using namespace Halley;
 
@@ -38,7 +39,7 @@ Polygon ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds)
 	const auto mask = image.makeAlphaMask(bounds);
 	const auto boundPixels = simplifyBoundaryPixelsForConvex(getBoundaryPixels(mask, bounds), bounds);
 	auto vertices = makePixelVertices(boundPixels, mask, bounds);
-	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), bounds);
+	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), Rect4f(bounds));
 }
 
 VertexList ImagePolygonExtractor::makeVertices(Rect4i bounds)
@@ -197,12 +198,14 @@ Vector<Vector2i> ImagePolygonExtractor::simplifyBoundaryPixelsForConvex(Vector<V
 VertexList ImagePolygonExtractor::makePixelVertices(gsl::span<const Vector2i> vs, const Vector<bool>& mask, Rect4i bounds)
 {
 	const auto width = bounds.getWidth();
+	const auto x0 = bounds.getLeft();
+	const auto y0 = bounds.getTop();
 
 	auto hasNeighbour = [&] (Vector2i p, Vector2i offset) -> bool
 	{
 		const auto n = p + offset;
 		if (bounds.contains(n)) {
-			return mask[n.x + n.y * width];
+			return mask.at((n.x - x0) + (n.y - y0) * width);
 		}
 		return false;
 	};
@@ -250,10 +253,103 @@ VertexList ImagePolygonExtractor::makePixelVertices(gsl::span<const Vector2i> vs
 	return result;
 }
 
-VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4i boundsInteger)
+VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4f maxBounds)
 {
-	const auto bounds = Rect4f(boundsInteger);
+	const float minAreaPerVertex = 32;
 
-	// TODO
+	auto getReplacementVertex = [&](Vector2f p0, Vector2f p1, Vector2f p2, Vector2f p3) -> std::pair<Vector2f, float>
+	{
+		// First, find the vertex at the intersection of p0-p1 and p2-p3
+		const auto l0 = Line(p0, p1 - p0);
+		const auto l1 = Line(p3, p2 - p3);
+		if (const auto p = l0.intersection(l1)) {
+			// This is the candidate to replace p1 and p2, find the area of the triangle comprised by them to see how many pixels we're sacrificing
+			const auto t = Triangle(*p, p1, p2);
+			return { *p, t.getArea() };
+		} else {
+			// Parallel
+			return { (p1 + p2) / 2.0f, std::numeric_limits<float>::max() };
+		}
+	};
+
+	struct Operation {
+		float cost = std::numeric_limits<float>::max();
+		uint32_t idx = 0;
+		Vector2f replacementVertex;
+
+		bool operator<(const Operation& other) const
+		{
+			return cost > other.cost;
+		}
+	};
+
+	Vector<Operation> operations;
+
+	auto getOperation = [&] (size_t i) -> std::optional<Operation>
+	{
+		const auto size = vs.size();
+		const auto p0 = vs[(i + size - 1) % size];
+		const auto p1 = vs[i];
+		const auto p2 = vs[(i + 1) % size];
+		const auto p3 = vs[(i + 2) % size];
+
+		const auto [replacement, cost] = getReplacementVertex(p0, p1, p2, p3);
+		if (cost < minAreaPerVertex) {
+			return Operation{ cost, static_cast<uint32_t>(i), replacement };
+		} else {
+			return std::nullopt;
+		}
+	};
+
+	// Start by adding all possible operations
+	for (size_t i = 0; i < vs.size(); ++i) {
+		if (auto op = getOperation(i)) {
+			operations += *op;
+		}
+	}
+
+	// Last is cheapest
+	std::sort(operations.begin(), operations.end());
+	
+	while (!operations.empty()) {
+		const auto curOp = operations.back();
+		if (curOp.cost >= minAreaPerVertex) {
+			// Those are never inserted, but they can be updated into this state
+			// Since they're sorted, at this point we know we're done
+			break;
+		}
+
+		operations.pop_back();
+		const auto startSize = vs.size();
+
+		vs[(curOp.idx + 1) % startSize] = curOp.replacementVertex;
+		vs.erase(vs.begin() + curOp.idx);
+
+		if (vs.size() < 4) {
+			break;
+		}
+
+		for (auto& o: operations) {
+			const bool isAdjacent = o.idx == (curOp.idx + 1) % startSize || (o.idx + 1) % startSize == curOp.idx;
+
+			// Decrease index to account for deleted vertex
+			if (o.idx > curOp.idx) {
+				--o.idx;
+			}
+
+			// Adjacent operations need to be re-evaluated
+			if (isAdjacent) {
+				if (auto op = getOperation(o.idx)) {
+					o = *op;
+				} else {
+					o.cost = std::numeric_limits<float>::max();
+				}
+			}
+		}
+
+		// This is pretty horrendous
+		std::sort(operations.begin(), operations.end());
+	}
+
 	return vs;
 }
