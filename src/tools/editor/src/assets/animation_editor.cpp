@@ -2,6 +2,7 @@
 
 #include "metadata_editor.h"
 #include "../../../tools/src/sprites/aseprite_file.h"
+#include "../../../tools/src/sprites/image_polygon_extractor.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/widgets/ui_dropdown.h"
@@ -213,6 +214,11 @@ void AnimationEditor::setupWindow()
 	setHandle(UIEventType::ButtonClicked, "clearPoint", [=] (const UIEvent& event)
 	{
 		animationDisplay->clearPoint();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "makePolygon", [=] (const UIEvent& event)
+	{
+		makePolygon();
 	});
 
 	updatePlayIcon();
@@ -430,6 +436,17 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 	if (nineSliceVSprite.isVisible()) {
 		painter.draw(nineSliceVSprite);
 	}
+
+	if (polygonBounds.isValid()) {
+		auto vs = polygonBounds.getVertices();
+		for (auto& v: vs) {
+			v = v * zoom + getPosition();
+		}
+		painter.draw([vs = std::move(vs)] (Painter& p)
+		{
+			p.drawLine(vs, 1.0f, Colour4f(1, 0, 0), true);
+		});
+	}
 	
 	const auto mousePos = screenSpaceMousePos;
 	const bool iso = isoMode;
@@ -513,6 +530,16 @@ void AnimationEditorDisplay::setSpriteUnderCursor(const SpriteSheetEntry* sprite
 	} else {
 		curBounds = std::nullopt;
 	}
+}
+
+const Sprite& AnimationEditorDisplay::getOrigSprite() const
+{
+	return origSprite;
+}
+
+void AnimationEditorDisplay::setPolygonBounds(Polygon poly)
+{
+	this->polygonBounds = std::move(poly);
 }
 
 void AnimationEditorDisplay::updateBounds()
@@ -683,4 +710,11 @@ Path AnimationEditor::makePalette(Project& project, const Path& path, const Meta
 	project.writeAssetToDisk(palettePath, palette.savePNGToBytes(false));
 
 	return palettePath.dropFront(1);
+}
+
+void AnimationEditor::makePolygon()
+{
+	const auto& sprite = animationDisplay->getOrigSprite();
+	const auto poly = ImagePolygonExtractor::extractPolygon(sprite);
+	animationDisplay->setPolygonBounds(poly);
 }

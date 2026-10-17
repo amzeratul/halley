@@ -26,6 +26,7 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
         
 		static Path makePalette(Project& project, const Path& file, const Metadata& meta);
+		void makePolygon();
 
     protected:
         void update(Time t, bool moved) override;
@@ -81,6 +82,9 @@ namespace Halley {
 
 		void setSpriteUnderCursor(const SpriteSheetEntry* sprite);
 
+		const Sprite& getOrigSprite() const;
+		void setPolygonBounds(Polygon poly);
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -109,6 +113,8 @@ namespace Halley {
 		bool isoMode = false;
 		Vector2f mousePos;
 		Vector2f screenSpaceMousePos;
+
+		Polygon polygonBounds;
 
 		void updateBounds();
 		Vector2f imageToScreenSpace(Vector2f pos) const;

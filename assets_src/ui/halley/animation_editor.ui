@@ -1,76 +1,131 @@
----
-widget: { class: widget }
-sizer: { type: vertical }
+uuid: 1d2c0b23-7b29-4ca6-943d-f519d4386d47
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
 children:
-- widget: { class: widget, id: topBar }
-  sizer: { type: horizontal }
-  children:
-  - widget: { id: animControls, class: widget }
-    sizer: { type: horizontal }
+  - uuid: fd96ab52-038e-4fdd-9e0b-6c356e21b57d
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: horizontal
+    widget:
+      class: widget
+      id: topBar
     children:
-    - uuid: 1f31e183-70ce-4714-af8c-828334516c18
-      widget:
-        class: button
-        icon: halley_ui/icon_play.png
-        id: play
-        style: buttonThin
-        tooltip: Play/Pause [Space]
-    - uuid: 7f0e545a-dfc4-4687-9166-10a126588195
-      widget:
-        class: button
-        icon: halley_ui/icon_previous.png
-        id: prevFrame
-        style: buttonThin
-        tooltip: Previous frame [Left]
-    - uuid: 2f9fe79d-0557-4411-9a02-91338401223f
-      widget:
-        class: button
-        icon: halley_ui/icon_next.png
-        id: nextFrame
-        style: buttonThin
-        tooltip: Next frame [Right]
-    - widget: { id: sequence, class: dropdown, size: [200, 22] }
-    - widget: { id: direction, class: dropdown, size: [200, 22] }
-  - spacer: {}
+      - uuid: 4311448f-dfa0-4899-8b02-8e55fca27244
+        sizer:
+          type: horizontal
+        widget:
+          class: widget
+          id: animControls
+        children:
+          - uuid: 1f31e183-70ce-4714-af8c-828334516c18
+            widget:
+              class: button
+              icon: halley_ui/icon_play.png
+              id: play
+              style: buttonThin
+              tooltip: Play/Pause [Space]
+          - uuid: 7f0e545a-dfc4-4687-9166-10a126588195
+            widget:
+              class: button
+              icon: halley_ui/icon_previous.png
+              id: prevFrame
+              style: buttonThin
+              tooltip: Previous frame [Left]
+          - uuid: 2f9fe79d-0557-4411-9a02-91338401223f
+            widget:
+              class: button
+              icon: halley_ui/icon_next.png
+              id: nextFrame
+              style: buttonThin
+              tooltip: Next frame [Right]
+          - uuid: b7acef57-737e-4cc0-8412-ae7cd6f24f11
+            widget:
+              class: dropdown
+              id: sequence
+              size: [200, 22]
+          - uuid: 87655c5a-9cad-45cf-80c8-603267a87f25
+            widget:
+              class: dropdown
+              id: direction
+              size: [200, 22]
+      - uuid: 3549a7a2-e375-43d6-9769-7d16a4a0941e
+        proportion: 1
+        spacer: {}
+      - uuid: 117786fb-c155-4db5-a399-8223c788be3a
+        sizer:
+          type: horizontal
+        widget:
+          class: widget
+          id: pointControls
+        children:
+          - uuid: d7b1ef62-7073-492c-9371-53b03a9dad14
+            widget:
+              class: dropdown
+              id: actionPoints
+              options:
+                - id: pivot
+                  text: Pivot (Global)
+              size: [200, 22]
+          - uuid: 4e3b287b-d2b4-4d08-befa-6de2eff74a58
+            widget:
+              class: button
+              id: addPoint
+              style: buttonThin
+              text: +
+              tooltip: Add Point
+          - uuid: a08888d3-ee81-447b-a246-3c1ed81443e2
+            widget:
+              class: button
+              id: removePoint
+              style: buttonThin
+              text: "-"
+              tooltip: Remove Point
+          - uuid: 7a79b0d3-f6c2-4867-90a9-d24c5eb1e4b3
+            widget:
+              class: button
+              id: clearPoint
+              style: buttonThin
+              text: x
+              tooltip: Clear Point from Frame
+      - uuid: 8359aa34-632f-4489-ab2e-6bfc2a3e7505
+        widget:
+          active: false
+          class: button
+          id: makePolygon
+          style: buttonThin
+          text: "Make Polygon "
+  - uuid: 38d3eafe-d384-429d-adf9-bdd0dd39bdf3
     proportion: 1
-  - widget: { id: pointControls, class: widget }
-    sizer: { type: horizontal }
+    sizer:
+      type: vertical
+    widget:
+      class: scrollBarPane
+      id: contents
+      mouseWheelEnabled: false
+      scrollHorizontal: true
+      scrollVertical: true
     children:
-    - widget: 
-        id: actionPoints
-        class: dropdown
-        size: [200, 22]
-        options:
-        - id: pivot
-          text: Pivot (Global)
-    - widget:
-        class: button
-        text: "+"
-        id: addPoint
-        style: buttonThin
-        tooltip: Add Point
-    - widget:
-        class: button
-        text: "-"
-        id: removePoint
-        style: buttonThin
-        tooltip: Remove Point
-    - widget:
-        class: button
-        text: "x"
-        id: clearPoint
-        style: buttonThin
-        tooltip: Clear Point from Frame
-- widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
-  proportion: 1
-  fill: fill
-  sizer: { type: vertical }
-  children:
-  - widget: { class: scrollBackground, id: scrollBackground }
-    proportion: 1
-    children:
-    - widget: { class: animationEditorDisplay, id: display }
-      proportion: 1
-      fill: centre
-- widget: { id: info, class: label, text: Test }
-...
+      - uuid: 64c66564-d02e-466b-83e4-fcb88092896c
+        proportion: 1
+        widget:
+          class: scrollBackground
+          id: scrollBackground
+        children:
+          - uuid: 00c3f746-08e7-40ca-9d5c-a861a905f7b1
+            proportion: 1
+            widget:
+              class: animationEditorDisplay
+              id: display
+            fill: centre
+    fill: fill
+  - uuid: 923a4e51-b37a-4f61-9cc9-8c1de2001534
+    proportion: 0
+    widget:
+      class: label
+      id: info
+      text: Test
+    fill: [fillHorizontal, centreVertical]

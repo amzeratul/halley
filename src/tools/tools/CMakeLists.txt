@@ -95,6 +95,7 @@ set(SOURCES
 
     "src/sprites/aseprite_file.cpp"
     "src/sprites/aseprite_reader.cpp"
+    "src/sprites/image_polygon_extractor.cpp"
 
     "src/steam/steam_utils.cpp"
 
@@ -206,6 +207,7 @@ set(HEADERS
 
 	"src/sprites/aseprite_file.h"
     "src/sprites/aseprite_reader.h"
+    "src/sprites/image_polygon_extractor.h"
 
     "src/steam/steam_utils.h"
     )
