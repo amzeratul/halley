@@ -398,9 +398,9 @@ size_t Image::countColours(std::optional<Rect4i> rect) const
 {
 	const auto r = rect.value_or(getRect());
 	const auto x0 = clamp<int>(r.getLeft(), 0, static_cast<int>(getWidth() - 1));
-	const auto x1 = clamp<int>(r.getRight(), 0, static_cast<int>(getWidth() - 1));
+	const auto x1 = clamp<int>(r.getRight(), 0, static_cast<int>(getWidth()));
 	const auto y0 = clamp<int>(r.getTop(), 0, static_cast<int>(getHeight() - 1));
-	const auto y1 = clamp<int>(r.getBottom(), 0, static_cast<int>(getHeight() - 1));
+	const auto y1 = clamp<int>(r.getBottom(), 0, static_cast<int>(getHeight()));
 
 	HashSet<int> cols;
 	cols.reserve(1024);
@@ -443,9 +443,9 @@ Vector<bool> Image::makeAlphaMask(std::optional<Rect4i> rect) const
 	const auto r = rect.value_or(getRect());
 
 	const auto x0 = clamp<int>(r.getLeft(), 0, static_cast<int>(getWidth() - 1));
-	const auto x1 = clamp<int>(r.getRight(), 0, static_cast<int>(getWidth() - 1));
+	const auto x1 = clamp<int>(r.getRight(), 0, static_cast<int>(getWidth()));
 	const auto y0 = clamp<int>(r.getTop(), 0, static_cast<int>(getHeight() - 1));
-	const auto y1 = clamp<int>(r.getBottom(), 0, static_cast<int>(getHeight() - 1));
+	const auto y1 = clamp<int>(r.getBottom(), 0, static_cast<int>(getHeight()));
 
 	const auto w = x1 - x0;
 	const auto h = y1 - y0;

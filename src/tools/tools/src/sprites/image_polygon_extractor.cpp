@@ -29,6 +29,11 @@ Polygon ImagePolygonExtractor::extractPolygon(const Sprite& sprite)
 
 Polygon ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds)
 {
+	bounds = image.getRect().intersection(bounds);
+	if (bounds.getWidth() == 0 || bounds.getHeight() == 0) {
+		return {};
+	}
+
 	const auto mask = image.makeAlphaMask(bounds);
 	const auto boundPixels = simplifyBoundaryPixelsForConvex(getBoundaryPixels(mask, bounds), bounds);
 	Logger::logInfo("Got " + toString(boundPixels.size()) + " boundary pixels: " + String::concat(boundPixels.const_span(), ", "));

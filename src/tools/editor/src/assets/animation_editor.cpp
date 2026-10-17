@@ -439,8 +439,10 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 
 	if (polygonBounds.isValid()) {
 		auto vs = polygonBounds.getVertices();
+		const auto trimOffset = Vector2f(origSprite.getOuterBorder().xy());
+		const auto atlasOffset = origSprite.getTexRect0().getTopLeft() * Vector2f(origSprite.getMaterial().getTexture(0)->getSize());
 		for (auto& v: vs) {
-			v = v * zoom + getPosition();
+			v = (v + trimOffset - atlasOffset) * zoom + getPosition();
 		}
 		painter.draw([vs = std::move(vs)] (Painter& p)
 		{
