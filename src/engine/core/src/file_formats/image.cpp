@@ -438,6 +438,43 @@ void Image::collectColours(HashMap<uint32_t, uint32_t>& dst) const
 	}
 }
 
+Vector<bool> Image::makeAlphaMask(std::optional<Rect4i> rect) const
+{
+	const auto r = rect.value_or(getRect());
+
+	const auto x0 = clamp<int>(r.getLeft(), 0, static_cast<int>(getWidth() - 1));
+	const auto x1 = clamp<int>(r.getRight(), 0, static_cast<int>(getWidth() - 1));
+	const auto y0 = clamp<int>(r.getTop(), 0, static_cast<int>(getHeight() - 1));
+	const auto y1 = clamp<int>(r.getBottom(), 0, static_cast<int>(getHeight() - 1));
+
+	const auto w = x1 - x0;
+	const auto h = y1 - y0;
+	const auto srcW = getWidth();
+
+	Vector<bool> result;
+	result.resize(w * h);
+
+	if (getBytesPerPixel() == 4) {
+		const auto src = getPixels4BPP();
+		for (int y = 0; y < h; ++y) {
+			for (int x = 0; x < w; ++x) {
+				const auto srcPixel = src[(x + x0) + (y + y0) * srcW];
+				result[x + y * w] = (srcPixel >> 24) != 0;
+			}
+		}
+	} else if (getBytesPerPixel() == 1) {
+		const auto src = getPixels1BPP();
+		for (int y = 0; y < h; ++y) {
+			for (int x = 0; x < w; ++x) {
+				const auto srcPixel = src[(x + x0) + (y + y0) * srcW];
+				result[x + y * w] = srcPixel != 0;
+			}
+		}
+	}
+
+	return result;
+}
+
 std::unique_ptr<Image> Image::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<Image>(*loader.getStatic(), loader.getMeta());

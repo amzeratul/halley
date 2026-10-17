@@ -130,8 +130,10 @@ namespace Halley {
 		void drawImageAdd(const Image& src, Vector2i pos, uint8_t opacity = 255);
 		void drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity = 255);
 
-		size_t countColours(std::optional<Rect4i> rect) const;
+		size_t countColours(std::optional<Rect4i> rect = {}) const;
 		void collectColours(HashMap<uint32_t, uint32_t>& dst) const;
+
+		Vector<bool> makeAlphaMask(std::optional<Rect4i> rect = {}) const;
 
 		static std::unique_ptr<Image> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Image; }
