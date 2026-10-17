@@ -255,7 +255,7 @@ VertexList ImagePolygonExtractor::makePixelVertices(gsl::span<const Vector2i> vs
 
 VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4f maxBounds)
 {
-	const float minAreaPerVertex = 32;
+	const float minAreaPerVertex = 64;
 
 	auto getReplacementVertex = [&](Vector2f p0, Vector2f p1, Vector2f p2, Vector2f p3) -> std::pair<Vector2f, float>
 	{
@@ -283,8 +283,6 @@ VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4f ma
 		}
 	};
 
-	Vector<Operation> operations;
-
 	auto getOperation = [&] (size_t i) -> std::optional<Operation>
 	{
 		const auto size = vs.size();
@@ -301,54 +299,22 @@ VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4f ma
 		}
 	};
 
-	// Start by adding all possible operations
-	for (size_t i = 0; i < vs.size(); ++i) {
-		if (auto op = getOperation(i)) {
-			operations += *op;
-		}
-	}
-
-	// Last is cheapest
-	std::sort(operations.begin(), operations.end());
-	
-	while (!operations.empty()) {
-		const auto curOp = operations.back();
-		if (curOp.cost >= minAreaPerVertex) {
-			// Those are never inserted, but they can be updated into this state
-			// Since they're sorted, at this point we know we're done
-			break;
-		}
-
-		operations.pop_back();
-		const auto startSize = vs.size();
-
-		vs[(curOp.idx + 1) % startSize] = curOp.replacementVertex;
-		vs.erase(vs.begin() + curOp.idx);
-
-		if (vs.size() < 4) {
-			break;
-		}
-
-		for (auto& o: operations) {
-			const bool isAdjacent = o.idx == (curOp.idx + 1) % startSize || (o.idx + 1) % startSize == curOp.idx;
-
-			// Decrease index to account for deleted vertex
-			if (o.idx > curOp.idx) {
-				--o.idx;
-			}
-
-			// Adjacent operations need to be re-evaluated
-			if (isAdjacent) {
-				if (auto op = getOperation(o.idx)) {
-					o = *op;
-				} else {
-					o.cost = std::numeric_limits<float>::max();
+	// This is O(n^2), but hopefully this convex hull is small enough to start with
+	while (vs.size() >= 4) {
+		std::optional<Operation> curOp;
+		for (size_t i = 0; i < vs.size(); ++i) {
+			if (auto op = getOperation(i)) {
+				if (!curOp || op->cost < curOp->cost) {
+					curOp = op;
 				}
 			}
 		}
+		if (!curOp) {
+			break;
+		}
 
-		// This is pretty horrendous
-		std::sort(operations.begin(), operations.end());
+		vs[(curOp->idx + 1) % vs.size()] = curOp->replacementVertex;
+		vs.erase(vs.begin() + curOp->idx);
 	}
 
 	return vs;
