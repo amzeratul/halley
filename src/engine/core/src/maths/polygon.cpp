@@ -1575,7 +1575,7 @@ void Polygon::triangulate(Vector<Triangle>& dst) const
 	}
 }
 
-Polygon Polygon::makeConvexHull(Vector<Vector2f> vs)
+VertexList Polygon::makeConvexHull(Vector<Vector2f> vs)
 {
 	// Using Graham Scan
 	// https://en.wikipedia.org/wiki/Graham_scan
@@ -1608,7 +1608,7 @@ Polygon Polygon::makeConvexHull(Vector<Vector2f> vs)
 	};
 
 	// Run the algorithm
-	Vector<Vector2f> stack;
+	VertexList stack;
 	stack += pivot;
 	for (const auto& v: vs) {
 		while (stack.size() > 1 && ccw(stack[stack.size() - 2], stack.back(), v)) {

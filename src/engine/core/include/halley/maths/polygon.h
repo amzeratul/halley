@@ -142,7 +142,7 @@ namespace Halley {
 		Vector<Triangle> triangulate() const;
 		void triangulate(Vector<Triangle>& dst) const;
 
-		static Polygon makeConvexHull(Vector<Vector2f> vs);
+		static VertexList makeConvexHull(Vector<Vector2f> vs);
 
 	private:
 		Circle circle;

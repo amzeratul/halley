@@ -447,6 +447,9 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 		painter.draw([vs = std::move(vs)] (Painter& p)
 		{
 			p.drawLine(vs, 1.0f, Colour4f(1, 0, 0), true);
+			for (auto& v: vs) {
+				p.drawCircle(v, 3, 1, Colour4f(1, 0, 0));
+			}
 		});
 	}
 	

@@ -36,13 +36,9 @@ Polygon ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds)
 	}
 
 	const auto mask = image.makeAlphaMask(bounds);
-	//Logger::logInfo("Got " + toString(mask.size()) + " mask pixels at " + bounds);
 	const auto boundPixels = simplifyBoundaryPixelsForConvex(getBoundaryPixels(mask, bounds), bounds);
-	//Logger::logInfo("Got " + toString(boundPixels.size()) + " boundary pixels");
-
-	auto result = Polygon::makeConvexHull(boundPixels);
-	//Logger::logInfo("Final convex hull has " + toString(result.getVertices().size()) + " vertices");
-	return result;
+	auto vertices = makePixelVertices(boundPixels, mask, bounds);
+	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), bounds);
 }
 
 VertexList ImagePolygonExtractor::makeVertices(Rect4i bounds)
@@ -56,7 +52,7 @@ VertexList ImagePolygonExtractor::makeVertices(Rect4i bounds)
 	return vs;
 }
 
-Vector<Vector2i> ImagePolygonExtractor::getBoundaryPixels(Vector<bool> mask, Rect4i bounds)
+Vector<Vector2i> ImagePolygonExtractor::getBoundaryPixels(const Vector<bool>& mask, Rect4i bounds)
 {
 	HalleyAssertDebug((int)mask.size() == bounds.getWidth() * bounds.getHeight());
 	const int width = bounds.getWidth();
@@ -196,4 +192,68 @@ Vector<Vector2i> ImagePolygonExtractor::simplifyBoundaryPixelsForConvex(Vector<V
 		}
 	}
 	return result;
+}
+
+VertexList ImagePolygonExtractor::makePixelVertices(gsl::span<const Vector2i> vs, const Vector<bool>& mask, Rect4i bounds)
+{
+	const auto width = bounds.getWidth();
+
+	auto hasNeighbour = [&] (Vector2i p, Vector2i offset) -> bool
+	{
+		const auto n = p + offset;
+		if (bounds.contains(n)) {
+			return mask[n.x + n.y * width];
+		}
+		return false;
+	};
+
+	VertexList result;
+	result.reserve(vs.size());
+
+	for (const auto& v: vs) {
+		const bool left = hasNeighbour(v, Vector2i(-1, 0));
+		const bool right = hasNeighbour(v, Vector2i(1, 0));
+		const bool up = hasNeighbour(v, Vector2i(0, -1));
+		const bool down = hasNeighbour(v, Vector2i(0, 1));
+		
+		if (left && right && up && down) {
+			Logger::logError("Invalid point at " + toString(v));
+		}
+
+		if (!left && !up) {
+			result += Vector2f(v);
+		}
+		if (!left && !down) {
+			result += Vector2f(v + Vector2i(0, 1));
+		}
+		if (!right && !up) {
+			result += Vector2f(v + Vector2i(1, 0));
+		}
+		if (!right && !down) {
+			result += Vector2f(v + Vector2i(1, 1));
+		}
+
+		if (!left && up && down) {
+			result += Vector2f(v) + Vector2f(0, 0.5f);
+		}
+		if (!right && up && down) {
+			result += Vector2f(v) + Vector2f(1, 0.5f);
+		}
+		if (!up && left && right) {
+			result += Vector2f(v) + Vector2f(0.5f, 0);
+		}
+		if (!down && left && right) {
+			result += Vector2f(v) + Vector2f(0.5f, 1);
+		}
+	}
+
+	return result;
+}
+
+VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4i boundsInteger)
+{
+	const auto bounds = Rect4f(boundsInteger);
+
+	// TODO
+	return vs;
 }
