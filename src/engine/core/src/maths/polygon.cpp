@@ -1575,6 +1575,50 @@ void Polygon::triangulate(Vector<Triangle>& dst) const
 	}
 }
 
+Polygon Polygon::makeConvexHull(Vector<Vector2f> vs)
+{
+	// Using Graham Scan
+	// https://en.wikipedia.org/wiki/Graham_scan
+
+	if (vs.size() < 3) {
+		return {};
+	}
+
+	// Find bottom-most idx
+	float bestY = -std::numeric_limits<float>::max();
+	size_t bestIdx = 0;
+	for (size_t i = 0; i < vs.size(); ++i) {
+		if (vs[i].y > bestY) {
+			bestY = vs[i].y;
+			bestIdx = i;
+		}
+	}
+	const auto pivot = vs[bestIdx];
+	vs.erase(vs.begin() + bestIdx);
+
+	// Sort all remaining vertices by angle to pivot
+	std::sort(vs.begin(), vs.end(), [&] (const Vector2f& a, const Vector2f& b)
+	{
+		return (a - pivot).cross(b - pivot) > 0;
+	});
+
+	auto ccw = [] (Vector2f p0, Vector2f p1, Vector2f p2)
+	{
+		return (p1 - p0).cross(p2 - p1) <= 0; // If equal they're collinear, remove segment
+	};
+
+	// Run the algorithm
+	Vector<Vector2f> stack;
+	stack += pivot;
+	for (const auto& v: vs) {
+		while (stack.size() > 1 && ccw(stack[stack.size() - 2], stack.back(), v)) {
+			stack.pop_back();
+		}
+		stack += v;
+	}
+	return stack;
+}
+
 String Polygon::toString() const
 {
 	return "[" + String::concatList(std_ex::transform(vertices, [&](Vector2f p) -> String { return p.toString(); }), ", ") + "]";
