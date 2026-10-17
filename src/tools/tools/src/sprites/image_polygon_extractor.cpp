@@ -31,16 +31,18 @@ Polygon ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds)
 {
 	bounds = image.getRect().intersection(bounds);
 	if (bounds.getWidth() == 0 || bounds.getHeight() == 0) {
+		//Logger::logError("Bounds " + toString(bounds) + " do not overlap image bounds " + image.getRect());
 		return {};
 	}
 
 	const auto mask = image.makeAlphaMask(bounds);
+	//Logger::logInfo("Got " + toString(mask.size()) + " mask pixels at " + bounds);
 	const auto boundPixels = simplifyBoundaryPixelsForConvex(getBoundaryPixels(mask, bounds), bounds);
-	Logger::logInfo("Got " + toString(boundPixels.size()) + " boundary pixels: " + String::concat(boundPixels.const_span(), ", "));
+	//Logger::logInfo("Got " + toString(boundPixels.size()) + " boundary pixels");
 
-	auto vs = makeVertices(bounds);
-	convexClip(vs, boundPixels);
-	return Polygon(std::move(vs));
+	auto result = Polygon::makeConvexHull(boundPixels);
+	//Logger::logInfo("Final convex hull has " + toString(result.getVertices().size()) + " vertices");
+	return result;
 }
 
 VertexList ImagePolygonExtractor::makeVertices(Rect4i bounds)
@@ -59,8 +61,8 @@ Vector<Vector2i> ImagePolygonExtractor::getBoundaryPixels(Vector<bool> mask, Rec
 	HalleyAssertDebug((int)mask.size() == bounds.getWidth() * bounds.getHeight());
 	const int width = bounds.getWidth();
 	const int height = bounds.getHeight();
-	const int x0 = bounds.getLeft();
-	const int y0 = bounds.getTop();
+	const auto origin = bounds.getTopLeft();
+	const auto localBounds = Rect4i(0, 0, width, height);
 
 	Vector<Vector2i> result;
 	std::deque<Vector2i> queue;
@@ -72,12 +74,12 @@ Vector<Vector2i> ImagePolygonExtractor::getBoundaryPixels(Vector<bool> mask, Rec
 
 	auto getIdx = [&](Vector2i p)
 	{
-		return (p.x - x0) + (p.y - y0) * width;
+		return p.x + p.y * width;
 	};
 
 	auto addToQueue = [&](Vector2i p)
 	{
-		if (bounds.contains(p)) {
+		if (localBounds.contains(p)) {
 			const auto idx = getIdx(p);
 			if (!closedList[idx] && !openList[idx]) {
 				openList[idx] = true;
@@ -92,7 +94,7 @@ Vector<Vector2i> ImagePolygonExtractor::getBoundaryPixels(Vector<bool> mask, Rec
 		if (!closedList[idx]) {
 			closedList[idx] = true;
 			if (mask[idx]) {
-				result += p;
+				result += p + origin;
 			} else {
 				addToQueue(p + Vector2i(-1, 0));
 				addToQueue(p + Vector2i(1, 0));
@@ -194,9 +196,4 @@ Vector<Vector2i> ImagePolygonExtractor::simplifyBoundaryPixelsForConvex(Vector<V
 		}
 	}
 	return result;
-}
-
-void ImagePolygonExtractor::convexClip(VertexList& vs, const Vector<Vector2i>& points)
-{
-	// TODO
 }

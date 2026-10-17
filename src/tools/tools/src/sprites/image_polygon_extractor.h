@@ -15,7 +15,5 @@ namespace Halley {
         static Vector<Vector2i> getBoundaryPixels(Vector<bool> mask, Rect4i bounds); /// Only care about the outline pixels
         static Vector<Vector2i> simplifyBoundaryPixelsForConvex(Vector<Vector2i> vs, Rect4i bounds); /// If a pixel is in line with two other on either side, it can be removed
         static VertexList makeVertices(Rect4i bounds); /// Makes a polygon for the rectangle
-
-        static void convexClip(VertexList& vs, const Vector<Vector2i>& points);
     };
 }
