@@ -1588,7 +1588,7 @@ VertexList Polygon::makeConvexHull(Vector<Vector2f> vs)
 	float bestY = -std::numeric_limits<float>::max();
 	size_t bestIdx = 0;
 	for (size_t i = 0; i < vs.size(); ++i) {
-		if (vs[i].y > bestY) {
+		if (vs[i].y > bestY || (vs[i].y == bestY && vs[i].x < vs[bestIdx].x)) {
 			bestY = vs[i].y;
 			bestIdx = i;
 		}
@@ -1599,7 +1599,12 @@ VertexList Polygon::makeConvexHull(Vector<Vector2f> vs)
 	// Sort all remaining vertices by angle to pivot
 	std::sort(vs.begin(), vs.end(), [&] (const Vector2f& a, const Vector2f& b)
 	{
-		return (a - pivot).cross(b - pivot) > 0;
+		const auto c = (a - pivot).cross(b - pivot);
+		if (c != 0) [[likely]] {
+			return c > 0;
+		}
+		// If they're collinear, we must consider the closest one first
+		return (a - pivot).squaredLength() < (b - pivot).squaredLength();
 	});
 
 	auto ccw = [] (Vector2f p0, Vector2f p1, Vector2f p2)
