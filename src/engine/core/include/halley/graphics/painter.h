@@ -85,7 +85,8 @@ namespace Halley
 
 		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
 		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
-		void drawSprites(const std::shared_ptr<const Material>& material, size_t numSprites, const void* vertexData);
+		void drawQuadSprites(const std::shared_ptr<const Material>& material, size_t numSprites, const void* vertexData);
+		void drawSprites(const std::shared_ptr<const Material>& material, size_t numSprites, const void* vertexData, gsl::span<const gsl::span<const Vector2f>> vertexPositions);
 
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
 		void drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData);
@@ -160,7 +161,8 @@ namespace Halley
 		virtual void endDrawCall() {}
 		virtual void onFinishRender() {}
 
-		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target);
+		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target) const;
+		size_t generateFanIndices(IndexType firstVertex, size_t numTriangles, IndexType* target) const;
 		RenderTarget& getActiveRenderTarget();
 		const RenderTarget* tryGetActiveRenderTarget() const;
 

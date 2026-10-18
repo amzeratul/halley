@@ -217,6 +217,8 @@ namespace Halley
 		Vector4s outerBorder;
 		Rect4f clip; // This is not a std::optional<Rect4f>, and instead has a companion bool, because it allows for better memory alignment
 
+		gsl::span<const Vector2f> polygon;
+
 		void doSetSprite(const SpriteSheetEntry& entry, bool applyPivot);
 		void computeSize();
 

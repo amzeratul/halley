@@ -176,7 +176,7 @@ void Painter::drawQuads(const std::shared_ptr<const Material>& material, size_t 
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
-void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* vertexData)
+void Painter::drawQuadSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* vertexData)
 {
 	HalleyAssertDev(vertexData != nullptr);
 
@@ -210,6 +210,69 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 
 		numSpritesLeft -= numSprites;
 		offset += numSprites * material->getDefinition().getVertexStride();
+	}
+}
+
+void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* vertexData, gsl::span<const gsl::span<const Vector2f>> vertexPositions)
+{
+	HalleyAssertDev(vertexData != nullptr);
+
+	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+	constexpr auto vertPosList = std::to_array({ Vector2f(0, 0), Vector2f(1, 0), Vector2f(1, 1), Vector2f(0, 1)});
+	gsl::span<const Vector2f> defaultVertexList = vertPosList;
+
+	constexpr size_t maxVerticesPerCall = std::numeric_limits<IndexType>::max();
+	size_t numSpritesLeft = totalNumSprites;
+	size_t firstSprite = 0;
+
+	while (numSpritesLeft > 0) {
+		size_t numSprites = 0;
+		size_t numVertices = 0;
+		size_t numIndices = 0;
+		for (size_t i = 0; i < numSpritesLeft; ++i) {
+			const auto& vs = vertexPositions[i + firstSprite];
+			const auto n = vs.size() < 3 ? vertPosList.size() : vs.size();
+			if (numVertices + n > maxVerticesPerCall) [[unlikely]] {
+				break;
+			} else {
+				numSprites++;
+				numVertices += n;
+				numIndices += 3 * (n - 2);
+			}
+		}
+
+		HalleyAssertDev(numSprites > 0);
+
+		const auto result = addDrawData(material, numVertices, numIndices, false);
+		IndexType nextIdx = result.firstIndex;
+		IndexType* dstIndex = result.dstIndex;
+		char* dstVertex = result.dstVertex;
+
+		const char* const src = static_cast<const char*>(vertexData) + firstSprite * material->getDefinition().getVertexStride();
+
+		for (size_t i = 0; i < numSprites; i++) {
+			const auto& vs = vertexPositions[i + firstSprite];
+			const auto& curVertexPositions = vs.size() < 3 ? defaultVertexList : vs;
+			const auto curNVertices = curVertexPositions.size();
+			
+			for (size_t j = 0; j < curNVertices; j++) {
+				const size_t srcOffset = i * result.vertexStride;
+				const size_t dstOffset = j * result.vertexStride;
+				memcpy(dstVertex + dstOffset, src + srcOffset, result.vertexSize);
+
+				const auto vertPos = Vector4f(curVertexPositions[j], curVertexPositions[j]);
+				memcpy(dstVertex + dstOffset + vertPosOffset, &vertPos, sizeof(vertPos));
+			}
+
+			// Assumes convex polygon
+			const auto nWritten = generateFanIndices(nextIdx, curNVertices - 2, dstIndex);
+			nextIdx += static_cast<IndexType>(curNVertices);
+			dstIndex += nWritten;
+			dstVertex += curNVertices * result.vertexStride;
+		}
+
+		numSpritesLeft -= numSprites;
+		firstSprite += numSprites;
 	}
 }
 
@@ -905,7 +968,7 @@ IndexType* Painter::getStandardQuadIndices(size_t numQuads)
 	return stdQuadIndexCache.data();
 }
 
-void Painter::generateQuadIndices(IndexType pos, size_t numQuads, IndexType* target)
+void Painter::generateQuadIndices(IndexType pos, size_t numQuads, IndexType* target) const
 {
 	size_t numIndices = numQuads * 6;
 	for (size_t i = 0; i < numIndices; i += 6) {
@@ -922,6 +985,18 @@ void Painter::generateQuadIndices(IndexType pos, size_t numQuads, IndexType* tar
 		target[i + 5] = pos;
 		pos += 4;
 	}
+}
+
+size_t Painter::generateFanIndices(IndexType pos, size_t numTriangles, IndexType* target) const
+{
+	size_t dst = 0;
+	for (IndexType i = 0; i < static_cast<IndexType>(numTriangles); ++i) {
+		target[dst] = pos;
+		target[dst + 1] = pos + 1 + i;
+		target[dst + 2] = pos + 2 + i;
+		dst += 3;
+	}
+	return dst;
 }
 
 RenderTarget& Painter::getActiveRenderTarget()

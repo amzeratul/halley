@@ -73,7 +73,12 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 		paintWithClip(painter, extClip, [&] ()
 		{
-			painter.drawSprites(material, 1, getVertexAttrib());
+			if (polygon.size() >= 3) {
+				const auto v = gsl::span<const Vector2f>(polygon);
+				painter.drawSprites(material, 1, getVertexAttrib(), gsl::span(&v, 1));
+			} else {
+				painter.drawQuadSprites(material, 1, getVertexAttrib());
+			}
 		});
 	}
 }
@@ -111,7 +116,8 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter, bool waitFo
 		return;
 	}
 
-	size_t spriteSize = sizeof(SpriteVertexAttrib) + 16;
+	constexpr size_t spriteSize = sizeof(SpriteVertexAttrib) + 16;
+
 	char buffer[4096];
 	char* vertexData;
 	Vector<char> vertices;
@@ -123,13 +129,25 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter, bool waitFo
 		vertexData = vertices.data();
 	}
 
+	Vector<gsl::span<const Vector2f>, std::allocator<gsl::span<const Vector2f>>, 512> polygons;
+	polygons.resize_no_init(sprites.size());
+
+	bool quadOnly = true;
 	for (size_t i = 0; i < sprites.size(); i++) {
 		auto& sprite = sprites[i];
 		HalleyAssertDev(sprite.material == material);
 		memcpy(&vertexData[i * spriteSize], sprite.getVertexAttrib(), spriteSize);
+		polygons[i] = sprite.polygon;
+		if (polygons[i].size() >= 3) {
+			quadOnly = false;
+		}
 	}
 
-	painter.drawSprites(material, sprites.size(), vertexData);
+	if (quadOnly) {
+		painter.drawQuadSprites(material, sprites.size(), vertexData);
+	} else {
+		painter.drawSprites(material, sprites.size(), vertexData, polygons.const_span());
+	}
 }
 
 void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter, bool waitForLoad)
@@ -565,6 +583,8 @@ void Sprite::doSetSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	}
 	vertexAttrib.texRect0 = entry.coords.toVector4();
 	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
+
+	polygon = entry.polygonSpan;
 
 #ifdef ENABLE_HOT_RELOAD
 	lastAppliedPivot = applyPivot;
