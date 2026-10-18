@@ -28,11 +28,11 @@ VertexList ImagePolygonExtractor::extractPolygon(const Sprite& sprite)
 	return extractPolygon(*img, Rect4i(Vector2i(r.getTopLeft().round()), Vector2i(r.getBottomRight().round())));
 }
 
-VertexList ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds, bool rotated)
+VertexList ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i origBounds, bool rotated)
 {
 	HalleyAssertDev(!rotated); // Not implemented
 
-	bounds = image.getRect().intersection(bounds);
+	const auto bounds = image.getRect().intersection(origBounds);
 	if (bounds.getWidth() == 0 || bounds.getHeight() == 0) {
 		//Logger::logError("Bounds " + toString(bounds) + " do not overlap image bounds " + image.getRect());
 		return {};
@@ -41,7 +41,7 @@ VertexList ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i boun
 	const auto mask = image.makeAlphaMask(bounds);
 	const auto boundPixels = simplifyBoundaryPixelsForConvex(getBoundaryPixels(mask, bounds), bounds);
 	auto vertices = makePixelVertices(boundPixels, mask, bounds);
-	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), Rect4f(bounds));
+	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), Rect4f(origBounds));
 }
 
 VertexList ImagePolygonExtractor::makeVertices(Rect4i bounds)
@@ -270,13 +270,19 @@ VertexList ImagePolygonExtractor::postProcessConvexHull(VertexList vs, Rect4f ma
 		const auto l0 = Line(p0, p1 - p0);
 		const auto l1 = Line(p3, p2 - p3);
 		if (const auto p = l0.intersection(l1)) {
-			// This is the candidate to replace p1 and p2, find the area of the triangle comprised by them to see how many pixels we're sacrificing
-			const auto t = Triangle(*p, p1, p2);
-			return { *p, t.getArea() };
-		} else {
-			// Parallel
-			return { (p1 + p2) / 2.0f, std::numeric_limits<float>::max() };
+			// Check if p is in bounds
+			if (maxBounds.contains(*p)) {
+				// Check if p is ahead
+				if ((*p - p1).dot(l0.dir) > 0 && (*p - p2).dot(l1.dir) > 0) {
+					// This is the candidate to replace p1 and p2, find the area of the triangle comprised by them to see how many pixels we're sacrificing
+					const auto t = Triangle(*p, p1, p2);
+					return { *p, t.getArea() };
+				}
+			}
 		}
+
+		// No valid point (either parallel or intersection is behind)
+		return { (p1 + p2) / 2.0f, std::numeric_limits<float>::max() };
 	};
 
 	struct Operation {
