@@ -741,6 +741,10 @@ Sprite& Sprite::crop(Vector4f sides)
 	const auto r0 = vertexAttrib.texRect0;
 	vertexAttrib.texRect0 = Vector4f(sample(r0, relTex.xy()), sample(r0, relTex.zw()));
 
+	// Split sprites do not currently support polygon, so just reset it here
+	// TODO: find a way to make this work (splitting the polygon isn't hard, but where to store it...)
+	polygon = {};
+
 	// Splitting texRect1 leads to undesired results, it's almost certainly not desired
 	//const auto r1 = vertexAttrib.texRect1;
 	//vertexAttrib.texRect1 = Vector4f(sample(r1, relTex.xy()), sample(r1, relTex.zw()));
