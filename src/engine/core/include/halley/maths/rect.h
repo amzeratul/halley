@@ -245,8 +245,22 @@ namespace Halley {
 
 		[[nodiscard]] constexpr Vector2D<T> wrapInside(Vector2D<T> p) const
 		{
-			Vector2D<T> size = getSize();
+			const auto size = getSize();
 			return ((((p-p1) % size) + size) % size) + p1;
+		}
+
+		[[nodiscard]] constexpr Vector2D<T> makeRelative(Vector2D<T> p) const
+		{
+			const auto size = getSize();
+			if (size.x == 0 || size.y == 0) [[unlikely]] {
+				return {};
+			}
+			return (p - getTopLeft()) / size;
+		}
+
+		[[nodiscard]] constexpr Vector2D<T> getPointAtRelativeCoords(Vector2D<T> p) const
+		{
+			return p * getSize() + getTopLeft();
 		}
 
 		[[nodiscard]] constexpr Rect2D<T> intersection(const Rect2D<T>& p) const
