@@ -28,7 +28,7 @@ namespace Halley {
 
 			if (dirHandle == INVALID_HANDLE_VALUE) {
 				dirHandle = nullptr;
-				Logger::logError("Directory monitor could not be set up for " + path.toString());
+				Logger::logError("Directory monitor could not be set up for " + path.getNativeString());
 			} else {
 				buffer.resize(1024 * 1024);
 
