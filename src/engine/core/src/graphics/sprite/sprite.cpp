@@ -1068,6 +1068,7 @@ void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
 	slices = other.slices;
 	outerBorder = other.outerBorder;
 	clip = other.clip;
+	polygon = other.polygon;
 
 #ifdef ENABLE_HOT_RELOAD
 	lastAppliedPivot = other.lastAppliedPivot;
@@ -1100,6 +1101,7 @@ void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
 	slices = other.slices;
 	outerBorder = other.outerBorder;
 	clip = other.clip;
+	polygon = other.polygon;
 
 #ifdef ENABLE_HOT_RELOAD
 	lastAppliedPivot = other.lastAppliedPivot;
