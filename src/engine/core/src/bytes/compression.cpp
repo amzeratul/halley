@@ -3,6 +3,7 @@
 #include "halley/bytes/compression.h"
 #include "../../../../contrib/zlib/zlib.h"
 #include "../../../../contrib/zlib/zutil.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/support/exception.h"
 #include "halley/text/string_converter.h"
 #include "lz4/lz4.h"
@@ -224,13 +225,13 @@ Bytes Compression::lz4DecompressFile(gsl::span<const std::byte> src, gsl::span<s
 	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
 
 	if (src.size() < totalHeaderSize) {
-		throw Exception("File too small to be LZ4 file", HalleyExceptions::Utils);
+		throw Exception("File too small to be LZ4 file", HalleyExceptions::Compression);
 	}
 
 	LZ4FileHeader lz4Header;
 	memcpy(&lz4Header, src.data(), sizeof(lz4Header));
 	if (memcmp(lz4Header.id, "LZ4", 4) != 0) {
-		throw Exception("Not LZ4 header file", HalleyExceptions::Utils);
+		throw Exception("Not LZ4 header file", HalleyExceptions::Compression);
 	}
 	
 	if (!header.empty()) {
@@ -250,13 +251,13 @@ std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<
 	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
 
 	if (src.size() < totalHeaderSize) {
-		throw Exception("File too small to be LZ4 file", HalleyExceptions::Utils);
+		throw Exception("File too small to be LZ4 file", HalleyExceptions::Compression);
 	}
 
 	LZ4FileHeader lz4Header;
 	memcpy(&lz4Header, src.data(), sizeof(lz4Header));
 	if (memcmp(lz4Header.id, "LZ4", 4) != 0) {
-		throw Exception("Not LZ4 header file", HalleyExceptions::Utils);
+		throw Exception("Not LZ4 header file", HalleyExceptions::Compression);
 	}
 
 	memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
@@ -264,7 +265,7 @@ std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<
 	auto output = std::shared_ptr<char>(new char[lz4Header.size], deleter);
 	const auto sz = lz4Decompress(src.subspan(totalHeaderSize), gsl::as_writable_bytes(gsl::span<char>(output.get(), lz4Header.size)));
 	if (!sz) {
-		throw Exception("Failed to decompress LZ4 file", HalleyExceptions::Utils);
+		throw Exception("Failed to decompress LZ4 file", HalleyExceptions::Compression);
 	}
 	HalleyAssertDev(sz == lz4Header.size);
 	outSize = *sz;
@@ -308,4 +309,76 @@ std::optional<size_t> Compression::lz4Decompress(gsl::span<const char> src, gsl:
 std::optional<size_t> Compression::lz4Decompress(gsl::span<const Byte> src, gsl::span<Byte> dst)
 {
 	return lz4Decompress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
+}
+
+
+
+CompressedBytes CompressedBytes::compressBytes(gsl::span<const std::byte> src, Type dstType)
+{
+	CompressedBytes result;
+	result.decompressedSize = src.size_bytes();
+	result.type = Type::Uncompressed;
+
+	if (dstType == Type::LZ4) {
+		Compression::LZ4Options options;
+		options.mode = Compression::LZ4Mode::HC;
+		result.compressedBytes = Compression::lz4Compress(src, options);
+		result.type = dstType;
+		//Logger::logDev("Compressed to " + toString(result.compressedBytes.size()));
+	}
+	
+	// Store uncompressed if it wasn't useful
+	if (dstType == Type::Uncompressed || result.compressedBytes.size() >= result.decompressedSize) {
+		Logger::logWarning("Storing as uncompressed, compressed size was " + toString(result.compressedBytes.size()) + " vs " + toString(result.decompressedSize));
+		result.compressedBytes.assign(src.begin(), src.end());
+		result.type = Type::Uncompressed;
+	}
+
+	return result;
+}
+
+Bytes CompressedBytes::decompressBytes() const
+{
+	if (type == Type::Uncompressed) {
+		return compressedBytes;
+	} else if (type == Type::LZ4) {
+		Bytes result;
+		result.resize_no_init(decompressedSize);
+		auto n = Compression::lz4Decompress(compressedBytes.const_byte_span(), result.byte_span());
+		HalleyAssertRelease(n == decompressedSize);
+		return result;
+	} else {
+		return {};
+	}
+}
+
+void CompressedBytes::serialize(Serializer& s) const
+{
+	s << type;
+	if (type != Type::Uncompressed) {
+		s << decompressedSize;
+	}
+	s << compressedBytes;
+}
+
+void CompressedBytes::deserialize(Deserializer& s)
+{
+	s >> type;
+	if (type != Type::Uncompressed) {
+		s >> decompressedSize;
+	}
+	s >> compressedBytes;
+	if (type == Type::Uncompressed) {
+		decompressedSize = compressedBytes.size();
+	}
+}
+
+Bytes CompressedBytes::toSerializedBytes() const
+{
+	return Serializer::toBytes(*this, SerializerOptions{ SerializerOptions::maxVersion });
+}
+
+CompressedBytes CompressedBytes::fromSerializedBytes(gsl::span<const std::byte> src)
+{
+	return Deserializer::fromBytes<CompressedBytes>(src, SerializerOptions{ SerializerOptions::maxVersion });
 }

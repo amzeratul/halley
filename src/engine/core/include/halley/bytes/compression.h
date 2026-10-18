@@ -4,7 +4,10 @@
 #include <limits>
 #include <optional>
 
+#include "byte_serializer.h"
+
 namespace Halley {
+
 	class Compression {
 	public:
 		static Bytes compress(const Bytes& bytes, int level = -1);
@@ -43,5 +46,54 @@ namespace Halley {
 		static Bytes lz4CompressFile(gsl::span<const std::byte> src, gsl::span<const std::byte> header, LZ4Options options = {});
 		static Bytes lz4DecompressFile(gsl::span<const std::byte> src, gsl::span<std::byte> header);
 		static std::shared_ptr<const char> lz4DecompressFileToSharedPtr(gsl::span<const std::byte> src, gsl::span<std::byte> header, size_t& outSize);
+	};
+
+	class CompressedBytes {
+	public:
+		enum class Type : uint8_t {
+			Uncompressed,
+			LZ4
+		};
+
+		CompressedBytes() = default;
+
+		static CompressedBytes compressBytes(gsl::span<const std::byte> src, Type dstType = Type::LZ4);
+		static CompressedBytes fromSerializedBytes(gsl::span<const std::byte> src);
+
+		Bytes decompressBytes() const;
+
+		const Bytes& getCompressedBytes() const { return compressedBytes; }
+		size_t getDecompressedSize() const { return static_cast<size_t>(decompressedSize); }
+		size_t getCompressedSize() const { return compressedBytes.size(); }
+		Type getType() const { return type; }
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
+		Bytes toSerializedBytes() const;
+
+		template <typename T>
+		static CompressedBytes compressValue(const T& v, Type dstType = Type::LZ4)
+		{
+			auto bytes = Serializer::toBytes(v, SerializerOptions(SerializerOptions::maxVersion));
+			return CompressedBytes::compressBytes(bytes.const_byte_span(), dstType);
+		}
+
+		template <typename T>
+		void decompressValue(T& dst) const
+		{
+			Deserializer::fromBytes<T>(dst, decompressBytes(), SerializerOptions(SerializerOptions::maxVersion));
+		}
+
+		template <typename T>
+		T decompressValue() const
+		{
+			return Deserializer::fromBytes<T>(decompressBytes(), SerializerOptions(SerializerOptions::maxVersion));
+		}
+
+	private:
+		Bytes compressedBytes;
+		uint64_t decompressedSize = 0;
+		Type type = Type::Uncompressed;
 	};
 }
