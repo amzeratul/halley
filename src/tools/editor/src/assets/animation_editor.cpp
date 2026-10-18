@@ -91,7 +91,7 @@ void AnimationEditor::update(Time t, bool moved)
 			str += "\nSprite: " + curSprite->name;
 
 			if (!curSprite->polygon.empty()) {
-				str += "\nPolygon: " + toString(Polygon(curSprite->polygon).getArea() * 100, 1) + "%";
+				str += ", Polygon coverage: " + toString(Polygon(curSprite->polygon).getArea() * 100, 1) + "%";
 			}
 		} else {
 			animationDisplay->setSpriteUnderCursor(nullptr);
