@@ -6,6 +6,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/sprite/sprite.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/bytes/compression.h"
 #include "halley/data_structures/bin_pack.h"
 #include "halley/support/logger.h"
 #include "halley/utils/hash.h"
@@ -21,6 +22,7 @@ SpriteSheetEntry::SpriteSheetEntry(const ConfigNode& node)
 	rotated = node["rotated"].asBool(false);
 	trimBorder = Vector4s(node["trimBorder"].asVector4i({}));
 	slices = Vector4s(node["slices"].asVector4i({}));
+	polygon = node["polygon"].asVector<Vector2f>({});
 }
 
 ConfigNode SpriteSheetEntry::toConfigNode() const
@@ -33,6 +35,7 @@ ConfigNode SpriteSheetEntry::toConfigNode() const
 	result["rotated"] = rotated;
 	result["trimBorder"] = Vector4i(trimBorder);
 	result["slices"] = Vector4i(slices);
+	result["polygon"] = polygon;
 	return result;
 }
 
@@ -48,6 +51,7 @@ void SpriteSheetEntry::serialize(Serializer& s) const
 	s << rotated;
 	s << trimBorder;
 	s << slices;
+	s << polygon;
 }
 
 void SpriteSheetEntry::deserialize(Deserializer& s)
@@ -59,6 +63,7 @@ void SpriteSheetEntry::deserialize(Deserializer& s)
 	s >> rotated;
 	s >> trimBorder;
 	s >> slices;
+	s >> polygon;
 
 	HalleyAssertDev(pivot.isValid());
 	HalleyAssertDev(size.isValid());
@@ -223,10 +228,14 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 		return {};
 	}
 	
-	Deserializer s(data->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
-	result->deserialize(s);
+	CompressedBytes::fromSerializedBytes(data->getSpan()).decompressValue(*result);
 
 	return result;
+}
+
+Bytes SpriteSheet::toBytes() const
+{
+	return CompressedBytes::compressValue(*this).toSerializedBytes();
 }
 
 void SpriteSheet::loadTexture(Resources& resources) const

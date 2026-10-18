@@ -27,12 +27,13 @@ namespace Halley
 	class SpriteSheetEntry
 	{
 	public:
+		Rect4f coords;
 		Vector2f pivot;
 		Vector2i origPivot;
 		Vector2f size;
-		Rect4f coords;
 		Vector4s trimBorder;
 		Vector4s slices;
+		Vector<Vector2f> polygon;
 		bool rotated = false;
 		bool sliced = false;
 
@@ -44,8 +45,8 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 #ifdef ENABLE_HOT_RELOAD
-		SpriteSheet* parent = nullptr;
 		uint32_t idx = 0;
+		SpriteSheet* parent = nullptr;
 		String name;
 #endif
 	};
@@ -152,6 +153,7 @@ namespace Halley
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 		void reload(Resource&& resource) override;
+		Bytes toBytes() const;
 
 		const String& getHotReloaderId() const override;
 

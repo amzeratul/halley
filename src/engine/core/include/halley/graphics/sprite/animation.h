@@ -156,6 +156,8 @@ namespace Halley
 		Animation();
 
 		static std::unique_ptr<Animation> loadResource(ResourceLoader& loader);
+		Bytes toBytes() const;
+
 		constexpr static AssetType getAssetType() { return AssetType::Animation; }
 		void reload(Resource&& resource) override;
 

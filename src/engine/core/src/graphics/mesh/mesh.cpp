@@ -17,7 +17,7 @@ Mesh::Mesh(Vector<MeshObject> objects)
 Mesh::Mesh(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();
-	Deserializer s(data->getSpan());
+	Deserializer s(data->getSpan(), SerializerOptions{ SerializerOptions::maxVersion });
 	deserialize(s);
 	loadDependencies(loader.getResources());
 }

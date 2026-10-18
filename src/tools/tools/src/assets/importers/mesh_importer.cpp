@@ -7,7 +7,9 @@ void MeshImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 {
 	for (auto& f: asset.inputFiles) {
 		if (auto mesh = parse(f.name, f.data, collector)) {
-			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*mesh));
+			Metadata meta = f.metadata;
+			meta.set("asset_compression", "lz4");
+			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*mesh, SerializerOptions{ SerializerOptions::maxVersion }), meta);
 		}
 	}
 }

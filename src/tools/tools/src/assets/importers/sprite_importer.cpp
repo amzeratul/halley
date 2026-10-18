@@ -110,7 +110,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			auto spriteSheetName = baseSpriteSheetName;// +(frames.first.isEmpty() ? "" : ":" + frames.first);
 			auto spriteName = baseSpriteName + (frames.first.isEmpty() ? "" : ":" + frames.first);
 			Animation animation = generateAnimation(spriteName, spriteSheetName, meta, frames.second);
-			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
+			collector.output(spriteName, AssetType::Animation, animation.toBytes(), {}, "pc", inputFile.name);
 
 			Vector<ImageData> totalFrames;
 			std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
@@ -163,7 +163,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	// Write spritesheet
 	spriteSheet->setAssetId(baseSpriteSheetName);
-	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(*spriteSheet, SerializerOptions(SerializerOptions::maxVersion)));
+	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, spriteSheet->toBytes());
 
 	// Write sprites
 	std::map<String, String> primaryPaths;

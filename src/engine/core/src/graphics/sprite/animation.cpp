@@ -9,6 +9,7 @@
 #include "halley/support/assert.h"
 #include <utility>
 
+#include "halley/bytes/compression.h"
 #include "halley/graphics/sprite/animation_player.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
@@ -238,10 +239,14 @@ std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 	}
 	
 	auto result = std::make_unique<Animation>();
-	Deserializer s(sData->getSpan());
-	s >> *result;
+	CompressedBytes::fromSerializedBytes(sData->getSpan()).decompressValue(*result);
 	result->loadDependencies(loader);
 	return result;
+}
+
+Bytes Animation::toBytes() const
+{
+	return CompressedBytes::compressValue(*this).toSerializedBytes();
 }
 
 void Animation::reload(Resource&& resource)

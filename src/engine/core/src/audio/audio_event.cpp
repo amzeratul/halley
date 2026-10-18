@@ -8,6 +8,7 @@
 #include "halley/resources/resources.h"
 #include "audio_filter_resample.h"
 #include "halley/audio/audio_object.h"
+#include "halley/bytes/compression.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 
@@ -169,9 +170,8 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 		return {};
 	}
 	
-	Deserializer s(staticData->getSpan());
 	auto event = std::make_shared<AudioEvent>();
-	s >> *event;
+	CompressedBytes::fromSerializedBytes(staticData->getSpan()).decompressValue(*event);
 
 	event->setAssetId(loader.getName());
 	event->loadDependencies(loader.getResources());

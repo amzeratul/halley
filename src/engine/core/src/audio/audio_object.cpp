@@ -12,6 +12,7 @@
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/audio/sub_objects/audio_sub_object_clips.h"
+#include "halley/bytes/compression.h"
 
 using namespace Halley;
 
@@ -350,9 +351,8 @@ std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
 		return {};
 	}
 	
-	Deserializer s(staticData->getSpan());
 	auto object = std::make_shared<AudioObject>();
-	s >> *object;
+	CompressedBytes::fromSerializedBytes(staticData->getSpan()).decompressValue(*object);
 	object->propagateObjectName(loader.getName());
 	object->loadDependencies(loader.getResources());
 	return object;
