@@ -96,6 +96,7 @@ void MetadataEditor::makeUI()
 		addEnumField<TextureAddressMode>("Address", "addressMode", "clamp");
 		addInt2Field("Tile Split", "tileWidth", "tileHeight", Vector2i());
 		addBoolField("Trim", "trim", true);
+		addBoolField("Generate Polygons", "generatePolygons", false);
 		addIntField("Padding", "padding", 0);
 		break;
 

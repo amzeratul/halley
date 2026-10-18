@@ -1,4 +1,6 @@
 #include "halley/graphics/sprite/sprite_sheet.h"
+
+#include "halley/file_formats/image_polygon_extractor.h"
 #include "halley/graphics/texture.h"
 #include "halley/api/halley_api.h"
 #include "halley/resources/resources.h"
@@ -105,7 +107,8 @@ void SpriteSheet::load(const ConfigNode& node)
 	} else {
 		spriteIdx.clear();
 	}
-	// TODO: frameTags
+	assignIds();
+	assignPolygonSpans();
 }
 
 ConfigNode SpriteSheet::toConfigNode() const
@@ -267,6 +270,14 @@ void SpriteSheet::assignIds()
 #endif	
 }
 
+void SpriteSheet::assignPolygonSpans()
+{
+	// TODO: move this to some permanent storage that can never be deallocated, since Sprites keep an unconditional reference to it
+	for (auto& sprite: sprites) {
+		sprite.polygonSpan = sprite.polygon;
+	}
+}
+
 SpriteResource::SpriteResource()
 {
 }
@@ -386,6 +397,7 @@ void SpriteSheet::reload(Resource&& resource)
 	}
 
 	assignIds();
+	assignPolygonSpans();
 
 	// Refresh sprite refs
 	for (auto& sprite: spriteRefs) {
@@ -445,6 +457,7 @@ void SpriteSheet::deserialize(Deserializer& s)
 	}
 
 	assignIds();
+	assignPolygonSpans();
 }
 
 void SpriteSheet::onOtherResourcesUnloaded()
@@ -545,6 +558,15 @@ std::unique_ptr<Image> SpriteSheet::makeAtlas(const Vector<BinPackResult>& resul
 		
 		atlasImage->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
 
+		VertexList polygon;
+		if (img->generatePolygon) {
+			polygon = ImagePolygonExtractor::extractPolygon(*img->img, img->clip, false);
+			const auto floatBounds = Rect4f(img->clip);
+			for (auto& v : polygon) {
+				v = floatBounds.makeRelative(v);
+			}
+		}
+
 		const auto borderTL = img->clip.getTopLeft();
 		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
 
@@ -558,6 +580,7 @@ std::unique_ptr<Image> SpriteSheet::makeAtlas(const Vector<BinPackResult>& resul
 			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + bias, Vector2f(packedImg.rect.getBottomRight()) - bias)) / Vector2f(size);
 			entry.trimBorder = Vector4s(static_cast<short>(borderTL.x), static_cast<short>(borderTL.y), static_cast<short>(borderBR.x), static_cast<short>(borderBR.y));
 			entry.slices = imgData.slices;
+			entry.polygon = polygon;
 
 			for (const auto& filename: imgData.filenames) {
 				addSprite(filename, entry);
@@ -647,17 +670,13 @@ bool SpriteSheet::ImageData::operator==(const SpriteSheet::ImageData& other) con
 		&& origFrameNumber == other.origFrameNumber
 		&& duration == other.duration
 		&& sequenceName == other.sequenceName
+		&& generatePolygon == other.generatePolygon
 		&& clip == other.clip
 		&& pivot == other.pivot
 		&& slices == other.slices
 		&& filenames == other.filenames
 		&& origFilename == other.origFilename
 		&& img->getSize() == other.img->getSize();
-}
-
-bool SpriteSheet::ImageData::operator!=(const SpriteSheet::ImageData& other) const
-{
-	return !(*this == other);
 }
 
 

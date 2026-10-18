@@ -1,4 +1,4 @@
-#include "image_polygon_extractor.h"
+#include "halley/file_formats/image_polygon_extractor.h"
 
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/sprite/sprite.h"

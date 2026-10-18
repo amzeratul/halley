@@ -2,7 +2,7 @@
 
 #include "metadata_editor.h"
 #include "../../../tools/src/sprites/aseprite_file.h"
-#include "../../../tools/src/sprites/image_polygon_extractor.h"
+#include "halley/file_formats/image_polygon_extractor.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/widgets/ui_dropdown.h"

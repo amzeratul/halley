@@ -37,6 +37,8 @@ namespace Halley
 		bool rotated = false;
 		bool sliced = false;
 
+		gsl::span<const Vector2f> polygonSpan;
+
 		SpriteSheetEntry() = default;
 		SpriteSheetEntry(const ConfigNode& node);
 		ConfigNode toConfigNode() const;
@@ -93,6 +95,7 @@ namespace Halley
 			int frameNumber = 0;
 			int origFrameNumber = 0;
 			int duration = 0;
+			bool generatePolygon = false;
 			String sequenceName;
 			String direction;
 			Rect4i clip;
@@ -105,7 +108,6 @@ namespace Halley
 			String group;
 
 			bool operator==(const ImageData& other) const;
-			bool operator!=(const ImageData& other) const;
 
 		private:
 			friend class SpriteSheet;
@@ -187,6 +189,7 @@ namespace Halley
 		void loadTexture(Resources& resources) const;
 		void loadPaletteTexture(Resources& resources) const;
 		void assignIds();
+		void assignPolygonSpans();
 
 		std::unique_ptr<Image> makeAtlas(const Vector<BinPackResult>& result, ConfigNode& spriteInfo, bool powerOfTwo);
 		Vector2i computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const;

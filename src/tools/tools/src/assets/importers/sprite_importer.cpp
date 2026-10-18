@@ -60,6 +60,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		if (meta.getBool("powerOfTwo", false)) {
 			powerOfTwo = true;
 		}
+		const bool generatePolygon = meta.getBool("generatePolygons", false);
 
 		// Import image data
 		std::map<String, Vector<ImageData>> groupedFrames;
@@ -99,6 +100,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			for (auto& f : frames.second) {
 				f.pivot = pivot;
 				f.slices = slices;
+				f.generatePolygon = generatePolygon;
 			}
 
 			// Split into a grid
