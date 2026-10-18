@@ -44,12 +44,12 @@ Vector2f UIScrollPane::getScrollPosition() const
 
 Vector2f UIScrollPane::getRelativeScrollPosition() const
 {
-	return scrollPos / std::max(contentsSize, Vector2f(1.0f, 1.0f));
+	return scrollPos / Vector2f::max(contentsSize, Vector2f(1.0f, 1.0f));
 }
 
 Vector2f UIScrollPane::getRelativeScrollEndPosition() const
 {
-	return (scrollPos + clipSize) / std::max(contentsSize, Vector2f(1.0f, 1.0f));
+	return (scrollPos + clipSize) / Vector2f::max(contentsSize, Vector2f(1.0f, 1.0f));
 }
 
 void UIScrollPane::setClipSize(Vector2f clipSize)
@@ -183,7 +183,7 @@ bool UIScrollPane::canScroll(UIScrollDirection direction) const
 
 float UIScrollPane::getCoverageSize(UIScrollDirection direction) const
 {
-	auto contentsSize = UIWidget::getLayoutMinimumSize(false);
+	auto contentsSize = Vector2f::max(UIWidget::getLayoutMinimumSize(false), Vector2f(1.0f, 1.0f));
 	if (direction == UIScrollDirection::Horizontal) {
 		return getSize().x / contentsSize.x;
 	} else {
