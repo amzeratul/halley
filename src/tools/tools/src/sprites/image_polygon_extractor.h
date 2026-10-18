@@ -8,8 +8,8 @@ namespace Halley {
 
     class ImagePolygonExtractor {
     public:
-        static Polygon extractPolygon(const Sprite& sprite);
-        static Polygon extractPolygon(const Image& image, Rect4i bounds);
+        static VertexList extractPolygon(const Sprite& sprite);
+        static VertexList extractPolygon(const Image& image, Rect4i bounds, bool rotated = false);
 
     private:
         static Vector<Vector2i> getBoundaryPixels(const Vector<bool>& mask, Rect4i bounds); /// Only care about the outline pixels

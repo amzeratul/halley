@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-Polygon ImagePolygonExtractor::extractPolygon(const Sprite& sprite)
+VertexList ImagePolygonExtractor::extractPolygon(const Sprite& sprite)
 {
 	if (!sprite.hasMaterial()) {
 		return {};
@@ -28,8 +28,10 @@ Polygon ImagePolygonExtractor::extractPolygon(const Sprite& sprite)
 	return extractPolygon(*img, Rect4i(Vector2i(r.getTopLeft().round()), Vector2i(r.getBottomRight().round())));
 }
 
-Polygon ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds)
+VertexList ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i bounds, bool rotated)
 {
+	HalleyAssertDev(!rotated); // Not implemented
+
 	bounds = image.getRect().intersection(bounds);
 	if (bounds.getWidth() == 0 || bounds.getHeight() == 0) {
 		//Logger::logError("Bounds " + toString(bounds) + " do not overlap image bounds " + image.getRect());
@@ -213,6 +215,11 @@ VertexList ImagePolygonExtractor::makePixelVertices(gsl::span<const Vector2i> vs
 	VertexList result;
 	result.reserve(vs.size());
 
+	// 0.25f to 0.75f almost works, but requires a conservative renderer
+	constexpr float s = 0.0f;
+	constexpr float m = 0.50f;
+	constexpr float e = 1.0f;
+
 	for (const auto& v: vs) {
 		const bool left = hasNeighbour(v, Vector2i(-1, 0));
 		const bool right = hasNeighbour(v, Vector2i(1, 0));
@@ -224,29 +231,29 @@ VertexList ImagePolygonExtractor::makePixelVertices(gsl::span<const Vector2i> vs
 		}
 
 		if (!left && !up) {
-			result += Vector2f(v);
+			result += Vector2f(v) + Vector2f(s, s);
 		}
 		if (!left && !down) {
-			result += Vector2f(v + Vector2i(0, 1));
+			result += Vector2f(v) + Vector2f(s, e);
 		}
 		if (!right && !up) {
-			result += Vector2f(v + Vector2i(1, 0));
+			result += Vector2f(v) + Vector2f(e, s);
 		}
 		if (!right && !down) {
-			result += Vector2f(v + Vector2i(1, 1));
+			result += Vector2f(v) + Vector2f(e, e);
 		}
 
 		if (!left && up && down) {
-			result += Vector2f(v) + Vector2f(0, 0.5f);
+			result += Vector2f(v) + Vector2f(s, m);
 		}
 		if (!right && up && down) {
-			result += Vector2f(v) + Vector2f(1, 0.5f);
+			result += Vector2f(v) + Vector2f(e, m);
 		}
 		if (!up && left && right) {
-			result += Vector2f(v) + Vector2f(0.5f, 0);
+			result += Vector2f(v) + Vector2f(m, s);
 		}
 		if (!down && left && right) {
-			result += Vector2f(v) + Vector2f(0.5f, 1);
+			result += Vector2f(v) + Vector2f(m, e);
 		}
 	}
 
