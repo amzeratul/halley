@@ -107,6 +107,7 @@ namespace Halley {
 		Rect4i origBounds;
 		Rect4f bounds;
 		std::optional<Rect4f> curBounds;
+		std::optional<Vector<Vector2f>> curPolygon;
 		String actionPointId;
 
 		float zoom = 1.0f;

@@ -89,6 +89,10 @@ void AnimationEditor::update(Time t, bool moved)
 		if (curSprite) {
 			animationDisplay->setSpriteUnderCursor(curSprite);
 			str += "\nSprite: " + curSprite->name;
+
+			if (!curSprite->polygon.empty()) {
+				str += "\nPolygon: " + toString(Polygon(curSprite->polygon).getArea() * 100, 1) + "%";
+			}
 		} else {
 			animationDisplay->setSpriteUnderCursor(nullptr);
 			str += "\nSprite: <none>";
@@ -425,7 +429,22 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 	painter.draw(drawSprite);
 	painter.draw(boundsSprite);
 	if (curBounds) {
-		painter.draw(curBoundsSprite);
+		if (curPolygon && !curPolygon->empty()) {
+			const auto scale = bounds.getSize() * zoom;
+			auto vs = *curPolygon;
+			for (auto& v: vs) {
+				v = getPosition() + curBounds->getPointAtRelativeCoords(v) * scale;
+			}
+			painter.draw([vs = std::move(vs)] (Painter& p)
+			{
+				p.drawLine(vs, 1.0f, Colour4f(0, 1, 0), true);
+				for (auto& v: vs) {
+					p.drawCircle(v, 3, 1, Colour4f(0, 1, 0));
+				}
+			});
+		} else {
+			painter.draw(curBoundsSprite);
+		}
 	}
 	if (actionPointSprite.isVisible()) {
 		painter.draw(actionPointSprite);
@@ -532,8 +551,10 @@ void AnimationEditorDisplay::setSpriteUnderCursor(const SpriteSheetEntry* sprite
 {
 	if (sprite) {
 		curBounds = sprite->coords;
+		curPolygon = sprite->polygon;
 	} else {
 		curBounds = std::nullopt;
+		curPolygon = std::nullopt;
 	}
 }
 
