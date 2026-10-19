@@ -142,7 +142,9 @@ namespace Halley {
 		Vector<Triangle> triangulate() const;
 		void triangulate(Vector<Triangle>& dst) const;
 
-		static VertexList makeConvexHull(Vector<Vector2f> vs);
+		static VertexList makeConvexHull(VertexList vs);
+		static VertexList cropPolygon(gsl::span<const Vector2f> vs, Rect4f bounds);
+		static VertexList cropPolygonAxis(gsl::span<const Vector2f> vs, Range<float> bounds, int axis);
 
 	private:
 		Circle circle;

@@ -1575,7 +1575,7 @@ void Polygon::triangulate(Vector<Triangle>& dst) const
 	}
 }
 
-VertexList Polygon::makeConvexHull(Vector<Vector2f> vs)
+VertexList Polygon::makeConvexHull(VertexList vs)
 {
 	// Using Graham Scan
 	// https://en.wikipedia.org/wiki/Graham_scan
@@ -1622,6 +1622,92 @@ VertexList Polygon::makeConvexHull(Vector<Vector2f> vs)
 		stack += v;
 	}
 	return stack;
+}
+
+VertexList Polygon::cropPolygon(gsl::span<const Vector2f> vs, Rect4f bounds)
+{
+	const auto hor = bounds.getHorizontal();
+	const auto vert = bounds.getVertical();
+	bool needsHCrop = false;
+	bool needsVCrop = false;
+	for (const auto& v: vs) {
+		if (!hor.contains(v.x)) {
+			needsHCrop = true;
+		}
+		if (!vert.contains(v.y)) {
+			needsVCrop = true;
+		}
+	}
+
+	if (needsHCrop && needsVCrop) {
+		return cropPolygonAxis(cropPolygonAxis(vs, hor, 0), vert, 1);
+	} else if (needsHCrop) {
+		return cropPolygonAxis(vs, hor, 0);
+	} else if (needsVCrop) {
+		return cropPolygonAxis(vs, vert, 1);
+	} else {
+		return vs;
+	}
+}
+
+VertexList Polygon::cropPolygonAxis(gsl::span<const Vector2f> vs, Range<float> bounds, int axis)
+{
+	if (vs.empty()) {
+		return {};
+	}
+
+	VertexList result;
+	result.reserve(vs.size());
+
+	enum class Classification {
+		Before,
+		Inside,
+		After
+	};
+	
+	std::optional<Vector2f> lastPoint;
+	Classification lastClass = Classification::Inside;
+
+	for (size_t i = 0; i <= vs.size(); ++i) {
+		const auto p1 = vs[i % vs.size()];
+
+		const auto curClass = p1[axis] < bounds.start ? Classification::Before : (p1[axis] > bounds.end ? Classification::After : Classification::Inside);
+		
+		if (lastPoint && (curClass != lastClass)) {
+			const auto p0 = *lastPoint;
+			const bool leftToRight = p0[axis] < p1[axis]; // or top to bottom
+
+			auto trimLeft = [&] () {
+				if (curClass == Classification::Before || lastClass == Classification::Before) {
+					result += lerp(p0, p1, invLerp(bounds.start, p0[axis], p1[axis]));
+				}
+			};
+			auto trimRight = [&] () {
+				if (curClass == Classification::After || lastClass == Classification::After) {
+					result += lerp(p0, p1, invLerp(bounds.end, p0[axis], p1[axis]));
+				}
+			};
+
+			if (leftToRight) {
+				trimLeft();
+				trimRight();
+			} else {
+				trimRight();
+				trimLeft();
+			}
+		}
+		
+		if (curClass == Classification::Inside) {
+			if (i < vs.size()) { // Don't insert duplicated last point
+				result += p1;
+			}
+		}
+
+		lastPoint = p1;
+		lastClass = curClass;
+	}
+
+	return result;
 }
 
 String Polygon::toString() const
