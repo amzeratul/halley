@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class SpriteSheetPolygonSpanStorage;
 	class VideoAPI;
 	class Image;
 	class SpriteHotReloader;
@@ -55,6 +56,7 @@ namespace Halley
 			Vector2f size;
 			Rect4f texRect0;
 			Rect4f texRect1;
+			gsl::span<const Vector2f> polygon;
 		};
 		
 		Sprite();
@@ -175,7 +177,7 @@ namespace Halley
 		std::optional<Rect4f> getClip() const;
 		std::optional<Rect4f> getAbsoluteClip() const;
 
-		Sprite& crop(Vector4f sides);
+		Sprite& crop(Vector4f sides, SpriteSheetPolygonSpanStorage* polygonSpanStorage = nullptr); // polygonSpanStorage needed for polygon clipping
 		RectInfo getRectInfo() const;
 		void setRectInfo(const RectInfo& info);
 

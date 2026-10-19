@@ -12,6 +12,7 @@
 #include "halley/api/video_api.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/maths/polygon.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -719,7 +720,7 @@ std::optional<Rect4f> Sprite::getAbsoluteClip() const
 	return hasClip ? clip + (absoluteClip ? Vector2f() : vertexAttrib.pos) : std::optional<Rect4f>();
 }
 
-Sprite& Sprite::crop(Vector4f sides)
+Sprite& Sprite::crop(Vector4f sides, SpriteSheetPolygonSpanStorage* polygonSpanStorage)
 {
 	const auto scale = getScale();
 	if (flip ^ (scale.x < 0)) {
@@ -741,9 +742,18 @@ Sprite& Sprite::crop(Vector4f sides)
 	const auto r0 = vertexAttrib.texRect0;
 	vertexAttrib.texRect0 = Vector4f(sample(r0, relTex.xy()), sample(r0, relTex.zw()));
 
-	// Split sprites do not currently support polygon, so just reset it here
-	// TODO: find a way to make this work (splitting the polygon isn't hard, but where to store it...)
-	polygon = {};
+	if (!polygon.empty()) {
+		if (polygonSpanStorage) {
+			const auto r = Rect4f(relTex.xy(), relTex.zw());
+			auto cropped = Polygon::cropPolygon(polygon, r);
+			for (auto& p: cropped) {
+				p = r.makeRelative(p);
+			}
+			polygon = polygonSpanStorage->getPolygonStorage(cropped);
+		} else {
+			polygon = {};
+		}
+	}
 
 	// Splitting texRect1 leads to undesired results, it's almost certainly not desired
 	//const auto r1 = vertexAttrib.texRect1;
@@ -754,7 +764,7 @@ Sprite& Sprite::crop(Vector4f sides)
 
 Sprite::RectInfo Sprite::getRectInfo() const
 {
-	return RectInfo{ vertexAttrib.pivot, size, vertexAttrib.texRect0, vertexAttrib.texRect1 };
+	return RectInfo{ vertexAttrib.pivot, size, vertexAttrib.texRect0, vertexAttrib.texRect1, polygon };
 }
 
 void Sprite::setRectInfo(const RectInfo& info)
@@ -763,6 +773,7 @@ void Sprite::setRectInfo(const RectInfo& info)
 	size = info.size;
 	vertexAttrib.texRect0 = info.texRect0.toVector4();
 	vertexAttrib.texRect1 = info.texRect1.toVector4();
+	polygon = info.polygon;
 	computeSize();
 }
 
