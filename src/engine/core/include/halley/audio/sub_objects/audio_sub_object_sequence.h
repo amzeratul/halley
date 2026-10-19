@@ -81,8 +81,8 @@ namespace Halley {
     	NonOwningAliveFlag makeAliveFlag() const;
 		uint32_t getVersion() const;
 
-		virtual void markActivelyInUse() const;
-		virtual void markBackgroundLoaded() const;
+		void markActivelyInUse() const override;
+		void markBackgroundLoaded() const override;
 
 	private:
 		String name;

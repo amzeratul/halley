@@ -36,8 +36,8 @@ namespace Halley {
     	const String& getSwitchId() const;
         void setSwitchId(String value);
 
-		virtual void markActivelyInUse() const;
-		virtual void markBackgroundLoaded() const;
+        void markActivelyInUse() const override;
+        void markBackgroundLoaded() const override;
 
     private:
 		String switchId;

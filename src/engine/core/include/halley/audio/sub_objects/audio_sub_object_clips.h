@@ -43,8 +43,8 @@ namespace Halley {
 		bool getRandomiseStart() const;
 		void setRandomiseStart(bool enabled);
 
-		void markActivelyInUse() const;
-		void markBackgroundLoaded() const;
+		void markActivelyInUse() const override;
+		void markBackgroundLoaded() const override;
 
 	private:
 		Vector<String> clips;
