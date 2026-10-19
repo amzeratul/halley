@@ -184,6 +184,9 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 
 			// Find which pack this asset goes into
 			const auto& packEntry = manifest.getPack(assetName);
+			if (!packEntry.shouldPack()) {
+				continue;
+			}
 	
 			// Retrieve pack
 			auto iter = packs.find(packEntry.getName());

@@ -16,6 +16,7 @@ AssetPackManifestEntry::AssetPackManifestEntry(const ConfigNode& node)
 	encryptionKey = Encode::decodeBase64(node["encryptionKey"].asString(""));
 	matches = node["matches"].asVector<String>({});
 	prefixes = node["prefixes"].asVector<String>({});
+	pack = node["pack"].asBool(true);
 
 	for (auto& m: matches) {
 		if (m.startsWith("~:")) {
@@ -53,6 +54,11 @@ bool AssetPackManifestEntry::isEncrypted() const
 const Vector<uint8_t>& AssetPackManifestEntry::getEncryptionKey() const
 {
 	return encryptionKey;
+}
+
+bool AssetPackManifestEntry::shouldPack() const
+{
+	return pack;
 }
 
 AssetPackManifest::AssetPackManifest(const Bytes& data)

@@ -16,12 +16,14 @@ namespace Halley {
 		bool checkMatch(std::string_view asset) const;
 		bool isEncrypted() const;
 		const Vector<uint8_t>& getEncryptionKey() const;
+		bool shouldPack() const;
 
 	private:
 		String name;
 		Vector<uint8_t> encryptionKey;
 		Vector<String> matches;
 		Vector<String> prefixes;
+		bool pack = true;
 	};
 
 	class AssetPackManifest {
