@@ -106,23 +106,25 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void preloadAll() const
+		void preloadAll(std::function<bool(const String&)> f) const
 		{
 			for (const auto& e: enumerate<T>()) {
-				preload<T>(e);
-				std::this_thread::yield();
+				if (!f || f(e)) {
+					preload<T>(e);
+					std::this_thread::yield();
+				}
 			}
 		}
 
 		template <typename T>
-		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq, ExecutionQueue& queue) const
+		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq, ExecutionQueue& queue, std::function<bool(const String&)> f) const
 		{
 			Vector<Future<void>> pending;
 
 			if (nThreadsReq == 1) {
-				pending += Concurrent::execute(queue, [this]
+				pending += Concurrent::execute(queue, [this, f = std::move(f)]
 				{
-					preloadAll<T>();
+					preloadAll<T>(f);
 				});
 			} else {
 				const auto entries = enumerate<T>();
@@ -139,10 +141,12 @@ namespace Halley {
 						es.push_back(std::move(entries[e]));
 					}
 
-					pending += Concurrent::execute(queue, [this, es = std::move(es)]
+					pending += Concurrent::execute(queue, [this, es = std::move(es), f]
 					{
 						for (auto& e: es) {
-							preload<T>(e);
+							if (!f || f(e)) {
+								preload<T>(e);
+							}
 						}
 					});
 				}
@@ -152,15 +156,15 @@ namespace Halley {
 		}
 
 		template <typename T>
-		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq) const
+		Vector<Future<void>> preloadAllParallelAsVector(size_t nThreadsReq, std::function<bool(const String&)> f) const
 		{
-			return preloadAllParallelAsVector<T>(nThreadsReq, Executors::getCPUAux());
+			return preloadAllParallelAsVector<T>(nThreadsReq, Executors::getCPUAux(), std::move(f));
 		}
 
 		template <typename T>
-		Future<void> preloadAllParallel(size_t nThreadsReq) const
+		Future<void> preloadAllParallel(size_t nThreadsReq, std::function<bool(const String&)> f = {}) const
 		{
-			return Concurrent::whenAll(preloadAllParallelAsVector<T>(nThreadsReq, Executors::getCPUAux()));
+			return Concurrent::whenAll(preloadAllParallelAsVector<T>(nThreadsReq, Executors::getCPUAux(), std::move(f)));
 		}
 
 		template <typename T>
