@@ -263,6 +263,7 @@ ResourceMemoryUsage AudioClip::getEstimatedMemoryUsage() const
 void AudioClip::incUseCounter() const
 {
 	++useCount;
+	markActivelyInUse();
 }
 
 void AudioClip::decUseCounter() const

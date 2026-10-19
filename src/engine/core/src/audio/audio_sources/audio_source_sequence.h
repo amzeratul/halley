@@ -53,6 +53,9 @@ namespace Halley
 		Vector<size_t> playList;
 		size_t curTrack = 0;
 
+		std::optional<size_t> nextTrack;
+		std::unique_ptr<AudioSource> preloadedNextSource;
+
 		bool initialized = false;
 		uint32_t version = 0;
 
@@ -60,7 +63,8 @@ namespace Halley
 
 		void initialize();
 		void checkForReload();
-		void nextTrack();
+		void chooseNextTrack();
+		void startNextTrack();
 		void loadCurrentTrack();
 	};
 }

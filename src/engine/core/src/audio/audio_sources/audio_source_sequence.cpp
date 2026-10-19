@@ -37,33 +37,45 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 
 	checkForReload();
 
-	for (auto& track: playingTracks) {
-		if (!track.initialized) {
-			track.initialize();
+	auto getNumReadySources = [&] () {
+		int nReady = 0;
+		for (auto& track: playingTracks) {
+			if (track.initialized) {
+				++nReady;
+			}
 		}
-	}
+		return nReady;
+	};
 
 	const auto nChannels = getNumberOfChannels();
 	size_t samplePos = 0;
 	const auto fadeLen = static_cast<size_t>(sequenceConfig.getCrossFade().getLength() * AudioConfig::sampleRate);
 
 	while (samplePos < samplesRequested) {
-		if (playingTracks.empty()) {
+		for (auto& track: playingTracks) {
+			if (!track.initialized) {
+				track.initialize();
+			}
+		}
+		
+		if (getNumReadySources() == 0) {
 			AudioMixer::zeroRange(dst, nChannels, samplePos);
-			return false;
+			return !playingTracks.empty();
 		}
 
 		// Figure out how many samples we'll read
 		size_t samplesToRead = samplesRequested - samplePos;
 		for (const auto& p: playingTracks) {
-			samplesToRead = std::min(samplesToRead, p.getSamplesBeforeNextEvent(fadeLen));
+			if (p.initialized) {
+				samplesToRead = std::min(samplesToRead, p.getSamplesBeforeNextEvent(fadeLen));
+			}
 		}
 
 		// Transition out anyone who needs it
 		size_t startNewTrack = 0;
 		size_t nPlaying = 0;
 		for (auto& p: playingTracks) {
-			if (p.state != TrackState::Done) {
+			if (p.initialized && p.state != TrackState::Done) {
 				if (p.getSamplesBeforeEnd() == samplesToRead) {
 					if (p.state == TrackState::Playing) {
 						++startNewTrack;
@@ -92,17 +104,19 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 			auto buffer = engine.getPool().getBuffers(nChannels, samplesRequested);
 			bool first = true;
 			for (auto& p: playingTracks) {
-				p.source->getAudioData(samplesToRead, buffer.getSampleSpans());
-				const float gain = lerp(p.prevGain, p.fader.getCurrentValue(), static_cast<float>(samplePos) / static_cast<float>(samplesRequested));
+				if (p.initialized) {
+					p.source->getAudioData(samplesToRead, buffer.getSampleSpans());
+					const float gain = lerp(p.prevGain, p.fader.getCurrentValue(), static_cast<float>(samplePos) / static_cast<float>(samplesRequested));
 
-				if (first) {
-					for (size_t i = 0; i < nChannels; ++i) {
-						AudioMixer::copy(dst[i].subspan(samplePos), buffer.getSampleSpans()[i], p.prevGain, gain);
-					}
-					first = false;
-				} else {
-					for (size_t i = 0; i < nChannels; ++i) {
-						AudioMixer::mixAudio(buffer.getSampleSpans()[i], dst[i].subspan(samplePos), p.prevGain, gain);
+					if (first) {
+						for (size_t i = 0; i < nChannels; ++i) {
+							AudioMixer::copy(dst[i].subspan(samplePos), buffer.getSampleSpans()[i], p.prevGain, gain);
+						}
+						first = false;
+					} else {
+						for (size_t i = 0; i < nChannels; ++i) {
+							AudioMixer::mixAudio(buffer.getSampleSpans()[i], dst[i].subspan(samplePos), p.prevGain, gain);
+						}
 					}
 				}
 			}
@@ -121,7 +135,7 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		
 		// Start new track(s)
 		for (size_t i = 0; i < startNewTrack; ++i) {
-			nextTrack();
+			startNextTrack();
 		}
 	}
 
@@ -180,17 +194,23 @@ size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeEnd() const
 
 void AudioSourceSequence::PlayingTrack::initialize()
 {
-	const auto nSamples = source->getSamplesLeft();
-	if (endSample > 0 && static_cast<size_t>(endSample) < nSamples) {
-		endSamplesOverlap = nSamples - static_cast<size_t>(endSample);
+	if (source->isReady()) {
+		const auto nSamples = source->getSamplesLeft();
+		if (endSample > 0 && static_cast<size_t>(endSample) < nSamples) {
+			endSamplesOverlap = nSamples - static_cast<size_t>(endSample);
+		}
+		initialized = true;
 	}
-	initialized = true;
 }
 
 void AudioSourceSequence::initialize()
 {
+	playingTracks.clear();
+
 	initialized = true;
 	version = sequenceConfig.getVersion();
+	nextTrack = std::nullopt;
+	preloadedNextSource = {};
 
 	playList.clear();
 	for (size_t i = 0; i < sequenceConfig.getNumSubObjects(); ++i) {
@@ -213,6 +233,8 @@ void AudioSourceSequence::initialize()
 	}
 
 	loadCurrentTrack();
+	nextTrack = curTrack;
+	chooseNextTrack();
 }
 
 void AudioSourceSequence::checkForReload()
@@ -222,19 +244,17 @@ void AudioSourceSequence::checkForReload()
 	}
 }
 
-void AudioSourceSequence::nextTrack()
+void AudioSourceSequence::chooseNextTrack()
 {
-	if (playList.empty()) {
-		return;
-	}
-
+	HalleyAssertDev(!playList.empty());
+	
 	if (sequenceConfig.getSequenceType() == AudioSequenceType::Random) {
-		curTrack = engine.getRNG().getSizeT(0, playList.size() - 1);
+		nextTrack = engine.getRNG().getSizeT(0, playList.size() - 1);
 	} else {
-		++curTrack;
+		nextTrack = nextTrack ? *nextTrack + 1 : 0;
 
-		if (curTrack == playList.size()) {
-			curTrack = 0;
+		if (nextTrack == playList.size()) {
+			nextTrack = 0;
 			if (sequenceConfig.getSequenceType() == AudioSequenceType::Shuffle) {
 				const auto lastTrack = playList.back();
 				shuffle(playList.begin(), playList.end(), engine.getRNG());
@@ -247,7 +267,22 @@ void AudioSourceSequence::nextTrack()
 		}
 	}
 
+	const auto& segment = sequenceConfig.getSegments()[playList.at(*nextTrack)];
+	preloadedNextSource = segment.object->makeSource(engine, emitter);
+}
+
+void AudioSourceSequence::startNextTrack()
+{
+	if (playList.empty()) {
+		return;
+	}
+
+	if (!nextTrack) {
+		chooseNextTrack();
+	}
+	curTrack = *nextTrack;
 	loadCurrentTrack();
+	chooseNextTrack();
 }
 
 void AudioSourceSequence::loadCurrentTrack()
@@ -257,7 +292,7 @@ void AudioSourceSequence::loadCurrentTrack()
 	}
 
 	const auto& segment = sequenceConfig.getSegments()[playList[curTrack]];
-	playingTracks.push_back({ segment.object->makeSource(engine, emitter) });
+	playingTracks.push_back({ preloadedNextSource ? std::move(preloadedNextSource) : segment.object->makeSource(engine, emitter) });
 	auto& track = playingTracks.back();
 	track.fader.startFade(0.0f, 1.0f, sequenceConfig.getCrossFade());
 	track.prevGain = track.fader.getCurrentValue();
