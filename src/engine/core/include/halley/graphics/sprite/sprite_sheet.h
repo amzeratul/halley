@@ -10,6 +10,7 @@
 
 #include "halley/file_formats/image.h"
 #include "halley/maths/vector4.h"
+#include "halley/resources/resources.h"
 
 namespace Halley
 {
@@ -85,6 +86,34 @@ namespace Halley
 		mutable Mutex spriteMutex;
 		mutable HashMap<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
 #endif
+	};
+
+	struct SpriteSheetPolygonSpanStorageType {
+		Vector<Vector2f, std::allocator<Vector2f>, 0, false> vs;
+
+		bool operator==(const SpriteSheetPolygonSpanStorageType& other) const = default;
+	};
+}
+
+namespace std {
+	template <>
+	struct hash<Halley::SpriteSheetPolygonSpanStorageType> {
+        std::size_t operator()(const Halley::SpriteSheetPolygonSpanStorageType& v) const noexcept
+        {
+			return Halley::Hash::hash(v.vs.const_byte_span());
+        }
+    };
+}
+
+namespace Halley {
+
+	class SpriteSheetPolygonSpanStorage : public IGlobalResource {
+	public:
+		gsl::span<const Vector2f> getPolygonStorage(gsl::span<const Vector2f> polygon);
+
+	private:
+		HashSet<SpriteSheetPolygonSpanStorageType> polygons;
+		Mutex mutex;
 	};
 	
 	class SpriteSheet final : public Resource, public SpriteHotReloader
@@ -185,6 +214,8 @@ namespace Halley
 		String defaultMaterialName;
 		mutable HashMap<String, std::weak_ptr<Material>> materials;
 		mutable Mutex materialMutex;
+
+		SpriteSheetPolygonSpanStorage* polygonStorage = nullptr;
 
 		void loadTexture(Resources& resources) const;
 		void loadPaletteTexture(Resources& resources) const;

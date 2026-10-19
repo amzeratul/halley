@@ -85,6 +85,15 @@ void SpriteSheetFrameTag::deserialize(Deserializer& s)
 	s >> from;
 }
 
+gsl::span<const Vector2f> SpriteSheetPolygonSpanStorage::getPolygonStorage(gsl::span<const Vector2f> polygon)
+{
+	auto lock = UniqueLock(mutex);
+	SpriteSheetPolygonSpanStorageType t;
+	t.vs.assign(polygon.begin(), polygon.end());
+	const auto [iter, inserted] = polygons.insert(t);
+	return iter->vs.const_span();
+}
+
 SpriteSheet::SpriteSheet()
 	: defaultMaterialName(MaterialDefinition::defaultMaterial)
 {
@@ -226,11 +235,12 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_unique<SpriteSheet>();
 	result->resources = &loader.getResources();
+	result->polygonStorage = result->resources->getGlobalResource<SpriteSheetPolygonSpanStorage>();
 	auto data = loader.getStatic(false);
 	if (!data) {
 		return {};
 	}
-	
+
 	CompressedBytes::fromSerializedBytes(data->getSpan()).decompressValue(*result);
 
 	return result;
@@ -272,9 +282,9 @@ void SpriteSheet::assignIds()
 
 void SpriteSheet::assignPolygonSpans()
 {
-	// TODO: move this to some permanent storage that can never be deallocated, since Sprites keep an unconditional reference to it
+	HalleyAssertDev(polygonStorage);
 	for (auto& sprite: sprites) {
-		sprite.polygonSpan = sprite.polygon;
+		sprite.polygonSpan = sprite.polygon.empty() ? gsl::span<const Vector2f>() : polygonStorage->getPolygonStorage(sprite.polygon);
 	}
 }
 

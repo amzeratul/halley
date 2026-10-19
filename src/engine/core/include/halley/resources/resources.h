@@ -23,6 +23,7 @@
 
 #include <ctime>
 #include <algorithm>
+#include <typeindex>
 #include <halley/concurrency/concurrent.h>
 #include <halley/support/exception.h>
 #include "halley/resources/resource.h"
@@ -33,6 +34,11 @@ namespace Halley {
 	
 	class ResourceLocator;
 	class HalleyAPI;
+
+	class IGlobalResource {
+	public:
+		virtual ~IGlobalResource() = default;
+	};
 	
 	class Resources {
 		friend class ResourceCollectionBase;
@@ -210,10 +216,26 @@ namespace Halley {
 		void generateMemoryReport();
 		void generateDetailedMemoryReport(AssetType type, std::optional<int> limit = {});
 
+		template <typename T>
+		T* getGlobalResource()
+		{
+			auto lock = UniqueLock(globalResourcesMutex);
+
+			static_assert(std::is_base_of_v<IGlobalResource, T>);
+			const auto id = std::type_index(typeid(T));
+			if (auto iter = globalResources.find(id); iter != globalResources.end()) {
+				return static_cast<T*>(iter->second.get());
+			}
+			const auto [iter2, inserted] = globalResources.insert_or_assign(id, std::make_unique<T>());
+			return static_cast<T*>(iter2->second.get());
+		}
+
 	private:
 		const std::unique_ptr<ResourceLocator> locator;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;
 		const HalleyAPI* const api;
 		ResourceOptions options;
+		HashMap<std::type_index, std::unique_ptr<IGlobalResource>> globalResources;
+		Mutex globalResourcesMutex;
 	};
 }
