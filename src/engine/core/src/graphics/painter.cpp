@@ -705,6 +705,11 @@ void Painter::unbind(RenderContext& context)
 	doUnbind();
 }
 
+void Painter::setCanDrawNonRectangularSprites(bool enabled)
+{
+	nonRectangularSprites = enabled;
+}
+
 void Painter::doBind(const Camera& cam, RenderTarget& renderTarget)
 {
 	// Setup camera

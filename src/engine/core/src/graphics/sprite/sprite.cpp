@@ -73,7 +73,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 		paintWithClip(painter, extClip, [&] ()
 		{
-			if (polygon.size() >= 3) {
+			if (polygon.size() >= 3 && painter.canDrawNonRectangularSprites()) {
 				const auto v = gsl::span<const Vector2f>(polygon);
 				painter.drawSprites(material, 1, getVertexAttrib(), gsl::span(&v, 1));
 			} else {

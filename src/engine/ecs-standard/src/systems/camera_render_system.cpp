@@ -27,8 +27,9 @@ public:
 
 		if (painterService.hasRenderGraph()) {
 			auto& renderGraph = painterService.getRenderGraph();
-			renderGraph.setDrawCallback([&painterService] (SpriteMaskBase mask, Painter& painter)
+			renderGraph.setDrawCallback([&painterService, nonRectSpritesEnabled = nonRectSpritesEnabled] (SpriteMaskBase mask, Painter& painter)
 			{
+				painter.setCanDrawNonRectangularSprites(nonRectSpritesEnabled);
 				painterService.draw(mask, painter);
 			});
 
@@ -243,7 +244,14 @@ private:
 				return "Usage: renderOutput [outputNode]";
 			}
 		});
+
+		getDevService().getConsoleCommands().addCommand("nonRectSprites", [this] (const Vector<String>& args) {
+			nonRectSpritesEnabled = args[0] == "true";
+			return String("Non-rect sprites are ") + (nonRectSpritesEnabled ? "enabled" : "disabled");			
+		}, { { "enabled", "bool" }});
 	}
+
+	bool nonRectSpritesEnabled = true;
 };
 
 REGISTER_SYSTEM(CameraRenderSystem)

@@ -133,6 +133,9 @@ namespace Halley
 		void startRecording(RenderSnapshot* snapshot);
 		void stopRecording();
 
+		bool canDrawNonRectangularSprites() const { return nonRectangularSprites; }
+		void setCanDrawNonRectangularSprites(bool enabled);
+
 	protected:
 		virtual void doBind(const Camera& camera, RenderTarget& renderTarget);
 		virtual void doStartRender() = 0;
@@ -198,6 +201,7 @@ namespace Halley
 		size_t bytesPending = 0;
 		size_t indicesPending = 0;
 		bool allIndicesAreQuads = true;
+		bool nonRectangularSprites = true;
 		Vector<char> vertexBuffer;
 		Vector<IndexType> indexBuffer;
 		std::shared_ptr<const Material> materialPending;
