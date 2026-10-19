@@ -41,7 +41,7 @@ VertexList ImagePolygonExtractor::extractPolygon(const Image& image, Rect4i orig
 	const auto mask = image.makeAlphaMask(bounds);
 	const auto boundPixels = simplifyBoundaryPixelsForConvex(getBoundaryPixels(mask, bounds), bounds);
 	auto vertices = makePixelVertices(boundPixels, mask, bounds);
-	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), Rect4f(origBounds));
+	return postProcessConvexHull(Polygon::makeConvexHull(std::move(vertices)), Rect4f(origBounds).grow(0.1f));
 }
 
 VertexList ImagePolygonExtractor::makeVertices(Rect4i bounds)
