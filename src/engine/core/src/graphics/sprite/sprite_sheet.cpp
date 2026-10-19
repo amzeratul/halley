@@ -282,9 +282,10 @@ void SpriteSheet::assignIds()
 
 void SpriteSheet::assignPolygonSpans()
 {
-	HalleyAssertDev(polygonStorage);
-	for (auto& sprite: sprites) {
-		sprite.polygonSpan = sprite.polygon.empty() ? gsl::span<const Vector2f>() : polygonStorage->getPolygonStorage(sprite.polygon);
+	if (polygonStorage) {
+		for (auto& sprite: sprites) {
+			sprite.polygonSpan = sprite.polygon.empty() ? gsl::span<const Vector2f>() : polygonStorage->getPolygonStorage(sprite.polygon);
+		}
 	}
 }
 
