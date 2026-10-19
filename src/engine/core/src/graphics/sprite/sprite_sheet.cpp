@@ -569,7 +569,9 @@ std::unique_ptr<Image> SpriteSheet::makeAtlas(const Vector<BinPackResult>& resul
 		atlasImage->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
 
 		VertexList polygon;
-		if (img->generatePolygon) {
+		const int nPixels = img->clip.getWidth() * img->clip.getHeight();
+		const int minSize = 20 * 20;
+		if (img->generatePolygon && nPixels > minSize) {
 			polygon = ImagePolygonExtractor::extractPolygon(*img->img, img->clip, false);
 			const auto floatBounds = Rect4f(img->clip);
 			for (auto& v : polygon) {
