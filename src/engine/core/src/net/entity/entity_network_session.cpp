@@ -830,6 +830,20 @@ void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 	}
 }
 
+void EntityNetworkSession::refreshOutboundInterpolators(EntityRef entity)
+{
+    UniqueLock lock(outboundInterpolatorLock);
+
+	auto& networkComponent = entity.getComponent<NetworkComponent>(true);
+
+	ByteDataInterpolatorSet set;
+	requestSetupByteDataInterpolators(set, entity);
+
+	set.copyState(networkComponent.byteDataInterpolatorSet);
+
+	networkComponent.byteDataInterpolatorSet = std::move(set);
+}
+
 void EntityNetworkSession::startGame()
 {
 	if (isHost()) {

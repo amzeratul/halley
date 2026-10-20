@@ -83,6 +83,7 @@ namespace Halley {
 		void requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote);
 		void requestSetupByteDataInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity);
 		void setupOutboundInterpolators(EntityRef entity);
+		void refreshOutboundInterpolators(EntityRef entity);
 
 		void startGame();
 		void joinGame();
