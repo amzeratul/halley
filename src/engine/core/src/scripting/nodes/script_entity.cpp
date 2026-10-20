@@ -50,7 +50,8 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 		PinType{ ET::TargetPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::TargetPin, PD::Input },
-        PinType{ ET::ReadDataPin, PD::Input }
+        PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
 	});
 	return data;
 }
@@ -62,7 +63,11 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 
 	auto str = ColourStringBuilder(true);
 	str.append("Spawn entity ");
-	str.append(node.getSettings()["prefab"].asString(""), settingColour);
+	if (node.getPin(7).hasConnection()) {
+		str.append(getConnectedNodeName(node, graph, 7), settingColour);
+	} else {
+		str.append(node.getSettings()["prefab"].asString(""), settingColour);
+	}
 	str.append(" at position ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with rotation ");
@@ -92,6 +97,9 @@ String ScriptSpawnEntity::getPinDescription(const BaseGraphNode& node, PinType e
 	if (elementIdx == 6) {
 		return "Height";
 	}
+	if (elementIdx == 7) {
+		return "Prefab";
+	}
 	return ScriptNodeTypeBase<ScriptSpawnEntityData>::getPinDescription(node, elementType, elementIdx);
 }
 
@@ -104,12 +112,17 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 {
 	data.entityId = EntityId();
 
-	const auto& prefab = node.getSettings()["prefab"].asString("");
+	auto prefab = node.getSettings()["prefab"].asString("");
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 	const bool serializable = node.getSettings()["serializable"].asBool(true);
 	const Vector3f position = readDataPin(environment, node, 2).asVector3f({});
 	const Angle1f rotation = Angle1f(readDataPin(environment, node, 4).asFloat(0.0f));
 	const float height = readDataPin(environment, node, 6).asFloat(0.0f);
+
+	const auto connectedPrefab = readDataPin(environment, node, 7).asString("");
+	if (!connectedPrefab.isEmpty()) {
+		prefab = connectedPrefab;
+	}
 
 	if (!prefab.isEmpty()) {
 		EntityRef parent;
