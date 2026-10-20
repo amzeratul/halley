@@ -33,6 +33,14 @@ public:
 				painterService.draw(mask, painter);
 			});
 
+			renderGraph.setCheckDrawCallback([&painterService] (gsl::span<const SpriteMaskBase> maskList) -> bool {
+				int masks = 0;
+				for (auto& mask: maskList) {
+					masks = masks | mask;
+				}
+				return painterService.hasAnythingToDraw(masks);
+			});
+			
 			setupRenderGraphCameras(rc.getDefaultRenderTarget().getViewPort(), renderGraph);
 			initializeRequestedScreenGrabs(renderGraph);
 			executeRenderGraphCommands(renderGraph);

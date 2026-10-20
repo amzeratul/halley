@@ -35,6 +35,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		prePaintMethodId = pars["prePaintMethodId"].asString("");
 		postPaintMethodId = pars["postPaintMethodId"].asString("");
 		paintMasks = pars["paintMasks"].asVector<SpriteMaskBase>({});
+		skipIfNothingToDraw = pars["skipIfNothingToDraw"].asBool(false);
 
 		cameraId = pars["cameraId"].asString();
 
@@ -343,6 +344,18 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 	if (const auto* camera = graph.tryGetCamera(cameraId)) {
 		getTargetRenderContext(rc).with(*camera).bind([this, &graph] (Painter& painter)
 		{
+			if (skipIfNothingToDraw && !graph.checkDraw(paintMasks, prePaintMethodId, postPaintMethodId)) {
+				++nothingToDrawFrames;
+			} else {
+				nothingToDrawFrames = 0;
+				//Logger::logDev("Drawing " + id, true);
+			}
+			if (nothingToDrawFrames >= 2) {
+				//Logger::logDev("Skipping drawing " + id, true);
+				// Always do at least one more frame after nothing to draw, to clear the buffer
+				return;
+			}
+
 			painter.pushDebugGroup(id);
 
 			if (colourClear || depthClear || stencilClear) {

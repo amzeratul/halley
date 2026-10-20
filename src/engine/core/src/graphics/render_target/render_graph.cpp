@@ -171,11 +171,37 @@ void RenderGraph::setDrawCallback(DrawCallback callback)
 	drawCallback = std::move(callback);
 }
 
+void RenderGraph::setCheckDrawCallback(CheckDrawCallback callback)
+{
+	checkDrawCallback = std::move(callback);
+}
+
 void RenderGraph::draw(SpriteMaskBase mask, Painter& painter) const
 {
 	if (drawCallback) {
 		drawCallback(mask, painter);
 	}
+}
+
+bool RenderGraph::checkDraw(gsl::span<const SpriteMaskBase> masks, std::string_view preDraw, std::string_view postDraw) const
+{
+	const bool hasMaskDraw = !masks.empty() && (!checkDrawCallback || checkDrawCallback(masks));
+	const bool hasPreDraw = checkDraw(preDraw);
+	const bool hasPostDraw = checkDraw(postDraw);
+
+	return hasMaskDraw || hasPreDraw || hasPostDraw;
+}
+
+bool RenderGraph::checkDraw(std::string_view id) const
+{
+	if (id.empty()) {
+		return false;
+	}
+	const auto iter = checkPaintMethods.find(id);
+	if (iter != checkPaintMethods.end()) {
+		return iter->second();
+	}
+	return true;
 }
 
 const RenderGraph::PaintMethod* RenderGraph::tryGetPaintMethod(std::string_view id) const
@@ -191,9 +217,12 @@ const RenderGraph::PaintMethod* RenderGraph::tryGetPaintMethod(std::string_view 
 	}
 }
 
-void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)
+void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method, CheckPaintMethod checkPaintMethod)
 {
 	paintMethods[id] = std::move(method);
+	if (checkPaintMethod) {
+		checkPaintMethods[id] = std::move(checkPaintMethod);
+	}
 }
 
 void RenderGraph::applyVariable(Material& material, const String& name, const ConfigNode& value) const

@@ -25,6 +25,8 @@ namespace Halley {
 
         virtual void drawOpaque(SpriteMaskBase mask, Painter& painter) {}
         virtual void drawTransparent(SpriteMaskBase mask, Painter& painter) {}
+        virtual bool hasAnythingToDraw(int masks) const { return false; }
+        virtual bool hasAnythingToDraw(std::string_view name) const { return false; }
         virtual void clear() {}
     };
 

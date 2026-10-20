@@ -28,6 +28,8 @@ namespace Halley {
 		bool hasFrameData() const;
 
 		void draw(SpriteMaskBase mask, Painter& painter);
+		bool hasAnythingToDraw(int masks);
+		bool hasAnythingToDraw(std::string_view name);
 		void clear();
 
 		void setClearColour(std::optional<Colour4f> colour);

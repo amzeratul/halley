@@ -62,6 +62,26 @@ void PainterService::draw(SpriteMaskBase mask, Painter& painter)
 	}
 }
 
+bool PainterService::hasAnythingToDraw(int masks)
+{
+	for (auto& p: getFrameData().painters) {
+		if (p->hasAnythingToDraw(masks)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool PainterService::hasAnythingToDraw(std::string_view name)
+{
+	for (auto& p: getFrameData().painters) {
+		if (p->hasAnythingToDraw(name)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void PainterService::clear()
 {
 	for (auto& p: getFrameData().painters) {

@@ -420,6 +420,16 @@ void SpritePainter::drawTransparent(SpriteMaskBase mask, Painter& painter)
 	painter.flush();
 }
 
+bool SpritePainter::hasAnythingToDraw(int masks) const
+{
+	for (const auto& s: sprites) {
+		if ((s.getMask() & masks) != 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 Vector<uint32_t> SpritePainter::getSpriteDrawOrder(int mask, Rect4f view, bool reorder) const
 {
 	if (reorder) {

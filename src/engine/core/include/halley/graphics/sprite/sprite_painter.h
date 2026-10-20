@@ -106,6 +106,7 @@ namespace Halley
 		void add(Rect4f bounds);
 
 		void drawTransparent(SpriteMaskBase mask, Painter& painter) override;
+		bool hasAnythingToDraw(int masks) const override;
 		std::optional<Rect4f> getBounds() const;
 
 		SpritePainterMaterialParamUpdater& getParamUpdater();

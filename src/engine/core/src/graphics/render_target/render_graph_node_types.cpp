@@ -99,6 +99,7 @@ Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::PaintNodeType::getSett
 		SettingType{ "prePaintMethodId", "Halley::String", Vector<String>{""} },
 		SettingType{ "paintMasks", "Halley::Vector<Halley::SpriteMasksBase>", Vector<String>{""} },
 		SettingType{ "postPaintMethodId", "Halley::String", Vector<String>{""} },
+		SettingType{ "skipIfNothingToDraw", "bool", Vector<String>{"false"} },
 	};
 }
 

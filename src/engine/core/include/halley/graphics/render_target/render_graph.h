@@ -23,7 +23,9 @@ namespace Halley {
 	class RenderGraph {
 	public:
 		using PaintMethod = std::function<void(Painter&)>;
+		using CheckPaintMethod = std::function<bool()>;
 		using DrawCallback = std::function<void(SpriteMaskBase, Painter&)>;
+		using CheckDrawCallback = std::function<bool(gsl::span<const SpriteMaskBase>)>;
 
 		RenderGraph();
 		explicit RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
@@ -36,10 +38,13 @@ namespace Halley {
 		void setCamera(std::string_view id, const Camera& camera);
 
 		void setDrawCallback(DrawCallback callback);
+		void setCheckDrawCallback(CheckDrawCallback callback);
 		void draw(SpriteMaskBase mask, Painter& painter) const;
+		bool checkDraw(gsl::span<const SpriteMaskBase> masks, std::string_view preDraw, std::string_view postDraw) const;
+		bool checkDraw(std::string_view method) const;
 
 		const PaintMethod* tryGetPaintMethod(std::string_view id) const;
-		void setPaintMethod(std::string_view id, PaintMethod method);
+		void setPaintMethod(std::string_view id, PaintMethod method, CheckPaintMethod checkPaintMethod = {});
 
 		void applyVariable(Material& material, const String& name, const ConfigNode& value) const;
 		void setVariable(std::string_view name, float value);
@@ -112,9 +117,11 @@ namespace Halley {
 		
 		std::map<String, Camera> cameras;
 		std::map<String, PaintMethod> paintMethods;
+		std::map<String, CheckPaintMethod> checkPaintMethods;
 		std::map<String, Variable> variables;
 		std::map<String, ImageOutputCallback> imageOutputCallbacks;
 		DrawCallback drawCallback;
+		CheckDrawCallback checkDrawCallback;
 
 		String remapOutputNode;
 		Vector<std::pair<uint8_t, Vector<std::pair<String, uint8_t>>>> defaultOutputMapping;
