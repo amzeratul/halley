@@ -167,6 +167,14 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 
 	const size_t n = std::min(commands.size(), maxCommands.value_or(commands.size()));
 
+	auto areMaterialsVertexCompatible = [] (const Material* a, const MaterialDefinition& b)
+	{
+		if (a) {
+			return a->getDefinition().getAttributes() == b.getAttributes();
+		}
+		return false;
+	};
+
 	for (size_t i = 0; i < n; ++i) {
 		for (const auto& command: commands[i]) {
 			const auto type = command.first;
@@ -192,7 +200,7 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 
 			case CommandType::Draw:
 				playDraw(painter, drawDatas[idx], {});
-				if (last && debugMaterial) {
+				if (last && debugMaterial && areMaterialsVertexCompatible(drawDatas[idx].material.get(), *debugMaterial)) {
 					playDraw(painter, drawDatas[idx], debugMaterial);
 				}
 				break;

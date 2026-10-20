@@ -9,5 +9,5 @@ float4 main(VOut input) : SV_TARGET {
 		return float4(1, 0, 0, 1);
 	}
 
-	return float4(1, 0, 0, 0.25);
+	return float4(1, 0, 0, 0.15);
 }

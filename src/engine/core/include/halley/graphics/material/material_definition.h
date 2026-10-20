@@ -203,6 +203,8 @@ namespace Halley
 
 		static size_t getAttributeSize(ShaderParameterType type);
 		static size_t getAttributeAlignment(ShaderParameterType type);
+
+		bool operator==(const MaterialAttribute& other) const = default;
 	};
 
 	class MaterialDefinition;
