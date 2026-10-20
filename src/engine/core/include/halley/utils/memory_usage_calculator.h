@@ -61,11 +61,15 @@ namespace Halley
 	struct MemoryUsageCalculator<Vector<T>> {
 		static size_t getSizeBytes(const Vector<T>& values)
 		{
-			size_t result = values.size_bytes();
-			for (const auto& e: values) {
-				result += MemoryUsageCalculator<T>::getSizeBytes(e);
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				return values.size_bytes();
+			} else {
+				size_t result = values.size_bytes();
+				for (const auto& e: values) {
+					result += MemoryUsageCalculator<T>::getSizeBytes(e);
+				}
+				return result;
 			}
-			return result;
 		}
 	};
 

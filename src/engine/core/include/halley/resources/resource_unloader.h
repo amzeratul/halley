@@ -60,7 +60,7 @@ namespace Halley {
         uint32_t activeFrameIdx = 0;
         Vector<float> frameTimes;
 
-        constexpr static float maxTimeLogged = 15.0; // seconds
+        constexpr static float maxTimeLogged = 20.0; // seconds
         
         HashMap<ResourceDesiredLoadState, StateCollection> lastStates;
 

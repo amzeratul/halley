@@ -53,6 +53,8 @@ void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 	const float dt = static_cast<float>(origDt);
 
 	for (const auto& [type, rule]: rules.rules) {
+		HalleyAssertDev(rule.staleTimeBackground <= maxTimeLogged);
+		HalleyAssertDev(rule.staleTimeUse <= maxTimeLogged);
 		prepareCollection(dt, resources.ofType(type));
 	}
 
