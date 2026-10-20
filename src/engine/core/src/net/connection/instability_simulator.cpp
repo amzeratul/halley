@@ -64,18 +64,17 @@ bool InstabilitySimulator::isSupported(TransmissionType type) const
 	return parent->isSupported(type);
 }
 
-void InstabilitySimulator::send(TransmissionType type, OutboundNetworkPacket packet)
+bool InstabilitySimulator::send(TransmissionType type, OutboundNetworkPacket packet)
 {
 	if (!active) {
-		parent->send(type, packet);
-		return;
+		return parent->send(type, packet);
 	}
 
 	auto& rng = Random::getGlobal();
 
 	if (rng.getFloat(0.0f, 1.0f) < packetLoss) {
 		// Drop packet
-		return;
+		return true;
 	}
 
 	do {
@@ -86,6 +85,8 @@ void InstabilitySimulator::send(TransmissionType type, OutboundNetworkPacket pac
 	} while (rng.getFloat(0.0f, 1.0f) < duplication);
 
 	sendPendingPackets();
+
+	return true;
 }
 
 bool InstabilitySimulator::receive(InboundNetworkPacket& packet)

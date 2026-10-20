@@ -32,7 +32,7 @@ namespace Halley
 
         [[nodiscard]] bool isSupported(TransmissionType type) const override;
 
-        void send(TransmissionType type, OutboundNetworkPacket packet) override;
+        bool send(TransmissionType type, OutboundNetworkPacket packet) override;
         bool receive(InboundNetworkPacket& packet) override;
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
@@ -134,7 +134,7 @@ namespace Halley
 
     	void close(const std::optional<String>& reason);
 
-        void doSend(gsl::span<const std::byte> packet);
+        bool doSend(gsl::span<const std::byte> packet);
         void doSend(SubPacket& packet, int packetIdx);
     	void doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) const;
 

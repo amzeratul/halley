@@ -37,7 +37,7 @@ String AsioUDPConnection::getRemoteAddress() const
 	return remote.address().to_string() + ":" + toString(static_cast<int32_t>(remote.port()));
 }
 
-void AsioUDPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
+bool AsioUDPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
     throw Exception("Not implemented", HalleyExceptions::Network);
 }

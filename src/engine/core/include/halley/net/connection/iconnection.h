@@ -32,7 +32,7 @@ namespace Halley
 
 		[[nodiscard]] virtual bool isSupported(TransmissionType type) const = 0;
 
-		virtual void send(TransmissionType type, OutboundNetworkPacket packet) = 0;
+		virtual bool send(TransmissionType type, OutboundNetworkPacket packet) = 0;
 		virtual bool receive(InboundNetworkPacket& packet) = 0;
 
 		[[nodiscard]] virtual String getRemoteAddress() const { return {"0.0.0.0:0"}; }

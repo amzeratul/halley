@@ -34,7 +34,7 @@ namespace Halley
 		[[nodiscard]] ConnectionStatus getStatus() const override;
 
 		[[nodiscard]] bool isSupported(TransmissionType type) const override;
-		void send(TransmissionType type, OutboundNetworkPacket packet) override;
+		bool send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
 		[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;

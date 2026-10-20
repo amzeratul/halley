@@ -27,13 +27,24 @@ void MessageQueueUDP::sendAll()
 
     connection->beginSendUnreliablePackets();
 
-    for (auto& p : outboundQueued) {
-        connection->send(IConnection::TransmissionType::Unreliable, p.packet);
+    const size_t count = outboundQueued.size();
+
+    size_t idx;
+    for (idx = 0; idx < count; idx++) {
+        const auto& p = outboundQueued[idx];
+        if (!connection->send(IConnection::TransmissionType::Unreliable, p.packet)) {
+            break;
+        }
     }
 
     connection->flushSendUnreliablePackets();
 
-    outboundQueued.clear();
+    if (idx == count) {
+        outboundQueued.clear();
+    } else {
+        Logger::logWarning("Outbound packet queue full, " + toString(count - idx) + " packets still pending");
+        outboundQueued.erase(outboundQueued.begin(), outboundQueued.begin() + static_cast<ptrdiff_t>(idx));
+    }
 }
 
 Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()

@@ -68,22 +68,22 @@ ConnectionStatus AckUnreliableConnection::getStatus() const
     return parent->getStatus();
 }
 
-void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
+bool AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
 	HalleyAssertDev(type == TransmissionType::Unreliable);
 
 	auto status = parent->getStatus();
 	if (status != ConnectionStatus::Connected) {
-		return;
+		return false;
 	}
 
 	if (realMaxPacketSize == 0) {
 		setRealMaxPacketSize();
 	}
 
-	doSend(packet.getBytes());
+	return doSend(packet.getBytes());
 }
 
-void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet)
+bool AckUnreliableConnection::doSend(gsl::span<const std::byte> packet)
 {
 	HalleyAssertDev(realMaxPacketSize > headerSize);
 
@@ -92,8 +92,7 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet)
 
     if (maxSize >= size) {
     	if (!checkOutboundQueue(1)) {
-    		close("outbound packet queue is full");
-    		return;
+    		return false;
     	}
 
         auto& slot = outbound.packets[outbound.curPacketIdx];
@@ -124,8 +123,7 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet)
         }
 
     	if (!checkOutboundQueue(static_cast<int>(numSubPackets))) {
-    		close("outbound packet queue is full");
-    		return;
+    		return false;
     	}
 
         for (size_t i = 0; i < numSubPackets; i++) {
@@ -157,6 +155,8 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet)
     }
 
     outbound.seqIndex.update();
+
+	return true;
 }
 
 void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)

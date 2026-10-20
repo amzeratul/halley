@@ -99,7 +99,7 @@ bool AsioTCPConnection::isSupported(TransmissionType type) const
 	return type == TransmissionType::Reliable;
 }
 
-void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
+bool AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
     statsListener.onSendData(packet.getSize(), 1);
 
@@ -113,6 +113,8 @@ void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet
 		sendQueue.emplace_back(std::move(bs));
 		trySend();
 	}
+
+	return true;
 }
 
 bool AsioTCPConnection::receive(InboundNetworkPacket& packet)

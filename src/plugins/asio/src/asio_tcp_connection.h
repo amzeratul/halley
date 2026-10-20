@@ -30,7 +30,7 @@ namespace Halley
 		void close() override;
 		ConnectionStatus getStatus() const override;
 		bool isSupported(TransmissionType type) const override;
-		void send(TransmissionType type, OutboundNetworkPacket packet) override;
+		bool send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
 		String getRemoteAddress() const override;
