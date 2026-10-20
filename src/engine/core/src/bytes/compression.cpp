@@ -329,7 +329,7 @@ CompressedBytes CompressedBytes::compressBytes(gsl::span<const std::byte> src, T
 	
 	// Store uncompressed if it wasn't useful
 	if (dstType == Type::Uncompressed || result.compressedBytes.size() >= result.decompressedSize) {
-		Logger::logWarning("Storing as uncompressed, compressed size was " + toString(result.compressedBytes.size()) + " vs " + toString(result.decompressedSize));
+		//Logger::logWarning("Storing as uncompressed, compressed size was " + toString(result.compressedBytes.size()) + " vs " + toString(result.decompressedSize));
 		result.compressedBytes.assign(src.begin(), src.end());
 		result.type = Type::Uncompressed;
 	}
