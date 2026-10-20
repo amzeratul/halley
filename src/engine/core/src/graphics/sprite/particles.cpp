@@ -107,9 +107,7 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	const auto tempBurst = node["toggleToBurst"].asBool(false);
 	if (tempBurst != toggleToBurst) {
 		toggleToBurst = tempBurst;
-		if (burst && !burstOnSpawn) {
-			spawn(burst.value(), 0, position);
-		}
+		toggleBurstPending = true;
 	}
 }
 
@@ -452,6 +450,15 @@ void Particles::spawnTriggeredByAnotherSystem(Vector3f triggerParticlePos)
 {
 	const auto n = std::max(burst.value_or(1), 1);
 	spawn(n, 0.0f, fixedTriggerSpawnPosition ? position : triggerParticlePos);
+}
+
+void Particles::spawnToggleBurst()
+{
+	// This is used for the toggle burst button in the editor
+	if (toggleBurstPending && burst && !burstOnSpawn) {
+		spawn(burst.value(), 0, position);
+	}
+	toggleBurstPending = false;
 }
 
 void Particles::destroyOverlapping(const Polygon& polygon)

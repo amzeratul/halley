@@ -121,6 +121,7 @@ namespace Halley {
 
 		void setSecondarySpawner(IParticleSpawner* spawner);
 		void spawnTriggeredByAnotherSystem(Vector3f triggerParticlePos);
+		void spawnToggleBurst();
 
 		std::optional<Rect4f> getAABB() const;
 		void destroyOverlapping(const Polygon& polygon);
@@ -183,6 +184,7 @@ namespace Halley {
 		std::optional<float> minHeight;
 		Range<float> trailSpawnInterval;
 		bool toggleToBurst = false;
+		bool toggleBurstPending = false;
 
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;

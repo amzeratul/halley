@@ -23,6 +23,9 @@ public:
 		for (auto& e: particleFamily) {
 			auto& particles = e.particles.particles;
 			particles.setPosition(Vector3f(e.transform2D.getGlobalPosition(), e.transform2D.getGlobalHeight()));
+			if (getWorld().isEditor()) {
+				particles.spawnToggleBurst();
+			}
 			particles.setSecondarySpawner(this);
 			particles.update(t);
 
