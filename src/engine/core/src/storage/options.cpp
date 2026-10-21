@@ -144,7 +144,7 @@ ConfigNode Options::toConfigNode(bool roaming) const
 
 bool Options::isRoamingKey(const String& key) const
 {
-	return key == "language" || key == "flashingEffects" || key == "screenShake";
+	return key == "language" || key == "flashingEffects" || key == "screenShake" || key == "control_bindings";
 }
 
 void Options::setOption(std::string_view name, ConfigNode value)
