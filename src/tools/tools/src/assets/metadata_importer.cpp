@@ -42,6 +42,15 @@ void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDir
 						}
 					}
 				}
+				if (rootList.hasKey("exclude")) {
+					for (auto& pattern: rootList["exclude"]) {
+						auto p = pattern.asString();
+						if (inputFilePathStr.contains(p)) {
+							matches = false;
+							break;
+						}
+					}
+				}
 				if (matches && rootList.hasKey("data")) {
 					loadMetaTable(meta, rootList["data"], true);
 					return;
