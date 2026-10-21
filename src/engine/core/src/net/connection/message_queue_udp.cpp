@@ -49,6 +49,7 @@ void MessageQueueUDP::sendAll()
     }
 
     outboundQueueSizeLeft = count - idx;
+    HalleyAssertDev(outboundQueued.size() == outboundQueueSizeLeft);
 }
 
 Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()

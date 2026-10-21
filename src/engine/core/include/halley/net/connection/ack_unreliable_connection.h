@@ -104,8 +104,8 @@ namespace Halley
 
         struct InOutQueue
         {
-            std::array<SubPacket, maxPacketQueueSize> packets;
-        	SeqIndex seqIndex;
+            std::array<SubPacket, maxPacketQueueSize> packets = {};
+        	SeqIndex seqIndex = {};
             int curPacketIdx = 0;
         	int firstPacketIdx = 0;
         };

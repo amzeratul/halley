@@ -24,12 +24,13 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
 
     for (auto& p: inbound.packets) {
         p.data.resize(totalMaxPacketSize);
-        p.seqIdx = 0xffff;
+    	p.clear();
+    	memset(p.data.data() + sizeof(headerSignature2), 0, totalMaxPacketSize - sizeof(headerSignature2));
     }
 
     for (auto& p: outbound.packets) {
         p.data.resize(totalMaxPacketSize);
-        p.seqIdx = 0xffff;
+    	p.clear();
     	memcpy(p.data.data(), headerSignature2, sizeof(headerSignature2));
     	memset(p.data.data() + sizeof(headerSignature2), 0, totalMaxPacketSize - sizeof(headerSignature2));
     }
@@ -242,6 +243,8 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         		statsListener->onPacketReceived(inbound.seqIndex.toSlot(), slot.dataSize, false);
         	}
 
+        	slot.dataSize = 0;
+
         	inbound.curPacketIdx = (inbound.curPacketIdx + 1) % maxPacketQueueSize;
         	inbound.seqIndex.update();
 
@@ -274,6 +277,7 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
                     totalSize += sub.dataSize;
 
                     sub.seqIdx = 0xffff;
+                	sub.dataSize = 0;
                 }
 
                 packet = InboundNetworkPacket(inboundCache.byte_span().subspan(0, totalSize));
@@ -660,6 +664,7 @@ void AckUnreliableConnection::evictInboundQueue(uint16_t seqIdx, uint8_t parity)
 		if (p.seqIdx != 0xffff) {
 			lost++;
 		}
+		p.dataSize = 0;
 		p.seqIdx = 0xffff;
 		p.subIdx = 0;
 		p.parity = parity;
@@ -676,9 +681,15 @@ void AckUnreliableConnection::evictInboundQueue(uint16_t seqIdx, uint8_t parity)
 
 bool AckUnreliableConnection::checkOutboundQueue(int numPacketsToSend) const
 {
+	// Does not allow the outbound queue be filled up completely - keep some spare slots.
+	//
+	// NB: There is some error condition when sending a huge amount of packets, saturating the
+	// queue, and some packet loss/timeout causing resends at the same time.
+	// Keeping a small window of slots unused (out of 512 total) seems to mitigate the problem.
+	const int numPacketsToSendPlusSpare = numPacketsToSend + 8;
 	int free = 0;
 
-	while (free < numPacketsToSend) {
+	while (free < numPacketsToSendPlusSpare) {
 		int packetIdx = (outbound.curPacketIdx + free) % maxPacketQueueSize;
 		auto& slot = outbound.packets[packetIdx];
 
@@ -691,7 +702,7 @@ bool AckUnreliableConnection::checkOutboundQueue(int numPacketsToSend) const
 		break;
 	}
 
-	return free >= numPacketsToSend;
+	return free >= numPacketsToSendPlusSpare;
 }
 
 void AckUnreliableConnection::setRealMaxPacketSize()
