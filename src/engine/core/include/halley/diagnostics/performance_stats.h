@@ -30,9 +30,9 @@ namespace Halley
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
 		void setNetworkStats(NetworkSession* networkSession);
 
-		int getNumPages() const;
-		int getPageNumber() const;
-		void setPageNumber(int page);
+		int getNumPages() const override;
+		int getPageNumber() const override;
+		void setPageNumber(int page) override;
 
         void setPaused(bool paused);
         bool isPaused() const;

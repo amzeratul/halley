@@ -83,6 +83,25 @@ void StatsView::setInput(std::shared_ptr<InputVirtual> input, const StatsViewCon
 	this->input->setEnabled(isInputActive());
 }
 
+void StatsView::nextPage(bool closeOnEnd)
+{
+	if (!isActive()) {
+		setActive(true);
+		setPageNumber(0);
+	} else {
+		const auto nextPage = getPageNumber() + 1;
+		if (nextPage >= getNumPages()) {
+			if (closeOnEnd) {
+				setActive(false);
+			} else {
+				setPageNumber(0);
+			}
+		} else {
+			setPageNumber(nextPage);
+		}
+	}
+}
+
 String StatsView::formatTime(int64_t ns) const
 {
 	const int64_t us = (ns + 500) / 1000;

@@ -5,11 +5,15 @@
 
 using namespace Halley;
 
+namespace {
+	constexpr static auto assetTypes = std::to_array({ AssetType::Texture, AssetType::AudioClip });
+}
+
 ResourcesView::ResourcesView(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
-	assetType = AssetType::AudioClip;
+	assetType = assetTypes[0];
 	text = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 }
 
@@ -40,6 +44,22 @@ void ResourcesView::paint(Painter& painter)
 
 	drawSummary(painter, rect, stats);
 	drawStats(painter, rect, stats);
+}
+
+int ResourcesView::getNumPages() const
+{
+	return int(assetTypes.size());
+}
+
+int ResourcesView::getPageNumber() const
+{
+	return pageNumber;
+}
+
+void ResourcesView::setPageNumber(int page)
+{
+	pageNumber = page;
+	assetType = assetTypes[page];
 }
 
 Colour4f ResourcesView::getColour(ResourceDesiredLoadState loadState) const

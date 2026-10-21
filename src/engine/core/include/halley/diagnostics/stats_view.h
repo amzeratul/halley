@@ -54,6 +54,12 @@ namespace Halley {
 		void setWorld(const World* world);
 		void setInput(std::shared_ptr<InputVirtual> input, const StatsViewControls& controls);
 
+		virtual int getNumPages() const { return 1; }
+		virtual int getPageNumber() const { return 0; }
+		virtual void setPageNumber(int page) {}
+
+		void nextPage(bool closeOnEnd = true);
+
     protected:
 		enum Buttons {
 			Accept,
