@@ -112,7 +112,7 @@ void ScriptStateSet::feedToHasher(Hash::Hasher& hasher) const
 
 void ScriptStateSet::serialize(Serializer& s, const EntitySerializationContext& context) const
 {
-	if (s.getOptions().toHash) {
+	if (s.getOptions().toHash || s.getOptions().deferredToHash) {
 		const bool isNetwork = context.matchType(makeMask(EntitySerialization::Type::Network));
 		for (auto& state: states) {
 			if (!isNetwork || state.state->getScriptGraphPtr()->isNetwork()) {

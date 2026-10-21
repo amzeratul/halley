@@ -439,6 +439,7 @@ uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, co
     }
     
     SerializerOptions opt(options.version);
+    opt.deferredToHash = true;
     opt.world = &entity.getWorld();
 
     Serializer serializer(hashScratch.byte_span(), opt);

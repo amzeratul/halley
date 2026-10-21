@@ -37,6 +37,7 @@ namespace Halley {
 		int version = 0;
 		bool exhaustiveDictionary = false;
 		bool toHash = false;
+		bool deferredToHash = false; // Serializer won't hash, but the final outcome is just a hash
 		ISerializationDictionary* dictionary = nullptr;
 		World* world = nullptr;
 
