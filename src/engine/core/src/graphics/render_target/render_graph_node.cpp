@@ -321,6 +321,10 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 			}
 		}
 	}
+
+	if (updated) {
+		nothingToDrawFrames = 0;
+	}
 }
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
