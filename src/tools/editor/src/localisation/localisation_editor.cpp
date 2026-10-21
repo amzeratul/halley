@@ -27,9 +27,9 @@ namespace {
 	float getPercent(int cur, int total)
 	{
 		// Note: round to closest per thousand, don't report 0 unless there are 0 keys, don't report 100% unless we have every key
-		if (cur == 0) {
+		if (cur <= 0) {
 			return 0.0f;
-		} else if (cur == total) {
+		} else if (cur >= total) {
 			return 100.0f;
 		}
 
@@ -516,7 +516,9 @@ void LocalisationEditor::populateTranslationData()
 
 void LocalisationEditor::addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, const LocTranslationData* translationDataRemote, const LocalisationStats& origStats, bool canEdit)
 {
-	const auto totalWords = std::max(origStats.totalWords, 1); // Avoid divisions by zero
+	//const auto totalWords = std::max(, 1); // Avoid divisions by zero
+	const bool showRelativeToReady = true;
+	const auto totalWords = std::max(showRelativeToReady ? origStats.readyWords : origStats.totalWords, 1); // Avoid divisions by zero
 
 	auto widget = factory.makeUI("halley/localisation/localisation_language_summary");
 	widget->layout();
@@ -547,11 +549,17 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 		percentString += " / " + toString(translatedPercentRemote, 1) + "%";
 	}
 
+	auto setBar = [&] (std::string_view name, int start, int width) {
+		auto img = widget->getWidgetAs<UIImage>(name);
+		img->setActive(width > 0);
+		img->setLocalClip(Rect4f(Rect4i(start, 0, width, totalH)));
+	};
+
 	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(percentString));
-	widget->getWidgetAs<UIImage>("bar_grey")->setLocalClip(Rect4f(Rect4i(totalW - greyW, 0, greyW, totalH)));
-	widget->getWidgetAs<UIImage>("bar_blue")->setLocalClip(Rect4f(Rect4i(0, 0, blueW, totalH)));
-	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
-	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
+	setBar("bar_grey", totalW - greyW, greyW);
+	setBar("bar_blue", 0, blueW);
+	setBar("bar_green", 0, greenW);
+	setBar("bar_yellow", greenW, yellowW);
 
 	widget->getWidget("upload")->setEnabled(translationDataRemote && translationData != *translationDataRemote);
 
