@@ -12,7 +12,8 @@
 using namespace Halley;
 
 #define PING_CONTROL_MSG_DELAY 2.0
-#define PING_CONTROL_MSG_NO_REPLY_TIMEOUT_CLIENT 4
+#define PING_CONTROL_MSG_NO_REPLY_TIMEOUT_CLIENT 8
+#define PING_CONTROL_MSG_NO_REPLY_TIMEOUT_HOST 16
 #define CONNECTING_TIMEOUT_CLIENT 15.0
 
 NetworkSession::NetworkSession(NetworkService& service, uint32_t networkVersion, String userName, ISharedDataHandler* sharedDataHandler)
@@ -209,6 +210,12 @@ void NetworkSession::update(Time t)
 			}
 			if (peer.connectingTime >= CONNECTING_TIMEOUT_CLIENT || peer.rttSentSinceLastReply >= PING_CONTROL_MSG_NO_REPLY_TIMEOUT_CLIENT) {
 				close();
+			}
+		}
+	} else if (type == NetworkSessionType::Host) {
+		for (auto& peer : peers) {
+			if (peer.rttSentSinceLastReply >= PING_CONTROL_MSG_NO_REPLY_TIMEOUT_HOST) {
+				disconnectPeer(peer);
 			}
 		}
 	}
