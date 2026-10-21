@@ -46,7 +46,7 @@ namespace Halley {
         ResourceUnloader(Resources& resources, SystemAPI& systemAPI);
 
         uint32_t startFrame();
-        void update(Time t, const ResourceUnloaderRules& rules);
+        void update(Time t, const ResourceUnloaderRules& rules, bool unloadingEnabled);
         uint32_t getFrameIdx() const;
 
     private:

@@ -289,3 +289,13 @@ bool Game::shouldProcessEventsOnFixedUpdate() const
 {
 	return false;
 }
+
+bool Game::isResourceUnloadingEnabled() const
+{
+	return resourceUnloadingEnabled;
+}
+
+void Game::setResourceUnloadingEnabled(bool enabled)
+{
+	resourceUnloadingEnabled = enabled;
+}

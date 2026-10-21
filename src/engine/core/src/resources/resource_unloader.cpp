@@ -42,13 +42,14 @@ uint32_t ResourceUnloader::startFrame()
 {
 	if (pendingUpdate.isValid()) {
 		pendingUpdate.wait();
+		pendingUpdate = {};
 	}
 	
 	++frameIdx;
 	return frameIdx;
 }
 
-void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
+void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules, bool unloadingEnabled)
 {
 	const float dt = static_cast<float>(origDt);
 
@@ -58,19 +59,21 @@ void ResourceUnloader::update(Time origDt, const ResourceUnloaderRules& rules)
 		prepareCollection(dt, resources.ofType(type));
 	}
 
-	pendingUpdate = Concurrent::execute(executor.getQueue(), [this, dt, rules = rules] {
-		for (auto& t: frameTimes) {
-			t += dt;
-		}
-		while (!frameTimes.empty() && frameTimes[0] > maxTimeLogged) {
-			frameTimes.erase(frameTimes.begin());
-		}
-		frameTimes.push_back(0);
+	if (unloadingEnabled) {
+		pendingUpdate = Concurrent::execute(executor.getQueue(), [this, dt, rules = rules] {
+			for (auto& t: frameTimes) {
+				t += dt;
+			}
+			while (!frameTimes.empty() && frameTimes[0] > maxTimeLogged) {
+				frameTimes.erase(frameTimes.begin());
+			}
+			frameTimes.push_back(0);
 
-		for (const auto& [type, rule]: rules.rules) {
-			updateCollection(dt, resources.ofType(type), rule);
-		}
-	});
+			for (const auto& [type, rule]: rules.rules) {
+				updateCollection(dt, resources.ofType(type), rule);
+			}
+		});
+	}
 }
 
 uint32_t ResourceUnloader::getFrameIdx() const

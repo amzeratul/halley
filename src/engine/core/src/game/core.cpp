@@ -564,7 +564,7 @@ void Core::preUpdate(Time time)
 {
 	{
 		ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
-		resourceUnloader->update(time, game->getResourceUnloaderRules());
+		resourceUnloader->update(time, game->getResourceUnloaderRules(), game->isResourceUnloadingEnabled());
 	}
 	if (devConClient) {
 		ProfilerEvent event(ProfilerEventType::CoreDevConClient);

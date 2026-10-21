@@ -56,6 +56,9 @@ namespace Halley
 		virtual size_t getMaxThreads(const ComputerData& computerData) const;
 		virtual bool shouldProcessEventsOnFixedUpdate() const;
 
+		bool isResourceUnloadingEnabled() const;
+		void setResourceUnloadingEnabled(bool enabled);
+
 		virtual String getDevConAddress() const;
 		virtual int getDevConPort() const;
 
@@ -104,5 +107,7 @@ namespace Halley
 		UIDebugConsoleCommands batchCommands;
 		ResourceUnloaderRules resourceUnloaderRules;
 		std::unique_ptr<I18N> i18n;
+
+		bool resourceUnloadingEnabled = true;
 	};
 }
