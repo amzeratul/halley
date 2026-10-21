@@ -42,9 +42,13 @@ void MessageQueueUDP::sendAll()
     if (idx == count) {
         outboundQueued.clear();
     } else {
-        Logger::logWarning("Outbound packet queue full, " + toString(count - idx) + " packets still pending");
+        if (outboundQueueSizeLeft == 0) { // Only warns on the first frame, to avoid log spam
+            Logger::logWarning("Outbound packet queue full, " + toString(count - idx) + " packets still pending");
+        }
         outboundQueued.erase(outboundQueued.begin(), outboundQueued.begin() + static_cast<ptrdiff_t>(idx));
     }
+
+    outboundQueueSizeLeft = count - idx;
 }
 
 Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()

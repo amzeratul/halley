@@ -29,5 +29,6 @@ namespace Halley
         std::shared_ptr<AckUnreliableConnection> connection;
 
         Vector<Outbound> outboundQueued;
+        size_t outboundQueueSizeLeft = 0;
     };
 }
