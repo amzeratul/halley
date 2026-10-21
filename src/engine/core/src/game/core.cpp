@@ -23,6 +23,7 @@
 #include "halley/graphics/render_snapshot.h"
 #include "halley/devcon/devcon_client.h"
 #include "halley/input/input_joystick.h"
+#include "halley/maths/random.h"
 #include "halley/net/connection/network_service.h"
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
@@ -87,11 +88,12 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 		Logger::logInfo(temp.str());
 	}
 
-	// Seed std library RNG
+	// Seed std library RNG and initialize Halley RNG
 	time_t curTime = time(nullptr);
 	clock_t curClock = clock();
 	int seed = static_cast<int>(curTime) ^ static_cast<int>(curClock) ^ 0x3F29AB51;
 	srand(seed);
+	Random::getSharedGlobal();
 
 	// Info
 	Logger::logInfo("Program dir: " + environment->getProgramPath());
