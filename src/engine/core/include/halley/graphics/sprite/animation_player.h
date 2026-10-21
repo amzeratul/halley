@@ -98,7 +98,8 @@ namespace Halley
 		bool applyPivot = true;
 		bool applyMaterial = true;
 		mutable bool hasUpdate = true;
-		mutable bool someoneCheckingOnPlayId = false;
+		mutable bool someoneCheckingOnPlayId : 1 = false;
+		bool hasNextSequence : 1 = false; // This is split from nextSequence to be cache friendly on performance-critical code
 
 		Time curSeqTime;
 		Time curFrameTime;
@@ -121,7 +122,7 @@ namespace Halley
 
 		std::shared_ptr<const Material> materialOverride;
 
-		std::optional<String> nextSequence = {};
+		String nextSequence;
 		
 		ResourceObserver observer;
 	};

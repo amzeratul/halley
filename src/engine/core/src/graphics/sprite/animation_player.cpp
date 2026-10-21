@@ -23,7 +23,12 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(std::string_view sequ
 		setSequence(sequence);
 		seqLooping = false;
 
-		nextSequence = nextLoopingSequence;
+		if (nextLoopingSequence) {
+			nextSequence = *nextLoopingSequence;
+			hasNextSequence = true;
+		} else {
+			hasNextSequence = false;
+		}
 
 		this->reverse = reverse;
 
@@ -91,7 +96,8 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(std::string_view s
 		curFrame = nullptr;
 		curLoopCount = 0;
 		curSeq = &animation->getSequence(sequence);
-		nextSequence = {};
+		nextSequence = "";
+		hasNextSequence = false;
 		reverse = false;
 
 		seqLen = static_cast<uint32_t>(curSeq->numFrames());
@@ -104,7 +110,8 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(std::string_view s
 
 		onSequenceStarted();
 	} else {
-		nextSequence = {};
+		nextSequence = "";
+		hasNextSequence = false;
 		reverse = false;
 	}
 
@@ -274,7 +281,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 bool AnimationPlayer::isActiveAnimation() const
 {
 	//updateResourceIfNeeded();
-	return seqLen > 1 || dirty || someoneCheckingOnPlayId;
+	return seqLen > 1 || dirty || someoneCheckingOnPlayId || hasNextSequence;
 }
 
 bool AnimationPlayer::hasSpriteUpdate() const
@@ -522,8 +529,8 @@ void AnimationPlayer::onSequenceStarted()
 
 void AnimationPlayer::onSequenceDone()
 {
-	if (nextSequence) {
-		setSequence(nextSequence.value());
+	if (hasNextSequence) {
+		setSequence(nextSequence);
 	} else {
 		if (playing) {
 			playing = false;
