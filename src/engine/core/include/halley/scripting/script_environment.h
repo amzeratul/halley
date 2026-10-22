@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include "script_message.h"
 #include "halley/entity/entity_factory.h"
 #include "script_node_type.h"
@@ -198,8 +199,7 @@ namespace Halley {
 	        GraphPinId inputPin = 0;
 	        Time deltaTime = 0;
         };
-        Vector<CurState, std::allocator<CurState>, 48> stateStack;
-        static_assert(decltype(stateStack)::sbo_max_objects() >= 1);
+        std::deque<CurState> stateStack; // Must not invalidate references on push/pop, getState returns references
 
         EntitySerializationContext serializationContext;
 
