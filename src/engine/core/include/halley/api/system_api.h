@@ -59,6 +59,7 @@ namespace Halley
 
 		virtual Path getStorageContainerPath(SaveDataType type, const String& containerName = "") const { return {}; }
 		virtual std::shared_ptr<ISaveData> getStorageContainer(SaveDataType type, const String& containerName = "") = 0;
+		virtual std::shared_ptr<ISaveData> getForeignStorageContainer(SaveDataType type, const String& foreignAppId, const String& containerName = "") { return {}; }
 
 		virtual std::thread createThread(const String& name, ThreadPriority priority, std::function<void()> runnable)
 		{
