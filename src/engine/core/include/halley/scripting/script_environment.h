@@ -199,7 +199,7 @@ namespace Halley {
 	        GraphPinId inputPin = 0;
 	        Time deltaTime = 0;
         };
-        std::deque<CurState> stateStack; // Must not invalidate references on push/pop, getState returns references
+        Vector<CurState> stateStack;
 
         EntitySerializationContext serializationContext;
 

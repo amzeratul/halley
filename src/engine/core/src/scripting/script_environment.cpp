@@ -27,6 +27,10 @@
 
 using namespace Halley;
 
+namespace {
+	constexpr static size_t stateStackCapacity = 8;
+}
+
 ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost)
 	: api(api)
 	, world(world)
@@ -35,6 +39,7 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 	, isHost(isHost)
 {
 	serializationContext.entityContext = this;
+	stateStack.reserve(stateStackCapacity);
 }
 
 bool ScriptEnvironment::hasCurrentState() const
@@ -52,6 +57,7 @@ void ScriptEnvironment::pushState(ScriptState& graphState, EntityId curEntity, S
 	}
 
 	auto& s = stateStack.emplace_back();
+	HalleyAssertDev(stateStack.capacity() == stateStackCapacity);
 	s.deltaTime = deltaTime;
 	s.graph = graphState.getScriptGraphPtr();
 	s.state = &graphState;
@@ -63,6 +69,7 @@ void ScriptEnvironment::pushState(ScriptState& graphState, EntityId curEntity, S
 void ScriptEnvironment::pushStateCopy(const ScriptGraph& graph)
 {
 	auto& s = stateStack.emplace_back(getState());
+	HalleyAssertDev(stateStack.capacity() == stateStackCapacity);
 	s.graph = &graph;
 }
 
@@ -70,6 +77,7 @@ void ScriptEnvironment::popState()
 {
 	HalleyAssertDebug(!stateStack.empty());
 	stateStack.pop_back();
+	HalleyAssertDev(stateStack.capacity() == stateStackCapacity);
 }
 
 void ScriptEnvironment::updateState(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
