@@ -225,11 +225,10 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 
     if (slot.seqIdx < 0x8000) {
         if (slot.seqIdx != inbound.seqIndex.toSlot()) {
-        	/*throw Exception("Unexpected packet sequence index:\n"
-            	"found " + toString(slot.seqIdx) + ", parity " + toString((int) slot.parity) + "\n"
-            	"expected " + toString(inbound.seqIndex.toSlot()) + ", parity " + toString((int) inbound.seqIndex.parity()),
-            	HalleyExceptions::Network);*/
+        	// Not the seqIdx we expect, try flushing the queue.
+			Logger::logWarning("Sequence index of packet slot does not match, flushing inbound queue.");
         	evictInboundQueue(inbound.seqIndex.toSlot(), inbound.seqIndex.parity());
+        	return false; // Need to stop here, there's no valid data left.
         }
 
         if (slot.subIdx == 0) {
@@ -333,7 +332,9 @@ void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::by
 
 	if (!inbound.seqIndex.isInValidRange(SeqIndex::make(seqIdx, parity), 256)) {
 		// The seqIdx/parity pair of this packet is far off the inbound queue.
-		evictInboundQueue(seqIdx, parity);
+		// NB: This can very probably not be recovered from, but should result in a disconnect.
+		Logger::logWarning("Sequence index of incoming packet out of range, flushing inbound queue.");
+		evictInboundQueue(seqIdx, parity); // TODO: maybe should just close the connection instead...
 	}
 
     uint8_t subIdx = header[6];
@@ -671,10 +672,8 @@ void AckUnreliableConnection::evictInboundQueue(uint16_t seqIdx, uint8_t parity)
 	}
 
 	if (lost > 0) {
-		Logger::logError("Inbound network queue has been flushed, " + toString(lost) + " packets dropped.");
+		Logger::logError("Flushed inbound network queue, " + toString(lost) + " packets dropped.");
 	}
-
-	Logger::logWarning("Inbound network queue has been reset.");
 
 	inbound.seqIndex = SeqIndex::make(seqIdx, parity);
 }
