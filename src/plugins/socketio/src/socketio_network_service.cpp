@@ -349,7 +349,7 @@ bool SocketIOConnection::isSupported(TransmissionType type) const
 	return false;
 }
 
-void SocketIOConnection::send(TransmissionType type, OutboundNetworkPacket packet)
+bool SocketIOConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
 	HalleyAssertDev(isSupported(type));
 
@@ -366,7 +366,9 @@ void SocketIOConnection::send(TransmissionType type, OutboundNetworkPacket packe
 	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		sendQueue.emplace_back(std::move(dst));
 		trySend();
+		return true;
 	}
+	return false;
 }
 
 void SocketIOConnection::trySend()
