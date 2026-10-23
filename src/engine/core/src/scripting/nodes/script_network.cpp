@@ -58,9 +58,9 @@ ConfigNode ScriptHostAuthority::doGetData(ScriptEnvironment& environment, const 
 
 String ScriptIfEntityAuthority::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
-	if (elementIdx == 1) {
+	if (elementIdx == 2) {
 		return "Has Authority";
-	} else if (elementIdx == 2) {
+	} else if (elementIdx == 3) {
 		return "Doesn't Have Authority";
 	}
 	return ScriptNodeTypeBase::getPinDescription(node, elementType, elementIdx);
