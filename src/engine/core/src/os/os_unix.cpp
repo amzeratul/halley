@@ -102,13 +102,20 @@ static String readPipeToString(int fd)
 	pfd.fd = fd;
 	pfd.events = POLLIN;
 
-	size_t bytesRead;
+	// Modified: handle failed reads before using their count as an array index.
+	ssize_t bytesRead;
 
 	// The Windows version uses a 10ms timeout during WaitForMultipleObjects().
 	// waitpid() doesn't support that, so we wait on the poll() call instead.
 
 	while (poll(&pfd, 1, 10) == 1) {
 		bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+		if (bytesRead < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+			break;
+		}
 		buffer[bytesRead] = 0;
 		result += buffer;
 		if (((pfd.revents & POLLHUP) != 0) && (bytesRead == 0)) {
