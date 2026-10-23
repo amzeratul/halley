@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <list>
 #include "../concurrency/mutex.h"
 #include "halley/data_structures/vector.h"
@@ -71,6 +72,9 @@ namespace Halley {
 
 			// Convert back to entry
 			Entry* entry = static_cast<Entry*>(p);
+#ifdef _DEBUG
+			memset(entry->data.data(), 0xDD, entry->data.size());
+#endif
 
 			// Store previous next on this and set it as the new next
 			auto lock = lockMutex();
