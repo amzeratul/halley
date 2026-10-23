@@ -58,6 +58,7 @@ namespace Halley {
 		void resetTextures();
 		std::shared_ptr<Texture> makeTexture(VideoAPI& video, RenderGraphElementType type);
 		void updateTexture(std::shared_ptr<Texture> texture, RenderGraphElementType type);
+		Vector2i getTextureSize() const;
 
 		void determineIfCanForwardRenderTarget();
 		void determineIfNeedsRenderTarget();

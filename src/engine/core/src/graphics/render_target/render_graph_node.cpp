@@ -249,7 +249,7 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 {
 	HalleyAssertDev(type == RenderGraphElementType::ColourBuffer || type == RenderGraphElementType::DepthStencilBuffer);
 
-	const auto size = Vector2i::max(currentSize, Vector2i(4, 4));
+	const auto size = getTextureSize();
 	auto texture = video.createTexture(size);
 	texture->setAssetId("renderGraph/" + id + "/" + (type == RenderGraphElementType::ColourBuffer ? "colour" : "depthStencil"));
 
@@ -264,7 +264,7 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 
 void RenderGraphNode::updateTexture(std::shared_ptr<Texture> texture, RenderGraphElementType type)
 {
-	auto desc = TextureDescriptor(currentSize, type == RenderGraphElementType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
+	auto desc = TextureDescriptor(getTextureSize(), type == RenderGraphElementType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
 	desc.isRenderTarget = true;
 	desc.isDepthStencil = type == RenderGraphElementType::DepthStencilBuffer;
 	desc.useFiltering = false;
@@ -301,7 +301,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 						updated = true;
 						attachment = makeTexture(video, input.type);
 					} else {
-						if (attachment->getSize() != currentSize) {
+						if (attachment->getSize() != getTextureSize()) {
 							updated = true;
 							updateTexture(attachment, input.type);
 						}
