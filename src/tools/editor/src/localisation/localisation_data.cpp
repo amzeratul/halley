@@ -681,7 +681,7 @@ const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) co
 	return nullptr;
 }
 
-TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& original, const LocalisationStats& origStats) const
+TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& original, const LocalisationStats& origStats, const LocalisationFilterRules& rules) const
 {
 	TranslationStats result;
 
@@ -689,10 +689,14 @@ TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& 
 		if (auto* originalEntry = original.tryGetEntry(entry.first)) {
 			const auto version = originalEntry->getVersion();
 			const auto wordCount = origStats.wordsPerKey.value_or(entry.first, 0);
+			const bool isReady = originalEntry->getReadyState(rules, language) == LocReadyStatus::Ready;
 
 			if (version == entry.second.origVersion) {
 				result.translatedKeys++;
 				result.translatedWords += wordCount;
+				if (isReady) {
+					result.translatedReadyWords += wordCount;
+				}
 			} else {
 				result.outdatedKeys++;
 				result.outdatedWords += wordCount;

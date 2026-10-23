@@ -529,23 +529,26 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidget("import")->setEnabled(canEdit);
 	widget->getWidget("upload")->setEnabled(canEdit);
 
+	const auto& filterRules = project.getProperties().getLocFilterRules();
 	const auto language = translationData.language;
-	const auto locStats = translationData.getTranslationStats(origData, origStats);
-	const auto locStatsRemote = translationDataRemote ? translationDataRemote->getTranslationStats(origData, origStats) : TranslationStats{};
+	const auto locStats = translationData.getTranslationStats(origData, origStats, filterRules);
+	const auto locStatsRemote = translationDataRemote ? translationDataRemote->getTranslationStats(origData, origStats, filterRules) : TranslationStats{};
 
-	const auto translatedPercent = getPercent(locStats.translatedWords, totalWords);
-	const auto translatedPercentRemote = getPercent(locStatsRemote.translatedWords, totalWords);
+	const auto translatedWords = showRelativeToReady ? locStats.translatedReadyWords : locStats.translatedWords;
+	const auto remoteTranslatedWords = showRelativeToReady ? locStatsRemote.translatedReadyWords : locStatsRemote.translatedWords;
+	const auto translatedPercent = getPercent(translatedWords, totalWords);
+	const auto translatedPercentRemote = getPercent(remoteTranslatedWords, totalWords);
 
 	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
 	const int totalW = rect.getWidth() - 2;
 	const int totalH = rect.getHeight();
 	const int greyW = std::max(((totalWords - origStats.readyWords) * totalW) / totalWords, origStats.readyWords == totalWords ? 0 : 1);
-	const int blueW = std::max((locStatsRemote.translatedWords * totalW) / totalWords, locStatsRemote.translatedWords > 0 ? 1 : 0);
-	const int greenW = std::max((locStats.translatedWords * totalW) / totalWords, locStats.translatedWords > 0 ? 1 : 0);
-	const int yellowW = std::max(((locStats.translatedWords + locStats.outdatedWords) * totalW) / totalWords - greenW, locStats.outdatedWords > 0 ? 1 : 0);
+	const int blueW = std::max((remoteTranslatedWords * totalW) / totalWords, remoteTranslatedWords > 0 ? 1 : 0);
+	const int greenW = std::max((translatedWords * totalW) / totalWords, translatedWords > 0 ? 1 : 0);
+	const int yellowW = std::max(((translatedWords + locStats.outdatedWords) * totalW) / totalWords - greenW, locStats.outdatedWords > 0 ? 1 : 0);
 
 	auto percentString = toString(translatedPercent, 1) + "%";
-	if (translationDataRemote && locStats.translatedWords != locStatsRemote.translatedWords) {
+	if (translationDataRemote && translatedWords != remoteTranslatedWords) {
 		percentString += " / " + toString(translatedPercentRemote, 1) + "%";
 	}
 

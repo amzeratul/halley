@@ -40,6 +40,7 @@ namespace Halley {
 		int outdatedKeys = 0;
 		int obsoleteKeys = 0;
 		int translatedWords = 0;
+		int translatedReadyWords = 0;
 		int outdatedWords = 0;
 	};
 
@@ -224,7 +225,7 @@ namespace Halley {
 		bool setVersion(const String& key, int32_t curVersion);
 		const LocTranslationEntry* tryGetEntry(const String& key) const;
 
-		TranslationStats getTranslationStats(const LocOriginalData& original, const LocalisationStats& origStats) const;
+		TranslationStats getTranslationStats(const LocOriginalData& original, const LocalisationStats& origStats, const LocalisationFilterRules& rules) const;
 		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
 
 		bool update(const LocTranslationData& remote);
