@@ -761,6 +761,7 @@ void World::updateEntities()
 	size_t nEntities = entitiesLocal.size();
 
 	Vector<uint32_t> entitiesRemoved;
+	Vector<Entity*> entitiesWithStaleComponents;
 
 	struct FullEntry {
 		FamilyMaskType maskType;
@@ -814,6 +815,10 @@ void World::updateEntities()
 				FamilyMaskType oldMask = entity.getMask();
 				entity.refresh(maskStorage.get(), *componentDeleterTable, alwaysEnabledComponents);
 				FamilyMaskType newMask = entity.getMask();
+
+				if (entity.hasStaleComponents()) {
+					entitiesWithStaleComponents.push_back(&entity);
+				}
 
 				// Did it change?
 				if (oldMask != newMask) {
@@ -876,7 +881,14 @@ void World::updateEntities()
 			iter->updateEntities();
 		}
 	}
-	
+
+	// Process deletion of stale components after family removal callbacks
+	for (auto* entity: entitiesWithStaleComponents) {
+		if (!entity->needsRefresh()) {
+			entity->deleteStaleComponents(*componentDeleterTable);
+		}
+	}
+
 	// Actually remove dead entities
 	if (!entitiesRemoved.empty()) {
 		size_t livingEntityCount = entities.size();

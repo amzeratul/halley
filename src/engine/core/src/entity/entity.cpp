@@ -294,25 +294,19 @@ void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::sp
 {
 	if (dirty) {
 		dirty = false;
-
-		// Delete stale components
-		for (size_t i = liveComponents; i < componentIds.size(); ++i) {
-			deleteComponent(componentPtrs[i], componentIds[i], table);
-		}
-		componentIds.resize(liveComponents);
-		componentPtrs.resize(liveComponents);
-
+		// Deletion of stale components deferred to after families have ran their removal callback
 		// Re-generate mask
 		if (!storage) {
 			mask = {};
 		} else {
 			auto m = FamilyMask::RealType();
+			const auto liveComponentIds = componentIds.const_span().subspan(0, liveComponents);
 			if (enabled && parentEnabled) {
-				for (auto i : componentIds) {
+				for (auto i : liveComponentIds) {
 					FamilyMask::setBit(m, i);
 				}
 			} else {
-				for (auto i : componentIds) {
+				for (auto i : liveComponentIds) {
 					if (std_ex::contains(alwaysEnabledComponents, i)) {
 						FamilyMask::setBit(m, i);
 					}
@@ -326,6 +320,20 @@ void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::sp
 			parent->propagateChildrenChange();
 		}
 	}
+}
+
+bool Entity::hasStaleComponents() const
+{
+	return static_cast<size_t>(liveComponents) < componentIds.size();
+}
+
+void Entity::deleteStaleComponents(ComponentDeleterTable& table)
+{
+	for (size_t i = liveComponents; i < componentIds.size(); ++i) {
+		deleteComponent(componentPtrs[i], componentIds[i], table);
+	}
+	componentIds.resize(liveComponents);
+	componentPtrs.resize(liveComponents);
 }
 
 EntityId Entity::getEntityId() const

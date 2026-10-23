@@ -225,7 +225,9 @@ namespace Halley {
 		EntityId getEntityId() const;
 
 		void refresh(MaskStorage* storage, ComponentDeleterTable& table, gsl::span<const int> alwaysEnabledComponents);
-		
+		bool hasStaleComponents() const;
+		void deleteStaleComponents(ComponentDeleterTable& table);
+
 		void sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids);
 
 		bool isEmpty() const;
