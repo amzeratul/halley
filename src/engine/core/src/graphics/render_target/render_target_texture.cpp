@@ -19,8 +19,8 @@ void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Textur
 	HalleyAssertDev(attachmentNumber < 8);
 	HalleyAssertDev(tex);
 
-	if (int(colourBuffer.size()) <= attachmentNumber) {
-		colourBuffer.resize(size_t(attachmentNumber) + 1);
+	if (static_cast<int>(colourBuffer.size()) <= attachmentNumber) {
+		colourBuffer.resize(static_cast<size_t>(attachmentNumber) + 1);
 		dirty = true;
 	}
 	if (colourBuffer[attachmentNumber] != tex) {

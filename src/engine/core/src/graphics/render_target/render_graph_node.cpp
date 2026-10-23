@@ -302,15 +302,17 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 						attachment = makeTexture(video, input.type);
 					} else {
 						if (attachment->getSize() != currentSize) {
+							updated = true;
 							updateTexture(attachment, input.type);
 						}
 					}
 				}
 
 				// Assign textures to render target
-				if (input.type == RenderGraphElementType::ColourBuffer && (!renderTarget->hasColourBuffer(colourIdx) || updated)) {
-					renderTarget->setTarget(colourIdx++, attachment);
-				} else if (input.type == RenderGraphElementType::DepthStencilBuffer && (!renderTarget->hasDepthBuffer() || updated)) {
+				if (input.type == RenderGraphElementType::ColourBuffer) {
+					renderTarget->setTarget(colourIdx, attachment);
+					++colourIdx;
+				} else if (input.type == RenderGraphElementType::DepthStencilBuffer) {
 					renderTarget->setDepthTexture(attachment);
 				}
 			} else {
@@ -345,21 +347,21 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 
 void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc)
 {
+	if (skipIfNothingToDraw && !graph.checkDraw(paintMasks, prePaintMethodId, postPaintMethodId)) {
+		++nothingToDrawFrames;
+	} else {
+		nothingToDrawFrames = 0;
+		//Logger::logDev("Drawing " + id, true);
+	}
+	if (nothingToDrawFrames >= 2) {
+		//Logger::logDev("Skipping drawing " + id, true);
+		// Always do at least one more frame after nothing to draw, to clear the buffer
+		return;
+	}
+	
 	if (const auto* camera = graph.tryGetCamera(cameraId)) {
 		getTargetRenderContext(rc).with(*camera).bind([this, &graph] (Painter& painter)
 		{
-			if (skipIfNothingToDraw && !graph.checkDraw(paintMasks, prePaintMethodId, postPaintMethodId)) {
-				++nothingToDrawFrames;
-			} else {
-				nothingToDrawFrames = 0;
-				//Logger::logDev("Drawing " + id, true);
-			}
-			if (nothingToDrawFrames >= 2) {
-				//Logger::logDev("Skipping drawing " + id, true);
-				// Always do at least one more frame after nothing to draw, to clear the buffer
-				return;
-			}
-
 			painter.pushDebugGroup(id);
 
 			if (colourClear || depthClear || stencilClear) {
@@ -380,6 +382,15 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 
 			painter.popDebugGroup();
 		});
+	} else {
+		if (colourClear || depthClear || stencilClear) {
+			getTargetRenderContext(rc).bind([this] (Painter& painter)
+			{
+				painter.pushDebugGroup(id);
+				painter.clear(colourClear, depthClear, stencilClear);
+				painter.popDebugGroup();
+			});
+		}
 	}
 }
 
