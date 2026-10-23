@@ -138,7 +138,7 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, msdfgen::
 	//Logger::logInfo(String(char32_t(charcode)) + ": size: " + toString(size) + ", pos: " + toString(pos) + ", scale: " + toString(scale) + ", bounds: " + toString(bounds.l) + ", " + toString(bounds.b) + ", " + toString(bounds.r) + ", " + toString(bounds.t));
 
 	edgeColoringSimple(shape, 3.0);
-	msdfgen::Projection projection({ scale, -scale }, { pos.x - bounds.l, pos.y - bounds.b - static_cast<double>(size.y) / scale });
+	msdfgen::Projection projection({ scale, -scale }, { pos.x - bounds.l, -pos.y - bounds.t });
 
 	if (type == Type::MTSDF) {
 		msdfgen::MSDFGeneratorConfig config;
@@ -156,5 +156,5 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, msdfgen::
 float DistanceFieldGenerator::getScale(const FontFace& font, float fontSize)
 {
 	const auto ftFace = font.getFreeTypeFace({});
-	return fontSize / (ftFace->units_per_EM / 64);
+	return fontSize * 64.0f / ftFace->units_per_EM;
 }
