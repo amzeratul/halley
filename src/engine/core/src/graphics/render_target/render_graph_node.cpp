@@ -271,6 +271,11 @@ void RenderGraphNode::updateTexture(std::shared_ptr<Texture> texture, RenderGrap
 	texture->load(std::move(desc));
 }
 
+Vector2i RenderGraphNode::getTextureSize() const
+{
+	return Vector2i::max(currentSize, Vector2i(4, 4));
+}
+
 void RenderGraphNode::render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, Vector<RenderGraphNode*>& renderQueue)
 {
 	const auto stack = StackDebugTrace("id", id);
