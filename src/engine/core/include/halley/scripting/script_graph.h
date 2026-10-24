@@ -76,6 +76,7 @@ namespace Halley {
 		bool serializableToSaveFile = false;
 		bool needsTransform = false;
 		bool needsVisiblePartition = false;
+		bool unpausable = false;
 
 		ScriptGraphProperties() = default;
 		explicit ScriptGraphProperties(const ConfigNode& node);
@@ -110,6 +111,7 @@ namespace Halley {
 		bool isNetworkRequired() const { return needsNetwork; }
 		bool needsTransform() const { return properties.needsTransform; }
 		bool needsVisiblePartition() const { return properties.needsVisiblePartition; }
+		bool isUnpausable() const { return properties.unpausable; }
 
 		ScriptGraphProperties& getProperties();
 		const ScriptGraphProperties& getProperties() const;

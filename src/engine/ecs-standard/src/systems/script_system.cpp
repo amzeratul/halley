@@ -421,7 +421,8 @@ private:
 						&& (!scriptGraph.needsVisiblePartition() || !entity.hasComponent<InvisiblePartitionTagComponent>());
 					if (canRun) {
 						++nScriptsRan;
-						env.updateState(t, state, entityId, scriptable.variables);
+						const Time time = scriptGraph.isUnpausable() ? getScriptingService().getCurrentTrueTimestep().value_or(t) : t;
+						env.updateState(time, state, entityId, scriptable.variables);
 					} else if (state.hasStarted()) {
 						env.stopState(state, entityId, scriptable.variables, true);
 						state.reset(); // This makes sure it won't be auto-terminated, and will restart when needed

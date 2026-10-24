@@ -181,3 +181,13 @@ std::shared_ptr<ScriptingService> ScriptingService::clone(std::unique_ptr<Script
 	result->resultCache = resultCache;
 	return result;
 }
+
+void ScriptingService::setCurrentTrueTimestep(std::optional<Time> time)
+{
+	currentTrueTimestep = time;
+}
+
+std::optional<Time> ScriptingService::getCurrentTrueTimestep() const
+{
+	return currentTrueTimestep;
+}

@@ -447,6 +447,11 @@ void ScriptGraphPropertiesWindow::onMakeUI()
 		properties.needsVisiblePartition = value;
 	});
 
+	bindData("unpausable", scriptGraph.isUnpausable(), [=] (bool value)
+	{
+		properties.unpausable = value;
+	});
+
 	getWidget("network")->setEnabled(!scriptGraph.isNetworkRequired());
 }
 

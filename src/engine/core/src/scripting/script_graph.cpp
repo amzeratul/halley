@@ -213,6 +213,7 @@ ScriptGraphProperties::ScriptGraphProperties(const ConfigNode& node)
 	serializableToSaveFile = node["serializableToSaveFile"].asBool(false);
 	needsTransform = node["needsTransform"].asBool(false);
 	needsVisiblePartition = node["needsVisiblePartition"].asBool(false);
+	unpausable = node["unpausable"].asBool(false);
 }
 
 ConfigNode ScriptGraphProperties::toConfigNode() const
@@ -238,6 +239,9 @@ ConfigNode ScriptGraphProperties::toConfigNode() const
 	}
 	if (needsVisiblePartition) {
 		result["needsVisiblePartition"] = needsVisiblePartition;
+	}
+	if (unpausable) {
+		result["unpausable"] = unpausable;
 	}
 	return result;
 }

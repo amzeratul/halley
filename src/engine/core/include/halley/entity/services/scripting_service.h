@@ -55,6 +55,9 @@ namespace Halley {
 
 		std::function<std::shared_ptr<ScriptingService>()> deferredClone(std::unique_ptr<ScriptEnvironment> environment = {}) const;
 		std::shared_ptr<ScriptingService> clone(std::unique_ptr<ScriptEnvironment> environment = {}) const;
+		
+		void setCurrentTrueTimestep(std::optional<Time> time);
+		std::optional<Time> getCurrentTrueTimestep() const;
 
 	private:
 		std::unique_ptr<ScriptEnvironment> scriptEnvironment;
@@ -63,6 +66,7 @@ namespace Halley {
 		String initialModule;
 		bool devMode;
 		Resources& resources;
+		std::optional<Time> currentTrueTimestep;
 
 	    mutable HashMap<String, ConfigNode> resultCache;
 		mutable HashMap<String, std::unique_ptr<LuaReference>> luaReferences;
