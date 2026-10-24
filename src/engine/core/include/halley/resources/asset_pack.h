@@ -39,10 +39,16 @@ namespace Halley {
 
     class AssetPack {
     public:
+		enum class CryptState : uint8_t {
+			PlainText,
+			Encrypted,
+			Decrypted
+		};
+
 		AssetPack();
 		AssetPack(const AssetPack& other) = delete;
 		AssetPack(AssetPack&& other) noexcept;
-		AssetPack(std::unique_ptr<ResourceDataReader> reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad = false);
+		AssetPack(std::unique_ptr<ResourceDataReader> reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad = false, bool validateEncryption = false);
 		~AssetPack();
 
 		AssetPack& operator=(const AssetPack& other) = delete;
@@ -59,7 +65,10 @@ namespace Halley {
 
 		void readToMemory();
 		void encrypt(Encrypt::AESKey key);
-		void decrypt(Encrypt::AESKey key);
+		bool decrypt(Encrypt::AESKey key, bool validate);
+		CryptState getCryptState() const;
+		int getVersion() const;
+		static int getLatestVersion();
 	    
     	void readData(size_t pos, gsl::span<std::byte> dst);
     	bool isMemoryResident() const { return !reader; }
@@ -81,6 +90,8 @@ namespace Halley {
 		Bytes data;
 		std::array<uint8_t, 16> iv;
 		mutable std::shared_ptr<bool> aliveToken;
+		CryptState cryptState = CryptState::PlainText;
+		int version = 0;
     };
 
 

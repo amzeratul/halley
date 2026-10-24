@@ -13,10 +13,19 @@ AssetPackManifestEntry::AssetPackManifestEntry()
 AssetPackManifestEntry::AssetPackManifestEntry(const ConfigNode& node)
 {
 	name = node["name"].asString();
-	encryptionKey = Encode::decodeBase64(node["encryptionKey"].asString(""));
 	matches = node["matches"].asVector<String>({});
 	prefixes = node["prefixes"].asVector<String>({});
 	pack = node["pack"].asBool(true);
+
+	if (node.hasKey("encryptionKeys")) {
+		for (const auto& [k, v] : node["encryptionKeys"].asMap()) {
+			encryptionKeys[k] = Encode::decodeBase64(v.asString(""));
+		}
+	}
+
+	if (node.hasKey("encryptionKey")) {
+		Logger::logError("Asset manifest no longer supports global encryptionKey; please specify one per platform instead");
+	}
 
 	for (auto& m: matches) {
 		if (m.startsWith("~:")) {
@@ -46,14 +55,17 @@ bool AssetPackManifestEntry::checkMatch(std::string_view asset) const
 	return false;
 }
 
-bool AssetPackManifestEntry::isEncrypted() const
+bool AssetPackManifestEntry::isEncrypted(std::string_view platformId) const
 {
-	return !encryptionKey.empty();
+	if (auto iter = encryptionKeys.find(platformId); iter != encryptionKeys.end()) {
+		return !iter->second.empty();
+	}
+	return false;
 }
 
-const Vector<uint8_t>& AssetPackManifestEntry::getEncryptionKey() const
+const HashMap<String, Vector<uint8_t>>& AssetPackManifestEntry::getEncryptionKeys() const
 {
-	return encryptionKey;
+	return encryptionKeys;
 }
 
 bool AssetPackManifestEntry::shouldPack() const

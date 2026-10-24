@@ -7,11 +7,17 @@ using namespace Halley;
 
 PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, std::optional<Encrypt::AESKey> key, bool preLoad, std::optional<int> priority)
 	: path(std::move(path))
-	, wasEncrypted(key.has_value())
 	, preLoad(preLoad)
 	, priority(priority)
 {
+	doLoad(std::move(reader), key, preLoad);
+}
+
+void PackResourceLocator::doLoad(std::unique_ptr<ResourceDataReader> reader, std::optional<Encrypt::AESKey> key, bool preLoad)
+{
 	assetPack = std::make_unique<AssetPack>(std::move(reader), key, preLoad);
+	HalleyAssertRelease(assetPack->getCryptState() != AssetPack::CryptState::Encrypted);
+	wasEncrypted = assetPack->getCryptState() == AssetPack::CryptState::Decrypted;
 }
 
 PackResourceLocator::~PackResourceLocator()
@@ -57,7 +63,7 @@ void PackResourceLocator::loadAfterPurge()
 	if (wasEncrypted) {
 		throw Exception("Attempting to hot reload a pack, but key has been lost.", HalleyExceptions::Resources);
 	}
-	assetPack = std::make_unique<AssetPack>(system->getDataReader(path.string()), std::nullopt, preLoad);
+	doLoad(system->getDataReader(path.string()), std::nullopt, preLoad);
 }
 
 int PackResourceLocator::getPriority() const

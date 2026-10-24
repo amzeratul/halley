@@ -8,10 +8,10 @@
 
 using namespace Halley;
 
-Bytes Encrypt::encryptAES(AESIV iv, AESKey key, const Bytes& data)
+Bytes Encrypt::encryptAES(AESIV iv, AESKey key, Bytes data)
 {
 	// Prepare buffer
-	Bytes result = data;
+	Bytes result = std::move(data);
 	const size_t origSize = result.size();
 	size_t newSize = alignUp(origSize, size_t(AES_BLOCKLEN));
 	if (newSize == origSize) {
@@ -34,10 +34,10 @@ Bytes Encrypt::encryptAES(AESIV iv, AESKey key, const Bytes& data)
 	return result;
 }
 
-Bytes Encrypt::decryptAES(AESIV iv, AESKey key, const Bytes& data)
+Bytes Encrypt::decryptAES(AESIV iv, AESKey key, Bytes data)
 {
 	// Prepare buffer
-	Bytes result = data;
+	Bytes result = std::move(data);
 
 	// If result is not mod AES_BLOCKLEN, things have already gone fucked, but we'll do our best...
 	if (result.size() % AES_BLOCKLEN != 0) {
@@ -59,4 +59,19 @@ Bytes Encrypt::decryptAES(AESIV iv, AESKey key, const Bytes& data)
 	result.resize(result.size() - padSize);
 
 	return result;
+}
+
+void Encrypt::generateIV(AESIVMut iv, AESKey key, uint64_t v0, uint64_t v1)
+{
+	static_assert(sizeof(v0) + sizeof(v1) == 16);
+
+	Bytes buffer;
+	buffer.resize(16);
+
+	memcpy(buffer.data(), &v0, sizeof(v0));
+	memcpy(buffer.data() + sizeof(v0), &v1, sizeof(v1));
+
+	const std::array<uint8_t, 16> zeroIV = {};
+	const auto encBlock = encryptAES(zeroIV, key, buffer);
+	memcpy(iv.data(), encBlock.data(), iv.size());
 }

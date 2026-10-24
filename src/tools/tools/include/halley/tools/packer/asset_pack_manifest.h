@@ -14,13 +14,13 @@ namespace Halley {
 
 		const String& getName() const;
 		bool checkMatch(std::string_view asset) const;
-		bool isEncrypted() const;
-		const Vector<uint8_t>& getEncryptionKey() const;
+		bool isEncrypted(std::string_view platformId) const;
+		const HashMap<String, Vector<uint8_t>>& getEncryptionKeys() const;
 		bool shouldPack() const;
 
 	private:
 		String name;
-		Vector<uint8_t> encryptionKey;
+		HashMap<String, Vector<uint8_t>> encryptionKeys;
 		Vector<String> matches;
 		Vector<String> prefixes;
 		bool pack = true;

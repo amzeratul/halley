@@ -24,6 +24,7 @@ namespace Halley {
 		
 	private:
 		void loadAfterPurge();
+		void doLoad(std::unique_ptr<ResourceDataReader> reader, std::optional<Encrypt::AESKey> key, bool preLoad);
 
 		std::unique_ptr<AssetPack> assetPack;
 

@@ -27,11 +27,11 @@ namespace Halley {
 		};
 		
 		AssetPackListing();
-		AssetPackListing(String name, Vector<uint8_t> encryptionKey);
+		AssetPackListing(String name, HashMap<String, Vector<uint8_t>> encryptionKeys);
 		
 		void addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry, bool modified);
 		const Vector<Entry>& getEntries() const;
-		std::optional<Encrypt::AESKey> getEncryptionKey() const;
+		std::optional<Encrypt::AESKey> getEncryptionKey(const String& platform) const;
 		
 		void setActive(bool active);
 		bool isActive() const;
@@ -42,7 +42,7 @@ namespace Halley {
 
 	private:
 		String name;
-		Vector<uint8_t> encryptionKey;
+		HashMap<String, Vector<uint8_t>> encryptionKeys;
 
 		bool active = false;
 

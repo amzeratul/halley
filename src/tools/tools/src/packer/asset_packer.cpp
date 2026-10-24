@@ -35,9 +35,9 @@ AssetPackListing::AssetPackListing()
 {
 }
 
-AssetPackListing::AssetPackListing(String name, Vector<uint8_t> encryptionKey)
+AssetPackListing::AssetPackListing(String name, HashMap<String, Vector<uint8_t>> encryptionKeys)
 	: name(std::move(name))
-	, encryptionKey(std::move(encryptionKey))
+	, encryptionKeys(std::move(encryptionKeys))
 {
 }
 
@@ -51,12 +51,15 @@ const Vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
 	return entries;
 }
 
-std::optional<Encrypt::AESKey> AssetPackListing::getEncryptionKey() const
+std::optional<Encrypt::AESKey> AssetPackListing::getEncryptionKey(const String& platform) const
 {
-	if (encryptionKey.empty()) {
-		return std::nullopt;
+	if (const auto iter = encryptionKeys.find(platform); iter != encryptionKeys.end()) {
+		if (!iter->second.empty()) {
+			return iter->second.const_span_size<16>();
+		}
 	}
-	return encryptionKey.const_span_size<16>();
+
+	return std::nullopt;
 }
 
 void AssetPackListing::setActive(bool a)
@@ -192,7 +195,7 @@ HashMap<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMani
 			auto iter = packs.find(packEntry.getName());
 			if (iter == packs.end()) {
 				// Pack doesn't exist yet, create it first
-				const auto [iter2, modified] = packs.insert_or_assign(packEntry.getName(), AssetPackListing(packEntry.getName(), packEntry.getEncryptionKey()));
+				const auto [iter2, modified] = packs.insert_or_assign(packEntry.getName(), AssetPackListing(packEntry.getName(), packEntry.getEncryptionKeys()));
 				iter = iter2;
 
 				// Initialise it to active if there's no asset list to pack
@@ -272,7 +275,10 @@ void AssetPacker::generatePack(Project& project, const String& platformId, const
 	auto reader = std::make_unique<ResourceDataReaderFileSystem>(dst);
 	if (reader->size() > 0) {
 		try {
-			oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(), true);
+			oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(platformId), true, true);
+			if (oldPack->getCryptState() == AssetPack::CryptState::Encrypted || oldPack->getVersion() != AssetPack::getLatestVersion()) {
+				oldPack = {};
+			}
 		} catch (...) {
 			// Just ignore it if it fails to load asset pack for whatever reason
 		}
@@ -324,9 +330,9 @@ void AssetPacker::generatePack(Project& project, const String& platformId, const
 
 	oldPack = {}; // Release file handle!
 
-	if (packListing.getEncryptionKey().has_value()) {
-		Logger::logInfo("- Encrypting \"" + packId + "\"...");
-		pack.encrypt(*packListing.getEncryptionKey());
+	if (auto key = packListing.getEncryptionKey(platformId)) {
+		Logger::logInfo("- Encrypting \"" + packId + "\" for " + platformId + "...");
+		pack.encrypt(*key);
 	}
 
 	// Write pack

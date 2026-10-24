@@ -3,7 +3,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/bytes/compression.h"
-#include "halley/maths/random.h"
+#include "halley/utils/hash.h"
 #include "halley/utils/encrypt.h"
 #include "halley/concurrency/executor.h"
 
@@ -18,7 +18,7 @@ void AssetPackHeaderV1::init(size_t assetDbSize)
 
 void AssetPackHeaderV2::init(size_t assetDbSize)
 {
-	version = 2;
+	version = gsl::narrow<uint8_t>(AssetPack::getLatestVersion());
 	assetDbStartPos = alignUp<size_t>(sizeof(AssetPackHeaderV2) + 8, 16);
 	assetDbPadding = static_cast<uint8_t>(alignUp<size_t>(assetDbSize, 16) - assetDbSize);
 	dataStartPos = assetDbStartPos + alignUp<size_t>(assetDbSize, 16);
@@ -27,6 +27,7 @@ void AssetPackHeaderV2::init(size_t assetDbSize)
 
 AssetPack::AssetPack()
 	: assetDb(std::make_unique<AssetDatabase>())
+	, version(AssetPack::getLatestVersion())
 {
 	memset(iv.data(), 0, iv.size());
 }
@@ -36,7 +37,7 @@ AssetPack::AssetPack(AssetPack&& other) noexcept
 	*this = std::move(other);
 }
 
-AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad)
+AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad, bool validateEncryption)
 	: reader(std::move(_reader))
 {
 	size_t totalSize = reader->size();
@@ -49,12 +50,12 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<
 	if (reader->read(gsl::as_writable_bytes(gsl::span(id))) != 8) {
 		throw Exception("Unable to read pack header identifier", HalleyExceptions::Resources);
 	}
-	int packVersion = 0;
+	int headerVersion = 0;
 	if (memcmp(id.data(), "HALLEYPK", 8) == 0) {
 		Logger::logWarning("Loading v1 asset pack");
-		packVersion = 1;
+		headerVersion = 1;
 	} else if (memcmp(id.data(), "HALLEYP2", 8) == 0) {
-		packVersion = 2;
+		headerVersion = 2;
 	} else {
 		throw Exception("Asset pack is invalid (invalid identifier)", HalleyExceptions::Resources);
 	}
@@ -62,21 +63,23 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<
 	uint8_t assetDbPadding = 0;
 	uint64_t assetDbStartPos = 0;
 	uint64_t dataStartPos = 0;
+	version = headerVersion;
 
-	if (packVersion == 2) {
+	if (headerVersion == 2) {
 		AssetPackHeaderV2 header;
 		if (reader->read(gsl::as_writable_bytes(gsl::span(&header, 1))) != sizeof(header)) {
 			throw Exception("Unable to read header", HalleyExceptions::Resources);
 		}
-		if (header.version != 2) {
+		if (header.version < 2 || header.version > getLatestVersion()) {
 			throw Exception("Unknown asset pack version", HalleyExceptions::Resources);
 		}
+		version = header.version;
 		iv = header.iv;
 		dataOffset = header.dataStartPos;
 		assetDbStartPos = header.assetDbStartPos;
 		dataStartPos = header.dataStartPos;
 		assetDbPadding = header.assetDbPadding;
-	} else if (packVersion == 1) {
+	} else if (headerVersion == 1) {
 		AssetPackHeaderV1 header;
 		if (reader->read(gsl::as_writable_bytes(gsl::span(&header, 1))) != sizeof(header)) {
 			throw Exception("Unable to read header", HalleyExceptions::Resources);
@@ -100,14 +103,16 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<
 
 	std::array<char, 16> ivEmpty;
 	memset(ivEmpty.data(), 0, ivEmpty.size());
-	const bool hasCrypt = memcmp(iv.data(), ivEmpty.data(), iv.size()) != 0 && encryptionKey.has_value();
+	cryptState = memcmp(iv.data(), ivEmpty.data(), iv.size()) != 0 ? CryptState::Encrypted : CryptState::PlainText;
 
-	if (preLoad || hasCrypt) {
+	if (preLoad || cryptState == CryptState::Encrypted) {
 		readToMemory();
 	}
 
-	if (hasCrypt) {
-		decrypt(*encryptionKey);
+	if (cryptState == CryptState::Encrypted && encryptionKey) {
+		if (decrypt(*encryptionKey, validateEncryption)) {
+			cryptState = CryptState::Decrypted;
+		}
 	}
 }
 
@@ -124,6 +129,9 @@ AssetPack& AssetPack::operator=(AssetPack&& other) noexcept
 	dataOffset = other.dataOffset;
 	reader = std::move(other.reader);
 	data = std::move(other.data);
+	iv = other.iv;
+	cryptState = other.cryptState;
+	version = other.version;
 
 	other.reader.reset();
 
@@ -210,15 +218,77 @@ void AssetPack::readToMemory()
 
 void AssetPack::encrypt(Encrypt::AESKey key)
 {
-	// Generate IV
-	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<uint8_t>(iv)));
+	// Hash, used to generate IV and validate decryption
+	Hash::Hasher hasher;
+	hasher.feedBytes(gsl::as_bytes(key));
+	hasher.feedBytes(data.const_byte_span());
+	const auto hash = hasher.digest();
 
-	data = Encrypt::encryptAES(iv, key, data);
+	// Generate IV
+	Encrypt::generateIV(iv, key, hash, data.size());
+
+	// Append hash to end of data so we can verify after decryption
+	static_assert(sizeof(hash) == 8);
+	data.resize(data.size() + 8);
+	memcpy(data.data() + (data.size() - 8), &hash, 8);
+	data = Encrypt::encryptAES(iv, key, std::move(data));
 }
 
-void AssetPack::decrypt(Encrypt::AESKey key)
+bool AssetPack::decrypt(Encrypt::AESKey key, bool validate)
 {
-	data = Encrypt::decryptAES(iv, key, data);
+	const bool supportValidation = version >= 3;
+
+	if (!validate || !supportValidation) {
+		// Faster path that doesn't allocate memory
+		data = Encrypt::decryptAES(iv, key, std::move(data));
+		if (!supportValidation) {
+			// Return here before extracting the validation data
+			return true;
+		}
+
+		HalleyAssertRelease(data.size() >= 8);
+		data.resize(data.size() - 8);
+		return true;
+	}
+
+	auto decryptedData = Encrypt::decryptAES(iv, key, data);
+	if (decryptedData.size() < 8) {
+		return false;
+	}
+
+	// Extract hash
+	uint64_t readHash;
+	static_assert(sizeof(readHash) == 8);
+	memcpy(&readHash, decryptedData.data() + (decryptedData.size() - 8), 8);
+	decryptedData.resize(decryptedData.size() - 8);
+
+	// Validate hash
+	Hash::Hasher hasher;
+	hasher.feedBytes(gsl::as_bytes(key));
+	hasher.feedBytes(decryptedData.const_byte_span());
+	const auto expectedHash = hasher.digest();
+
+	if (expectedHash != readHash) {
+		return false;
+	}
+
+	data = std::move(decryptedData);
+	return true;
+}
+
+AssetPack::CryptState AssetPack::getCryptState() const
+{
+	return cryptState;
+}
+
+int AssetPack::getVersion() const
+{
+	return version;
+}
+
+int AssetPack::getLatestVersion()
+{
+	return 3;
 }
 
 void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
