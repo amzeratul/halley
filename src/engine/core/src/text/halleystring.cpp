@@ -292,22 +292,18 @@ String String::mid(size_t start, size_t count) const
 
 bool String::startsWith(std::string_view string, bool caseSensitive) const
 {
-	if (caseSensitive) {
-		return std::string_view(str).starts_with(string);
-	} else {
-		return asciiLower().startsWith(String(string).asciiLower(), true);
-	}
+	return startsWith(std::string_view(str), string, caseSensitive);
 }
 
 bool String::startsWith(std::u8string_view string, bool caseSensitive) const
 {
-	return startsWith(toStringView(string), caseSensitive);
+	return startsWith(std::string_view(str), toStringView(string), caseSensitive);
 }
 
-bool String::startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive) const
+bool String::startsWithAnyOf(gsl::span<const String> prefixes, bool caseSensitive) const
 {
-	for (const auto& str: strings) {
-		if (startsWith(str, caseSensitive)) {
+	for (const auto& prefix: prefixes) {
+		if (startsWith(std::string_view(str), prefix, caseSensitive)) {
 			return true;
 		}
 	}
@@ -317,16 +313,46 @@ bool String::startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive
 
 bool String::endsWith(std::string_view string, bool caseSensitive) const
 {
-	if (caseSensitive) {
-		return std::string_view(str).ends_with(string);
-	} else {
-		return asciiLower().endsWith(String(string).asciiLower(), true);
-	}
+	return endsWith(std::string_view(str), string, caseSensitive);
 }
 
 bool String::endsWith(std::u8string_view string, bool caseSensitive) const
 {
-	return endsWith(toStringView(string), caseSensitive);
+	return endsWith(std::string_view(str), toStringView(string), caseSensitive);
+}
+
+bool String::startsWith(std::string_view string, std::string_view prefix, bool caseSensitive)
+{
+	return string.size() >= prefix.size() && equals(string.substr(0, prefix.size()), prefix, caseSensitive);
+}
+
+bool String::endsWith(std::string_view string, std::string_view suffix, bool caseSensitive)
+{
+	return string.size() >= suffix.size() && equals(string.substr(string.size() - suffix.size()), suffix, caseSensitive);
+}
+
+bool String::equals(std::string_view a, std::string_view b, bool caseSensitive)
+{
+	if (caseSensitive) {
+		return a == b;
+	} else {
+		if (a.size() != b.size()) {
+			return false;
+		}
+		const size_t n = a.size();
+		for (size_t i = 0; i < n; ++i) {
+			if (!isSameAsciiLetterIgnoreCase(a[i], b[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+bool String::isSameAsciiLetterIgnoreCase(char a, char b)
+{
+	const char aLower = (a | 0x20);
+	return a == b || (aLower == (b | 0x20) && aLower >= 'a' && aLower <= 'z');
 }
 
 

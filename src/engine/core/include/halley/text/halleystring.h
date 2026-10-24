@@ -159,6 +159,11 @@ namespace Halley {
 		[[nodiscard]] bool endsWith(std::string_view string, bool caseSensitive = true) const;
 		[[nodiscard]] bool endsWith(std::u8string_view string, bool caseSensitive = true) const;
 
+		[[nodiscard]] static bool startsWith(std::string_view string, std::string_view prefix, bool caseSensitive);
+		[[nodiscard]] static bool endsWith(std::string_view string, std::string_view suffix, bool caseSensitive);
+		[[nodiscard]] static bool equals(std::string_view a, std::string_view b, bool caseSensitive);
+		[[nodiscard]] static bool isSameAsciiLetterIgnoreCase(char a, char b);
+
 		void writeText(const Character* src, size_t len, size_t &pos);
 		void writeChar(const Character &src, size_t &pos);
 		void writeNumber(Character *temp, int number, int pad, size_t &pos);
