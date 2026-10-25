@@ -30,3 +30,7 @@ add_definitions(-DCPPHTTPLIB_ZLIB_SUPPORT)
 
 add_library (halley-httplib ${SOURCES} ${HEADERS})
 target_link_libraries(halley-httplib halley-engine ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
+
+# cpp-httplib calls some OpenSSL functions marked as deprecated, which fails the build with C4996
+# on Windows with OpenSSL 4.1 installed.
+target_compile_options(halley-httplib PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/wd4996>)
