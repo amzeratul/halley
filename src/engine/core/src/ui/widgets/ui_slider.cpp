@@ -191,6 +191,10 @@ void UISlider::update(Time t, bool moved)
 	if (timeSinceMove > 0.1f) {
 		maxSpeed = 0;
 	}
+
+	if (sliderBar->isEnabled() != isEnabled()) {
+		sliderBar->setEnabled(isEnabled());
+	}
 }
 
 LocalisedString UISlider::makeLabel(bool forceMax) const
