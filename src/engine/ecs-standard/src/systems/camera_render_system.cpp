@@ -9,9 +9,8 @@ public:
 		getScreenService().setScreenGrabInterface(this);
 
 		if (!getPainterService().hasRenderGraph()) {
-			getPainterService().setRenderGraph(std::make_unique<RenderGraph>(getResources().get<RenderGraphDefinition>("default_render_graph")));
+			getPainterService().setRenderGraph(std::make_shared<RenderGraph>(getResources().get<RenderGraphDefinition>("default_render_graph")));
 		}
-		setupRenderGraphMethods(getPainterService().getRenderGraph());
 
 		setupCheats();
 	}
@@ -27,6 +26,8 @@ public:
 
 		if (painterService.hasRenderGraph()) {
 			auto& renderGraph = painterService.getRenderGraph();
+			setupRenderGraphMethods(renderGraph);
+
 			renderGraph.setDrawCallback([&painterService, nonRectSpritesEnabled = nonRectSpritesEnabled] (SpriteMaskBase mask, Painter& painter)
 			{
 				painter.setCanDrawNonRectangularSprites(nonRectSpritesEnabled);

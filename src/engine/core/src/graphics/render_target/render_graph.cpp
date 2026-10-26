@@ -318,6 +318,7 @@ void RenderGraph::notifyImage(const String& nodeId) const
 
 std::shared_ptr<Texture> RenderGraph::getOutputTexture(const String& id)
 {
+	// TODO: fix race condition here? This is called from update thread
 	auto* targetNode = tryGetNode(id);
 	if (!targetNode) {
 		return nullptr;

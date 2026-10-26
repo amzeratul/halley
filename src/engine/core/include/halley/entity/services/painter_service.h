@@ -44,7 +44,7 @@ namespace Halley {
 		void setUpdateEnabled(bool enabled);
 		bool isUpdateEnabled() const;
 
-		void setRenderGraph(std::unique_ptr<RenderGraph> renderGraph);
+		void setRenderGraph(std::shared_ptr<RenderGraph> renderGraph);
 		RenderGraph& getRenderGraph();
 		bool hasRenderGraph() const;
 
@@ -54,8 +54,6 @@ namespace Halley {
 			return *getFrameData().tryGetPainter<T>();
 		}
 
-		ResourceMemoryUsage getMemoryUsage() const override;
-
 	private:
 		bool updateEnabled = true;
 		bool depthQueriesEnabled = false;
@@ -64,7 +62,7 @@ namespace Halley {
 		std::optional<Colour4f> clearColour;
 		std::optional<uint8_t> stencilClear;
 		std::optional<float> depthClear;
-		std::unique_ptr<RenderGraph> renderGraph;
+		std::shared_ptr<RenderGraph> renderGraph;
 	};
 }
 

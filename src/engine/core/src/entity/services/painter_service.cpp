@@ -120,7 +120,7 @@ bool PainterService::isUpdateEnabled() const
 	return updateEnabled;
 }
 
-void PainterService::setRenderGraph(std::unique_ptr<RenderGraph> renderGraph)
+void PainterService::setRenderGraph(std::shared_ptr<RenderGraph> renderGraph)
 {
 	this->renderGraph = std::move(renderGraph);
 }
@@ -134,13 +134,4 @@ RenderGraph& PainterService::getRenderGraph()
 bool PainterService::hasRenderGraph() const
 {
 	return !!renderGraph;
-}
-
-ResourceMemoryUsage PainterService::getMemoryUsage() const
-{
-	ResourceMemoryUsage result = { sizeof(this), 0 };
-	if (renderGraph) {
-		result += renderGraph->getMemoryUsage();
-	}
-	return result;
 }
