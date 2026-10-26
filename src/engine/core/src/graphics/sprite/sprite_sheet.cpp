@@ -625,8 +625,8 @@ std::unique_ptr<Image> SpriteSheet::makeAtlas(const Vector<BinPackResult>& resul
 
 Vector2i SpriteSheet::computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const
 {
-	int w = 0;
-	int h = 0;
+	int w = 1;
+	int h = 1;
 
 	for (const auto& r: results) {
 		w = std::max(w, r.rect.getRight());
