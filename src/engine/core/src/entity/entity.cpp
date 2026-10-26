@@ -327,6 +327,18 @@ bool Entity::hasStaleComponents() const
 	return static_cast<size_t>(liveComponents) < componentIds.size();
 }
 
+bool Entity::hasReplacedComponents() const
+{
+	// Has added a removed component
+	const auto liveIds = componentIds.const_span().subspan(0, liveComponents);
+	for (size_t i = liveComponents; i < componentIds.size(); ++i) {
+		if (std_ex::contains(liveIds, componentIds[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void Entity::deleteStaleComponents(ComponentDeleterTable& table)
 {
 	for (size_t i = liveComponents; i < componentIds.size(); ++i) {

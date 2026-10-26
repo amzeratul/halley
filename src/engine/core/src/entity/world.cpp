@@ -788,6 +788,7 @@ void World::updateEntities()
 		Vector<FullEntry> toAdd;
 		Vector<ShortEntry> toRemove;
 		Vector<ShortEntry> toReload;
+		Vector<FullEntry> toRefreshComponentPointers;
 	};
 	HashMap<FamilyMaskType, FamilyTodo> pending;
 	pending.reserve(32);
@@ -818,6 +819,10 @@ void World::updateEntities()
 
 				if (entity.hasStaleComponents()) {
 					entitiesWithStaleComponents.push_back(&entity);
+					if (entity.hasReplacedComponents()) {
+						// Deleting then re-adding the same component doesn't trigger family add/remove, so force refresh to get new pointers
+						pending[oldMask].toRefreshComponentPointers.emplace_back(newMask, entity.getEntityId().getIndex(), &entity);
+					}
 				}
 
 				// Did it change?
@@ -856,6 +861,7 @@ void World::updateEntities()
 						fam->removeEntity(e.index);
 					}
 				}
+
 				for (auto& e: todo.second.toAdd) {
 					// Only add if the entity was not already in this
 					const auto& oldMask = e.maskType;
@@ -865,6 +871,13 @@ void World::updateEntities()
 					} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
 						// Needs refreshing of optional references
 						fam->refreshEntityOptionals(*e.entity);
+					}
+				}
+
+				for (auto& e : todo.second.toRefreshComponentPointers) {
+					if (fam->matches(e.maskType, ms)) {
+						// Still belongs here, but might have new components, retrieve them all again
+						fam->refreshEntity(*e.entity);
 					}
 				}
 
