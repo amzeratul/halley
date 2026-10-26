@@ -686,6 +686,9 @@ TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& 
 	TranslationStats result;
 
 	for (const auto& entry: entries) {
+		if (String::trimSpaces(entry.second.getValue()).empty()) {
+			continue;
+		}
 		if (auto* originalEntry = original.tryGetEntry(entry.first)) {
 			const auto version = originalEntry->getVersion();
 			const auto wordCount = origStats.wordsPerKey.value_or(entry.first, 0);
