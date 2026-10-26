@@ -76,6 +76,10 @@ public:
 					} else {
 						//Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
 						e.network.ownerId = 0;
+						// The host is supposed to send a create message eventually, which will
+						// make the following call again. But until this happens, this entity might
+						// linger in a state that can cause unintended behaviour.
+						entityNetworkSession.onRemoteEntityCreated(entity, 0);
 					}
 				}
 
