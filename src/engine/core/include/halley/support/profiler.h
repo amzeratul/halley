@@ -40,6 +40,10 @@ namespace Halley {
 		WorldSystemUpdate,
 		WorldSystemRender,
 		WorldSystemMessages,
+		WorldUpdateEntities,
+		WorldFamilyNotifyAdd,
+		WorldFamilyNotifyRemove,
+		WorldFamilyNotifyReload,
 
         ScriptUpdate,
 
@@ -90,6 +94,10 @@ namespace Halley {
 				"WorldSystemUpdate",
 				"WorldSystemRender",
 				"WorldSystemMessages",
+				"WorldUpdateEntities",
+				"WorldFamilyNotifyAdd",
+				"WorldFamilyNotifyRemove",
+				"WorldFamilyNotifyReload",
 
 		        "ScriptUpdate",
 

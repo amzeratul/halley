@@ -1,5 +1,6 @@
 #include "halley/entity/family.h"
 #include "halley/entity/family_binding.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 

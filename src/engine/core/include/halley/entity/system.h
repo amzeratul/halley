@@ -12,6 +12,7 @@
 #include "system_message.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/temp_allocator.h"
+#include "halley/support/profiler.h"
 
 namespace Halley {
 	class Message;
@@ -160,8 +161,9 @@ namespace Halley {
 		void initialiseOnEntityAdded(FamilyBinding<F>& binding, T* system)
 		{
 			if constexpr (is_detected_v<Detail::OnEntitiesAddedMember, T, F>) {
-				binding.setOnEntitiesAdded([system] (void* es, size_t count)
+				binding.setOnEntitiesAdded([system, this] (void* es, size_t count)
 				{
+					const auto event = ProfilerEvent(ProfilerEventType::WorldFamilyNotifyAdd, getName());
 					system->onEntitiesAdded(Span<F>(static_cast<F*>(es), count));
 				});
 			}
@@ -171,8 +173,9 @@ namespace Halley {
 		void initialiseOnEntityRemoved(FamilyBinding<F>& binding, T* system)
 		{
 			if constexpr (is_detected_v<Detail::OnEntitiesRemovedMember, T, F>) {
-				binding.setOnEntitiesRemoved([system] (void* es, size_t count)
+				binding.setOnEntitiesRemoved([system, this] (void* es, size_t count)
 				{
+					const auto event = ProfilerEvent(ProfilerEventType::WorldFamilyNotifyRemove, getName());
 					system->onEntitiesRemoved(Span<F>(static_cast<F*>(es), count));
 				});
 			}
@@ -182,8 +185,9 @@ namespace Halley {
 		void initializeOnEntityReloaded(FamilyBinding<F>& binding, T* system)
 		{
 			if constexpr (is_detected_v<Detail::OnEntitiesReloadedMember, T, F>) {
-				binding.setOnEntitiesReloaded([system](void* es, size_t count)
+				binding.setOnEntitiesReloaded([system, this](void* es, size_t count)
 				{
+					const auto event = ProfilerEvent(ProfilerEventType::WorldFamilyNotifyReload, getName());
 					system->onEntitiesReloaded(Span<F*>(static_cast<F**>(es), count));
 				});
 			}

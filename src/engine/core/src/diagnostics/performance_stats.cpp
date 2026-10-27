@@ -763,7 +763,7 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 {
 	switch (type) {
 	case ProfilerEventType::CoreVSync:
-		return Colour4f(0.7f, 0.5f, 0.1f);
+		return Colour4f::fromHexString("#B3801A");
 	case ProfilerEventType::CoreUpdate:
 	case ProfilerEventType::CoreUpdatePlatform:
 	case ProfilerEventType::CoreUpdateResources:
@@ -771,7 +771,7 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 	case ProfilerEventType::CorePumpEvents:
 	case ProfilerEventType::CorePumpAudio:
 	case ProfilerEventType::CoreDevConClient:
-		return Colour4f(0.1f, 0.1f, 1.0f);
+		return Colour4f::fromHexString("#1A1AFF");
 	case ProfilerEventType::CoreFixedUpdate:
 	case ProfilerEventType::CoreVariableUpdate:
 	case ProfilerEventType::CoreStartFrame:
@@ -780,38 +780,43 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 	case ProfilerEventType::WorldFixedUpdate:
 	case ProfilerEventType::WorldVariableUpdate:
 	case ProfilerEventType::WorldSystemMessages:
-		return Colour4f(0.1f, 0.1f, 0.7f);
+		return Colour4f::fromHexString("#1A1AB3");
+	case ProfilerEventType::WorldUpdateEntities:
+	case ProfilerEventType::WorldFamilyNotifyAdd:
+	case ProfilerEventType::WorldFamilyNotifyReload:
+	case ProfilerEventType::WorldFamilyNotifyRemove:
+		return Colour4f::fromHexString("#800D80");
 	case ProfilerEventType::ConcurrentTask:
-		return Colour4f(0.1f, 0.7f, 0.3f);
+		return Colour4f::fromHexString("#1AB34D");
 	case ProfilerEventType::CoreRender:
 	case ProfilerEventType::WorldSystemRender:
 	case ProfilerEventType::WorldRender:
-		return Colour4f(0.7f, 0.1f, 0.1f);
+		return Colour4f::fromHexString("#B31A1A");
 	case ProfilerEventType::PainterDrawCall:
-		return Colour4f(0.97f, 0.51f, 0.65f);
+		return Colour4f::fromHexString("#F782A6");
 	case ProfilerEventType::CoreStartRender:
 	case ProfilerEventType::PainterEndRender:
-		return Colour4f(1.0f, 0.61f, 0.75f);
+		return Colour4f::fromHexString("#FF9CBF");
 	case ProfilerEventType::PainterUpdateProjection:
-		return Colour4f(1.0f, 0.71f, 0.85f);
+		return Colour4f::fromHexString("#FFB5D9");
 	case ProfilerEventType::StatsView:
-		return Colour4f(0.7f, 0.7f, 0.7f);
+		return Colour4f::fromHexString("#B3B3B3");
 	case ProfilerEventType::AudioGenerateBuffer:
-		return Colour4f(0.5f, 0.8f, 1.0f);
+		return Colour4f::fromHexString("#80B0D0");
 	case ProfilerEventType::AudioRenderVoice:
-		return Colour4f(0.4f, 1.0, 0.9f);
+		return Colour4f::fromHexString("#66FFE6");
 	case ProfilerEventType::ScriptUpdate:
-		return Colour4f(0.8f, 0.51f, 0.97f);
+		return Colour4f::fromHexString("#CC82F7");
 	case ProfilerEventType::GPU:
-		return Colour4f(1.0f, 0.85f, 0.1f);
+		return Colour4f::fromHexString("#FFD91A");
 	case ProfilerEventType::ExternalCode:
-		return Colour4f(0.8f, 0.4f, 0.8f);
+		return Colour4f::fromHexString("#CC66CC");
 	case ProfilerEventType::DiskIO:
-		return Colour4f(1.0f, 0.5f, 0.13f);
+		return Colour4f::fromHexString("#FF8021");
 	case ProfilerEventType::Game:
 	case ProfilerEventType::UserDefined:
 	default:
-		return Colour4f(0.1f, 0.7f, 0.1f);
+		return Colour4f::fromHexString("#FFFFFF");
 	}
 }
 

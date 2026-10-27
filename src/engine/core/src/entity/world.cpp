@@ -753,6 +753,8 @@ void World::updateEntities()
 		return;
 	}
 
+	const auto event = ProfilerEvent(ProfilerEventType::WorldUpdateEntities);
+
 	++familyRevision;
 
 	entityDirty = false;
