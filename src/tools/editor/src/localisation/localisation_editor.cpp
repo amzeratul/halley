@@ -547,6 +547,10 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	const int greenW = std::max((translatedWords * totalW) / totalWords, translatedWords > 0 ? 1 : 0);
 	const int yellowW = std::max(((translatedWords + locStats.outdatedWords) * totalW) / totalWords - greenW, locStats.outdatedWords > 0 ? 1 : 0);
 
+	if (language.getLanguageCode() == "pt") {
+		Logger::logInfo("total: " + toString(totalWords) + ", translated " + translatedWords + ", outdated: " + locStats.outdatedWords);
+	}
+
 	auto percentString = toString(translatedPercent, 1) + "%";
 	if (translationDataRemote && translatedWords != remoteTranslatedWords) {
 		percentString += " / " + toString(translatedPercentRemote, 1) + "%";

@@ -25,7 +25,7 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 	const bool isTranslated = translation && !translation->getValue().isEmpty();
 
 	if (outdatedEnabled) {
-		const bool isOutOfDate = isTranslated && translation->origVersion < entry.getVersion();
+		const bool isOutOfDate = isTranslated && translation->origVersion != entry.getVersion();
 		const bool wantsOutOfDate = outdated == LocOutdatedStatus::OutOfDate;
 		if (isOutOfDate != wantsOutOfDate) {
 			return false;
