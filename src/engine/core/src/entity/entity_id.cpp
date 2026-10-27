@@ -25,8 +25,9 @@ namespace {
 			return {};
 		}
 
-		const auto& value = node.asString("");
-		const auto uuid = value.isEmpty() ? UUID() : UUID(value);
+		String buffer;
+		const auto& value = node.asStringView("", &buffer);
+		const auto uuid = value.empty() ? UUID() : UUID(value);
 		if (!context.entityContext || !uuid.isValid()) {
 			return EntityId();
 		}

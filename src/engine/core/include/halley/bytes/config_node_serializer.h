@@ -659,8 +659,8 @@ namespace Halley {
 			if (assetId.empty()) {
 				return {};
 			} else {
-				if (context.resources->exists<T>(assetId)) {
-					return ResourceReference<T>(context.resources->get<T>(assetId));
+				if (auto r = context.resources->tryGet<T>(assetId)) {
+					return ResourceReference<T>(std::move(r));
 				} else {
 					Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId, true);
 					return {};
@@ -1035,9 +1035,9 @@ namespace Halley {
 				if (fieldNode.getType() != ConfigNodeType::Noop && (fieldNode.getType() != ConfigNodeType::Undefined || !delta)) {
 					auto* interpolator = context.interpolators ? context.interpolators->tryGetInterpolator(context, componentName, fieldName) : nullptr;
 					if (interpolator) {
-						interpolator->deserialize(&value, &defaultValue, context, node[fieldName]);
+						interpolator->deserialize(&value, &defaultValue, context, fieldNode);
 					} else {
-						ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node[fieldName]);
+						ConfigNodeHelper<T>::deserialize(value, defaultValue, context, fieldNode);
 					}
 				}
 			}
