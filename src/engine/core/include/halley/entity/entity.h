@@ -632,15 +632,20 @@ namespace Halley {
 		template <typename T>
 		EntityId tryGetEntityIdWithComponentInAncestors() const
 		{
+			return tryGetEntityWithComponentInAncestors<T>().getEntityId();
+		}
+
+		template <typename T>
+		EntityRef tryGetEntityWithComponentInAncestors() const
+		{
 			validateComponentType<T>();
-			auto* comp = tryGetComponent<T>();
-			if (comp) {
-				return getEntityId();
+			if (auto* comp = tryGetComponent<T>()) {
+				return *this;
 			}
 			if (const auto parent = getParent(); parent.isValid()) {
-				const auto parentId = parent.tryGetEntityIdWithComponentInAncestors<T>();
-				if (parentId.isValid()) {
-					return parentId;
+				const auto result = parent.tryGetEntityWithComponentInAncestors<T>();
+				if (result.isValid()) {
+					return result;
 				}
 			}
 			return {};
