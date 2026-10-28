@@ -617,16 +617,16 @@ namespace Halley {
 
 		void ensureType(ConfigNodeType type);
 
-		bool hasKey(std::string_view key) const;
-		bool removeKey(std::string_view key, bool unsetMapIfEmpty = false);
+		bool hasKey(const PrehashedStringView& key) const;
+		bool removeKey(const PrehashedStringView& key, bool unsetMapIfEmpty = false);
 
-		ConfigNode& operator[](std::string_view key);
+		ConfigNode& operator[](const PrehashedStringView& key);
 		ConfigNode& operator[](size_t idx);
 		void push_back(ConfigNode node);
 
-		const ConfigNode& operator[](std::string_view key) const;
+		const ConfigNode& operator[](const PrehashedStringView& key) const;
 		const ConfigNode& operator[](size_t idx) const;
-		const ConfigNode& at(std::string_view key) const;
+		const ConfigNode& at(const PrehashedStringView& key) const;
 
 		SequenceType::iterator begin();
 		SequenceType::iterator end();
@@ -790,5 +790,7 @@ namespace Halley {
 		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
 		void applyMapDelta(const ConfigNode& delta);
 		void applySequenceDelta(const ConfigNode& delta);
+
+		const ConfigNode& getUndefinedConfigNode() const;
 	};
 }

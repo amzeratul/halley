@@ -160,11 +160,11 @@ ConfigNode::ConfigNode(Range<int> value)
 	operator=(value);
 }
 
-bool ConfigNode::removeKey(std::string_view key, bool unsetMapIfEmpty)
+bool ConfigNode::removeKey(const PrehashedStringView& key, bool unsetMapIfEmpty)
 {
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		auto& map = asMap();
-		const auto iter = map.find(key);
+		const auto iter = map.find(key.str, key.hash);
 		const bool hadKey = iter != map.end();
 		if (hadKey) {
 			map.erase(iter);
@@ -1583,21 +1583,21 @@ void ConfigNode::ensureType(ConfigNodeType t)
 	}
 }
 
-bool ConfigNode::hasKey(std::string_view key) const
+bool ConfigNode::hasKey(const PrehashedStringView& key) const
 {
 	const auto t = getType();
 	if (t == ConfigNodeType::Map || t == ConfigNodeType::DeltaMap || t == ConfigNodeType::MapRef) {
 		auto& map = asMap();
-		auto iter = map.find(key);
+		auto iter = map.find(key.str, key.hash);
 		return iter != map.end() && iter->second.getType() != ConfigNodeType::Undefined;
 	} else {
 		return false;
 	}
 }
 
-ConfigNode& ConfigNode::operator[](std::string_view key)
+ConfigNode& ConfigNode::operator[](const PrehashedStringView& key)
 {
-	return asMap()[key];
+	return asMap().get_with_hash(key.str, key.hash);
 }
 
 ConfigNode& ConfigNode::operator[](size_t idx)
@@ -1610,50 +1610,45 @@ void ConfigNode::push_back(ConfigNode node)
 	asSequence().push_back(std::move(node));
 }
 
-const ConfigNode& ConfigNode::operator[](std::string_view key) const
+const ConfigNode& ConfigNode::operator[](const PrehashedStringView& key) const
 {
 	if (getType() == ConfigNodeType::Undefined) {
-#if defined(STORE_CONFIG_NODE_PARENTING)
-		undefinedConfigNode.setParent(this, -1);
-		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
-#endif
-		//undefinedConfigNodeName = key;
-		return undefinedConfigNode;		
+		return getUndefinedConfigNode();
 	}
 
 	const auto& map = asMap();
-	const auto iter = map.find(key);
+	const auto iter = map.find(key.str, key.hash);
 	if (iter != map.end()) {
 		return iter->second;
 	} else {
-#if defined(STORE_CONFIG_NODE_PARENTING)
-		undefinedConfigNode.setParent(this, -1);
-		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
-#endif
-		//undefinedConfigNodeName = key;
-		return undefinedConfigNode;
+		return getUndefinedConfigNode();
 	}
+}
+
+const ConfigNode& ConfigNode::at(const PrehashedStringView& key) const
+{
+	const auto& map = asMap();
+	const auto iter = map.find(key.str, key.hash);
+	if (iter != map.end()) {
+		return iter->second;
+	} else {
+		return getUndefinedConfigNode();
+	}	
+}
+
+const ConfigNode& ConfigNode::getUndefinedConfigNode() const
+{
+#if defined(STORE_CONFIG_NODE_PARENTING)
+	undefinedConfigNode.setParent(this, -1);
+	undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
+#endif
+	//undefinedConfigNodeName = key;
+	return undefinedConfigNode;
 }
 
 const ConfigNode& ConfigNode::operator[](size_t idx) const
 {
 	return asSequence().at(idx);
-}
-
-const ConfigNode& ConfigNode::at(std::string_view key) const
-{
-	const auto& map = asMap();
-	const auto iter = map.find(key);
-	if (iter != map.end()) {
-		return iter->second;
-	} else {
-#if defined(STORE_CONFIG_NODE_PARENTING)
-		undefinedConfigNode.setParent(this, -1);
-		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
-#endif
-		//undefinedConfigNodeName = key;
-		return undefinedConfigNode;
-	}
 }
 
 Vector<ConfigNode>::iterator ConfigNode::begin()

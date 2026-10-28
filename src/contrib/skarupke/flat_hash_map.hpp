@@ -526,9 +526,9 @@ public:
     }
 
     template<typename U>
-    iterator find(const U & key)
+    iterator find(const U & key, size_t hash)
     {
-        size_t index = hash_policy.index_for_hash(hash_object(key), num_slots_minus_one);
+        size_t index = hash_policy.index_for_hash(hash, num_slots_minus_one);
         EntryPointer it = entries + ptrdiff_t(index);
         for (int8_t distance = 0; it->distance_from_desired >= distance; ++distance, ++it)
         {
@@ -536,6 +536,18 @@ public:
                 return { it };
         }
         return end();
+    }
+
+    template<typename U>
+    const_iterator find(const U & key, size_t hash) const
+    {
+        return const_cast<sherwood_v3_table *>(this)->find<U>(key, hash);
+    }
+
+    template<typename U>
+    iterator find(const U & key)
+    {
+        return find(key, hash_object(key));
     }
 
     template<typename U>
@@ -571,9 +583,9 @@ public:
     }
 
     template<typename Key, typename... Args>
-    std::pair<iterator, bool> emplace(Key && key, Args &&... args)
+    std::pair<iterator, bool> emplace_with_hash(Key && key, size_t hash, Args &&... args)
     {
-        size_t index = hash_policy.index_for_hash(hash_object(key), num_slots_minus_one);
+        size_t index = hash_policy.index_for_hash(hash, num_slots_minus_one);
         EntryPointer current_entry = entries + ptrdiff_t(index);
         int8_t distance_from_desired = 0;
         for (; current_entry->distance_from_desired >= distance_from_desired; ++current_entry, ++distance_from_desired)
@@ -582,6 +594,12 @@ public:
                 return { { current_entry }, false };
         }
         return emplace_new_key(distance_from_desired, current_entry, std::forward<Key>(key), std::forward<Args>(args)...);
+    }
+
+    template<typename Key, typename... Args>
+    std::pair<iterator, bool> emplace(Key && key, Args &&... args)
+    {
+    	return emplace_with_hash(std::forward<Key>(key), hash_object(key), std::forward<Args>(args)...);
     }
 
     std::pair<iterator, bool> insert(const value_type & value)
@@ -1346,10 +1364,18 @@ public:
     {
         return emplace(key, convertible_to_value()).first->second;
     }
+
     inline V & operator[](K && key)
     {
         return emplace(std::move(key), convertible_to_value()).first->second;
     }
+
+    template<typename U>
+	inline V & get_with_hash(U && key, size_t hash)
+	{
+	    return this->emplace_with_hash(std::forward<U>(key), hash, convertible_to_value()).first->second;
+	}
+
     template<typename U>
     V & at(const U & key)
     {
@@ -1358,10 +1384,29 @@ public:
             throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
         return found->second;
     }
+
     template<typename U>
     const V & at(const U & key) const
     {
         auto found = this->find(key);
+        if (found == this->end())
+            throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
+        return found->second;
+    }
+
+    template<typename U>
+    V & at(const U & key, size_t hash)
+    {
+        auto found = this->find(key, hash);
+        if (found == this->end())
+            throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
+        return found->second;
+    }
+
+    template<typename U>
+    const V & at(const U & key, size_t hash) const
+    {
+        auto found = this->find(key, hash);
         if (found == this->end())
             throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
         return found->second;

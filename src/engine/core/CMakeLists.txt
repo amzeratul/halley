@@ -934,6 +934,7 @@ set(HEADERS
         "include/halley/text/i18n.h"
         "include/halley/text/i18n_language.h"
         "include/halley/text/localised_string.h"
+        "include/halley/text/prehashed_string.h"
         "include/halley/text/string_converter.h"
         "include/halley/text/string_diff.h"
         "include/halley/text/string_output_server.h"

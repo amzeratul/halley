@@ -7,6 +7,7 @@
 #include "halley/utils/type_traits.h"
 #include "config_node_serializer_base.h"
 #include <set>
+#include <halley/text/prehashed_string.h>
 
 
 #include "halley/entity/entity_id.h"
@@ -1008,7 +1009,7 @@ namespace Halley {
 	template <typename T, typename Interpolator = void>
 	class EntityConfigNodeSerializer {
 	public:
-		static void serialize(const T& value, const T& defaultValue, const EntitySerializationContext& context, ConfigNode& node, std::string_view componentName, std::string_view name, int serializationMask)
+		static void serialize(const T& value, const T& defaultValue, const EntitySerializationContext& context, ConfigNode& node, std::string_view componentName, PrehashedStringView name, int serializationMask)
 		{
 			if (context.matchType(serializationMask)) {
 				bool canWrite;
@@ -1027,13 +1028,13 @@ namespace Halley {
 			}
 		}
 
-		static void deserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node, std::string_view componentName, std::string_view fieldName, int serializationMask)
+		static void deserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node, std::string_view componentName, PrehashedStringView fieldName, int serializationMask)
 		{
 			if ((context.matchType(serializationMask) || node.getType() != ConfigNodeType::Undefined) && node.getType() != ConfigNodeType::Noop) {
 				const bool delta = node.getType() == ConfigNodeType::DeltaMap;
 				const auto& fieldNode = node[fieldName];
 				if (fieldNode.getType() != ConfigNodeType::Noop && (fieldNode.getType() != ConfigNodeType::Undefined || !delta)) {
-					auto* interpolator = context.interpolators ? context.interpolators->tryGetInterpolator(context, componentName, fieldName) : nullptr;
+					auto* interpolator = context.interpolators ? context.interpolators->tryGetInterpolator(context, componentName, fieldName.str) : nullptr;
 					if (interpolator) {
 						interpolator->deserialize(&value, &defaultValue, context, fieldNode);
 					} else {
