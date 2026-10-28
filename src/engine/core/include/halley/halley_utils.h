@@ -112,6 +112,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "text/halleystring.h"
 #include "text/i18n.h"
 #include "text/localised_string.h"
+#include "text/prehashed_string.h"
 #include "text/string_converter.h"
 #include "text/string_diff.h"
 #include "text/string_output_server.h"

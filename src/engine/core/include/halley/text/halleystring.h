@@ -337,7 +337,7 @@ namespace Halley {
 		std::strong_ordering operator<=> (std::string_view rhp) const;
 		std::strong_ordering operator<=> (std::u8string_view rhp) const;
 
-		operator std::string_view() const noexcept { return str; }
+		constexpr operator std::string_view() const noexcept { return str; }
 		explicit operator std::u8string_view() const noexcept { return std::u8string_view(reinterpret_cast<const char8_t*>(str.c_str()), str.length()); }
 		const String& toString() const { return *this; }
 
@@ -410,18 +410,4 @@ namespace Halley {
 		return typeid(T).name();
 #endif
 	}
-}
-
-namespace std {
-	template<>
-	struct hash<Halley::String>
-	{
-		using hash_type = std::hash<std::string_view>;
-		using is_transparent = void;
-
-		size_t operator()(const Halley::String& s) const noexcept { return hash_type()(s.cppStr());	}
-		size_t operator()(const std::string& s) const noexcept { return hash_type()(s); }
-		size_t operator()(const std::string_view s) const noexcept { return hash_type()(s); }
-		size_t operator()(const char* s) const noexcept { return hash_type()(s); }
-	};
 }

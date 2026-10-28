@@ -3,6 +3,7 @@
 #include "../../../../../contrib/skarupke/flat_hash_map.hpp"
 #include "halley/utils/hash.h"
 #include <string_view>
+#include <halley/text/prehashed_string.h>
 
 #include "temp_allocator.h"
 
@@ -44,7 +45,7 @@ namespace Halley {
 		template<int N>
 		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, N);
+			return Hash::hash(s, N - 1);
 		}
 	};
 
@@ -68,7 +69,7 @@ namespace Halley {
 		template<int N>
 		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, N);
+			return Hash::hash(s, N - 1);
 		}
 	};
 	
@@ -92,7 +93,7 @@ namespace Halley {
 		template<int N>
 		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, N);
+			return Hash::hash(s, N - 1);
 		}
 	};
 
@@ -116,7 +117,7 @@ namespace Halley {
 		template<int N>
 		constexpr uint64_t operator()(const char (&s)[N]) const noexcept
 		{
-			return Hash::hash(s, N);
+			return Hash::hash(s, N - 1);
 		}
 	};
 
@@ -166,4 +167,17 @@ namespace std {
 			return Halley::Hash::combineHash(Halley::Hash::combineHash(Halley::DefaultHash<A>()(std::get<0>(v)),Halley:: DefaultHash<B>()(std::get<1>(v))), Halley::DefaultHash<C>()(std::get<2>(v)));
         }
     };
+
+	template<>
+	struct hash<Halley::String>
+	{
+		using hash_type = Halley::hash<std::string_view>;
+		using is_transparent = void;
+
+		constexpr size_t operator()(const Halley::String& s) const noexcept { return hash_type()(std::string_view(s)); }
+		constexpr size_t operator()(const std::string& s) const noexcept { return hash_type()(s); }
+		constexpr size_t operator()(const std::string_view& s) const noexcept { return hash_type()(s); }
+		constexpr size_t operator()(const Halley::PrehashedStringView& s) const noexcept { return s.hash; }
+		constexpr size_t operator()(const char* s) const noexcept { return hash_type()(std::string_view(s)); }
+	};
 }
