@@ -691,7 +691,7 @@ IScriptNodeType::Result ScriptSetEntityEnabled::doUpdate(ScriptEnvironment& envi
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
 	if (!entityRef.isValid()) {
 		const auto& assetId = environment.getCurrentGraph()->getAssetId();
-		Logger::logError(assetId + ": Entity with id " + entityId.toDetailedString() + " does not exist and can't be toggled!");
+		Logger::logError(assetId + ": Entity with id " + entityId.toDetailedString() + " does not exist and can't be toggled!", true);
 		return Result(ScriptNodeExecutionState::Done);
 	}
 	data.entityId = entityRef.getEntityId();
@@ -736,7 +736,7 @@ IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& e
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
 	if (!entityRef.isValid()) {
 		const auto& assetId = environment.getCurrentGraph()->getAssetId();
-		Logger::logError(assetId + ": Entity with id " + toString(entityId) + " does not exist and can't be toggled!");
+		Logger::logError(assetId + ": Entity with id " + toString(entityId) + " does not exist and can't be toggled!", true);
 		return Result(ScriptNodeExecutionState::Done);
 	}
 	entityRef.setEnabled(!entityRef.isEnabled());
