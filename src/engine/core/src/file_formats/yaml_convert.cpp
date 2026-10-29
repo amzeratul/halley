@@ -36,7 +36,14 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions
 		for (auto& n : node) {
 			list.emplace_back(parseYAMLNode(n, options));
 		}
-		result = std::move(list);
+
+		if (list.size() == 2 && node.Tag().find("float2") != std::string::npos) {
+			result = ConfigNode(Vector2f(list[0].asFloat(), list[1].asFloat()));
+		} else if (list.size() == 2 && node.Tag().find("int2") != std::string::npos) {
+			result = ConfigNode(Vector2i(list[0].asInt(), list[1].asInt()));
+		} else {
+			result = std::move(list);
+		}
 	} else if (node.IsScalar()) {
 		if (node.Tag().find("binary") != std::string::npos) {
 			auto b = node.as<YAML::Binary>();
@@ -147,7 +154,7 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 	case ConfigNodeType::Int2:
 		{
 			const auto vec = node.asVector2i();
-			emitter << YAML::Flow << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
+			emitter << YAML::Flow << YAML::LocalTag("int2") << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
 		}
 		return;
 
@@ -158,7 +165,8 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 	case ConfigNodeType::Float2:
 		{
 			const auto vec = node.asVector2f();
-			emitter << YAML::Flow << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
+			
+			emitter << YAML::Flow << YAML::LocalTag("float2") << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
 		}
 		return;
 
