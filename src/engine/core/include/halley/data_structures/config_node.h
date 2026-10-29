@@ -575,13 +575,12 @@ namespace Halley {
 		template <typename T>
 		T asEnum() const
 		{
-			String buffer;
-			if (auto v = tryFromString<T>(asStringView(&buffer))) {
+			if (auto v = tryFromString<T>(asStringView())) {
 				return *v;
-			} else {
-				Logger::logError("Unknown enum value \"" + asString() + "\" in type " + typeid(T).name());
-				return T();
 			}
+
+			Logger::logError("Unknown enum value \"" + asString() + "\" in type " + typeid(T).name());
+			return T();
 		}
 
 		template <typename T>
