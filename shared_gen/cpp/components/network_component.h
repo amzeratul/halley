@@ -20,7 +20,6 @@ public:
 
 	std::optional<uint8_t> ownerId{};
 	std::optional<uint8_t> authorityId{};
-	std::optional<uint8_t> creatorId{};
 	bool sendUpdates{ false };
 	bool alwaysSend{ false };
 	bool requiresEntityFrameModified{ false };

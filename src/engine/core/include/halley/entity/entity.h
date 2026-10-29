@@ -336,6 +336,7 @@ namespace Halley {
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
         std::pair<std::optional<uint8_t>, std::optional<uint8_t>> getAuthorityAndOwnerPeerId() const;
 		void setFromNetwork(bool fromNetwork);
+		bool isFromNetwork() const { return fromNetwork; }
 
 		void destroy(World& world);
 		void doDestroy(World& world, bool updateParenting);
@@ -1112,6 +1113,12 @@ namespace Halley {
 		{
 			validate();
 			entity->setFromNetwork(fromNetwork);
+		}
+
+		bool isFromNetwork() const
+		{
+			validate();
+			return entity->isFromNetwork();
 		}
 
 		uint32_t getLastFrameModified() const

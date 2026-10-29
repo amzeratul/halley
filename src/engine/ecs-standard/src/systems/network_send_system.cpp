@@ -67,23 +67,27 @@ public:
 					HalleyAssertDev(myPeerId == 0);
 					e.network.ownerId = myPeerId;
 				} else {
-					// Entities created locally belong to this peer. Entities loaded from world chunks are
-					// supposed to be claimed by the host.
 					HalleyAssertDev(myPeerId != 0);
-					if (entity.getWorldPartition() == 0) {
-						//Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
-						e.network.ownerId = myPeerId;
-					} else {
-						//Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
+					if (entity.isFromNetwork()) {
+						// This entity was created by someone else. Do not touch. (Just treat as
+						// owned by host, so we don't repeat this check every frame.)
 						e.network.ownerId = 0;
-						// The host is supposed to send a create message eventually, which will
-						// make the following call again. But until this happens, this entity might
-						// linger in a state that can cause unintended behaviour.
-						entityNetworkSession.onRemoteEntityCreated(entity, 0);
+					} else {
+						// Entities created locally belong to this peer. Entities loaded from world
+						// chunks are supposed to be claimed by the host.
+						if (entity.getWorldPartition() == 0) {
+							//Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
+							e.network.ownerId = myPeerId;
+						} else {
+							//Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
+							e.network.ownerId = 0;
+							// The host is supposed to send a create message eventually, which will
+							// make the following call again. But until this happens, this entity might
+							// linger in a state that can cause unintended behaviour.
+							entityNetworkSession.onRemoteEntityCreated(entity, 0);
+						}
 					}
 				}
-
-				e.network.creatorId = myPeerId;
 			}
 
 			if (e.network.sendUpdates && e.network.ownerId) {
