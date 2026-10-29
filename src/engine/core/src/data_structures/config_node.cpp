@@ -1393,7 +1393,7 @@ String ConfigNode::asStringNoUndefined() const
 std::string_view ConfigNode::asStringView(String* buffer) const
 {
 	if (type == ConfigNodeType::String) {
-		return *strData;
+		return std::string_view(*strData);
 	} else if (type == ConfigNodeType::RawString) {
 		return std::string_view(rawStrData);
 	} else if (type == ConfigNodeType::Reference) {
@@ -1472,7 +1472,7 @@ std::string_view ConfigNode::asStringView(const std::string_view& defaultValue, 
 
 const ConfigNode::SequenceType& ConfigNode::asSequence() const
 {
-	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
+	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) [[likely]] {
 		return *sequenceData;
 	} else if (type == ConfigNodeType::Reference) {
 		return dereference().asSequence();
@@ -1483,7 +1483,7 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 
 const ConfigNode::MapType& ConfigNode::asMap() const
 {
-	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) [[likely]] {
 		return *mapData;
 	} else if (type == ConfigNodeType::Reference) {
 		return dereference().asMap();
@@ -1494,7 +1494,7 @@ const ConfigNode::MapType& ConfigNode::asMap() const
 
 ConfigNode::SequenceType& ConfigNode::asSequence()
 {
-	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
+	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) [[likely]] {
 		return *sequenceData;
 	} else if (type == ConfigNodeType::Undefined) {
 		*this = SequenceType();
@@ -1506,7 +1506,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 
 ConfigNode::MapType& ConfigNode::asMap()
 {
-	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) [[likely]] {
 		return *mapData;
 	} else if (type == ConfigNodeType::Undefined) {
 		*this = MapType();
@@ -1518,7 +1518,7 @@ ConfigNode::MapType& ConfigNode::asMap()
 
 size_t ConfigNode::getSequenceSize(size_t defaultValue) const
 {
-	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
+	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) [[likely]] {
 		return asSequence().size();
 	} else if (type == ConfigNodeType::Reference) {
 		return dereference().getSequenceSize(defaultValue);

@@ -122,7 +122,7 @@ namespace Halley
 			if constexpr (std::is_enum_v<T>) {
 				constexpr EnumNames<T> n;
 				constexpr auto names = n();
-				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
+				auto res = std::find_if(std::begin(names), std::end(names), [&](auto v) { return str == v; });
 				if (res == std::end(names)) {
 					Logger::logError("String \"" + String(str) + "\" does not exist in enum \"" + typeid(T).name() + "\".");
 					return {};
