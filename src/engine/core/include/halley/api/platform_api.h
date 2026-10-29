@@ -358,5 +358,9 @@ namespace Halley
 		virtual void setActivitiesAvailable(const Vector<String>& availableActivities, const Vector<String>& unavailableActivities, bool wipeOldState) {};
 		virtual void startActivity(const String& activityName) {};
 		virtual void endActivity(const String& activityName, const ActivityOutcome outcome) {};
+
+		// Another very PS5-specific thing
+		virtual bool requiresGameplayNotification() { return false; };
+		virtual void notifyActiveGampeplay() { };
 	};
 }
