@@ -58,6 +58,12 @@ namespace Halley {
 
 		bool hasChildWithUUID(const UUID& uuid) const;
 	};
+
+    class IComponentConfigNodeFormatCallback {
+    public:
+        virtual ~IComponentConfigNodeFormatCallback() = default;
+        virtual void process(std::string_view componentName, std::string_view fieldName, ConfigNode& data) const = 0;
+    };
 	
     class EntityData final : public IEntityConcreteData {
     	friend class EntityDataDelta;
@@ -155,6 +161,7 @@ namespace Halley {
         void makeComponentChangesIntoDeltas();
 
     	void sanitize(const WorldReflection& worldReflection, int mask);
+        void ensureComponentConfigNodeFormat(const IComponentConfigNodeFormatCallback& callback);
 
         bool operator==(const EntityData& other) const;
         bool operator!=(const EntityData& other) const;

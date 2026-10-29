@@ -4,6 +4,8 @@
 
 namespace Halley
 {
+	class Prefab;
+	class Project;
 	class ConfigFile;
 
 	class ConfigImporter : public IAssetImporter
@@ -17,17 +19,29 @@ namespace Halley
 	class PrefabImporter : public IAssetImporter
 	{
 	public:
+		PrefabImporter(Project& project);
+
 		ImportAssetType getType() const override { return ImportAssetType::Prefab; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
+
+		static void validateEntityData(Project& project, Prefab& prefab);
+
+	private:
+		Project& project;
 	};
 
 	class SceneImporter : public IAssetImporter
 	{
 	public:
+		SceneImporter(Project& project);
+
 		ImportAssetType getType() const override { return ImportAssetType::Scene; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
+
+	private:
+		Project& project;
 	};
 
 	class NavmeshSetImporter : public IAssetImporter

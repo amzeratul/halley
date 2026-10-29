@@ -787,6 +787,19 @@ void EntityData::sanitize(const WorldReflection& worldReflection, int mask)
 	}
 }
 
+void EntityData::ensureComponentConfigNodeFormat(const IComponentConfigNodeFormatCallback& callback)
+{
+	for (auto& [componentId, compData]: components) {
+		for (auto& field: compData.asMap()) {
+			callback.process(componentId, field.first, field.second);
+		}
+	}
+
+	for (auto& child: children) {
+		child.ensureComponentConfigNodeFormat(callback);
+	}
+}
+
 bool EntityData::operator==(const EntityData& other) const
 {
 	return name == other.name &&
