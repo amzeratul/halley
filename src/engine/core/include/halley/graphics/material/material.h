@@ -53,7 +53,7 @@ namespace Halley
 
 	public:
 		MaterialDataBlock();
-		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def);
+		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint);
 		MaterialDataBlock(const MaterialDataBlock& other) = default;
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 

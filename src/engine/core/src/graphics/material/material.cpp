@@ -21,7 +21,7 @@ MaterialDataBlock::MaterialDataBlock()
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def)
+MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint)
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
 	, dataBlockType(type)
 	, bindPoint(static_cast<int16_t>(bindPoint))
@@ -203,12 +203,15 @@ void Material::initUniforms(bool forceLocalBlocks)
 {
 	int nextBindPoint = 1;
 	dataBlocks.clear();
-	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
+
+	const auto& defBlocks = materialDefinition->getUniformBlocks();
+	dataBlocks.reserve(defBlocks.size());
+	for (const auto& uniformBlock: defBlocks) {
 		const auto type = uniformBlock.name == "HalleyBlock"
 			? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal)
 			: MaterialDataBlockType::Local;
 		const int bind = type == MaterialDataBlockType::Local ? nextBindPoint++ : 0;
-		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, bind, uniformBlock.name, *materialDefinition));
+		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, bind));
 	}
 
 	// Load textures
