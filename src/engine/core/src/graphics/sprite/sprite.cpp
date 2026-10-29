@@ -943,6 +943,14 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		materialDefinition = sprite.getMaterial().getDefinitionPtr();
 	}
 
+	std::optional<MaterialUpdater> _materialUpdater;
+	auto getMutableMaterial = [&] () -> MaterialUpdater& {
+		if (!_materialUpdater) {
+			_materialUpdater = sprite.getMutableMaterial();
+		}
+		return *_materialUpdater;
+	};
+
 	auto loadTexture = [&](std::string_view nodeName, size_t texUnit) -> bool
 	{
 		if (!node.hasKey(nodeName)) {
@@ -951,7 +959,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		
 		const auto& imageNode = node[nodeName];
 		if (imageNode.getType() == ConfigNodeType::Del) {
-			sprite.getMutableMaterial().set(texUnit, std::shared_ptr<const Texture>());
+			getMutableMaterial().set(texUnit, std::shared_ptr<const Texture>());
 			return false;
 		}
 		
@@ -960,7 +968,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		} else if (texUnit == 1) {
 			const auto image = context.resources->get<SpriteResource>(imageNode.asStringView());
 			sprite.setTexRect1(image->getSprite().coords);
-			sprite.getMutableMaterial().set(texUnit, *image);
+			getMutableMaterial().set(texUnit, *image);
 		}
 		return true;
 	};
@@ -998,16 +1006,16 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 				auto applyValue = [&] (const ConfigNode& node)
 				{
 					if (uniform.type == ShaderParameterType::Float) {
-						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asFloat(0)));
+						getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asFloat(0)));
 					} else if (uniform.type == ShaderParameterType::Float2) {
-						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector2f(Vector2f())));
+						getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector2f(Vector2f())));
 					} else if (uniform.type == ShaderParameterType::Float3) {
-						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector3f(Vector3f())));
+						getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector3f(Vector3f())));
 					} else if (uniform.type == ShaderParameterType::Float4) {
 						if (uniform.semantic == ShaderParameterSemanticType::Colour) {
-							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, Colour4f::fromString(node.asString("#000000"))));
+							getMutableMaterial().set(uniform.name, clampToRange(uniform.range, Colour4f::fromString(node.asString("#000000"))));
 						} else {
-							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
+							getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
 						}
 					}
 				};
