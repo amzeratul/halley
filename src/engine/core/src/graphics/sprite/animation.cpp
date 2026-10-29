@@ -376,6 +376,10 @@ const AnimationSequence& Animation::getSequence(size_t idx) const
 
 size_t Animation::getSequenceIdx(std::string_view name) const
 {
+	if (sequences.size() <= 1) {
+		// Avoid string comparisons for one-sequence animations
+		return 0;
+	}
 	if (sequences.size() <= 4) {
 		// With few sequences, avoid the string hashing and just check them all
 		for (const auto& seq: sequences) {
@@ -395,7 +399,12 @@ size_t Animation::getSequenceIdx(std::string_view name) const
 
 const AnimationDirection& Animation::getDirection(std::string_view dirName) const
 {
-	HalleyAssertDev(directions.size() > 0);
+	HalleyAssertDebug(!directions.empty());
+
+	if (directions.size() == 0) {
+		// Avoid string comparisons for one-dir animations
+		return directions[0];
+	}
 
 	for (auto& dir : directions) {
 		if (dir.name == dirName) {
