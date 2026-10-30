@@ -329,6 +329,12 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(PrehashedStringView asse
 		// Store in cache
 		if (loaded) {
 			UniqueLock lock2(mutex);
+			// Preallocate if this is the first one
+			if (resources.empty()) {
+				const auto n = parent.getLocator().count(type);
+				resources.reserve(n);
+				resourceMap.reserve(n);
+			}
 			newRes->setAssetIdx(curIdx++);
 			allocateWrapper(assetId).res = newRes;
 		}
