@@ -361,6 +361,6 @@ namespace Halley
 
 		// Another very PS5-specific thing
 		virtual bool requiresGameplayNotification() { return false; };
-		virtual void notifyActiveGampeplay() { };
+		virtual void notifyActiveGameplay() { };
 	};
 }
