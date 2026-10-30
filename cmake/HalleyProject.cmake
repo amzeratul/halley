@@ -54,6 +54,17 @@ endif()
 
 option(HALLEY_HAS_LIVEPP "Build with Live++ support" ${LIVEPP_FOUND})
 
+# Use the system ccache if there is one, otherwise halley/deps/bin/ccache.exe
+option(HALLEY_USE_CCACHE "Use ccache" ON)
+if (HALLEY_USE_CCACHE AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+	find_program(HALLEY_CCACHE_PROGRAM ccache PATHS "${HALLEY_PATH}/deps/bin")
+	if (HALLEY_CCACHE_PROGRAM)
+		set(HALLEY_CCACHE_LAUNCHER "${HALLEY_CCACHE_PROGRAM}" "sloppiness=pch_defines,time_macros")
+		set(CMAKE_C_COMPILER_LAUNCHER ${HALLEY_CCACHE_LAUNCHER})
+		set(CMAKE_CXX_COMPILER_LAUNCHER ${HALLEY_CCACHE_LAUNCHER})
+	endif()
+endif()
+
 # C++20 support
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
