@@ -1,44 +1,41 @@
 @echo off
 
+REM Usage: build_project_win_ninja.bat <projectDir> <binName> <config>
 
-cd /d %1
-if not exist build-ninja mkdir build-ninja
-cd build-ninja
+set "projectDir=%~1"
+set "binName=%~2"
+set "config=%~3"
 
+cd /d "%projectDir%" || exit /b 1
 
-IF EXIST "vcvars.bat" GOTO RUNVCVARS
+taskkill /IM "%binName%.exe" /F >nul 2>nul
 
-for /f "usebackq tokens=1* delims=: " %%i in (`"%~1/halley/bin/vswhere.exe" -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64`) do (
-    if /i "%%i"=="installationPath" set vsdir=%%j
+if not exist bin mkdir bin
+if not exist "bin\SDL2.dll" (
+    echo Copying SDL2.dll to bin
+    copy "%~dp0..\deps\bin\SDL2.dll" "bin\" || exit /b 1
 )
-if defined %vsdir% (echo Visual Studio at %vsdir%) else (echo Unable to find Visual Studio && exit /b 1)
-@echo call "%vsdir%\VC\Auxiliary\Build\vcvars64.bat" ^|^| exit /b 1 > vcvars.bat
 
+call "%~dp0setup_ninja_env.bat" || exit /b 1
 
-:RUNVCVARS
-call vcvars.bat || exit /b 1
-
-
+if exist "build-ninja\CMakeCache.txt" goto BUILD
 echo Configuring Ninja...
-IF NOT EXIST "build.ninja" (
-cmake -GNinja ^
-    -DHALLEY_PATH=../halley ^
+if not exist CMakePresets.json goto CONFIGURE_NO_PRESET
+
+cmake --preset windows-ninja %HALLEY_NINJA_ARG% || exit /b 1
+goto BUILD
+
+:CONFIGURE_NO_PRESET
+cmake -S . -B build-ninja -G "Ninja Multi-Config" ^
+    -DHALLEY_PATH="%projectDir%\halley" ^
     -DBUILD_HALLEY_TOOLS=0 ^
     -DBUILD_HALLEY_TESTS=0 ^
-    -DCMAKE_INCLUDE_PATH="lib\include" ^
-    -DCMAKE_LIBRARY_PATH="lib\windows64" ^
-    -DCMAKE_BUILD_TYPE=%3 ^
-    .. || exit /b 1
-)
+    -DCMAKE_INCLUDE_PATH="%projectDir%\lib\include" ^
+    -DCMAKE_LIBRARY_PATH="%projectDir%\lib\windows64" ^
+    %HALLEY_NINJA_ARG% || exit /b 1
 
-set targetDllPath="%~1\bin\SDL2.dll"
-if not exist %targetDllPath% (
-    echo Copying SDL2.dll to %targetDllPath%
-    copy SDL2.dll %targetDllPath% || exit /b 1
-)
-
-set binTargetName="%~2-gamebins"
+:BUILD
 echo Building with Ninja...
-cmake.exe --build . --target %binTargetName% --config %3 || exit /b 1
+cmake --build build-ninja --target "%binName%-gamebins" --config %config% || exit /b 1
 
 echo Build successful.

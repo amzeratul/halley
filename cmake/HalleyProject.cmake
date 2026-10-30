@@ -76,8 +76,9 @@ if (MSVC)
 	endif()
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20 /permissive-")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /sdl /Oi /Ot /Oy /Ob2 /Zi")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /sdl /Oi /Ot /Oy /Ob2 /Zi")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /sdl /Oi /Ot /Oy /Ob2")
+	string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}") # Ninja doesn't like "/Ob1 /Ob2"
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /sdl /Oi /Ot /Oy")
 
 	if (FALSE)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
@@ -682,7 +683,9 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		target_link_libraries(${name}-dll ${name}-game ${LINK_LIBRARIES})
 	endif()
 
-	set_property(TARGET ${name} PROPERTY VS_DPI_AWARE "PerMonitor")
+	if (MSVC)
+		target_sources(${name} PRIVATE ${HALLEY_PATH}/cmake/halley_dpi_aware.manifest)
+	endif()
 	#set_property(TARGET ${name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 	if (USE_GDK)
