@@ -153,9 +153,9 @@ namespace Halley {
 		
 		const std::shared_ptr<const Texture>& getTexture() const;
 		const std::shared_ptr<const Texture>& getPaletteTexture() const;
-		const SpriteSheetEntry& getSprite(std::string_view name) const;
+		const SpriteSheetEntry& getSprite(PrehashedStringView name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
-		const SpriteSheetEntry* tryGetSprite(std::string_view name) const;
+		const SpriteSheetEntry* tryGetSprite(PrehashedStringView name) const;
 		const SpriteSheetEntry& getDummySprite() const;
 
 		const Vector<SpriteSheetFrameTag>& getFrameTags() const;
@@ -163,15 +163,15 @@ namespace Halley {
 		const HashMap<String, uint32_t>& getSpriteNameMap() const;
 
 		size_t getSpriteCount() const;
-		std::optional<size_t> getIndex(std::string_view name) const;
-		bool hasSprite(std::string_view name) const;
+		std::optional<size_t> getIndex(PrehashedStringView name) const;
+		bool hasSprite(PrehashedStringView name) const;
 
 		const SpriteSheetEntry* getSpriteAtTexel(Vector2i pos) const;
 
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);
 
-		std::shared_ptr<Material> getMaterial(std::string_view name) const;
+		std::shared_ptr<Material> getMaterial(PrehashedStringView name) const;
 		void clearMaterialCache() const;
 
 		void setDefaultMaterialName(String materialName);
@@ -212,7 +212,7 @@ namespace Halley {
 		mutable std::shared_ptr<const Texture> paletteTexture;
 
 		String defaultMaterialName;
-		mutable HashMap<String, std::weak_ptr<Material>> materials;
+		mutable HashMap<uint64_t, std::weak_ptr<Material>, no_hash<uint64_t>> materials;
 		mutable Mutex materialMutex;
 
 		SpriteSheetPolygonSpanStorage* polygonStorage = nullptr;

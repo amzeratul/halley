@@ -115,13 +115,22 @@ std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& ass
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
 
-Vector<String> ResourceLocator::enumerate(const AssetType type)
+Vector<String> ResourceLocator::enumerate(const AssetType type) const
 {
 	Vector<String> result;
 	for (auto& l: locators) {
 		for (auto& r: l->getAssetDatabase().enumerate(type)) {
 			result.push_back(std::move(r));
 		}
+	}
+	return result;
+}
+
+size_t ResourceLocator::count(AssetType type) const
+{
+	size_t result = 0;
+	for (auto& l: locators) {
+		result += l->getAssetDatabase().count(type);
 	}
 	return result;
 }
@@ -196,7 +205,7 @@ const Metadata* ResourceLocator::getMetaData(const String& asset, AssetType type
 	}
 }
 
-bool ResourceLocator::exists(const String& asset, AssetType type)
+bool ResourceLocator::exists(const String& asset, AssetType type) const
 {
 	return assetToLocator.find(toString(type) + ":" + asset) != assetToLocator.end();
 }

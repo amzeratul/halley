@@ -66,8 +66,9 @@ namespace Halley {
 		void purgeAll();
 		void purgePacks(gsl::span<const String> assetIds, gsl::span<const String> packs);
 
-		Vector<String> enumerate(AssetType type);
-		bool exists(const String& asset, AssetType type);
+		Vector<String> enumerate(AssetType type) const;
+		size_t count(AssetType type) const;
+		bool exists(const String& asset, AssetType type) const;
 
 		size_t getLocatorCount() const;
 		void generateMemoryReport() const;

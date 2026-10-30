@@ -149,11 +149,11 @@ const std::shared_ptr<const Texture>& SpriteSheet::getPaletteTexture() const
 	return paletteTexture;
 }
 
-const SpriteSheetEntry& SpriteSheet::getSprite(std::string_view name) const
+const SpriteSheetEntry& SpriteSheet::getSprite(PrehashedStringView name) const
 {
 	const auto idx = getIndex(name);
 	if (!idx) {
-		Logger::logError("Spritesheet does not contain sprite \"" + String(name) + "\".", true);
+		Logger::logError("Spritesheet does not contain sprite \"" + String(name.str) + "\".", true);
 		return dummySprite;
 	}
 	return getSprite(idx.value());
@@ -164,7 +164,7 @@ const SpriteSheetEntry& SpriteSheet::getSprite(size_t idx) const
 	return sprites[idx];
 }
 
-const SpriteSheetEntry* SpriteSheet::tryGetSprite(std::string_view name) const
+const SpriteSheetEntry* SpriteSheet::tryGetSprite(PrehashedStringView name) const
 {
 	const auto idx = getIndex(name);
 	if (!idx) {
@@ -202,9 +202,9 @@ size_t SpriteSheet::getSpriteCount() const
 	return sprites.size();
 }
 
-std::optional<size_t> SpriteSheet::getIndex(std::string_view name) const
+std::optional<size_t> SpriteSheet::getIndex(PrehashedStringView name) const
 {
-	const auto iter = spriteIdx.find(name);
+	const auto iter = spriteIdx.find(name.str, name.hash);
 	if (iter == spriteIdx.end()) {
 		return {};
 	} else {
@@ -212,9 +212,9 @@ std::optional<size_t> SpriteSheet::getIndex(std::string_view name) const
 	}
 }
 
-bool SpriteSheet::hasSprite(std::string_view name) const
+bool SpriteSheet::hasSprite(PrehashedStringView name) const
 {
-	return spriteIdx.find(name) != spriteIdx.end();
+	return spriteIdx.find(name.str, name.hash) != spriteIdx.end();
 }
 
 const SpriteSheetEntry* SpriteSheet::getSpriteAtTexel(Vector2i pos) const
@@ -304,11 +304,11 @@ void SpriteSheet::setTextureName(String name)
 	textureName = std::move(name);
 }
 
-std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
+std::shared_ptr<Material> SpriteSheet::getMaterial(PrehashedStringView name) const
 {
 	auto lock = UniqueLock(materialMutex);
 
-	const auto iter = materials.find(name);
+	const auto iter = materials.find(name.hash);
 	std::shared_ptr<Material> result;
 	if (iter != materials.end()) {
 		result = iter->second.lock();
@@ -324,7 +324,7 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 				result->set(i, getTexture());
 			}
 		}
-		materials[name] = result;
+		materials[name.hash] = result;
 	}
 
 	return result;

@@ -74,7 +74,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
+		std::shared_ptr<const T> get(PrehashedStringView name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
 		{
 #ifdef VIRTUAL_RESOURCE_GET
 			return std::static_pointer_cast<T>(ofBase<T>().get(name, priority));
@@ -84,7 +84,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> tryGet(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
+		std::shared_ptr<const T> tryGet(PrehashedStringView name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
 		{
 #ifdef VIRTUAL_RESOURCE_GET
 			auto& collection = ofBase<T>();
@@ -102,7 +102,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void preload(std::string_view name) const
+		void preload(PrehashedStringView name) const
 		{
 #ifdef VIRTUAL_RESOURCE_GET
 			static_cast<void>(ofBase<T>().get(name, ResourceLoadPriority::Low));
@@ -174,7 +174,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void unload(std::string_view name) const
+		void unload(PrehashedStringView name) const
 		{
 			ofBase<T>().unload(name);
 		}
@@ -186,13 +186,13 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void setFallback(std::string_view name)
+		void setFallback(String name)
 		{
-			ofBase<T>().setFallback(name);
+			ofBase<T>().setFallback(std::move(name));
 		}
 
 		template <typename T>
-		[[nodiscard]] bool exists(std::string_view name) const
+		[[nodiscard]] bool exists(PrehashedStringView name) const
 		{
 			return ofBase<T>().exists(name);
 		}

@@ -122,6 +122,15 @@ namespace Halley {
 	};
 
 
+	template <typename T, typename Enable = void>
+	struct no_hash {
+		constexpr uint64_t operator()(const T& v) const noexcept
+		{
+			return static_cast<uint64_t>(v);
+		}
+	};
+
+
 	class String;
 
 	template <typename T>

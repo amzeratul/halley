@@ -50,15 +50,15 @@ namespace Halley
 		void setResourceEnumerator(ResourceEnumeratorFunc enumerator);
 
 		void clear();
-		void unload(std::string_view assetId);
+		void unload(PrehashedStringView assetId);
 		void unloadAll();
-		bool exists(std::string_view assetId) const;
-		void setFallback(std::string_view assetId);
+		bool exists(PrehashedStringView assetId) const;
+		void setFallback(String assetId);
 
-		void reload(std::string_view assetId);
+		void reload(PrehashedStringView assetId);
 		void purge(std::string_view assetId);
 
-		std::shared_ptr<Resource> getUntyped(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal);
+		std::shared_ptr<Resource> getUntyped(PrehashedStringView name, ResourceLoadPriority priority = ResourceLoadPriority::Normal);
 
 		Vector<String> enumerate() const;
 
@@ -97,18 +97,18 @@ namespace Halley
 		void getAllResources(Vector<Resource*>& dst) const;
 
 #ifdef VIRTUAL_RESOURCE_GET
-		virtual std::shared_ptr<Resource> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal, bool allowFallback = true);
+		virtual std::shared_ptr<Resource> get(PrehashedStringView name, ResourceLoadPriority priority = ResourceLoadPriority::Normal, bool allowFallback = true);
 #endif
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
-		std::shared_ptr<Resource> doGet(std::string_view name, ResourceLoadPriority priority, bool allowFallback);
+		std::shared_ptr<Resource> doGet(PrehashedStringView name, ResourceLoadPriority priority, bool allowFallback);
 		std::pair<std::shared_ptr<Resource>, bool> loadAsset(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback);
 
 	private:
 		Resources& parent;
-		HashMap<String, uint32_t> resourceMap;
+		HashMap<uint64_t, uint32_t, no_hash<uint64_t>> resourceMap;
 		Vector<Wrapper> resources;
 		String fallback;
 		AssetType type;
@@ -119,11 +119,11 @@ namespace Halley
 		mutable SharedRecursiveMutex mutex;
 		mutable SharedRecursiveMutex loadingMutex;
 		mutable ConditionVariableAny resourceLoaded;
-		HashSet<String> resourcesLoading;
+		HashSet<uint64_t, no_hash<uint64_t>> resourcesLoading;
 
 		Vector<uint32_t> freeIdxs;
 
-		Wrapper& allocateWrapper(const String& id);
+		Wrapper& allocateWrapper(PrehashedStringView id);
 	};
 
 	template <typename T>

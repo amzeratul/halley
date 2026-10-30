@@ -61,6 +61,7 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 		Vector<String> enumerate(AssetType type) const;
+		size_t count(AssetType type) const;
 
 		size_t getMemoryUsage() const;
 

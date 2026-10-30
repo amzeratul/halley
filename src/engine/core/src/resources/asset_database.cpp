@@ -172,6 +172,15 @@ Vector<String> AssetDatabase::enumerate(AssetType type) const
 	return result;
 }
 
+size_t AssetDatabase::count(AssetType type) const
+{
+	if (hasDatabase(type)) {
+		return getDatabase(type).getAssets().size();
+	} else {
+		return 0;
+	}
+}
+
 size_t AssetDatabase::getMemoryUsage() const
 {
 	size_t result = 0;

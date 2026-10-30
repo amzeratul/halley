@@ -26,11 +26,11 @@ void ResourceCollectionBase::clear()
 	resourceMap.clear();
 }
 
-void ResourceCollectionBase::unload(std::string_view assetId)
+void ResourceCollectionBase::unload(PrehashedStringView assetId)
 {
 	UniqueLock lock(mutex);
 
-	if (const auto iter = resourceMap.find(assetId); iter != resourceMap.end()) {
+	if (const auto iter = resourceMap.find(assetId.hash); iter != resourceMap.end()) {
 		const uint32_t idx = iter->second;
 		resources[idx].res = {};
 		resourceMap.erase(iter);
@@ -43,26 +43,26 @@ void ResourceCollectionBase::unloadAll()
 	clear();
 }
 
-void ResourceCollectionBase::reload(std::string_view assetId)
+void ResourceCollectionBase::reload(PrehashedStringView assetId)
 {
 	SharedLock lock(mutex);
 	
-	const auto res = resourceMap.find(assetId);
+	const auto res = resourceMap.find(assetId.hash);
 	if (res != resourceMap.end()) {
 		const auto idx = res->second;
 		auto& oldAsset = *resources[idx].res;
 		try {
-			const auto [newAsset, loaded] = loadAsset(assetId, ResourceLoadPriority::High, false);
-			newAsset->setAssetId(assetId);
+			const auto [newAsset, loaded] = loadAsset(assetId.str, ResourceLoadPriority::High, false);
+			newAsset->setAssetId(assetId.str);
 			newAsset->onLoaded(parent);
 
 			const auto oldIdx = oldAsset.getAssetIdx();
 			oldAsset.reloadResource(std::move(*newAsset));
 			oldAsset.setAssetIdx(oldIdx);
 		} catch (std::exception& e) {
-			Logger::logError("Error while reloading " + String(assetId) + ": " + e.what());
+			Logger::logError("Error while reloading " + String(assetId.str) + ": " + e.what());
 		} catch (...) {
-			Logger::logError("Unknown error while reloading " + String(assetId));
+			Logger::logError("Unknown error while reloading " + String(assetId.str));
 		}
 	}
 }
@@ -74,7 +74,7 @@ void ResourceCollectionBase::purge(std::string_view assetId)
 	}
 }
 
-std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(std::string_view name, ResourceLoadPriority priority)
+std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(PrehashedStringView name, ResourceLoadPriority priority)
 {
 #ifdef VIRTUAL_RESOURCE_GET
 	return get(name, priority, true);
@@ -249,13 +249,13 @@ void ResourceCollectionBase::getAllResources(Vector<Resource*>& dst) const
 }
 
 #ifdef VIRTUAL_RESOURCE_GET
-std::shared_ptr<Resource> ResourceCollectionBase::get(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
+std::shared_ptr<Resource> ResourceCollectionBase::get(PrehashedStringView assetId, ResourceLoadPriority priority, bool allowFallback)
 {
 	return doGet(assetId, priority, allowFallback);
 }
 #endif
 
-std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
+std::shared_ptr<Resource> ResourceCollectionBase::doGet(PrehashedStringView assetId, ResourceLoadPriority priority, bool allowFallback)
 {
 	using namespace std::chrono_literals;
 
@@ -264,7 +264,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 			// First of all, look in cache and return if it's there
 			// This is the most common case, and we use a shared lock to avoid stopping other threads
 			SharedLock lock(mutex);
-			if (const auto res = resourceMap.find(assetId); res != resourceMap.end()) {
+			if (const auto res = resourceMap.find(assetId.hash); res != resourceMap.end()) {
 				// Found resource, all good
 				return resources[res->second].res;
 			}
@@ -274,20 +274,20 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 			// Resource is not cached
 			// Another thread might already be loading it - check for that, and wait if so
 			SharedLock lock(loadingMutex);
-			if (resourcesLoading.contains(assetId)) {
+			if (resourcesLoading.contains(assetId.hash)) {
 				do {
 					resourceLoaded.waitFor(lock, 100us);
-				} while (resourcesLoading.contains(assetId));
+				} while (resourcesLoading.contains(assetId.hash));
 				lock.unlock();
 
 				// Should be loaded, try again
 				SharedLock lock2(mutex);
-				if (const auto res = resourceMap.find(assetId); res != resourceMap.end()) {
+				if (const auto res = resourceMap.find(assetId.hash); res != resourceMap.end()) {
 					// Found resource
 					return resources[res->second].res;
 				} else {
 					// This means the previous one failed, we're giving up
-					Logger::logError("Resource not found after waiting for it to be loaded elsewhere: \"" + toString(type) + ":" + assetId + "\"");
+					Logger::logError("Resource not found after waiting for it to be loaded elsewhere: \"" + toString(type) + ":" + assetId.str + "\"");
 					return {};
 				}
 			}
@@ -299,24 +299,24 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		{
 			// Resource not found; claim loading it
 			UniqueLock lock(loadingMutex);
-			if (resourcesLoading.contains(assetId)) {
+			if (resourcesLoading.contains(assetId.hash)) {
 				// Someone else already loading it, between our last lock and now.
 				// Wait until signaled then do the whole thing again
 				resourceLoaded.waitFor(lock, 100us);
 				continue;
 			}
 			// Claim loading, we're now responsible for this resource being loaded
-			resourcesLoading.insert(assetId);
+			resourcesLoading.insert(assetId.hash);
 		}
 
 		// Load resource from disk
 		std::shared_ptr<Resource> newRes;
 		bool loaded = false;
 		try {
-			std::tie(newRes, loaded) = loadAsset(assetId, priority, allowFallback);
+			std::tie(newRes, loaded) = loadAsset(assetId.str, priority, allowFallback);
 		} catch (...) {
 			UniqueLock lock(loadingMutex);
-			resourcesLoading.erase(assetId);
+			resourcesLoading.erase(assetId.hash);
 			resourceLoaded.notifyAll();
 			throw;
 		}
@@ -336,7 +336,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		// Notify done loading
 		{
 			UniqueLock lock(loadingMutex);
-			resourcesLoading.erase(assetId);
+			resourcesLoading.erase(assetId.hash);
 		}
 		if (loaded) {
 			resourceLoaded.notifyAll();
@@ -346,34 +346,34 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 	}
 }
 
-ResourceCollectionBase::Wrapper& ResourceCollectionBase::allocateWrapper(const String& id)
+ResourceCollectionBase::Wrapper& ResourceCollectionBase::allocateWrapper(PrehashedStringView id)
 {
 	if (freeIdxs.empty()) {
-		resourceMap.emplace(id, static_cast<uint32_t>(resources.size()));
+		resourceMap.emplace(id.hash, static_cast<uint32_t>(resources.size()));
 		return resources.emplace_back();
 	} else {
 		const auto idx = freeIdxs.back();
 		freeIdxs.pop_back();
-		resourceMap.emplace(id, idx);
+		resourceMap.emplace(id.hash, idx);
 		return resources[idx];
 	}
 }
 
-bool ResourceCollectionBase::exists(std::string_view assetId) const
+bool ResourceCollectionBase::exists(PrehashedStringView assetId) const
 {
 	// Look in cache
 	SharedLock lock(mutex);
-	if (resourceMap.contains(assetId)) {
+	if (resourceMap.contains(assetId.hash)) {
 		return true;
 	}
 	lock.unlock();
 
-	return parent.locator->exists(assetId, type);
+	return parent.locator->exists(assetId.str, type);
 }
 
-void ResourceCollectionBase::setFallback(std::string_view assetId)
+void ResourceCollectionBase::setFallback(String assetId)
 {
-	fallback = assetId;
+	fallback = std::move(assetId);
 }
 
 void ResourceCollectionBase::setResourceLoader(ResourceLoaderFunc loader)
