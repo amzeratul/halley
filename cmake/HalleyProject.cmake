@@ -94,6 +94,10 @@ if (MSVC)
 	# This enables /Z7 instead of /Zi
 	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo,Release>:Embedded>")
 
+	if (CMAKE_GENERATOR STREQUAL "Ninja Multi-Config" AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4651")
+	endif()
+
 	if (FALSE)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
 	endif()
