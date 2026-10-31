@@ -129,7 +129,7 @@ EntityDataDelta EntityFactory::serializeEntityAsDelta(EntityRef entity, const Se
 	if (entity.getPrefab()) {
 		entityData.setPrefab(entity.getPrefab()->getAssetId());
 	}
-	return entityDataToPrefabDelta(entityData, entity.getPrefab(), deltaOptions, debugListener);
+	return entityDataToPrefabDelta(std::move(entityData), entity.getPrefab(), deltaOptions, debugListener);
 }
 
 EntityDataDelta EntityFactory::serializeEntityDataAsDelta(const EntityData& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener) const
@@ -137,17 +137,29 @@ EntityDataDelta EntityFactory::serializeEntityDataAsDelta(const EntityData& enti
 	return entityDataToPrefabDelta(entityData, prefab, deltaOptions, debugListener);
 }
 
-EntityDataDelta EntityFactory::entityDataToPrefabDelta(const EntityData& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener) const
+EntityDataDelta EntityFactory::serializeEntityDataAsDelta(EntityData&& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener) const
+{
+	return entityDataToPrefabDelta(std::move(entityData), prefab, deltaOptions, debugListener);
+}
+
+template <typename T>
+EntityDataDelta EntityFactory::entityDataToPrefabDelta(T&& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener) const
 {
 	if (prefab) {
 		HalleyAssertDev(entityData.getPrefab() == prefab->getAssetId()); // Caller needs to preset this
-		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
+		const auto prefabUUID = entityData.getPrefabUUID();
+		
+		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(prefabUUID)) {
+			const auto instanceUUID = entityData.getInstanceUUID();
+
 			if (prefabData->hasPrefabInstances() || debugListener) {
 				// This path requires instancing because of nested prefabs
-				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
-				auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
-				delta.setInstanceUUID(entityData.getInstanceUUID());
-				delta.setPrefabUUID(entityData.getPrefabUUID());
+				const auto instancedData = prefabData->instantiatePrefabsAsCopy(instanceUUID, resources);
+				auto delta = debugListener
+					? EntityDataDelta(instancedData, std::as_const(entityData), deltaOptions)
+					: EntityDataDelta(instancedData, forwardLike<T>(entityData), deltaOptions);
+				delta.setInstanceUUID(instanceUUID);
+				delta.setPrefabUUID(prefabUUID);
 
 				if (debugListener) {
 					debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
@@ -155,19 +167,23 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(const EntityData& entityD
 
 				return delta;
 			} else {
+				/*
+				// Validate prepare
+				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+				auto delta2 = EntityDataDelta(instancedData, entityData, deltaOptions);
+				*/
+
 				// No copy path
-				auto delta = EntityDataDelta(*prefabData, entityData, entityData.getInstanceUUID(), EntityDataDelta::Mode::Instancing, deltaOptions);
-				delta.setInstanceUUID(entityData.getInstanceUUID());
-				delta.setPrefabUUID(entityData.getPrefabUUID());
+				auto delta = EntityDataDelta(*prefabData, forwardLike<T>(entityData), instanceUUID, EntityDataDelta::Mode::Instancing, deltaOptions);
+				delta.setInstanceUUID(instanceUUID);
+				delta.setPrefabUUID(prefabUUID);
 
 				/*
 				// Validate
-				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
-				auto delta2 = EntityDataDelta(instancedData, entityData, deltaOptions);
 				delta2.setInstanceUUID(entityData.getInstanceUUID());
 				delta2.setPrefabUUID(entityData.getPrefabUUID());
 				if (delta != delta2) {
-					Logger::logError("Algorithm mismatch in entityDataToPrefabData with " + prefab->getAssetId());
+					Logger::logError("Algorithm mismatch in entityDataToPrefabDelta with " + prefab->getAssetId());
 					Logger::logError("Old:\n\n" + delta2.toYAML() + "\n");
 					Logger::logError("New:\n\n" + delta.toYAML() + "\n");
 				}
@@ -178,7 +194,7 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(const EntityData& entityD
 		}
 	}
 	//Logger::logInfo("Entity " + entityData.getName() + " has no prefab or prefab data associated with it.");
-	return EntityDataDelta(entityData, deltaOptions);
+	return EntityDataDelta(forwardLike<T>(entityData), deltaOptions);
 }
 
 uint64_t EntityFactory::hashEntity(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions)

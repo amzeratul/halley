@@ -1978,22 +1978,32 @@ ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to,
 			// Old path, slow but supports hints
 			ConfigNode to2 = ConfigNode(from);
 			to2.applyMapDelta(to);
-			return doCreateDelta(from, to2, BreadCrumb(), hints);
+			return doCreateDelta(from, std::move(to2), BreadCrumb(), hints);
 		} else {
 			// This path is faster, but doesn't support hints
 			return createDeltaFromMapDelta(from, to);
-			/*
-			ConfigNode to2 = ConfigNode(from);
-			to2.applyMapDelta(to);
-			auto oldRes = doCreateDelta(from, to2, BreadCrumb(), hints);
-			if (res != oldRes) {
-				Logger::logError("New and old ConfigNode createDelta algorithm don't agree");
-			}
-			*/
 		}
 	}
 
 	return doCreateDelta(from, to, BreadCrumb(), hints);
+}
+
+ConfigNode ConfigNode::createDelta(const ConfigNode& from, ConfigNode&& to, const IDeltaCodeHints* hints)
+{
+	if (from.getType() == ConfigNodeType::Map && to.getType() == ConfigNodeType::DeltaMap) {
+		// Deltas need a special algorithm
+		if (hints) {
+			// Old path, slow but supports hints
+			ConfigNode to2 = ConfigNode(from);
+			to2.applyMapDelta(to);
+			return doCreateDelta(from, std::move(to2), BreadCrumb(), hints);
+		} else {
+			// This path is faster, but doesn't support hints
+			return createDeltaFromMapDelta(from, std::move(to));
+		}
+	}
+
+	return doCreateDelta(from, std::move(to), BreadCrumb(), hints);
 }
 
 ConfigNode ConfigNode::applyDelta(const ConfigNode& from, const ConfigNode& delta)
@@ -2003,7 +2013,8 @@ ConfigNode ConfigNode::applyDelta(const ConfigNode& from, const ConfigNode& delt
 	return result;
 }
 
-ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
+template <typename To>
+ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, To&& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
 	// This allows things (e.g. ConfigNodeSerializer) to return Noop for fields that should skip the delta, for example when a field is not relevant to save data
 	if (to.getType() == ConfigNodeType::Noop) {
@@ -2016,13 +2027,13 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 		}
 
 		if (from.getType() == ConfigNodeType::Map || from.getType() == ConfigNodeType::DeltaMap) {
-			auto delta = createMapDelta(from, to, breadCrumb, hints);
+			auto delta = createMapDelta(from, forwardLike<To>(to), breadCrumb, hints);
 			delta.auxData = breadCrumb.idx.value_or(0);
 			return delta;
 		}
 
 		if (from.getType() == ConfigNodeType::Sequence) {
-			auto delta = createSequenceDelta(from, to, breadCrumb, hints);
+			auto delta = createSequenceDelta(from, forwardLike<To>(to), breadCrumb, hints);
 			delta.auxData = breadCrumb.idx.value_or(0);
 			return delta;
 		}
@@ -2042,18 +2053,19 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 	}
 
 	// No delta coding available, return the outcome
-	return ConfigNode(to);
+	return ConfigNode(forwardLike<To>(to));
 }
 
-ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
+template <typename To>
+ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, To&& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
 	const auto& fromMap = from.asMap();
-	const auto& toMap = to.asMap();
+	auto& toMap = to.asMap();
 
 	// Trivial delta
 	const auto isNoop = [](const auto& e) { return e.second.getType() == ConfigNodeType::Noop; };
 	if (fromMap.empty() && !toMap.empty() && std::none_of(toMap.begin(), toMap.end(), isNoop)) {
-		auto result = ConfigNode(to);
+		auto result = ConfigNode(forwardLike<To>(to));
 		result.type = ConfigNodeType::DeltaMap;
 		return result;
 	}
@@ -2073,20 +2085,23 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 			
 	// Store the new keys if there's a change
 	size_t matchingKeys = 0;
-	for (const auto& [k, v]: toMap) {
+	for (auto& e: toMap) {
+		const auto& k = e.first;
+		auto& v = e.second;
+
 		if (v.getType() != ConfigNodeType::Noop) {
 			const auto origIter = fromMap.find(k);
 
 			if (origIter != fromMap.end()) {
 				// Was present before, delta compress and store if it's different
-				auto delta = doCreateDelta(origIter->second, v, BreadCrumb(breadCrumb, k), hints);
+				auto delta = doCreateDelta(origIter->second, forwardLike<To>(v), BreadCrumb(breadCrumb, k), hints);
 				if (delta.getType() != ConfigNodeType::Noop) {
 					getResult()[k] = std::move(delta);
 				}
 				++matchingKeys;
 			} else {
 				// Is new, store all of it
-				getResult()[k] = ConfigNode(v);
+				getResult()[k] = ConfigNode(forwardLike<To>(v));
 			}			
 		}
 	}
@@ -2116,7 +2131,8 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 	return _result;
 }
 
-ConfigNode ConfigNode::createDeltaFromMapDelta(const ConfigNode& from, const ConfigNode& delta)
+template <typename To>
+ConfigNode ConfigNode::createDeltaFromMapDelta(const ConfigNode& from, To&& delta)
 {
 	const auto& fromMap = from.asMap();
 
@@ -2132,7 +2148,10 @@ ConfigNode ConfigNode::createDeltaFromMapDelta(const ConfigNode& from, const Con
 		return result;
 	};
 
-	for (const auto& [k, v]: delta.asMap()) {
+	for (auto& e: delta.asMap()) {
+		const auto& k = e.first;
+		auto& v = e.second;
+
 		const auto deltaType = v.getType();
 		if (deltaType == ConfigNodeType::Noop) {
 			continue;
@@ -2144,20 +2163,20 @@ ConfigNode ConfigNode::createDeltaFromMapDelta(const ConfigNode& from, const Con
 				getResult()[k] = ConfigNode(DelType());
 			}
 		} else if (iter == fromMap.end()) {
-			getResult()[k] = ConfigNode(v);
+			getResult()[k] = ConfigNode(forwardLike<To>(v));
 		} else {
 			const auto& fromValue = iter->second;
 			const auto fromType = fromValue.getType();
 
 			ConfigNode fieldDelta;
 			if ((fromType == ConfigNodeType::Map || fromType == ConfigNodeType::DeltaMap) && deltaType == ConfigNodeType::DeltaMap) {
-				fieldDelta = createDeltaFromMapDelta(fromValue, v);
+				fieldDelta = createDeltaFromMapDelta(fromValue, forwardLike<To>(v));
 			} else if (fromType == ConfigNodeType::Sequence && deltaType == ConfigNodeType::DeltaSequence) {
 				fieldDelta = doCreateDelta(fromValue, applyDelta(fromValue, v), BreadCrumb(), nullptr);
 			} else if (deltaType == ConfigNodeType::Idx) {
 				throw Exception("Invalid ConfigNode delta type at this position", HalleyExceptions::Utils);
 			} else {
-				fieldDelta = doCreateDelta(fromValue, v, BreadCrumb(), nullptr);
+				fieldDelta = doCreateDelta(fromValue, forwardLike<To>(v), BreadCrumb(), nullptr);
 			}
 
 			if (fieldDelta.getType() != ConfigNodeType::Noop) {
@@ -2169,7 +2188,8 @@ ConfigNode ConfigNode::createDeltaFromMapDelta(const ConfigNode& from, const Con
 	return resultAllocated ? std::move(result) : ConfigNode(NoopType());
 }
 
-ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
+template <typename To>
+ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, To&& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
 	auto tryExtend = [] (Vector<ConfigNode>& seq, int idx) -> bool
 	{
@@ -2194,7 +2214,7 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 		return ConfigNode(NoopType());
 	}
 	if (!hints) {
-		return ConfigNode(to);
+		return ConfigNode(forwardLike<To>(to));
 	}
 
     auto& resultSeq = result.asSequence();

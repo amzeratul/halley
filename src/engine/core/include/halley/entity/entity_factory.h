@@ -88,6 +88,7 @@ namespace Halley {
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true, IEntityFactorySerializationDebugListener* debugListener = nullptr);
 		EntityDataDelta serializeEntityDataAsDelta(const EntityData& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener = nullptr) const;
+		EntityDataDelta serializeEntityDataAsDelta(EntityData&& entityData, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener = nullptr) const;
 
 		uint64_t hashEntity(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions);
 
@@ -111,7 +112,8 @@ namespace Halley {
 
 		EntityData doSerializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent, const String& lastPrefab);
 		
-		EntityDataDelta entityDataToPrefabDelta(const EntityData& data, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener = nullptr) const;
+		template <typename T>
+		EntityDataDelta entityDataToPrefabDelta(T&& data, const std::shared_ptr<const Prefab>& prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener = nullptr) const;
 
 		void doHashEntity(Hash::Hasher& hasher, EntityRef entity, const SerializationOptions& options, const EntityFactoryContext& serializeContext, const EntityDataDelta::Options& deltaOptions);
 

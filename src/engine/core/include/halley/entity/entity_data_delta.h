@@ -42,8 +42,11 @@ namespace Halley {
 		
         EntityDataDelta();
 		explicit EntityDataDelta(const EntityData& to, const Options& options = Options());
+		explicit EntityDataDelta(EntityData&& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
+		EntityDataDelta(const EntityData& from, EntityData&& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, Mode mode, const Options& options = Options());
+		EntityDataDelta(const EntityData& from, EntityData&& to, const UUID& rootUUID, Mode mode, const Options& options = Options());
 
 		EntityDataDelta(const EntityDataDelta& other) = default;
 		EntityDataDelta(EntityDataDelta&& other) noexcept = default;
@@ -147,6 +150,9 @@ namespace Halley {
 		uint32_t getFieldsPresent() const;
 
 		Vector<std::pair<String, ConfigNode>> getComponentEmptyStructure() const;
+
+		template <typename To>
+		void make(const EntityData& from, To&& to, const UUID& rootUUID, Mode mode, const Options& options);
 	};
 
 	class SceneDataDelta {

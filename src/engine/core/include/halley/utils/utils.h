@@ -373,6 +373,16 @@ namespace Halley {
         return (T) (T(val >> n) | T(val << ((8 * sizeof(T)) - n)));
     }
 
+	template <typename To, typename T>
+	[[nodiscard]] constexpr decltype(auto) forwardLike(T& value)
+	{
+		if constexpr (std::is_lvalue_reference_v<To>) {
+			return value;
+		} else {
+			return std::move(value);
+		}
+	}
+
 	// Prefetch data from memory
 	static inline void prefetchL1(const void* p) {
 #if defined( _MSC_VER)

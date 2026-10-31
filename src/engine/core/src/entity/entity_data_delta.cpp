@@ -28,12 +28,34 @@ EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
 {
 }
 
+EntityDataDelta::EntityDataDelta(EntityData&& to, const Options& options)
+	: EntityDataDelta(EntityData(), std::move(to), options)
+{
+}
+
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options)
 	: EntityDataDelta(from, to, to.getInstanceUUID(), Mode::Regular, options)
 {
 }
 
+EntityDataDelta::EntityDataDelta(const EntityData& from, EntityData&& to, const Options& options)
+{
+	auto rootUUID = to.getInstanceUUID();
+	make(from, std::move(to), rootUUID, Mode::Regular, options);
+}
+
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, Mode mode, const Options& options)
+{
+	make(from, to, rootUUID, mode, options);
+}
+
+EntityDataDelta::EntityDataDelta(const EntityData& from, EntityData&& to, const UUID& rootUUID, Mode mode, const Options& options)
+{
+	make(from, std::move(to), rootUUID, mode, options);
+}
+
+template <typename To>
+void EntityDataDelta::make(const EntityData& from, To&& to, const UUID& rootUUID, Mode mode, const Options& options)
 {
 	// In Instancing mode, "from" is an uninstantiated prefab, so use the instance UUIDs that EntityData::doInstantiatePrefabs() would have given it
 	const auto fromInstanceUUID = mode == Mode::Instancing ?
@@ -52,19 +74,19 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	};
 
 	if (from.prefab != to.prefab) {
-		prefab = to.prefab;
+		prefab = forwardLike<To>(to.prefab);
 	}
 	if (from.name != to.name && options.canSerializeName) {
-		name = to.name;
+		name = forwardLike<To>(to.name);
 	}
 	if (from.icon != to.icon && options.canSerializeIcon) {
-		icon = to.icon;
+		icon = forwardLike<To>(to.icon);
 	}
 	if (from.variant != to.variant) {
-		variant = to.variant;
+		variant = forwardLike<To>(to.variant);
 	}
 	if (from.enableRules != to.enableRules) {
-		enableRules = to.enableRules;
+		enableRules = forwardLike<To>(to.enableRules);
 	}
 	if (from.flags != to.flags) {
 		flags = to.flags;
@@ -81,7 +103,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 	// Children
 	if (!options.shallow) {
-		for (const auto& toChild: to.children) {
+		for (auto& toChild: to.children) {
 			if (!options.allowNonSerializable && toChild.getFlag(IEntityConcreteData::Flag::NotSerializable)) {
 				// Ignore non-serializables
 				continue;
@@ -104,16 +126,17 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 				if (alreadyExists) {
 					// Potentially modified
-					auto delta = EntityDataDelta(fromChild, toChild, rootUUID, mode, options);
+					const auto uuid = toChild.instanceUUID.isValid() ? toChild.instanceUUID : toChild.prefabUUID;
+					auto delta = EntityDataDelta(fromChild, forwardLike<To>(toChild), rootUUID, mode, options);
 					if (delta.hasChange()) {
-						childrenChanged.emplace_back(toChild.instanceUUID.isValid() ? toChild.instanceUUID : toChild.prefabUUID, std::move(delta));
+						childrenChanged.emplace_back(uuid, std::move(delta));
 					}
 					break;
 				}
 			}
 			if (!alreadyExists) {
 				// Inserted
-				childrenAdded.emplace_back(toChild);
+				childrenAdded.emplace_back(forwardLike<To>(toChild));
 				childrenAdded.back().postProcessAddedChild(options.ignoreComponents, options.omitEmptyComponents);
 			}
 		}
@@ -152,7 +175,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	}
 
 	// Components
-	for (const auto& toComponent: to.components) {
+	for (auto& toComponent: to.components) {
 		const String& compId = toComponent.first;
 
 		if (!options.ignoreComponents.contains(compId)) {
@@ -162,21 +185,24 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				ConfigNode delta;
 				if (options.interpolatorSet) {
 					delta = options.interpolatorSet->createComponentDelta(fromInstanceUUID, fromIter->first, fromIter->second, toComponent.second);
+				} else if (options.deltaComponents) {
+					delta = ConfigNode::createDelta(fromIter->second, forwardLike<To>(toComponent.second));
 				} else {
-					delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
+					// Can't forward this, will be used again in a few lines
+					delta = ConfigNode::createDelta(fromIter->second, std::as_const(toComponent.second));
 				}
 				
 				if (delta.getType() == ConfigNodeType::DeltaMap && !delta.asMap().empty()) {
 					if (options.deltaComponents) {
 						componentsChanged.emplace_back(toComponent.first, std::move(delta));
 					} else {
-						componentsChanged.emplace_back(toComponent.first, toComponent.second);
+						componentsChanged.emplace_back(toComponent.first, forwardLike<To>(toComponent.second));
 					}
 				}
 			} else {
 				// Inserted
 				if (!options.ignoreInsertComponents.contains(compId)) {
-					componentsChanged.emplace_back(toComponent.first, ConfigNode::createDelta(ConfigNode::MapType(), toComponent.second));
+					componentsChanged.emplace_back(toComponent.first, ConfigNode::createDelta(ConfigNode::MapType(), forwardLike<To>(toComponent.second)));
 				}
 			}
 		}

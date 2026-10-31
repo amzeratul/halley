@@ -674,6 +674,7 @@ namespace Halley {
 		};
 
 		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints = nullptr);
+		static ConfigNode createDelta(const ConfigNode& from, ConfigNode&& to, const IDeltaCodeHints* hints = nullptr);
 		static ConfigNode applyDelta(const ConfigNode& from, const ConfigNode& delta);
 		void applyDelta(const ConfigNode& delta);
 		void decayDeltaArtifacts();
@@ -784,10 +785,15 @@ namespace Halley {
 
 		bool isNullOrEmpty() const;
 
-		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
-		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
-		static ConfigNode createDeltaFromMapDelta(const ConfigNode& from, const ConfigNode& delta);
-		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+		template <typename To>
+		static ConfigNode doCreateDelta(const ConfigNode& from, To&& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+		template <typename To>
+		static ConfigNode createMapDelta(const ConfigNode& from, To&& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+		template <typename To>
+		static ConfigNode createDeltaFromMapDelta(const ConfigNode& from, To&& delta);
+		template <typename To>
+		static ConfigNode createSequenceDelta(const ConfigNode& from, To&& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+
 		void applyMapDelta(const ConfigNode& delta);
 		void applySequenceDelta(const ConfigNode& delta);
 
