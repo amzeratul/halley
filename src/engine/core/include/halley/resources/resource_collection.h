@@ -142,7 +142,7 @@ namespace Halley
 		}
 
 #ifndef VIRTUAL_RESOURCE_GET
-		std::shared_ptr<const T> get(std::string_view assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(PrehashedStringView assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return std::static_pointer_cast<T>(doGet(assetId, priority, true));
 		}
