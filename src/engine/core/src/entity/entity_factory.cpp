@@ -9,6 +9,7 @@
 #include "halley/entity/entity_data_instanced.h"
 #include "halley/entity/world.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/entity/entity_data_applied_delta.h"
 #include "halley/entity/services/enable_rules_service.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/resources/resources.h"
@@ -472,7 +473,7 @@ EntityRef EntityFactory::createEntity(const String& prefabName, EntityRef parent
 	return createEntity(data, mask, parent, scene);
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRef parent, EntityScene* scene, EntityFactoryContext* parentContext, String fallbackVariant)
+EntityRef EntityFactory::createEntity(const IEntityConcreteData& data, int mask, EntityRef parent, EntityScene* scene, EntityFactoryContext* parentContext, String fallbackVariant)
 {
 	const auto context = makeContext(data, {}, scene, false, mask, parentContext, nullptr, std::move(fallbackVariant));
 	const auto entity = tryGetEntity(data.getInstanceUUID(), *context, false);
@@ -603,10 +604,13 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 	if (entity.getNumComponents() == 0) {
 		// Simple population
 		for (size_t i = 0; i < nComponents; ++i) {
-			const auto& [componentName, componentData] = data.getComponent(i);
-			const auto result = reflection.createComponent(context, componentName, entity, componentData);
-			if (!result.created) {
-				Logger::logError("Failed to create component \"" + componentName + "\" on empty entity " + entity.getName() + ". Data was: \n" + YAMLConvert::generateYAML(componentData));
+			ConfigNode buffer;
+			const auto& [componentName, componentData] = data.getComponentApplied(i, buffer);
+			if (componentData) {
+				const auto result = reflection.createComponent(context, componentName, entity, *componentData);
+				if (!result.created) {
+					Logger::logError("Failed to create component \"" + String(componentName) + "\" on empty entity " + entity.getName() + ". Data was: \n" + YAMLConvert::generateYAML(*componentData));
+				}
 			}
 		}
 	} else {
@@ -618,14 +622,17 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 
 		// Populate
 		for (size_t i = 0; i < nComponents; ++i) {
-			const auto& [componentName, componentData] = data.getComponent(i);
-			const auto result = reflection.createComponent(context, componentName, entity, componentData);
-			if (!result.created) {
-				if (auto iter = std::find(existingComps.begin(), existingComps.end(), result.componentId); iter != existingComps.end()) {
-					existingComps.erase(iter);
-				}
-				if (result.componentId == -1) {
-					Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName() + ", and couldn't find it on entity either. Data was:\n" + YAMLConvert::generateYAML(componentData));
+			ConfigNode buffer;
+			const auto& [componentName, componentData] = data.getComponentApplied(i, buffer);
+			if (componentData) {
+				const auto result = reflection.createComponent(context, componentName, entity, *componentData);
+				if (!result.created) {
+					if (auto iter = std::find(existingComps.begin(), existingComps.end(), result.componentId); iter != existingComps.end()) {
+						existingComps.erase(iter);
+					}
+					if (result.componentId == -1) {
+						Logger::logError("Failed to create component \"" + String(componentName) + "\" on entity " + entity.getName() + ", and couldn't find it on entity either. Data was:\n" + YAMLConvert::generateYAML(*componentData));
+					}
 				}
 			}
 		}
@@ -695,7 +702,8 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 	// Update children
 	const auto nChildren = data.getNumChildren();
 	for (size_t i = 0; i < nChildren; ++i) {
-		const auto& child = data.getChild(i);
+		EntityDataAppliedDelta buffer;
+		const auto& child = data.getChild(i, buffer);
 		if (context->needsNewContextFor(child)) {
 			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
 			auto childEntity = tryGetEntity(child.getInstanceUUID(), *newContext, false);
@@ -718,7 +726,8 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 	Vector<UUID> childInstanceUUIDs;
 	childInstanceUUIDs.reserve(nChildren);
 	for (size_t i = 0; i < nChildren; ++i) {
-		const auto& child = data.getChild(i);
+		EntityDataAppliedDelta buffer;
+		const auto& child = data.getChild(i, buffer);
 		childInstanceUUIDs.push_back(child.getInstanceUUID());
 	}
 	entity.sortChildrenByInstanceUUIDs(childInstanceUUIDs);
@@ -770,7 +779,8 @@ void EntityFactory::preInstantiate(const IEntityConcreteData& data, WorldPartiti
 
 	const auto nChildren = data.getNumChildren();
 	for (size_t i = 0; i < nChildren; ++i) {
-		preInstantiate(data.getChild(i), worldPartition, entities);
+		EntityDataAppliedDelta buffer;
+		preInstantiate(data.getChild(i, buffer), worldPartition, entities);
 	}
 }
 
@@ -798,7 +808,8 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 
 		const auto nChildren = data.getNumChildren();
 		for (size_t i = 0; i < nChildren; ++i) {
-			const auto& child = data.getChild(i);
+			EntityDataAppliedDelta buffer;
+			const auto& child = data.getChild(i, buffer);
 			preInstantiateEntities(child, context, depth + 1);
 		}
 	}

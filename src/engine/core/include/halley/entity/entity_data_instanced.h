@@ -19,9 +19,9 @@ namespace Halley {
 		const UUID& getInstanceUUID() const override;
 		const UUID& getPrefabUUID() const override;
 		size_t getNumChildren() const override;
-		const IEntityConcreteData& getChild(size_t idx) const override;
+		const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const override;
 		size_t getNumComponents() const override;
-		const std::pair<String, ConfigNode>& getComponent(size_t idx) const override;
+		std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> getComponentAndDelta(size_t idx) const override;
 
 	private:
 		const EntityData* prefabData = nullptr;

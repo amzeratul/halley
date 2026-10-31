@@ -16,11 +16,14 @@ EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEn
 
 	const auto& nComponents = instanceData.getNumComponents();
 	for (size_t i = 0; i < nComponents; ++i) {
-		const auto& component = instanceData.getComponent(i);
-		if (prefabData.tryGetComponent(component.first)) {
-			componentOverrides[component.first] = component;
-		} else if (allowAddComponensNotInPrefab) {
-			componentsAdded.emplace_back(component);
+		ConfigNode buffer;
+		const auto& component = instanceData.getComponentApplied(i, buffer);
+		if (component.second) {
+			if (prefabData.tryGetComponent(component.first)) {
+				componentOverrides[component.first] = std::pair{ component.first, *component.second };
+			} else if (allowAddComponensNotInPrefab) {
+				componentsAdded.emplace_back(std::pair{ component.first, *component.second });
+			}
 		}
 	}
 }
@@ -89,7 +92,7 @@ size_t EntityDataInstanced::getNumChildren() const
 	return prefabData->getNumChildren();
 }
 
-const IEntityConcreteData& EntityDataInstanced::getChild(size_t idx) const
+const IEntityConcreteData& EntityDataInstanced::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
 {
 	return children[idx];
 }
@@ -99,7 +102,7 @@ size_t EntityDataInstanced::getNumComponents() const
 	return prefabData->getNumComponents() + componentsAdded.size();
 }
 
-const std::pair<String, ConfigNode>& EntityDataInstanced::getComponent(size_t idx) const
+std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> EntityDataInstanced::getComponentAndDelta(size_t idx) const
 {
 	const size_t numComponentsInPrefab = prefabData->getNumComponents();
 
@@ -111,21 +114,18 @@ const std::pair<String, ConfigNode>& EntityDataInstanced::getComponent(size_t id
 			const auto& fromData = original.second;
 			const auto& toData = iter->second.second;
 			if (toData.asMap().empty()) {
-				return original;
+				return { original.first, &original.second, nullptr };
 			}
 
 			if (toData.getType() == ConfigNodeType::DeltaMap && !fromData.asMap().empty()) {
-				thread_local std::pair<String, ConfigNode> temp;
-
-				temp = original;
-				temp.second.applyDelta(toData);
-				return temp;
+				return { original.first, &original.second, &toData };
 			} else {
-				return iter->second;
+				return { original.first, &toData, nullptr };
 			}
 		}
-		return original;
+		return { original.first, &original.second, nullptr };
 	} else {
-		return componentsAdded.at(idx - numComponentsInPrefab);
+		const auto& comp = componentsAdded.at(idx - numComponentsInPrefab);
+		return { comp.first, &comp.second, nullptr };
 	}
 }

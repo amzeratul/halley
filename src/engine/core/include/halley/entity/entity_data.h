@@ -4,6 +4,7 @@
 #include <set>
 
 namespace Halley {
+	class EntityDataAppliedDelta;
 	class WorldReflection;
 	class EntityData;
     class EntityDataDelta;
@@ -52,9 +53,19 @@ namespace Halley {
         virtual const UUID& getPrefabUUID() const = 0;
 
         virtual size_t getNumChildren() const = 0;
-        virtual const IEntityConcreteData& getChild(size_t idx) const = 0;
+        virtual const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const = 0;
         virtual size_t getNumComponents() const = 0;
-        virtual const std::pair<String, ConfigNode>& getComponent(size_t idx) const = 0;
+        virtual std::pair<std::string_view, const ConfigNode*> getComponentApplied(size_t idx, ConfigNode& buffer) const
+        {
+	        auto [name, data, delta] = getComponentAndDelta(idx);
+            if (data && delta) {
+	            buffer = ConfigNode(*data);
+                buffer.applyDelta(*delta);
+	            return { name, &buffer };
+            }
+            return { name, data };
+        }
+        virtual std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> getComponentAndDelta(size_t idx) const = 0;
 
 		bool hasChildWithUUID(const UUID& uuid) const;
 	};
@@ -100,13 +111,15 @@ namespace Halley {
     	const Vector<EntityData>& getChildren() const { return children; }
     	Vector<EntityData>& getChildren() { return children; }
         size_t getNumChildren() const override;
-        const IEntityConcreteData& getChild(size_t idx) const override;
+        const IEntityConcreteData& getChild(size_t idx) const;
+        const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const override;
 
         const Vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
     	Vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
         bool hasComponent(const String& componentName) const;
         size_t getNumComponents() const override;
-        const std::pair<String, ConfigNode>& getComponent(size_t idx) const override;
+        const std::pair<String, ConfigNode>& getComponent(size_t idx) const;
+    	std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> getComponentAndDelta(size_t idx) const override;
         const ConfigNode* tryGetComponent(const String& componentName) const;
 
         bool fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const;

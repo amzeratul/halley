@@ -75,7 +75,7 @@ namespace Halley {
 		World& getWorld();
 		
 		EntityRef createEntity(const String& prefabName, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr, String fallbackVariant = "");
+		EntityRef createEntity(const IEntityConcreteData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr, String fallbackVariant = "");
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, WorldPartitionId worldPartition = 0, String variant = "");
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");

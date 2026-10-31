@@ -2,6 +2,7 @@
 #include "halley/entity/entity_data_delta.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/entity/entity_data_applied_delta.h"
 #include "halley/entity/world_reflection.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
@@ -51,7 +52,8 @@ bool IEntityConcreteData::hasChildWithUUID(const UUID& uuid) const
 {
 	const auto n = getNumChildren();
 	for (size_t i = 0; i < n; ++i) {
-		if (getChild(i).getInstanceUUID() == uuid) {
+		EntityDataAppliedDelta buffer;
+		if (getChild(i, buffer).getInstanceUUID() == uuid) {
 			return true;
 		}
 	}
@@ -228,6 +230,11 @@ const IEntityConcreteData& EntityData::getChild(size_t idx) const
 	return children[idx];
 }
 
+const IEntityConcreteData& EntityData::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
+{
+	return children[idx];
+}
+
 bool EntityData::hasComponent(const String& componentName) const
 {
 	return tryGetComponent(componentName) != nullptr;
@@ -241,6 +248,11 @@ size_t EntityData::getNumComponents() const
 const std::pair<String, ConfigNode>& EntityData::getComponent(size_t idx) const
 {
 	return components[idx];
+}
+
+std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> EntityData::getComponentAndDelta(size_t idx) const
+{
+	return { components[idx].first, &components[idx].second, static_cast<const ConfigNode*>(nullptr) };
 }
 
 const ConfigNode* EntityData::tryGetComponent(const String& componentName) const
