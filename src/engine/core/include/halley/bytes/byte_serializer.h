@@ -37,6 +37,7 @@ namespace Halley {
 		int version = 0;
 		bool exhaustiveDictionary = false;
 		bool toHash = false;
+		bool unsortedKeys = false;
 		bool deferredToHash = false; // Serializer won't hash, but the final outcome is just a hash
 		ISerializationDictionary* dictionary = nullptr;
 		World* world = nullptr;
@@ -183,7 +184,7 @@ namespace Halley {
 			// Rationale: if the object doesn't change, it will still iterate in the same order and generate the same hash
 			// It's possible that two identical hash maps will generate different hashes, but that should be benign
 			// Also bypass sorting if there's 0 or 1 keys, as there's nothing to sort
-			if (options.toHash || sz <= 1) {
+			if (options.toHash || options.unsortedKeys || sz <= 1) {
 				*this << sz;
 				for (const auto& [k, v]: val) {
 					*this << k << v;
