@@ -898,7 +898,7 @@ EntityRef EntityFactory::tryGetMatchingEntity(const EntityDataDelta& delta, cons
 
 namespace {
 		
-	std::tuple<const IEntityConcreteData*, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityDataV2(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, EntityDataAppliedDelta& buffer1, EntityData& buffer2, const EntityFactory::DebugInfo debugInfo)
+	std::tuple<std::optional<EntityDataAppliedDelta>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityDataV2(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, const EntityFactory::DebugInfo debugInfo)
 	{
 		if (delta.getPrefab()) {
 			auto prefab = resources.get<Prefab>(delta.getPrefab().value());
@@ -912,12 +912,10 @@ namespace {
 				return {};
 			}
 
-			buffer1 = EntityDataAppliedDelta(*prefabData, &delta, entityUUID, true);
-			return { &buffer1, std::move(prefab), prefabUUID };
+			return { EntityDataAppliedDelta(*prefabData, &delta, entityUUID, true), std::move(prefab), prefabUUID };
 		} else {
-			buffer2 = EntityData(delta);
-			buffer2.setInstanceUUID(entityUUID);
-			return { &buffer2, {}, {} };
+			const static EntityData baseData;
+			return { EntityDataAppliedDelta(baseData, &delta, entityUUID, true), {}, {} };
 		}
 	}
 
@@ -936,10 +934,10 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 		updateEntity(entity, delta, mask);
 	} else {
 		// Generate full EntityData from prefab first
-		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid, debugInfo);
-		if (entityData) {
-			entityData->setInstanceUUID(uuid);
+		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityDataV2(delta, uuid, resources, debugInfo);
+		//auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid, resources, debugInfo);
 
+		if (entityData) {
 			if (entity.isValid()) {
 				// Update existing entity
 				updateEntity(entity, *entityData, mask);
