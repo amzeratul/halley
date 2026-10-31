@@ -29,12 +29,16 @@ WorldPosition::WorldPosition(const ConfigNode& node, Vector2f defaultPos, int de
 
 ConfigNode WorldPosition::toConfigNode() const
 {
-	ConfigNode::SequenceType seq;
-	seq.reserve(3);
-	seq.push_back(ConfigNode(pos.x));
-	seq.push_back(ConfigNode(pos.y));
-	seq.push_back(ConfigNode(subWorld));
-	return ConfigNode(std::move(seq));
+	if (subWorld == 0) {
+		return ConfigNode(pos);
+	} else {
+		ConfigNode::SequenceType seq;
+		seq.reserve(3);
+		seq.push_back(ConfigNode(pos.x));
+		seq.push_back(ConfigNode(pos.y));
+		seq.push_back(ConfigNode(subWorld));
+		return ConfigNode(std::move(seq));
+	}
 }
 
 String WorldPosition::toString() const

@@ -629,7 +629,11 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, const EntitySerializationContext& context)
 {
 	ConfigNode result = ConfigNode::MapType();
-	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : String::emptyString();
+	result.asMap().reserve(4);
+
+	if (player.hasAnimation()) {
+		result["animation"] = player.getAnimation().getAssetId();
+	}
 	result["sequence"] = player.getCurrentSequenceName();
 	result["direction"] = player.getCurrentDirectionName();
 	if (player.isApplyingPivot() != true) {
