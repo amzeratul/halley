@@ -1,4 +1,4 @@
-// Halley codegen version 151
+// Halley codegen version 155
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -35,6 +35,7 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		_node.asMap().reserve(6);
 		Halley::EntityConfigNodeSerializer<decltype(position)>::serialize(position, Halley::Vector2f{}, _context, _node, componentName, "position", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(scale)>::serialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, _context, _node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rotation)>::serialize(rotation, Halley::Angle1f{}, _context, _node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));

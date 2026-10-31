@@ -1,4 +1,4 @@
-// Halley codegen version 151
+// Halley codegen version 155
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -31,6 +31,7 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		_node.asMap().reserve(0);
 		Halley::EntityConfigNodeSerializer<decltype(script)>::serialize(script, Halley::ScriptGraph{}, _context, _node, componentName, "script", makeMask(Type::Prefab));
 		return _node;
 	}

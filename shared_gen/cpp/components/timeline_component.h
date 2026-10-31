@@ -1,4 +1,4 @@
-// Halley codegen version 151
+// Halley codegen version 155
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -34,6 +34,7 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		_node.asMap().reserve(1);
 		Halley::EntityConfigNodeSerializer<decltype(timeline)>::serialize(timeline, Halley::Timeline{}, _context, _node, componentName, "timeline", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(player)>::serialize(player, Halley::TimelinePlayer{}, _context, _node, componentName, "player", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(playOnStart)>::serialize(playOnStart, bool{ false }, _context, _node, componentName, "playOnStart", makeMask(Type::Prefab));

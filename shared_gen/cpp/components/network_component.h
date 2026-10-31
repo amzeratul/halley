@@ -1,4 +1,4 @@
-// Halley codegen version 151
+// Halley codegen version 155
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -41,6 +41,7 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		_node.asMap().reserve(2);
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::serialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::serialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::serialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));

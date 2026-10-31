@@ -211,10 +211,23 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	}
 	contents.push_back("");
 
+	// Serialize reserves enough space for the biggest of save and network, because those are the two major cases we want to microoptimise for
+	size_t nSave = 0;
+	size_t nNetwork = 0;
+	for (const auto& member: component.members) {
+		if (member.serializationTypes.contains(EntitySerialization::Type::SaveData)) {
+			++nSave;
+		}
+		if (member.serializationTypes.contains(EntitySerialization::Type::Network)) {
+			++nNetwork;
+		}
+	}
+	const size_t toReserve = std::max(nSave, nNetwork);
+
 	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
 	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak
-		+ "Halley::ConfigNode _node = Halley::ConfigNode::MapType();" + lineBreak;
-		+ "_node.asMap().reserve(" + toString(component.members.size()) + ");" + lineBreak;
+		+ "Halley::ConfigNode _node = Halley::ConfigNode::MapType();" + lineBreak
+		+ "_node.asMap().reserve(" + toString(toReserve) + ");" + lineBreak;
 	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	String hashBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	String sanitizeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
