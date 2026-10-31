@@ -158,7 +158,8 @@ namespace Halley {
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
 	    void instantiatePrefabs(const UUID& rootUUID, const Resources& resources);
 	    EntityData instantiatePrefabsAsCopy(const UUID& uuid, const Resources& resources) const;
-    	
+		bool hasPrefabInstances() const;
+
         Type getType() const override;
 
     	void setSceneRoot(bool root);

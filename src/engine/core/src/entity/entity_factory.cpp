@@ -142,16 +142,39 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(const EntityData& entityD
 	if (prefab) {
 		HalleyAssertDev(entityData.getPrefab() == prefab->getAssetId()); // Caller needs to preset this
 		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
-			const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
-			auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
-			delta.setInstanceUUID(entityData.getInstanceUUID());
-			delta.setPrefabUUID(entityData.getPrefabUUID());
+			if (prefabData->hasPrefabInstances() || debugListener) {
+				// This path requires instancing because of nested prefabs
+				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+				auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
+				delta.setInstanceUUID(entityData.getInstanceUUID());
+				delta.setPrefabUUID(entityData.getPrefabUUID());
 
-			if (debugListener) {
-				debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
+				if (debugListener) {
+					debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
+				}
+
+				return delta;
+			} else {
+				// No copy path
+				auto delta = EntityDataDelta(*prefabData, entityData, entityData.getInstanceUUID(), EntityDataDelta::Mode::Instancing, deltaOptions);
+				delta.setInstanceUUID(entityData.getInstanceUUID());
+				delta.setPrefabUUID(entityData.getPrefabUUID());
+
+				/*
+				// Validate
+				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+				auto delta2 = EntityDataDelta(instancedData, entityData, deltaOptions);
+				delta2.setInstanceUUID(entityData.getInstanceUUID());
+				delta2.setPrefabUUID(entityData.getPrefabUUID());
+				if (delta != delta2) {
+					Logger::logError("Algorithm mismatch in entityDataToPrefabData with " + prefab->getAssetId());
+					Logger::logError("Old:\n\n" + delta2.toYAML() + "\n");
+					Logger::logError("New:\n\n" + delta.toYAML() + "\n");
+				}
+				*/
+
+				return delta;
 			}
-
-			return delta;
 		}
 	}
 	//Logger::logInfo("Entity " + entityData.getName() + " has no prefab or prefab data associated with it.");

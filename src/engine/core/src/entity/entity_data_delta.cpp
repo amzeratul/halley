@@ -29,12 +29,28 @@ EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
 }
 
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options)
-	: EntityDataDelta(from, to, to.getInstanceUUID(), options)
+	: EntityDataDelta(from, to, to.getInstanceUUID(), Mode::Regular, options)
 {
 }
 
-EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, const Options& options)
+EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, Mode mode, const Options& options)
 {
+	// In Instancing mode, "from" is an uninstantiated prefab, so use the instance UUIDs that EntityData::doInstantiatePrefabs() would have given it
+	const auto fromInstanceUUID = mode == Mode::Instancing ?
+		(to.instanceUUID == rootUUID ? rootUUID : rootUUID ^ from.prefabUUID) :
+		from.instanceUUID;
+
+	auto matchesEntityUUIDs = [](const UUID& instanceUUID, const UUID& prefabUUID, const UUID& otherInstanceUUID, const UUID& otherPrefabUUID)
+	{
+		if (instanceUUID.isValid()) {
+			return instanceUUID == otherInstanceUUID || instanceUUID == otherPrefabUUID || (prefabUUID.isValid() && prefabUUID == otherInstanceUUID);
+		} else if (prefabUUID.isValid()) {
+			return prefabUUID == otherPrefabUUID;
+		} else {
+			return false;
+		}
+	};
+
 	if (from.prefab != to.prefab) {
 		prefab = to.prefab;
 	}
@@ -53,7 +69,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	if (from.flags != to.flags) {
 		flags = to.flags;
 	}
-	if (from.instanceUUID != to.instanceUUID) {
+	if (fromInstanceUUID != to.instanceUUID) {
 		instanceUUID = to.instanceUUID;
 	}
 	if (from.prefabUUID != to.prefabUUID) {
@@ -73,21 +89,22 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			// Try to find a matching child in source data.
 			bool alreadyExists = false;
 			for (const auto& fromChild : from.children) {
+				const auto fromChildInstanceUUID = mode == Mode::Instancing ? rootUUID ^ fromChild.prefabUUID : fromChild.instanceUUID;
 				if (fromChild.prefabUUID == toChild.prefabUUID) {
 					// This might be an instantiated prefab. Mirror the UUID generation in
 					// EntityData::doInstantiatePrefabs().
 					const auto combined = rootUUID ^ fromChild.prefabUUID;
-					alreadyExists = fromChild.matchesUUID(combined);
+					alreadyExists = fromChild.prefabUUID == combined || fromChildInstanceUUID == combined;
 				}
 
 				if (!alreadyExists) {
 					const auto combined = fromChild.prefabUUID ^ to.instanceUUID;
-					alreadyExists = fromChild.matchesUUID(toChild) || toChild.matchesUUID(combined);
+					alreadyExists = matchesEntityUUIDs(fromChildInstanceUUID, fromChild.prefabUUID, toChild.instanceUUID, toChild.prefabUUID) || toChild.matchesUUID(combined);
 				}
 
 				if (alreadyExists) {
 					// Potentially modified
-					auto delta = EntityDataDelta(fromChild, toChild, rootUUID, options);
+					auto delta = EntityDataDelta(fromChild, toChild, rootUUID, mode, options);
 					if (delta.hasChange()) {
 						childrenChanged.emplace_back(toChild.instanceUUID.isValid() ? toChild.instanceUUID : toChild.prefabUUID, std::move(delta));
 					}
@@ -101,6 +118,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 		}
 		for (const auto& fromChild: from.children) {
+			const auto fromChildInstanceUUID = mode == Mode::Instancing ? rootUUID ^ fromChild.prefabUUID : fromChild.instanceUUID;
 			if (!options.allowNonSerializable && fromChild.getFlag(IEntityConcreteData::Flag::NotSerializable)) {
 				// Ignore non-serializables
 				continue;
@@ -111,12 +129,12 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 					// This might be an instantiated prefab. Mirror the UUID generation in
 					// EntityData::doInstantiatePrefabs().
 					const auto combined = rootUUID ^ fromChild.prefabUUID;
-					stillExists = fromChild.matchesUUID(combined);
+					stillExists = fromChild.prefabUUID == combined || fromChildInstanceUUID == combined;
 				}
 
 				if (!stillExists) {
 					const auto combined = fromChild.prefabUUID ^ to.instanceUUID;
-					stillExists = toChild.matchesUUID(fromChild) || toChild.matchesUUID(combined);
+					stillExists = matchesEntityUUIDs(toChild.instanceUUID, toChild.prefabUUID, fromChildInstanceUUID, fromChild.prefabUUID) || toChild.matchesUUID(combined);
 				}
 
 				if (stillExists) {
@@ -125,7 +143,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 			if (!stillExists) {
 				// Removed
-				childrenRemoved.emplace_back(fromChild.instanceUUID.isValid() ? fromChild.instanceUUID : fromChild.prefabUUID);
+				childrenRemoved.emplace_back(fromChildInstanceUUID.isValid() ? fromChildInstanceUUID : fromChild.prefabUUID);
 			}
 		}
 	}
@@ -143,7 +161,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				// Potentially modified, compute delta
 				ConfigNode delta;
 				if (options.interpolatorSet) {
-					delta = options.interpolatorSet->createComponentDelta(from.getInstanceUUID(), fromIter->first, fromIter->second, toComponent.second);
+					delta = options.interpolatorSet->createComponentDelta(fromInstanceUUID, fromIter->first, fromIter->second, toComponent.second);
 				} else {
 					delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
 				}

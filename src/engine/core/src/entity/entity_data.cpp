@@ -630,6 +630,21 @@ EntityData EntityData::instantiatePrefabsAsCopy(const UUID& uuid, const Resource
 	return clone;
 }
 
+bool EntityData::hasPrefabInstances() const
+{
+	if (!prefab.isEmpty()) {
+		return true;
+	}
+
+	for (auto& child: children) {
+		if (child.hasPrefabInstances()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void EntityData::generateChildUUID(const UUID& root)
 {
 	instanceUUID = UUID::xorUUIDs(prefabUUID, root);

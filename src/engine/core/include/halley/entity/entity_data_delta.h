@@ -34,11 +34,16 @@ namespace Halley {
 
 			void makeIgnoreComponentIds(const WorldReflection& reflection);
         };
+
+		enum class Mode {
+			Regular,
+			Instancing
+		};
 		
         EntityDataDelta();
 		explicit EntityDataDelta(const EntityData& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
-		EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, const Options& options = Options());
+		EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, Mode mode, const Options& options = Options());
 
 		EntityDataDelta(const EntityDataDelta& other) = default;
 		EntityDataDelta(EntityDataDelta&& other) noexcept = default;
