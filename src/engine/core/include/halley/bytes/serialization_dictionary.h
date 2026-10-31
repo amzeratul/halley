@@ -28,7 +28,7 @@ namespace Halley {
     
     private:
         Vector<String> strings;
-        HashMap<uint64_t, int> indices;
+        HashMap<uint64_t, int, no_hash<uint64_t>> indices;
     	
         HashMap<String, int> missing;
         bool logMissingStrings = false;
