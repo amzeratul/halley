@@ -649,15 +649,15 @@ namespace Halley {
 
 		struct BreadCrumb {
 			const BreadCrumb* prev = nullptr;
-			String key;
+			std::string_view key;
 			OptionalLite<int> idx;
 			int depth = 0;
 
 			BreadCrumb() = default;
-			BreadCrumb(const BreadCrumb& prev, String key) : prev(&prev), key(std::move(key)), depth(prev.depth + 1) {}
+			BreadCrumb(const BreadCrumb& prev, std::string_view key) : prev(&prev), key(key), depth(prev.depth + 1) {}
 			BreadCrumb(const BreadCrumb& prev, int index) : prev(&prev), idx(index), depth(prev.depth + 1) {}
 
-			bool hasKeyAt(const String& key, int depth) const;
+			bool hasKeyAt(std::string_view key, int depth) const;
 			bool hasIndexAt(int idx, int depth) const;
 		};
 
