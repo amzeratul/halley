@@ -53,7 +53,7 @@ bool IEntityConcreteData::hasChildWithUUID(const UUID& uuid) const
 	const auto n = getNumChildren();
 	for (size_t i = 0; i < n; ++i) {
 		EntityDataAppliedDelta buffer;
-		if (getChild(i, buffer).getInstanceUUID() == uuid) {
+		if (auto* child = getChild(i, buffer); child && child->getInstanceUUID() == uuid) {
 			return true;
 		}
 	}
@@ -225,14 +225,14 @@ size_t EntityData::getNumChildren() const
 	return children.size();
 }
 
-const IEntityConcreteData& EntityData::getChild(size_t idx) const
+const EntityData& EntityData::getChild(size_t idx) const
 {
 	return children[idx];
 }
 
-const IEntityConcreteData& EntityData::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
+const IEntityConcreteData* EntityData::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
 {
-	return children[idx];
+	return &children[idx];
 }
 
 bool EntityData::hasComponent(const String& componentName) const

@@ -703,21 +703,22 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 	const auto nChildren = data.getNumChildren();
 	for (size_t i = 0; i < nChildren; ++i) {
 		EntityDataAppliedDelta buffer;
-		const auto& child = data.getChild(i, buffer);
-		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
-			auto childEntity = tryGetEntity(child.getInstanceUUID(), *newContext, false);
-			if (childEntity.isValid()) {
-				updateEntityNode(newContext->getRootEntityData(), childEntity, entity, newContext);
+		if (const auto* child = data.getChild(i, buffer)) {
+			if (context->needsNewContextFor(*child)) {
+				const auto newContext = makeContext(*child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
+				auto childEntity = tryGetEntity(child->getInstanceUUID(), *newContext, false);
+				if (childEntity.isValid()) {
+					updateEntityNode(newContext->getRootEntityData(), childEntity, entity, newContext);
+				} else {
+					Logger::logError("Could not find child with UUID " + child->getInstanceUUID().toString() + " when updating prefab " + newContext->getPrefabAssetId());
+				}
 			} else {
-				Logger::logError("Could not find child with UUID " + child.getInstanceUUID().toString() + " when updating prefab " + newContext->getPrefabAssetId());
-			}
-		} else {
-			auto childEntity = tryGetEntity(child.getInstanceUUID(), *context, false);
-			if (childEntity.isValid()) {
-				updateEntityNode(child, childEntity, entity, context);
-			} else {
-				Logger::logError("Could not find child with UUID " + child.getInstanceUUID().toString() + " when updating prefab " + context->getPrefabAssetId());
+				auto childEntity = tryGetEntity(child->getInstanceUUID(), *context, false);
+				if (childEntity.isValid()) {
+					updateEntityNode(*child, childEntity, entity, context);
+				} else {
+					Logger::logError("Could not find child with UUID " + child->getInstanceUUID().toString() + " when updating prefab " + context->getPrefabAssetId());
+				}
 			}
 		}
 	}
@@ -727,8 +728,9 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 	childInstanceUUIDs.reserve(nChildren);
 	for (size_t i = 0; i < nChildren; ++i) {
 		EntityDataAppliedDelta buffer;
-		const auto& child = data.getChild(i, buffer);
-		childInstanceUUIDs.push_back(child.getInstanceUUID());
+		if (const auto* child = data.getChild(i, buffer)) {
+			childInstanceUUIDs.push_back(child->getInstanceUUID());
+		}
 	}
 	entity.sortChildrenByInstanceUUIDs(childInstanceUUIDs);
 }
@@ -780,7 +782,9 @@ void EntityFactory::preInstantiate(const IEntityConcreteData& data, WorldPartiti
 	const auto nChildren = data.getNumChildren();
 	for (size_t i = 0; i < nChildren; ++i) {
 		EntityDataAppliedDelta buffer;
-		preInstantiate(data.getChild(i, buffer), worldPartition, entities);
+		if (const auto* child = data.getChild(i, buffer)) {
+			preInstantiate(*child, worldPartition, entities);
+		}
 	}
 }
 
@@ -809,8 +813,9 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 		const auto nChildren = data.getNumChildren();
 		for (size_t i = 0; i < nChildren; ++i) {
 			EntityDataAppliedDelta buffer;
-			const auto& child = data.getChild(i, buffer);
-			preInstantiateEntities(child, context, depth + 1);
+			if (const auto* child = data.getChild(i, buffer)) {
+				preInstantiateEntities(*child, context, depth + 1);
+			}
 		}
 	}
 }
@@ -889,6 +894,33 @@ EntityRef EntityFactory::tryGetMatchingEntity(const EntityDataDelta& delta, cons
 	} else {
 		return {};
 	}
+}
+
+namespace {
+		
+	std::tuple<const IEntityConcreteData*, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityDataV2(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, EntityDataAppliedDelta& buffer1, EntityData& buffer2, const EntityFactory::DebugInfo debugInfo)
+	{
+		if (delta.getPrefab()) {
+			auto prefab = resources.get<Prefab>(delta.getPrefab().value());
+			const auto& prefabDataRoot = prefab->getEntityData();
+			const auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
+			const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
+			if (!prefabData) {
+				Logger::logWarning("Error loading: \"" + debugInfo.label + "\" - Entity with UUID " + prefabUUID.toString()
+					+ " not found in prefab \"" + delta.getPrefab().value() + "\" while loading entity delta with context "
+					+ toString(debugInfo.type));
+				return {};
+			}
+
+			buffer1 = EntityDataAppliedDelta(*prefabData, &delta, entityUUID, true);
+			return { &buffer1, std::move(prefab), prefabUUID };
+		} else {
+			buffer2 = EntityData(delta);
+			buffer2.setInstanceUUID(entityUUID);
+			return { &buffer2, {}, {} };
+		}
+	}
+
 }
 
 std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo)

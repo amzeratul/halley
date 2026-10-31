@@ -97,9 +97,9 @@ size_t EntityDataInstanced::getNumChildren() const
 	return prefabData->getNumChildren();
 }
 
-const IEntityConcreteData& EntityDataInstanced::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
+const IEntityConcreteData* EntityDataInstanced::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
 {
-	return children[idx];
+	return &children[idx];
 }
 
 size_t EntityDataInstanced::getNumComponents() const

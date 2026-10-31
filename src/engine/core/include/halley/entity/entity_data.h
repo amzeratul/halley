@@ -54,7 +54,7 @@ namespace Halley {
         virtual const UUID& getParentUUID() const = 0;
 
         virtual size_t getNumChildren() const = 0;
-        virtual const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const = 0;
+        virtual const IEntityConcreteData* getChild(size_t idx, EntityDataAppliedDelta& buffer) const = 0;
         virtual size_t getNumComponents() const = 0;
         virtual std::pair<std::string_view, const ConfigNode*> getComponentApplied(size_t idx, ConfigNode& buffer) const
         {
@@ -68,7 +68,7 @@ namespace Halley {
         }
         virtual std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> getComponentAndDelta(size_t idx) const = 0;
 
-		bool hasChildWithUUID(const UUID& uuid) const;
+		virtual bool hasChildWithUUID(const UUID& uuid) const;
 	};
 
     class IComponentConfigNodeFormatCallback {
@@ -112,8 +112,8 @@ namespace Halley {
     	const Vector<EntityData>& getChildren() const { return children; }
     	Vector<EntityData>& getChildren() { return children; }
         size_t getNumChildren() const override;
-        const IEntityConcreteData& getChild(size_t idx) const;
-        const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const override;
+        const EntityData& getChild(size_t idx) const;
+	    const IEntityConcreteData* getChild(size_t idx, EntityDataAppliedDelta& buffer) const override;
 
         const Vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
     	Vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
