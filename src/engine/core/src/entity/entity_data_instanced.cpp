@@ -87,6 +87,11 @@ const UUID& EntityDataInstanced::getPrefabUUID() const
 	return prefabData->getPrefabUUID();
 }
 
+const UUID& EntityDataInstanced::getParentUUID() const
+{
+	throw Exception("Unimplemented", HalleyExceptions::Entity);
+}
+
 size_t EntityDataInstanced::getNumChildren() const
 {
 	return prefabData->getNumChildren();

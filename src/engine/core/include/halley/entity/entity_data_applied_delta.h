@@ -6,7 +6,7 @@ namespace Halley {
     class EntityDataAppliedDelta final : public IEntityConcreteData {
     public:
 		EntityDataAppliedDelta() = default;
-		EntityDataAppliedDelta(const EntityData& base, const EntityDataDelta& delta, const UUID& rootUUID);
+		EntityDataAppliedDelta(const EntityData& base, const EntityDataDelta* delta, const UUID& rootUUID, bool isRoot);
 
 	    Type getType() const override;
 	    const String& getName() const override;
@@ -17,6 +17,7 @@ namespace Halley {
 	    bool getFlag(Flag flag) const override;
 	    const UUID& getInstanceUUID() const override;
 	    const UUID& getPrefabUUID() const override;
+	    const UUID& getParentUUID() const override;
 	    size_t getNumChildren() const override;
 		const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const override;
 	    size_t getNumComponents() const override;
@@ -25,6 +26,8 @@ namespace Halley {
     private:
 		const EntityData* base = nullptr;
 		const EntityDataDelta* delta = nullptr;
-		const UUID* rootUUID = nullptr;
+		UUID rootUUID;
+		UUID instanceUUID;
+		bool isRoot = true;
     };
 }

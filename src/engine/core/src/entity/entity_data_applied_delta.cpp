@@ -2,16 +2,24 @@
 
 using namespace Halley;
 
-EntityDataAppliedDelta::EntityDataAppliedDelta(const EntityData& base, const EntityDataDelta& delta, const UUID& rootUUID)
+EntityDataAppliedDelta::EntityDataAppliedDelta(const EntityData& base, const EntityDataDelta* delta, const UUID& rootUUID, bool isRoot)
 	: base(&base)
-	, delta(&delta)
-	, rootUUID(&rootUUID)
+	, delta(delta)
+	, rootUUID(rootUUID)
+	, isRoot(isRoot)
 {
+	if (isRoot) {
+		instanceUUID = rootUUID;
+	} else if (delta && delta->getInstanceUUID()) {
+		instanceUUID = *delta->getInstanceUUID();
+	} else {
+		instanceUUID = UUID::xorUUIDs(rootUUID, base.getPrefabUUID());
+	}
 }
 
 IEntityData::Type EntityDataAppliedDelta::getType() const
 {
-	return Type::Instanced;
+	return Type::Data;
 }
 
 const String& EntityDataAppliedDelta::getName() const
@@ -30,8 +38,21 @@ const String& EntityDataAppliedDelta::getName() const
 
 const String& EntityDataAppliedDelta::getPrefab() const
 {
-	// It has been applied, return empty on purpose
-	return String::emptyString();
+	if (isRoot) {
+		// It has been applied, return empty on purpose
+		return String::emptyString();
+	}
+
+	if (!base) [[unlikely]] {
+		return String::emptyString();
+	}
+	
+	if (delta) {
+		if (const auto& prefab = delta->getPrefab()) {
+			return *prefab;
+		}
+	}
+	return base->getPrefab();
 }
 
 const String& EntityDataAppliedDelta::getVariant() const
@@ -83,16 +104,7 @@ bool EntityDataAppliedDelta::getFlag(Flag flag) const
 
 const UUID& EntityDataAppliedDelta::getInstanceUUID() const
 {
-	thread_local UUID uuid;
-
-	if (!base) [[unlikely]] {
-		uuid = {};
-		return uuid;
-	}
-	HalleyAssertDebug(rootUUID);
-
-	uuid = UUID::xorUUIDs(base->getPrefabUUID(), *rootUUID);
-	return uuid;
+	return instanceUUID;
 }
 
 const UUID& EntityDataAppliedDelta::getPrefabUUID() const
@@ -107,6 +119,20 @@ const UUID& EntityDataAppliedDelta::getPrefabUUID() const
 		}
 	}
 	return base->getPrefabUUID();
+}
+
+const UUID& EntityDataAppliedDelta::getParentUUID() const
+{
+	if (!base) [[unlikely]] {
+		throw Exception("Unsupported operation on EntityDataAppliedDelta", HalleyExceptions::Entity);
+	}
+	
+	if (delta) {
+		if (const auto& uuid = delta->getParentUUID()) {
+			return *uuid;
+		}
+	}
+	return base->getParentUUID();
 }
 
 size_t EntityDataAppliedDelta::getNumChildren() const

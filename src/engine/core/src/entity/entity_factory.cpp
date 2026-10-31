@@ -397,7 +397,7 @@ UUID EntityFactoryContext::getRootUUID() const
 {
 	UUID rootUUID;
 	if (entityData && entityData->getType() == IEntityData::Type::Data) {
-		if (const auto* rootEntity = dynamic_cast<const EntityData*>(entityData)) {
+		if (const auto* rootEntity = dynamic_cast<const IEntityConcreteData*>(entityData)) {
 			rootUUID = rootEntity->getInstanceUUID();
 		}
 	}

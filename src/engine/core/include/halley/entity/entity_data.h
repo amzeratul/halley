@@ -51,6 +51,7 @@ namespace Halley {
     	virtual bool getFlag(Flag flag) const = 0;
         virtual const UUID& getInstanceUUID() const = 0;
         virtual const UUID& getPrefabUUID() const = 0;
+        virtual const UUID& getParentUUID() const = 0;
 
         virtual size_t getNumChildren() const = 0;
         virtual const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const = 0;
@@ -58,8 +59,8 @@ namespace Halley {
         virtual std::pair<std::string_view, const ConfigNode*> getComponentApplied(size_t idx, ConfigNode& buffer) const
         {
 	        auto [name, data, delta] = getComponentAndDelta(idx);
-            if (data && delta) {
-	            buffer = ConfigNode(*data);
+            if (delta) {
+                buffer = data ? ConfigNode(*data) : ConfigNode(ConfigNode::MapType());
                 buffer.applyDelta(*delta);
 	            return { name, &buffer };
             }
@@ -106,7 +107,7 @@ namespace Halley {
         bool getFlag(Flag flag) const override;
     	const UUID& getInstanceUUID() const override { return instanceUUID; }
     	const UUID& getPrefabUUID() const override { return prefabUUID; }
-    	const UUID& getParentUUID() const { return parentUUID; }
+    	const UUID& getParentUUID() const override { return parentUUID; }
 
     	const Vector<EntityData>& getChildren() const { return children; }
     	Vector<EntityData>& getChildren() { return children; }

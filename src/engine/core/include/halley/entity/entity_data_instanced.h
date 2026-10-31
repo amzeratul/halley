@@ -18,6 +18,7 @@ namespace Halley {
 		bool getFlag(Flag flag) const override;
 		const UUID& getInstanceUUID() const override;
 		const UUID& getPrefabUUID() const override;
+		const UUID& getParentUUID() const override;
 		size_t getNumChildren() const override;
 		const IEntityConcreteData& getChild(size_t idx, EntityDataAppliedDelta& buffer) const override;
 		size_t getNumComponents() const override;
