@@ -634,7 +634,7 @@ void SceneDataDelta::Entry::serialize(Serializer& s) const
 	s << version;
 	s << uuid;
 	s << hash;
-	s << entityData;
+	s << *entityData;
 }
 
 void SceneDataDelta::Entry::deserialize(Deserializer& s)
@@ -643,7 +643,9 @@ void SceneDataDelta::Entry::deserialize(Deserializer& s)
 	s >> version;
 	s >> uuid;
 	s >> hash;
-	s >> entityData;
+	auto data = std::make_shared<EntityDataDelta>();
+	s >> *data;
+	entityData = std::move(data);
 }
 
 ConfigNode SceneDataDelta::Entry::toConfigNode() const
@@ -651,15 +653,20 @@ ConfigNode SceneDataDelta::Entry::toConfigNode() const
 	ConfigNode result;
 	result["uuid"] = uuid;
 	result["hash"] = static_cast<int64_t>(hash);
-	result["entityData"] = entityData;
+	result["entityData"] = *entityData;
 	return result;
 }
 
 void SceneDataDelta::addEntity(Entry entry)
 {
-	entry.entityData.assignChildUUIDs();
 	index[entry.uuid] = static_cast<uint32_t>(entities.size());
 	entities.emplace_back(std::move(entry));
+}
+
+void SceneDataDelta::addEntity(const UUID& uuid, uint64_t hash, EntityDataDelta entityData)
+{
+	entityData.assignChildUUIDs();
+	addEntity(Entry{ .uuid = uuid, .hash = hash, .entityData = std::make_shared<const EntityDataDelta>(std::move(entityData)) });
 }
 
 const Vector<SceneDataDelta::Entry>& SceneDataDelta::getEntities() const
@@ -695,7 +702,7 @@ void SceneDataDelta::deserialize(Deserializer& s)
 		entities.resize(es.size());
 		for (size_t i = 0; i < es.size(); ++i) {
 			entities[i].uuid = es[i].first;
-			entities[i].entityData = std::move(es[i].second);
+			entities[i].entityData = std::make_shared<const EntityDataDelta>(std::move(es[i].second));
 		}
 	} else if (version == 2) {
 		s >> entities;

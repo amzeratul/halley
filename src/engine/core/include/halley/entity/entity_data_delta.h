@@ -149,7 +149,7 @@ namespace Halley {
 		struct Entry {
 			UUID uuid;
 			uint64_t hash = 0;
-			EntityDataDelta entityData;
+			std::shared_ptr<const EntityDataDelta> entityData; // EntityData is never modified once it is stored, so snapshots can share entries
 
 			void serialize(Serializer& s) const;
     		void deserialize(Deserializer& s);
@@ -158,6 +158,7 @@ namespace Halley {
 		};
 
 		void addEntity(Entry entry);
+		void addEntity(const UUID& uuid, uint64_t hash, EntityDataDelta entityData);
 		const Vector<Entry>& getEntities() const;
 		const Entry* tryGetEntity(const UUID& uuid) const;
 
