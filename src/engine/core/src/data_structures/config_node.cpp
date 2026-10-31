@@ -1972,13 +1972,25 @@ bool ConfigNode::BreadCrumb::hasIndexAt(int idx, int depth) const
 
 ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints)
 {
-	// If destination is a delta map, this isn't going to work...
-	// So assume that it's a delta on top of from, then re-compute a delta
-	// This is different from just returning to because sometimes it will have no-op delta ops
 	if (from.getType() == ConfigNodeType::Map && to.getType() == ConfigNodeType::DeltaMap) {
-		ConfigNode to2 = ConfigNode(from);
-		to2.applyMapDelta(to);
-		return doCreateDelta(from, to2, BreadCrumb(), hints);
+		// Deltas need a special algorithm
+		if (hints) {
+			// Old path, slow but supports hints
+			ConfigNode to2 = ConfigNode(from);
+			to2.applyMapDelta(to);
+			return doCreateDelta(from, to2, BreadCrumb(), hints);
+		} else {
+			// This path is faster, but doesn't support hints
+			return createDeltaFromMapDelta(from, to);
+			/*
+			ConfigNode to2 = ConfigNode(from);
+			to2.applyMapDelta(to);
+			auto oldRes = doCreateDelta(from, to2, BreadCrumb(), hints);
+			if (res != oldRes) {
+				Logger::logError("New and old ConfigNode createDelta algorithm don't agree");
+			}
+			*/
+		}
 	}
 
 	return doCreateDelta(from, to, BreadCrumb(), hints);
@@ -2102,6 +2114,59 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 	// TODO: if it replaces ALL of the original map, just return the new map?
 	
 	return _result;
+}
+
+ConfigNode ConfigNode::createDeltaFromMapDelta(const ConfigNode& from, const ConfigNode& delta)
+{
+	const auto& fromMap = from.asMap();
+
+	ConfigNode result;
+	bool resultAllocated = false;
+	auto getResult = [&] () -> ConfigNode&
+	{
+		if (!resultAllocated) {
+			resultAllocated = true;
+			result = ConfigNode(MapType());
+			result.type = ConfigNodeType::DeltaMap;
+		}
+		return result;
+	};
+
+	for (const auto& [k, v]: delta.asMap()) {
+		const auto deltaType = v.getType();
+		if (deltaType == ConfigNodeType::Noop) {
+			continue;
+		}
+
+		const auto iter = fromMap.find(k);
+		if (deltaType == ConfigNodeType::Del) {
+			if (iter != fromMap.end()) {
+				getResult()[k] = ConfigNode(DelType());
+			}
+		} else if (iter == fromMap.end()) {
+			getResult()[k] = ConfigNode(v);
+		} else {
+			const auto& fromValue = iter->second;
+			const auto fromType = fromValue.getType();
+
+			ConfigNode fieldDelta;
+			if ((fromType == ConfigNodeType::Map || fromType == ConfigNodeType::DeltaMap) && deltaType == ConfigNodeType::DeltaMap) {
+				fieldDelta = createDeltaFromMapDelta(fromValue, v);
+			} else if (fromType == ConfigNodeType::Sequence && deltaType == ConfigNodeType::DeltaSequence) {
+				fieldDelta = doCreateDelta(fromValue, applyDelta(fromValue, v), BreadCrumb(), nullptr);
+			} else if (deltaType == ConfigNodeType::Idx) {
+				throw Exception("Invalid ConfigNode delta type at this position", HalleyExceptions::Utils);
+			} else {
+				fieldDelta = doCreateDelta(fromValue, v, BreadCrumb(), nullptr);
+			}
+
+			if (fieldDelta.getType() != ConfigNodeType::Noop) {
+				getResult()[k] = std::move(fieldDelta);
+			}
+		}
+	}
+
+	return resultAllocated ? std::move(result) : ConfigNode(NoopType());
 }
 
 ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)

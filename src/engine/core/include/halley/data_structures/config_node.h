@@ -786,6 +786,7 @@ namespace Halley {
 
 		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
 		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+		static ConfigNode createDeltaFromMapDelta(const ConfigNode& from, const ConfigNode& delta);
 		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
 		void applyMapDelta(const ConfigNode& delta);
 		void applySequenceDelta(const ConfigNode& delta);
