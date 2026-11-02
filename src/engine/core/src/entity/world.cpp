@@ -42,7 +42,7 @@ World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldRe
 
 World::World(World& world, StagingWorldTag tag)
 	: entityMap(world.entityMap)
-	, maskStorage({})
+	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, devMode(world.devMode)
 	, transform2DAnisotropy(world.transform2DAnisotropy)
 	, api(world.api)
@@ -105,10 +105,15 @@ std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, c
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, const std::optional<String>& systemTag, bool devMode)
 {
 	auto world = std::make_unique<World>(api, resources, std::make_shared<WorldReflection>(*CreateEntityFunctions::getCodegenFunctions()));
-	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
-	world->setName(sceneName);
-	world->loadSystems(sceneConfig, systemTag, devMode);
+	world->loadScene(sceneName, systemTag, devMode);
 	return world;
+}
+
+void World::loadScene(const String& sceneName, const std::optional<String>& systemTag, bool devMode)
+{
+	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
+	setName(sceneName);
+	loadSystems(sceneConfig, systemTag, devMode);
 }
 
 void World::loadSystems(const ConfigNode& root, const std::optional<String>& systemTag, bool devMode)

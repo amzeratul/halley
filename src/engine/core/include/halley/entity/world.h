@@ -50,11 +50,13 @@ namespace Halley {
 	class World
 	{
 	public:
+		World(World&& other) = default;
 		World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldReflection> reflection);
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, const std::optional<String>& systemTag, bool devMode);
+		void loadScene(const String& sceneName, const std::optional<String>& systemTag, bool devMode);
 		std::unique_ptr<World> makeStagingWorld();
 
 		void step(TimeLine timeline, Time elapsed);
