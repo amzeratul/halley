@@ -83,7 +83,10 @@ private:
 
 	Rect4f getViewPort() const
 	{
-		return getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
+		if (getScreenService().hasInterface()) {
+			return getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
+		}
+		return {};
 	}
 
 	void updateAnimators(Time time, Rect4f viewPort)
