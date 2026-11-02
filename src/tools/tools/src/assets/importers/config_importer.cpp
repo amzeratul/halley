@@ -67,23 +67,27 @@ void PrefabImporter::validateEntityData(Project& project, Prefab& prefab)
 
 		static void toFloat2(ConfigNode& data)
 		{
-			const auto& seq = data.asSequence();
-			if (seq.size() == 2) {
-				Vector2f v;
-				v.x = seq[0].asFloat();
-				v.y = seq[1].asFloat();
-				data = v;
+			if (data.getType() == ConfigNodeType::Sequence) {
+				const auto& seq = data.asSequence();
+				if (seq.size() == 2) {
+					Vector2f v;
+					v.x = seq[0].asFloat();
+					v.y = seq[1].asFloat();
+					data = v;
+				}
 			}
 		}
 
 		static void toInt2(ConfigNode& data)
 		{
-			const auto& seq = data.asSequence();
-			if (seq.size() == 2) {
-				Vector2i v;
-				v.x = seq[0].asInt();
-				v.y = seq[1].asInt();
-				data = v;
+			if (data.getType() == ConfigNodeType::Sequence) {
+				const auto& seq = data.asSequence();
+				if (seq.size() == 2) {
+					Vector2i v;
+					v.x = seq[0].asInt();
+					v.y = seq[1].asInt();
+					data = v;
+				}
 			}
 		}
 

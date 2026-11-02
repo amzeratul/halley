@@ -1,4 +1,4 @@
-// Halley codegen version 151
+// Halley codegen version 155
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -50,6 +50,7 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		_node.asMap().reserve(7);
 		Halley::EntityConfigNodeSerializer<decltype(event)>::serialize(event, Halley::ResourceReference<Halley::AudioEvent>{}, _context, _node, componentName, "event", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::serialize(rangeMin, float{ 50 }, _context, _node, componentName, "rangeMin", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::serialize(rangeMax, float{ 100 }, _context, _node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
