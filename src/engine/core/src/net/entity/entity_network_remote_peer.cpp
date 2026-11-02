@@ -906,6 +906,8 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
         //Logger::logDev("Receive Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
         //Logger::logDev("Updating entity " + entity.getName() + ":\n" + delta.toYAML());
 
+    	updateRemoteEntityCheckChildrenAdded(entity, delta);
+
         try {
             parentSession->getFactory().updateEntity(entity, delta,
                                               EntitySerialization::makeMask(EntitySerialization::Type::Network),
@@ -919,6 +921,27 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
     	// Need to refresh interpolators
     	parentSession->refreshOutboundInterpolators(entity);
     }
+}
+
+void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityRef& entity, const EntityDataDelta& delta) const
+{
+	// NB: When the host attachs an existing networked entity to a new parent, which is also
+	// networked, it will trigger a full update on that parent.
+	// But, peers that receive this update may not know about the reparenting yet, depending on the
+	// order the updates come in, so they may fail to apply this delta to their local copy.
+	//
+	// To resolve that, here we check if the child entities to be added already exist, and reparent
+	// them right away.
+
+	auto& world = parentSession->getFactory().getWorld();
+
+	for (const auto& childData : delta.getChildrenAdded()) {
+		if (auto existingEntity = world.findEntity(childData.getInstanceUUID())) {
+			if (existingEntity->isValid() && existingEntity->getParent() != entity) {
+				existingEntity->setParent(entity);
+			}
+		}
+	}
 }
 
 void EntityNetworkRemotePeer::destroyRemoteEntity(const InboundEntity& inboundEntity)
