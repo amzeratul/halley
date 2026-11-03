@@ -1319,8 +1319,9 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 
 	for (auto& [_, inboundEntity] : inboundEntities) {
 		if (outboundEntities.contains(inboundEntity.worldId)) {
-			// TODO: this could be a flag in inboundEntity
-			HalleyAssertDebug(outboundEntities[inboundEntity.worldId].hasAuthorityOnly);
+			if (!outboundEntities[inboundEntity.worldId].hasAuthorityOnly) {
+				Logger::logError("Have both inbound and outbound entity for " + inboundEntity.worldId.toDetailedString(), true);
+			}
 			continue;
 		}
 		interpolateRemoteEntityPosition(inboundEntity, now, latency);
