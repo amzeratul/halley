@@ -3,6 +3,8 @@
 #include "halley/bytes/byte_serializer.h"
 
 namespace Halley {
+	enum class NetworkConnectError : uint8_t;
+
 	enum class NetworkSessionControlMessageType : int8_t {
 		Join,
 		SetPeerId,
@@ -13,7 +15,8 @@ namespace Halley {
 		GetServerSideData,
 		GetServerSideDataReply,
 		Ping,
-		PingReply
+		PingReply,
+		ConnectionError
 	};
 
 	struct ControlMsgHeader
@@ -94,6 +97,13 @@ namespace Halley {
 	struct ControlMsgPingReply {
 		int32_t timestamp;
 		int32_t remoteTimestamp;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgConnectionError {
+		NetworkConnectError error;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

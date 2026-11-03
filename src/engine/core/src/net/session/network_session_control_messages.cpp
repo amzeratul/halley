@@ -116,3 +116,13 @@ void ControlMsgPingReply::deserialize(Deserializer& s)
 	s >> timestamp;
 	s >> remoteTimestamp;
 }
+
+void ControlMsgConnectionError::serialize(Serializer& s) const
+{
+	s << error;
+}
+
+void ControlMsgConnectionError::deserialize(Deserializer& s)
+{
+	s >> error;
+}

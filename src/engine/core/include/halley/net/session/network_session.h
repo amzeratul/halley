@@ -128,6 +128,7 @@ namespace Halley {
 
 		void simulateLatency(float average, float variance);
 		void simulateQuality(float packetLoss, float packetDuplicate);
+		std::optional<NetworkConnectError> getLastConnectError() const;
 
 	protected:
 		SharedData& doGetMySharedData();
@@ -154,6 +155,7 @@ namespace Halley {
 			int rttSentSinceLastReply = 0;
 			Time delayNextPingMsg = 0;
 			Time connectingTime = 0;
+			std::optional<Time> disconnectingIn;
 
 #if defined(DEV_BUILD) && defined(_WIN32)
 			std::shared_ptr<InstabilitySimulator> simulator = nullptr;
@@ -202,16 +204,19 @@ namespace Halley {
 		Clock::time_point curTime;
 		Clock::time_point startTime;
 
+		std::optional<NetworkConnectError> errorType;
+
 		OutboundNetworkPacket makeOutbound(gsl::span<const std::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
 		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
 		
-		bool closeConnection(PeerId peerId, std::string_view errorMessage = "");
+		bool closeConnection(PeerId peerId, std::string_view errorMessage = "", std::optional<NetworkConnectError> type = std::nullopt);
 		void processReceive();
 
 		void retransmitControlMessage(PeerId peerId, gsl::span<const std::byte> bytes);
 		void receiveControlMessage(PeerId peerId, InboundNetworkPacket& packet);
 		void onControlMessage(PeerId peerId, const ControlMsgJoin& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgConnectionError& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerState& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetSessionState& msg);

@@ -295,7 +295,10 @@ bool SessionMultiplayer::update(Time t)
 	if (!host && curState == SessionState::JoiningSession) {
 		joiningTime += t;
 		if (session->getStatus() == ConnectionStatus::Closed) {
-			connectError = service->getLastConnectError();
+			connectError = session->getLastConnectError();
+			if (!connectError) {
+				connectError = service->getLastConnectError();
+			}
 			Logger::logError("Failed to join multiplayer session: " + (connectError ? toString(*connectError) : String("connection closed")));
 			setState(SessionState::JoinFailed);
 		} else if (joiningTime > joinTimeout) {

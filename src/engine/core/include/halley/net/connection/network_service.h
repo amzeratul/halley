@@ -27,10 +27,12 @@ namespace Halley
 		virtual size_t getReceivedPacketsPerSecond() const = 0;
 	};
 
-	enum class NetworkConnectError {
+	enum class NetworkConnectError : uint8_t {
 		Unknown, 
 		SessionFull,
 		SessionNotFound,
+		VersionTooLow,
+		VersionTooHigh,
 	};
 	
 	template<>
@@ -40,6 +42,8 @@ namespace Halley
 				"unknown",
 				"sessionFull",
 				"sessionNotFound",
+				"versionTooLow",
+				"versionTooHigh",
 			});
 		}
 	};

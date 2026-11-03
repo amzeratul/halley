@@ -177,6 +177,13 @@ void NetworkSession::update(Time t)
 
 		// Remove dead connections
 		for (auto& peer: peers) {
+			if (peer.disconnectingIn) {
+				*peer.disconnectingIn -= t;
+				if (*peer.disconnectingIn <= 0) {
+					disconnectPeer(peer);
+					continue;
+				}
+			}
 			if (peer.getStatus() == ConnectionStatus::Closed) {
 				disconnectPeer(peer);
 			}
@@ -434,7 +441,7 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 void NetworkSession::doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except)
 {
 	for (const auto& peer : peers) {
-		if (peer.peerId != except) {
+		if (peer.peerId != except && !peer.disconnectingIn) {
 			doSendToPeer(peer, OutboundNetworkPacket(packet));
 		}
 	}
@@ -516,8 +523,12 @@ void NetworkSession::processReceive()
 	}
 }
 
-bool NetworkSession::closeConnection(PeerId peerId, std::string_view errorMessage)
+bool NetworkSession::closeConnection(PeerId peerId, std::string_view errorMessage, std::optional<NetworkConnectError> type)
 {
+	if (!errorType && type) {
+		errorType = type;
+	}
+
 	if (!errorMessage.empty()) {
 		Logger::logError("Closing connection: " + String(errorMessage));
 	}
@@ -608,6 +619,12 @@ void NetworkSession::receiveControlMessage(PeerId peerId, InboundNetworkPacket& 
 			onControlMessage(peerId, msg);
 		}
 		break;
+	case NetworkSessionControlMessageType::ConnectionError:
+		{
+			ControlMsgConnectionError msg = Deserializer::fromBytes<ControlMsgConnectionError>(packet.getBytes());
+			onControlMessage(peerId, msg);
+		}
+		break;
 	default:
 		closeConnection(peerId, "Invalid control packet.");
 	}
@@ -623,7 +640,16 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgJoin& msg)
 	}
 
 	if (msg.networkVersion != networkVersion) {
-		closeConnection(peerId, "Incompatible network version - I'm on " + toString(networkVersion) + ", remote is " + msg.networkVersion);
+		Logger::logWarning("Closing incoming connection: Incompatible network version - I'm on " + toString(networkVersion) + ", remote is " + msg.networkVersion);
+
+		ControlMsgConnectionError outMsg;
+		outMsg.error = msg.networkVersion < networkVersion ? NetworkConnectError::VersionTooLow : NetworkConnectError::VersionTooHigh;
+		Bytes bytes = Serializer::toBytes(outMsg);
+		
+		auto& peer = getPeer(peerId);
+		peer.disconnectingIn = 2.0;
+		doSendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::ConnectionError, OutboundNetworkPacket(bytes)));
+		
 		return;
 	}
 
@@ -641,6 +667,11 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgJoin& msg)
 	for (auto* listener : listeners) {
 		listener->onPeerConnected(peerId);
 	}
+}
+
+void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgConnectionError& msg)
+{
+	closeConnection(peerId, "Connection closed by remote", msg.error);
 }
 
 void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg)
@@ -1198,4 +1229,9 @@ void NetworkSession::simulateQuality(float packetLoss, float packetDuplicate)
 		peer.simulator->setDuplication(packetDuplicate);
 	}
 #endif
+}
+
+std::optional<NetworkConnectError> NetworkSession::getLastConnectError() const
+{
+	return errorType;
 }
