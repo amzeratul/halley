@@ -22,6 +22,7 @@ NetworkSession::NetworkSession(NetworkService& service, uint32_t networkVersion,
 	, networkVersion(networkVersion)
 	, userName(std::move(userName))
 {
+	Logger::logInfo("Starting network session with version " + toString(networkVersion));
 	curTime = startTime = Clock::now();
 }
 
@@ -622,7 +623,7 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgJoin& msg)
 	}
 
 	if (msg.networkVersion != networkVersion) {
-		closeConnection(peerId, "Incompatible network version.");
+		closeConnection(peerId, "Incompatible network version - I'm on " + toString(networkVersion) + ", remote is " + msg.networkVersion);
 		return;
 	}
 
