@@ -137,7 +137,9 @@ void FrameDebugger::paint(Painter& painter)
 				str.append(info.materialDefinition, info.hasMaterialDefChange ? red : green);
 				str.append(" [");
 				str.append("0x" + toString(info.materialHash, 16, 16).asciiUpper(), info.hasMaterialParamsChange ? red : green);
-				str.append("]\nTextures: ");
+				str.append("]\nDetails: ");
+				str.append(info.materialConfigDetails.asString("null"), info.hasMaterialParamsChange ? red : green);
+				str.append("\nTextures: ");
 				str.append(String::concatList(info.textures, ", "), info.hasTextureChange ? red : green);
 			} else if (info.type == RenderSnapshot::CommandType::Clear) {
 				if (info.clearData->colour) {

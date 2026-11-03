@@ -419,6 +419,18 @@ void Material::computeHashes() const
 	fullHashValue = hasher.digest();
 }
 
+ConfigNode Material::getConfigDetails() const
+{
+	ConfigNode result;
+	result["nDataBlocks"] = static_cast<int>(dataBlocks.size());
+	result["nStructuredBuffers"] = static_cast<int>(localStructuredBuffers.size());
+	result["nTextures"] = static_cast<int>(textures.size());
+	result["stencilReferenceOverride"] = stencilReferenceOverride;
+	result["depthStencilEnabled"] = depthStencilEnabled;
+	result["passEnabled"] = static_cast<int>(passEnabled.to_ulong());
+	return result;
+}
+
 const std::shared_ptr<const Texture>& Material::getFallbackTexture() const
 {
 	return materialDefinition->getFallbackTexture();

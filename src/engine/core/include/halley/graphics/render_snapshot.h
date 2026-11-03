@@ -60,6 +60,7 @@ namespace Halley {
             size_t numTriangles = 0;
             uint64_t materialHash = 0;
             String materialDefinition;
+            ConfigNode materialConfigDetails;
             Vector<String> textures;
             std::optional<ClearData> clearData;
         };

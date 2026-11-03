@@ -196,6 +196,8 @@ namespace Halley
 			return fullHashValue;
 		}
 
+		ConfigNode getConfigDetails() const;
+
 		const String& getTexUnitAssetId(int texUnit) const;
 
 	private:
