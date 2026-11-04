@@ -186,7 +186,7 @@ namespace Halley
 		Rect4f getAABB() const;
 		Rect4f getUncroppedAABB() const;
 		
-		bool isInView(Rect4f rect) const;
+		bool isInView(Rect4f viewRect) const;
 
 		Vector4s getOuterBorder() const { return outerBorder; }
 		Sprite& setOuterBorder(Vector4s border);
@@ -229,6 +229,8 @@ namespace Halley
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
 
 		Vector2f getRelativePosition(Vector2f pos, Vector2f size, Vector2f origSize) const;
+		void transformVertexPoints(gsl::span<Vector2f> vs) const;
+		bool checkPolygonOverlap(const Rect4f& rect) const;
 
 #ifdef ENABLE_HOT_RELOAD
 	public:

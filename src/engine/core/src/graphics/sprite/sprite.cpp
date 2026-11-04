@@ -217,14 +217,60 @@ Rect4f Sprite::getUncroppedAABB() const
 	}
 }
 
-bool Sprite::isInView(Rect4f rect) const
+bool Sprite::isInView(Rect4f viewRect) const
 {
 	if (!visible) [[unlikely]] {
 		return false;
 	}
 
 	const auto aabb = getAABB();
-	return aabb.overlaps(rect) && !floatEquals(aabb.getWidth() * aabb.getHeight(), 0.0f);
+	if (!aabb.overlaps(viewRect) || floatEquals(aabb.getWidth() * aabb.getHeight(), 0.0f)) {
+		return false;
+	}
+
+	// Note about containsAtLeastOneAxis:
+	// If the aabb is fully contained, either horizontally or vertically, in the view rect,
+	// then we assume the polygon overlaps, since the rect should fit fairly tightly around it
+	//
+	//  +-------+
+	//  |       |
+	//  |      +----+
+	//  | rect |aabb|
+	//  |      +----+
+	//  |       |
+	//  +-------+
+	//
+	// The only case we do the full polygon overlap test is when they overlap on a corner
+
+	return sliced || polygon.size() < 3 || viewRect.containsAtLeastOneAxis(aabb) || checkPolygonOverlap(viewRect);
+}
+
+bool Sprite::checkPolygonOverlap(const Rect4f& rect) const
+{
+	gsl::span<Vector2f> dst;
+
+	// Assign dst to a suitable buffer
+	std::array<Vector2f, 32> buf;
+	Vector<Vector2f> buf2;
+	if (polygon.size() <= buf.size()) {
+		dst = gsl::span<Vector2f>(buf).subspan(0, polygon.size());
+	} else {
+		buf2.resize(polygon.size());
+		dst = buf2;
+	}
+
+	// Copy polygon to buffer and transform to world space
+	memcpy(dst.data(), polygon.data(), polygon.size_bytes());
+	transformVertexPoints(dst);
+
+	if (rect.containsAll(dst)) {
+		return true;
+	}
+
+	const std::array<Vector2f, 4> rectPoints = { rect.getTopLeft(), rect.getTopRight(), rect.getBottomRight(), rect.getBottomLeft() };
+
+	// Check overlap
+	return Polygon::classifyConvex(dst, rectPoints) != Polygon::SATClassification::Separate;
 }
 
 Sprite& Sprite::setRotation(Angle1f v)
@@ -685,6 +731,26 @@ Vector2f Sprite::getRelativePosition(Vector2f pos, Vector2f size, Vector2f origS
 		getInRange(pos.x, slices[0], slices[2], size.x, origSize.x, sliceScale),
 		getInRange(pos.y, slices[1], slices[3], size.y, origSize.y, sliceScale)
 	);
+}
+
+void Sprite::transformVertexPoints(gsl::span<Vector2f> vs) const
+{
+	// This code mirrors sprite_basic_vertex.hlsl
+
+	const Vector2f size = vertexAttrib.size * vertexAttrib.scale;
+
+	if (!rotated) [[likely]] {
+		for (auto& v: vs) {
+			v = vertexAttrib.pos + ((v - vertexAttrib.pivot) * size);
+		}
+	} else {
+		const float a = vertexAttrib.rotation;
+		const float sine = sin(a);
+		const float cosine = cos(a);
+		for (auto& v: vs) {
+			v = vertexAttrib.pos + ((v - vertexAttrib.pivot) * size).rotate(sine, cosine);
+		}
+	}
 }
 
 Sprite& Sprite::setClip(Rect4f c)
