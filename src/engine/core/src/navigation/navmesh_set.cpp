@@ -682,20 +682,24 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 	constexpr size_t stride = 1;
 	constexpr float recencyBias = 1.1f; // Bias towards points that are further away, this avoids duplicated work
 
+	// Pre-calculate costs
+	Vector<float> costs;
+	costs.resize(points.size());
+	for (size_t i = 0; i < points.size(); ++i) {
+		if (i < points.size() - 1) {
+			costs[i] = findRayCollision(points[i], points[i + 1], nodeIds[i]).distance;
+		} else {
+			costs[i] = 0;
+		}
+	}
+
+	std::array<RayResult, maxLookAhead> resultCache;
+	size_t resultsInCache = 0;
+
 	// This algorithm is run in two passes; the first one only accepts paths which are substantially shorter, the second one accepts most simplifications
 	for (int pass = 0; pass < 2; ++pass) {
 		float distThreshold = pass == 0 ? 0.8f : 1.25f;
-
-		// Pre-calculate costs
-		Vector<float> costs;
-		costs.resize(points.size());
-		for (size_t i = 0; i < points.size(); ++i) {
-			if (i < points.size() - 1) {
-				costs[i] = findRayCollision(points[i], points[i + 1], nodeIds[i]).distance;
-			} else {
-				costs[i] = 0;
-			}
-		}
+		resultsInCache = 0;
 
 		for (size_t i = 1; i < points.size() - 1; i += stride) {
 			// This point can be removed if the previous point has direct line of sight to one of the points after this
@@ -703,11 +707,13 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 			const auto p0 = points.at(i - 1);
 			const auto p1 = points.at(i);
 			if (p0.pos.subWorld != p1.pos.subWorld) {
+				resultsInCache = 0;
 				continue;
 			}
 
 			size_t bestCandidate = 0;
 			float bestRatio = distThreshold;
+			float bestDist = 0;
 
 			const auto lastCheck = std::min(points.size() - 1, i + maxLookAhead);
 			float oldCost = costs[i - 1];
@@ -717,7 +723,12 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 					break;
 				}
 
-				const auto col = findRayCollision(p0, p2, nodeIds[i - 1]);
+				const auto cacheIdx = j - i - 1;
+				RayResult& col = resultCache[cacheIdx];
+				if (cacheIdx >= resultsInCache) {
+					col = findRayCollision(p0, p2, nodeIds[i - 1]);
+					resultsInCache = cacheIdx + 1;
+				}
 				oldCost += costs[j - 1];
 				
 				if (col.collision) {
@@ -731,18 +742,29 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 					if (costRatio < bestRatio * recencyBias) {
 						bestRatio = costRatio;
 						bestCandidate = j;
+						bestDist = col.distance;
 					}
 				}
 			}
 
 			if (bestCandidate != 0) {
+				// Next iteration will retry this p0
+				// Delete the cached entries that are being skipped
+				const size_t shift = bestCandidate - i;
+			    std::move(resultCache.begin() + shift, resultCache.begin() + resultsInCache, resultCache.begin());
+			    resultsInCache -= shift;
+
 				points.erase(points.begin() + i, points.begin() + bestCandidate);
 				nodeIds.erase(nodeIds.begin() + i, nodeIds.begin() + bestCandidate);
 				costs.erase(costs.begin() + i, costs.begin() + bestCandidate);
+				costs[i - 1] = bestDist;
 
 				// i is now the next item, so decrement (so when it increments on the loop, it ends up where it started)
 				// Note that this is only safe because the loop starts on 1, otherwise it could overflow and stop the loop
 				--i;
+			} else {
+				// Moving on to next p0
+				resultsInCache = 0;
 			}
 		}
 	}

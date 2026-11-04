@@ -107,6 +107,7 @@ namespace Halley {
 		};
 
 		struct RayResult {
+			RayResult() = default;
 			RayResult(std::optional<Vector2f> collision, float distance, OptionalLite<NodeId> endNodePos, OptionalLite<uint16_t> endNavmesh)
 				: collision(collision)
 				, distance(distance)
@@ -115,7 +116,7 @@ namespace Halley {
 			{}
 
 			std::optional<Vector2f> collision;
-			float distance;
+			float distance = 0;
 			OptionalLite<NodeId> endNodePos;
 			OptionalLite<uint16_t> endNavmesh;
 		};
