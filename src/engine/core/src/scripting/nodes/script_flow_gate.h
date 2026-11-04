@@ -197,6 +197,7 @@ namespace Halley {
 		String getName() const override { return "Fence"; }
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/fence.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		bool hasDestructor(const ScriptGraphNode& node, const ScriptGraph& graph) const override { return true; }
 
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
@@ -205,6 +206,7 @@ namespace Halley {
 		void doInitData(ScriptFenceData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptFenceData& curData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptFenceData& curData) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptFenceData& data) const override;
 	};
 
 

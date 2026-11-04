@@ -622,6 +622,10 @@ IScriptNodeType::Result ScriptFence::doUpdate(ScriptEnvironment& environment, Ti
 	}
 }
 
+void ScriptFence::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptFenceData& data) const
+{
+	data.signaled = false;
+}
 
 
 ConfigNode ScriptBreakerData::toConfigNode(const EntitySerializationContext& context)
