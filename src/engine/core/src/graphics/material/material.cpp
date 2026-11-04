@@ -405,10 +405,22 @@ void Material::computeHashes() const
 		hasher.feedBytes(structuredBuffer.second->getData());
 	}
 
-	hasher.feed(stencilReferenceOverride.has_value());
-	hasher.feed(stencilReferenceOverride.value_or(0));
-	hasher.feed(depthStencilEnabled);
 	hasher.feed(passEnabled.to_ulong());
+
+	const auto& passes = materialDefinition->getPasses();
+	for (size_t i = 0; i < passes.size(); ++i) {
+		if (isPassEnabled(static_cast<int>(i))) {
+			const auto& pass = passes[i];
+			const auto& ds = pass.getDepthStencil();
+			if (depthStencilEnabled && (ds.isDepthTestEnabled() || ds.isDepthWriteEnabled() || ds.isStencilTestEnabled())) {
+				hasher.feed(1);
+				const auto mask = ds.getStencilReadMask() | ds.getStencilWriteMask();
+				hasher.feed(stencilReferenceOverride.value_or(ds.getStencilReference()) & mask);
+			} else {
+				hasher.feed(0);
+			}
+		}
+	}
 
 	partialHashValue = hasher.digest();
 
