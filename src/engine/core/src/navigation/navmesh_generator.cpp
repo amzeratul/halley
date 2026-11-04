@@ -9,6 +9,9 @@ using namespace Halley;
 
 NavmeshSet NavmeshGenerator::generate(const Params& params)
 {
+	auto trace2 = StackDebugTrace("subWorld", static_cast<int64_t>(params.subWorld));
+	auto trace1 = StackDebugTrace("scene", params.sceneName);
+
 	auto obstacles = preProcessObstacles(params.obstacles, params.agentSize);
 
 	const auto& bounds = params.bounds;
