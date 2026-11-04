@@ -218,40 +218,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 			continue;
 		}
 
-		auto n = poly.connections.size();
-		for (size_t i = 0; i < n;) {
-			if (poly.connections[i] >= 0 && poly.connections[i] == poly.connections[(i + 1) % n]) {
-				if (n <= 3) {
-					Logger::logError("Navmesh generation for scene \"" + sceneName + "\": Post-processing found a triangle with two faces connecting to the same node: " + poly.polygon.toString());
-					i++;
-					continue;
-				}
-
-				// If two adjacent connections connect to the same polygon, delete that connection and the middle vertex
-				// e.g.:
-				//
-				//         1
-				//  0 +----+----+ 2
-				//	  |         |
-				//  4 +---------+ 3
-				//
-				// connections[0] and [1] link to the same polygon, therefore erase connections[0] and vertex[1]
-
-				auto vs = poly.polygon.getVertices();
-				auto origVs = vs;
-				vs.erase(vs.begin() + ((i + 1) % n));
-				poly.polygon.setVertices(vs);
-				if (poly.polygon.isValid()) {
-					poly.connections.erase(poly.connections.begin() + i);
-					--n;
-				} else {
-					// Rollback if something didn't go according to plan
-					poly.polygon.setVertices(origVs);
-				}
-			} else {
-				++i;
-			}
-		}
+		dedupPolygon(poly, sceneName);
 	}
 	
 	// Go through each polygon and see if any of its neighbours can be merged with it.
@@ -285,8 +252,14 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 							remapConnections(polygons[c], bIdx, aIdx);
 						}
 					}
+					dedupPolygon(*mergedPolygon, sceneName);
+					for (auto& c: mergedPolygon->connections) {
+						if (c >= 0) {
+							dedupPolygon(polygons[c], sceneName);
+						}
+					}
 
-					for (auto& c: mergedPolygon.value().connections) {
+					for (auto& c: mergedPolygon->connections) {
 						HalleyAssertDev(c != aIdx);
 						HalleyAssertDev(c != bIdx);
 					}
@@ -301,6 +274,44 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 	}
 
 	removeDeadPolygons(polygons);
+}
+
+void NavmeshGenerator::dedupPolygon(NavmeshNode& poly, const String& sceneName)
+{
+	auto n = poly.connections.size();
+	for (size_t i = 0; i < n;) {
+		if (poly.connections[i] >= 0 && poly.connections[i] == poly.connections[(i + 1) % n]) {
+			if (n <= 3) {
+				Logger::logError("Navmesh generation for scene \"" + sceneName + "\": Post-processing found a triangle with two faces connecting to the same node: " + poly.polygon.toString());
+				i++;
+				continue;
+			}
+
+			// If two adjacent connections connect to the same polygon, delete that connection and the middle vertex
+			// e.g.:
+			//
+			//         1
+			//  0 +----+----+ 2
+			//	  |         |
+			//  4 +---------+ 3
+			//
+			// connections[0] and [1] link to the same polygon, therefore erase connections[0] and vertex[1]
+
+			auto vs = poly.polygon.getVertices();
+			auto origVs = vs;
+			vs.erase(vs.begin() + ((i + 1) % n));
+			poly.polygon.setVertices(vs);
+			if (poly.polygon.isValid()) {
+				poly.connections.erase(poly.connections.begin() + i);
+				--n;
+			} else {
+				// Rollback if something didn't go according to plan
+				poly.polygon.setVertices(origVs);
+			}
+		} else {
+			++i;
+		}
+	}
 }
 
 void NavmeshGenerator::removeDeadPolygons(Vector<NavmeshNode>& polygons)

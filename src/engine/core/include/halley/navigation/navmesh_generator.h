@@ -62,6 +62,7 @@ namespace Halley {
 		static Vector<NavmeshNode> toNavmeshNode(Vector<Polygon> polygons);
 		static void generateConnectivity(gsl::span<NavmeshNode> polygons);
 		static void postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification, const NavmeshBounds& bounds, const String& sceneName);
+		static void dedupPolygon(NavmeshNode& polygon, const String& sceneName);
 		static void removeDeadPolygons(Vector<NavmeshNode>& polygons);
 		static void tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::span<const Line> mapEdges);
 
