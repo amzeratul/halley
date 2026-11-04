@@ -122,6 +122,9 @@ void FrameDebugger::paint(Painter& painter)
 			const auto frameIdx = framesToDraw - 1;
 			const auto info = renderSnapshot->getCommandInfo(frameIdx);
 
+			str.append("Group: ");
+			str.append(info.debugGroup, green);
+			str.append("\n");
 			str.append(getCommandType(info.type), green);
 			str.append(" [");
 			str.append(getReason(info.reason), green);

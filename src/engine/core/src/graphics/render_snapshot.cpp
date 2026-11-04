@@ -51,17 +51,17 @@ void RenderSnapshot::setClip(Rect4i rect, bool enable)
 	setClipDatas.push_back(SetClipData{ rect, enable });
 }
 
-void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
+void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil, String debugGroup)
 {
 	getCurDrawCall().emplace_back(CommandType::Clear, static_cast<uint16_t>(clearDatas.size()));
-	clearDatas.push_back(ClearData{ colour, depth, stencil });
+	clearDatas.push_back(ClearData{ colour, depth, stencil, std::move(debugGroup) });
 	finishDrawCall();
 }
 
-void RenderSnapshot::draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads)
+void RenderSnapshot::draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads, String debugGroup)
 {
 	getCurDrawCall().emplace_back(CommandType::Draw, static_cast<uint16_t>(drawDatas.size()));
-	drawDatas.push_back(DrawData{ material.clone(), numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
+	drawDatas.push_back(DrawData{ material.clone(), numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads, std::move(debugGroup) });
 	finishDrawCall();
 }
 
@@ -102,6 +102,7 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 
 	if (result.type == CommandType::Clear) {
 		const auto& curClear = clearDatas[commands.at(commandIdx).back().second];
+		result.debugGroup = curClear.debugGroup;
 		result.clearData = curClear;
 	} else if (result.type == CommandType::Draw) {
 		const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
@@ -115,6 +116,7 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 			}
 		}
 		result.numTriangles = curDraw.indices.size() / 3;
+		result.debugGroup = curDraw.debugGroup;
 
 		if (const auto* prevDraw = getLastDraw()) {
 			const auto prevMat = prevDraw->material;

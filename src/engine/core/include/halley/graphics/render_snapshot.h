@@ -47,6 +47,7 @@ namespace Halley {
             std::optional<Colour4f> colour;
             std::optional<float> depth;
             std::optional<uint8_t> stencil;
+            String debugGroup;
         };
 
         struct CommandInfo {
@@ -62,6 +63,7 @@ namespace Halley {
             String materialDefinition;
             ConfigNode materialConfigDetails;
             Vector<String> textures;
+            String debugGroup;
             std::optional<ClearData> clearData;
         };
 
@@ -84,8 +86,8 @@ namespace Halley {
         void unbind(RenderContext& context);
 
         void setClip(Rect4i rect, bool enable);
-    	void clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil);
-	    void draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads);
+    	void clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil, String debugGroup);
+	    void draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads, String debugGroup);
 
         void finish();
 
@@ -120,6 +122,7 @@ namespace Halley {
             Vector<IndexType> indices;
             PrimitiveType primitive;
             bool allIndicesAreQuads;
+            String debugGroup;
         };
 
         Vector<Vector<std::pair<CommandType, uint16_t>>> commands;

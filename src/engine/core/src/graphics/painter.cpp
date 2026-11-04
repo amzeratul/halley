@@ -97,7 +97,7 @@ void Painter::clear(std::optional<Colour> colour, std::optional<float> depth, st
 {
 	if (recordingSnapshot) {
 		const auto commandIdx = recordingSnapshot->getNumCommands();
-		recordingSnapshot->clear(colour, depth, stencil);
+		recordingSnapshot->clear(colour, depth, stencil, curDebugGroupStack.empty() ? String::emptyString() : curDebugGroupStack.back());
 		recordTimestamp(TimestampType::CommandStart, commandIdx);
 		doClear(colour, depth, stencil);
 		recordTimestamp(TimestampType::CommandEnd, commandIdx);
@@ -886,7 +886,7 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 	size_t commandIdx = 0;
 	if (recordingSnapshot) {
 		commandIdx = recordingSnapshot->getNumCommands();
-		recordingSnapshot->draw(material, numVertices, vertexData, indices, primitiveType, allIndicesAreQuads);
+		recordingSnapshot->draw(material, numVertices, vertexData, indices, primitiveType, allIndicesAreQuads, curDebugGroupStack.empty() ? String::emptyString() : curDebugGroupStack.back());
 		recordTimestamp(TimestampType::CommandStart, commandIdx);
 	}
 
