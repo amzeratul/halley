@@ -509,6 +509,9 @@ Polygon::SATClassification Polygon::classifyConvex(gsl::span<const Vector2f> vsA
 		for (size_t i = 0; i < n; i++) {
 			// Find the orthonormal axis
 			const Vector2f axis = (vs[(i + 1) % n] - vs[i]).orthoLeft().unit();
+			if (axis.x == 0.0f && axis.y == 0.0f) {
+				continue;
+			}
 
 			// Project both polygons there
 			const auto myRange = project(vsA, axis);
