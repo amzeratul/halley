@@ -186,16 +186,20 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 {
 	for (size_t polyAIdx = 0; polyAIdx < polygons.size(); ++polyAIdx) {
 		NavmeshNode& a = polygons[polyAIdx];
+		if (a.polygon.isValid()) {
+			// Should we assert/skip invalid ones?
+			HalleyAssertDev(a.polygon.isClockwise());
+		}
 
 		for (size_t edgeAIdx = 0; edgeAIdx < a.connections.size(); ++edgeAIdx) {
 			if (a.connections[edgeAIdx] < 0) {
 				const auto edgeA = a.polygon.getEdge(edgeAIdx);
-				
+				const float epsilon = clamp(0.1f * edgeA.getLength(), 1e-4f, 0.01f);
+
 				for (size_t polyBIdx = polyAIdx + 1; polyBIdx < polygons.size(); ++polyBIdx) {
 					NavmeshNode& b = polygons[polyBIdx];
 
-					const auto edgeBIdx = b.polygon.findEdge(edgeA, 0.01f);
-					if (edgeBIdx) {
+					if (const auto edgeBIdx = b.polygon.findEdgeOppositeDir(edgeA, epsilon)) {
 						if (b.connections[edgeBIdx.value()] < 0) {
 							// Establish connection
 							a.connections[edgeAIdx] = static_cast<int>(polyBIdx);
