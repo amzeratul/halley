@@ -231,9 +231,34 @@ namespace Halley {
 			return (p.x >= p1.x && p.x < p2.x && p.y >= p1.y && p.y < p2.y);
 		}
 
-		[[nodiscard]] constexpr bool contains(Rect2D r) const
+		[[nodiscard]] constexpr bool contains(const Rect2D& r) const
 		{
 			return getHorizontal().contains(r.getHorizontal()) && getVertical().contains(r.getVertical());
+		}
+
+		[[nodiscard]] constexpr bool containsAtLeastOneAxis(const Rect2D& r) const
+		{
+			return getHorizontal().contains(r.getHorizontal()) || getVertical().contains(r.getVertical());
+		}
+
+		[[nodiscard]] constexpr bool containsAll(gsl::span<const Vector2D<T>> ps) const
+		{
+			for (const auto& p: ps) {
+				if (!contains(p)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		[[nodiscard]] constexpr bool containsAny(gsl::span<const Vector2D<T>> ps) const
+		{
+			for (const auto& p: ps) {
+				if (contains(p)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		[[nodiscard]] constexpr Vector2D<T> getClosestPoint(Vector2D<T> p) const
