@@ -200,6 +200,7 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 							// Establish connection
 							a.connections[edgeAIdx] = static_cast<int>(polyBIdx);
 							b.connections[edgeBIdx.value()] = static_cast<int>(polyAIdx);
+							break;
 						}
 					}
 				}
@@ -295,14 +296,15 @@ void NavmeshGenerator::dedupPolygon(NavmeshNode& poly, const String& sceneName)
 			//	  |         |
 			//  4 +---------+ 3
 			//
-			// connections[0] and [1] link to the same polygon, therefore erase connections[0] and vertex[1]
+			// connections[0] and [1] link to the same polygon, therefore erase connections[1] and vertex[1]
 
 			auto vs = poly.polygon.getVertices();
 			auto origVs = vs;
-			vs.erase(vs.begin() + ((i + 1) % n));
+			const auto eraseIdx = (i + 1) % n;
+			vs.erase(vs.begin() + eraseIdx);
 			poly.polygon.setVertices(vs);
 			if (poly.polygon.isValid()) {
-				poly.connections.erase(poly.connections.begin() + i);
+				poly.connections.erase(poly.connections.begin() + eraseIdx);
 				--n;
 			} else {
 				// Rollback if something didn't go according to plan
