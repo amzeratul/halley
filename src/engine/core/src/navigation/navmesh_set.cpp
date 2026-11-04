@@ -820,30 +820,46 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 		const float threshold = 1.0f;
 		if (d0.length() >= threshold && d1.length() >= threshold) {
 			// Two potential target points, c and d, are constructed
-			const auto c = makePoint(a.pos + d0s);
-			const auto d = makePoint(a.pos + d1s);
-
 			// See if either path is acceptable
-			if (c && isPathClear(std::to_array({ a, *c, b }))) {
-				result.push_back(*c);
-			} else if (d && isPathClear(std::to_array({ a, *d, b }))) {
-				result.push_back(*d);
-			} else {
-				// Try a more zig-zaggy path, composed of half of one leg, then the full other leg, followed by another half leg
-				const auto e = makePoint(a.pos + 0.5f * d1s);
+
+			if (const auto c = makePoint(a.pos + d0s)) {
+				if (isPathClear(std::to_array({ a, *c, b }))) {
+					result.push_back(*c);
+					result.push_back(b);
+					continue;
+				}
+			}
+
+			if (const auto d = makePoint(a.pos + d1s)) {
+				if (isPathClear(std::to_array({ a, *d, b }))) {
+					result.push_back(*d);
+					result.push_back(b);
+					continue;
+				}
+			}
+
+			// Try a more zig-zaggy path, composed of half of one leg, then the full other leg, followed by another half leg
+			if (const auto e = makePoint(a.pos + 0.5f * d1s)) {
 				const auto f = makePoint(a.pos + 0.5f * d1s + d0s);
-				const auto g = makePoint(a.pos + 0.5f * d0s);
-				const auto h = makePoint(a.pos + 0.5f * d0s + d1s);
-				if (e && f && isPathClear(std::to_array({ a, *e, *f, b }))) {
+				if (f && isPathClear(std::to_array({ a, *e, *f, b }))) {
 					result.push_back(*e);
 					result.push_back(*f);
-				} else if (g && h && isPathClear(std::to_array({ a, *g, *h, b}))) {
+					result.push_back(b);
+					continue;
+				}
+			}
+
+			if (const auto g = makePoint(a.pos + 0.5f * d0s)) {
+				const auto h = makePoint(a.pos + 0.5f * d0s + d1s);
+				if (h && isPathClear(std::to_array({ a, *g, *h, b}))) {
 					result.push_back(*g);
 					result.push_back(*h);
+					result.push_back(b);
+					continue;
 				}
 			}
 		}
-
+		
 		result.push_back(b);
 	}
 
