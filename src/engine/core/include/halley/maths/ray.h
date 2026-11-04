@@ -28,8 +28,12 @@ namespace Halley {
 		Vector2f p;
 		Vector2f dir;
 
-		Ray();
-		Ray(Vector2f start, Vector2f dir);
+		constexpr Ray() = default;
+		constexpr Ray(Vector2f start, Vector2f dir)
+			: p(start)
+			, dir(dir)
+		{
+		}
 
 		std::optional<RayCastResult> castCircle(Vector2f centre, float radius) const;
 		std::optional<RayCastResult> castCircle(const Circle& circle) const;

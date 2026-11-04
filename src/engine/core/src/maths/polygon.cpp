@@ -1482,19 +1482,23 @@ float Polygon::getDistanceTo(const LineSegment& line) const
 std::optional<size_t> Polygon::getExitEdge(const Ray& ray, size_t startFromEdge) const
 {
 	const size_t n = vertices.size();
+	if (n < 3 || startFromEdge >= n) [[unlikely]] {
+		return {};
+	}
+
+	const Vector2f a = vertices[startFromEdge];
+	float ca = (a - ray.p).cross(ray.dir);
+
 	for (size_t i = startFromEdge; i < n; ++i) {
-		const Vector2f a = vertices[i];
 		const Vector2f b = vertices[(i + 1) % n];
+		const auto cb = (b - ray.p).cross(ray.dir);
 
 		// Look for a on the left and b on the right
-		const Vector2f pa = a - ray.p;
-		const Vector2f pb = b - ray.p;
-		const auto ca = pa.cross(ray.dir);
-		const auto cb = pb.cross(ray.dir);
-
 		if (ca >= 0 && cb <= 0 && (ca != 0 || cb != 0)) {
 			return i;
 		}
+
+		ca = cb;
 	}
 	return {};
 }

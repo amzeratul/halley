@@ -7,16 +7,6 @@ bool Ray::RayCastResult::operator<(const RayCastResult& other) const
 	return distance < other.distance;
 }
 
-Ray::Ray()
-{
-}
-
-Ray::Ray(Vector2f start, Vector2f dir)
-	: p(start)
-	, dir(dir)
-{
-}
-
 String Ray::toString() const
 {
 	return "Ray(p=" + Halley::toString(p) + ", d=" + Halley::toString(dir) + ")";
