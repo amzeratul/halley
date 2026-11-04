@@ -588,14 +588,14 @@ Navmesh::RayResult Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray,
 	NodeId curPoly = initialPolygon;
 	std::optional<NodeId> prevPoly;
 	while (distanceLeft > 0) {
-		const auto& poly = curNavmesh->polygons.at(curPoly);
+		const auto& poly = curNavmesh->polygons[curPoly];
 		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
 		if (!edgeIdx) {
 			// Something went wrong
 			return RayResult(ray.p, weightedDistance, std::nullopt, std::nullopt);
 		}
 
-		const auto nextPoly = curNavmesh->nodes.at(curPoly).connections.at(edgeIdx.value());
+		const auto nextPoly = curNavmesh->nodes[curPoly].connections.at(edgeIdx.value());
 		if (nextPoly && (nextPoly == prevPoly)) {
 			//Logger::logError("Navmesh::findRayCollision error: ping-ponging on navmesh. Prev = " + toString(prevPoly) + ", cur = " + toString(curPoly) + ", next = " + toString(nextPoly));
 
@@ -609,19 +609,28 @@ Navmesh::RayResult Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray,
 		}
 
 		// Find intersection with that edge
+		// Solves ray.p + t * ray.dir = edge.a + s * edgeDir for t, the distance along the ray (ray.dir is normalized)
 		const auto edge = poly.getEdge(edgeIdx.value());
-		const Line edgeLine(edge.a, (edge.b - edge.a).normalized());
-		std::optional<Vector2f> intersection = edgeLine.intersection(Line(ray.p, ray.dir));
-		if (!intersection) {
+		const auto edgeDir = edge.b - edge.a;
+		const float divisor = ray.dir.cross(edgeDir);
+		Vector2f intersection;
+		float distMoved;
+		if (divisor * divisor > 0.000001f * 0.000001f * edgeDir.squaredLength()) {
+			// Same parallel threshold as Line::intersection, which compares against normalized vectors
+			const float t = (edge.a - ray.p).cross(edgeDir) / divisor;
+			intersection = ray.p + ray.dir * t;
+			distMoved = std::abs(t);
+		} else {
 			// Parallel - Must be overlapping due to exitEdge test previously
 
 			// ray.p must be between edge.a and edge.b OR be at edge.a or edge.b
 			// The corner intersected by the ray is b if edge goes in the same direction as the ray, a otherwise
-			const bool useEdgeB = (edge.b - edge.a).dot(ray.dir) > 0;
+			const bool useEdgeB = edgeDir.dot(ray.dir) > 0;
 			const auto endCorner = useEdgeB ? edge.b : edge.a;
 
 			const float intersectDist = std::min(distanceLeft, (endCorner - ray.p).length());
 			intersection = ray.p + ray.dir * intersectDist;
+			distMoved = intersectDist;
 
 			if (intersectDist <= 0) {
 				// We are already at end corner, pick the next edge round with the same corner
@@ -632,12 +641,10 @@ Navmesh::RayResult Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray,
 				}
 			}
 		}
-		HalleyAssertDev(intersection.has_value());
-		HalleyAssertDev(intersection->isValid());
+		HalleyAssertDev(intersection.isValid());
 
 		// Check how much more we have left to go and stop if we reach the destination
 		constexpr float epsilon = 0.1f;
-		float distMoved = (ray.p - intersection.value()).length();
 
 		if (distMoved < std::min(epsilon, distanceLeft)) {
 			// If distMoved is zero, this can infinite loop (seen it in practice)
@@ -653,24 +660,24 @@ Navmesh::RayResult Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray,
 		if (nextPoly) {
 			prevPoly = curPoly;
 			curPoly = nextPoly.value();
-			ray = Ray(intersection.value(), ray.dir);
+			ray = Ray(intersection, ray.dir);
 		} else {
 			// Hit the edge of the navmesh - continue on next navmesh if available, otherwise stop here
 			if (navmeshSet) {
 				if (auto nextNavmeshId = curNavmesh->getNavmeshFromEdge(NodeAndConn(curPoly, static_cast<uint16_t>(*edgeIdx)))) {
 					const auto& nextNavmesh = navmeshSet->getNavmesh(*nextNavmeshId);
-					if (auto nextNodeId = nextNavmesh.getNodeAt(*intersection)) {
+					if (auto nextNodeId = nextNavmesh.getNodeAt(intersection)) {
 						curNavmesh = &nextNavmesh;
-						ray = Ray(*intersection, ray.dir);
+						ray = Ray(intersection, ray.dir);
 						curPoly = *nextNodeId;
 						prevPoly = {};
 						continue;
-						//return nextNavmesh.findRayCollision(Ray(*intersection, ray.dir), distanceLeft, *nextNodeId, weightedDistance, navmeshSet);
+						//return nextNavmesh.findRayCollision(Ray(intersection, ray.dir), distanceLeft, *nextNodeId, weightedDistance, navmeshSet);
 					}
 				}
 			}
 
-			return RayResult{ intersection.value(), weightedDistance, std::nullopt, std::nullopt };
+			return RayResult{ intersection, weightedDistance, std::nullopt, std::nullopt };
 		}
 	}
 
