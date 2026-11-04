@@ -493,12 +493,17 @@ Polygon::SATClassification Polygon::classify(const Polygon& other, float epsilon
 		return SATClassification::Separate;
 	}
 	
+	return classifyConvex(vertices, other.vertices, epsilon);
+}
+
+Polygon::SATClassification Polygon::classifyConvex(gsl::span<const Vector2f> vsA, gsl::span<const Vector2f> vsB, float epsilon)
+{
 	bool contains = true;
 	bool isContainedBy = true;
 
 	// For each polygon
 	for (size_t j = 0; j < 2; ++j) {
-		const auto& vs = j == 0 ? vertices : other.vertices;
+		const auto& vs = j == 0 ? vsA : vsB;
 		const size_t n = vs.size();
 		// For each edge
 		for (size_t i = 0; i < n; i++) {
@@ -506,8 +511,8 @@ Polygon::SATClassification Polygon::classify(const Polygon& other, float epsilon
 			const Vector2f axis = (vs[(i + 1) % n] - vs[i]).orthoLeft().unit();
 
 			// Project both polygons there
-			const auto myRange = project(axis);
-			const auto otherRange = other.project(axis);
+			const auto myRange = project(vsA, axis);
+			const auto otherRange = project(vsB, axis);
 
 			if (myRange.overlaps(otherRange)) {
 				if (myRange.getOverlap(otherRange).getLength() < epsilon) {
@@ -593,12 +598,17 @@ Polygon::SATClassification Polygon::classify(const LineSegment& line) const
 
 Range<float> Polygon::project(Vector2f axis) const
 {
+	return project(vertices, axis);
+}
+
+Range<float> Polygon::project(gsl::span<const Vector2f> vs, Vector2f axis)
+{
 	float min = std::numeric_limits<float>::max();
 	float max = -std::numeric_limits<float>::max();
 
-	const size_t len = vertices.size();
+	const size_t len = vs.size();
 	for (size_t i = 0; i < len; i++) {
-		const float dot = axis.dot(vertices[i]);
+		const float dot = axis.dot(vs[i]);
 		min = std::min(min, dot);
 		max = std::max(max, dot);
 	}

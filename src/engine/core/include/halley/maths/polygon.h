@@ -75,6 +75,7 @@ namespace Halley {
 		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
 
 		SATClassification classify(const Polygon& other, float epsilon = 0.0001f) const;
+		static SATClassification classifyConvex(gsl::span<const Vector2f> vsA, gsl::span<const Vector2f> vsB, float epsilon = 0.0001f);
 		SATClassification classify(const LineSegment& line) const;
 
 		void setVertices(VertexList vertices);
@@ -161,6 +162,7 @@ namespace Halley {
 		bool collideConvex(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 
 		Range<float> project(Vector2f axis) const;
+		static Range<float> project(gsl::span<const Vector2f> vs, Vector2f axis);
 		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
 		void checkConvex();
