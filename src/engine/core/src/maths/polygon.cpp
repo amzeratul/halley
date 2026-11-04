@@ -23,6 +23,7 @@
 #include "halley/maths/polygon.h"
 
 #include "halley/support/assert.h"
+#include <algorithm>
 #include <limits>
 
 #include "halley/file_formats/config_file.h"
@@ -644,6 +645,58 @@ std::optional<size_t> Polygon::findEdge(const LineSegment& edge, float epsilon) 
 		}
 	}
 	return {};
+}
+
+std::optional<size_t> Polygon::findEdgeSameDir(const LineSegment& edge, float epsilon) const
+{
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		if (getEdge(i).epsilonEqualsSameDir(edge, epsilon)) {
+			return i;
+		}
+	}
+	return {};
+}
+
+std::optional<size_t> Polygon::findEdgeOppositeDir(const LineSegment& edge, float epsilon) const
+{
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		if (getEdge(i).epsilonEqualsOppositeDir(edge, epsilon)) {
+			return i;
+		}
+	}
+	return {};
+}
+
+float Polygon::getShortestEdgeLength() const
+{
+	float result = std::numeric_limits<float>::max();
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		result = std::min(result, getEdge(i).getLength());
+	}
+	return result;
+}
+
+float Polygon::getLongestEdgeLength() const
+{
+	float result = 0;
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		result = std::max(result, getEdge(i).getLength());
+	}
+	return result;
+}
+
+float Polygon::getPerimeter() const
+{
+	float result = 0;
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		result += getEdge(i).getLength();
+	}
+	return result;
 }
 
 void Polygon::rotate(Angle<float> angle)

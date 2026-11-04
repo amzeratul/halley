@@ -286,8 +286,17 @@ namespace Halley {
 
 		bool epsilonEquals(const LineSegment& other, float epsilon) const
 		{
-			return (a.epsilonEquals(other.a, epsilon) && b.epsilonEquals(other.b, epsilon))
-				|| (a.epsilonEquals(other.b, epsilon) && b.epsilonEquals(other.a, epsilon));
+			return epsilonEqualsSameDir(other, epsilon) || epsilonEqualsOppositeDir(other, epsilon);
+		}
+
+		bool epsilonEqualsSameDir(const LineSegment& other, float epsilon) const
+		{
+			return a.epsilonEquals(other.a, epsilon) && b.epsilonEquals(other.b, epsilon);
+		}
+
+		bool epsilonEqualsOppositeDir(const LineSegment& other, float epsilon) const
+		{
+			return a.epsilonEquals(other.b, epsilon) && b.epsilonEquals(other.a, epsilon);
 		}
 
 		[[nodiscard]] Range<float> project(const Vector2f& axis) const
