@@ -781,8 +781,11 @@ void NavmeshSet::quantizePath(Vector<NavigationPath::Point>& points, NavigationQ
 
 void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const
 {
-	auto makePoint = [this] (WorldPosition pos) -> std::optional<NavigationPath::Point>
+	auto makePoint = [this] (WorldPosition pos, uint16_t hint) -> std::optional<NavigationPath::Point>
 	{
+		if (navmeshes[hint].containsPoint(pos)) {
+			return NavigationPath::Point(pos, hint);
+		}
 		auto navmeshIdx = getNavMeshIdxAt(pos);
 		if (!navmeshIdx) {
 			return std::nullopt;
@@ -822,7 +825,7 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 			// Two potential target points, c and d, are constructed
 			// See if either path is acceptable
 
-			if (const auto c = makePoint(a.pos + d0s)) {
+			if (const auto c = makePoint(a.pos + d0s, a.navmeshId)) {
 				if (isPathClear(std::to_array({ a, *c, b }))) {
 					result.push_back(*c);
 					result.push_back(b);
@@ -830,7 +833,7 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 				}
 			}
 
-			if (const auto d = makePoint(a.pos + d1s)) {
+			if (const auto d = makePoint(a.pos + d1s, a.navmeshId)) {
 				if (isPathClear(std::to_array({ a, *d, b }))) {
 					result.push_back(*d);
 					result.push_back(b);
@@ -839,8 +842,8 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 			}
 
 			// Try a more zig-zaggy path, composed of half of one leg, then the full other leg, followed by another half leg
-			if (const auto e = makePoint(a.pos + 0.5f * d1s)) {
-				const auto f = makePoint(a.pos + 0.5f * d1s + d0s);
+			if (const auto e = makePoint(a.pos + 0.5f * d1s, a.navmeshId)) {
+				const auto f = makePoint(a.pos + 0.5f * d1s + d0s, a.navmeshId);
 				if (f && isPathClear(std::to_array({ a, *e, *f, b }))) {
 					result.push_back(*e);
 					result.push_back(*f);
@@ -849,8 +852,8 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 				}
 			}
 
-			if (const auto g = makePoint(a.pos + 0.5f * d0s)) {
-				const auto h = makePoint(a.pos + 0.5f * d0s + d1s);
+			if (const auto g = makePoint(a.pos + 0.5f * d0s, a.navmeshId)) {
+				const auto h = makePoint(a.pos + 0.5f * d0s + d1s, a.navmeshId);
 				if (h && isPathClear(std::to_array({ a, *g, *h, b}))) {
 					result.push_back(*g);
 					result.push_back(*h);
