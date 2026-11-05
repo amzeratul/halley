@@ -86,6 +86,7 @@ namespace Halley {
 		Vector<SpriteMaskBase> paintMasks;
 		bool skipIfNothingToDraw = false;
 		bool filteringOnOwnRenderTarget = false;
+		bool enabledOnDemand = false;
 
 		std::shared_ptr<Material> overlayFilterMethod;
 		Vector<Variable> variables;
@@ -98,6 +99,7 @@ namespace Halley {
 		bool curBypass = false;
 		bool ignoreDependencies = false;
 		int nothingToDrawFrames = 0;
+		int framesSinceDemanded = 0;
 
 		Vector<InputPin> inputPins;
 		Vector<InputPin> bypassInputPins;

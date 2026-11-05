@@ -335,6 +335,7 @@ Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::RenderToTextureNodeTyp
 	return {
 		SettingType{ "name", "Halley::String", Vector<String>{""} },
 		SettingType{ "renderSize", "Halley::Vector2i", Vector<String>{""} },
+		SettingType{ "enableOnDemand", "bool", Vector<String>{"false"} },
 	};
 }
 

@@ -114,10 +114,11 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 	}
 
 	for (auto& node: nodes) {
-		if (node->enabled
-			&& (node->method == RenderGraphMethod::Output
-			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id)))) {
-			node->prepareDependencyGraph(video, renderSize);
+		if (node->enabled) {
+			if (node->method == RenderGraphMethod::Output
+				|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id))) {
+				node->prepareDependencyGraph(video, renderSize);
+			}
 		}
 	}
 
@@ -322,6 +323,11 @@ std::shared_ptr<Texture> RenderGraph::getOutputTexture(const String& id)
 	auto* targetNode = tryGetNode(id);
 	if (!targetNode) {
 		return nullptr;
+	}
+
+	if (targetNode->enabledOnDemand) {
+		targetNode->enabled = true;
+		targetNode->framesSinceDemanded = 0;
 	}
 
 	const auto& pin = targetNode->getInputPins()[0];

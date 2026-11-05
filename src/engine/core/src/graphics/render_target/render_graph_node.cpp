@@ -71,6 +71,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		}
 	} else if (method == RenderGraphMethod::RenderToTexture) {
 		currentSize = pars["renderSize"].asVector2i();
+		enabledOnDemand = pars["enableOnDemand"].asBool(false);
 	}
 }
 
@@ -79,6 +80,12 @@ void RenderGraphNode::startRender()
 	if (curBypass != bypass) {
 		curBypass = bypass;
 		renderTarget.reset();
+	}
+	if (enabledOnDemand && enabled) {
+		++framesSinceDemanded;
+		if (framesSinceDemanded >= 2) {
+			enabled = false;
+		}
 	}
 	activeInCurrentPass = false;
 	ownRenderTarget = false;
