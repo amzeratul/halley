@@ -266,7 +266,7 @@ void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, Vector<Polygon>& output
 bool Polygon::isPointInside(Vector2f point) const
 {
 	// Fast fail
-	if ((point - circle.getCentre()).squaredLength() > circle.getRadius() * circle.getRadius()) { // Perf: run this before AABB test, and don't call circle.contains()
+	if (!circle.contains(point)) {
 		return false;
 	}
 	if (!aabb.contains(point)) {
