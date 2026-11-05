@@ -514,6 +514,10 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLa
 
 void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
+	if (colour.a < 0.00001f) {
+		return;
+	}
+
 	generateSprites();
 
 	if (spriteFilter) {
