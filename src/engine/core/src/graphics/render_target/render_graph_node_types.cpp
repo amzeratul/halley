@@ -100,6 +100,7 @@ Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::PaintNodeType::getSett
 		SettingType{ "paintMasks", "Halley::Vector<Halley::SpriteMasksBase>", Vector<String>{""} },
 		SettingType{ "postPaintMethodId", "Halley::String", Vector<String>{""} },
 		SettingType{ "skipIfNothingToDraw", "bool", Vector<String>{"false"} },
+		SettingType{ "filteringOnOwnRenderTarget", "bool", Vector<String>{"false"} },
 	};
 }
 

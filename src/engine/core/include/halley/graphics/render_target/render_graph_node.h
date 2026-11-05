@@ -85,6 +85,7 @@ namespace Halley {
 		std::optional<uint8_t> stencilClear;
 		Vector<SpriteMaskBase> paintMasks;
 		bool skipIfNothingToDraw = false;
+		bool filteringOnOwnRenderTarget = false;
 
 		std::shared_ptr<Material> overlayFilterMethod;
 		Vector<Variable> variables;

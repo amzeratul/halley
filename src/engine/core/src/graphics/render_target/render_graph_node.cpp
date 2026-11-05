@@ -36,6 +36,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		postPaintMethodId = pars["postPaintMethodId"].asString("");
 		paintMasks = pars["paintMasks"].asVector<SpriteMaskBase>({});
 		skipIfNothingToDraw = pars["skipIfNothingToDraw"].asBool(false);
+		filteringOnOwnRenderTarget = pars["filteringOnOwnRenderTarget"].asBool(false);
 
 		cameraId = pars["cameraId"].asString();
 
@@ -256,7 +257,7 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 	auto desc = TextureDescriptor(size, type == RenderGraphElementType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
 	desc.isRenderTarget = true;
 	desc.isDepthStencil = type == RenderGraphElementType::DepthStencilBuffer;
-	desc.useFiltering = false; // TODO: allow filtering
+	desc.useFiltering = filteringOnOwnRenderTarget;
 	texture->load(std::move(desc));
 
 	return texture;
