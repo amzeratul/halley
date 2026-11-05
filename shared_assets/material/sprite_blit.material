@@ -1,0 +1,12 @@
+---
+name: Halley/SpriteBlit
+base: sprite_base.material
+textures:
+  - image: sampler2D
+passes:
+  - blend: Opaque
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: sprite_blit.pixel.hlsl
+...
