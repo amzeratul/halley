@@ -275,7 +275,7 @@ void RenderGraphNode::updateTexture(std::shared_ptr<Texture> texture, RenderGrap
 	auto desc = TextureDescriptor(getTextureSize(), type == RenderGraphElementType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
 	desc.isRenderTarget = true;
 	desc.isDepthStencil = type == RenderGraphElementType::DepthStencilBuffer;
-	desc.useFiltering = false;
+	desc.useFiltering = filteringOnOwnRenderTarget;
 	texture->load(std::move(desc));
 }
 
