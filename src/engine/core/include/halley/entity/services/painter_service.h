@@ -54,6 +54,9 @@ namespace Halley {
 			return *getFrameData().tryGetPainter<T>();
 		}
 
+		void setRenderFlag(std::string_view key, bool value);
+		bool getRenderFlag(std::string_view key, bool defaultValue = false) const;
+
 	private:
 		bool updateEnabled = true;
 		bool depthQueriesEnabled = false;
@@ -63,6 +66,7 @@ namespace Halley {
 		std::optional<uint8_t> stencilClear;
 		std::optional<float> depthClear;
 		std::shared_ptr<RenderGraph> renderGraph;
+		HashMap<String, bool> renderFlags;
 	};
 }
 

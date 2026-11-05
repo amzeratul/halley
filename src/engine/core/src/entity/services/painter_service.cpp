@@ -135,3 +135,16 @@ bool PainterService::hasRenderGraph() const
 {
 	return !!renderGraph;
 }
+
+void PainterService::setRenderFlag(std::string_view key, bool value)
+{
+	renderFlags[key] = value;
+}
+
+bool PainterService::getRenderFlag(std::string_view key, bool defaultValue) const
+{
+	if (auto iter = renderFlags.find(key); iter != renderFlags.end()) {
+		return iter->second;
+	}
+	return defaultValue;
+}
