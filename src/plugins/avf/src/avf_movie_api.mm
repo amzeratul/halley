@@ -15,7 +15,7 @@ void AVFMovieAPI::deInit()
 {
 }
 
-std::shared_ptr<MoviePlayer> AVFMovieAPI::makePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data)
+std::shared_ptr<MoviePlayer> AVFMovieAPI::makePlayer(const HalleyAPI& halleyAPI, std::shared_ptr<ResourceDataStream> data)
 {
-	return std::make_shared<AVFMoviePlayer>(video, audio, data);
+	return std::make_shared<AVFMoviePlayer>(halleyAPI, data);
 }

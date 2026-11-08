@@ -181,7 +181,9 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	glCheckError();
 
 #ifdef WITH_OPENGL
-	glObjectLabel(GL_TEXTURE, textureId, -1, getAssetId().c_str());
+	if (glObjectLabel) { // null unless KHR_debug is available (e.g. not on macOS OpenGL 4.1)
+		glObjectLabel(GL_TEXTURE, textureId, -1, getAssetId().c_str());
+	}
 #endif
 
 	texSize = size;
