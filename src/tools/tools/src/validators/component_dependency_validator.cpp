@@ -16,6 +16,12 @@ ComponentDependencyValidator::ComponentDependencyValidator(const ECSData* ecsDat
 
 Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(EntityValidator& validator, const EntityData& entityData)
 {
+	// Don't run it for instances, as the dependency might be on the actual prefab
+	// This would actually need to be validated against the instantiated version
+	if (!entityData.getPrefab().isEmpty()) {
+		return {};
+	}
+
 	Vector<Result> result;
 
 	const auto& componentSchemas = ecsData->getComponents();
@@ -28,8 +34,8 @@ Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(En
 
 		const auto& componentSchema = iter->second;
 		for (auto& dependsOn : componentSchema.componentDependencies) {
-			const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
-			if (!hasDepedency) {
+			const bool hasDependency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
+			if (!hasDependency) {
 				result.emplace_back(Severity::Error, component.first + " depends on " + dependsOn + " which is missing.");
 			}
 		}
