@@ -131,29 +131,31 @@ namespace Halley {
 		}
 
 		// Cross product
-		constexpr inline Vector3D cross(const Vector3D& p) const { return Vector3D(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x); }
+		[[nodiscard]] constexpr Vector3D cross(const Vector3D& p) const { return Vector3D(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x); }
 
 		// Dot product
-		constexpr inline T dot(const Vector3D& p) const { return (x * p.x) + (y * p.y) + (z * p.z); }
+		[[nodiscard]] constexpr T dot(const Vector3D& p) const { return (x * p.x) + (y * p.y) + (z * p.z); }
 
 		// Length
-		constexpr inline T length() const { return static_cast<T>(std::sqrt(squaredLength())); }
+		[[nodiscard]] constexpr T length() const { return static_cast<T>(std::sqrt(squaredLength())); }
 
 		// Squared length, often useful and much faster
-		constexpr inline T squaredLength() const { return x * x + y * y + z * z; }
+		[[nodiscard]] constexpr T squaredLength() const { return x * x + y * y + z * z; }
 
-		// Floor
-		inline Vector3D floor() const { return Vector3D(::floor(x), ::floor(y), ::floor(z)); }
+		[[nodiscard]] constexpr Vector3D floor() const { return Vector3D(std::floor(x), std::floor(y), std::floor(z)); }
+		[[nodiscard]] constexpr Vector3D ceil() const { return Vector3D(std::ceil(x), std::ceil(y), std::ceil(z)); }
+		[[nodiscard]] constexpr Vector3D round() const { return Vector3D(std::round(x), std::round(y), std::round(z)); }
 
 		// Projection on another vector
-		inline Vector3D projection(const Vector3D &p) const { Vector3D unit = p.unit(); return dot(unit) * unit; }
-		inline T projectionLength(const Vector3D &p) const { Vector3D unit = p.unit(); return dot(unit); }
+		[[nodiscard]] constexpr Vector3D projection(const Vector3D &p) const { Vector3D unit = p.unit(); return dot(unit) * unit; }
+		[[nodiscard]] constexpr T projectionLength(const Vector3D &p) const { Vector3D unit = p.unit(); return dot(unit); }
 
-		inline Vector3D normalized() const
+		[[nodiscard]] constexpr Vector3D normalized() const
 		{
 			return unit();
 		}
-		inline void normalize()
+		
+		constexpr void normalize()
 		{
 			*this = unit();
 		}
