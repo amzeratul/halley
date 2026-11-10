@@ -141,11 +141,18 @@ void DX12Painter::doClear(std::optional<Colour> colour, std::optional<float> dep
         }
 
         if (dsv.ptr != 0) {
+	        D3D12_CLEAR_FLAGS flags = {};
+	        if (depth) {
+		        flags |= D3D12_CLEAR_FLAG_DEPTH;
+	        }
+	        if (stencil) {
+		        flags |= D3D12_CLEAR_FLAG_STENCIL;
+	        }
 	        cmdList->ClearDepthStencilView(
 	                dsv,
-	                D3D12_CLEAR_FLAG_DEPTH,
-	                1.0f,
-	                0,
+	                flags,
+	                depth.value_or(1.0f),
+	                stencil.value_or(0),
 	                0,
 	                nullptr
 	        );
