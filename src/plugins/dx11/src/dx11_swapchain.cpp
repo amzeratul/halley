@@ -97,13 +97,13 @@ void DX11SwapChain::init(Window& window)
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = numBuffers;
 	swapChainDesc.SampleDesc.Count = 1;
-#if WINVER >= 0x0A00
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-#else
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-#endif
 
 	if (usingCoreWindow) {
+#if WINVER >= 0x0A00
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+#else
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+#endif
 		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
