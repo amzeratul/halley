@@ -7,12 +7,12 @@
 namespace Halley {
 	class NavigationQuery {
 	public:
-		enum class PostProcessingType {
+		enum class PostProcessingType : uint8_t {
 			None,
 			Normal
 		};
 
-		enum class QuantizationType {
+		enum class QuantizationType : uint8_t {
 			None,
 			Quantize8Way,
 			Quantize8WayIsometric,
@@ -26,24 +26,26 @@ namespace Halley {
 			DebugData(String agentId);
 
 			String toString() const;
+
+			bool operator==(const DebugData& other) const = default;
 		};
 
 		WorldPosition from;
 		WorldPosition to;
 		PostProcessingType postProcessingType;
 		QuantizationType quantizationType;
+		float sideShift = 0;
 		DebugData debugData;
 
 		NavigationQuery();
-		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType, DebugData debugData = {});
+		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType, float sideShift, DebugData debugData = {});
 		explicit NavigationQuery(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
 		void feedToHasher(Hash::Hasher& hasher) const;
 		String toString() const;
 
-		bool operator==(const NavigationQuery& other) const;
-		bool operator!=(const NavigationQuery& other) const;
+		bool operator==(const NavigationQuery& other) const = default;
 	};
 
 	template <>

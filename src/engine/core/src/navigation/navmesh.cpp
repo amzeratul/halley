@@ -956,7 +956,7 @@ void Navmesh::computePortalDistances(const String& name)
 			const auto pos0 = WorldPosition(p0.pos, subWorld);
 			const auto pos1 = WorldPosition(p1.pos, subWorld);
 
-			const auto interPortalPath = pathfind(NavigationQuery(pos0, pos1, NavigationQuery::PostProcessingType::Normal, NavigationQuery::QuantizationType::None));
+			const auto interPortalPath = pathfind(NavigationQuery(pos0, pos1, NavigationQuery::PostProcessingType::Normal, NavigationQuery::QuantizationType::None, 0));
 			if (!interPortalPath) {
 				Logger::logError("Navmesh generation failure for \"" + name + "\": Unable to compute distance between portals on same navmesh - between " + toString(pos0) + " and " + toString(pos1));
 			}

@@ -18,11 +18,12 @@ String NavigationQuery::DebugData::toString() const
 
 NavigationQuery::NavigationQuery() = default;
 
-NavigationQuery::NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType, DebugData debugData)
+NavigationQuery::NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType, float sideShift, DebugData debugData)
 	: from(from)
 	, to(to)
 	, postProcessingType(postProcessing)
 	, quantizationType(quantizationType)
+	, sideShift(sideShift)
 	, debugData(std::move(debugData))
 {
 }
@@ -33,6 +34,7 @@ NavigationQuery::NavigationQuery(const ConfigNode& node)
 	to = WorldPosition(node["to"]);
 	postProcessingType = fromString<PostProcessingType>(node["postProcessingType"].asString());
 	quantizationType = fromString<QuantizationType>(node["quantizationType"].asString());
+	sideShift = node["sideShift"].asFloat(0);
 }
 
 ConfigNode NavigationQuery::toConfigNode() const
@@ -43,6 +45,9 @@ ConfigNode NavigationQuery::toConfigNode() const
 	result["to"] = to;
 	result["postProcessingType"] = Halley::toString(postProcessingType);
 	result["quantizationType"] = Halley::toString(quantizationType);
+	if (std::abs(sideShift) > 0.0001f) {
+		result["sideShift"] = sideShift;
+	}
 	
 	return result;
 }
@@ -53,23 +58,11 @@ void NavigationQuery::feedToHasher(Hash::Hasher& hasher) const
 	ConfigNodeHelper<decltype(to)>::hash(to, hasher);
 	ConfigNodeHelper<decltype(postProcessingType)>::hash(postProcessingType, hasher);
 	ConfigNodeHelper<decltype(quantizationType)>::hash(quantizationType, hasher);
+	ConfigNodeHelper<decltype(sideShift)>::hash(sideShift, hasher);
 }
 
 String NavigationQuery::toString() const
 {
 	using Halley::toString;
-	return "navQuery(" + toString(from) + " -> " + toString(to) + ", " + toString(postProcessingType) + ", " + toString(quantizationType) + ")";
-}
-
-bool NavigationQuery::operator==(const NavigationQuery& other) const
-{
-	return from == other.from
-		&& to == other.to
-		&& postProcessingType == other.postProcessingType
-		&& quantizationType == other.quantizationType;
-}
-
-bool NavigationQuery::operator!=(const NavigationQuery& other) const
-{
-	return !(*this == other);
+	return "navQuery(" + toString(from) + " -> " + toString(to) + ", " + toString(postProcessingType) + ", " + toString(quantizationType) + ", " + toString(sideShift) + ")";
 }
