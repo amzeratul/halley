@@ -51,6 +51,11 @@ namespace Halley {
 			return (point - origin).projection(dir) + origin;
 		}
 
+		constexpr Vector2f getPoint(float t) const
+		{
+			return origin + t * dir;
+		}
+
 		std::optional<Vector2f> intersection(const Line& other) const
 		{
 			const auto& a = origin;
