@@ -417,6 +417,10 @@ void EntityNetworkChanges::notifyComponentRemoved(int pageIdx, uint16_t componen
     componentsRemoved.emplace_back(pageIdx, componentId);
 }
 
+// The maximum scratch pad sizes depend on some limits: MTU, maximum UDP packet split size in
+// AckUnreliableConnection, and maximum network message split size in EntityNetworkSession.
+static constexpr size_t scratchpadMaxSize = 16 * 32 * 1024; // 512 KB
+
 void EntityNetworkSerialize::setSession(const EntityNetworkSession* entityNetworkSession)
 {
     HalleyAssertDebug(session == nullptr || session == entityNetworkSession);
@@ -435,7 +439,7 @@ uint64_t EntityNetworkSerialize::serializeEntityHash(const EntityRef& entity, co
     // compute string hashes, the additional dictionary lookup is kind of counterproductive.
     thread_local Bytes hashScratch;
     if (hashScratch.empty()) {
-        hashScratch.resize_no_init(256 * 1024); // a span-backed Serializer throws if this overflows
+        hashScratch.resize_no_init(scratchpadMaxSize); // a span-backed Serializer throws if this overflows
     }
     
     SerializerOptions opt(options.version);
@@ -537,7 +541,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
     // The maximum size depends on some limits: MTU, maximum UDP packet split size in AckUnreliableConnection,
     // and maximum network message split size in EntityNetworkSession.
     if (scratchpad.empty()) {
-        scratchpad.reserve(16 * 32 * 1024);
+        scratchpad.reserve(scratchpadMaxSize);
         scratchpad.resize_no_init(scratchpad.capacity());
     }
 
