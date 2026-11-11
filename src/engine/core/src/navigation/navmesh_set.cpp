@@ -877,10 +877,17 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 {
 	auto& rng = Random::getGlobal();
 
+	auto getNavmeshIdxAtWithHint = [&](WorldPosition pos, uint16_t idx) -> OptionalLite<uint16_t>
+	{
+		if (auto& nav = getNavmesh(idx); nav.containsPoint(pos)) {
+			return idx;
+		} else {
+			return getNavMeshIdxAt(pos, true);
+		}
+	};
+
 	for (size_t i = 0; i + 3 < points.size(); ++i) {
-		// Shift bc perpendicularly to itself
-		// This only applies if abc and bcd turn in opposite directions
-		// (otherwise it'd be expanding the radius or cutting the corner)
+		// Shift segment bc perpendicularly to itself
 		//
 		//                 lC
 		//              c------d
@@ -895,34 +902,35 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 		const auto c = points[i + 2];
 		const auto d = points[i + 3];
 
-		// Must all be on the same navmesh
-		if (a.navmeshId != b.navmeshId || a.navmeshId != c.navmeshId || a.navmeshId != d.navmeshId) {
-			continue;
-		}
-
 		const auto a0 = a.pos.pos;
 		const auto b0 = b.pos.pos;
 		const auto c0 = c.pos.pos;
 		const auto d0 = d.pos.pos;
 
-		// Must turn in opposite directions
+		// Only apply if abc and bcd turn in opposite directions
+		// (otherwise it'd be expanding the radius or cutting the corner)
+		/*
 		const auto turnDir1 = (b0 - a0).cross(c0 - b0);
 		const auto turnDir2 = (c0 - b0).cross(d0 - c0);
 		if (turnDir1 * turnDir2 >= 0) {
 			continue;
 		}
+		*/
 
 		// The three original lines
 		const auto lA = Line(a0, b0 - a0);
 		const auto lB = Line(b0, c0 - b0);
 		const auto lC = Line(d0, c0 - d0);
 
+		// Generate the distances to try
+		const float curMaxDist = std::min(maxDistance, (c0 - b0).length() * 0.5f); // Cap max dist based on segment size
+		const float baseDist = rng.getFloat(-curMaxDist, curMaxDist); // From -max to +max to keep distribution unbiased
+		const std::array<float, 4> distMults = { 1, -1, 0.5f, -0.5f };
+
 		// Try a few times
-		const int maxTries = 4;
-		for (int j = 0; j < maxTries; ++j) {
+		for (const auto distMult: distMults) {
 			// Generate offset
-			const float dist = rng.getFloat(-maxDistance, maxDistance);
-			const Vector2f offset = lB.dir.orthoRight() * dist;
+			const Vector2f offset = lB.dir.orthoRight() * (baseDist * distMult);
 
 			// Try new set
 			const auto lB1 = Line(lB.origin + offset, lB.dir);
@@ -937,11 +945,20 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 				continue;
 			}
 
+			// Check if the two new points are on the same navmesh
+			const auto b1p = WorldPosition(b1, b.pos.subWorld);
+			const auto c1p = WorldPosition(c1, c.pos.subWorld);
+			const auto navBIdx = getNavmeshIdxAtWithHint(b1p, b.navmeshId);
+			const auto navCIdx = getNavmeshIdxAtWithHint(c1p, c.navmeshId);
+			if (!navBIdx || !navCIdx) {
+				continue;
+			}
+
 			// Generate path
 			std::array<NavigationPath::Point, 4> path;
 			path[0] = a;
-			path[1] = NavigationPath::Point(WorldPosition(b1, a.pos.subWorld), a.navmeshId); // they should all have the same subworld
-			path[2] = NavigationPath::Point(WorldPosition(c1, a.pos.subWorld), a.navmeshId);
+			path[1] = NavigationPath::Point(b1p, *navBIdx);
+			path[2] = NavigationPath::Point(c1p, *navCIdx);
 			path[3] = d;
 
 			// If this path works, update b and c
