@@ -146,22 +146,14 @@ const UUID& EntityDataAppliedDelta::getParentUUID() const
 
 size_t EntityDataAppliedDelta::getNumChildren() const
 {
-	if (base && delta) {
-		const auto nBaseChildren = base->getNumChildren();
-        const auto nAdded = delta->getChildrenAdded().size();
-		return nBaseChildren + nAdded;
-	} else if (base) {
-		return base->getNumChildren();
-	} else {
-		return 0;
-	}
+	const auto nBaseChildren = base ? base->getNumChildren() : 0;
+    const auto nAdded = delta ? delta->getChildrenAdded().size() : 0;
+	return nBaseChildren + nAdded;
 }
 
 const IEntityConcreteData* EntityDataAppliedDelta::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
 {
-	HalleyAssertDev(base);
-
-	const auto nBaseChildren = base->getNumChildren();
+	const auto nBaseChildren = base ? base->getNumChildren() : 0;
 	if (idx >= nBaseChildren) {
 		return &delta->getChildrenAdded().at(idx - nBaseChildren);
 	}
