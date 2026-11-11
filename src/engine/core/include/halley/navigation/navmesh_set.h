@@ -138,6 +138,7 @@ namespace Halley {
 		void simplifyPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const;
 		void quantizePath(Vector<NavigationPath::Point>& points, NavigationQuery::QuantizationType type) const;
 		void quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const;
+		void shiftPath(Vector<NavigationPath::Point>& points, float maxDistance) const;
 
 		void assignNavmeshIds();
 	};
