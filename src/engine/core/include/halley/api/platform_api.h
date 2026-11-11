@@ -342,6 +342,7 @@ namespace Halley
 		virtual float getSystemOverscan() const { return 1.0f; }
 
 		virtual bool canShowSubscriptionNeeded() const { return false; }
+		virtual bool subscriptionRequiresRecheckEveryTime() const { return false; }
 		virtual bool showSubscriptionNeeded() const { return true; }
 		virtual bool canShowEULA() const { return false; }
 		
