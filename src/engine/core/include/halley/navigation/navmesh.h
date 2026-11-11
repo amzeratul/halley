@@ -182,6 +182,8 @@ namespace Halley {
 		void setDebugName(String name);
 		[[nodiscard]] const String& getDebugName() const;
 
+		Vector2f getScaleFactor() const { return scaleFactor; }
+
 	private:
 		struct State {
 			float gScore = std::numeric_limits<float>::max();

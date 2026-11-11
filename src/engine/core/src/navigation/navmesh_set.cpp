@@ -169,8 +169,12 @@ NavigationPath NavmeshSet::extendToFullPath(const NavigationQuery& query, const 
 			Logger::logError("Unable to find path within region from " + toString(p0) + " to " + p1, true);
 			return {};
 		}
-		for (const auto& point: newPath->path) {
-			result.emplace_back(NavigationPath::Point{ point.pos, region.regionNodeId });
+		if (!newPath->path.empty()) {
+			const bool skipFirst = !result.empty() && result.back().pos == newPath->path.front().pos;
+			const auto points = gsl::span<const NavigationPath::Point>(newPath->path).subspan(skipFirst ? 1 : 0);
+			for (const auto& point: points) {
+				result.emplace_back(NavigationPath::Point{ point.pos, region.regionNodeId });
+			}
 		}
 		lastPosition = endPos;
 	}
@@ -183,21 +187,30 @@ const Navmesh& NavmeshSet::getNavmesh(uint16_t idx) const
 	return navmeshes.at(idx);
 }
 
-const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos, bool allowNonConnected) const
+const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos, bool allowNonConnected, OptionalLite<uint16_t> hint) const
 {
-	if (auto idx = getNavMeshIdxAt(pos, allowNonConnected)) {
+	if (auto idx = getNavMeshIdxAt(pos, allowNonConnected, hint)) {
 		return &navmeshes[*idx];
 	} else {
 		return nullptr;
 	}
 }
 
-OptionalLite<uint16_t> NavmeshSet::getNavMeshIdxAt(WorldPosition pos, bool allowNonConnected) const
+OptionalLite<uint16_t> NavmeshSet::getNavMeshIdxAt(WorldPosition pos, bool allowNonConnected, OptionalLite<uint16_t> hint) const
 {
+	if (hint) {
+		const auto& navmesh = getNavmesh(*hint);
+		if ((allowNonConnected || navmesh.isConnectedSet()) && navmesh.containsPoint(pos)) {
+			return *hint;
+		}
+	}
+
 	uint16_t i = 0;
 	for (const auto& navmesh: navmeshes) {
-		if ((allowNonConnected || navmesh.isConnectedSet()) && navmesh.containsPoint(pos)) {
-			return i;
+		if (hint != i) [[likely]] {
+			if ((allowNonConnected || navmesh.isConnectedSet()) && navmesh.containsPoint(pos)) {
+				return i;
+			}
 		}
 		i++;
 	}
@@ -656,14 +669,18 @@ Vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPos, Ve
 
 void NavmeshSet::postProcessPath(NavigationPath& path) const
 {
+	const float quickSimplifyMinLen = 20.0f; // TODO
+
 	if (path.query.postProcessingType != NavigationQuery::PostProcessingType::None) {
 		simplifyPath(path.path, path.query.postProcessingType);
 	}
 	if (path.query.quantizationType != NavigationQuery::QuantizationType::None) {
 		quantizePath(path.path, path.query.quantizationType);
+		quickSimplify(path.path, quickSimplifyMinLen);
 	}
 	if (path.query.sideShift > 0.0001f) {
 		shiftPath(path.path, path.query.sideShift);
+		quickSimplify(path.path, quickSimplifyMinLen);
 	}
 }
 
@@ -877,15 +894,6 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 {
 	auto& rng = Random::getGlobal();
 
-	auto getNavmeshIdxAtWithHint = [&](WorldPosition pos, uint16_t idx) -> OptionalLite<uint16_t>
-	{
-		if (auto& nav = getNavmesh(idx); nav.containsPoint(pos)) {
-			return idx;
-		} else {
-			return getNavMeshIdxAt(pos, true);
-		}
-	};
-
 	for (size_t i = 0; i + 3 < points.size(); ++i) {
 		// Shift segment bc perpendicularly to itself
 		//
@@ -902,20 +910,15 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 		const auto c = points[i + 2];
 		const auto d = points[i + 3];
 
+		// Ensure they're all on the same subworld
+		if (a.pos.subWorld != b.pos.subWorld || b.pos.subWorld != c.pos.subWorld || c.pos.subWorld != d.pos.subWorld) {
+			continue;
+		}
+
 		const auto a0 = a.pos.pos;
 		const auto b0 = b.pos.pos;
 		const auto c0 = c.pos.pos;
 		const auto d0 = d.pos.pos;
-
-		// Only apply if abc and bcd turn in opposite directions
-		// (otherwise it'd be expanding the radius or cutting the corner)
-		/*
-		const auto turnDir1 = (b0 - a0).cross(c0 - b0);
-		const auto turnDir2 = (c0 - b0).cross(d0 - c0);
-		if (turnDir1 * turnDir2 >= 0) {
-			continue;
-		}
-		*/
 
 		// The three original lines
 		const auto lA = Line(a0, b0 - a0);
@@ -923,14 +926,15 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 		const auto lC = Line(d0, c0 - d0);
 
 		// Generate the distances to try
-		const float curMaxDist = std::min(maxDistance, (c0 - b0).length() * 0.5f); // Cap max dist based on segment size
+		const auto scaleFactor = getNavmesh(b.navmeshId).getScaleFactor();
+		const float curMaxDist = std::min(maxDistance, ((c0 - b0) * scaleFactor).length() * 0.5f); // Cap max dist based on segment size
 		const float baseDist = rng.getFloat(-curMaxDist, curMaxDist); // From -max to +max to keep distribution unbiased
 		const std::array<float, 4> distMults = { 1, -1, 0.5f, -0.5f };
 
 		// Try a few times
 		for (const auto distMult: distMults) {
 			// Generate offset
-			const Vector2f offset = lB.dir.orthoRight() * (baseDist * distMult);
+			const Vector2f offset = ((lB.dir * scaleFactor).orthoRight().normalized() / scaleFactor) * (baseDist * distMult);
 
 			// Try new set
 			const auto lB1 = Line(lB.origin + offset, lB.dir);
@@ -948,8 +952,8 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 			// Check if the two new points are on the same navmesh
 			const auto b1p = WorldPosition(b1, b.pos.subWorld);
 			const auto c1p = WorldPosition(c1, c.pos.subWorld);
-			const auto navBIdx = getNavmeshIdxAtWithHint(b1p, b.navmeshId);
-			const auto navCIdx = getNavmeshIdxAtWithHint(c1p, c.navmeshId);
+			const auto navBIdx = getNavMeshIdxAt(b1p, true, b.navmeshId);
+			const auto navCIdx = getNavMeshIdxAt(c1p, true, c.navmeshId);
 			if (!navBIdx || !navCIdx) {
 				continue;
 			}
@@ -967,6 +971,85 @@ void NavmeshSet::shiftPath(Vector<NavigationPath::Point>& points, float maxDista
 				points[i + 2] = path[2];
 				break;
 			}
+		}
+	}
+}
+
+void NavmeshSet::quickSimplify(Vector<NavigationPath::Point>& points, float minDistance) const
+{
+	const float postMaxDistance = minDistance * 2;
+	const float minDistance2 = minDistance * minDistance;
+	const float postMaxDistance2 = postMaxDistance * postMaxDistance;
+
+	// Removes any segment smaller than minDistance, if possible
+	// Ignore first and last segments
+	for (size_t i = 0; i + 3 < points.size(); ++i) {
+		// Segment points
+		const auto b = points[i + 1];
+		const auto c = points[i + 2];
+		const auto b0 = b.pos.pos;
+		const auto c0 = c.pos.pos;
+
+		const auto scaleFactor = getNavmesh(b.navmeshId).getScaleFactor();
+		if (((b0 - c0) * scaleFactor).squaredLength() >= minDistance2) {
+			// Too long, ignore
+			continue;
+		}
+
+		// Points before and after this segment
+		const auto a = points[i];
+		const auto d = points[i + 3];
+		const auto a0 = a.pos.pos;
+		const auto d0 = d.pos.pos;
+
+		// Ensure they're all on the same subworld
+		if (a.pos.subWorld != b.pos.subWorld || b.pos.subWorld != c.pos.subWorld || c.pos.subWorld != d.pos.subWorld) {
+			continue;
+		}
+
+		// Only apply if abc and bcd turn in opposite directions to avoid removing corner smoothing
+		const auto turnDir1 = (b0 - a0).cross(c0 - b0);
+		const auto turnDir2 = (c0 - b0).cross(d0 - c0);
+		if (turnDir1 * turnDir2 >= 0) {
+			continue;
+		}
+
+		// See if we can find a good intersection that skips bc
+		const auto lA = Line(a0, b0 - a0);
+		const auto lC = Line(d0, c0 - d0);
+		const auto tA = lA.intersectionParametric(lC);
+		if (!tA || tA <= 0) {
+			continue;
+		}
+		const auto tC = lC.intersectionParametric(lA);
+		if (!tC || tC <= 0) {
+			continue;
+		}
+		const auto b1 = lA.getPoint(*tA);
+
+		// Check if the new point isn't too far away
+		if (((b1 - b0) * scaleFactor).squaredLength() > postMaxDistance2 || ((b1 - c0) * scaleFactor).squaredLength() > postMaxDistance2) {
+			continue;
+		}
+
+		// Check if the new point is on the same navmesh
+		const auto b1p = WorldPosition(b1, b.pos.subWorld);
+		const auto navBIdx = getNavMeshIdxAt(b1p, true, b.navmeshId);
+		if (!navBIdx) {
+			continue;
+		}
+
+		// Generate path
+		std::array<NavigationPath::Point, 3> path;
+		path[0] = a;
+		path[1] = NavigationPath::Point(b1p, *navBIdx);
+		path[2] = d;
+
+		// If this path works, update b, erase c
+		if (isPathClear(path)) {
+			points[i + 1] = path[1];
+			points.erase(points.begin() + (i + 2));
+			--i;
 		}
 	}
 }

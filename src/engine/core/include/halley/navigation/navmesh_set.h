@@ -38,8 +38,8 @@ namespace Halley {
 		gsl::span<const Navmesh> getNavmeshes() const { return navmeshes; }
 		const Navmesh& getNavmesh(uint16_t idx) const;
 
-		const Navmesh* getNavMeshAt(WorldPosition pos, bool allowNonConnected = false) const;
-		OptionalLite<uint16_t> getNavMeshIdxAt(WorldPosition pos, bool allowNonConnected = false) const;
+		const Navmesh* getNavMeshAt(WorldPosition pos, bool allowNonConnected = false, OptionalLite<uint16_t> hint = std::nullopt) const;
+		OptionalLite<uint16_t> getNavMeshIdxAt(WorldPosition pos, bool allowNonConnected = false, OptionalLite<uint16_t> hint = std::nullopt) const;
 		std::pair<OptionalLite<uint16_t>, WorldPosition> getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist = std::numeric_limits<float>::max(), float anisotropy = 1.0f, float nudge = 0.1f, bool allowNonConnected = false) const;
 		std::optional<WorldPosition> getClosestPointTo(WorldPosition pos, float maxDist = std::numeric_limits<float>::max(), float anisotropy = 1.0f, float nudge = 0.1f, bool anySubWorld = false, bool allowNonConnected = false) const;
 		Vector<WorldPosition> getClosestPointInEverySubWorld(Vector2f pos, Range<int> subWorldRange, float maxDist = std::numeric_limits<float>::max(), float anisotropy = 1.0f, bool allowNonConnected = false) const;
@@ -139,6 +139,7 @@ namespace Halley {
 		void quantizePath(Vector<NavigationPath::Point>& points, NavigationQuery::QuantizationType type) const;
 		void quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const;
 		void shiftPath(Vector<NavigationPath::Point>& points, float maxDistance) const;
+		void quickSimplify(Vector<NavigationPath::Point>& points, float minDistance) const;
 
 		void assignNavmeshIds();
 	};
