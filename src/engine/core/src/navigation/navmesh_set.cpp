@@ -676,6 +676,8 @@ void NavmeshSet::postProcessPath(NavigationPath& path) const
 	}
 	if (path.query.quantizationType != NavigationQuery::QuantizationType::None) {
 		quantizePath(path.path, path.query.quantizationType);
+	}
+	if (path.query.quantizationType != NavigationQuery::QuantizationType::None || path.query.sideShift > 0.0001f) {
 		quickSimplify(path.path, quickSimplifyMinLen);
 	}
 	if (path.query.sideShift > 0.0001f) {
@@ -980,6 +982,28 @@ void NavmeshSet::quickSimplify(Vector<NavigationPath::Point>& points, float minD
 	const float postMaxDistance = minDistance * 2;
 	const float minDistance2 = minDistance * minDistance;
 	const float postMaxDistance2 = postMaxDistance * postMaxDistance;
+
+	// Remove collinear points
+	for (size_t i = 1; i + 1 < points.size(); ++i) {
+		const auto a = points[i - 1];
+		const auto b = points[i];
+		const auto c = points[i + 1];
+
+		if (a.pos.subWorld != b.pos.subWorld || b.pos.subWorld != c.pos.subWorld) {
+			continue;
+		}
+
+		const auto a0 = a.pos.pos;
+		const auto b0 = b.pos.pos;
+		const auto c0 = c.pos.pos;
+		const auto v0 = b0 - a0;
+		const auto v1 = c0 - b0;
+
+		if (v0.dot(v1) > 0 && std::abs(v0.normalized().cross(v1.normalized())) < 0.001f) {
+			points.erase(points.begin() + i);
+			--i;
+		}
+	}
 
 	// Removes any segment smaller than minDistance, if possible
 	// Ignore first and last segments
