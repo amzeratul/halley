@@ -37,7 +37,7 @@ void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vec
 			Vector2i p;
 			p.x = event.motion.x;
 			p.y = event.motion.y;
-			relMove = Vector2f(Vector2i(event.motion.xrel, event.motion.yrel));
+			relMove += Vector2f(Vector2i(event.motion.xrel, event.motion.yrel));
 			pos = remap(Vector2i(p));
 			break;
 		}
