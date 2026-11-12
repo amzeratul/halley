@@ -618,16 +618,30 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId
 
 	allocatedOutboundIds.erase(remote.networkId);
 
-	send(EntityNetworkMessageDestroy(remote.networkId));
+	// If this entity has been reparented, and the new parent is networked too, we do not want to
+	// send a delete message. Peers want to keep their copy around to be reparented on their side.
+	bool wantSendDestroyMsg = true;
+	if (const auto entity = parentSession->getWorld().tryGetEntity(entityId); entity.isValid()) {
+		if (const auto parent = entity.tryGetParent()) {
+			const auto networkParentId = parent->tryGetEntityIdWithComponentInAncestors<NetworkComponent>();
+			if (networkParentId.isValid()) {
+				wantSendDestroyMsg = !outboundEntities.contains(networkParentId);
+			}
+		}
+	}
 
-	//if (const auto entity = parentSession->getWorld().tryGetEntity(entityId); entity.isValid()) {
-	//	Logger::logDev("Send Destroy: " + entity.getName() + " (" + entity.getInstanceUUID() +
-	//		") with EntityNetworkId (" + remote.networkId +
-	//		") to peer " + toString(static_cast<int>(peerId)));
-	//} else {
-	//	Logger::logDev("Send Destroy: entity does not exist anymore, but EntityNetworkId (" +
-	//		toString(remote.networkId) + ") to peer " + toString(static_cast<int>(peerId)));
-	//}
+	if (wantSendDestroyMsg) {
+		send(EntityNetworkMessageDestroy(remote.networkId));
+
+		//if (const auto entity = parentSession->getWorld().tryGetEntity(entityId); entity.isValid()) {
+		//	Logger::logDev("Send Destroy: " + entity.getName() + " (" + entity.getInstanceUUID() +
+		//		") with EntityNetworkId (" + remote.networkId +
+		//		") to peer " + toString(static_cast<int>(peerId)));
+		//} else {
+		//	Logger::logDev("Send Destroy: entity does not exist anymore, but EntityNetworkId (" +
+		//		toString(remote.networkId) + ") to peer " + toString(static_cast<int>(peerId)));
+		//}
+	}
 }
 
 void EntityNetworkRemotePeer::sendKeepAlive()
