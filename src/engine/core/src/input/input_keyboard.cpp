@@ -48,6 +48,21 @@ TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, Softwa
 	return TextInputCapture(textInputData, std::move(data), std::move(capture));
 }
 
+void InputKeyboard::update()
+{
+	bool hasActiveCapture = false;
+	for (const auto& capture: captures) {
+		if (capture->isTextInput()) {
+			hasActiveCapture = true;
+		}
+	}
+
+	if (hasActiveCapture != lastHadActiveCapture) {
+		lastHadActiveCapture = hasActiveCapture;
+		onHasCapturesChanged(hasActiveCapture);
+	}
+}
+
 void InputKeyboard::onKeyPressed(KeyCode code, KeyCode virtualCode, KeyMods mods)
 {
 	const auto key = KeyboardKeyPress(virtualCode, mods);
@@ -160,6 +175,15 @@ void InputKeyboard::addCapture(ITextInputCapture* capture)
 void InputKeyboard::removeCapture(ITextInputCapture* capture)
 {
 	captures.erase(capture);
+}
+
+void InputKeyboard::onHasCapturesChanged(bool hasCapture)
+{
+}
+
+bool InputKeyboard::hasCaptures() const
+{
+	return !captures.empty();
 }
 
 InputType InputKeyboard::getInputType() const

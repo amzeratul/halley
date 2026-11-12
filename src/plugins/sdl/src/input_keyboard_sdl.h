@@ -13,7 +13,10 @@ namespace Halley {
 	public:
 		String getButtonName(int code) const override;
 
-		void update();
+		void update() override;
+
+	protected:
+		void onHasCapturesChanged(bool hasCapture) override;
 
 	private:
 		InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard);

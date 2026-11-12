@@ -26,6 +26,8 @@ namespace Halley {
 		explicit InputKeyboard(int nButtons = -1, std::shared_ptr<IClipboard> clipboard = {});
 		virtual ~InputKeyboard() = default;
 
+		virtual void update();
+
 		void onKeyPressed(KeyCode code, KeyCode virtualCode, KeyMods mods);
 		void onKeyReleased(KeyCode code, KeyCode virtualCode, KeyMods mods);
 
@@ -37,6 +39,8 @@ namespace Halley {
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData, UIRootGroup* rootGroup = nullptr);
 		void addCapture(ITextInputCapture* capture);
 		virtual void removeCapture(ITextInputCapture* capture);
+		virtual void onHasCapturesChanged(bool hasCapture);
+		bool hasCaptures() const;
 
 		InputType getInputType() const override;
 
@@ -55,5 +59,6 @@ namespace Halley {
 		std::set<ITextInputCapture*> captures;
 		std::shared_ptr<IClipboard> clipboard;
 		Vector<KeyboardKeyPress> keyPresses;
+		bool lastHadActiveCapture = false;
 	};
 }

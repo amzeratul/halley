@@ -25,6 +25,7 @@ namespace Halley {
 
 		virtual bool isOpen() const = 0;
 		virtual void update() = 0;
+		virtual bool isTextInput() const;
 
 		virtual void onTextEntered(const StringUTF32& text);
 		virtual void onEditingText(const StringUTF32& text);
@@ -71,6 +72,7 @@ namespace Halley {
 		void close() override;
 		bool isOpen() const override;
 		void update() override;
+		bool isTextInput() const override;
 
 		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard) override;
 

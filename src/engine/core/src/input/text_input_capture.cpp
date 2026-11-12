@@ -9,6 +9,11 @@
 using namespace Halley;
 
 
+bool ITextInputCapture::isTextInput() const
+{
+	return true;
+}
+
 void ITextInputCapture::onTextEntered(const StringUTF32& text)
 {
 }
@@ -131,6 +136,11 @@ void HotkeyTextInputCapture::update()
 	for (auto& p: pressed) {
 		p = false;
 	}
+}
+
+bool HotkeyTextInputCapture::isTextInput() const
+{
+	return false;
 }
 
 bool HotkeyTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)

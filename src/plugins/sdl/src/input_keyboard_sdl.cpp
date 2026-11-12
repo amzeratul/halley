@@ -29,7 +29,6 @@ InputKeyboardSDL::InputKeyboardSDL(std::shared_ptr<IClipboard> clipboard)
 	: InputKeyboard(SDL_NUM_SCANCODES, clipboard)
 {
 	setupMapping();
-	SDL_StartTextInput();
 }
 
 void InputKeyboardSDL::processEvent(const SDL_Event& rawEvent)
@@ -136,6 +135,7 @@ String InputKeyboardSDL::getButtonName(int code) const
 
 void InputKeyboardSDL::update()
 {
+	InputKeyboard::update();
 	clearPresses();
 
 	if (auto rect = getCaptureRect()) {
@@ -147,5 +147,14 @@ void InputKeyboardSDL::update()
 		sdlRect.w = iRect.getWidth();
 		sdlRect.h = iRect.getHeight();
 		SDL_SetTextInputRect(&sdlRect);
+	}
+}
+
+void InputKeyboardSDL::onHasCapturesChanged(bool hasCapture)
+{
+	if (hasCapture) {
+		SDL_StartTextInput();
+	} else {
+		SDL_StopTextInput();
 	}
 }
