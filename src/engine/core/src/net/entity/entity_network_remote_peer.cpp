@@ -914,18 +914,23 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
     		return;
     	}
 
-        const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parentSession->getByteSerializationOptions());
+        auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parentSession->getByteSerializationOptions());
 
         auto retriever = DataInterpolatorSetRetriever(entity, false);
         //Logger::logDev("Receive Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
         //Logger::logDev("Updating entity " + entity.getName() + ":\n" + delta.toYAML());
 
-    	updateRemoteEntityCheckChildrenAdded(entity, delta);
-
     	// Check network component for immutableChildHierarchy flag. If this is set, pass to
     	// entity factory so it does not mess with removing existing child entities.
     	const auto networkComponent = entity.tryGetComponent<NetworkComponent>();
     	const bool keepChildHierarchy = networkComponent ? networkComponent->immutableChildHierarchy : false;
+
+    	// We also do some "patch-up" right here.
+    	// TODO: this isn't pretty, needs reconsideration
+    	updateRemoteEntityCheckChildren(entity, delta);
+    	if (keepChildHierarchy) {
+    		updateRemoteEntityCheckChildrenRemoved(entity, delta);
+    	}
 
         try {
             parentSession->getFactory().updateEntity(entity, delta,
@@ -942,25 +947,100 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
     }
 }
 
-void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityRef& entity, const EntityDataDelta& delta) const
+static void changeParent(EntityRef entity, const EntityRef& parent)
 {
-	// NB: When the host attachs an existing networked entity to a new parent, which is also
-	// networked, it will trigger a full update on that parent.
+	Vector2f position;
+	float height = 0.0f;
+	Angle1f rotation;
+
+	const auto transform2D = entity.tryGetComponent<Transform2DComponent>();
+
+	if (transform2D) {
+		position = transform2D->getGlobalPosition();
+		height = transform2D->getGlobalHeight();
+		rotation = transform2D->getGlobalRotation();
+	}
+
+	entity.setParent(parent);
+
+	if (transform2D) {
+		transform2D->setGlobalPosition(position);
+		transform2D->setGlobalHeight(height);
+		transform2D->setGlobalRotation(rotation);
+	}
+};
+
+static void checkEntityData(World& world, const EntityRef& entity, const EntityData& data)
+{
+	const size_t numChildren = data.getNumChildren();
+
+	for (size_t idx = 0; idx < numChildren; idx++) {
+		const auto& child = data.getChild(idx);
+
+		if (auto existingEntity = world.findEntity(child.getInstanceUUID())) {
+			if (existingEntity->isValid() && existingEntity->getParent() != entity) {
+				changeParent(*existingEntity, entity);
+			}
+			checkEntityData(world, *existingEntity, child);
+		}
+	}
+}
+
+static void checkEntityDataDelta(World& world, const EntityRef& entity, const EntityDataDelta& delta)
+{
+	for (const auto& child : delta.getChildrenAdded()) {
+		if (auto existingEntity = world.findEntity(child.getInstanceUUID())) {
+			if (existingEntity->isValid() && existingEntity->getParent() != entity) {
+				changeParent(*existingEntity, entity);
+			}
+			checkEntityData(world, *existingEntity, child);
+		}
+	}
+}
+
+void EntityNetworkRemotePeer::updateRemoteEntityCheckChildren(const EntityRef& entity, const EntityDataDelta& delta) const
+{
+	// NB: When the host attachs or detachs an existing networked entity to/from an entity which is
+	// also networked, it will trigger a full update on that parent.
+	//
 	// But, peers that receive this update may not know about the reparenting yet, depending on the
 	// order the updates come in, so they may fail to apply this delta to their local copy.
 	//
-	// To resolve that, here we check if the child entities to be added already exist, and reparent
-	// them right away.
+	// To resolve that, here we check if the child entities to be added or modified already exist,
+	// and reparent them right away.
 
 	auto& world = parentSession->getFactory().getWorld();
 
-	for (const auto& childData : delta.getChildrenAdded()) {
-		if (auto existingEntity = world.findEntity(childData.getInstanceUUID())) {
-			if (existingEntity->isValid() && existingEntity->getParent() != entity) {
-				existingEntity->setParent(entity);
+	checkEntityDataDelta(world, entity, delta);
+}
+
+void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenRemoved(const EntityRef& entity, EntityDataDelta& delta) const
+{
+#if 0
+	// NB: Just as above, but check for children removed that we, in fact, do not want to destroy,
+	// because they have been reparented.
+	auto& world = parentSession->getFactory().getWorld();
+
+	Vector<UUID> doNotRemove;
+
+	for (const auto& childUUID : delta.getChildrenRemoved()) {
+		if (auto existingEntity = world.findEntity(childUUID)) {
+			if (existingEntity->isValid()) {
+				if (existingEntity->getParent() == entity) {
+					Logger::logDev(".. want to apply remove on child " + existingEntity->getEntityId().toDetailedString());
+				} else {
+					doNotRemove.emplace_back(childUUID);
+					Logger::logDev(".. want to apply remove on child " + existingEntity->getEntityId().toDetailedString() + " that is not attached");
+				}
 			}
 		}
 	}
+
+	/*auto& container = const_cast<Vector<UUID>&>(delta.getChildrenRemoved());
+	std_ex::erase_if(container, [&](const UUID& uuid) -> bool {
+		return doNotRemove.contains(uuid);
+	});*/
+#endif
 }
 
 void EntityNetworkRemotePeer::destroyRemoteEntity(const InboundEntity& inboundEntity)

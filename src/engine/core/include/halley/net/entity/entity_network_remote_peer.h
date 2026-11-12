@@ -198,7 +198,8 @@ namespace Halley {
         EntityRef createRemoteEntity(EntityNetworkId id, const EntityDataDelta& delta, bool allowExistingLookup);
     	void assignRemoteEntity(EntityNetworkId id, EntityRef entity);
         void updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg);
-    	void updateRemoteEntityCheckChildrenAdded(const EntityRef& entity, const EntityDataDelta& delta) const;
+    	void updateRemoteEntityCheckChildren(const EntityRef& entity, const EntityDataDelta& delta) const;
+    	void updateRemoteEntityCheckChildrenRemoved(const EntityRef& entity, EntityDataDelta& delta) const;
         void destroyRemoteEntity(const InboundEntity& inboundEntity);
 
         void trySpawningPendingEntities();
