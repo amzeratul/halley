@@ -31,6 +31,12 @@ component:
       canEdit: true
       canSave: false
       canNetwork: false
+  - immutableChildHierarchy:
+      type: bool
+      defaultValue: false
+      canEdit: true
+      canSave: false
+      canNetwork: false
   - lastRevision:
       type: uint32_t
       canSave: false

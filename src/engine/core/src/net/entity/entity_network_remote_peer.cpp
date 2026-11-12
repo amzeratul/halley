@@ -908,10 +908,15 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
 
     	updateRemoteEntityCheckChildrenAdded(entity, delta);
 
+    	// Check network component for immutableChildHierarchy flag. If this is set, pass to
+    	// entity factory so it does not mess with removing existing child entities.
+    	const auto networkComponent = entity.tryGetComponent<NetworkComponent>();
+    	const bool keepChildHierarchy = networkComponent ? networkComponent->immutableChildHierarchy : false;
+
         try {
             parentSession->getFactory().updateEntity(entity, delta,
                                               EntitySerialization::makeMask(EntitySerialization::Type::Network),
-                                              nullptr, &retriever);
+                                              nullptr, &retriever, "", keepChildHierarchy);
         } catch (const std::exception &e) {
             Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
             Logger::logException(e);

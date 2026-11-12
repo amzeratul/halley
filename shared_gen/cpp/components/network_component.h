@@ -23,6 +23,7 @@ public:
 	bool sendUpdates{ false };
 	bool alwaysSend{ false };
 	bool requiresEntityFrameModified{ false };
+	bool immutableChildHierarchy{ false };
 	uint32_t lastRevision{ 0 };
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
@@ -31,9 +32,10 @@ public:
 	NetworkComponent() {
 	}
 
-	NetworkComponent(bool alwaysSend, bool requiresEntityFrameModified)
+	NetworkComponent(bool alwaysSend, bool requiresEntityFrameModified, bool immutableChildHierarchy)
 		: alwaysSend(std::move(alwaysSend))
 		, requiresEntityFrameModified(std::move(requiresEntityFrameModified))
+		, immutableChildHierarchy(std::move(immutableChildHierarchy))
 	{
 	}
 
@@ -44,6 +46,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::serialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::serialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::serialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(immutableChildHierarchy)>::serialize(immutableChildHierarchy, bool{ false }, _context, _node, componentName, "immutableChildHierarchy", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		return _node;
 	}
@@ -53,6 +56,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::deserialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::deserialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::deserialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(immutableChildHierarchy)>::deserialize(immutableChildHierarchy, bool{ false }, _context, _node, componentName, "immutableChildHierarchy", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 	}
 
@@ -68,6 +72,7 @@ public:
 		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("authorityId");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic)) == 0) _node.removeKey("alwaysSend");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("requiresEntityFrameModified");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("immutableChildHierarchy");
 		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("locks");
 	}
 

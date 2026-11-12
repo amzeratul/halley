@@ -358,11 +358,15 @@ private:
 
 				if (withAuthority) {
 					if (!success) {
-						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
+						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + targetId.toDetailedString());
 					}
 					auto [ok, _] = changeAuthority(targetId, {}, {});
 					if (!ok) {
-						Logger::logWarning("client failed to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
+						Logger::logWarning("client failed to release lock, with authority, for entity ID " + targetId.toDetailedString());
+					}
+				} else {
+					if (!success) {
+						Logger::logWarning("client failed to tell host to release lock for entity ID " + targetId.toDetailedString());
 					}
 				}
 
@@ -482,7 +486,7 @@ private:
 
         const auto* e = tryFindNetworkRoot(targetId);
         if (!e) {
-            Logger::logWarning("Trying to change authority of entity " + toString(targetId.value & 0xffffffff) + " which is unknown, or not a network entity");
+            Logger::logWarning("Trying to change authority of entity " + targetId.toDetailedString() + " which is unknown, or not a network entity");
             return {false, {}};
         }
 
@@ -505,11 +509,11 @@ private:
 			} else {
 				if (authorityId.has_value()) {
 		            Logger::logWarning("Failed to assign authority of entity " +
-		            	toString(networkFamily->entityId.value & 0xffffffff) + " to " +
+		            	networkFamily->entityId.toDetailedString() + " to " +
 		            	toString(static_cast<int>(authorityId.value())));
 				} else {
 					Logger::logWarning("Failed to release authority of entity " +
-						toString(networkFamily->entityId.value & 0xffffffff) + " to " +
+						networkFamily->entityId.toDetailedString() + " to " +
 						toString(static_cast<int>(networkFamily->network.ownerId.value_or(0))));
 				}
 

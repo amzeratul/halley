@@ -282,12 +282,13 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> 
 EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, 
 	bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene,
 	EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant,
-	bool preloadAssets)
+	bool preloadAssets, bool immutableChildHierarchy)
 	: world(&world)
 	, scene(scene)
 	, parent(parent)
 	, update(update)
 	, preloadAssets(preloadAssets)
+	, immutableChildHierarchy(immutableChildHierarchy)
 	, fallbackVariant(std::move(fallbackVariant))
 {
 	prefab = std::move(_prefab);
@@ -453,6 +454,11 @@ bool EntityFactoryContext::canPreloadAssets() const
 	return preloadAssets;
 }
 
+bool EntityFactoryContext::isImmutableChildHierarchy() const
+{
+	return immutableChildHierarchy;
+}
+
 void EntityFactoryContext::addToDelete(EntityRef entityRef)
 {
 	toDelete.push_back(entityRef);
@@ -520,21 +526,21 @@ EntityRef EntityFactory::createEntity(const IEntityConcreteData& data, int mask,
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
+void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant, bool immutableChildHierarchy)
 {
 	const auto trace = StackDebugTrace("entityName", entity.getName());
 	HalleyAssertDev(entity.isValid());
-	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, std::move(fallbackVariant));
+	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, std::move(fallbackVariant), immutableChildHierarchy);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 	for (auto& c : context->getToDeleteEntities()) {
 		destroyEntity(c);
 	}
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant, bool immutableChildHierarchy)
 {
 	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext,
-		getPrefab(existing, data), &data, scene, parent, interpolators, fallbackVariant, preloadAssets);
+		getPrefab(existing, data), &data, scene, parent, interpolators, fallbackVariant, preloadAssets, immutableChildHierarchy);
 
 	if (existing) {
 		context->notifyEntity(existing.value());
@@ -725,26 +731,28 @@ std::optional<ConfigNode> EntityFactory::getComponentsWithPrefabDefaults(EntityR
 
 void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcreteData& data, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	if (!entity.getRawChildren().empty()) {
-		// Delete old children that are no longer present
-		Vector<EntityRef> toDelete;
-		for (auto c: entity.getChildren()) {
-			if (!data.hasChildWithUUID(c.getInstanceUUID())) {
-				toDelete.push_back(c);
+	if (!context->isImmutableChildHierarchy()) {
+		if (!entity.getRawChildren().empty()) {
+			// Delete old children that are no longer present
+			Vector<EntityRef> toDelete;
+			for (auto c: entity.getChildren()) {
+				if (!data.hasChildWithUUID(c.getInstanceUUID())) {
+					toDelete.push_back(c);
+				}
+			}
+			for (auto& c: toDelete) {
+				destroyEntity(c);
 			}
 		}
-		for (auto& c: toDelete) {
-			destroyEntity(c);
-		}
 	}
-	
+
 	// Update children
 	const auto nChildren = data.getNumChildren();
 	for (size_t i = 0; i < nChildren; ++i) {
 		EntityDataAppliedDelta buffer;
 		if (const auto* child = data.getChild(i, buffer)) {
 			if (context->needsNewContextFor(*child)) {
-				const auto newContext = makeContext(*child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
+				const auto newContext = makeContext(*child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant(), context->isImmutableChildHierarchy());
 				auto childEntity = tryGetEntity(child->getInstanceUUID(), *newContext, false);
 				if (childEntity.isValid()) {
 					updateEntityNode(newContext->getRootEntityData(), childEntity, entity, newContext);
@@ -800,7 +808,7 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		context->removeDelete(childData.getInstanceUUID());
 
 		if (context->needsNewContextFor(childData)) {
-			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
+			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant(), context->isImmutableChildHierarchy());
 			auto child = tryGetEntity(childData.getInstanceUUID(), *newContext, false);
 			if (child.isValid()) {
 				updateEntityNode(newContext->getRootEntityData(), child, entity, newContext);

@@ -78,7 +78,7 @@ namespace Halley {
 		EntityRef createEntity(const IEntityConcreteData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr, String fallbackVariant = "");
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, WorldPartitionId worldPartition = 0, String variant = "");
 
-		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
+		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "", bool immutableChildHierarchy = false);
 
 		EntityRef tryGetMatchingEntity(const EntityDataDelta& delta, const std::optional<UUID>& uuid);
 		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo = {}); // Returns entity and parent UUID
@@ -121,7 +121,8 @@ namespace Halley {
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		void destroyEntity(EntityRef entity);
 
-		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
+		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "", bool immutableChildHierarchy = false);
+
 		EntityRef instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiate(const IEntityConcreteData& data, WorldPartitionId worldPartition, Vector<EntityRef>& entities);
 		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);
@@ -149,7 +150,7 @@ namespace Halley {
 			std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr,
 			EntityScene* scene = nullptr, EntityFactoryContext* parent = nullptr,
 			IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "",
-			bool preloadAssets = true);
+			bool preloadAssets = true, bool immutableChildHierarchy = false);
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -207,7 +208,7 @@ namespace Halley {
 
 		bool isHeadless() const override;
 		bool canPreloadAssets() const override;
-
+		bool isImmutableChildHierarchy() const;
 
 		// TODO HACKFIX: Not sure how to fix the problem with reparenting when the hierachy deletes the child first.
 		// Problem is that when children are moved down the hierachy into a new parent, they will be removed first.
@@ -227,6 +228,7 @@ namespace Halley {
 		Vector<EntityRef> entities;
 		bool update = false;
 		bool preloadAssets = false;
+		bool immutableChildHierarchy = false;
 		WorldPartitionId worldPartition = 0;
 		EntityId curEntity;
 		String fallbackVariant;
