@@ -184,7 +184,13 @@ String KeyCodes::toName(KeyMods mods)
 	} else if (mods == KeyMods::Shift) {
 		return "Shift";
 	} else if (mods == KeyMods::Mod) {
-		return "Mod";
+		if (getPlatform() == GamePlatform::Windows || getPlatform() == GamePlatform::Emscripten || getPlatform() == GamePlatform::WindowsGDK) {
+			return "Win";
+		} else if (getPlatform() == GamePlatform::MacOS) {
+			return "Option";
+		} else {
+			return "Mod";
+		}
 	} else {
 		Logger::logError("Cannot convert key mods to name: " + Halley::toString(int(mods)));
 		return "?";
