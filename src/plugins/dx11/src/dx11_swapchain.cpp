@@ -18,23 +18,30 @@ DX11SwapChain::~DX11SwapChain()
 	clearRenderTarget();
 	clearDepthStencilView();
 
-	if (swapChain) {
-		swapChain->Release();
-		swapChain = nullptr;
-	}
+	deInit();
 }
 
 void DX11SwapChain::present(bool useVsync)
 {
-	swapChain->Present(useVsync ? 1 : 0, 0);
+	swapChain1->Present(useVsync ? 1 : 0, 0);
+	waitedSincePresent = false;
 }
 
 void DX11SwapChain::waitForVsync()
 {
-	IDXGIOutput* output = nullptr;
-	if (swapChain->GetContainingOutput(&output) == S_OK) {
-		output->WaitForVBlank();
-		output->Release();
+	if (frameLatencyWaitableObject && !waitedSincePresent) {
+		waitedSincePresent = true;
+		WaitForSingleObjectEx(frameLatencyWaitableObject, 1000, TRUE);
+	} else {
+		// Already waited this frame, or no waitable object (< Win10)
+		IDXGIOutput* output = nullptr;
+		if (swapChain1->GetContainingOutput(&output) == S_OK) {
+			output->WaitForVBlank();
+			output->Release();
+		} else {
+			// Fallback
+			Sleep(1);
+		}
 	}
 }
 
@@ -42,7 +49,7 @@ void DX11SwapChain::resize(Vector2i newSize)
 {
 	clearRenderTarget();
 	
-	HRESULT result = swapChain->ResizeBuffers(0, newSize.x, newSize.y, DXGI_FORMAT_UNKNOWN, 0);
+	HRESULT result = swapChain1->ResizeBuffers(0, newSize.x, newSize.y, DXGI_FORMAT_UNKNOWN, flags);
 	if (result != S_OK) {
 		throw Exception("Unable to resize swap chain", HalleyExceptions::VideoPlugin);
 	}
@@ -69,21 +76,25 @@ ID3D11DepthStencilView* DX11SwapChain::getDepthStencilView() const
 
 void DX11SwapChain::init(Window& window)
 {
-	if (swapChain) {
-		swapChain->Release();
-		swapChain = nullptr;
-	}
+	deInit();
 
 	size = window.getWindowRect().getSize();
 	const bool usingCoreWindow = window.getNativeHandleType() == "CoreWindow";
 
-	IDXGIDevice2* pDXGIDevice;
-	video.getDevice().QueryInterface(__uuidof(IDXGIDevice2), reinterpret_cast<void **>(&pDXGIDevice));
-	IDXGIAdapter * pDXGIAdapter;
-	pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void **>(&pDXGIAdapter));
-	IDXGIFactory2 * pIDXGIFactory;
-	pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
+	IDXGIFactory2* pIDXGIFactory = nullptr;
+	{
+		IDXGIDevice2* pDXGIDevice;
+		IDXGIAdapter * pDXGIAdapter;
 
+		video.getDevice().QueryInterface(__uuidof(IDXGIDevice2), reinterpret_cast<void **>(&pDXGIDevice));
+		pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void **>(&pDXGIAdapter));
+		pDXGIAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void **>(&pIDXGIFactory));
+
+		pDXGIAdapter->Release();
+		pDXGIDevice->Release();
+	}
+
+	flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
 	swapChainDesc.Width = size.x;
@@ -93,27 +104,52 @@ void DX11SwapChain::init(Window& window)
 	swapChainDesc.BufferCount = numBuffers;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapChainDesc.Flags = flags;
 
 	if (usingCoreWindow) {
 		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
 		IUnknown* coreWindow = reinterpret_cast<IUnknown*>(window.getNativeHandle());
-		auto result = pIDXGIFactory->CreateSwapChainForCoreWindow(&video.getDevice(), coreWindow, &swapChainDesc, nullptr, &swapChain);
+		auto result = pIDXGIFactory->CreateSwapChainForCoreWindow(&video.getDevice(), coreWindow, &swapChainDesc, nullptr, &swapChain1);
 		if (result != S_OK) {
+			pIDXGIFactory->Release();
 			throw Exception("Unable to create swap chain for CoreWindow", HalleyExceptions::VideoPlugin);
 		}
 	} else {
 		auto hWnd = reinterpret_cast<HWND>(window.getNativeHandle());
-		auto result = pIDXGIFactory->CreateSwapChainForHwnd(&video.getDevice(), hWnd, &swapChainDesc, nullptr, nullptr, &swapChain);
+		auto result = pIDXGIFactory->CreateSwapChainForHwnd(&video.getDevice(), hWnd, &swapChainDesc, nullptr, nullptr, &swapChain1);
 		if (result != S_OK) {
+			pIDXGIFactory->Release();
 			throw Exception("Unable to create swap chain for HWND", HalleyExceptions::VideoPlugin);
 		}
 
 		pIDXGIFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_WINDOW_CHANGES);
 	}
+	pIDXGIFactory->Release();
+
+	IDXGISwapChain2* swapChain2 = nullptr;
+	swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain2));
+	if (swapChain2) {
+		// Win10+ should always have this
+		swapChain2->SetMaximumFrameLatency(1); // Could also be numBuffers - 1?
+		frameLatencyWaitableObject = swapChain2->GetFrameLatencyWaitableObject();
+		swapChain2->Release();
+	}
 
 	initRenderTarget();
+}
+
+void DX11SwapChain::deInit()
+{
+	if (swapChain1) {
+		swapChain1->Release();
+		swapChain1 = nullptr;
+	}
+	if (frameLatencyWaitableObject) {
+		CloseHandle(frameLatencyWaitableObject);
+		frameLatencyWaitableObject = nullptr;
+	}
 }
 
 void DX11SwapChain::initRenderTarget()
@@ -121,7 +157,7 @@ void DX11SwapChain::initRenderTarget()
 	clearRenderTarget();
 
 	ID3D11Texture2D *pBackBuffer;
-    swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
+    swapChain1->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
     video.getDevice().CreateRenderTargetView(pBackBuffer, nullptr, &renderTarget);
     pBackBuffer->Release();
 
