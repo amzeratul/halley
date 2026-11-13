@@ -12,6 +12,8 @@
 #include <d3d11.h>
 #include <DXGI1_2.h>
 #include <DXGI.h>
+#include <dxgi1_6.h>
+
 #include "dx11_loader.h"
 #include "halley/support/logger.h"
 #include "halley/support/debug.h"
@@ -51,25 +53,73 @@ void DX11Video::onSuspend()
 	loader.reset();
 }
 
+namespace {
+
+	IDXGIAdapter* getVideoAdapter()
+	{
+		IDXGIAdapter* adapter = nullptr;
+
+		IDXGIFactory1* factory = nullptr;
+		if (CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory)) != S_OK) {
+			return nullptr;
+		}
+
+		IDXGIFactory6* factory6 = nullptr;
+		factory->QueryInterface(__uuidof(IDXGIFactory6), reinterpret_cast<void**>(&factory6));
+		if (factory6) {
+			IDXGIAdapter4* curAdapter = nullptr;
+			Logger::logInfo("Available DX11 video adapters (DXGIFactory6):");
+			for (int i = 0; ; ++i) {
+				const auto result = factory6->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, __uuidof(IDXGIAdapter4), reinterpret_cast<void**>(&curAdapter));
+				if (result == S_OK) {
+					DXGI_ADAPTER_DESC3 desc;
+					curAdapter->GetDesc3(&desc);
+					const bool choose = !adapter && (desc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE) == 0;
+					Logger::logInfo(String(choose ? "      * " : "        ") + toString(i) + ": " + String(desc.Description) + " (" + String::prettySize(desc.DedicatedVideoMemory) + ")" + (desc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE ? " [software]" : " [hardware]"));
+					if (choose) {
+						adapter = curAdapter;
+					} else {
+						curAdapter->Release();
+					}
+				} else {
+					break;
+				}
+			}
+
+			factory6->Release();
+		} else {
+			IDXGIAdapter* curAdapter = nullptr;
+			Logger::logInfo("Available DX11 video adapters (DXGIFactory1):");
+			for (int i = 0; ; ++i) {
+				const auto result = factory->EnumAdapters(i, &curAdapter);
+				if (result == S_OK) {
+					DXGI_ADAPTER_DESC desc;
+					curAdapter->GetDesc(&desc);
+					Logger::logInfo(String(i == 0 ? "      * " : "        ") + toString(i) + ": " + String(desc.Description) + " (" + String::prettySize(desc.DedicatedVideoMemory) + ")");
+					if (i == 0) {
+						adapter = curAdapter;
+					} else {
+						curAdapter->Release();
+					}
+				} else {
+					break;
+				}
+			}
+		}
+
+		factory->Release();
+
+		return adapter;
+	}
+}
+
 void DX11Video::initD3D(Window& window)
 {
 	if (initialised) {
 		return;
 	}
 
-#if !defined(_GAMING_DESKTOP)
-	{
-		IDXGIFactory* factory;
-		CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&factory));
-		IDXGIAdapter* adapter;
-		factory->EnumAdapters(0, &adapter);
-		if (adapter) {
-			DXGI_ADAPTER_DESC desc;
-			adapter->GetDesc(&desc);
-			Logger::logInfo("Using display adapter for DX11: " + String(desc.Description));
-		}
-	}
-#endif
+	auto* adapter = getVideoAdapter();
 
 	ID3D11DeviceContext* dc;
 	std::array<D3D_FEATURE_LEVEL, 3> featureLevels = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
@@ -77,19 +127,24 @@ void DX11Video::initD3D(Window& window)
 	if (Debug::isDebug()) {
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
-	const auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels.data(), static_cast<UINT>(featureLevels.size()), D3D11_SDK_VERSION, &device, &featureLevel, &dc);
-	if (result != S_OK) {
-		throw Exception("Unable to initialise DX11", HalleyExceptions::VideoPlugin);
+	auto result = D3D11CreateDevice(adapter, adapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels.data(), static_cast<UINT>(featureLevels.size()), D3D11_SDK_VERSION, &device, &featureLevel, &dc);
+	if (adapter) {
+		adapter->Release();
 	}
-	dc->QueryInterface(__uuidof(ID3D11DeviceContext1), reinterpret_cast<void**>(&deviceContext));
-	if (!dc) {
-		throw Exception("Unable to initialise DX11.1", HalleyExceptions::VideoPlugin);
+	if (result != S_OK) {
+		throw Exception("Unable to initialise DX11, D3D11CreateDevice returned 0x" + toString(uint32_t(result), 16), HalleyExceptions::VideoPlugin);
+	}
+	result = dc->QueryInterface(__uuidof(ID3D11DeviceContext1), reinterpret_cast<void**>(&deviceContext));
+	dc->Release();
+	if (FAILED(result) || !deviceContext) {
+		throw Exception("Unable to initialise DX11.1, QueryInterface returned 0x" + toString(uint32_t(result), 16), HalleyExceptions::VideoPlugin);
 	}
 
-	ID3D10Multithread* mt;
+	ID3D10Multithread* mt = nullptr;
 	device->QueryInterface(__uuidof(ID3D10Multithread), reinterpret_cast<void**>(&mt));
 	if (mt) {
 		mt->SetMultithreadProtected(true);
+		mt->Release();
 	}
 
 	swapChain = std::make_unique<DX11SwapChain>(*this, window, 3);
