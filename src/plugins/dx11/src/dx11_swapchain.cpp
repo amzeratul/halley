@@ -16,7 +16,7 @@ DX11SwapChain::DX11SwapChain(DX11Video& video, Window& window, int numBuffers)
 DX11SwapChain::~DX11SwapChain()
 {
 	clearRenderTarget();
-	clearDepthStencilViews();
+	clearDepthStencilView();
 
 	if (swapChain) {
 		swapChain->Release();
@@ -27,7 +27,6 @@ DX11SwapChain::~DX11SwapChain()
 void DX11SwapChain::present(bool useVsync)
 {
 	swapChain->Present(useVsync ? 1 : 0, 0);
-	curBuffer = (curBuffer + 1) % numBuffers;
 }
 
 void DX11SwapChain::waitForVsync()
@@ -65,10 +64,7 @@ ID3D11RenderTargetView* DX11SwapChain::getRenderTargetView() const
 
 ID3D11DepthStencilView* DX11SwapChain::getDepthStencilView() const
 {
-	if (depthStencilViews.empty()) {
-		return nullptr;
-	}
-	return depthStencilViews.at(curBuffer);
+	return depthStencilView;
 }
 
 void DX11SwapChain::init(Window& window)
@@ -92,18 +88,13 @@ void DX11SwapChain::init(Window& window)
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
 	swapChainDesc.Width = size.x;
 	swapChainDesc.Height = size.y;
-	swapChainDesc.BufferCount = 1;
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = numBuffers;
 	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
 	if (usingCoreWindow) {
-#if WINVER >= 0x0A00
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-#else
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-#endif
 		swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
@@ -134,35 +125,29 @@ void DX11SwapChain::initRenderTarget()
     video.getDevice().CreateRenderTargetView(pBackBuffer, nullptr, &renderTarget);
     pBackBuffer->Release();
 
-	initDepthStencilViews();
+	initDepthStencilView();
 }
 
-void DX11SwapChain::initDepthStencilViews()
+void DX11SwapChain::initDepthStencilView()
 {
-	clearDepthStencilViews();
+	clearDepthStencilView();
 
-	for (int i = 0; i < numBuffers; ++i) {
-		auto t = video.createTexture(size);
-		auto& tex = dynamic_cast<DX11Texture&>(*t);
-		TextureDescriptor descriptor;
-		descriptor.size = size;
-		descriptor.isDepthStencil = true;
-		descriptor.format = TextureFormat::Depth;
-		tex.load(std::move(descriptor));
+	depthStencilTexture = video.createTexture(size);
+	auto& tex = dynamic_cast<DX11Texture&>(*depthStencilTexture);
+	TextureDescriptor descriptor;
+	descriptor.size = size;
+	descriptor.isDepthStencil = true;
+	descriptor.format = TextureFormat::Depth;
+	tex.load(std::move(descriptor));
 
-		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Flags = 0;
-		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		desc.Texture2D.MipSlice = 0;
-		ID3D11DepthStencilView *view;
-		auto result = video.getDevice().CreateDepthStencilView(tex.getTexture(), &desc, &view);
-		if (result != S_OK) {
-			throw Exception("Unable to create DepthStencilView", HalleyExceptions::VideoPlugin);
-		}
-
-		depthStencilTextures.push_back(std::move(t));
-		depthStencilViews.push_back(view);
+	D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+	desc.Flags = 0;
+	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	desc.Texture2D.MipSlice = 0;
+	auto result = video.getDevice().CreateDepthStencilView(tex.getTexture(), &desc, &depthStencilView);
+	if (result != S_OK) {
+		throw Exception("Unable to create DepthStencilView", HalleyExceptions::VideoPlugin);
 	}
 }
 
@@ -174,11 +159,11 @@ void DX11SwapChain::clearRenderTarget()
 	}
 }
 
-void DX11SwapChain::clearDepthStencilViews()
+void DX11SwapChain::clearDepthStencilView()
 {
-	for (auto& view: depthStencilViews) {
-		view->Release();
+	if (depthStencilView) {
+		depthStencilView->Release();
+		depthStencilView = nullptr;
 	}
-	depthStencilViews.clear();
-	depthStencilTextures.clear();
+	depthStencilTexture = {};
 }
