@@ -74,7 +74,7 @@ void UISizerEntry::placeInside(Vector2f tl, Vector2f br, Rect4f origRect, Vector
 	}
 
 	if (element) {
-		element->setRect(finalRect, listener);
+		element->setRect(finalRect, Rect4f(tl, br), listener);
 	}
 }
 
@@ -189,7 +189,7 @@ Vector2f UISizer::computeMinimumSize(bool includeProportional, Vector2f sizeHint
 	}
 }
 
-void UISizer::setRect(Rect4f rect, IUIElementListener* listener)
+void UISizer::setRect(Rect4f rect, Rect4f cell, IUIElementListener* listener)
 {
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
 		setRectBox(rect, listener);

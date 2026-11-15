@@ -39,7 +39,7 @@ namespace Halley {
 		virtual ~UIWidget();
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
-		void setRect(Rect4f rect, IUIElementListener* listener) final override;
+		void setRect(Rect4f rect, Rect4f cell, IUIElementListener* listener) final override;
 		virtual void onPreNotifySetRect(IUIElementListener& listener);
 
 		UIRoot* getRoot() final override;
@@ -255,6 +255,8 @@ namespace Halley {
 		virtual bool onDestroyRequested();
 		virtual void onParentChanged();
 		virtual void onActiveChanged(bool active);
+		
+		virtual void setWidgetCell(Rect4f cell);
 
 		void notifyDataBind(bool data, bool force = false) const;
 		void notifyDataBind(int data, bool force = false) const;

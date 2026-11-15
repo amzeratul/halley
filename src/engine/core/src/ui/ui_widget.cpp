@@ -201,9 +201,10 @@ Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 	return minSize;
 }
 
-void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
+void UIWidget::setRect(Rect4f rect, Rect4f cell, IUIElementListener* listener)
 {
 	setWidgetRect(rect);
+	setWidgetCell(cell);
 	if (sizer) {
 		const auto border = getInnerBorder();
 		const auto p0 = getLayoutOriginPosition();
@@ -211,7 +212,7 @@ void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
 		if (listener) {
 			onPreNotifySetRect(*listener);
 		}
-		sizer->setRect(Rect4f(p0 + border.xy(), p0 + size - border.zw()), listener);
+		sizer->setRect(Rect4f(p0 + border.xy(), p0 + size - border.zw()), cell, listener);
 	} else {
 		for (auto& c: getChildren()) {
 			c->layout();
@@ -229,7 +230,8 @@ void UIWidget::layout(IUIElementListener* listener)
 	if (isActive()) {
 		Vector2f minimumSize = getLayoutMinimumSize(false).ceil();
 		Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
-		setRect(Rect4f(getPosition(), getPosition() + targetSize), listener);
+		const auto rect = Rect4f(getPosition(), getPosition() + targetSize);
+		setRect(rect, rect, listener);
 
 		alignAtAnchor();
 		onLayout();
@@ -1323,6 +1325,10 @@ void UIWidget::setWidgetRect(Rect4f rect)
 		size = rect.getSize();
 		positionUpdated = true;
 	}
+}
+
+void UIWidget::setWidgetCell(Rect4f cell)
+{
 }
 
 void UIWidget::resetInputResults()

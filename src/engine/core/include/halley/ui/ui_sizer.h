@@ -97,7 +97,7 @@ namespace Halley {
 		UISizerSpacer(Vector2f size = Vector2f()) : size(size) {}
 
 		Vector2f getLayoutMinimumSize(bool force) const override { return size; }
-		void setRect(Rect4f, IUIElementListener*) override {}
+		void setRect(Rect4f, Rect4f, IUIElementListener*) override {}
 		bool isActive() const override { return true; }
 
 	private:
@@ -117,7 +117,7 @@ namespace Halley {
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		Vector2f getLayoutMinimumSize(bool force, Vector2f sizeHint) const;
-		void setRect(Rect4f rect, IUIElementListener* listener) override;
+		void setRect(Rect4f rect, Rect4f cell, IUIElementListener* listener) override;
 
 		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;

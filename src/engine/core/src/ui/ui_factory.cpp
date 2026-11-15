@@ -807,6 +807,9 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("lineSpacing")) {
 		label->setLineSpacing(node["lineSpacing"].asFloat(0));
 	}
+	if (node.hasKey("flowLayout")) {
+		label->setFlowLayout(node["flowLayout"].asBool(false));
+	}
 	label->setReplayBehavioursOnModified(node["replayBehavioursOnModified"].asBool(false));
 	return label;
 }
@@ -823,6 +826,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.5f) } });
 	result.entries.emplace_back("Marquee", "marquee", "std::optional<float>", "");
 	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "false");
+	result.entries.emplace_back("Flow Layout", "flowLayout", "bool", "false");
 	result.entries.emplace_back("Font", "font", "std::optional<Halley::ResourceReference<Halley::Font>>", "");
 	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
 	result.entries.emplace_back("Outline", "outline", "std::optional<float>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.1f) } });

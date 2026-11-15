@@ -63,6 +63,7 @@ namespace Halley {
 
 	protected:
 		void onParentChanged() override;
+		void setWidgetCell(Rect4f cell) override;
 
 	private:
 		TextRenderer renderer;
@@ -90,6 +91,7 @@ namespace Halley {
 		float lastCellWidth;
 
 		std::optional<Rect4f> worldClip;
+		float cellWidth = 0;
 
 		void updateMinSize();
 		void updateText(bool allowReplay = true);

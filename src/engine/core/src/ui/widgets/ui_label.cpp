@@ -170,14 +170,8 @@ void UILabel::updateMarquee(Time t)
 
 float UILabel::getCellWidth()
 {
-	if (flowLayout) {
-		auto parent = getParent();
-		if (parent) {
-			auto max = parent->getMaxChildWidth();
-			if (max) {
-				return max.value();
-			}
-		}
+	if (flowLayout && cellWidth > 0) {
+		return cellWidth;
 	}
 	
 	return std::numeric_limits<float>::max();
@@ -409,6 +403,11 @@ void UILabel::onParentChanged()
 	if (flowLayout) {
 		updateText();
 	}
+}
+
+void UILabel::setWidgetCell(Rect4f cell)
+{
+	cellWidth = cell.getWidth();
 }
 
 Vector2f UILabel::getMinimumSize() const
