@@ -261,7 +261,7 @@ void UITextInput::onTextModified()
 {
 	validateText();
 
-	const auto str = String(text.getText());
+	const auto str = String(text.getFullText());
 	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
 	notifyDataBind(str);
 
