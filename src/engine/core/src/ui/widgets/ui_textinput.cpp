@@ -251,7 +251,7 @@ void UITextInput::updateCaret(bool force)
 
 void UITextInput::onMaybeTextModified()
 {
-	if (lastText != text.getFullText()) {
+	if (lastText != text.getFullText() && text.getEditingText().empty()) {
 		lastText = text.getFullText();
 		onTextModified();
 	}
