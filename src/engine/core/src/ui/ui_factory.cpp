@@ -1972,7 +1972,7 @@ std::shared_ptr<UIWidget> UIFactory::makePlaceholder(const ConfigNode& entryNode
 		}
 	}
 
-	return makeBaseWidget(entryNode);
+	return {};
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeMaskOverride(const ConfigNode& entryNode)
