@@ -311,6 +311,30 @@ std::optional<size_t> Compression::lz4Decompress(gsl::span<const Byte> src, gsl:
 	return lz4Decompress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
 }
 
+Bytes Compression::lz4CompressWithSize32(gsl::span<const std::byte> src, LZ4Options options)
+{
+	auto result = lz4Compress(src, options);
+	const size_t pos = result.size();
+	uint32_t origSize = static_cast<uint32_t>(src.size());
+	result.resize(result.size() + sizeof(origSize));
+	memcpy(reinterpret_cast<char*>(result.data()) + pos, &origSize, sizeof(origSize));
+	return result;
+}
+
+Bytes Compression::lz4DecompressWithSize32(gsl::span<const std::byte> src)
+{
+	HalleyAssertRelease(src.size() > 4);
+	uint32_t origSize;
+	memcpy(&origSize, reinterpret_cast<const char*>(src.data()) + (src.size() - sizeof(origSize)), sizeof(origSize));
+	Bytes dst;
+	dst.resize(origSize);
+	auto size = lz4Decompress(src.subspan(0, src.size() - sizeof(origSize)), dst.byte_span());
+	if (!size) {
+		return {};
+	}
+	dst.resize(*size);
+	return dst;
+}
 
 
 CompressedBytes CompressedBytes::compressBytes(gsl::span<const std::byte> src, Type dstType)

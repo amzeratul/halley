@@ -43,6 +43,9 @@ namespace Halley {
 		static std::optional<size_t> lz4Decompress(gsl::span<const char> src, gsl::span<char> dst);
 		static std::optional<size_t> lz4Decompress(gsl::span<const Byte> src, gsl::span<Byte> dst);
 
+		static Bytes lz4CompressWithSize32(gsl::span<const std::byte> src, LZ4Options options = {});
+		static Bytes lz4DecompressWithSize32(gsl::span<const std::byte> src);
+
 		static Bytes lz4CompressFile(gsl::span<const std::byte> src, gsl::span<const std::byte> header, LZ4Options options = {});
 		static Bytes lz4DecompressFile(gsl::span<const std::byte> src, gsl::span<std::byte> header);
 		static std::shared_ptr<const char> lz4DecompressFileToSharedPtr(gsl::span<const std::byte> src, gsl::span<std::byte> header, size_t& outSize);
