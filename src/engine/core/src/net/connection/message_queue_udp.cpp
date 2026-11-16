@@ -32,9 +32,20 @@ void MessageQueueUDP::sendAll()
     size_t idx;
     for (idx = 0; idx < count; idx++) {
         const auto& p = outboundQueued[idx];
-        if (!connection->send(IConnection::TransmissionType::Unreliable, p.packet)) {
-            break;
-        }
+
+        // If this would push beyond 25% of max capacity, wait until queue is empty
+        // Low limit to leave plenty of room for acks
+        const int maxInFlightSubPackets = connection->getMaxPacketQueueSize() / 4;
+    	const int needed = connection->getNumSubPacketsNeeded(p.packet.getSize());
+        const auto outboundInFlight = connection->getOutboundInFlight();
+		if (outboundInFlight > 0 && outboundInFlight + needed > maxInFlightSubPackets) {
+            // Queue full
+			break;
+		}
+
+		if (!connection->send(IConnection::TransmissionType::Unreliable, p.packet)) {
+			break;
+		}
     }
 
     connection->flushSendUnreliablePackets();

@@ -37,6 +37,9 @@ namespace Halley
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
     	[[nodiscard]] size_t getRealMaxUnreliablePacketSize() const override;
+		[[nodiscard]] int getOutboundInFlight() const { return outboundInFlight; }
+		[[nodiscard]] int getNumSubPacketsNeeded(size_t size) const;
+		[[nodiscard]] int getMaxPacketQueueSize() const;
 
         void beginSendUnreliablePackets() override;
         void flushSendUnreliablePackets() override;
@@ -129,6 +132,8 @@ namespace Halley
     	// The mean time in seconds, interpolated, how long it took for sent packets to be
     	// acknowledged by the remote peer of this connection.
         float averagePacketAckTime = 1.0f;
+
+        int outboundInFlight = 0;
 
         IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 

@@ -189,12 +189,24 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 	memcpy(&datagramId, &header[sizeof(headerSignature2)], 8);
 	HalleyAssertDebug(datagramId != 0);
 
+	++outboundInFlight;
 	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), datagramId);
 }
 
 void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> packet, uint64_t id) const
 {
 	parent->sendUnreliablePacket(packet, id);
+}
+
+int AckUnreliableConnection::getNumSubPacketsNeeded(size_t size) const
+{
+	const size_t maxSize = realMaxPacketSize - headerSize;
+	return static_cast<int>(std::max<size_t>(1, (size + maxSize - 1) / maxSize));
+}
+
+int AckUnreliableConnection::getMaxPacketQueueSize() const
+{
+	return maxPacketQueueSize;
 }
 
 void AckUnreliableConnection::beginSendUnreliablePackets()
@@ -600,6 +612,7 @@ bool AckUnreliableConnection::doProcessAckPacket(SubPacket& slot, int packetIdx,
 			}
 
 			slot.clear();
+			--outboundInFlight;
 
 			return true;
 		}
