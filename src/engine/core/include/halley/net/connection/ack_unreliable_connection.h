@@ -151,6 +151,9 @@ namespace Halley
     	void setRealMaxPacketSize();
 
     	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity);
+
+        static int64_t seqDistance(SeqIndex from, SeqIndex to);
+        void queueAck(int packetIdx, uint16_t seqIdx);
     };
 
 }

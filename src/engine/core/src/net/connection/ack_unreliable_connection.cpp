@@ -311,45 +311,72 @@ size_t AckUnreliableConnection::getRealMaxUnreliablePacketSize() const
 	return realMaxPacketSize >= headerSize ? realMaxPacketSize - headerSize : 0;
 }
 
+int64_t AckUnreliableConnection::seqDistance(SeqIndex from, SeqIndex to)
+{
+	static constexpr size_t seqIndexBits = 19; // 15 bits of seqIndx + 4 bits parity
+	static constexpr size_t seqIndexMask = (static_cast<size_t>(1) << seqIndexBits) - 1;
+
+	constexpr int64_t space = static_cast<int64_t>(1) << seqIndexBits;
+	int64_t diff = static_cast<int64_t>((to.count - from.count) & seqIndexMask);
+	if (diff >= space / 2) {
+		diff -= space;
+	}
+	return diff;
+}
+
 void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::byte> packet)
 {
-    size_t packetSize = packet.size();
-    auto* header = reinterpret_cast<const uint8_t*>(packet.data());
-
-    if (packetSize < 6 || memcmp(header, headerSignature2, 3) != 0) {
-    	Logger::logWarning("rcv packet too small, or wrong signature");
-        return;
-    }
-
-	uint8_t parity = header[3];
-    uint16_t seqIdx = (static_cast<uint16_t>(header[4]) << 8) | header[5];
-
-    if (seqIdx == 0xffff) {
-    	// This is an ACK packet.
-        onAckPacketsReceive(packet.subspan(6), parity);
-        return;
-    }
-
-	if (!inbound.seqIndex.isInValidRange(SeqIndex::make(seqIdx, parity), 256)) {
-		// The seqIdx/parity pair of this packet is far off the inbound queue.
-		// NB: This can very probably not be recovered from, but should result in a disconnect.
-		Logger::logWarning("Sequence index of incoming packet out of range, flushing inbound queue.");
-		evictInboundQueue(seqIdx, parity); // TODO: maybe should just close the connection instead...
+	const size_t packetSize = packet.size();
+	auto* header = reinterpret_cast<const uint8_t*>(packet.data());
+	
+	if (packetSize < 6) {
+		Logger::logWarning("rcv packet too small: " + toString(packetSize) + " bytes");
+		return;
 	}
 
-    uint8_t subIdx = header[6];
-    int packetIdx = (header[7] << 8) | header[8];
+	if (memcmp(header, headerSignature2, 3) != 0) {
+		Logger::logWarning("rcv packet has the wrong signature (" + Encode::encodeBase16(packet.subspan(0, 3)) + ")");
+		return;
+	}
+
+	const uint8_t parity = header[3];
+	const uint16_t seqIdx = (static_cast<uint16_t>(header[4]) << 8) | header[5];
+
+	if (seqIdx == 0xffff) {
+		// This is an ACK packet.
+		onAckPacketsReceive(packet.subspan(6), parity);
+		return;
+	}
+	
+	if (packetSize < headerSize) {
+		Logger::logWarning("rcv packet smaller than header: " + toString(packetSize) + " bytes");
+		return;
+	}
+
+	const uint8_t subIdx = header[6];
+	const int packetIdx = (header[7] << 8) | header[8];
+
+	const int64_t distance = seqDistance(inbound.seqIndex, SeqIndex::make(seqIdx, parity));
+
+	if (distance < 0) {
+		// Already delivered
+		queueAck(packetIdx, seqIdx);
+		return;
+	}
+
+	if (distance > 256) {
+		// Too far ahead, desync happened
+		Logger::logWarning("Incoming packet " + toString(distance) + " ahead of expected sequence, flushing inbound queue.");
+		evictInboundQueue(seqIdx, parity);
+	}
 
 	HalleyAssertDebug(header[9] == 1 && header[10] == 0 && header[11] == 0);
 
-	size_t dataSize = packetSize - headerSize;
+	const size_t dataSize = packetSize - headerSize;
+	auto& slot = inbound.packets[packetIdx];
 
-	bool isDupe = false;
-	bool isExpired = false;
-
-    auto& slot = inbound.packets[packetIdx];
-
-	if (slot.seqIdx == seqIdx) {
+	const bool isDupe = slot.seqIdx == seqIdx && slot.parity == parity;
+	if (isDupe) {
 		// Already got this packet.
 		if (slot.subIdx != subIdx || slot.dataSize != dataSize) {
 	        throw Exception("Rcv resent packet, but data mismatch", HalleyExceptions::Network);
@@ -357,13 +384,8 @@ void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::by
 		if (statsListener) {
 			statsListener->onPacketReceived(seqIdx, dataSize, true);
 		}
-		isDupe = true;
 		slot.resend++;
-	}
-
-	isExpired = !isDupe && isExpiredSeqIndex(inbound, seqIdx, parity);
-
-	if (!isDupe && !isExpired) {
+	} else {
 		if (slot.seqIdx < 0x8000) {
 			close("too many inbound packets");
 		}
@@ -380,18 +402,19 @@ void AckUnreliableConnection::onUnreliablePacketReceived(gsl::span<const std::by
 	}
 
 	// Need to always ACK, even for duplicated and expired packets.
+	queueAck(packetIdx, seqIdx);
+}
 
-	int ackIdx = 0;
-	while (ackIdx < numAckPackets) {
-		// TODO: a hash set may be faster?
-		if (ackPackets[ackIdx].first == packetIdx && ackPackets[ackIdx].second == seqIdx) {
-			break;
+void AckUnreliableConnection::queueAck(int packetIdx, uint16_t seqIdx)
+{
+	for (int i = 0; i < numAckPackets; i++) {
+		if (ackPackets[i].first == packetIdx && ackPackets[i].second == seqIdx) {
+			return;
 		}
-		ackIdx++;
 	}
 
-	if (ackIdx >= numAckPackets && numAckPackets < maxPacketQueueSize) {
-		ackPackets[numAckPackets++] = {packetIdx, seqIdx};
+	if (numAckPackets < maxPacketQueueSize) {
+		ackPackets[numAckPackets++] = { packetIdx, seqIdx };
 	}
 }
 
