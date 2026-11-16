@@ -321,11 +321,16 @@ Bytes Compression::lz4CompressWithSize32(gsl::span<const std::byte> src, LZ4Opti
 	return result;
 }
 
-Bytes Compression::lz4DecompressWithSize32(gsl::span<const std::byte> src)
+Bytes Compression::lz4DecompressWithSize32(gsl::span<const std::byte> src, uint32_t maxSize)
 {
 	HalleyAssertRelease(src.size() > 4);
 	uint32_t origSize;
 	memcpy(&origSize, reinterpret_cast<const char*>(src.data()) + (src.size() - sizeof(origSize)), sizeof(origSize));
+
+	if (origSize > maxSize) {
+		throw Exception("Unable to decompress LZ4 stream: original size is " + String::prettySize(origSize) + ", which is more than the maximum of " + String::prettySize(maxSize), HalleyExceptions::Compression);
+	}
+
 	Bytes dst;
 	dst.resize(origSize);
 	auto size = lz4Decompress(src.subspan(0, src.size() - sizeof(origSize)), dst.byte_span());
