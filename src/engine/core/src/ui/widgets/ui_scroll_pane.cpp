@@ -248,6 +248,14 @@ void UIScrollPane::onLayout()
 	refresh();
 }
 
+void UIScrollPane::onGamepadInput(const UIInputResults& input, Time time)
+{
+	auto axis = Vector2f(scrollHorizontal ? input.getAxis(UIGamepadInput::Axis::X) : 0.0f, scrollVertical ? input.getAxis(UIGamepadInput::Axis::Y) : 0.0f);
+	if (axis.length() > 0.1f) {
+		scrollBy(axis * scrollSpeed * static_cast<float>(time));
+	}
+}
+
 void UIScrollPane::onMouseWheel(const UIEvent& event)
 {
 	if (scrollWheelEnabled) {

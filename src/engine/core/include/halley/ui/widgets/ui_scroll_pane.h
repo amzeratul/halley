@@ -65,6 +65,7 @@ namespace Halley {
 	    Vector2f getLayoutOriginPosition() const override;
 	    bool canInteractWithMouse() const override;
 		void onLayout() override;
+		void onGamepadInput(const UIInputResults& input, Time time) override;
 
    	private:
 		Vector2f clipSize;
