@@ -43,6 +43,11 @@ void SystemSDL::init()
 	Logger::logInfo("\tVersion/Compiled: " + toString(int(compiled.major)) + "." + int(compiled.minor) + "." + int(compiled.patch));
 	Logger::logInfo("\tVersion/Linked: " + toString(int(linked.major)) + "." + int(linked.minor) + "." + int(linked.patch));
 
+#ifdef _WIN32
+	SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+	SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "0");
+#endif
+
 	// Initialize SDL
 	if (!SDL_WasInit(0)) {
 		if (SDL_Init(0) == -1) {
