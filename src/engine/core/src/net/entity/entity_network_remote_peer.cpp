@@ -676,7 +676,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		}
 	}
 
-	createRemoteEntity(msg.entityId, delta, msg.worldPartition != 0);
+	createRemoteEntity(msg.entityId, delta, msg.worldPartition != 0 || targetParentUUID.isValid());
 }
 
 void EntityNetworkRemotePeer::receiveAssignEntity(const EntityNetworkMessageCreate& msg)
@@ -1001,7 +1001,7 @@ void EntityNetworkRemotePeer::createPendingEntity(const PendingEntity& pendingDa
 {
 	HalleyAssertDev(pendingData.data);
 
-	const auto entity = createRemoteEntity(pendingData.id, pendingData.data.value(), pendingData.worldPartition != 0);
+	const auto entity = createRemoteEntity(pendingData.id, pendingData.data.value(), pendingData.worldPartition != 0 || pendingData.instanceInfo.parentUUID.isValid());
 
 	if (!entity.isValid()) {
 		Logger::logError("Error when creating pending entity - entity creation failed");

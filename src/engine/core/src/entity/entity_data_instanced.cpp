@@ -2,6 +2,11 @@
 using namespace Halley;
 
 EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData, bool allowAddComponensNotInPrefab)
+	: EntityDataInstanced(prefabData, instanceData, allowAddComponensNotInPrefab, instanceData.getInstanceUUID())
+{
+}
+
+EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData, bool allowAddComponensNotInPrefab, const UUID& rootInstanceUUID)
 	: prefabData(&prefabData)
 {
 	instanceUUID = instanceData.getInstanceUUID();
@@ -9,9 +14,34 @@ EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEn
 	variant = instanceData.getVariant();
 	enableRules = instanceData.getEnableRules();
 
+	const auto* instanceEntityData = allowAddComponensNotInPrefab && instanceData.getType() == Type::Data ? static_cast<const EntityData*>(&instanceData) : nullptr;
+
+	auto findChild = [](const Vector<EntityData>& list, const UUID& prefabUUID) -> const EntityData* {
+		for (const auto& c: list) {
+			if (c.getPrefabUUID().isValid() && c.getPrefabUUID() == prefabUUID) {
+				return &c;
+			}
+		}
+		return nullptr;
+	};
+
 	children.reserve(prefabData.getNumChildren());
 	for (const auto& child: prefabData.getChildren()) {
-		children.emplace_back(EntityDataInstanced(child, instanceUUID));
+		const auto* instanceChild = instanceEntityData ? findChild(instanceEntityData->getChildren(), child.getPrefabUUID()) : nullptr;
+		if (instanceChild) {
+			children.emplace_back(EntityDataInstanced(child, *instanceChild, true, rootInstanceUUID));
+		} else {
+			children.emplace_back(EntityDataInstanced(child, rootInstanceUUID));
+		}
+	}
+
+	if (instanceEntityData) {
+		// Children not in prefab
+		for (const auto& c: instanceEntityData->getChildren()) {
+			if (!findChild(prefabData.getChildren(), c.getPrefabUUID())) {
+				childrenAdded.push_back(&c);
+			}
+		}
 	}
 
 	const auto& nComponents = instanceData.getNumComponents();
@@ -94,12 +124,15 @@ const UUID& EntityDataInstanced::getParentUUID() const
 
 size_t EntityDataInstanced::getNumChildren() const
 {
-	return prefabData->getNumChildren();
+	return children.size() + childrenAdded.size();
 }
 
 const IEntityConcreteData* EntityDataInstanced::getChild(size_t idx, EntityDataAppliedDelta& buffer) const
 {
-	return &children[idx];
+	if (idx < children.size()) {
+		return &children[idx];
+	}
+	return childrenAdded[idx - children.size()];
 }
 
 size_t EntityDataInstanced::getNumComponents() const

@@ -25,6 +25,8 @@ namespace Halley {
 		std::tuple<std::string_view, const ConfigNode*, const ConfigNode*> getComponentAndDelta(size_t idx) const override;
 
 	private:
+		EntityDataInstanced(const EntityData& prefabData, const IEntityConcreteData& instanceData, bool allowAddComponensNotInPrefab, const UUID& rootInstanceUUID);
+
 		const EntityData* prefabData = nullptr;
 		UUID instanceUUID;
 		uint8_t flags = 0;
@@ -32,6 +34,7 @@ namespace Halley {
 		String enableRules;
 
 		Vector<EntityDataInstanced> children;
+		Vector<const EntityData*> childrenAdded;
 		HashMap<String, std::pair<String, ConfigNode>> componentOverrides;
 		Vector<std::pair<String, ConfigNode>> componentsAdded;
 	};
