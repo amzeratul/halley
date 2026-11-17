@@ -180,10 +180,9 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			//
 			// Simply skipping the sendCreateEntity() call works here because the alive check
 			// will just pick them up again to be sent on the next update.
-			if (const auto parent = e.getParent(); parent.hasComponentInAncestors<NetworkComponent>()) {
-				if (outboundEntities.find(parent.getEntityId()) == outboundEntities.end()) {
-					continue;
-				}
+			auto networkRoot = e.getParent().tryGetEntityIdWithComponentInAncestors<NetworkComponent>();
+			if (networkRoot.isValid() && !outboundEntities.contains(networkRoot)) {
+				continue;
 			}
 		}
 		parentSession->setupOutboundInterpolators(e);
