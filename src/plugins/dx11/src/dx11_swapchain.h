@@ -32,7 +32,7 @@ namespace Halley
 		uint32_t flags = 0;
 
 		ID3D11RenderTargetView* renderTarget = nullptr;
-		ID3D11DepthStencilView* depthStencilView;
+		ID3D11DepthStencilView* depthStencilView = nullptr;
 		std::unique_ptr<Texture> depthStencilTexture;
 
 		Vector2i size;
