@@ -128,6 +128,7 @@ void EntityDataDelta::make(const EntityData& from, To&& to, const UUID& rootUUID
 					// Potentially modified
 					const auto uuid = toChild.instanceUUID.isValid() ? toChild.instanceUUID : toChild.prefabUUID;
 					auto delta = EntityDataDelta(fromChild, forwardLike<To>(toChild), rootUUID, mode, options);
+					delta.setParentUUID(std::nullopt);
 					if (delta.hasChange()) {
 						childrenChanged.emplace_back(uuid, std::move(delta));
 					}
@@ -234,12 +235,12 @@ void EntityDataDelta::make(const EntityData& from, To&& to, const UUID& rootUUID
 	}
 }
 
-bool EntityDataDelta::hasChange() const
+bool EntityDataDelta::hasChange(bool includeUUIDs) const
 {
-	// Checking instance/prefab UUID causes issues with spurious serialisation of entities - if they cause other issues, this method might need to be split/take parameters
-	return name || prefab || icon || variant || enableRules || flags || parentUUID /*|| instanceUUID || prefabUUID*/
+	return name || prefab || icon || variant || enableRules || flags
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
-		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
+		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty()
+		|| (includeUUIDs && (parentUUID || instanceUUID || prefabUUID));
 }
 
 void EntityDataDelta::serialize(Serializer& s) const
@@ -326,14 +327,19 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	assignChildUUIDs();
 }
 
-void EntityDataDelta::setInstanceUUID(const UUID& uuid)
+void EntityDataDelta::setInstanceUUID(std::optional<UUID> uuid)
 {
 	instanceUUID = uuid;
 }
 
-void EntityDataDelta::setPrefabUUID(const UUID& uuid)
+void EntityDataDelta::setPrefabUUID(std::optional<UUID> uuid)
 {
 	prefabUUID = uuid;
+}
+
+void EntityDataDelta::setParentUUID(std::optional<UUID> uuid)
+{
+	parentUUID = uuid;
 }
 
 void EntityDataDelta::randomiseInstanceUUIDs()

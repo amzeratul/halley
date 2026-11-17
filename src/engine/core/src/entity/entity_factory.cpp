@@ -75,6 +75,7 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 	result.setFlag(EntityData::Flag::Disabled, !entity.isEnabled());
 	result.setInstanceUUID(entity.getInstanceUUID());
 	result.setPrefabUUID(entity.getPrefabUUID());
+	result.setEnableRules(entity.getEnableRules());
 	const auto& prefabId = entity.getPrefabAssetId().value_or(String::emptyString());
 	if (prefabId != lastPrefab) {
 		result.setPrefab(prefabId);

@@ -53,7 +53,7 @@ namespace Halley {
 		EntityDataDelta& operator=(const EntityDataDelta& other) = default;
 		EntityDataDelta& operator=(EntityDataDelta&& other) noexcept = default;
 
-		bool hasChange() const;
+		bool hasChange(bool includeUUIDs = false) const;
 
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
@@ -67,8 +67,9 @@ namespace Halley {
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		const std::optional<UUID>& getInstanceUUID() const { return instanceUUID; }
 		const std::optional<UUID>& getParentUUID() const { return parentUUID; }
-		void setInstanceUUID(const UUID& uuid);
-		void setPrefabUUID(const UUID& uuid);
+		void setInstanceUUID(std::optional<UUID> uuid);
+		void setPrefabUUID(std::optional<UUID> uuid);
+		void setParentUUID(std::optional<UUID> uuid);
 		void randomiseInstanceUUIDs();
 		void assignChildUUIDs();
 
