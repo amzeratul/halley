@@ -380,4 +380,50 @@ namespace std_ex {
 		}
 		return result;
 	}
+
+	template <typename C>
+	void removeDuplicates(C& vs)
+	{
+		// Special case: 0 or 1 element (no work to do)
+		if (vs.size() <= 1) {
+			return;
+		}
+
+		// Special case: 2 elements (trivial check)
+		if (vs.size() == 2) {
+			if (vs[0] == vs[1]) {
+				vs.resize(1);
+			}
+			return;
+		}
+
+		std::sort(vs.begin(), vs.end());
+		auto end = std::unique(vs.begin(), vs.end());
+		vs.erase(end, vs.end());
+	}
+
+	template <typename C>
+	void removeDuplicatesKeepOrder(C& vs)
+	{
+		// Special case: 0 or 1 element (no work to do)
+		if (vs.size() <= 1) {
+			return;
+		}
+
+		// Special case: 2 elements (trivial check)
+		if (vs.size() == 2) {
+			if (vs[0] == vs[1]) {
+				vs.resize(1);
+			}
+			return;
+		}
+
+		Halley::HashSet<typename C::value_type> uniqueValues;
+		uniqueValues.reserve(vs.size());
+
+		std_ex::erase_if(vs, [&] (const auto& v) {
+			auto [iter, inserted] = uniqueValues.insert(v);
+			return !inserted;
+		});
+	}
 }
