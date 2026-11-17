@@ -50,25 +50,31 @@ void ScriptGraphVariableInspector::updateVariables(const ConfigNode& data)
 	const auto& sharedVariables = data["shared"];
 
 	int count = 0;
-	for (const auto& variable : entityVariables.asMap()) {
-		const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
-		entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Entity");
-		list->add(entry);
-		count++;
+	if (entityVariables.getType() == ConfigNodeType::Map) {
+		for (const auto& variable : entityVariables.asMap()) {
+			const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
+			entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Entity");
+			list->add(entry);
+			count++;
+		}
 	}
 
-	for (const auto& variable : localVariables.asMap()) {
-		const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
-		entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Local");
-		list->add(entry);
-		count++;
+	if (localVariables.getType() == ConfigNodeType::Map) {
+		for (const auto& variable : localVariables.asMap()) {
+			const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
+			entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Local");
+			list->add(entry);
+			count++;
+		}
 	}
 
-	for (const auto& variable : sharedVariables.asMap()) {
-		const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
-		entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Shared");
-		list->add(entry);
-		count++;
+	if (sharedVariables.getType() == ConfigNodeType::Map) {
+		for (const auto& variable : sharedVariables.asMap()) {
+			const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
+			entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Shared");
+			list->add(entry);
+			count++;
+		}
 	}
 
 	setActive(count > 0);
