@@ -770,6 +770,8 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 {
 	const auto debugInfo = EntityFactory::DebugInfo("NetworkEntity " + toString(id), EntityLoadContextType::Network);
 
+	//Logger::logDev("Created entity (" + toString(id) + ") from network:\n\n" + EntityData(delta).toYAML());
+
 	// Generate EntityData from prefab, with delta applied.
 	auto [entityData, prefab, prefabUUID] = parentSession->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID(), debugInfo);
 	if (!entityData) {
@@ -938,6 +940,15 @@ void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityR
 		if (auto existingEntity = world.findEntity(childData.getInstanceUUID())) {
 			if (existingEntity->isValid() && existingEntity->getParent() != entity) {
 				existingEntity->setParent(entity);
+			}
+		}
+	}
+
+	for (const auto& [uuid, childDelta] : delta.getChildrenChanged()) {
+		for (const auto& child : entity.getChildren()) {
+			if (child.getInstanceUUID() == uuid || child.getPrefabUUID() == uuid) {
+				updateRemoteEntityCheckChildrenAdded(child, childDelta);
+				break;
 			}
 		}
 	}
