@@ -87,7 +87,7 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 {
 	const bool isNetwork = context.matchType(makeMask(EntitySerialization::Type::Network));
 
-	ConfigNode::MapType statesNode;
+	ConfigNode statesNode;
 	for (auto& state: states) {
 		const auto& script = state.state->getScriptGraphPtr();
 		if (isNetwork ? script->isNetwork() : script->isSerializableToSaveFile()) {
@@ -95,8 +95,10 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 		}
 	}
 
-	ConfigNode::MapType result;
-	result["states"] = std::move(statesNode);
+	ConfigNode result;
+	if (statesNode.getType() != ConfigNodeType::Undefined) {
+		result["states"] = std::move(statesNode);
+	}
 	if (!isNetwork) {
 		result["curId"] = curId;
 	}
