@@ -94,7 +94,7 @@ namespace Halley {
 
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
-		void setNetworkFactory(bool network);
+		void setNetworkFactory(bool network, const std::bitset<maxComponents>& ignoredComponentIds = {});
 		void setCanPreloadAssets(bool preload);
 
 	private:
@@ -102,6 +102,7 @@ namespace Halley {
 		Resources& resources;
 		bool networkFactory = false;
 		bool preloadAssets = true;
+		std::unique_ptr<std::bitset<maxComponents>> ignoredComponentIds;
 
 		void updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const IEntityConcreteData& data, const EntityFactoryContext& context);

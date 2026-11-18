@@ -556,9 +556,14 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeStandaloneContext()
 	return std::make_shared<EntityFactoryContext>(world, resources, mask, true);
 }
 
-void EntityFactory::setNetworkFactory(bool network)
+void EntityFactory::setNetworkFactory(bool network, const std::bitset<maxComponents>& ignoredComponentIds)
 {
 	networkFactory = network;
+	if (ignoredComponentIds.any()) {
+		this->ignoredComponentIds = std::make_unique<std::bitset<maxComponents>>(ignoredComponentIds);
+	} else {
+		this->ignoredComponentIds = {};
+	}
 }
 
 void EntityFactory::setCanPreloadAssets(bool preload)
@@ -656,15 +661,21 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 	} else {
 		// Store the existing ids
 		Vector<int> existingComps;
+		Vector<std::string_view> keepComps;
 		for (const auto& id: entity.getComponentIds()) {
-			existingComps.push_back(id);
+			if (ignoredComponentIds && ignoredComponentIds->test(id)) {
+				// Don't reset/remove ignored components (needed to avoid network from wiping them)
+				keepComps += reflection.getComponentReflector(id).getName();
+			} else {
+				existingComps.push_back(id);
+			}
 		}
 
 		// Populate
 		for (size_t i = 0; i < nComponents; ++i) {
 			ConfigNode buffer;
 			const auto& [componentName, componentData] = data.getComponentApplied(i, buffer);
-			if (componentData) {
+			if (componentData && !keepComps.contains(componentName)) {
 				const auto result = reflection.createComponent(context, componentName, entity, *componentData);
 				if (!result.created) {
 					if (auto iter = std::find(existingComps.begin(), existingComps.end(), result.componentId); iter != existingComps.end()) {

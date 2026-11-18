@@ -81,12 +81,12 @@ void EntityNetworkSession::close()
 
 void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 {
-	factory = std::make_shared<EntityFactory>(world, resources);
-	factory->setNetworkFactory(true);
-	messageBridge = bridge;
-
 	// This needs a world to update
 	deltaOptions.makeIgnoreComponentIds(world.getReflection());
+
+	factory = std::make_shared<EntityFactory>(world, resources);
+	factory->setNetworkFactory(true, deltaOptions.ignoreComponentIds);
+	messageBridge = bridge;
 
 	// Clear queue
 	if (!queuedPackets.empty()) {
