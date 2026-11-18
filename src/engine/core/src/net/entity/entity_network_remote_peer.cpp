@@ -944,6 +944,21 @@ void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityR
 		}
 	}
 
+	// Detach children if they have their own inbound entity, instead of letting them being deleted
+	// Their lifecycle is managed by the network manually
+	Vector<EntityRef> toDetach;
+	for (const auto& child : entity.getChildren()) {
+		if (delta.getChildrenRemoved().contains(child.getInstanceUUID())) {
+			const auto iter = std_ex::find_if(inboundEntities, [&](const auto& kv) { return kv.second.worldId == child.getEntityId(); });
+			if (iter != inboundEntities.end()) {
+				toDetach.push_back(child);
+			}
+		}
+	}
+	for (auto& child : toDetach) {
+		child.setParent();
+	}
+
 	for (const auto& [uuid, childDelta] : delta.getChildrenChanged()) {
 		for (const auto& child : entity.getChildren()) {
 			if (child.getInstanceUUID() == uuid || child.getPrefabUUID() == uuid) {
