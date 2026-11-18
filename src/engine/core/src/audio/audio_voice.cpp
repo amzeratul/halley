@@ -242,7 +242,8 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	}
 
 	// Find the target gain
-	const float gain = paused ? 0.0f : (baseGain * userGain * fader.getCurrentValue() * busGain);
+	const float unpausedGain = baseGain * userGain * fader.getCurrentValue() * busGain;
+	const float gain = paused ? 0.0f : unpausedGain;
 	lastGain = gain;
 
 	// Mix
@@ -267,7 +268,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	
 	if (!hasMixOutput && !suspended && !resumingFromSuspension) {
 		if (source->isLooping()) {
-			if (gain > 0 && silentTime > 2.5f) { // "gain" being over 0 means that hasMixOutput is only false because of distance attenuation
+			if (unpausedGain > 0 && silentTime > 2.5f) { // "unpausedGain" being over 0 means that hasMixOutput is only false because of distance attenuation
 				suspend();
 			}
 		} else {
