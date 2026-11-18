@@ -958,10 +958,16 @@ void EntityNetworkRemotePeer::destroyRemoteEntity(const InboundEntity& inboundEn
 {
 	auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId);
 	if (entity.isValid()) {
-		bool shouldBeDeleted = !inboundEntity.appliedOnExistingEntity // don't delete world entities (loaded from chunk)
-			&& !inboundEntity.forChangedAuthorityOnly; // local peer owns this, let nobody tell us what to delete
+		// If nested under another networked entity, it owns my lifecycle
+		const bool nested = entity.hasParent() && entity.getParent().tryGetEntityIdWithComponentInAncestors<NetworkComponent>().isValid();
 
-		entity.setFromNetwork(false);
+		bool shouldBeDeleted = !inboundEntity.appliedOnExistingEntity // don't delete world entities (loaded from chunk)
+			&& !inboundEntity.forChangedAuthorityOnly // local peer owns this, let nobody tell us what to delete
+			&& !nested;
+
+		if (!nested) {
+			entity.setFromNetwork(false);
+		}
 
 		if (shouldBeDeleted) {
 			parentSession->getWorld().destroyEntity(entity);
