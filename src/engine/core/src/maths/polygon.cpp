@@ -1183,11 +1183,18 @@ std::optional<Vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other
 		}
 
 		Vector<Vector2f> curOutput;
+		constexpr float threshold = 0.001f;
+		auto addOutput = [&] (Vector2f p) {
+			// Ignore points which are too close together
+			if (curOutput.empty() || (curOutput.back() - p).squaredLength() >= threshold * threshold) {
+				curOutput += p;
+			}
+		};
 
 		for (size_t idxA = startPoint.value(); idxA != startPoint.value() || curOutput.empty(); idxA = (idxA + 1) % polyA.size()) {
 			auto& curVert = polyA[idxA];
 			curVert.processed = true;
-			curOutput.push_back(curVert.pos);
+			addOutput(curVert.pos);
 
 			const bool isCrossingPoint = curVert.crossIdx != -1; // TODO: also check for special case
 
@@ -1196,7 +1203,7 @@ std::optional<Vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other
 				while (true) {
 					idxB = (idxB + polyB.size() + nextOffset) % polyB.size(); // Increment with bi-directional unsigned wraparound
 					auto& curOtherVert = polyB[idxB];
-					curOutput.push_back(curOtherVert.pos);
+					addOutput(curOtherVert.pos);
 
 					const bool isOtherCrossingPoint = curOtherVert.crossIdx != -1; // TODO: also check for special case
 					if (isOtherCrossingPoint) {
@@ -1207,10 +1214,21 @@ std::optional<Vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other
 			}
 		}
 
+		// Remove last point if it's too close to start point
+		while (!curOutput.empty() && (curOutput.front() - curOutput.back()).squaredLength() < threshold * threshold) {
+			curOutput.pop_back();
+		}
+		if (curOutput.size() < 3) {
+			continue;
+		}
+
 		// Output polygons
 		auto poly = Polygon(std::move(curOutput));
 		if (forceConvexOutput) {
-			poly.splitIntoConvex(result, allowSimplify);
+			bool success = poly.splitIntoConvex(result, allowSimplify);
+			if (!success) {
+				Logger::logError("Failed to split " + poly.toString() + " with allowSimplify = " + allowSimplify);
+			}
 		} else {
 			result.emplace_back(std::move(poly));
 		}
