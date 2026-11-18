@@ -1185,7 +1185,9 @@ std::pair<bool, std::optional<EntityNetworkId>> EntityNetworkRemotePeer::prepare
 				outbound.forChildEntityTemporaryOnly = true;
 			} else {
 				if (inboundIter->first != assignNetworkId.value()) {
-					Logger::logError("Inbound entity exists, but assigned network ID does not match");
+					Logger::logError(String("Inbound entity exists, but assigned network ID does not match.")
+						+ " Entity: " + inboundIter->second.debugName + " (worldId: " + inboundIter->second.worldId + ")"
+						+ " Inbound: " + inboundIter->first + ", assigned: " + assignNetworkId.value());
 				}
 			}
 
