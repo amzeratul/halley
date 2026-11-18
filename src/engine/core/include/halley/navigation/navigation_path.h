@@ -32,6 +32,9 @@ namespace Halley {
 		bool operator!=(const NavigationPath& other) const;
 
 		float getLength(float anisotropy = 1.0f, size_t startPoint = 0) const;
+		void trimStartAbsolute(float distance, float anisotropy = 1.0f);
+		void trimStartRelative(float relDistance, float anisotropy = 1.0f);
+
 		String toString() const;
 
 		static NavigationPath merge(gsl::span<const NavigationPath> paths);

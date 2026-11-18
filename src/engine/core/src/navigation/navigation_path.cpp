@@ -43,9 +43,40 @@ float NavigationPath::getLength(float anisotropy, size_t startPoint) const
 	float len = 0;
 	const auto ps = path.span();
 	for (size_t i = startPoint + 1; i < ps.size(); ++i) {
-		len += ((ps[i].pos.pos - ps[i - 1].pos.pos) * Vector2f(1, anisotropy)).length();
+		len += (ps[i].pos.pos - ps[i - 1].pos.pos).scaleY(anisotropy).length();
 	}
 	return len;
+}
+
+void NavigationPath::trimStartAbsolute(float distance, float anisotropy)
+{
+	float remaining = distance;
+
+	const auto ps = path.span();
+	for (size_t i = 1; i < ps.size(); ++i) {
+		auto& a = ps[i - 1];
+		const auto& b = ps[i];
+		const float curLen = (b.pos.pos - a.pos.pos).scaleY(anisotropy).length();
+
+		if (remaining < curLen) {
+			/*
+			// This might generate a point out of navmesh, so commented out for now
+			if (a.navmeshId == b.navmeshId) {
+				const float t = remaining / curLen;
+				a.pos.pos = lerp(a.pos.pos, b.pos.pos, t);
+			}
+			*/
+			path.erase(path.begin(), path.begin() + (i - 1)); // Delete every point before this segment
+			return;
+		}
+
+		remaining -= curLen;
+	}
+}
+
+void NavigationPath::trimStartRelative(float relDistance, float anisotropy)
+{
+	trimStartAbsolute(relDistance * getLength(anisotropy), anisotropy);
 }
 
 String NavigationPath::toString() const
