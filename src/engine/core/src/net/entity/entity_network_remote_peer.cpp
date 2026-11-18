@@ -948,7 +948,9 @@ void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityR
 	for (const auto& childData : delta.getChildrenAdded()) {
 		if (auto existingEntity = world.findEntity(childData.getInstanceUUID())) {
 			if (existingEntity->isValid() && existingEntity->getParent() != entity) {
+				existingEntity->setModifiedThisFrame(true, true);
 				existingEntity->setParent(entity);
+				existingEntity->setModifiedThisFrame(true, true);
 			}
 		}
 	}
