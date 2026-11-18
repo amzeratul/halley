@@ -158,6 +158,12 @@ SendEntitiesStats EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId
 			continue;
 		}
 
+		// Can't destroy while another peer has authority
+		if (std_ex::find_if(tempInboundEntities, [&](const auto& kv) { return kv.second.worldId == e.first; }) != tempInboundEntities.end()) {
+			e.second.alive = true;
+			continue;
+		}
+
 		sendDestroyEntity(e.second, e.first);
 		++stats.nDestroyed;
 	}
@@ -839,6 +845,9 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 	remote.worldId = entity.getEntityId();
 	remote.appliedOnExistingEntity = appliedOnExistingEntity;
 	remote.debugName = entity.getName() + "|" + entity.getPrefabAssetId();
+	if (appliedOnExistingEntity) {
+		std_ex::erase_if_value(inboundEntities, [&](const InboundEntity& e) { return e.worldId == remote.worldId; });
+	}
 	inboundEntities[id] = std::move(remote);
 
 	auto& interpolatorSet = entity.setupNetwork(peerId);
@@ -944,13 +953,13 @@ void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityR
 		}
 	}
 
-	// Detach children if they have their own inbound entity, instead of letting them being deleted
+	// Detach children if they have their own inbound or outbound entity, instead of letting them being deleted
 	// Their lifecycle is managed by the network manually
 	Vector<EntityRef> toDetach;
 	for (const auto& child : entity.getChildren()) {
 		if (delta.getChildrenRemoved().contains(child.getInstanceUUID())) {
 			const auto iter = std_ex::find_if(inboundEntities, [&](const auto& kv) { return kv.second.worldId == child.getEntityId(); });
-			if (iter != inboundEntities.end()) {
+			if (iter != inboundEntities.end() || outboundEntities.contains(child.getEntityId())) {
 				toDetach.push_back(child);
 			}
 		}
