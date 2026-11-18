@@ -59,13 +59,11 @@ void NavigationPath::trimStartAbsolute(float distance, float anisotropy)
 		const float curLen = (b.pos.pos - a.pos.pos).scaleY(anisotropy).length();
 
 		if (remaining < curLen) {
-			/*
 			// This might generate a point out of navmesh, so commented out for now
 			if (a.navmeshId == b.navmeshId) {
 				const float t = remaining / curLen;
 				a.pos.pos = lerp(a.pos.pos, b.pos.pos, t);
 			}
-			*/
 			path.erase(path.begin(), path.begin() + (i - 1)); // Delete every point before this segment
 			return;
 		}
