@@ -199,6 +199,7 @@ namespace Halley {
     	void assignRemoteEntity(EntityNetworkId id, EntityRef entity);
         void updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg);
     	void updateRemoteEntityCheckChildrenAdded(const EntityRef& entity, const EntityDataDelta& delta) const;
+    	void stripLocalAuthorityComponents(const EntityRef& entity, EntityDataDelta& delta, bool hasLocalAuthority, NetworkSession::PeerId myPeerId) const;
         void destroyRemoteEntity(const InboundEntity& inboundEntity);
 
         void trySpawningPendingEntities();

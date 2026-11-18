@@ -75,11 +75,13 @@ namespace Halley {
 
 		Vector<std::pair<String, ConfigNode>>& getComponentsChanged() { return componentsChanged; }
 		const Vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
+		Vector<String>& getComponentsRemoved() { return componentsRemoved; }
 		const Vector<String>& getComponentsRemoved() const { return componentsRemoved; }
 		ConfigNode* tryGetComponentChanged(const String& compName);
 		const ConfigNode* tryGetComponentChanged(const String& compName) const;
-		
+
 		const Vector<EntityData>& getChildrenAdded() const { return childrenAdded; }
+		Vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() { return childrenChanged; }
 		const Vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() const { return childrenChanged; }
 		const Vector<UUID>& getChildrenRemoved() const { return childrenRemoved; }
 

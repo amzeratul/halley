@@ -910,13 +910,16 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
     		return;
     	}
 
-        const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parentSession->getByteSerializationOptions());
+        auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parentSession->getByteSerializationOptions());
 
         auto retriever = DataInterpolatorSetRetriever(entity, false);
         //Logger::logDev("Receive Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
         //Logger::logDev("Updating entity " + entity.getName() + ":\n" + delta.toYAML());
 
     	updateRemoteEntityCheckChildrenAdded(entity, delta);
+
+    	const auto myPeerId = parentSession->getSession().getMyPeerId().value_or(0);
+    	stripLocalAuthorityComponents(entity, delta, entity.getAuthorityPeerId() == myPeerId, myPeerId);
 
         try {
             parentSession->getFactory().updateEntity(entity, delta,
@@ -974,6 +977,26 @@ void EntityNetworkRemotePeer::updateRemoteEntityCheckChildrenAdded(const EntityR
 		for (const auto& child : entity.getChildren()) {
 			if (child.getInstanceUUID() == uuid || child.getPrefabUUID() == uuid) {
 				updateRemoteEntityCheckChildrenAdded(child, childDelta);
+				break;
+			}
+		}
+	}
+}
+
+void EntityNetworkRemotePeer::stripLocalAuthorityComponents(const EntityRef& entity, EntityDataDelta& delta, bool hasLocalAuthority, NetworkSession::PeerId myPeerId) const
+{
+	// Don't change any children that I have local authority for, otherwise it'll overwrite that data
+	if (hasLocalAuthority) {
+		delta.getComponentsChanged().clear();
+		delta.getComponentsRemoved().clear();
+	}
+
+	for (auto& [uuid, childDelta] : delta.getChildrenChanged()) {
+		for (const auto& child : entity.getChildren()) {
+			if (child.getInstanceUUID() == uuid || child.getPrefabUUID() == uuid) {
+				const auto* networkComponent = child.tryGetComponent<NetworkComponent>();
+				const bool childAuthority = hasLocalAuthority || (networkComponent && networkComponent->authorityId == myPeerId);
+				stripLocalAuthorityComponents(child, childDelta, childAuthority, myPeerId);
 				break;
 			}
 		}
