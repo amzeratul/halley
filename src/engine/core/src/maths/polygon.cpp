@@ -1222,15 +1222,43 @@ std::optional<Vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other
 			continue;
 		}
 
-		// Output polygons
-		auto poly = Polygon(std::move(curOutput));
-		if (forceConvexOutput) {
-			bool success = poly.splitIntoConvex(result, allowSimplify);
-			if (!success) {
-				Logger::logError("Failed to split " + poly.toString() + " with allowSimplify = " + allowSimplify);
+		// If a crossing point got duplicated, this might now be non-simple polygon (e.g. a figure-8)
+		Vector<Vector<Vector2f>> loops;
+		{
+			Vector<Vector2f> tmpPath;
+			for (const auto& p: curOutput) {
+				const auto iter = std::find_if(tmpPath.begin(), tmpPath.end(), [&] (const Vector2f& o) {
+					return (o - p).squaredLength() < threshold * threshold;
+				});
+				if (iter != tmpPath.end()) {
+					loops += Vector<Vector2f>(iter, tmpPath.end());
+					tmpPath.erase(iter + 1, tmpPath.end());
+				} else {
+					tmpPath.push_back(p);
+				}
 			}
-		} else {
-			result.emplace_back(std::move(poly));
+			loops.emplace_back(std::move(tmpPath));
+		}
+
+		// Output polygons
+		for (auto& loop: loops) {
+			if (loop.size() < 3) {
+				continue;
+			}
+
+			auto poly = Polygon(std::move(loop));
+			if (!poly.isValid() || poly.isClockwise() != clockwise) {
+				continue;
+			}
+
+			if (forceConvexOutput) {
+				bool success = poly.splitIntoConvex(result, allowSimplify);
+				if (!success) {
+					Logger::logError("Failed to split " + poly.toString() + " with allowSimplify = " + allowSimplify);
+				}
+			} else {
+				result.emplace_back(std::move(poly));
+			}
 		}
 	}
 
