@@ -1059,6 +1059,10 @@ void Painter::updateClip()
 	Rect4i finalRect = viewPort;
 	if (pendingClip) {
 		finalRect = (pendingClip.value() + viewPort.getTopLeft()).intersection(viewPort);
+
+		const auto p1 = Vector2i::min(Vector2i::max(finalRect.getTopLeft(), viewPort.getTopLeft()), viewPort.getBottomRight());
+		const auto p2 = Vector2i::min(Vector2i::max(finalRect.getBottomRight(), viewPort.getTopLeft()), viewPort.getBottomRight());
+		finalRect = Rect4i(p1, p2);
 	}
 	const Rect4i targetClip = getRectangleForActiveRenderTarget(finalRect);
 	const bool enableClip = finalRect != activeRenderTarget->getViewPort();
