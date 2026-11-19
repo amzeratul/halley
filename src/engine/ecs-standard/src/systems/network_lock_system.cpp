@@ -10,11 +10,10 @@ public:
 
 class NetworkLock : public INetworkLock {
 public:
-	NetworkLock(INetworkLockSystem& parent, EntityId playerId, EntityId targetId, NetworkLockType type)
+	NetworkLock(INetworkLockSystem& parent, EntityId playerId, EntityId targetId)
 		: parent(parent)
 		, playerId(playerId)
 		, targetId(targetId)
-		, type(type)
 	{}
 
 	~NetworkLock() override
@@ -26,7 +25,6 @@ private:
 	INetworkLockSystem& parent;
 	EntityId playerId;
 	EntityId targetId;
-	NetworkLockType type;
 };
 
 class NetworkLockSystem final : public NetworkLockSystemBase<NetworkLockSystem>, INetworkLockSystemInterface, INetworkLockSystem, NetworkSession::IListener
@@ -74,6 +72,8 @@ public:
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId, uint8_t myPeerId) const
 	{
+		targetId = resolveLockTarget(targetId);
+
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
 			if (const NetworkFamily* locker = networkFamily.tryFind(iter->second.playerId)) {
 				const auto lockType = iter->second.type;
@@ -140,12 +140,12 @@ public:
 				// message sent to the host is about to be delivered still...
 				if (lock.refCount > 0) {
 					// Locked by some local entity
-					if (lock.playerId == playerId && lock.type == lockType) {
+					if (lock.playerId == playerId && lockType <= lock.type) {
 						// Already locked by this player.
 						// Increment lock count!
 						lock.refCount++;
 
-						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId, lockType));
+						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
 					} else {
 						// Locked by someone else
 						return Future<NetworkLockHandle>::makeImmediate({});
@@ -166,7 +166,7 @@ public:
 				l.playerId = playerId;
 				l.refCount++;
                 l.type = lockType;
-				return std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId, lockType);
+				return std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId);
 			}
 			return {};
 		});
@@ -174,6 +174,7 @@ public:
 
 	void lockUpdate(EntityId targetId, bool destroyOnUnlock) override
 	{
+		targetId = resolveLockTarget(targetId);
 		const auto iter = myLocks.find(targetId);
 		if (iter != myLocks.end()) {
 			iter->second.destroyOnUnlock = destroyOnUnlock;
@@ -183,6 +184,7 @@ public:
 	bool lockAddRef(EntityId targetId) override
 	{
 		// Adding a lock reference assumes that there is a lock already. Just increase the ref count.
+		targetId = resolveLockTarget(targetId);
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
 			HalleyAssertDev(iter->second.refCount > 0); // Assumes that there is a lock already.
 			iter->second.refCount++;
@@ -195,6 +197,7 @@ public:
 	bool lockDecRef(EntityId targetId) override
 	{
 		// Decrease ref count, and release lock if there are no references left.
+		targetId = resolveLockTarget(targetId);
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
 			if (auto& lock = iter->second; lock.refCount > 1) {
 				lock.refCount--;
@@ -229,7 +232,15 @@ public:
 
 	ConfigNode onMessageReceived(NetworkEntityLockSystemMessage msg) override
 	{
-		const auto [success, networkId] = doEntityLockAction(msg.target, msg.peerId, msg.lock, static_cast<NetworkLockType>(msg.lockType), msg.destroyOnUnlock);
+		if (msg.lockType > static_cast<uint8_t>(NetworkLockType::UniqueWithAuthority)) {
+			Logger::logError("Invalid lock type");
+			ConfigNode::MapType result;
+			result["success"] = false;
+			return result;
+		}
+
+		const auto lockType = static_cast<NetworkLockType>(msg.lockType);
+		const auto [success, networkId] = doEntityLockAction(msg.target, msg.peerId, msg.lock, lockType, msg.destroyOnUnlock);
 
 		ConfigNode::MapType result;
 		result["success"] = success;
@@ -459,7 +470,7 @@ private:
 			auto& existingLock = locks[i];
 			if (existingLock.peerId == peerId) {
 				if (existingLock.type != lockType) {
-					Logger::logWarning("Attempting to unlock lock with different type from acquired");
+					Logger::logError("Attempting to unlock lock with different type from acquired");
 				}
 
 				// Lock exists, locked by this peer
@@ -474,7 +485,7 @@ private:
                     }
                 }
 				locks.erase(locks.begin() + i);
-				if (destroyOnUnlock) {
+				if (locks.empty() && destroyOnUnlock) {
 					getWorld().destroyEntity(targetId);
 				}
 
@@ -560,6 +571,12 @@ private:
 
 		return result;
     }
+
+	[[nodiscard]] EntityId resolveLockTarget(EntityId id) const
+	{
+	    const auto* root = tryFindNetworkRoot(id);
+	    return root ? root->entityId : id;
+	}
 
 	[[nodiscard]] const NetworkFamily* tryFindNetworkRoot(EntityId entityId) const
 	{

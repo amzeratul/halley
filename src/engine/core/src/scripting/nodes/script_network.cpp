@@ -229,6 +229,12 @@ IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Tim
 }
 
 
+Vector<IGraphNodeType::SettingType> ScriptLockAvailable::getSettingTypes() const
+{
+	return {
+		SettingType{ "shared", "bool", Vector<String>{"false"} }
+	};
+}
 
 String ScriptLockAvailable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
@@ -254,8 +260,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptLockAvailable::getPinConfiguratio
 
 std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
+	const auto shared = node.getSettings()["shared"].asBool(false);
 	ColourStringBuilder str;
-	str.append("Is lock for ");
+	str.append("Is ");
+	str.append(shared ? "shared lock" : "unique lock", settingColour);
+	str.append(" for ");
 	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(" available or acquired by ");
 	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
@@ -274,14 +283,18 @@ String ScriptLockAvailable::getPinDescription(const BaseGraphNode& node, PinType
 
 ConfigNode ScriptLockAvailable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
+	const auto shared = node.getSettings()["shared"].asBool(false);
+	const auto lockType = shared ? NetworkLockType::Shared : NetworkLockType::Unique;
+
 	const auto player = readEntityId(environment, node, 0);
 	const auto toLock = readEntityId(environment, node, 1);
 
 	const auto* lockInterface = environment.getWorld().tryGetInterface<INetworkLockSystemInterface>();
 	if (pinN == 2) {
-		return ConfigNode(lockInterface ? lockInterface->isLockedByOrAvailableTo(player, toLock) : true);
+		return ConfigNode(lockInterface ? lockInterface->isLockedByOrAvailableTo(player, toLock, lockType) : true);
 	} else if (pinN == 3) {
-		return ConfigNode((lockInterface ? lockInterface->getLockStatus(toLock) : INetworkLockSystemInterface::LockStatus::Unlocked) == INetworkLockSystemInterface::LockStatus::Unlocked);
+		const auto status = lockInterface ? lockInterface->getLockStatus(toLock) : INetworkLockSystemInterface::LockStatus::Unlocked;
+		return ConfigNode(status == INetworkLockSystemInterface::LockStatus::Unlocked || (shared && (status == INetworkLockSystemInterface::LockStatus::SharedAcquiredByMe || status == INetworkLockSystemInterface::LockStatus::SharedAcquiredByOther)));
 	}
 
 	return {};
@@ -304,6 +317,13 @@ ConfigNode ScriptLockAvailableGateData::toConfigNode(const EntitySerializationCo
 		result["flowing"] = *flowing;
 	}
 	return result;
+}
+
+Vector<IGraphNodeType::SettingType> ScriptLockAvailableGate::getSettingTypes() const
+{
+	return {
+		SettingType{ "shared", "bool", Vector<String>{"false"} }
+	};
 }
 
 String ScriptLockAvailableGate::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -335,8 +355,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptLockAvailableGate::getPinConfigur
 
 std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
+	const auto shared = node.getSettings()["shared"].asBool(false);
 	ColourStringBuilder str;
-	str.append("Flow based on lock for ");
+	str.append("Flow based on ");
+	str.append(shared ? "shared lock" : "unique lock", settingColour);
+	str.append(" for ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" being available or acquired by ");
 	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
@@ -345,7 +368,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescri
 
 IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockAvailableGateData& data) const
 {
-	const auto shouldFlow = environment.getInterface<INetworkLockSystemInterface>().isLockedByOrAvailableTo(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+	const auto shared = node.getSettings()["shared"].asBool(false);
+	const auto shouldFlow = environment.getInterface<INetworkLockSystemInterface>().isLockedByOrAvailableTo(readEntityId(environment, node, 1), readEntityId(environment, node, 2), shared ? NetworkLockType::Shared : NetworkLockType::Unique);
 
 	if (shouldFlow != data.flowing) {
 		data.flowing = shouldFlow;
