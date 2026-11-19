@@ -9,6 +9,7 @@
 #endif
 #include "halley/support/exception.h"
 
+#include "halley/net/utils/network_lock.h"
 
 class NetworkComponent final : public Halley::Component {
 public:
@@ -26,7 +27,7 @@ public:
 	uint32_t lastRevision{ 0 };
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
-	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
+	Halley::Vector<Halley::NetworkLockInfo> locks{};
 
 	NetworkComponent() {
 	}
@@ -44,7 +45,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::serialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::serialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::serialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
-		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::Vector<Halley::NetworkLockInfo>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		return _node;
 	}
 
@@ -53,7 +54,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(authorityId)>::deserialize(authorityId, std::optional<uint8_t>{}, _context, _node, componentName, "authorityId", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(alwaysSend)>::deserialize(alwaysSend, bool{ false }, _context, _node, componentName, "alwaysSend", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(requiresEntityFrameModified)>::deserialize(requiresEntityFrameModified, bool{ false }, _context, _node, componentName, "requiresEntityFrameModified", makeMask(Type::Prefab));
-		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<Halley::NetworkLockInfo>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 	}
 
 	void hash(const Halley::EntitySerializationContext& _context, Halley::Hash::Hasher& _hasher) const {

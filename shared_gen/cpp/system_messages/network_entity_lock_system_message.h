@@ -1,4 +1,4 @@
-// Halley codegen version 140
+// Halley codegen version 155
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -14,17 +14,17 @@ public:
 
 	Halley::EntityId target{};
 	bool lock{};
-	bool withAuthority{};
+	uint8_t lockType{};
 	bool destroyOnUnlock{};
 	uint8_t peerId{};
 
 	NetworkEntityLockSystemMessage() {
 	}
 
-	NetworkEntityLockSystemMessage(Halley::EntityId target, bool lock, bool withAuthority, bool destroyOnUnlock, uint8_t peerId)
+	NetworkEntityLockSystemMessage(Halley::EntityId target, bool lock, uint8_t lockType, bool destroyOnUnlock, uint8_t peerId)
 		: target(std::move(target))
 		, lock(std::move(lock))
-		, withAuthority(std::move(withAuthority))
+		, lockType(std::move(lockType))
 		, destroyOnUnlock(std::move(destroyOnUnlock))
 		, peerId(std::move(peerId))
 	{
@@ -45,7 +45,7 @@ public:
 	void serialize(Halley::Serializer& s) const override final {
 		s << target;
 		s << lock;
-		s << withAuthority;
+		s << lockType;
 		s << destroyOnUnlock;
 		s << peerId;
 	}
@@ -53,7 +53,7 @@ public:
 	void deserialize(Halley::Deserializer& s) override final {
 		s >> target;
 		s >> lock;
-		s >> withAuthority;
+		s >> lockType;
 		s >> destroyOnUnlock;
 		s >> peerId;
 	}
@@ -62,7 +62,7 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(target)>::deserialize(target, Halley::EntityId{}, context, node, "", "target", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(lock)>::deserialize(lock, bool{}, context, node, "", "lock", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
-		Halley::EntityConfigNodeSerializer<decltype(withAuthority)>::deserialize(withAuthority, bool{}, context, node, "", "withAuthority", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(lockType)>::deserialize(lockType, uint8_t{}, context, node, "", "lockType", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(destroyOnUnlock)>::deserialize(destroyOnUnlock, bool{}, context, node, "", "destroyOnUnlock", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(peerId)>::deserialize(peerId, uint8_t{}, context, node, "", "peerId", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 	}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/net/utils/network_lock.h"
 #include "halley/api/audio_api.h"
 #include "halley/text/halleystring.h"
 #include "halley/concurrency/future.h"
@@ -34,14 +35,16 @@ namespace Halley {
         enum class LockStatus {
 	        Unlocked,
             AcquiredByMe,
-            AcquiredByOther
+            AcquiredByOther,
+			SharedAcquiredByMe,
+			SharedAcquiredByOther,
         };
 
     	virtual ~INetworkLockSystemInterface() override = default;
 
         virtual LockStatus getLockStatus(EntityId targetId) const = 0;
-        virtual bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const = 0;
-        virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) = 0;
+        virtual bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId, NetworkLockType lockType = NetworkLockType::Unique) const = 0;
+        virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, NetworkLockType lockType = NetworkLockType::Unique) = 0;
     	virtual void lockUpdate(EntityId targetId, bool destroyOnUnlock) = 0;
 
     	virtual bool lockAddRef(EntityId targetId) = 0;

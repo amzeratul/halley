@@ -139,7 +139,8 @@ ConfigNode ScriptLockData::toConfigNode(const EntitySerializationContext& contex
 Vector<IGraphNodeType::SettingType> ScriptLock::getSettingTypes() const
 {
 	return {
-		SettingType{ "acquireAuthority", "bool", Vector<String>{"false"} }
+		SettingType{ "acquireAuthority", "bool", Vector<String>{"false"} },
+		SettingType{ "shared", "bool", Vector<String>{"false"} }
 	};
 }
 
@@ -190,12 +191,14 @@ gsl::span<const IGraphNodeType::PinType> ScriptLock::getPinConfiguration(const B
 
 std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
+	const bool acquireAuthority = node.getSettings()["acquireAuthority"].asBool(false);
+	const bool shared = node.getSettings()["shared"].asBool(false);
+	const auto type = acquireAuthority ? NetworkLockType::UniqueWithAuthority : (shared ? NetworkLockType::Shared : NetworkLockType::Unique);
+
 	ColourStringBuilder str;
 	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
-	str.append(" tries to acquire network lock");
-	if (node.getSettings()["acquireAuthority"].asBool(false)) {
-		str.append(" and authority", settingColour);
-	}
+	str.append(" tries to acquire network ");
+	str.append(type == NetworkLockType::UniqueWithAuthority ? "authority unique lock" : (type == NetworkLockType::Unique ? "unique lock" : "shared lock"), settingColour);
 	str.append(" over entity ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
@@ -208,8 +211,11 @@ IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Tim
 		if (!target.isValid()) {
 			return Result(ScriptNodeExecutionState::Done, 0, 1);
 		}
-		bool acquireAuthority = node.getSettings()["acquireAuthority"].asBool(false);
-		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), target, acquireAuthority);
+		const bool acquireAuthority = node.getSettings()["acquireAuthority"].asBool(false);
+		const bool shared = node.getSettings()["shared"].asBool(false);
+		const auto type = acquireAuthority ? NetworkLockType::UniqueWithAuthority : (shared ? NetworkLockType::Shared : NetworkLockType::Unique);
+
+		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), target, type);
 	}
 
 	if (data.requestPending.hasValue()) {

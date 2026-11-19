@@ -10,10 +10,11 @@ public:
 
 class NetworkLock : public INetworkLock {
 public:
-	NetworkLock(INetworkLockSystem& parent, EntityId playerId, EntityId targetId)
+	NetworkLock(INetworkLockSystem& parent, EntityId playerId, EntityId targetId, NetworkLockType type)
 		: parent(parent)
 		, playerId(playerId)
 		, targetId(targetId)
+		, type(type)
 	{}
 
 	~NetworkLock() override
@@ -25,6 +26,7 @@ private:
 	INetworkLockSystem& parent;
 	EntityId playerId;
 	EntityId targetId;
+	NetworkLockType type;
 };
 
 class NetworkLockSystem final : public NetworkLockSystemBase<NetworkLockSystem>, INetworkLockSystemInterface, INetworkLockSystem, NetworkSession::IListener
@@ -67,12 +69,16 @@ public:
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId) const override
 	{
-		const auto myPeerId = getMyPeerId();
+		return getLockStatus(targetId, getMyPeerId());
+	}
 
+	[[nodiscard]] LockStatus getLockStatus(EntityId targetId, uint8_t myPeerId) const
+	{
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			if (const NetworkFamily* playerEntity = networkFamily.tryFind(iter->second.playerId)) {
-				const auto playerPeer = playerEntity->network.ownerId.value_or(0);
-				return playerPeer == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+			if (const NetworkFamily* locker = networkFamily.tryFind(iter->second.playerId)) {
+				const auto lockType = iter->second.type;
+				const auto lockerPeer = locker->network.ownerId.value_or(0);
+				return lockerPeer == myPeerId ? (lockType == NetworkLockType::Shared ? LockStatus::SharedAcquiredByMe : LockStatus::AcquiredByMe) : (lockType == NetworkLockType::Shared ? LockStatus::SharedAcquiredByOther : LockStatus::AcquiredByOther);
 			}
 			Logger::logWarning("Couldn't find player entity " + toString(iter->second.playerId) + " to check lock status", true);
 			return LockStatus::AcquiredByOther;
@@ -82,13 +88,18 @@ public:
 			if (e->network.authorityId) {
 				return e->network.authorityId == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
 			} else {
-				const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) {
-					return lock.first == targetId;
-				});
-
-				if (iter != e->network.locks.end()) {
-					return iter->second == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+				const auto& locks = e->network.locks;
+				if (locks.empty()) {
+					return LockStatus::Unlocked;
 				}
+				for (auto& lock: locks) {
+					if (lock.peerId == myPeerId) {
+						return lock.type == NetworkLockType::Shared ? LockStatus::SharedAcquiredByMe : LockStatus::AcquiredByMe;
+					} else if (lock.type == NetworkLockType::Unique || lock.type == NetworkLockType::UniqueWithAuthority) {
+						return LockStatus::AcquiredByOther;
+					}
+				}
+				return LockStatus::SharedAcquiredByOther;
 			}
 		} else {
 			if (auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
@@ -101,42 +112,19 @@ public:
 		return LockStatus::Unlocked;
 	}
 
-	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const override
+	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId, NetworkLockType lockType) const override
 	{
-		const auto myPeerId = getMyPeerId();
-
-		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
-				const auto playerPeer = playerEntity->network.ownerId.value_or(0);
-				return playerPeer == myPeerId;
-			}
-			Logger::logWarning("Couldn't find player entity to check lock availability");
-			return false;
+		uint8_t peerId = 0;
+		if (const NetworkFamily* locker = networkFamily.tryFind(playerId)) {
+			peerId = locker->network.ownerId.value_or(0);
+		} else {
+			peerId = getMyPeerId();
 		}
-
-		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
-			if (e->network.authorityId) {
-				return e->network.authorityId == myPeerId;
-			} else {
-				const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) {
-					return lock.first == targetId;
-				});
-
-				if (iter != e->network.locks.end()) {
-					if (const NetworkFamily* playerEntity = networkFamily.tryFind(playerId)) {
-						const auto playerPeer = playerEntity->network.ownerId.value_or(0);
-						return iter->second == playerPeer;
-					}
-					Logger::logWarning("Couldn't find player entity to check lock availability");
-					return false;
-				}
-			}
-		}
-
-		return true;
+		const auto status = getLockStatus(targetId, peerId);
+		return status == LockStatus::Unlocked || status == LockStatus::AcquiredByMe || (lockType == NetworkLockType::Shared && (status == LockStatus::SharedAcquiredByOther || status == LockStatus::SharedAcquiredByMe));
 	}
 
-	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) override
+	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, NetworkLockType lockType) override
 	{
 		if (const auto target = tryFindNetworkRoot(targetId); target != nullptr) {
 			targetId = target->entityId;
@@ -152,25 +140,12 @@ public:
 				// message sent to the host is about to be delivered still...
 				if (lock.refCount > 0) {
 					// Locked by some local entity
-					if (lock.playerId == playerId) {
+					if (lock.playerId == playerId && lock.type == lockType) {
 						// Already locked by this player.
-						if (!acquireAuthority && lock.withAuthority) {
-							// Tries to obtain a non-authoritive lock, but already has a lock with
-							// authority. This isn't good - reject the attempt.
-							Logger::logError("Tried to acquire lock, for entity already locked with authority");
-							return Future<NetworkLockHandle>::makeImmediate({});
-						}
-
-						if (acquireAuthority && !lock.withAuthority) {
-							// Wants to lock with authority, but already has a lock without. Let's
-							// allow this, but we need to "promote" the lock.
-							lock.withAuthority = true;
-						}
-
 						// Increment lock count!
 						lock.refCount++;
 
-						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
+						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId, lockType));
 					} else {
 						// Locked by someone else
 						return Future<NetworkLockHandle>::makeImmediate({});
@@ -184,14 +159,14 @@ public:
 		}
 
 		// Not locked locally, try to lock
-		return doLockAcquireForMe(targetId, acquireAuthority).then([=, this] (bool success) -> NetworkLockHandle
+		return doLockAcquireForMe(targetId, lockType).then([=, this] (bool success) -> NetworkLockHandle
 		{
 			if (success) {
 				auto& l = myLocks[targetId];
 				l.playerId = playerId;
 				l.refCount++;
-                l.withAuthority = acquireAuthority;
-				return std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId);
+                l.type = lockType;
+				return std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId, lockType);
 			}
 			return {};
 		});
@@ -239,7 +214,7 @@ public:
 				if (lock.playerId == playerId) {
 					lock.refCount--;
 					if (lock.refCount == 0) {
-						doLockReleaseForMe(targetId, lock.withAuthority, lock.destroyOnUnlock);
+						doLockReleaseForMe(targetId, lock.type, lock.destroyOnUnlock);
 					}
 				} else {
 					Logger::logError("Releasing network lock with handle that isn't locking it!");
@@ -254,7 +229,7 @@ public:
 
 	ConfigNode onMessageReceived(NetworkEntityLockSystemMessage msg) override
 	{
-		const auto [success, networkId] = doEntityLock(msg.target, msg.peerId, msg.lock, msg.withAuthority, msg.destroyOnUnlock);
+		const auto [success, networkId] = doEntityLockAction(msg.target, msg.peerId, msg.lock, static_cast<NetworkLockType>(msg.lockType), msg.destroyOnUnlock);
 
 		ConfigNode::MapType result;
 		result["success"] = success;
@@ -275,8 +250,8 @@ private:
 	struct LocalLock {
 		EntityId playerId;
 		int refCount = 0;
-        bool withAuthority = false;
 		bool destroyOnUnlock = false;
+		NetworkLockType type = NetworkLockType::Unique;
 	};
 	HashMap<EntityId, LocalLock> myLocks;
 	ListenerSetToken sessionChangedToken;
@@ -297,15 +272,18 @@ private:
 					}
 				}
 				// Erase any stale locks.
-				std_ex::erase_if_value(e.network.locks, predicate);
+				const auto modified = std_ex::erase_if(e.network.locks, [&] (const NetworkLockInfo& info) { return predicate(info.peerId); });
+				if (modified) {
+					notifyEntityModified(&e);
+				}
 			}
 		}
 	}
 
-	Future<bool> doLockAcquireForMe(EntityId targetId, bool withAuthority)
+	Future<bool> doLockAcquireForMe(EntityId targetId, NetworkLockType lockType)
 	{
 		if (isHost()) {
-			auto [success, networkId] = doEntityLock(targetId, getMyPeerId(), true, withAuthority, false);
+			auto [success, networkId] = doEntityLockAction(targetId, getMyPeerId(), true, lockType, false);
 			HalleyAssertDebug(!networkId.has_value());
 			return Future<bool>::makeImmediate(success);
 		} else {
@@ -315,12 +293,12 @@ private:
 				// blocked until the result is delivered.
 				LocalLock& l = myLocks[targetId];
 				l.playerId = {};
-				l.withAuthority = withAuthority;
+				l.type = lockType;
 			}
 
 			Promise<bool> promise;
 			auto future = promise.getFuture();
-			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, this, promise = std::move(promise)] (ConfigNode result) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, true, static_cast<uint8_t>(lockType), false, getMyPeerId()), [=, this, promise = std::move(promise)] (ConfigNode result) mutable
 			{
 				bool success = result["success"].asBool(false);
 
@@ -329,7 +307,7 @@ private:
 					assignNetworkId = result["id"].asInt();
 				}
 
-                if (success && withAuthority) {
+                if (success && lockType == NetworkLockType::UniqueWithAuthority) {
                     auto [ok, networkId] = changeAuthority(targetId, getMyPeerId(), assignNetworkId);
                 	HalleyAssertDebug(!networkId.has_value());
                 	success = ok;
@@ -346,17 +324,17 @@ private:
 		}
 	}
 
-	void doLockReleaseForMe(EntityId targetId, bool withAuthority, bool destroyOnUnlock)
+	void doLockReleaseForMe(EntityId targetId, NetworkLockType lockType, bool destroyOnUnlock)
 	{
 		if (isHost()) {
-			doEntityLock(targetId, getMyPeerId(), false, withAuthority, destroyOnUnlock);
+			doEntityLockAction(targetId, getMyPeerId(), false, lockType, destroyOnUnlock);
 			myLocks.erase(targetId);
 		} else {
-			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=, this] (ConfigNode result) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, false, static_cast<uint8_t>(lockType), destroyOnUnlock, getMyPeerId()), [=, this] (ConfigNode result) mutable
             {
 				bool success = result["success"].asBool(false);
 
-				if (withAuthority) {
+				if (lockType == NetworkLockType::UniqueWithAuthority) {
 					if (!success) {
 						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
 					}
@@ -371,12 +349,10 @@ private:
 		}
 	}
 
-	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority, bool destroyOnUnlock)
+	std::pair<bool, std::optional<EntityNetworkId>> doEntityLockAction(EntityId targetId, NetworkSession::PeerId peerId, bool wantsToLock, NetworkLockType lockType, bool destroyOnUnlock)
 	{
-		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
-
 		if (!targetId.isValid()) {
-			if (lock) {
+			if (wantsToLock) {
 				Logger::logDev("Peer tries to lock entity, but ID is invalid");
 			} else if (destroyOnUnlock) {
 				Logger::logDev("Peer tries to unlock entity, with destroyOnUnlock flag set, but ID is invalid");
@@ -385,66 +361,129 @@ private:
 		}
 
 		const auto* e = tryFindNetworkRoot(targetId);
-		if (e) {
-			if (e->network.ownerId.value_or(0) != getMyPeerId()) {
-				Logger::logError("Peer tries to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host");
-				return {false, {}};
-			}
-
-			auto& locks = e->network.locks;
-			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });
-
-			if (iter == locks.end()) {
-				// No existing lock
-				if (lock) {
-					// New lock
-					notifyEntityModified(e);
-                    if (withAuthority) {
-                    	// Try changing authority first. If this fails, don't bother creating a lock.
-                    	result = doChangeAuthority(e, peerId, {});
-                        if (!result.first) {
-	                        return result;
-                        }
-                    }
-					locks.emplace_back(targetId, peerId);
-					return result;
-				} else {
-					// Tries to unlock non-existing lock
-					return {false, {}};
-				}
-			} else if (iter->second == peerId) {
-				// Lock exists, locked by this peer
-				notifyEntityModified(e);
-				if (!lock) {
-					// Release lock
-                    if (withAuthority) {
-                    	// Release authority first. If this fails, keep the lock.
-                    	result = doChangeAuthority(e, {}, {});
-                        if (!result.first) {
-	                        return result;
-                        }
-                    }
-					locks.erase(iter);
-					if (destroyOnUnlock) {
-						getWorld().destroyEntity(targetId);
-					}
-					return result;
-				} else {
-					// Wants to lock again
-					result.first = true;
-					return result;
-				}
-			} else {
-				// Lock exists, locked by someone else
-				return {false, {}};
-			}
-		} else {
+		if (!e) {
 			// Entity not found
 			if (const auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
 				Logger::logWarning("Peer tries to lock entity " + entity.getName() + " which isn't a network entity");
 			}
 			return {false, {}};
 		}
+
+		if (e->network.ownerId.value_or(0) != getMyPeerId()) {
+			Logger::logError("Peer tries to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host");
+			return {false, {}};
+		}
+
+		if (wantsToLock) {
+			return doEntityLock(e, targetId, peerId, lockType);
+		} else {
+			return doEntityUnlock(e, targetId, peerId, lockType, destroyOnUnlock);
+		}
+	}
+
+	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(const NetworkFamily* e, EntityId targetId, NetworkSession::PeerId peerId, NetworkLockType lockType)
+	{
+		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
+		auto& locks = e->network.locks;
+
+		// Figure out the current lock situation
+		bool someoneHasSharedLock = false;
+		bool someoneHasExclusiveLock = false;
+		NetworkLockInfo* myLock = nullptr;
+		for (auto& existingLock: locks) {
+			if (existingLock.peerId == peerId) {
+				myLock = &existingLock;
+			} else {
+				if (existingLock.type == NetworkLockType::Shared) {
+					someoneHasSharedLock = true;
+				} else {
+					someoneHasExclusiveLock = true;
+				}
+			}
+		}
+
+		// Someone has a lock that clashes with this
+		const bool targetLockValid = !someoneHasExclusiveLock && (!someoneHasSharedLock || lockType == NetworkLockType::Shared);
+		if (!targetLockValid) {
+			return {false, {}};
+		}
+
+		// Try to update my existing lock
+		if (myLock) {
+			notifyEntityModified(e);
+			if (lockType != myLock->type) {
+				if (lockType < myLock->type) {
+					// Downgrading lock type is not supported (could lead to inconsistencies?)
+					return {false, {}};
+				}
+
+	            if (lockType == NetworkLockType::UniqueWithAuthority) {
+	                // Try changing authority first. If this fails, don't bother creating a lock.
+	                result = doChangeAuthority(e, peerId, {});
+	                if (!result.first) {
+	                    return result;
+	                }
+	            }
+				myLock->type = lockType;
+			}
+
+			// Wants to lock again
+			result.first = true;
+			return result;
+		}
+
+		// New lock
+		notifyEntityModified(e);
+        if (lockType == NetworkLockType::UniqueWithAuthority) {
+            // Try changing authority first. If this fails, don't bother creating a lock.
+            result = doChangeAuthority(e, peerId, {});
+            if (!result.first) {
+                return result;
+            }
+        }
+		locks.emplace_back(peerId, lockType);
+		return result;
+	}
+
+	std::pair<bool, std::optional<EntityNetworkId>> doEntityUnlock(const NetworkFamily* e, EntityId targetId, NetworkSession::PeerId peerId, NetworkLockType lockType, bool destroyOnUnlock)
+	{
+		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
+		auto& locks = e->network.locks;
+
+		if (locks.empty()) {
+			// Tries to unlock non-existing lock
+			return {false, {}};
+		}
+
+		for (size_t i = 0; i < locks.size(); ++i) {
+			auto& existingLock = locks[i];
+			if (existingLock.peerId == peerId) {
+				if (existingLock.type != lockType) {
+					Logger::logWarning("Attempting to unlock lock with different type from acquired");
+				}
+
+				// Lock exists, locked by this peer
+				notifyEntityModified(e);
+
+				// Release lock
+                if (existingLock.type == NetworkLockType::UniqueWithAuthority) {
+                    // Release authority first. If this fails, keep the lock.
+                    result = doChangeAuthority(e, {}, {});
+                    if (!result.first) {
+                        return result;
+                    }
+                }
+				locks.erase(locks.begin() + i);
+				if (destroyOnUnlock) {
+					getWorld().destroyEntity(targetId);
+				}
+
+				return result;
+			}
+		} 
+
+		// Lock exists, locked by someone else
+		return {false, {}};
 	}
 
 	[[nodiscard]] NetworkSession::PeerId getMyPeerId() const

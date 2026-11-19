@@ -21,3 +21,6 @@ namespace Halley {}
 #include "halley/net/session/network_session.h"
 #include "halley/net/session/session.h"
 #include "halley/net/session/session_multiplayer.h"
+
+#include "halley/net/utils/network_lock.h"
+
