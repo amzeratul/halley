@@ -1278,6 +1278,15 @@ void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundE
 {
 	auto& entries = inboundEntity.positionUpdates;
 
+	// Reset entries when parents change (interpolation is based on local pos)
+	if (const auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId); entity.isValid()) {
+		const auto parentId = entity.hasParent() ? entity.getParent().getEntityId() : EntityId();
+		if (parentId != inboundEntity.lastParent) {
+			entries.clear();
+			inboundEntity.lastParent = parentId;
+		}
+	}
+
 	if (entries.empty() || entries.back().second < timestamp) {
 		// This "should" be the default: latest position update, just append.
 		entries.emplace_back(position, timestamp);
@@ -1335,6 +1344,14 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPosition(InboundEntity& inb
 
 	auto transform = entity.tryGetComponent<Transform2DComponent>();
 	if (transform == nullptr) {
+		return;
+	}
+
+	// Clear on parent change
+	const auto parentId = entity.hasParent() ? entity.getParent().getEntityId() : EntityId();
+	if (parentId != inboundEntity.lastParent) {
+		entries.clear();
+		inboundEntity.lastParent = parentId;
 		return;
 	}
 

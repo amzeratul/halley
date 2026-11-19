@@ -146,6 +146,7 @@ namespace Halley {
             EntityId worldId;
             EntityData data;
         	Vector<std::pair<Vector2f, int32_t>> positionUpdates;
+        	EntityId lastParent;
         	bool appliedOnExistingEntity = false;
         	bool forChangedAuthorityOnly = false;
         	String debugName; // for debug only, do a proper lookup if needed
