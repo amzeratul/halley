@@ -75,13 +75,13 @@ public:
 		targetId = resolveLockTarget(targetId);
 
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			if (const NetworkFamily* locker = networkFamily.tryFind(iter->second.playerId)) {
-				const auto lockType = iter->second.type;
-				const auto lockerPeer = locker->network.ownerId.value_or(0);
-				return lockerPeer == myPeerId ? (lockType == NetworkLockType::Shared ? LockStatus::SharedAcquiredByMe : LockStatus::AcquiredByMe) : (lockType == NetworkLockType::Shared ? LockStatus::SharedAcquiredByOther : LockStatus::AcquiredByOther);
+			const bool mine = myPeerId == getMyPeerId();
+			const bool shared = iter->second.type == NetworkLockType::Shared;
+			if (mine) {
+				return shared ? LockStatus::SharedAcquiredByMe : LockStatus::AcquiredByMe;
+			} else {
+				return shared ? LockStatus::SharedAcquiredByOther : LockStatus::AcquiredByOther;
 			}
-			Logger::logWarning("Couldn't find player entity " + toString(iter->second.playerId) + " to check lock status", true);
-			return LockStatus::AcquiredByOther;
 		}
 
 		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
