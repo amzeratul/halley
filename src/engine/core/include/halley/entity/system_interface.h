@@ -32,6 +32,7 @@ namespace Halley {
 
     class INetworkLockSystemInterface : public ISystemInterface {
 	public:
+		// NB: the order here matters, NetworkLockSystem relies on it to pick the most strict lock
         enum class LockStatus {
 	        Unlocked,
 			SharedAcquiredByMe,

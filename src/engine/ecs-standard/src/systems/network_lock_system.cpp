@@ -99,30 +99,44 @@ public:
 		return LockStatus::Unlocked;
 	}
 
-	[[nodiscard]] LockStatus getRemoteLockStatus(EntityId targetId, uint8_t myPeerId) const
+	[[nodiscard]] LockStatus getRemoteLockStatus(const NetworkFamily* e, uint8_t myPeerId, bool includeMine) const
 	{
-		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
-			if (e->network.authorityId) {
-				return e->network.authorityId == myPeerId ? LockStatus::UniqueAcquiredByMe : LockStatus::UniqueAcquiredByOther;
-			} else {
-				const auto& locks = e->network.locks;
-				if (locks.empty()) {
-					return LockStatus::Unlocked;
-				}
-				for (auto& lock: locks) {
-					// Don't report shared by others yet, wait to see what else is there (shared locked by me takes priority)
-					if (const auto status = makeLockStatus(lock.peerId == myPeerId, lock.type); status != LockStatus::SharedAcquiredByOther) {
-						return status;
-					}
-				}
-				return LockStatus::SharedAcquiredByOther;
-			}
-		} else {
-			auto entity = getWorld().tryGetEntity(targetId);
-			Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
+		if (e->network.authorityId) {
+			return e->network.authorityId == myPeerId ? (includeMine ? LockStatus::UniqueAcquiredByMe : LockStatus::Unlocked) : LockStatus::UniqueAcquiredByOther;
 		}
 
-		return LockStatus::Unlocked;
+		bool otherShared = false;
+		for (auto& lock: e->network.locks) {
+			const bool mine = lock.peerId == myPeerId;
+			if (mine && !includeMine) {
+		        continue; // my own locks on relatives never affect me
+		    }
+
+			const auto status = makeLockStatus(mine, lock.type);
+			if (status != LockStatus::SharedAcquiredByOther) {
+				return status;
+			}
+			otherShared = true;
+		}
+		return otherShared ? LockStatus::SharedAcquiredByOther : LockStatus::Unlocked;
+	}
+
+	[[nodiscard]] LockStatus getRemoteLockStatus(EntityId targetId, uint8_t myPeerId) const
+	{
+		const NetworkFamily* e = tryFindNetworkRoot(targetId);
+		if (!e) {
+			auto entity = getWorld().tryGetEntity(targetId);
+			Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
+			return LockStatus::Unlocked;
+		}
+
+		const auto ns = collectNetworkAncestorsAndDescendants(getWorld().tryGetEntity(e->entityId));
+
+		LockStatus result = LockStatus::Unlocked;
+		for (const auto* n: ns) {
+			result = std::max(result, getRemoteLockStatus(n, myPeerId, n == e));
+		}
+		return result;
 	}
 
 	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId, NetworkLockType lockType) const override
@@ -212,7 +226,11 @@ public:
 		targetId = resolveLockTarget(targetId, true);
 		const auto iter = myLocks.find(targetId);
 		if (iter != myLocks.end()) {
-			iter->second.destroyOnUnlock = destroyOnUnlock;
+			if (iter->second.type == NetworkLockType::Shared) {
+				Logger::logError("Attempting to set destroyOnUnlock on shared lock is not supported");
+			} else {
+				iter->second.destroyOnUnlock = destroyOnUnlock;
+			}
 		}
 	}
 
@@ -343,6 +361,11 @@ private:
 
 	void doLockReleaseForMe(EntityId targetId, NetworkLockType lockType, bool destroyOnUnlock)
 	{
+		if (lockType == NetworkLockType::Shared && destroyOnUnlock) {
+			destroyOnUnlock = false;
+			Logger::logError("Attempting to release shared lock with destroyOnUnlock");
+		}
+
 		if (isHost()) {
 			doEntityLockAction(targetId, getMyPeerId(), false, lockType, destroyOnUnlock);
 			myLocks.erase(targetId);
@@ -398,23 +421,63 @@ private:
 		}
 	}
 
+	Vector<const NetworkFamily*> collectNetworkAncestorsAndDescendants(ConstEntityRef e) const
+	{
+		Vector<const NetworkFamily*> result;
+		collectNetworkEntitiesInHierarchyUp(e, result); // Include self
+		for (auto c: e.getChildren()) {
+			collectNetworkEntitiesInHierarchyDown(c, result);
+		}
+		return result;
+	}
+
+	void collectNetworkEntitiesInHierarchyUp(ConstEntityRef e, Vector<const NetworkFamily*>& dst) const
+	{
+		if (e.hasComponent<NetworkComponent>()) {
+			if (auto* n = networkFamily.tryFind(e.getEntityId())) {
+				dst += n;
+			}
+		}
+		if (e.hasParent()) {
+			collectNetworkEntitiesInHierarchyUp(e.getParent(), dst);
+		}
+	}
+
+	void collectNetworkEntitiesInHierarchyDown(ConstEntityRef e, Vector<const NetworkFamily*>& dst) const
+	{
+		if (e.hasComponent<NetworkComponent>()) {
+			if (auto* n = networkFamily.tryFind(e.getEntityId())) {
+				dst += n;
+			}
+		}
+		for (auto c: e.getChildren()) {
+			collectNetworkEntitiesInHierarchyDown(c, dst);
+		}
+	}
+
 	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(const NetworkFamily* e, NetworkSession::PeerId peerId, NetworkLockType lockType)
 	{
 		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
-		auto& locks = e->network.locks;
+
+		const auto ns = collectNetworkAncestorsAndDescendants(getWorld().getEntity(e->entityId));
 
 		// Figure out the current lock situation
 		bool someoneHasSharedLock = false;
 		bool someoneHasExclusiveLock = false;
 		NetworkLockInfo* myLock = nullptr;
-		for (auto& existingLock: locks) {
-			if (existingLock.peerId == peerId) {
-				myLock = &existingLock;
-			} else {
-				if (existingLock.type == NetworkLockType::Shared) {
-					someoneHasSharedLock = true;
+		for (const auto* n: ns) {
+			auto& locks = n->network.locks;
+			for (auto& existingLock: locks) {
+				if (existingLock.peerId == peerId) {
+					if (n == e) { // Only do this for the target entity
+						myLock = &existingLock;
+					}
 				} else {
-					someoneHasExclusiveLock = true;
+					if (existingLock.type == NetworkLockType::Shared) {
+						someoneHasSharedLock = true;
+					} else {
+						someoneHasExclusiveLock = true;
+					}
 				}
 			}
 		}
@@ -458,7 +521,7 @@ private:
                 return result;
             }
         }
-		locks.emplace_back(peerId, lockType);
+		e->network.locks.emplace_back(peerId, lockType);
 		return result;
 	}
 
