@@ -422,15 +422,7 @@ namespace Halley {
 				return *this;
 			}
 
-			constexpr bool operator==(const Iterator& other) const
-			{
-				return iter == other.iter;
-			}
-
-			constexpr bool operator!=(const Iterator& other) const
-			{
-				return iter != other.iter;
-			}
+			constexpr bool operator==(const Iterator& other) const { return iter == other.iter; }
 
 			EntityRef operator*() const;
 
@@ -444,19 +436,50 @@ namespace Halley {
 			, world(world)
 		{}
 
-		constexpr Iterator begin() const
-		{
-			return Iterator(entities.begin(), world);
-		}
-
-		constexpr Iterator end() const
-		{
-			return Iterator(entities.end(), world);
-		}
+		constexpr Iterator begin() const { return Iterator(entities.begin(), world); }
+		constexpr Iterator end() const { return Iterator(entities.end(), world); }
 
 	private:
 		const Vector<Entity*>& entities;
 		World& world;
+	};
+	
+	class ConstEntityRefIterable {
+	public:
+		class Iterator {
+		public:
+
+			constexpr Iterator(Vector<Entity*>::const_iterator iter, const World& world)
+				: iter(iter)
+				, world(world)
+			{}
+
+			constexpr Iterator& operator++()
+			{
+				++iter;
+				return *this;
+			}
+
+			constexpr bool operator==(const Iterator& other) const { return iter == other.iter; }
+
+			ConstEntityRef operator*() const;
+
+		private:
+			Vector<Entity*>::const_iterator iter;
+			const World& world;
+		};
+		
+		constexpr ConstEntityRefIterable(const Vector<Entity*>& entities, const World& world)
+			: entities(entities)
+			, world(world)
+		{}
+
+		constexpr Iterator begin() const { return Iterator(entities.begin(), world); }
+		constexpr Iterator end() const { return Iterator(entities.end(), world); }
+
+	private:
+		const Vector<Entity*>& entities;
+		const World& world;
 	};
 
 	class ConstEntityRef;
@@ -1259,6 +1282,11 @@ namespace Halley {
 			return entity->getChildren();
 		}
 
+		ConstEntityRefIterable getChildren() const
+		{
+			return ConstEntityRefIterable(entity->getChildren(), *world);
+		}
+
 		uint8_t getHierarchyRevision() const
 		{
 			return entity->hierarchyRevision;
@@ -1374,6 +1402,11 @@ namespace Halley {
 	inline EntityRef EntityRefIterable::Iterator::operator*() const
 	{
 		return EntityRef(*(*iter), world);
+	}
+
+	inline ConstEntityRef ConstEntityRefIterable::Iterator::operator*() const
+	{
+		return ConstEntityRef(*(*iter), world);
 	}
 	
 }
