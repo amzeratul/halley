@@ -72,7 +72,7 @@ public:
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId, uint8_t myPeerId) const
 	{
-		targetId = resolveLockTarget(targetId);
+		targetId = resolveLockTarget(targetId, true);
 
 		if (auto localStatus = getLocalLockStatus(targetId, myPeerId); localStatus != LockStatus::Unlocked) {
 			return localStatus;
@@ -137,13 +137,18 @@ public:
 		return status == LockStatus::Unlocked || status == LockStatus::UniqueAcquiredByMe || (lockType == NetworkLockType::Shared && (status == LockStatus::SharedAcquiredByOther || status == LockStatus::SharedAcquiredByMe));
 	}
 
-	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, NetworkLockType lockType) override
+	enum class LockAcquireResult {
+		Acquired,
+		Refused,
+		NotHeld
+	};
+
+	[[nodiscard]] std::pair<LockAcquireResult, NetworkLockHandle> tryAcquireLocal(EntityId playerId, EntityId targetId, NetworkLockType lockType)
 	{
-		if (const auto target = tryFindNetworkRoot(targetId); target != nullptr) {
-			targetId = target->entityId;
-		} else {
-			Logger::logError("Tried to acquire lock, but " + targetId.toDetailedString() + " not found, or misses Network component");
-			return Future<NetworkLockHandle>::makeImmediate({});
+		// targetId should have gone through resolveLockTarget already
+		if (!targetId.isValid()) {
+			// Invalid entity
+			return { LockAcquireResult::Refused, {} };
 		}
 
 		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
@@ -158,17 +163,34 @@ public:
 						// Increment lock count!
 						lock.refCount++;
 
-						return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
+						return { LockAcquireResult::Acquired, std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId) };
 					} else {
 						// Locked by someone else
-						return Future<NetworkLockHandle>::makeImmediate({});
+						return { LockAcquireResult::Refused, {} };
 					}
 				}
 			} else if (lock.refCount == 0) {
 				// Preliminary lock, waiting for result from host. Block any follow-up attempt.
 				Logger::logWarning("Tried to aquire lock, but previous request still pending");
-				return Future<NetworkLockHandle>::makeImmediate({});
+				return { LockAcquireResult::Refused, {} };
 			}
+		}
+
+		return { LockAcquireResult::NotHeld, {} };
+	}
+
+	NetworkLockHandle lockReacquireLocal(EntityId playerId, EntityId targetId, NetworkLockType lockType) override
+	{
+		return tryAcquireLocal(playerId, resolveLockTarget(targetId, false), lockType).second;
+	}
+
+	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, NetworkLockType lockType) override
+	{
+		targetId = resolveLockTarget(targetId, false);
+
+		if (auto [result, local] = tryAcquireLocal(playerId, targetId, lockType); result != LockAcquireResult::NotHeld) {
+			// Either succeeded or was refused
+			return Future<NetworkLockHandle>::makeImmediate(std::move(local));
 		}
 
 		// Not locked locally, try to lock
@@ -187,40 +209,11 @@ public:
 
 	void lockUpdate(EntityId targetId, bool destroyOnUnlock) override
 	{
-		targetId = resolveLockTarget(targetId);
+		targetId = resolveLockTarget(targetId, true);
 		const auto iter = myLocks.find(targetId);
 		if (iter != myLocks.end()) {
 			iter->second.destroyOnUnlock = destroyOnUnlock;
 		}
-	}
-
-	bool lockAddRef(EntityId targetId) override
-	{
-		// Adding a lock reference assumes that there is a lock already. Just increase the ref count.
-		targetId = resolveLockTarget(targetId);
-		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			HalleyAssertDev(iter->second.refCount > 0); // Assumes that there is a lock already.
-			iter->second.refCount++;
-			return true;
-		}
-		Logger::logWarning("No lock found for " + targetId.toDetailedString() + ", can't add reference");
-		return false;
-	}
-
-	bool lockDecRef(EntityId targetId) override
-	{
-		// Decrease ref count, and release lock if there are no references left.
-		targetId = resolveLockTarget(targetId);
-		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			if (auto& lock = iter->second; lock.refCount > 1) {
-				lock.refCount--;
-			} else {
-				lockRelease(lock.playerId, targetId);
-			}
-			return true;
-		}
-		Logger::logWarning("No lock found for " + targetId.toDetailedString() + ", can't dec reference");
-		return false;
 	}
 
 	void lockRelease(EntityId playerId, EntityId targetId) override
@@ -585,9 +578,13 @@ private:
 		return result;
     }
 
-	[[nodiscard]] EntityId resolveLockTarget(EntityId id) const
+	[[nodiscard]] EntityId resolveLockTarget(EntityId id, bool useFallback) const
 	{
 	    const auto* root = tryFindNetworkRoot(id);
+		if (!root && !useFallback) {
+			Logger::logError("NetworkLockSystem failed to find root for entity " + id.toDetailedString());
+			return {};
+		}
 	    return root ? root->entityId : id;
 	}
 

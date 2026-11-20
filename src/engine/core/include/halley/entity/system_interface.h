@@ -45,10 +45,8 @@ namespace Halley {
         virtual LockStatus getLockStatus(EntityId targetId) const = 0;
         virtual bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId, NetworkLockType lockType = NetworkLockType::Unique) const = 0;
         virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, NetworkLockType lockType = NetworkLockType::Unique) = 0;
+        virtual NetworkLockHandle lockReacquireLocal(EntityId playerId, EntityId targetId, NetworkLockType lockType = NetworkLockType::Unique) = 0;
     	virtual void lockUpdate(EntityId targetId, bool destroyOnUnlock) = 0;
-
-    	virtual bool lockAddRef(EntityId targetId) = 0;
-    	virtual bool lockDecRef(EntityId targetId) = 0;
 	};
 
     class ILuaInterface : public ISystemInterface {
