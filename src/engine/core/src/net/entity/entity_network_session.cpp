@@ -34,10 +34,11 @@ struct LargeMessageInfoHeader
 	uint32_t totalSize{};
 };
 
-EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener)
+EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener, bool host)
 	: resources(resources)
 	, listener(listener)
 	, session(std::move(session))
+	, host(host)
 {
 	HalleyAssertDev(this->session);
 	HalleyAssertDev(this->listener);
@@ -921,7 +922,9 @@ Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
 
 bool EntityNetworkSession::isHost() const
 {
-	return session->getType() == NetworkSessionType::Host;
+	// They should agree once session is defined, but game needs to know whether it's host before that
+	HalleyAssertDev(session->getType() == NetworkSessionType::Undefined || (host == (session->getType() == NetworkSessionType::Host)));
+	return host;
 }
 
 bool EntityNetworkSession::isConnected() const

@@ -32,7 +32,7 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 	}
 	
 	session = std::make_shared<NetworkSession>(*service, settings.networkVersion, playerName);
-	entitySession = std::make_unique<EntityNetworkSession>(session, resources, std::move(settings.ignoreComponents), this);
+	entitySession = std::make_unique<EntityNetworkSession>(session, resources, std::move(settings.ignoreComponents), this, host);
 	setupDictionary(entitySession->getSerializationDictionary(), std::move(settings.serializationDict));
 }
 

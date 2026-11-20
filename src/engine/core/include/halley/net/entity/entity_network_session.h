@@ -52,7 +52,7 @@ namespace Halley {
 			virtual void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) = 0;
 		};
 		
-		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener);
+		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener, bool host);
 		~EntityNetworkSession() override;
 
 		void close();
@@ -162,6 +162,7 @@ namespace Halley {
 		HashMap<int, Vector<EntityNetworkMessage>> outbox;
 		Mutex outboxMutex;
 
+		bool host = true;
 		bool readyToStartGame = false;
 		bool gameStarted = false;
 		bool lobbyReady = false;
