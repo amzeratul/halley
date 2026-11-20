@@ -266,11 +266,11 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 	elapsedTime = 0;
 	
-	// "unpausedGain" being over 0 means that hasMixOutput is only false because of distance attenuation
-	// Without that check, pausing would cull sounds that it shouldn't
-	if (!hasMixOutput && !suspended && !resumingFromSuspension && unpausedGain > 0) {
+	if (!hasMixOutput && !paused && !suspended && !resumingFromSuspension) {
 		if (source->isLooping()) {
-			if (silentTime > 2.5f) {
+			// "unpausedGain" being over 0 means that hasMixOutput is only false because of distance attenuation
+			// Without that check, pausing would cull sounds that it shouldn't
+			if (unpausedGain > 0 && silentTime > 2.5f) {
 				suspend();
 			}
 		} else {
