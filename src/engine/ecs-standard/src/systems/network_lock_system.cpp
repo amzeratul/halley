@@ -74,39 +74,52 @@ public:
 	{
 		targetId = resolveLockTarget(targetId);
 
-		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
-			const bool mine = myPeerId == getMyPeerId();
-			const bool shared = iter->second.type == NetworkLockType::Shared;
-			if (mine) {
-				return shared ? LockStatus::SharedAcquiredByMe : LockStatus::AcquiredByMe;
-			} else {
-				return shared ? LockStatus::SharedAcquiredByOther : LockStatus::AcquiredByOther;
-			}
+		if (auto localStatus = getLocalLockStatus(targetId, myPeerId); localStatus != LockStatus::Unlocked) {
+			return localStatus;
 		}
 
+		return getRemoteLockStatus(targetId, myPeerId);
+	}
+
+	[[nodiscard]] LockStatus makeLockStatus(bool mine, NetworkLockType type) const
+	{
+		const bool shared = type == NetworkLockType::Shared;
+		if (mine) {
+			return shared ? LockStatus::SharedAcquiredByMe : LockStatus::UniqueAcquiredByMe;
+		} else {
+			return shared ? LockStatus::SharedAcquiredByOther : LockStatus::UniqueAcquiredByOther;
+		}
+	}
+
+	[[nodiscard]] LockStatus getLocalLockStatus(EntityId targetId, uint8_t myPeerId) const
+	{
+		if (const auto iter = myLocks.find(targetId); iter != myLocks.end()) {
+			return makeLockStatus(myPeerId == getMyPeerId(), iter->second.type);
+		}
+		return LockStatus::Unlocked;
+	}
+
+	[[nodiscard]] LockStatus getRemoteLockStatus(EntityId targetId, uint8_t myPeerId) const
+	{
 		if (const NetworkFamily* e = tryFindNetworkRoot(targetId)) {
 			if (e->network.authorityId) {
-				return e->network.authorityId == myPeerId ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
+				return e->network.authorityId == myPeerId ? LockStatus::UniqueAcquiredByMe : LockStatus::UniqueAcquiredByOther;
 			} else {
 				const auto& locks = e->network.locks;
 				if (locks.empty()) {
 					return LockStatus::Unlocked;
 				}
 				for (auto& lock: locks) {
-					if (lock.peerId == myPeerId) {
-						return lock.type == NetworkLockType::Shared ? LockStatus::SharedAcquiredByMe : LockStatus::AcquiredByMe;
-					} else if (lock.type == NetworkLockType::Unique || lock.type == NetworkLockType::UniqueWithAuthority) {
-						return LockStatus::AcquiredByOther;
+					// Don't report shared by others yet, wait to see what else is there (shared locked by me takes priority)
+					if (const auto status = makeLockStatus(lock.peerId == myPeerId, lock.type); status != LockStatus::SharedAcquiredByOther) {
+						return status;
 					}
 				}
 				return LockStatus::SharedAcquiredByOther;
 			}
 		} else {
-			if (auto entity = getWorld().tryGetEntity(targetId); entity.isValid()) {
-				Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId) + " (" + entity.getName() + ")", true);
-			} else {
-				Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId), true);
-			}
+			auto entity = getWorld().tryGetEntity(targetId);
+			Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
 		}
 
 		return LockStatus::Unlocked;
@@ -121,7 +134,7 @@ public:
 			peerId = getMyPeerId();
 		}
 		const auto status = getLockStatus(targetId, peerId);
-		return status == LockStatus::Unlocked || status == LockStatus::AcquiredByMe || (lockType == NetworkLockType::Shared && (status == LockStatus::SharedAcquiredByOther || status == LockStatus::SharedAcquiredByMe));
+		return status == LockStatus::Unlocked || status == LockStatus::UniqueAcquiredByMe || (lockType == NetworkLockType::Shared && (status == LockStatus::SharedAcquiredByOther || status == LockStatus::SharedAcquiredByMe));
 	}
 
 	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, NetworkLockType lockType) override

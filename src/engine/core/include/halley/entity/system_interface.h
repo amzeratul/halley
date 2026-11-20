@@ -34,10 +34,10 @@ namespace Halley {
 	public:
         enum class LockStatus {
 	        Unlocked,
-            AcquiredByMe,
-            AcquiredByOther,
 			SharedAcquiredByMe,
 			SharedAcquiredByOther,
+            UniqueAcquiredByMe,
+            UniqueAcquiredByOther,
         };
 
     	virtual ~INetworkLockSystemInterface() override = default;
