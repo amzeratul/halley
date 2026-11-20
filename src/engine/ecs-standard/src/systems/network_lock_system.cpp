@@ -392,13 +392,13 @@ private:
 		}
 
 		if (wantsToLock) {
-			return doEntityLock(e, targetId, peerId, lockType);
+			return doEntityLock(e, peerId, lockType);
 		} else {
-			return doEntityUnlock(e, targetId, peerId, lockType, destroyOnUnlock);
+			return doEntityUnlock(e, peerId, lockType, destroyOnUnlock);
 		}
 	}
 
-	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(const NetworkFamily* e, EntityId targetId, NetworkSession::PeerId peerId, NetworkLockType lockType)
+	std::pair<bool, std::optional<EntityNetworkId>> doEntityLock(const NetworkFamily* e, NetworkSession::PeerId peerId, NetworkLockType lockType)
 	{
 		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
 		auto& locks = e->network.locks;
@@ -462,7 +462,7 @@ private:
 		return result;
 	}
 
-	std::pair<bool, std::optional<EntityNetworkId>> doEntityUnlock(const NetworkFamily* e, EntityId targetId, NetworkSession::PeerId peerId, NetworkLockType lockType, bool destroyOnUnlock)
+	std::pair<bool, std::optional<EntityNetworkId>> doEntityUnlock(const NetworkFamily* e, NetworkSession::PeerId peerId, NetworkLockType lockType, bool destroyOnUnlock)
 	{
 		std::pair<bool, std::optional<EntityNetworkId>> result = {true, {}};
 		auto& locks = e->network.locks;
@@ -492,7 +492,7 @@ private:
                 }
 				locks.erase(locks.begin() + i);
 				if (locks.empty() && destroyOnUnlock) {
-					getWorld().destroyEntity(targetId);
+					getWorld().destroyEntity(e->entityId);
 				}
 
 				return result;
