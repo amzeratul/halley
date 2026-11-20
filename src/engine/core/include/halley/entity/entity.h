@@ -1277,6 +1277,20 @@ namespace Halley {
 			return parent != nullptr ? ConstEntityRef(*parent, *world) : std::optional<ConstEntityRef>();
 		}
 
+		bool hasEntityIdInAncestors(EntityId parentId) const
+		{
+			if (!parentId.isValid()) {
+				return false;
+			}
+			for (auto parent = getParent(); parent.isValid(); parent = parent.getParent()) {
+				if (parent.getEntityId() == parentId) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		const Vector<Entity*>& getRawChildren() const
 		{
 			return entity->getChildren();

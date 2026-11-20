@@ -63,6 +63,7 @@ public:
 	void update(Time t)
 	{
 		checkStaleLocks({});
+		hasRemoteLockCache = false;
 	}
 
 	[[nodiscard]] LockStatus getLockStatus(EntityId targetId) const override
@@ -130,7 +131,7 @@ public:
 			return LockStatus::Unlocked;
 		}
 
-		const auto ns = collectNetworkAncestorsAndDescendants(getWorld().tryGetEntity(e->entityId));
+		const auto ns = collectNetworkAncestorsAndDescendantsCached(getWorld().tryGetEntity(e->entityId));
 
 		LockStatus result = LockStatus::Unlocked;
 		for (const auto* n: ns) {
@@ -291,6 +292,9 @@ private:
 	HashMap<EntityId, LocalLock> myLocks;
 	ListenerSetToken sessionChangedToken;
 
+	mutable Vector<EntityId> remoteLockCache;
+	mutable bool hasRemoteLockCache = false;
+
 	void checkStaleLocks(std::optional<NetworkSession::PeerId> otherPeerId)
 	{
 		if (isHost()) {
@@ -313,6 +317,25 @@ private:
 				}
 			}
 		}
+	}
+
+	const Vector<EntityId>& getRemoteLockCache() const
+	{
+		if (!hasRemoteLockCache) {
+			updateRemoteLockCache();
+		}
+		return remoteLockCache;
+	}
+
+	void updateRemoteLockCache() const
+	{
+		remoteLockCache.clear();
+		for (const auto& e: networkFamily) {
+			if (!e.network.locks.empty() || e.network.authorityId.has_value()) {
+				remoteLockCache += e.entityId;
+			}
+		}
+		hasRemoteLockCache = true;
 	}
 
 	Future<bool> doLockAcquireForMe(EntityId targetId, NetworkLockType lockType)
@@ -419,6 +442,30 @@ private:
 		} else {
 			return doEntityUnlock(e, peerId, lockType, destroyOnUnlock);
 		}
+	}
+
+	Vector<const NetworkFamily*> collectNetworkAncestorsAndDescendantsCached(ConstEntityRef e) const
+	{
+		Vector<const NetworkFamily*> result;
+		result += &networkFamily.find(e.getEntityId());
+
+		const auto& cache = getRemoteLockCache();
+		for (const auto& r: cache) {
+			if (r != e.getEntityId()) {
+				auto other = getWorld().tryGetEntity(r);
+				if (!other.isValid()) {
+					continue;
+				}
+
+				if (e.hasEntityIdInAncestors(r) || other.hasEntityIdInAncestors(e.getEntityId())) {
+					if (auto* n = networkFamily.tryFind(r)) {
+						result += n;
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 	Vector<const NetworkFamily*> collectNetworkAncestorsAndDescendants(ConstEntityRef e) const
@@ -688,6 +735,8 @@ private:
 			auto entity = getWorld().getEntity(e->entityId);
 			entity.setModifiedThisFrame();
 		}
+
+		hasRemoteLockCache = false;
 	}
 
 };
