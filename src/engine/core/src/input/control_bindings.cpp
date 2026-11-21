@@ -509,7 +509,7 @@ std::optional<ControlBinding> ControlBindings::scanForPressGamepad(const InputDe
 		const auto& buttons = allowChords ? gamepad.getButtonsReleased() : gamepad.getButtonsPressed();
 
 		for (auto b: buttons) {
-			if (auto pos = gamepad.getPositionForButton(b)) {
+			if (auto pos = gamepad.getPositionForButtonWithAcceptCancel(b)) {
 				std::optional<JoystickButtonPosition> chord;
 
 				if (allowChords) {

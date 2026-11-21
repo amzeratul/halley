@@ -76,6 +76,16 @@ std::optional<JoystickButtonPosition> InputDevice::getPositionForButton(int code
 	return std::nullopt;
 }
 
+std::optional<JoystickButtonPosition> InputDevice::getPositionForButtonWithAcceptCancel(int code) const
+{
+	if (getButtonAtPosition(JoystickButtonPosition::Accept) == code) {
+		return JoystickButtonPosition::Accept;
+	} else if (getButtonAtPosition(JoystickButtonPosition::Cancel) == code) {
+		return JoystickButtonPosition::Cancel;
+	}
+	return getPositionForButton(code);
+}
+
 std::optional<JoystickAxisPosition> InputDevice::getPositionForAxis(int code) const
 {
 	if (code >= 0 && code <= 5) {

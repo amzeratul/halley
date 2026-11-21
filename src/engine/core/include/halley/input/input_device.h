@@ -305,6 +305,7 @@ namespace Halley {
 		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 		virtual int getAxisAtPosition(JoystickAxisPosition position) const;
 		virtual std::optional<JoystickButtonPosition> getPositionForButton(int code) const;
+		virtual std::optional<JoystickButtonPosition> getPositionForButtonWithAcceptCancel(int code) const;
 		virtual std::optional<JoystickAxisPosition> getPositionForAxis(int code) const;
 
 		virtual bool isAnyButtonPressed() const;
