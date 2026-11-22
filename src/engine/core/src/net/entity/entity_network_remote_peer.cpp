@@ -1367,15 +1367,16 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPosition(InboundEntity& inb
 	// Assuming the entries are sorted (which is done in updateRemoteEntityPosition()),
 	// look for the entries covering the current timestamp.
 
+	const int32_t targetTime = now - latency;
+
 	idx = 0;
-	while (idx + 1 < sz) {
-		if (entries.at(idx).second > now - latency) {
-			break;
-		}
+	while (idx + 1 < sz && entries.at(idx + 1).second <= targetTime) {
 		idx++;
 	}
 
-	if (idx + 1 == sz) {
+	if (targetTime <= entries.front().second) {
+		pos = entries.front().first;
+	} else if (idx + 1 == sz) {
 		// At last position, or there's only one entry.
 		pos = entries.back().first;
 	} else {
@@ -1383,7 +1384,7 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPosition(InboundEntity& inb
 		const auto& e0 = entries.at(idx);
 		const auto& e1 = entries.at(idx + 1);
 
-		float t = static_cast<float>((now - latency) - e0.second) / static_cast<float>(e1.second - e0.second);
+		const float t = clamp(static_cast<float>(targetTime - e0.second) / static_cast<float>(e1.second - e0.second), 0.0f, 1.0f);
 
 		pos = (1.0f - t) * e0.first + t * e1.first;
 	}
@@ -1400,6 +1401,9 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 
 	int32_t now = session.getLocalSessionTimeMs();
 	int32_t latency = session.getLatency(session.getIndexOfRemotePeer(peerId));
+
+	const int32_t minInterpolationDelay = static_cast<int32_t>(parentSession->getMinSendInterval() * 1000.0) + 20;
+	latency = std::max(latency, minInterpolationDelay);
 
 	for (auto& [_, inboundEntity] : inboundEntities) {
 		if (outboundEntities.contains(inboundEntity.worldId)) {
