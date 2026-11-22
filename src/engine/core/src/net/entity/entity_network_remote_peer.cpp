@@ -897,7 +897,7 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
             auto result = fastSerializer.deserializeEntityUpdate(entity, msg.bytes, parentSession->getByteSerializationOptions());
         	if (result.position) {
         		updateRemoteEntityPosition(inboundEntity, result.position.value(), timestamp);
-        	} else {
+        	} else if (result.positionAppliedDirectly) {
         		inboundEntity.positionUpdates.clear();
         	}
         } catch (const std::exception& e) {

@@ -99,6 +99,7 @@ namespace Halley {
         struct InboundResult
         {
             std::optional<Vector2f> position;
+            bool positionAppliedDirectly = false;
         };
 
         EntityNetworkSerialize() = default;

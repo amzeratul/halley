@@ -830,6 +830,10 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                     transform->setLocalPosition(pos);
                 } else {
                     guardedDeserialize();
+
+                    if (result && componentId == Transform2DComponent::componentIndex) {
+                        result->positionAppliedDirectly = true;
+                    }
                 }
                 
                 if (expectedEndPos != deserializer.getPosition()) {
