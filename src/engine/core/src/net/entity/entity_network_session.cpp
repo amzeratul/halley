@@ -1094,6 +1094,16 @@ bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId
 	return false;
 }
 
+bool EntityNetworkSession::isPositionInterpolating(EntityId entityId) const
+{
+	for (const auto& peer: peers) {
+		if (peer.isPositionInterpolating(entityId)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 std::optional<float> EntityNetworkSession::getPositionSnapDistance(EntityRef entity) const
 {
 	if (listener) {

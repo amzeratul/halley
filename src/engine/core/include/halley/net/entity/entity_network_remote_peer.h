@@ -94,6 +94,8 @@ namespace Halley {
     public:
         EntityNetworkRemotePeer(EntityNetworkSession& parentSession, NetworkSession::PeerId peerId);
 
+        bool isPositionInterpolating(EntityId entityId) const;
+
         NetworkSession::PeerId getPeerId() const;
 
     	bool isAlive() const;
@@ -174,6 +176,7 @@ namespace Halley {
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;
         HashMap<EntityNetworkId, InboundEntity> tempInboundEntities;
         HashMap<EntityNetworkId, PendingEntity> pendingEntities;
+        HashSet<EntityId> positionInterpolatingEntities;
 
     	HashSet<EntityNetworkId> allocatedOutboundIds;
         uint16_t nextId = 0;

@@ -1071,6 +1071,14 @@ bool World::isEntityNetworkAuthority(EntityId entityId) const
 	return true;
 }
 
+bool World::isEntityNetworkPositionInterpolating(EntityId entityId) const
+{
+	if (networkInterface) {
+		return networkInterface->isPositionInterpolating(entityId);
+	}
+	return false;
+}
+
 bool World::isEntityNetworkAuthority(EntityRef entity) const
 {
 	if (networkInterface) {

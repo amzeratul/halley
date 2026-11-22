@@ -102,6 +102,7 @@ namespace Halley {
 		bool isOwner(ConstEntityRef entity) const override;
 		bool isAuthority(ConstEntityRef entity) const override;
 		uint8_t getMyPeerId() const override;
+		bool isPositionInterpolating(EntityId entityId) const override;
 		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
 		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) override;
 

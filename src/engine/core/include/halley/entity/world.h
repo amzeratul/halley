@@ -45,6 +45,7 @@ namespace Halley {
 		virtual bool isOwner(ConstEntityRef entity) const = 0;
 		virtual bool isAuthority(ConstEntityRef entity) const = 0;
 		virtual uint8_t getMyPeerId() const = 0;
+		virtual bool isPositionInterpolating(EntityId entityId) const { return false; }
 	};
 
 	class World
@@ -162,6 +163,7 @@ namespace Halley {
 		bool isEntityNetworkAuthority(EntityId entityId) const;
 		bool isEntityNetworkAuthority(EntityRef entity) const;
 		bool isEntityNetworkAuthority(ConstEntityRef entity) const;
+		bool isEntityNetworkPositionInterpolating(EntityId entityId) const;
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
 		void sendNetworkSystemMessage(const String& targetSystem, const SystemMessageContext& context, SystemMessageDestination destination);
 		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);

@@ -1405,6 +1405,15 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPosition(InboundEntity& inb
 
 	HalleyAssertDev(pos.isValid());
 	transform->setLocalPosition(pos);
+
+	if (targetTime < entries.back().second && (entries.back().first - pos).squaredLength() > 0.0025f) {
+		positionInterpolatingEntities.insert(inboundEntity.worldId);
+	}
+}
+
+bool EntityNetworkRemotePeer::isPositionInterpolating(EntityId entityId) const
+{
+	return positionInterpolatingEntities.contains(entityId);
 }
 
 void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
@@ -1418,6 +1427,8 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 
 	const int32_t minInterpolationDelay = static_cast<int32_t>(parentSession->getMinSendInterval() * 1000.0) + 20;
 	latency = std::max(latency, minInterpolationDelay);
+
+	positionInterpolatingEntities.clear();
 
 	for (auto& [_, inboundEntity] : inboundEntities) {
 		if (outboundEntities.contains(inboundEntity.worldId)) {
