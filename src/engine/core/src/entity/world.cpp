@@ -548,7 +548,7 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 	using enum SystemMessageDestinationType;
 
 	const bool amITheHost = !networkInterface || networkInterface->isHost();
-	const uint8_t myPeerId = networkInterface ? networkInterface->getMyPeerId() : static_cast<uint8_t>(0);
+	const uint8_t myPeerId = networkInterface ? networkInterface->getMyPeerId().value_or(0) : static_cast<uint8_t>(0);
 
 	// Pre-process specific peer
 	if (destination.type == SpecificPeer) {

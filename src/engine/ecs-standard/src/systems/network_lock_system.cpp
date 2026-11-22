@@ -345,6 +345,11 @@ private:
 			HalleyAssertDebug(!networkId.has_value());
 			return Future<bool>::makeImmediate(success);
 		} else {
+			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
+			if (!entityNetworkSession || !entityNetworkSession->isConnected()) {
+				return Future<bool>::makeImmediate(false);
+			}
+
 			if (!myLocks.contains(targetId)) {
 				// Store a preliminary lock, assigned to invalid player ID.
 				// This is done to ensure that follow-up locking attempts by the same client are
@@ -393,6 +398,12 @@ private:
 			doEntityLockAction(targetId, getMyPeerId(), false, lockType, destroyOnUnlock);
 			myLocks.erase(targetId);
 		} else {
+			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
+			if (!entityNetworkSession || !entityNetworkSession->isConnected()) {
+				myLocks.erase(targetId);
+				return;
+			}
+
 			sendMessage(NetworkEntityLockSystemMessage(targetId, false, static_cast<uint8_t>(lockType), destroyOnUnlock, getMyPeerId()), [=, this] (ConfigNode result) mutable
             {
 				bool success = result["success"].asBool(false);

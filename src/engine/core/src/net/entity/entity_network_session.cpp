@@ -168,6 +168,11 @@ void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
 
 void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId)
 {
+	if (!getMyPeerId()) {
+		Logger::logInfo("Dropping network message - session disconnected");
+		return;
+	}
+
 	if (peerId == getMyPeerId()) {
 		Logger::logError("Trying to send peer message to myself");
 		Logger::logError(Debug::getCallStack());
@@ -533,6 +538,10 @@ void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageType, 
 
 void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback)
 {
+	if (!getMyPeerId()) {
+		Logger::logInfo("Dropping network system message " + toString(messageType) + " to \"" + targetSystem + "\" - session disconnected");
+		return;
+	}
 	HalleyAssertDev(destination.type != SystemMessageDestination::Local);
 	HalleyAssertDev(destination.type != SystemMessageDestination::SpecificPeer || destination.dstPeerId != getMyPeerId());
 
@@ -676,7 +685,7 @@ void EntityNetworkSession::precomputeEntityHashes(const Time t, const gsl::span<
 	// Decide the cadence for every entry and collect the ones that some peer will actually compare.
 	// Flagged `requiresEntityFrameModified` entities stay on the per-peer path, and a remote peer
 	// holding authority over an entity never receives updates for it.
-	const uint8_t myPeerId = getMyPeerId();
+	const uint8_t myPeerId = getMyPeerId().value_or(0);
 	hashTodo.clear();
 	for (size_t i = 0; i < entityIds.size(); ++i) {
 		auto& e = entityIds[i]; 
@@ -950,9 +959,9 @@ bool EntityNetworkSession::isAuthority(ConstEntityRef entity) const
 	return !ownerId || ownerId == session->getMyPeerId();
 }
 
-uint8_t EntityNetworkSession::getMyPeerId() const
+std::optional<uint8_t> EntityNetworkSession::getMyPeerId() const
 {
-	return session->getMyPeerId().value_or(0);
+	return session->getMyPeerId();
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

@@ -44,7 +44,7 @@ namespace Halley {
 		virtual bool isConnected() const = 0;
 		virtual bool isOwner(ConstEntityRef entity) const = 0;
 		virtual bool isAuthority(ConstEntityRef entity) const = 0;
-		virtual uint8_t getMyPeerId() const = 0;
+		virtual std::optional<uint8_t> getMyPeerId() const = 0;
 		virtual bool isPositionInterpolating(EntityId entityId) const { return false; }
 	};
 
