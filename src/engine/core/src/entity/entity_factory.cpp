@@ -698,9 +698,10 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 void EntityFactory::updateEntityComponentsDelta(EntityRef entity, const EntityDataDelta& delta, const EntityFactoryContext& context)
 {
 	const auto& reflection = world.getReflection();
+	const bool isNetwork = context.getEntitySerializationContext().matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
 
 	for (const auto& [componentName, componentData]: delta.getComponentsChanged()) {
-		auto overriden = getComponentsWithPrefabDefaults(entity, context, componentData, componentName);		
+		auto overriden = isNetwork ? std::nullopt : getComponentsWithPrefabDefaults(entity, context, componentData, componentName);
 		reflection.createComponent(context, componentName, entity, overriden ? *overriden : componentData);
 	}
 
