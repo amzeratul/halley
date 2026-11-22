@@ -1909,6 +1909,16 @@ Vector4f ConfigNode::convertTo(Tag<Vector4f> tag) const
 	return asVector4f({});
 }
 
+Rect4i ConfigNode::convertTo(Tag<Rect4i> tag) const
+{
+	return asRect4i({});
+}
+
+Rect4f ConfigNode::convertTo(Tag<Rect4f> tag) const
+{
+	return asRect4f({});
+}
+
 Range<int> ConfigNode::convertTo(Tag<Range<int>> tag) const
 {
 	return asIntRange({});

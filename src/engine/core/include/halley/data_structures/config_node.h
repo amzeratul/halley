@@ -747,6 +747,8 @@ namespace Halley {
 		Vector3f convertTo(Tag<Vector3f> tag) const;
 		Vector4i convertTo(Tag<Vector4i> tag) const;
 		Vector4f convertTo(Tag<Vector4f> tag) const;
+		Rect4i convertTo(Tag<Rect4i> tag) const;
+		Rect4f convertTo(Tag<Rect4f> tag) const;
 		Range<int> convertTo(Tag<Range<int>> tag) const;
 		Range<float> convertTo(Tag<Range<float>> tag) const;
 		String convertTo(Tag<String> tag) const;
