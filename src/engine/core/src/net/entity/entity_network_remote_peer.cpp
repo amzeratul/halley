@@ -1278,12 +1278,26 @@ void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundE
 {
 	auto& entries = inboundEntity.positionUpdates;
 
-	// Reset entries when parents change (interpolation is based on local pos)
-	if (const auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId); entity.isValid()) {
+	if (auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId); entity.isValid()) {
+		// Reset entries when parents change (interpolation is based on local pos)
 		const auto parentId = entity.hasParent() ? entity.getParent().getEntityId() : EntityId();
 		if (parentId != inboundEntity.lastParent) {
 			entries.clear();
 			inboundEntity.lastParent = parentId;
+		}
+
+		// Snap if too moved too far from current position
+		if (!entries.empty() && entries.back().second < timestamp) {
+			const auto snapDistance = parentSession->getPositionSnapDistance(entity);
+			if (snapDistance && (position - entries.back().first).length() > *snapDistance) {
+				entries.clear();
+				entries.emplace_back(position, timestamp);
+
+				if (auto* transform = entity.tryGetComponent<Transform2DComponent>()) {
+					transform->setLocalPosition(position);
+				}
+				return;
+			}
 		}
 	}
 

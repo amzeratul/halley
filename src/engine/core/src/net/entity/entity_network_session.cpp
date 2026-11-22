@@ -1094,6 +1094,14 @@ bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId
 	return false;
 }
 
+std::optional<float> EntityNetworkSession::getPositionSnapDistance(EntityRef entity) const
+{
+	if (listener) {
+		return listener->getPositionSnapDistance(entity);
+	}
+	return std::nullopt;
+}
+
 void EntitySessionSharedData::serialize(Serializer& s) const
 {
 	s << gameStarted;
