@@ -415,7 +415,7 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 	if (entityRef.isValid()) [[likely]] {
 		if (!environment.hasNetworkAuthorityOver(entityRef)) {
 			if (environment.isNetworkConnected()) {
-				Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + node.getSettings()["field"].asString() + "\", not owned by this client");
+				Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + node.getSettings()["field"].asString() + "\", not owned by this client. Script: " + environment.getCurrentScriptName());
 			}
 			return;
 		}
