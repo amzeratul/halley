@@ -206,6 +206,26 @@ void Options::setResolution(bool fullscreen, Vector2i resolution)
 	setOption("resolution" + String(fullscreen ? "_fullscreen" : "_window"), ConfigNode(resolution));
 }
 
+std::optional<Vector2i> Options::getLastWindowPosition() const
+{
+	return getOption("windowPos").asOptional<Vector2i>();
+}
+
+void Options::setWindowPosition(Vector2i pos)
+{
+	setOption("windowPos", ConfigNode(pos));
+}
+
+std::optional<Rect4i> Options::getLastConsoleRect() const
+{
+	return getOption("consoleRect").asOptional<Rect4i>();
+}
+
+void Options::setConsoleRect(Rect4i rect)
+{
+	setOption("consoleRect", ConfigNode(rect));
+}
+
 bool Options::getFullscreen() const
 {
 	if constexpr (isPCPlatform()) {

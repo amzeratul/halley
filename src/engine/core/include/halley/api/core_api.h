@@ -58,6 +58,7 @@ namespace Halley
 		virtual Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() = 0;
 
 		virtual bool isDevMode() = 0;
+		virtual bool hasConsole() = 0;
 
 		virtual DevConClient* getDevConClient() const = 0;
 

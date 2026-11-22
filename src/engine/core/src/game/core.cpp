@@ -65,7 +65,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 
 	// Console
 	if (game->shouldCreateSeparateConsole()) {
-		hasConsole = true;
+		consoleCreated = true;
 		const auto info = game->getConsoleInfo();
 		OS::get().createLogConsole(info.name, info.monitor, info.monitorAlign);
 		OS::get().initializeConsole();
@@ -306,7 +306,7 @@ void Core::deInit()
 	out.reset();
 
 #if defined(_WIN32) && !defined(WITH_GDK)
-	if (hasError && hasConsole) {
+	if (hasError && consoleCreated) {
 		system("pause");
 	}
 #endif

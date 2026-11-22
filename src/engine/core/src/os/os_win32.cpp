@@ -215,8 +215,8 @@ void OSWin32::createLogConsole(String winTitle, std::optional<size_t> monitor, V
 	SetConsoleOutputCP(65001);
 
 	// Icon
-	HWND con = GetConsoleWindow();
-	loadWindowIcon(con);
+	HWND console = GetConsoleWindow();
+	loadWindowIcon(console);
 
 	// Position console
 	MonitorInfo info;
@@ -226,13 +226,28 @@ void OSWin32::createLogConsole(String winTitle, std::optional<size_t> monitor, V
 		const auto curMonitor = info.rects[n];
 		
 		RECT curRect;
-		GetWindowRect(con, &curRect);
+		GetWindowRect(console, &curRect);
         const auto limitWidth = std::min(curMonitor.getWidth(), curMonitor.getHeight() * 16 / 9) / 2;
 		const auto limitHeight = (curMonitor.getHeight() - 64) / (1 + int(2.001f * std::abs(align.y - 0.5f)));
 		const auto targetSize = Vector2i(limitWidth, limitHeight);
+		const auto pos = Vector2i(Vector2f(curMonitor.getSize() - targetSize) * align) + curMonitor.getTopLeft();
 		
-		SetWindowPos(con, HWND_TOP, int((curMonitor.getWidth() - targetSize.x) * align.x) + curMonitor.getLeft(), int((curMonitor.getHeight() - targetSize.y) * align.y) + curMonitor.getTop(), targetSize.x, targetSize.y, 0);
+		SetWindowPos(console, HWND_TOP, pos.x, pos.y, targetSize.x, targetSize.y, 0);
 	}
+}
+
+void OSWin32::setConsoleRect(Rect4i rect)
+{
+	HWND console = GetConsoleWindow();
+	SetWindowPos(console, HWND_TOP, rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), 0);
+}
+
+Rect4i OSWin32::getConsoleRect()
+{
+	HWND console = GetConsoleWindow();
+	RECT curRect;
+	GetWindowRect(console, &curRect);
+	return Rect4i(curRect.left, curRect.top, curRect.right - curRect.left, curRect.bottom - curRect.top);
 }
 
 void OSWin32::initializeConsole()

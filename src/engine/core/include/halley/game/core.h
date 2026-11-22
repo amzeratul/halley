@@ -44,6 +44,7 @@ namespace Halley
 		void quit(int exitCode = 0) override;
 		const Environment& getEnvironment() override;
 		bool isDevMode() override;
+		bool hasConsole() override { return consoleCreated; }
 		
 		void onTick(Time delta) override;
 		bool isRunning() const override	{ return running; }
@@ -134,7 +135,7 @@ namespace Halley
 		bool initialized = false;
 		bool running = true;
 		bool hasError = false;
-		bool hasConsole = false;
+		bool consoleCreated = false;
 		int exitCode = 0;
 		std::unique_ptr<RedirectStream> out;
 

@@ -61,6 +61,8 @@ namespace Halley {
 		static OS* createOS();
 
 		virtual void createLogConsole(String name, std::optional<size_t> monitor, Vector2f align);
+		virtual Rect4i getConsoleRect();
+		virtual void setConsoleRect(Rect4i rect);
 		virtual void initializeConsole();
 		virtual void displayError(std::string_view cs);
 

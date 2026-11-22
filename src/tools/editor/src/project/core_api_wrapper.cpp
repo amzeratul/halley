@@ -59,6 +59,11 @@ bool CoreAPIWrapper::isDevMode()
 	return parent.isDevMode();
 }
 
+bool CoreAPIWrapper::hasConsole()
+{
+	return parent.hasConsole();
+}
+
 void CoreAPIWrapper::addProfilerCallback(IProfileCallback* callback)
 {
 	parent.addProfilerCallback(callback);

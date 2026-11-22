@@ -68,6 +68,15 @@ void OS::createLogConsole(String /*name*/, std::optional<size_t> monitor, Vector
 {
 }
 
+Rect4i OS::getConsoleRect()
+{
+	return {};
+}
+
+void OS::setConsoleRect(Rect4i rect)
+{
+}
+
 void OS::initializeConsole()
 {
 }

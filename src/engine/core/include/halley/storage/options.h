@@ -64,6 +64,10 @@ namespace Halley {
 
 		Vector2i getResolution(bool fullscreen) const;
 		void setResolution(bool fullscreen, Vector2i resolution);
+		std::optional<Vector2i> getLastWindowPosition() const;
+		void setWindowPosition(Vector2i pos);
+		std::optional<Rect4i> getLastConsoleRect() const;
+		void setConsoleRect(Rect4i rect);
 		bool getFullscreen() const;
 		void setFullscreen(bool fullscreen);
 
