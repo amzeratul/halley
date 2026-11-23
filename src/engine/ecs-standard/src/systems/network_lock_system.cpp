@@ -127,7 +127,7 @@ public:
 		const NetworkFamily* e = tryFindNetworkRoot(targetId);
 		if (!e) {
 			auto entity = getWorld().tryGetEntity(targetId);
-			Logger::logError("Trying to check lock status of unknown network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
+			Logger::logWarning("Trying to check lock status of non-network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
 			return LockStatus::Unlocked;
 		}
 
@@ -742,10 +742,8 @@ private:
 		// kind of auto-enables support of this feature, without requiring much more attention
 		// in source code (like, in more complex entity systems, to attend all cases where we
 		// need to call this to signal a modifications).
-		if (e->network.requiresEntityFrameModified) {
-			auto entity = getWorld().getEntity(e->entityId);
-			entity.setModifiedThisFrame();
-		}
+		auto entity = getWorld().getEntity(e->entityId);
+		entity.setModifiedThisFrame(true, true);
 
 		hasRemoteLockCache = false;
 	}
