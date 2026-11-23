@@ -66,7 +66,9 @@ void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
 
 void ScriptingBaseGizmo::setDebugDisplayData(HashMap<int, String> values)
 {
-	renderer->setDebugDisplayData(std::move(values));
+	if (renderer) {
+		renderer->setDebugDisplayData(std::move(values));
+	}
 }
 
 std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& node)
