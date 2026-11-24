@@ -1215,12 +1215,13 @@ void LocalisationEditor::validateTags()
 		};
 		Vector<Mismatch> mismatches;
 
-		auto isOptionalTag = [&](std::string_view tag)
+		auto isOptionalTag = [&](std::string_view tagLowercase)
 		{
-			return tag.starts_with("g:"); // This should probably not live here
+			return tagLowercase.starts_with("g:") || tagLowercase == "playercharactername"; // This should probably not live here
 		};
 
-		auto getTags = [&] (const String& str) -> Vector<String> {
+		auto getTags = [&] (const String& str) -> std::pair<Vector<String>, Vector<String>> {
+			Vector<String> tagsLower;
 			Vector<String> tags;
 			
 			auto strRemaining = std::string_view(str);
@@ -1234,24 +1235,26 @@ void LocalisationEditor::validateTags()
 					break;
 				}
 				auto tag = strRemaining.substr(bracketStart + 1, bracketEnd - bracketStart - 1);
-				if (!isOptionalTag(tag) && !tags.contains(tag)) {
+				auto tagLower = String(tag).asciiLower();
+				if (!isOptionalTag(tagLower) && !tagsLower.contains(tagLower)) {
 					tags += tag;
+					tagsLower += tagLower;
 				}
 				strRemaining = strRemaining.substr(bracketEnd + 1);
 			}
 
-			return tags;
+			return { tags, tagsLower };
 		};
 
 		for (const auto& [lang, locData]: remoteStrings->localised) {
 			for (const auto& chunk: remoteStrings->originalLanguage->getChunks()) {
 				for (const auto& entry: chunk.entries) {
 					if (const auto iter = locData.entries.find(entry.getKey()); iter != locData.entries.end()) {
-						auto tags0 = getTags(entry.getValue());
-						auto tags1 = getTags(iter->second.getValue());
-						std::sort(tags0.begin(), tags0.end());
-						std::sort(tags1.begin(), tags1.end());
-						if (tags0 != tags1) {
+						auto [tags0, tagsLower0] = getTags(entry.getValue());
+						auto [tags1, tagsLower1] = getTags(iter->second.getValue());
+						std::sort(tagsLower0.begin(), tagsLower0.end());
+						std::sort(tagsLower1.begin(), tagsLower1.end());
+						if (tagsLower0 != tagsLower1) {
 							mismatches += Mismatch{ lang, entry.getKey(), entry.getValue(), iter->second.getValue(), std::move(tags0), std::move(tags1) };
 						}
 					}
