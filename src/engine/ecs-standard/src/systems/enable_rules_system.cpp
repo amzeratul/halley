@@ -13,9 +13,11 @@ public:
 	{
 	}
 
-    void refreshEnabled() override
+    void refreshEnabled(bool clearCache) override
     {
-		getEnableRulesService().clearCache();
+		if (clearCache) {
+			getEnableRulesService().clearCache();
+		}
 
 		auto& world = getWorld();
 		for (auto* e: world.getRawEntities()) {

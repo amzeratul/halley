@@ -114,7 +114,7 @@ namespace Halley {
 	public:
 		virtual ~IEnableRulesSystemInterface() override = default;
 
-		virtual void refreshEnabled() = 0;
+		virtual void refreshEnabled(bool clearCache = true) = 0;
 	};
 
 	class SpriteAnimationEvent {
