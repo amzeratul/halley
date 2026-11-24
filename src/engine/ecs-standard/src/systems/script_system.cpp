@@ -590,6 +590,16 @@ private:
 				return "Error";
 			}
 		});
+
+		getDevService().getConsoleCommands().addCommand("evalCache", [=, this] (Vector<String> args) -> String
+		{
+			try {
+				return getScriptingService().evaluateExpression(String::concatList(args, " "), true).asString("null");
+			} catch (const std::exception& e) {
+				Logger::logException(e);
+				return "Error";
+			}
+		});
 	}
 
 	size_t runScript(std::shared_ptr<const ScriptGraph> script, const String& tag)
