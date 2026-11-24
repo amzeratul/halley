@@ -584,7 +584,7 @@ private:
 		getDevService().getConsoleCommands().addCommand("eval", [=, this] (Vector<String> args) -> String
 		{
 			try {
-				return getScriptingService().evaluateExpression(String::concatList(args, " ")).asString("null");
+				return getScriptingService().evaluateExpression(String::concatList(args, " "), false, false).asString("null");
 			} catch (const std::exception& e) {
 				Logger::logException(e);
 				return "Error";
@@ -594,7 +594,7 @@ private:
 		getDevService().getConsoleCommands().addCommand("evalCache", [=, this] (Vector<String> args) -> String
 		{
 			try {
-				return getScriptingService().evaluateExpression(String::concatList(args, " "), true).asString("null");
+				return getScriptingService().evaluateExpression(String::concatList(args, " "), true, false).asString("null");
 			} catch (const std::exception& e) {
 				Logger::logException(e);
 				return "Error";
