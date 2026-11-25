@@ -24,6 +24,7 @@ public:
 	bool sendUpdates{ false };
 	bool alwaysSend{ false };
 	bool requiresEntityFrameModified{ false };
+	bool sendFullUpdateOnFirstEntityFrameModified{ false };
 	uint32_t lastRevision{ 0 };
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};

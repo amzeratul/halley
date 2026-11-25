@@ -37,6 +37,12 @@ component:
       canEdit: true
       canSave: false
       canNetwork: false
+  - sendFullUpdateOnFirstEntityFrameModified:
+      type: bool
+      defaultValue: false
+      canEdit: false
+      canSave: false
+      canNetwork: false
   - lastRevision:
       type: uint32_t
       canSave: false

@@ -132,7 +132,7 @@ namespace Halley {
         	bool hasAuthorityOnly = false;
         	bool forChildEntityTemporaryOnly = false;
         	bool forceNextFastUpdate = false;
-        	bool hasValidEntityData = false;
+        	bool firstUpdateForEntityFrameModified = true;
 
         	uint64_t lastSerializerHash = 0;
 

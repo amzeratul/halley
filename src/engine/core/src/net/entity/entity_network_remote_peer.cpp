@@ -463,7 +463,16 @@ void EntityNetworkRemotePeer::sendUpdateEntity(int32_t sessionTimestamp, Outboun
     				// to send this, and fill up the journal for future updates.
     				fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, false);
     				modified = true;
-    				modifiedInStructure = false;
+    				if (entry.requiresEntityFrameModified && remote.firstUpdateForEntityFrameModified) {
+    					// First update on a dormant entity. We can not know if there have been
+    					// structural changes before this was signaled, so let's use the slow path,
+    					// if the flag in its network component is set too.
+    					const auto* networkComponent = entity.tryGetComponent<NetworkComponent>();
+						modifiedInStructure = networkComponent && networkComponent->sendFullUpdateOnFirstEntityFrameModified;
+    					remote.firstUpdateForEntityFrameModified = false;
+    				} else {
+    					modifiedInStructure = false;
+    				}
     			}
     		} else {
     			modified = fastSerializer.processEntityUpdateChanges(remote.fastUpdateJournal, remote.forceNextFastUpdate);
