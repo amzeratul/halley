@@ -50,7 +50,7 @@ void MoviePlayer::play(float gain, String bus)
 
 		if (!streamingClip) {
 			streamingClip = std::make_shared<AudioClipStreaming>(2);
-			streamingClip->setLatencyTarget(8192);
+			streamingClip->setLatencyTarget(4096, 4096 * 8);
 		}
 
 		state = MoviePlayerState::StartingToPlay;
@@ -149,19 +149,23 @@ void MoviePlayer::update(Time t)
 				}
 			}
 		}
-
-		if (state == MoviePlayerState::Playing && pendingFrames.empty() && !needsMoreVideoFrames()) {
-			state = MoviePlayerState::Finished;
-		}
-
+		
 		if (state == MoviePlayerState::StartingToPlay) {
 			if (pendingFrames.size() >= 3) {
-				if (streamingClip) {
-					auto emitter = halleyAPI.audio->createEmitter(AudioPosition::makeFixed());
-					emitter->detach();
-					audioHandle = halleyAPI.audio->play(streamingClip, emitter, audioGain, false, audioBus);
-				}
 				state = MoviePlayerState::Playing;
+			}
+		}
+
+		if (state == MoviePlayerState::Playing) {
+			if (!audioHandle && streamingClip && streamingClip->getSamplesLeft() >= streamingClip->getLatencyTarget()) {
+				Logger::logDev("Starting audio playback with " + toString(streamingClip->getSamplesLeft()) + " samples buffered");
+				auto emitter = halleyAPI.audio->createEmitter(AudioPosition::makeFixed());
+				emitter->detach();
+				audioHandle = halleyAPI.audio->play(streamingClip, emitter, audioGain, false, audioBus);
+			}
+
+			if (pendingFrames.empty() && !needsMoreVideoFrames()) {
+				state = MoviePlayerState::Finished;
 			}
 		}
 	}

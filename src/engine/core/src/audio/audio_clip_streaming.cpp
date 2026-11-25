@@ -45,6 +45,9 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 
 		// Add to buffer
 		const auto n = std::min(nSamples, buffers[i].availableToWrite());
+		if (n < nSamples) {
+			Logger::logError("Buffer overflow on AudioClipStreaming", true);
+		}
 		buffers[i].write(gsl::span<float>(tmp).subspan(0, n));
 	}
 
@@ -108,6 +111,9 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 
 	UniqueLock lock(mutex);
 	const size_t toWrite = std::min(len, buffer.availableToRead());
+	if (toWrite < len) {
+		Logger::logError("Buffer underflow in AudioClipStreaming", true);
+	}
 	if (channelN == 0) {
 		samplesLeft -= toWrite;
 	}
@@ -146,11 +152,11 @@ bool AudioClipStreaming::isLoaded() const
 	return ready;
 }
 
-void AudioClipStreaming::setLatencyTarget(size_t samples)
+void AudioClipStreaming::setLatencyTarget(size_t samples, std::optional<size_t> bufferSize)
 {
 	latencyTarget = samples;
 	buffers.clear();
-	buffers.resize(numChannels, RingBuffer<float>(latencyTarget * 2));
+	buffers.resize(numChannels, RingBuffer<float>(bufferSize.value_or(latencyTarget * 8)));
 	samplesLeft = 0;
 }
 

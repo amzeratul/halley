@@ -25,7 +25,7 @@ namespace Halley
 		bool isLoaded() const override;
 		bool isLive() const override { return true; }
 
-		void setLatencyTarget(size_t samples);
+		void setLatencyTarget(size_t samples, std::optional<size_t> bufferSize = std::nullopt);
 		size_t getLatencyTarget() const;
 
 		void setPaused(bool paused);
