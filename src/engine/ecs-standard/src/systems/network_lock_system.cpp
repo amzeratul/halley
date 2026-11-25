@@ -127,7 +127,7 @@ public:
 		const NetworkFamily* e = tryFindNetworkRoot(targetId);
 		if (!e) {
 			auto entity = getWorld().tryGetEntity(targetId);
-			Logger::logWarning("Trying to check lock status of non-network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
+			//Logger::logWarning("Trying to check lock status of non-network entity " + toString(targetId) + (entity.isValid() ? " (" + entity.getName() + ")" : ""), true);
 			return LockStatus::Unlocked;
 		}
 
