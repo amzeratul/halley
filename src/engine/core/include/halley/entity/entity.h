@@ -332,6 +332,7 @@ namespace Halley {
 		void propagateChildrenChange();
 		void propagateChildWorldPartition(WorldPartitionId newWorldPartition);
 		void propagateEnabled(bool enabled, bool parentEnabled);
+		void setModifiedThisFrame(uint32_t frameNumber, bool applyToAncestors = false, bool onlyIfNetworkRequired = false);
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
         std::pair<std::optional<uint8_t>, std::optional<uint8_t>> getAuthorityAndOwnerPeerId() const;

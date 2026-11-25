@@ -269,6 +269,26 @@ void Entity::propagateEnabled(bool enabledStatus, bool parentStatus)
 	}
 }
 
+void Entity::setModifiedThisFrame(uint32_t frameNumber, bool applyToAncestors, bool onlyIfNetworkRequired)
+{
+	bool modify = true;
+	if (onlyIfNetworkRequired) {
+		const NetworkComponent* component = tryGetComponent<NetworkComponent>(true);
+		if (!component || !component->requiresEntityFrameModified) {
+			modify = false;
+		}
+	}
+	if (modify) {
+		lastFrameModified = frameNumber;
+	}
+
+	if (applyToAncestors) {
+		if (parent) {
+			parent->setModifiedThisFrame(frameNumber, applyToAncestors, onlyIfNetworkRequired);
+		}
+	}
+}
+
 void Entity::setEnabled(World& world, bool enabled)
 {
 	if (enabled != this->enabled) {
@@ -542,17 +562,6 @@ void EntityRef::setReloaded()
 
 void EntityRef::setModifiedThisFrame(bool applyToAncestors, bool onlyIfNetworkRequired)
 {
-	if (applyToAncestors) {
-		if (auto parent = getParent(); parent.isValid()) {
-			parent.setModifiedThisFrame(applyToAncestors, onlyIfNetworkRequired);
-		}
-	}
-
-	if (onlyIfNetworkRequired) {
-		const NetworkComponent* component = tryGetComponent<NetworkComponent>(true);
-		if (!component || !component->requiresEntityFrameModified) {
-			return;
-		}
-	}
-	setLastFrameModified(world->getFrameNumber());
+	validate();
+	entity->setModifiedThisFrame(world->getFrameNumber(), applyToAncestors, onlyIfNetworkRequired);
 }
