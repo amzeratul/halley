@@ -18,9 +18,6 @@ namespace Halley {
 			: pos(pos)
 			, subWorld(subWorld)
 		{
-			if (!pos.isValid()) {
-				throw Exception("Invalid WorldPosition created", HalleyExceptions::Utils);
-			}
 		}
 
 		WorldPosition(const ConfigNode& node, Vector2f defaultPos = {}, int defaultSubWorld = 0);
