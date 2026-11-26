@@ -216,7 +216,8 @@ void PerformanceStatsView::processProfileData(std::shared_ptr<ProfilerData> data
 		flushRenderVoiceTime();
 	}
 
-	totalTimePerAudioBuffer = int64_t(data->getAudioBufferLen()) * 1'000'000'000 / int64_t(data->getAudioSampleRate());
+	const auto sampleRate = int64_t(data->getAudioSampleRate());
+	totalTimePerAudioBuffer = int64_t(data->getAudioBufferLen()) * 1'000'000'000 / int64_t(sampleRate > 0 ? sampleRate : 48000);
 
 	lastProfileData = std::move(data);
 }
