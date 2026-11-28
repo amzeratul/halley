@@ -147,7 +147,7 @@ bool Options::isRoamingKey(const String& key) const
 	return key == "language" || key == "flashingEffects" || key == "screenShake" || key == "control_bindings";
 }
 
-void Options::setOption(std::string_view name, ConfigNode value)
+bool Options::setOption(std::string_view name, ConfigNode value)
 {
 	if (options[name] != value) {
 		options[name] = std::move(value);
@@ -155,7 +155,9 @@ void Options::setOption(std::string_view name, ConfigNode value)
 			roamingDirty = true;
 		}
 		markModified();
+		return true;
 	}
+	return false;
 }
 
 ConfigNode Options::getOption(std::string_view name) const
@@ -201,9 +203,9 @@ Vector2i Options::getResolution(bool fullscreen) const
 	return getOption("resolution" + String(fullscreen ? "_fullscreen" : "_window")).asVector2i(Vector2i(1280, 720));
 }
 
-void Options::setResolution(bool fullscreen, Vector2i resolution)
+bool Options::setResolution(bool fullscreen, Vector2i resolution)
 {
-	setOption("resolution" + String(fullscreen ? "_fullscreen" : "_window"), ConfigNode(resolution));
+	return setOption("resolution" + String(fullscreen ? "_fullscreen" : "_window"), ConfigNode(resolution));
 }
 
 std::optional<Vector2i> Options::getLastWindowPosition() const
@@ -211,9 +213,9 @@ std::optional<Vector2i> Options::getLastWindowPosition() const
 	return getOption("windowPos").asOptional<Vector2i>();
 }
 
-void Options::setWindowPosition(Vector2i pos)
+bool Options::setWindowPosition(Vector2i pos)
 {
-	setOption("windowPos", ConfigNode(pos));
+	return setOption("windowPos", ConfigNode(pos));
 }
 
 std::optional<Rect4i> Options::getLastConsoleRect() const
@@ -322,6 +324,28 @@ void Options::saveControlBindings()
 	if (controlBindings) {
 		setOption("control_bindings", controlBindings->toConfigNode());
 	}
+}
+
+bool Options::saveWindowState(const Window& window)
+{
+	const auto rect = window.getWindowRect();
+	bool changed = setResolution(window.getDefinition().getWindowType() == WindowType::Fullscreen, rect.getSize());
+	changed = setWindowPosition(rect.getTopLeft()) || changed;
+	changed = setOption("window_state", ConfigNode(window.getDefinition().getWindowState())) || changed;
+	return changed;
+}
+
+WindowDefinition Options::loadWindowState(const WindowDefinition& base) const
+{
+	const bool fullscreen = base.getWindowType() == WindowType::Fullscreen;
+	const auto state = getOption("window_state").asEnum(WindowState::Normal);
+	if (state == WindowState::Maximized) {
+		return base.withState(state);
+	}
+	return base
+		.withState(state)
+		.withPosition(getLastWindowPosition())
+		.withSize(getResolution(fullscreen));
 }
 
 float Options::getVolume(std::string_view bus) const

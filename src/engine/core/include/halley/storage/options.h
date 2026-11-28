@@ -1,6 +1,8 @@
 #pragma once
 #include "halley/api/save_data.h"
+#include "halley/api/video_api.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/graphics/window.h"
 #include "halley/text/i18n_language.h"
 
 namespace Halley {
@@ -40,7 +42,7 @@ namespace Halley {
 		void markModified();
 		bool isWaitingForRoaming() const;
 
-		void setOption(std::string_view name, ConfigNode value);
+		bool setOption(std::string_view name, ConfigNode value);
 		ConfigNode getOption(std::string_view name) const;
 		bool hasOption(std::string_view name) const;
 
@@ -63,9 +65,9 @@ namespace Halley {
 		bool isLanguageSet() const;
 
 		Vector2i getResolution(bool fullscreen) const;
-		void setResolution(bool fullscreen, Vector2i resolution);
+		bool setResolution(bool fullscreen, Vector2i resolution);
 		std::optional<Vector2i> getLastWindowPosition() const;
-		void setWindowPosition(Vector2i pos);
+		bool setWindowPosition(Vector2i pos);
 		std::optional<Rect4i> getLastConsoleRect() const;
 		void setConsoleRect(Rect4i rect);
 		bool getFullscreen() const;
@@ -88,6 +90,9 @@ namespace Halley {
 		void loadControlBindings(ControlBindingConfigs config, bool devMode = false);
 		ControlBindings& getControlBindings() const;
 		void saveControlBindings();
+
+		bool saveWindowState(const Window& window);
+		WindowDefinition loadWindowState(const WindowDefinition& base) const;
 
 	protected:
 		

@@ -19,13 +19,6 @@ namespace Halley
 		BorderlessWindow
 	};
 
-	enum class WindowState
-	{
-		Normal,
-		Minimized,
-		Maximized
-	};
-
 	template <>
 	struct EnumNames<WindowType> {
 		constexpr auto operator()() const {
@@ -35,6 +28,24 @@ namespace Halley
 				"window",
 				"resizeableWindow",
 				"borderlessWindow",
+			});
+		}
+	};
+
+	enum class WindowState
+	{
+		Normal,
+		Minimized,
+		Maximized
+	};
+
+	template <>
+	struct EnumNames<WindowState> {
+		constexpr auto operator()() const {
+			return std::to_array({
+				"normal",
+				"minimized",
+				"maximized"
 			});
 		}
 	};
